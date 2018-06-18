@@ -21,7 +21,8 @@ package io.spine.server.delivery;
 
 import com.google.common.testing.EqualsTester;
 import io.spine.server.model.ModelTests;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.server.delivery.given.ShardedStreamTestEnv.anotherProjectsShardZero;
 import static io.spine.server.delivery.given.ShardedStreamTestEnv.projectsShardOne;
@@ -32,10 +33,13 @@ import static io.spine.server.delivery.given.ShardedStreamTestEnv.tasksShardZero
 /**
  * @author Alex Tymchenko
  */
-public class ShardingKeyShould {
+@DisplayName("ShardingKey should")
+class ShardingKeyTest {
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
-    public void support_equality() {
+    @DisplayName("support equality")
+    void supportEquality() {
         ModelTests.clearModel();
 
         final ShardingKey projectsZero = projectsShardZero().getKey();

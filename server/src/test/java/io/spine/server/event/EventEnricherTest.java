@@ -39,9 +39,10 @@ import io.spine.test.event.ProjectStarred;
 import io.spine.test.event.ProjectStarted;
 import io.spine.test.event.SeparateEnrichmentForMultipleProjectEvents;
 import io.spine.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Enrichments.getEnrichment;
@@ -57,7 +58,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class EventEnricherShould {
+@DisplayName("EventEnricher should")
+class EventEnricherTest {
 
     private BoundedContext boundedContext;
     private EventBus eventBus;
@@ -67,13 +69,13 @@ public class EventEnricherShould {
     private final Function<ProjectId, UserId> getProjectOwnerId = new GetProjectOwnerId();
 
     private static Event createEvent(Message msg) {
-        final TestEventFactory eventFactory = newInstance(EventEnricherShould.class);
+        final TestEventFactory eventFactory = newInstance(EventEnricherTest.class);
         final Event event = eventFactory.createEvent(msg);
         return event;
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         enricher = newEventEnricher();
         boundedContext = newBoundedContext(enricher);
         eventBus = boundedContext.getEventBus();
@@ -81,18 +83,21 @@ public class EventEnricherShould {
         eventBus.register(subscriber);
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() throws Exception {
         boundedContext.close();
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
-    public void have_builder() {
+    @DisplayName("have builder")
+    void haveBuilder() {
         assertNotNull(EventEnricher.newBuilder());
     }
 
     @Test
-    public void enrich_event_if_enrichment_definition_is_enclosed_to_event() {
+    @DisplayName("enrich event if enrichment definition is enclosed to event")
+    void enrichEnclosedToEvent() {
         final ProjectStarted msg = GivenEventMessage.projectStarted();
         final Event event = createEvent(msg);
 
@@ -103,7 +108,8 @@ public class EventEnricherShould {
     }
 
     @Test
-    public void enrich_event_if_enrichment_definition_is_not_enclosed_to_event_same_package() {
+    @DisplayName("enrich event if enrichment definition is not enclosed to event and is from same package")
+    void enrichFromSamePackage() {
         final ProjectCreated msg = GivenEventMessage.projectCreated();
 
         eventBus.post(createEvent(msg));
@@ -113,7 +119,8 @@ public class EventEnricherShould {
     }
 
     @Test
-    public void enrich_event_if_enrichment_definition_is_in_another_package() {
+    @DisplayName("enrich event if enrichment definition is in another package")
+    void enrichFromAnotherPackage() {
         final ProjectCreated msg = GivenEventMessage.projectCreated();
 
         eventBus.post(createEvent(msg));
@@ -123,7 +130,8 @@ public class EventEnricherShould {
     }
 
     @Test
-    public void enrich_event_with_several_fields_by_same_source_id() {
+    @DisplayName("enrich event with several fields by same source id")
+    void enrichSeveralBySameSourceId() {
         final ProjectCreated msg = GivenEventMessage.projectCreated();
         final ProjectId projectId = msg.getProjectId();
 
@@ -136,7 +144,8 @@ public class EventEnricherShould {
     }
 
     @Test
-    public void enrich_several_events_with_same_enrichment_message_with_wildcard_by() {
+    @DisplayName("enrich several events with same enrichment message with wildcard")
+    void enrichSeveralWithWildcard() {
         final ProjectCompleted completed = GivenEventMessage.projectCompleted();
         final ProjectStarred starred = GivenEventMessage.projectStarred();
         final ProjectId completedProjectId = completed.getProjectId();
@@ -152,7 +161,8 @@ public class EventEnricherShould {
     }
 
     @Test
-    public void enrich_several_events_bound_by_fields() {
+    @DisplayName("enrich several events bound by fields")
+    void enrichSeveralBoundByFields() {
         final EventEnvelope permissionGranted = EventEnvelope.of(GivenEvent.permissionGranted());
         final EventEnvelope permissionRevoked = EventEnvelope.of(GivenEvent.permissionRevoked());
         final EventEnvelope sharingRequestApproved = EventEnvelope.of(GivenEvent.sharingRequestApproved());
@@ -163,19 +173,22 @@ public class EventEnricherShould {
     }
 
     @Test
-    public void confirm_that_event_can_be_enriched_if_enrichment_registered() {
+    @DisplayName("confirm that event can be enriched if enrichment registered")
+    void stateEventEnrichable() {
         assertTrue(enricher.canBeEnriched(EventEnvelope.of(projectStarted())));
     }
 
     @Test
-    public void confirm_that_event_can_not_be_enriched_if_no_such_enrichment_registered() {
+    @DisplayName("confirm that event can not be enriched if no such enrichment registered")
+    void stateEventNonEnrichableWhenNoEnrichment() {
         final EventEnvelope dummyEvent = EventEnvelope.of(createEvent(toMessage(newUuid())));
 
         assertFalse(enricher.canBeEnriched(dummyEvent));
     }
 
     @Test
-    public void confirm_that_event_can_not_be_enriched_if_enrichment_disabled() {
+    @DisplayName("confirm that event can not be enriched if enrichment disabled")
+    void stateEventNonEnrichableWhenEnrichmentDisabled() {
         final Event event = createEvent(toMessage(newUuid()));
         final EventEnvelope notEnrichableEvent = EventEnvelope.of(
                 event.toBuilder()

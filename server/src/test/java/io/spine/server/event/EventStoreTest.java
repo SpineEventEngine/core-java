@@ -39,9 +39,10 @@ import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
 import io.spine.testdata.Sample;
 import io.spine.time.Durations2;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -61,17 +62,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class EventStoreShould {
+@DisplayName("EventStore should")
+class EventStoreTest {
 
     private static TestEventFactory eventFactory = null;
 
     private EventStore eventStore;
 
-    protected EventStore creteStore() {
+    private static EventStore createStore() {
         final BoundedContext bc = BoundedContext.newBuilder()
                                                 .setMultitenant(false)
                                                 .build();
@@ -82,18 +85,19 @@ public class EventStoreShould {
                          .build();
     }
 
-    @BeforeClass
-    public static void prepare() {
-        eventFactory = TestEventFactory.newInstance(EventStoreShould.class);
+    @BeforeAll
+    static void prepare() {
+        eventFactory = TestEventFactory.newInstance(EventStoreTest.class);
     }
 
-    @Before
-    public void setUp() {
-        eventStore = creteStore();
+    @BeforeEach
+    void setUp() {
+        eventStore = createStore();
     }
 
     @Test
-    public void read_events_by_time_bounds() {
+    @DisplayName("read events by time bounds")
+    void readEventsByTimeBounds() {
         final Duration delta = Durations2.seconds(111);
         final Timestamp present = getCurrentTime();
         final Timestamp past = subtract(present, delta);
@@ -123,7 +127,8 @@ public class EventStoreShould {
     }
 
     @Test
-    public void read_events_by_time_and_type() {
+    @DisplayName("read events by time and type")
+    void readEventsByTimeAndType() {
         final Duration delta = Durations2.seconds(111);
         final Timestamp present = getCurrentTime();
         final Timestamp past = subtract(present, delta);
@@ -156,7 +161,8 @@ public class EventStoreShould {
     }
 
     @Test
-    public void read_events_by_type() {
+    @DisplayName("read events by type")
+    void readEventsByType() {
         final Timestamp now = getCurrentTime();
 
         final Event taskAdded1 = taskAdded(now);
@@ -183,8 +189,9 @@ public class EventStoreShould {
     }
 
     @Test
-    public void do_nothing_when_appending_empty_iterable() {
-        eventStore.appendAll(Collections.<Event>emptySet());
+    @DisplayName("do nothing when appending empty iterable")
+    void doNothingWhenAppendingEmptyIterable() {
+        eventStore.appendAll(Collections.emptySet());
     }
 
     /**
@@ -192,12 +199,14 @@ public class EventStoreShould {
      * package but in a different module.
      */
     @Test
-    public void expose_event_repository_to_the_package() {
+    @DisplayName("expose event repository to the package")
+    void exposeEventRepository() {
         assertNotNull(eventStore.getStorage());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void fail_to_store_events_of_different_tenants_in_a_single_operation() {
+    @Test
+    @DisplayName("fail to store events of different tenants in a single operation")
+    void notStoreEventsFromDifferentTenantsInSingleOperation() {
         final TenantId firstTenantId = TenantId.newBuilder()
                                                .setValue("abc")
                                                .build();
@@ -229,11 +238,13 @@ public class EventStoreShould {
                                              .setContext(secondTenantContext)
                                              .build();
         final Collection<Event> event = ImmutableSet.of(firstTenantEvent, secondTenantEvent);
-        eventStore.appendAll(event);
+
+        assertThrows(IllegalArgumentException.class, () -> eventStore.appendAll(event));
     }
 
     @Test
-    public void not_store_enrichment_for_EventContext() {
+    @DisplayName("not store enrichment for EventContext")
+    void notStoreEnrichmentForEventContext() {
         final Event event = projectCreated(Time.getCurrentTime());
         final Event enriched = event.toBuilder()
                                     .setContext(event.getContext()
@@ -250,7 +261,8 @@ public class EventStoreShould {
     }
 
     @Test
-    public void not_store_enrichment_for_origin_of_RejectionContext_type() {
+    @DisplayName("not store enrichment for origin of RejectionContext type")
+    void notStoreEnrichmentForOriginOfRejectionContextType() {
         final RejectionContext originContext = RejectionContext.newBuilder()
                                                                .setEnrichment(withOneAttribute())
                                                                .build();
@@ -271,7 +283,8 @@ public class EventStoreShould {
     }
 
     @Test
-    public void not_store_enrichment_for_origin_of_EventContext_type() {
+    @DisplayName("not store enrichment for origin of EventContext type")
+    void notStoreEnrichmentForOriginOfEventContextType() {
         final EventContext.Builder originContext = EventContext.newBuilder()
                                                                .setEnrichment(withOneAttribute());
         final Event event = projectCreated(Time.getCurrentTime());

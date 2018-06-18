@@ -25,98 +25,104 @@ import io.spine.server.delivery.given.ShardedStreamTestEnv.TaskAggregateReposito
 import io.spine.server.model.ModelTests;
 import io.spine.test.Tests;
 import io.spine.test.aggregate.ProjectId;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.server.delivery.given.ShardedStreamTestEnv.builder;
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 /**
  * @author Alex Tymchenko
  */
 @SuppressWarnings("unchecked")  // the numerous generic parameters are omitted to simplify tests.
-public class ShardedStreamBuilderShould {
+@DisplayName("ShardedStream Builder should")
+class ShardedStreamBuilderTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         // as long as we refer to the Model in delivery tag initialization.
         ModelTests.clearModel();
     }
 
     @Test
-    public void not_accept_null_boundedContextName() {
-        thrown.expect(NullPointerException.class);
-        builder().setBoundedContextName(Tests.nullRef());
+    @DisplayName("not accept null boundedContextName")
+    void notAcceptNullContextName() {
+       assertThrows(NullPointerException.class,
+                    () -> builder().setBoundedContextName(Tests.nullRef()));
     }
 
     @Test
-    public void return_set_boundedContextName() {
+    @DisplayName("return set boundedContextName")
+    void returnSetContextName() {
         BoundedContextName value = BoundedContext.newName("ShardedStreams");
         assertEquals(value, builder().setBoundedContextName(value)
                                      .getBoundedContextName());
     }
 
     @Test
-    public void not_accept_null_key() {
-        thrown.expect(NullPointerException.class);
-        builder().setKey(Tests.nullRef());
+    @DisplayName("not accept null key")
+    void notAcceptNullKey() {
+        assertThrows(NullPointerException.class, () -> builder().setKey(Tests.nullRef()));
     }
 
     @Test
-    public void return_set_key() {
+    @DisplayName("return set key")
+    void returnSetKey() {
         ShardingKey value = mock(ShardingKey.class);
         assertEquals(value, builder().setKey(value)
                                      .getKey());
     }
 
     @Test
-    public void not_accept_null_tag() {
-        thrown.expect(NullPointerException.class);
-        builder().setTag(Tests.nullRef());
+    @DisplayName("not accept null tag")
+    void notAcceptNullTag() {
+        assertThrows(NullPointerException.class, () -> builder().setTag(Tests.nullRef()));
     }
 
     @Test
-    public void return_set_tag() {
+    @DisplayName("return set tag")
+    void returnSetTag() {
         DeliveryTag value = DeliveryTag.forCommandsOf(new TaskAggregateRepository());
         assertEquals(value, builder().setTag(value)
                                      .getTag());
     }
 
     @Test
-    public void not_accept_null_targetIdClass() {
-        thrown.expect(NullPointerException.class);
-        builder().setTargetIdClass(Tests.nullRef());
+    @DisplayName("not accept null targetIdClass")
+    void notAcceptNullTargetIdClass() {
+        assertThrows(NullPointerException.class,
+                     () -> builder().setTargetIdClass(Tests.nullRef()));
     }
 
     @Test
-    public void return_set_targetIdClass() {
+    @DisplayName("return set targetIdClass")
+    void returnSetTargetIdClass() {
         Class value = ProjectId.class;
         assertEquals(value, builder().setTargetIdClass(value)
                                      .getTargetIdClass());
     }
 
     @Test
-    public void not_accept_null_consumer() {
-        thrown.expect(NullPointerException.class);
-        builder().setConsumer(Tests.<Consumer>nullRef());
+    @DisplayName("not accept null consumer")
+    void notAcceptNullConsumer() {
+        assertThrows(NullPointerException.class,
+                     () -> builder().setConsumer(Tests.<Consumer>nullRef()));
     }
 
     @Test
-    public void return_set_consumer() {
+    @DisplayName("return set consumer")
+    void returnSetConsumer() {
         Consumer value = mock(Consumer.class);
         assertEquals(value, builder().setConsumer(value)
                                      .getConsumer());
     }
 
     @Test
-    public void not_accept_null_transportFactory() {
-        thrown.expect(NullPointerException.class);
-        builder().build(Tests.nullRef());
+    @DisplayName("not accept null transportFactory")
+    void notAcceptNullTransportFactory() {
+        assertThrows(NullPointerException.class, () -> builder().build(Tests.nullRef()));
     }
 }

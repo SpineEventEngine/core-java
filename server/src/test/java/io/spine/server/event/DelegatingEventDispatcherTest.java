@@ -32,12 +32,14 @@ import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.integration.ExternalMessages;
-import org.junit.Before;
-import org.junit.Test;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 import java.util.Set;
 
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.TestValues.newUuidValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -45,26 +47,29 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Alexander Yevsyukov
  */
-public class DelegatingEventDispatcherShould {
+@DisplayName("DelegatingEventDispatcher should")
+class DelegatingEventDispatcherTest {
 
     private EmptyEventDispatcherDelegate delegate;
     private DelegatingEventDispatcher<String> delegatingDispatcher;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         delegate = new EmptyEventDispatcherDelegate();
         delegatingDispatcher = DelegatingEventDispatcher.of(delegate);
     }
 
     @Test
-    public void pass_null_tolerance_test() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(EventDispatcherDelegate.class, new EmptyEventDispatcherDelegate())
                 .testAllPublicStaticMethods(DelegatingEventDispatcher.class);
     }
 
     @Test
-    public void delegate_onError() {
+    @DisplayName("delegate `onError`")
+    void delegateOnError() {
         final TestEventFactory factory = TestEventFactory.newInstance(getClass());
         final EventEnvelope envelope = EventEnvelope.of(factory.createEvent(newUuidValue()));
 
@@ -76,7 +81,8 @@ public class DelegatingEventDispatcherShould {
     }
 
     @Test
-    public void expose_external_dispatcher_that_delegates_onError() {
+    @DisplayName("expose external dispatcher that delegates `onError`")
+    void exposeDispatcherDelegatingOnError() {
         final ExternalMessageDispatcher<String> extMessageDispatcher =
                 delegatingDispatcher.getExternalDispatcher();
 
@@ -105,8 +111,7 @@ public class DelegatingEventDispatcherShould {
 
         private boolean onErrorCalled;
 
-        @Nullable
-        private RuntimeException lastException;
+        private @Nullable RuntimeException lastException;
 
         @Override
         public Set<EventClass> getEventClasses() {
@@ -134,8 +139,7 @@ public class DelegatingEventDispatcherShould {
             return onErrorCalled;
         }
 
-        @Nullable
-        private RuntimeException getLastException() {
+        private @Nullable RuntimeException getLastException() {
             return lastException;
         }
     }

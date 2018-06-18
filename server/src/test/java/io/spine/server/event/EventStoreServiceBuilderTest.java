@@ -24,26 +24,24 @@ import com.google.common.util.concurrent.MoreExecutors;
 import io.spine.server.BoundedContext;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.Tests;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.Executor;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class EventStoreServiceBuilderShould {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+@DisplayName("EventStore ServiceBuilder")
+class EventStoreServiceBuilderTest {
 
     private StorageFactory storageFactory;
     private EventStore.ServiceBuilder builder;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         BoundedContext bc = BoundedContext
                 .newBuilder()
                 .setMultitenant(true)
@@ -53,46 +51,49 @@ public class EventStoreServiceBuilderShould {
     }
 
     @Test
-    public void throw_NPE_on_null_executor() {
-        thrown.expect(NullPointerException.class);
-        builder.setStreamExecutor(Tests.nullRef());
+    @DisplayName("throw NPE on null executor")
+    void throwOnNullExecutor() {
+        assertThrows(NullPointerException.class, () -> builder.setStreamExecutor(Tests.nullRef()));
     }
 
     @Test
-    public void throw_NPE_on_null_EventStorage() {
-        thrown.expect(NullPointerException.class);
-        builder.setStreamExecutor(Tests.nullRef());
+    @DisplayName("throw NPE on null EventStorage")
+    void throwOnNullEventStorage() {
+        assertThrows(NullPointerException.class, () -> builder.setStreamExecutor(Tests.nullRef()));
     }
 
     @Test
-    public void throw_NPE_on_non_set_streamExecutor() {
-        thrown.expect(NullPointerException.class);
-        builder.setStorageFactory(storageFactory)
-               .build();
+    @DisplayName("throw NPE on non set streamExecutor")
+    void throwOnNonSetStreamExecutor() {
+        assertThrows(NullPointerException.class, () -> builder.setStorageFactory(storageFactory)
+                                                              .build());
     }
 
     @Test
-    public void throw_NPE_on_non_set_eventStorage() {
-        thrown.expect(NullPointerException.class);
-        builder.setStreamExecutor(newExecutor())
-               .build();
+    @DisplayName("throw NPE on non set eventStorage")
+    void throwOnNonSetEventStorage() {
+        assertThrows(NullPointerException.class, () -> builder.setStreamExecutor(newExecutor())
+                                                              .build());
     }
 
     @Test
-    public void return_set_streamExecutor() {
+    @DisplayName("return set streamExecutor")
+    void returnSetStreamExecutor() {
         Executor executor = newExecutor();
         assertEquals(executor, builder.setStreamExecutor(executor)
                                       .getStreamExecutor());
     }
 
     @Test
-    public void return_set_eventStorage() {
+    @DisplayName("return set eventStorage")
+    void returnSetEventStorage() {
         assertEquals(storageFactory, builder.setStorageFactory(storageFactory)
                                             .getStorageFactory());
     }
 
     @Test
-    public void build_service_definition() {
+    @DisplayName("build service definition")
+    void buildServiceDefinition() {
         assertNotNull(builder.setStreamExecutor(newExecutor())
                              .setStorageFactory(storageFactory)
                              .build());

@@ -28,25 +28,29 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.command.TestEventFactory.newInstance;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class MatchesStreamQueryShould {
+@DisplayName("MatchesStreamQuery should")
+class MatchesStreamQueryTest {
 
     private static final String FIELD_NAME = "spine.test.event.ProjectCreated.projectId";
 
     private static final TestEventFactory eventFactory =
-            newInstance(MatchesStreamQueryShould.class);
+            newInstance(MatchesStreamQueryTest.class);
 
     @Test
-    public void not_accept_nulls() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         final MatchesStreamQuery predicate = new MatchesStreamQuery(
                 EventStreamQuery.getDefaultInstance());
 
@@ -56,7 +60,8 @@ public class MatchesStreamQueryShould {
     }
 
     @Test
-    public void match_proper_records() {
+    @DisplayName("match proper records")
+    void matchProperRecords() {
         final ProjectId properField = ProjectId.newBuilder()
                                                .setId(newUuid())
                                                .build();
@@ -69,7 +74,8 @@ public class MatchesStreamQueryShould {
     }
 
     @Test
-    public void not_match_improper_records() {
+    @DisplayName("not match improper records")
+    void notMatchImproperRecords() {
         final ProjectId properField = ProjectId.newBuilder()
                                                .setId(newUuid())
                                                .build();

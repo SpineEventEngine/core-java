@@ -43,7 +43,7 @@ import io.spine.server.bus.AbstractBusFilter;
 import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.EventBusShould;
+import io.spine.server.event.EventBusTest;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.event.EBProjectCreated;
@@ -76,7 +76,7 @@ public class EventBusTestEnv {
     private static final ProjectId PROJECT_ID = projectId();
 
     public static final ActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(EventBusShould.class, TENANT_ID);
+            TestActorRequestFactory.newInstance(EventBusTest.class, TENANT_ID);
 
     private EventBusTestEnv() {
         // Prevent instantiation.

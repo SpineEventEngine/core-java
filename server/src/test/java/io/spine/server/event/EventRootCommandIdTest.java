@@ -36,9 +36,10 @@ import io.spine.test.event.EvInvitationAccepted;
 import io.spine.test.event.EvTeamMemberAdded;
 import io.spine.test.event.EvTeamProjectAdded;
 import io.spine.test.event.ProjectCreated;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.List;
 
@@ -60,12 +61,13 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Mykhailo Drachuk
  */
-public class EventRootCommandIdShould {
+@DisplayName("Event root CommandId should")
+public class EventRootCommandIdTest {
 
     private BoundedContext boundedContext;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(true)
                                        .build();
@@ -81,13 +83,14 @@ public class EventRootCommandIdShould {
         boundedContext.register(userSignUpRepository);
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() throws Exception {
         boundedContext.close();
     }
 
     @Test
-    public void match_the_id_of_a_command_handled_by_an_aggregate() {
+    @DisplayName("match id of command handled by aggregate")
+    void matchIdOfCommandHandledByAggregate() {
         final Command command = command(createProject(projectId(), teamId()));
 
         postCommand(command);
@@ -97,7 +100,8 @@ public class EventRootCommandIdShould {
     }
 
     @Test
-    public void match_the_id_of_a_command_handled_by_an_aggregate_for_multiple_events() {
+    @DisplayName("match id of command handled by aggregate for multiple events")
+    void matchTheIdOfACommandHandledByAnAggregateForMultipleEvents() {
         final Command command = command(addTasks(projectId(), 3));
 
         postCommand(command);
@@ -123,7 +127,8 @@ public class EventRootCommandIdShould {
      * </ol>
      */
     @Test
-    public void match_the_id_of_an_external_event_handled_by_an_aggregate() {
+    @DisplayName("match id of external event handled by aggregate")
+    void matchTheIdOfAnExternalEventHandledByAnAggregate() {
         final Command command = command(createProject(projectId(), teamId()));
 
         postCommand(command);
@@ -136,7 +141,8 @@ public class EventRootCommandIdShould {
     }
 
     @Test
-    public void match_the_id_of_a_command_handled_by_a_process_manager() {
+    @DisplayName("match id of command handled by process manager")
+    void matchIdOfCommandHandledByProcessManager() {
         final Command command = command(addTeamMember(teamId()));
 
         postCommand(command);
@@ -149,7 +155,8 @@ public class EventRootCommandIdShould {
     }
 
     @Test
-    public void match_the_id_of_a_command_handled_by_a_process_manager_for_multiple_events() {
+    @DisplayName("match id of command handled by process manager for multiple events")
+    void matchIdOfCommandHandledByProcessManagerForMultipleEvents() {
         final Command command = command(inviteTeamMembers(teamId(), 3));
 
         postCommand(command);
@@ -175,7 +182,8 @@ public class EventRootCommandIdShould {
      * </ol>
      */
     @Test
-    public void match_the_id_of_an_external_event_handled_by_a_process_manager() {
+    @DisplayName("match id of external event handled by process manager")
+    void matchIdOfExternalEventHandledByProcessManager() {
         final Command command = command(acceptInvitation(teamId()));
 
         postCommand(command);

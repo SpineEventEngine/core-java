@@ -27,7 +27,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.DeliveryProject;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.SingleShardProjectRepository;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.TripleShardProjectRepository;
-import io.spine.server.delivery.AbstractMessageDeliveryShould;
+import io.spine.server.delivery.AbstractMessageDeliveryTest;
 import io.spine.server.delivery.given.ParallelDispatcher;
 import io.spine.server.delivery.given.ThreadStats;
 import io.spine.test.aggregate.ProjectId;
@@ -48,7 +48,7 @@ import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWait
         /* JUnit 5 Nested classes cannot to be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names */})
 @DisplayName("Aggregate Message delivery should")
-class AggregateMessageDeliveryTest extends AbstractMessageDeliveryShould {
+class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
 
     @Override
     @BeforeEach

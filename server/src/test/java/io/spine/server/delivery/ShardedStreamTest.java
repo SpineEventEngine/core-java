@@ -32,9 +32,9 @@ import io.spine.server.model.ModelTests;
 import io.spine.server.transport.TransportFactory;
 import io.spine.test.Tests;
 import io.spine.test.aggregate.ProjectId;
-import org.junit.Test;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.server.delivery.given.ShardedStreamTestEnv.anotherProjectsShardOne;
 import static io.spine.server.delivery.given.ShardedStreamTestEnv.anotherProjectsShardZero;
@@ -44,14 +44,18 @@ import static io.spine.server.delivery.given.ShardedStreamTestEnv.streamToShardW
 import static io.spine.server.delivery.given.ShardedStreamTestEnv.tasksShardOne;
 import static io.spine.server.delivery.given.ShardedStreamTestEnv.tasksShardZero;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alex Tymchenko
  */
-public class ShardedStreamShould {
+@DisplayName("ShardedStream should")
+class ShardedStreamTest {
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
-    public void support_equality() {
+    @DisplayName("support equality")
+    void supportEquality() {
         ModelTests.clearModel();
         new EqualsTester().addEqualityGroup(projectsShardZero(), anotherProjectsShardZero())
                           .addEqualityGroup(projectsShardOne(), anotherProjectsShardOne())
@@ -61,7 +65,8 @@ public class ShardedStreamShould {
     }
 
     @Test
-    public void support_toString() {
+    @DisplayName("support `toString`")
+    void supportToString() {
         final CommandShardedStream<ProjectId> stream = projectsShardZero();
         final ShardingKey key = stream.getKey();
         final DeliveryTag<CommandEnvelope> tag = stream.getTag();
@@ -76,13 +81,13 @@ public class ShardedStreamShould {
         assertTrue(stringRepresentation.contains(contextName.toString()));
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throw_ISE_if_incoming_stream_is_completed() {
+    @Test
+    @DisplayName("throw ISE if incoming stream is completed")
+    void throwOnStreamCompleted() {
         final Function<StreamObserver<ExternalMessage>, Void> onCompletedCallback =
                 new Function<StreamObserver<ExternalMessage>, Void>() {
-                    @Nullable
                     @Override
-                    public Void apply(@Nullable StreamObserver<ExternalMessage> observer) {
+                    public @Nullable Void apply(@Nullable StreamObserver<ExternalMessage> observer) {
                         observer.onCompleted();
                         return Tests.<Void>nullRef();
                     }
@@ -92,18 +97,20 @@ public class ShardedStreamShould {
 
         final CommandShardedStream<ProjectId> stream = streamToShardWithFactory(factory);
         final Command createProject = Given.ACommand.createProject();
-        stream.post(ProjectId.getDefaultInstance(), CommandEnvelope.of(createProject));
+        assertThrows(IllegalStateException.class,
+                     () -> stream.post(ProjectId.getDefaultInstance(),
+                                       CommandEnvelope.of(createProject)));
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throw_ISE_if_incoming_stream_is_errored() {
+    @Test
+    @DisplayName("throw ISE if incoming stream is errored")
+    void throwOnStreamErrored() {
 
         // Create a factory, which calls {@code onError()} for the subscriber upon any message.
         final Function<StreamObserver<ExternalMessage>, Void> onErrorCallback =
                 new Function<StreamObserver<ExternalMessage>, Void>() {
-                    @Nullable
                     @Override
-                    public Void apply(@Nullable StreamObserver<ExternalMessage> observer) {
+                    public @Nullable Void apply(@Nullable StreamObserver<ExternalMessage> observer) {
                         observer.onError(new RuntimeException("Something went wrong"));
                         return Tests.<Void>nullRef();
                     }
@@ -113,6 +120,8 @@ public class ShardedStreamShould {
 
         final CommandShardedStream<ProjectId> stream = streamToShardWithFactory(factory);
         final Command createProject = Given.ACommand.createProject();
-        stream.post(ProjectId.getDefaultInstance(), CommandEnvelope.of(createProject));
+        assertThrows(IllegalStateException.class,
+                     () -> stream.post(ProjectId.getDefaultInstance(),
+                                       CommandEnvelope.of(createProject)));
     }
 }

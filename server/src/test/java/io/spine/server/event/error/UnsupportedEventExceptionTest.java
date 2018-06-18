@@ -17,23 +17,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.delivery;
 
-import io.spine.server.delivery.given.MessageDeliveryTestEnv.EmptyShardable;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
-import org.junit.Test;
+package io.spine.server.event.error;
+
+import com.google.protobuf.StringValue;
+import io.spine.server.event.UnsupportedEventException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static io.spine.protobuf.TypeConverter.toMessage;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
- * @author Alex Tymchenko
+ * @author Alexander Litus
  */
-public class InProcessShardingShould {
+@DisplayName("UnsupportedEventException should")
+class UnsupportedEventExceptionTest {
 
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_IAE_if_register_shardable_with_no_consumers() {
-        final InProcessSharding sharding = new InProcessSharding(
-                InMemoryTransportFactory.newInstance());
+    @Test
+    @DisplayName("have message and error")
+    void haveMessageAndError() {
+        final StringValue msg = toMessage("");
 
-        sharding.register(new EmptyShardable());
+        final UnsupportedEventException exception = new UnsupportedEventException(msg);
+
+        assertNotNull(exception.getMessage());
+        assertNotNull(exception.asError());
+        assertEquals(msg, exception.getEventMessage());
     }
-
 }

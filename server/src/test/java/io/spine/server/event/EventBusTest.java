@@ -45,12 +45,11 @@ import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.Task;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.List;
@@ -74,6 +73,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -84,10 +84,8 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Mykhailo Drachuk
  */
-public class EventBusShould {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+@DisplayName("EventBus should")
+public class EventBusTest {
 
     private EventBus eventBus;
     private CommandBus commandBus;
@@ -104,8 +102,8 @@ public class EventBusShould {
         return busBuilder;
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         setUp(null);
     }
 
@@ -124,18 +122,21 @@ public class EventBusShould {
         this.eventBus = bc.getEventBus();
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() throws Exception {
         bc.close();
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
-    public void have_builder() {
+    @DisplayName("have builder")
+    void haveBuilder() {
         assertNotNull(EventBus.newBuilder());
     }
 
     @Test
-    public void return_associated_EventStore() {
+    @DisplayName("return associated EventStore")
+    void returnAssociatedEventStore() {
         EventStore eventStore = mock(EventStore.class);
         EventBus result = EventBus.newBuilder()
                                   .setEventStore(eventStore)
@@ -144,15 +145,18 @@ public class EventBusShould {
     }
 
     @Test
-    public void reject_object_with_no_subscriber_methods() {
-        thrown.expect(IllegalArgumentException.class);
+    @DisplayName("reject object with no subscriber methods")
+    void rejectObjectWithNoSubscriberMethods() {
+
         // Pass just String instance.
-        eventBus.register(new EventSubscriber() {
-        });
+        assertThrows(IllegalArgumentException.class,
+                     () -> eventBus.register(new EventSubscriber() {
+                     }));
     }
 
     @Test
-    public void register_event_subscriber() {
+    @DisplayName("register event subscriber")
+    void registerEventSubscriber() {
         EventSubscriber subscriberOne = new ProjectCreatedSubscriber();
         EventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
 
@@ -169,7 +173,8 @@ public class EventBusShould {
     }
 
     @Test
-    public void unregister_subscribers() {
+    @DisplayName("unregister subscribers")
+    void unregisterSubscribers() {
         EventSubscriber subscriberOne = new ProjectCreatedSubscriber();
         EventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
         eventBus.register(subscriberOne);
@@ -193,7 +198,8 @@ public class EventBusShould {
     }
 
     @Test
-    public void call_subscriber_when_event_posted() {
+    @DisplayName("call subscriber when event posted")
+    void callSubscriberWhenEventPosted() {
         ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
         Event event = GivenEvent.projectCreated();
         eventBus.register(subscriber);
@@ -206,7 +212,8 @@ public class EventBusShould {
     }
 
     @Test
-    public void register_dispatchers() {
+    @DisplayName("register dispatchers")
+    void registerDispatchers() {
         EventDispatcher dispatcher = new BareDispatcher();
 
         eventBus.register(dispatcher);
@@ -216,7 +223,8 @@ public class EventBusShould {
     }
 
     @Test
-    public void call_dispatchers() {
+    @DisplayName("call dispatchers")
+    void callDispatchers() {
         BareDispatcher dispatcher = new BareDispatcher();
 
         eventBus.register(dispatcher);
@@ -227,7 +235,8 @@ public class EventBusShould {
     }
 
     @Test
-    public void unregister_dispatchers() {
+    @DisplayName("unregister dispatchers")
+    void unregisterDispatchers() {
         EventDispatcher dispatcherOne = new BareDispatcher();
         EventDispatcher dispatcherTwo = new BareDispatcher();
         EventClass eventClass = EventClass.of(ProjectCreated.class);
@@ -247,7 +256,8 @@ public class EventBusShould {
     }
 
     @Test
-    public void unregister_registries_on_close() throws Exception {
+    @DisplayName("unregister registries on close")
+    void unregisterRegistriesOnClose() throws Exception {
         EventStore eventStore = spy(mock(EventStore.class));
         EventBus eventBus = EventBus
                 .newBuilder()
@@ -265,7 +275,8 @@ public class EventBusShould {
     }
 
     @Test
-    public void enrich_event_if_it_can_be_enriched() {
+    @DisplayName("enrich event if it can be enriched")
+    void enrichEventIfItCanBeEnriched() {
         EventEnricher enricher = mock(EventEnricher.class);
         EventEnvelope event = EventEnvelope.of(GivenEvent.projectCreated());
         doReturn(true).when(enricher)
@@ -284,7 +295,8 @@ public class EventBusShould {
     }
 
     @Test
-    public void do_not_enrich_event_if_it_cannot_be_enriched() {
+    @DisplayName("not enrich event if it cannot be enriched")
+    void notEnrichEventIfItCannotBeEnriched() {
         EventEnricher enricher = mock(EventEnricher.class);
         doReturn(false).when(enricher)
                        .canBeEnriched(any(EventEnvelope.class));
@@ -300,14 +312,16 @@ public class EventBusShould {
     }
 
     @Test
-    public void create_validator_once() {
+    @DisplayName("create validator once")
+    void createValidatorOnce() {
         EnvelopeValidator<EventEnvelope> validator = eventBus.getValidator();
         assertNotNull(validator);
         assertSame(validator, eventBus.getValidator());
     }
 
     @Test
-    public void store_an_event() {
+    @DisplayName("store event")
+    void storeEvent() {
         Command command = command(createProject());
         eventBus.register(new EBProjectCreatedNoOpSubscriber());
         commandBus.post(command, StreamObservers.noOpObserver());
@@ -317,7 +331,8 @@ public class EventBusShould {
     }
 
     @Test
-    public void store_a_dead_event() {
+    @DisplayName("store dead event")
+    void storeDeadEvent() {
         Command command = command(createProject());
 
         commandBus.post(command, StreamObservers.noOpObserver());
@@ -327,7 +342,8 @@ public class EventBusShould {
     }
 
     @Test
-    public void not_store_an_invalid_event() {
+    @DisplayName("not store invalid event")
+    void notStoreInvalidEvent() {
         Command command = command(invalidArchiveProject());
         eventBus.register(new EBProjectArchivedSubscriber());
 
@@ -338,7 +354,8 @@ public class EventBusShould {
     }
 
     @Test
-    public void not_store_an_invalid_dead_event() {
+    @DisplayName("not store invalid dead event")
+    void notStoreInvalidDeadEvent() {
         Command command = command(invalidArchiveProject());
 
         commandBus.post(command, StreamObservers.noOpObserver());
@@ -358,7 +375,8 @@ public class EventBusShould {
      * filtered out by the {@link io.spine.server.bus.DeadMessageFilter}.
      */
     @Test
-    public void store_multiple_messages_passing_filters() {
+    @DisplayName("store multiple messages passing filters")
+    void storeMultipleMessages() {
         eventBus.register(new EBTaskAddedNoOpSubscriber());
         Command command = command(addTasks(newTask(false), newTask(false), newTask(false)));
 
@@ -380,7 +398,8 @@ public class EventBusShould {
      * filtered out by the {@link io.spine.server.bus.DeadMessageFilter}.
      */
     @Test
-    public void store_only_events_passing_filters() {
+    @DisplayName("store only events passing filters")
+    void storeMultipleEvents() {
         eventBus.register(new EBTaskAddedNoOpSubscriber());
         Command command = command(addTasks(newTask(false), newTask(true), newTask(false),
                                            newTask(true), newTask(true)));
@@ -408,7 +427,8 @@ public class EventBusShould {
      * filtered out by the {@link io.spine.server.bus.DeadMessageFilter}.
      */
     @Test
-    public void not_store_any_events_when_they_are_failing_filtering() {
+    @DisplayName("not store any events when they are failing filtering")
+    void notEventsFailingFiltering() {
         eventBus.register(new EBTaskAddedNoOpSubscriber());
         Command command = command(addTasks(newTask(true), newTask(true), newTask(true)));
 
@@ -432,11 +452,12 @@ public class EventBusShould {
      * initialization multiple times from several threads.
      */
     @SuppressWarnings("MethodWithMultipleLoops") // OK for such test case.
-    @Ignore // This test is used only to diagnose EventBus malfunctions in concurrent environment.
+    @Disabled // This test is used only to diagnose EventBus malfunctions in concurrent environment.
     // It's too long to execute this test per each build, so we leave it as is for now.
     // Please see build log to find out if there were some errors during the test execution.
     @Test
-    public void store_filters_regarding_possible_concurrent_modifications()
+    @DisplayName("store filters regarding possible concurrent modifications")
+    void storeFiltersInConcurrentEnv()
             throws InterruptedException {
         int threadCount = 50;
 

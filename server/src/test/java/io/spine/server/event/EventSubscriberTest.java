@@ -24,8 +24,9 @@ import com.google.protobuf.BoolValue;
 import io.spine.core.EventEnvelope;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.given.EventSubscriberTestEnv.FailingSubscriber;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
@@ -34,14 +35,15 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-public class EventSubscriberShould {
+@DisplayName("EventSubscriber should")
+class EventSubscriberTest {
 
     private final TestEventFactory factory = TestEventFactory.newInstance(getClass());
 
     private EventSubscriber subscriber;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         subscriber = new FailingSubscriber();
     }
 
@@ -52,7 +54,8 @@ public class EventSubscriberShould {
     }
 
     @Test
-    public void catch_exceptions_caused_by_methods() {
+    @DisplayName("catch exceptions caused by methods")
+    void catchExceptionsCausedByMethods() {
         // Create event which should fail.
         final EventEnvelope eventEnvelope = createEvent(false);
 
@@ -66,7 +69,8 @@ public class EventSubscriberShould {
     }
 
     @Test
-    public void dispatch_event() {
+    @DisplayName("dispatch event")
+    void dispatchEvent() {
         final EventEnvelope eventEnvelope = createEvent(true);
 
         final Set<String> dispatchingResult = subscriber.dispatch(eventEnvelope);
@@ -78,7 +82,8 @@ public class EventSubscriberShould {
     }
 
     @Test
-    public void have_log() {
+    @DisplayName("have log")
+    void haveLog() {
         assertEquals(subscriber.getClass()
                                .getName(),
                      subscriber.log()
@@ -86,7 +91,8 @@ public class EventSubscriberShould {
     }
 
     @Test
-    public void return_handled_message_classes() {
+    @DisplayName("return handled message classes")
+    void returnHandledMessageClasses() {
         assertEquals(3, subscriber.getMessageClasses()
                                   .size());
     }

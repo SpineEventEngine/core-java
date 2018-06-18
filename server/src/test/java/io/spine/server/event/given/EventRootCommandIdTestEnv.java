@@ -34,7 +34,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.event.EventRootCommandIdShould;
+import io.spine.server.event.EventRootCommandIdTest;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
@@ -79,7 +79,7 @@ public class EventRootCommandIdTestEnv {
     public static final TenantId TENANT_ID = tenantId();
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(EventRootCommandIdShould.class, TENANT_ID);
+            TestActorRequestFactory.newInstance(EventRootCommandIdTest.class, TENANT_ID);
 
     private EventRootCommandIdTestEnv() {
         // Prevent instantiation.
@@ -182,7 +182,7 @@ public class EventRootCommandIdTestEnv {
     /**
      * Routes the {@link ProjectCreated} event to the {@link TeamAggregate} the project belongs to.
      * This is done for the purposes of the
-     * {@linkplain EventRootCommandIdShould#match_the_id_of_an_external_event_handled_by_an_aggregate()}
+     * {@linkplain EventRootCommandIdTest#matchTheIdOfAnExternalEventHandledByAnAggregate()}
      * test.
      */
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
@@ -206,7 +206,7 @@ public class EventRootCommandIdTestEnv {
     /**
      * Routes the {@link EvInvitationAccepted} event to the {@link TeamCreationProcessManager} which
      * created the invitation. This is done for the purposes of the
-     * {@linkplain EventRootCommandIdShould#match_the_id_of_an_external_event_handled_by_a_process_manager()}
+     * {@linkplain EventRootCommandIdTest#matchTheIdOfAnExternalEventHandledByAProcessManager()}
      * test.
      */
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")

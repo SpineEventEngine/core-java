@@ -26,7 +26,8 @@ import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.CompositeColumnFilter.CompositeOperator;
 import io.spine.client.EntityFilters;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -38,10 +39,12 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Dmytro Grankin
  */
-public class ERepositoryShould {
+@DisplayName("ERepository should")
+class ERepositoryTest {
 
     @Test
-    public void convert_empty_query_to_empty_EntityFilters() {
+    @DisplayName("convert empty query to empty EntityFilters")
+    void convertEmptyQueryToEmptyEntityFilters() {
         EventStreamQuery query = EventStreamQuery.newBuilder()
                                                  .build();
         EntityFilters entityFilters = toEntityFilters(query);
@@ -50,7 +53,8 @@ public class ERepositoryShould {
     }
 
     @Test
-    public void convert_time_query_to_EntityFilters() {
+    @DisplayName("convert time query to EntityFilters")
+    void convertTimeQueryToEntityFilters() {
         EventStreamQuery query = EventStreamQuery
                 .newBuilder()
                 .setAfter(Timestamps.MIN_VALUE)
@@ -66,7 +70,8 @@ public class ERepositoryShould {
     }
 
     @Test
-    public void convert_type_query_to_EntityFilters() {
+    @DisplayName("convert type query to EntityFilters")
+    void convertTypeQueryToEntityFilters() {
         String typeName = " com.example.EventType ";
         EventFilter validFilter = filterForType(typeName);
         EventFilter invalidFilter = filterForType("   ");

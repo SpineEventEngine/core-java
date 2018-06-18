@@ -18,29 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.error;
+package io.spine.server.event;
 
-import com.google.protobuf.StringValue;
-import io.spine.server.event.UnsupportedEventException;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static io.spine.protobuf.TypeConverter.toMessage;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertFalse;
 
-/**
- * @author Alexander Litus
- */
-public class UnsupportedEventExceptionShould {
+@DisplayName("MatchFilter should")
+class MatchFilterTest {
 
     @Test
-    public void have_msg_and_error() {
-        final StringValue msg = toMessage("");
-
-        final UnsupportedEventException exception = new UnsupportedEventException(msg);
-
-        assertNotNull(exception.getMessage());
-        assertNotNull(exception.asError());
-        assertEquals(msg, exception.getEventMessage());
+    @DisplayName("not pass null events")
+    void notPassNullEvents() {
+        final MatchFilter filter = new MatchFilter(EventFilter.getDefaultInstance());
+        assertFalse(filter.apply(null));
     }
 }
