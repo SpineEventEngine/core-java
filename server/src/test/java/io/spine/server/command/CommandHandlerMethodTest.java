@@ -85,10 +85,6 @@ class CommandHandlerMethodTest {
 
     private static final CommandContext emptyContext = CommandContext.getDefaultInstance();
 
-    private static void assertIsCommandHandler(Method handler, boolean isHandler) {
-        assertEquals(isHandler, predicate().apply(handler));
-    }
-
     @BeforeEach
     void setUp() {
         ModelTests.clearModel();
@@ -300,5 +296,9 @@ class CommandHandlerMethodTest {
         CommandEnvelope cmd = requestFactory.createEnvelope(startProject());
 
         assertThrows(IllegalStateException.class, () -> handler.dispatch(cmd));
+    }
+
+    private static void assertIsCommandHandler(Method handler, boolean isHandler) {
+        assertEquals(isHandler, predicate().apply(handler));
     }
 }
