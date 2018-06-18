@@ -25,22 +25,28 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.Rejection;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class BusesShould {
+@DisplayName("Buses utility should")
+class BusesTest {
 
     @Test
-    public void have_private_util_ctor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(Buses.class);
     }
 
     @Test
-    public void not_accept_nulls() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Message.class, Any.getDefaultInstance())
                 .setDefault(Error.class, Error.newBuilder()

@@ -18,11 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.commandbus;
+
+import org.junit.jupiter.api.DisplayName;
+
 /**
- * Test environments for tests of the {@code io.spine.server.commandbus} package.
+ * @author Alexander Yevsyukov
  */
+@DisplayName("Multitenant CommandStore should")
+class MultiTenantCommandStoreTest extends CommandStoreTest {
 
-@ParametersAreNonnullByDefault
-package io.spine.server.commandbus.given;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+    MultiTenantCommandStoreTest() {
+        super(true);
+    }
+}

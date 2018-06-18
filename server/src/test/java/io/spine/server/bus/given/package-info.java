@@ -18,14 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandbus;
-
 /**
- * @author Alexander Yevsyukov
+ * Test environments for tests of the {@code io.spine.server.bus} package.
  */
-public class MultiTenantCommandStoreShould extends CommandStoreShould {
 
-    public MultiTenantCommandStoreShould() {
-        super(true);
-    }
-}
+@ParametersAreNonnullByDefault
+package io.spine.server.bus.given;
+
+import javax.annotation.ParametersAreNonnullByDefault;

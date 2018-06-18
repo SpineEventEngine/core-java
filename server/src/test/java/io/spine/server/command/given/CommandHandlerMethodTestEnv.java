@@ -95,7 +95,7 @@ public class CommandHandlerMethodTestEnv {
     }
 
     @SuppressWarnings("unused")
-        // because the method is not annotated, which is the purpose of this test class.
+    // because the method is not annotated, which is the purpose of this test class.
     public static class InvalidHandlerNoAnnotation extends TestCommandHandler {
         public RefProjectCreated handleTest(RefCreateProject cmd, CommandContext context) {
             return projectCreated(cmd.getProjectId());

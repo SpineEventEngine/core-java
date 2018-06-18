@@ -18,25 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandbus;
-
-import com.google.protobuf.Message;
-import io.spine.client.TestActorRequestFactory;
-import io.spine.core.Command;
-
 /**
- * @author Alexander Yevsyukov
+ * Test environments for tests of the {@code io.spine.server.commandstore} package.
  */
-public class SingleTenantCommandStoreShould extends CommandStoreShould {
 
-    public SingleTenantCommandStoreShould() {
-        super(false);
-    }
+@ParametersAreNonnullByDefault
+package io.spine.server.commandstore.given;
 
-    @Override
-    protected Command newCommand() {
-        final Message commandMessage = Given.CommandMessage.createProjectMessage();
-        return TestActorRequestFactory.newInstance(SingleTenantCommandBusShould.class)
-                                      .createCommand(commandMessage);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

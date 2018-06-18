@@ -18,67 +18,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command;
+package io.spine.server.command.given;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.CommandEnvelope;
+import io.spine.server.command.CommandHandlingEntity;
 import io.spine.validate.StringValueVBuilder;
-import org.junit.Before;
-import org.junit.Test;
 
 import java.util.List;
 
 import static io.spine.test.TestValues.newUuidValue;
-import static org.junit.Assert.assertEquals;
 
-/**
- * @author Alexander Yevsyukov
- */
-public class CommandHandlingEntityShould {
+public class CommandHandlingEntityTestEnv {
 
-    /** The object we test. */
-    private HandlingEntity entity;
-
-    @Before
-    public void setUp() {
-        entity = new HandlingEntity(1L);
-    }
-
-    @Test
-    public void set_version_when_creating_mismatches() {
-        final int version = entity.getVersion().getNumber();
-
-        assertEquals(version, entity.expectedDefault(msg(), msg()).getVersion());
-        assertEquals(version, entity.expectedNotDefault(msg()).getVersion());
-        assertEquals(version, entity.expectedNotDefault(msg(), msg()).getVersion());
-        assertEquals(version, entity.unexpectedValue(msg(), msg(), msg()).getVersion());
-
-        assertEquals(version, entity.expectedEmpty(str(), str()).getVersion());
-        assertEquals(version, entity.expectedNotEmpty(str()).getVersion());
-        assertEquals(version, entity.unexpectedValue(str(), str(), str()).getVersion());
+    /** Prevents instantiation on this utility class. */
+    private CommandHandlingEntityTestEnv() {
     }
 
     /**
      * @return generated {@code StringValue} based on generated UUID
      */
-    private static StringValue msg() {
+    public static StringValue msg() {
         return newUuidValue();
     }
 
     /**
      * @return generated {@code String} based on generated UUID
      */
-    private static String str() {
+    public static String str() {
         return msg().getValue();
     }
 
-
-    private static class HandlingEntity extends CommandHandlingEntity<Long,
-                                                                      StringValue,
-                                                                      StringValueVBuilder> {
-        private HandlingEntity(Long id) {
+    public static class HandlingEntity extends CommandHandlingEntity<Long,
+                                                                     StringValue,
+                                                                     StringValueVBuilder> {
+        public HandlingEntity(Long id) {
             super(id);
         }
 

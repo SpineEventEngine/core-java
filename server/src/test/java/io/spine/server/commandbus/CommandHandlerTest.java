@@ -34,9 +34,11 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.given.CommandHandlerTestEnv.EventCatcher;
 import io.spine.server.event.given.CommandHandlerTestEnv.TestCommandHandler;
 import io.spine.server.model.ModelTests;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.event.EventRecodingLogger;
 import org.slf4j.event.Level;
@@ -47,23 +49,26 @@ import java.util.List;
 import java.util.Queue;
 
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.nullRef;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Litus
  */
-public class CommandHandlerShould {
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
+@DisplayName("CommandHandler should")
+class CommandHandlerTest {
 
     private CommandBus commandBus;
     private EventBus eventBus;
     private TestCommandHandler handler;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ModelTests.clearModel();
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .setMultitenant(true)
@@ -75,26 +80,47 @@ public class CommandHandlerShould {
         commandBus.register(handler);
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() throws Exception {
         commandBus.close();
         eventBus.close();
     }
 
     @Test
-    public void handle_command() {
-        assertHandles(Given.ACommand.createProject());
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        new NullPointerTester()
+                .setDefault(CommandEnvelope.class, givenCommandEnvelope())
+                .testAllPublicInstanceMethods(handler);
+    }
+
+    @Nested
+    @DisplayName("handle")
+    class Handle {
+
+        @Test
+        @DisplayName("one command")
+        void command() {
+            assertHandles(Given.ACommand.createProject());
+        }
+
+        @Test
+        @DisplayName("several commands")
+        void severalCommands() {
+            assertHandles(Given.ACommand.createProject());
+            assertHandles(Given.ACommand.addTask());
+            assertHandles(Given.ACommand.startProject());
+        }
+
+        private void assertHandles(Command cmd) {
+            handler.handle(cmd);
+            handler.assertHandled(cmd);
+        }
     }
 
     @Test
-    public void handle_several_commands() {
-        assertHandles(Given.ACommand.createProject());
-        assertHandles(Given.ACommand.addTask());
-        assertHandles(Given.ACommand.startProject());
-    }
-
-    @Test
-    public void post_generated_events_to_event_bus() {
+    @DisplayName("post generated events to EventBus")
+    void postGeneratedEventsToBus() {
         final Command cmd = Given.ACommand.startProject();
 
         final EventCatcher eventCatcher = new EventCatcher();
@@ -111,49 +137,61 @@ public class CommandHandlerShould {
         }
     }
 
-    @Test
-    public void generate_non_zero_hash_code_if_handler_has_non_empty_id() {
-        final int hashCode = handler.hashCode();
+    @Nested
+    @DisplayName("provide `hashCode` method such that")
+    class ProvideHashCode {
 
-        assertTrue(hashCode != 0);
+        @Test
+        @DisplayName("for non-empty handler ID non-zero hashcode is generated")
+        void nonZeroForNonEmptyId() {
+            final int hashCode = handler.hashCode();
+
+            assertTrue(hashCode != 0);
+        }
+
+        @Test
+        @DisplayName("for same handler instances same hashcode is generated")
+        void sameForSameInstances() {
+            assertEquals(handler.hashCode(), handler.hashCode());
+        }
+    }
+
+    @Nested
+    @DisplayName("provide `equals` method such that")
+    class ProvideEqualsSuchThat {
+
+        @Test
+        @DisplayName("same handlers are equal")
+        void equalsToSame() {
+            final TestCommandHandler same = new TestCommandHandler(eventBus);
+
+            assertTrue(handler.equals(same));
+        }
+
+        @SuppressWarnings("EqualsWithItself") // is the goal of the test
+        @Test
+        @DisplayName("handler is equal to itself")
+        void equalsToSelf() {
+            assertTrue(handler.equals(handler));
+        }
+
+        @Test
+        @DisplayName("handler is not equal to null")
+        void notEqualsToNull() {
+            assertFalse(handler.equals(nullRef()));
+        }
+
+        @SuppressWarnings("EqualsBetweenInconvertibleTypes") // is the goal of the test
+        @Test
+        @DisplayName("handler is not equal to object of another class")
+        void notEqualsToOtherClass() {
+            assertFalse(handler.equals(newUuid()));
+        }
     }
 
     @Test
-    public void generate_same_hash_code_for_same_instances() {
-        assertEquals(handler.hashCode(), handler.hashCode());
-    }
-
-    @Test
-    public void assure_same_handlers_are_equal() {
-        final TestCommandHandler same = new TestCommandHandler(eventBus);
-
-        assertTrue(handler.equals(same));
-    }
-
-    @SuppressWarnings("EqualsWithItself") // is the goal of the test
-    @Test
-    public void assure_handler_is_equal_to_itself() {
-        assertTrue(handler.equals(handler));
-    }
-
-    @Test
-    public void assure_handler_is_not_equal_to_null() {
-        assertFalse(handler.equals(nullRef()));
-    }
-
-    @SuppressWarnings("EqualsBetweenInconvertibleTypes") // is the goal of the test
-    @Test
-    public void assure_handler_is_not_equal_to_object_of_another_class() {
-        assertFalse(handler.equals(newUuid()));
-    }
-
-    private void assertHandles(Command cmd) {
-        handler.handle(cmd);
-        handler.assertHandled(cmd);
-    }
-
-    @Test
-    public void have_class_specific_logger() {
+    @DisplayName("have class-specific logger")
+    void haveClassSpecificLogger() {
         final Logger logger = handler.log();
         assertNotNull(logger);
         assertEquals(logger.getName(), handler.getClass()
@@ -161,7 +199,8 @@ public class CommandHandlerShould {
     }
 
     @Test
-    public void log_errors() {
+    @DisplayName("log errors")
+    void logErrors() {
         final CommandEnvelope commandEnvelope = givenCommandEnvelope();
 
         // Since we're in the tests mode `Environment` returns `SubstituteLogger` instance.
@@ -185,12 +224,5 @@ public class CommandHandlerShould {
 
     private CommandEnvelope givenCommandEnvelope() {
         return TestActorRequestFactory.newInstance(getClass()).generateEnvelope();
-    }
-
-    @Test
-    public void pass_null_tolerance_check() {
-        new NullPointerTester()
-                .setDefault(CommandEnvelope.class, givenCommandEnvelope())
-                .testAllPublicInstanceMethods(handler);
     }
 }

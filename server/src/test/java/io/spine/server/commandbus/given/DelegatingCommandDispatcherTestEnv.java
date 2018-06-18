@@ -18,11 +18,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * Test environments for tests of the {@code io.spine.server.commandbus} package.
- */
-
-@ParametersAreNonnullByDefault
 package io.spine.server.commandbus.given;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import com.google.common.collect.ImmutableSet;
+import io.spine.core.CommandClass;
+import io.spine.core.CommandEnvelope;
+import io.spine.server.commandbus.CommandDispatcherDelegate;
+
+import java.util.Set;
+
+public class DelegatingCommandDispatcherTestEnv {
+
+    /** Prevents instantiation of this utility class. */
+    private DelegatingCommandDispatcherTestEnv() {
+    }
+
+    public static final class EmptyCommandDispatcherDelegate
+            implements CommandDispatcherDelegate<String> {
+
+        private boolean onErrorCalled;
+
+        @Override
+        public Set<CommandClass> getCommandClasses() {
+            return ImmutableSet.of();
+        }
+
+        @Override
+        public String dispatchCommand(CommandEnvelope envelope) {
+            return getClass().getName();
+        }
+
+        @Override
+        public void onError(CommandEnvelope envelope, RuntimeException exception) {
+            onErrorCalled = true;
+        }
+
+        public boolean onErrorCalled() {
+            return onErrorCalled;
+        }
+    }
+}

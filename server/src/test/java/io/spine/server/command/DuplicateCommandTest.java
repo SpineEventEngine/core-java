@@ -28,9 +28,10 @@ import io.spine.core.TenantId;
 import io.spine.server.command.given.DuplicateCommandTestEnv.TestClient;
 import io.spine.server.command.given.DuplicateCommandTestEnv.TestServer;
 import io.spine.server.commandbus.DuplicateCommandException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 import static io.spine.server.command.given.DuplicateCommandTestEnv.SERVICE_HOST;
@@ -38,33 +39,35 @@ import static io.spine.server.command.given.DuplicateCommandTestEnv.command;
 import static io.spine.server.command.given.DuplicateCommandTestEnv.createProject;
 import static io.spine.server.command.given.DuplicateCommandTestEnv.newTenantId;
 import static io.spine.server.command.given.DuplicateCommandTestEnv.runServer;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Mykhailo Drachuk
  */
-public class DuplicateCommandShould {
+@DisplayName("Duplicate Command should")
+class DuplicateCommandTest {
 
     private TestClient client;
     private TestServer server;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() throws Exception {
         server = new TestServer(DEFAULT_CLIENT_SERVICE_PORT);
         runServer(server);
 
         client = new TestClient(SERVICE_HOST, DEFAULT_CLIENT_SERVICE_PORT);
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() throws Exception {
         client.shutdown();
         server.shutdown();
     }
 
     @Test
-    public void not_be_acknowledged_on_client_when_not_sent() {
+    @DisplayName("not be acknowledged on client when not sent")
+    void notBeAcknowledgedWhenNotSent() {
         final TenantId tenantId = newTenantId();
 
         final Command command = command(createProject(), tenantId);
@@ -76,7 +79,8 @@ public class DuplicateCommandShould {
     }
 
     @Test
-    public void be_acknowledged_on_client_when_posted_to_an_aggregate() {
+    @DisplayName("be acknowledged on client when posted to aggregate")
+    void beAcknowledgedWhenPosted() {
         final TenantId tenantId = newTenantId();
 
         final Command command = command(createProject(), tenantId);

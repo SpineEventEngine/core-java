@@ -18,11 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.bus;
+
+import com.google.common.collect.Lists;
+import io.spine.core.EventEnvelope;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 /**
- * Test environments for tests of the {@code io.spine.server.commandbus} package.
+ * @author Alexander Yevsyukov
  */
+@DisplayName("FilterChain should")
+class FilterChainTest {
 
-@ParametersAreNonnullByDefault
-package io.spine.server.commandbus.given;
+    @Test
+    @DisplayName("not allow closing twice")
+    void notAllowClosingTwice() throws Exception {
+        FilterChain<EventEnvelope, BusFilter<EventEnvelope>> chain =
+                new FilterChain<>(Lists.<BusFilter<EventEnvelope>>newArrayList());
 
-import javax.annotation.ParametersAreNonnullByDefault;
+        chain.close();
+        assertThrows(IllegalStateException.class, chain::close);
+    }
+}
