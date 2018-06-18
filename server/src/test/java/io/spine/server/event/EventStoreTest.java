@@ -38,6 +38,7 @@ import io.spine.test.event.TaskAdded;
 import io.spine.time.Durations2;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -65,6 +66,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("EventStore should")
 public class EventStoreTest {
 
@@ -86,102 +88,107 @@ public class EventStoreTest {
         eventStore = createStore();
     }
 
-    @Test
-    @DisplayName("read events by time bounds")
-    void readEventsByTimeBounds() {
-        final Duration delta = Durations2.seconds(111);
-        final Timestamp present = getCurrentTime();
-        final Timestamp past = subtract(present, delta);
-        final Timestamp future = add(present, delta);
+    @Nested
+    @DisplayName("read events by")
+    class ReadEventsBy {
 
-        final Event eventInPast = projectCreated(past);
-        final Event eventInPresent = projectCreated(present);
-        final Event eventInFuture = projectCreated(future);
+        @Test
+        @DisplayName("time bounds")
+        void timeBounds() {
+            final Duration delta = Durations2.seconds(111);
+            final Timestamp present = getCurrentTime();
+            final Timestamp past = subtract(present, delta);
+            final Timestamp future = add(present, delta);
 
-        eventStore.append(eventInPast);
-        eventStore.append(eventInPresent);
-        eventStore.append(eventInFuture);
+            final Event eventInPast = projectCreated(past);
+            final Event eventInPresent = projectCreated(present);
+            final Event eventInFuture = projectCreated(future);
 
-        final EventStreamQuery query = EventStreamQuery.newBuilder()
-                                                       .setAfter(past)
-                                                       .setBefore(future)
-                                                       .build();
-        final AtomicBoolean done = new AtomicBoolean(false);
-        final Collection<Event> resultEvents = newConcurrentHashSet();
-        eventStore.read(query, new ResponseObserver(resultEvents, done));
-        assertDone(done);
+            eventStore.append(eventInPast);
+            eventStore.append(eventInPresent);
+            eventStore.append(eventInFuture);
 
-        assertSize(1, resultEvents);
-        final Event event = resultEvents.iterator()
-                                        .next();
-        assertEquals(eventInPresent, event);
-    }
+            final EventStreamQuery query = EventStreamQuery.newBuilder()
+                                                           .setAfter(past)
+                                                           .setBefore(future)
+                                                           .build();
+            final AtomicBoolean done = new AtomicBoolean(false);
+            final Collection<Event> resultEvents = newConcurrentHashSet();
+            eventStore.read(query, new ResponseObserver(resultEvents, done));
+            assertDone(done);
 
-    @Test
-    @DisplayName("read events by time and type")
-    void readEventsByTimeAndType() {
-        final Duration delta = Durations2.seconds(111);
-        final Timestamp present = getCurrentTime();
-        final Timestamp past = subtract(present, delta);
-        final Timestamp future = add(present, delta);
+            assertSize(1, resultEvents);
+            final Event event = resultEvents.iterator()
+                                            .next();
+            assertEquals(eventInPresent, event);
+        }
 
-        final Event eventInPast = taskAdded(past);
-        final Event eventInPresent = projectCreated(present);
-        final Event eventInFuture = taskAdded(future);
+        @Test
+        @DisplayName("type")
+        void type() {
+            final Timestamp now = getCurrentTime();
 
-        eventStore.append(eventInPast);
-        eventStore.append(eventInPresent);
-        eventStore.append(eventInFuture);
+            final Event taskAdded1 = taskAdded(now);
+            final Event projectCreated = projectCreated(now);
+            final Event teasAdded2 = taskAdded(now);
 
-        final EventFilter taskAddedType = EventFilter.newBuilder()
-                                                     .setEventType(of(TaskAdded.class).value())
-                                                     .build();
-        final EventStreamQuery query = EventStreamQuery.newBuilder()
-                                                       .setAfter(past)
-                                                       .addFilter(taskAddedType)
-                                                       .build();
-        final AtomicBoolean done = new AtomicBoolean(false);
-        final Collection<Event> resultEvents = newConcurrentHashSet();
-        eventStore.read(query, new ResponseObserver(resultEvents, done));
-        assertDone(done);
+            eventStore.append(taskAdded1);
+            eventStore.append(projectCreated);
+            eventStore.append(teasAdded2);
 
-        assertSize(1, resultEvents);
-        final Event event = resultEvents.iterator()
-                                        .next();
-        assertEquals(eventInFuture, event);
-    }
+            final EventFilter taskAddedType = EventFilter.newBuilder()
+                                                         .setEventType(of(TaskAdded.class).value())
+                                                         .build();
+            final EventStreamQuery query = EventStreamQuery.newBuilder()
+                                                           .addFilter(taskAddedType)
+                                                           .build();
+            final AtomicBoolean done = new AtomicBoolean(false);
+            final Collection<Event> resultEvents = newConcurrentHashSet();
+            eventStore.read(query, new ResponseObserver(resultEvents, done));
+            assertDone(done);
 
-    @Test
-    @DisplayName("read events by type")
-    void readEventsByType() {
-        final Timestamp now = getCurrentTime();
+            assertSize(2, resultEvents);
+            assertContainsAll(resultEvents, taskAdded1, teasAdded2);
+        }
 
-        final Event taskAdded1 = taskAdded(now);
-        final Event projectCreated = projectCreated(now);
-        final Event teasAdded2 = taskAdded(now);
+        @Test
+        @DisplayName("time bounds and type")
+        void timeBoundsAndType() {
+            final Duration delta = Durations2.seconds(111);
+            final Timestamp present = getCurrentTime();
+            final Timestamp past = subtract(present, delta);
+            final Timestamp future = add(present, delta);
 
-        eventStore.append(taskAdded1);
-        eventStore.append(projectCreated);
-        eventStore.append(teasAdded2);
+            final Event eventInPast = taskAdded(past);
+            final Event eventInPresent = projectCreated(present);
+            final Event eventInFuture = taskAdded(future);
 
-        final EventFilter taskAddedType = EventFilter.newBuilder()
-                                                     .setEventType(of(TaskAdded.class).value())
-                                                     .build();
-        final EventStreamQuery query = EventStreamQuery.newBuilder()
-                                                       .addFilter(taskAddedType)
-                                                       .build();
-        final AtomicBoolean done = new AtomicBoolean(false);
-        final Collection<Event> resultEvents = newConcurrentHashSet();
-        eventStore.read(query, new ResponseObserver(resultEvents, done));
-        assertDone(done);
+            eventStore.append(eventInPast);
+            eventStore.append(eventInPresent);
+            eventStore.append(eventInFuture);
 
-        assertSize(2, resultEvents);
-        assertContainsAll(resultEvents, taskAdded1, teasAdded2);
+            final EventFilter taskAddedType = EventFilter.newBuilder()
+                                                         .setEventType(of(TaskAdded.class).value())
+                                                         .build();
+            final EventStreamQuery query = EventStreamQuery.newBuilder()
+                                                           .setAfter(past)
+                                                           .addFilter(taskAddedType)
+                                                           .build();
+            final AtomicBoolean done = new AtomicBoolean(false);
+            final Collection<Event> resultEvents = newConcurrentHashSet();
+            eventStore.read(query, new ResponseObserver(resultEvents, done));
+            assertDone(done);
+
+            assertSize(1, resultEvents);
+            final Event event = resultEvents.iterator()
+                                            .next();
+            assertEquals(eventInFuture, event);
+        }
     }
 
     @Test
     @DisplayName("do nothing when appending empty iterable")
-    void doNothingWhenAppendingEmptyIterable() {
+    void processEmptyIterable() {
         eventStore.appendAll(Collections.emptySet());
     }
 
@@ -190,14 +197,14 @@ public class EventStoreTest {
      * package but in a different module.
      */
     @Test
-    @DisplayName("expose event repository to the package")
+    @DisplayName("expose event repository to package")
     void exposeEventRepository() {
         assertNotNull(eventStore.getStorage());
     }
 
     @Test
     @DisplayName("fail to store events of different tenants in a single operation")
-    void notStoreEventsFromDifferentTenantsInSingleOperation() {
+    void rejectEventsFromDifferentTenants() {
         final TenantId firstTenantId = TenantId.newBuilder()
                                                .setValue("abc")
                                                .build();
@@ -233,64 +240,68 @@ public class EventStoreTest {
         assertThrows(IllegalArgumentException.class, () -> eventStore.appendAll(event));
     }
 
-    @Test
-    @DisplayName("not store enrichment for EventContext")
-    void notStoreEnrichmentForEventContext() {
-        final Event event = projectCreated(Time.getCurrentTime());
-        final Event enriched = event.toBuilder()
-                                    .setContext(event.getContext()
-                                                     .toBuilder()
-                                                     .setEnrichment(withOneAttribute()))
-                                    .build();
-        eventStore.append(enriched);
-        final MemoizingObserver<Event> observer = memoizingObserver();
-        eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
-        final EventContext context = observer.responses()
-                                             .get(0)
-                                             .getContext();
-        assertTrue(isDefault(context.getEnrichment()));
-    }
+    @Nested
+    @DisplayName("not store enrichment for")
+    class NotStoreEnrichmentFor {
+        @Test
+        @DisplayName("EventContext")
+        void eventContext() {
+            final Event event = projectCreated(Time.getCurrentTime());
+            final Event enriched = event.toBuilder()
+                                        .setContext(event.getContext()
+                                                         .toBuilder()
+                                                         .setEnrichment(withOneAttribute()))
+                                        .build();
+            eventStore.append(enriched);
+            final MemoizingObserver<Event> observer = memoizingObserver();
+            eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
+            final EventContext context = observer.responses()
+                                                 .get(0)
+                                                 .getContext();
+            assertTrue(isDefault(context.getEnrichment()));
+        }
 
-    @Test
-    @DisplayName("not store enrichment for origin of RejectionContext type")
-    void notStoreEnrichmentForOriginOfRejectionContextType() {
-        final RejectionContext originContext = RejectionContext.newBuilder()
-                                                               .setEnrichment(withOneAttribute())
-                                                               .build();
-        final Event event = projectCreated(Time.getCurrentTime());
-        final Event enriched = event.toBuilder()
-                                    .setContext(event.getContext()
-                                                     .toBuilder()
-                                                     .setRejectionContext(originContext))
-                                    .build();
-        eventStore.append(enriched);
-        final MemoizingObserver<Event> observer = memoizingObserver();
-        eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
-        final RejectionContext loadedOriginContext = observer.responses()
+        @Test
+        @DisplayName("origin of RejectionContext type")
+        void rejectionContextOrigin() {
+            final RejectionContext originContext = RejectionContext.newBuilder()
+                                                                   .setEnrichment(withOneAttribute())
+                                                                   .build();
+            final Event event = projectCreated(Time.getCurrentTime());
+            final Event enriched = event.toBuilder()
+                                        .setContext(event.getContext()
+                                                         .toBuilder()
+                                                         .setRejectionContext(originContext))
+                                        .build();
+            eventStore.append(enriched);
+            final MemoizingObserver<Event> observer = memoizingObserver();
+            eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
+            final RejectionContext loadedOriginContext = observer.responses()
+                                                                 .get(0)
+                                                                 .getContext()
+                                                                 .getRejectionContext();
+            assertTrue(isDefault(loadedOriginContext.getEnrichment()));
+        }
+
+        @Test
+        @DisplayName("origin of EventContext type")
+        void eventContextOrigin() {
+            final EventContext.Builder originContext = EventContext.newBuilder()
+                                                                   .setEnrichment(withOneAttribute());
+            final Event event = projectCreated(Time.getCurrentTime());
+            final Event enriched = event.toBuilder()
+                                        .setContext(event.getContext()
+                                                         .toBuilder()
+                                                         .setEventContext(originContext))
+                                        .build();
+            eventStore.append(enriched);
+            final MemoizingObserver<Event> observer = memoizingObserver();
+            eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
+            final EventContext loadedOriginContext = observer.responses()
                                                              .get(0)
                                                              .getContext()
-                                                             .getRejectionContext();
-        assertTrue(isDefault(loadedOriginContext.getEnrichment()));
-    }
-
-    @Test
-    @DisplayName("not store enrichment for origin of EventContext type")
-    void notStoreEnrichmentForOriginOfEventContextType() {
-        final EventContext.Builder originContext = EventContext.newBuilder()
-                                                               .setEnrichment(withOneAttribute());
-        final Event event = projectCreated(Time.getCurrentTime());
-        final Event enriched = event.toBuilder()
-                                    .setContext(event.getContext()
-                                                     .toBuilder()
-                                                     .setEventContext(originContext))
-                                    .build();
-        eventStore.append(enriched);
-        final MemoizingObserver<Event> observer = memoizingObserver();
-        eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
-        final EventContext loadedOriginContext = observer.responses()
-                                                         .get(0)
-                                                         .getContext()
-                                                         .getEventContext();
-        assertTrue(isDefault(loadedOriginContext.getEnrichment()));
+                                                             .getEventContext();
+            assertTrue(isDefault(loadedOriginContext.getEnrichment()));
+        }
     }
 }

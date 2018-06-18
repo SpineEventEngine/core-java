@@ -34,7 +34,7 @@ class InProcessShardingTest {
 
     @Test
     @DisplayName("throw IAE if register shardable with no consumers")
-    void notRegisterWithoutConsumers() {
+    void notRegisterEmptyShardable() {
         final InProcessSharding sharding = new InProcessSharding(
                 InMemoryTransportFactory.newInstance());
 

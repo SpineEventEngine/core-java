@@ -55,7 +55,7 @@ class EventSubscriberTest {
 
     @Test
     @DisplayName("catch exceptions caused by methods")
-    void catchExceptionsCausedByMethods() {
+    void catchMethodExceptions() {
         // Create event which should fail.
         final EventEnvelope eventEnvelope = createEvent(false);
 
@@ -81,6 +81,7 @@ class EventSubscriberTest {
         assertNull(sub.getLastException());
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
     @DisplayName("have log")
     void haveLog() {
@@ -91,8 +92,8 @@ class EventSubscriberTest {
     }
 
     @Test
-    @DisplayName("return handled message classes")
-    void returnHandledMessageClasses() {
+    @DisplayName("expose handled message classes")
+    void exposeMessageClasses() {
         assertEquals(3, subscriber.getMessageClasses()
                                   .size());
     }

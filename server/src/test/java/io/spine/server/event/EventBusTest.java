@@ -48,6 +48,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -83,6 +84,7 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Mykhailo Drachuk
  */
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names
 @DisplayName("EventBus should")
 public class EventBusTest {
 
@@ -135,7 +137,7 @@ public class EventBusTest {
 
     @Test
     @DisplayName("return associated EventStore")
-    void returnAssociatedEventStore() {
+    void returnEventStore() {
         EventStore eventStore = mock(EventStore.class);
         EventBus result = EventBus.newBuilder()
                                   .setEventStore(eventStore)
@@ -145,7 +147,7 @@ public class EventBusTest {
 
     @Test
     @DisplayName("reject object with no subscriber methods")
-    void rejectObjectWithNoSubscriberMethods() {
+    void rejectEmptySubscriber() {
 
         // Pass just String instance.
         assertThrows(IllegalArgumentException.class,
@@ -153,105 +155,120 @@ public class EventBusTest {
                      }));
     }
 
-    @Test
-    @DisplayName("register event subscriber")
-    void registerEventSubscriber() {
-        EventSubscriber subscriberOne = new ProjectCreatedSubscriber();
-        EventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
+    @Nested
+    @DisplayName("register")
+    class Register {
 
-        eventBus.register(subscriberOne);
-        eventBus.register(subscriberTwo);
+        @Test
+        @DisplayName("event subscriber")
+        void eventSubscriber() {
+            EventSubscriber subscriberOne = new ProjectCreatedSubscriber();
+            EventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
 
-        EventClass eventClass = EventClass.of(ProjectCreated.class);
-        assertTrue(eventBus.hasDispatchers(eventClass));
+            eventBus.register(subscriberOne);
+            eventBus.register(subscriberTwo);
 
-        Collection<? extends EventDispatcher<?>> dispatchers =
-                eventBus.getDispatchers(eventClass);
-        assertTrue(dispatchers.contains(subscriberOne));
-        assertTrue(dispatchers.contains(subscriberTwo));
+            EventClass eventClass = EventClass.of(ProjectCreated.class);
+            assertTrue(eventBus.hasDispatchers(eventClass));
+
+            Collection<? extends EventDispatcher<?>> dispatchers =
+                    eventBus.getDispatchers(eventClass);
+            assertTrue(dispatchers.contains(subscriberOne));
+            assertTrue(dispatchers.contains(subscriberTwo));
+        }
+
+        @Test
+        @DisplayName("event dispatcher")
+        void eventDispatcher() {
+            EventDispatcher dispatcher = new BareDispatcher();
+
+            eventBus.register(dispatcher);
+
+            assertTrue(eventBus.getDispatchers(EventClass.of(ProjectCreated.class))
+                               .contains(dispatcher));
+        }
     }
 
-    @Test
-    @DisplayName("unregister subscribers")
-    void unregisterSubscribers() {
-        EventSubscriber subscriberOne = new ProjectCreatedSubscriber();
-        EventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
-        eventBus.register(subscriberOne);
-        eventBus.register(subscriberTwo);
-        EventClass eventClass = EventClass.of(ProjectCreated.class);
+    @Nested
+    @DisplayName("unregister")
+    class Unregister {
 
-        eventBus.unregister(subscriberOne);
+        @Test
+        @DisplayName("event subscriber")
+        void eventSubscriber() {
+            EventSubscriber subscriberOne = new ProjectCreatedSubscriber();
+            EventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
+            eventBus.register(subscriberOne);
+            eventBus.register(subscriberTwo);
+            EventClass eventClass = EventClass.of(ProjectCreated.class);
 
-        // Check that the 2nd subscriber with the same event subscriber method remains
-        // after the 1st subscriber unregisters.
-        Collection<? extends EventDispatcher<?>> subscribers =
-                eventBus.getDispatchers(eventClass);
-        assertFalse(subscribers.contains(subscriberOne));
-        assertTrue(subscribers.contains(subscriberTwo));
+            eventBus.unregister(subscriberOne);
 
-        // Check that after 2nd subscriber us unregisters he's no longer in
-        eventBus.unregister(subscriberTwo);
+            // Check that the 2nd subscriber with the same event subscriber method remains
+            // after the 1st subscriber unregisters.
+            Collection<? extends EventDispatcher<?>> subscribers =
+                    eventBus.getDispatchers(eventClass);
+            assertFalse(subscribers.contains(subscriberOne));
+            assertTrue(subscribers.contains(subscriberTwo));
 
-        assertFalse(eventBus.getDispatchers(eventClass)
-                            .contains(subscriberTwo));
+            // Check that after 2nd subscriber us unregisters he's no longer in
+            eventBus.unregister(subscriberTwo);
+
+            assertFalse(eventBus.getDispatchers(eventClass)
+                                .contains(subscriberTwo));
+        }
+
+        @Test
+        @DisplayName("event dispatcher")
+        void eventDispatcher() {
+            EventDispatcher dispatcherOne = new BareDispatcher();
+            EventDispatcher dispatcherTwo = new BareDispatcher();
+            EventClass eventClass = EventClass.of(ProjectCreated.class);
+            eventBus.register(dispatcherOne);
+            eventBus.register(dispatcherTwo);
+
+            eventBus.unregister(dispatcherOne);
+            Set<? extends EventDispatcher<?>> dispatchers = eventBus.getDispatchers(eventClass);
+
+            // Check we don't have 1st dispatcher, but have 2nd.
+            assertFalse(dispatchers.contains(dispatcherOne));
+            assertTrue(dispatchers.contains(dispatcherTwo));
+
+            eventBus.unregister(dispatcherTwo);
+            assertFalse(eventBus.getDispatchers(eventClass)
+                                .contains(dispatcherTwo));
+        }
     }
 
-    @Test
-    @DisplayName("call subscriber when event posted")
-    void callSubscriberWhenEventPosted() {
-        ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
-        Event event = GivenEvent.projectCreated();
-        eventBus.register(subscriber);
+    @Nested
+    @DisplayName("call")
+    class Call {
 
-        eventBus.post(event);
+        @Test
+        @DisplayName("event subscriber")
+        void eventSubscriber() {
+            ProjectCreatedSubscriber subscriber = new ProjectCreatedSubscriber();
+            Event event = GivenEvent.projectCreated();
+            eventBus.register(subscriber);
 
-        // Exclude event ID from comparison.
-        assertEquals(Events.getMessage(event), subscriber.getEventMessage());
-        assertEquals(event.getContext(), subscriber.getEventContext());
-    }
+            eventBus.post(event);
 
-    @Test
-    @DisplayName("register dispatchers")
-    void registerDispatchers() {
-        EventDispatcher dispatcher = new BareDispatcher();
+            // Exclude event ID from comparison.
+            assertEquals(Events.getMessage(event), subscriber.getEventMessage());
+            assertEquals(event.getContext(), subscriber.getEventContext());
+        }
 
-        eventBus.register(dispatcher);
+        @Test
+        @DisplayName("event dispatcher")
+        void eventDispatcher() {
+            BareDispatcher dispatcher = new BareDispatcher();
 
-        assertTrue(eventBus.getDispatchers(EventClass.of(ProjectCreated.class))
-                           .contains(dispatcher));
-    }
+            eventBus.register(dispatcher);
 
-    @Test
-    @DisplayName("call dispatchers")
-    void callDispatchers() {
-        BareDispatcher dispatcher = new BareDispatcher();
+            eventBus.post(GivenEvent.projectCreated());
 
-        eventBus.register(dispatcher);
-
-        eventBus.post(GivenEvent.projectCreated());
-
-        assertTrue(dispatcher.isDispatchCalled());
-    }
-
-    @Test
-    @DisplayName("unregister dispatchers")
-    void unregisterDispatchers() {
-        EventDispatcher dispatcherOne = new BareDispatcher();
-        EventDispatcher dispatcherTwo = new BareDispatcher();
-        EventClass eventClass = EventClass.of(ProjectCreated.class);
-        eventBus.register(dispatcherOne);
-        eventBus.register(dispatcherTwo);
-
-        eventBus.unregister(dispatcherOne);
-        Set<? extends EventDispatcher<?>> dispatchers = eventBus.getDispatchers(eventClass);
-
-        // Check we don't have 1st dispatcher, but have 2nd.
-        assertFalse(dispatchers.contains(dispatcherOne));
-        assertTrue(dispatchers.contains(dispatcherTwo));
-
-        eventBus.unregister(dispatcherTwo);
-        assertFalse(eventBus.getDispatchers(eventClass)
-                            .contains(dispatcherTwo));
+            assertTrue(dispatcher.isDispatchCalled());
+        }
     }
 
     @Test
@@ -273,41 +290,46 @@ public class EventBusTest {
         verify(eventStore).close();
     }
 
-    @Test
-    @DisplayName("enrich event if it can be enriched")
-    void enrichEventIfItCanBeEnriched() {
-        EventEnricher enricher = mock(EventEnricher.class);
-        EventEnvelope event = EventEnvelope.of(GivenEvent.projectCreated());
-        doReturn(true).when(enricher)
-                      .canBeEnriched(any(EventEnvelope.class));
-        doReturn(event).when(enricher)
-                       .enrich(any(EventEnvelope.class));
+    @Nested
+    @DisplayName("manage event enrichment")
+    class ManageEventEnrichment {
 
-        // Close the bounded context, which was previously initialized in `@Before`.
-        closeBoundedContext();
-        setUp(enricher);
-        eventBus.register(new ProjectCreatedSubscriber());
+        @Test
+        @DisplayName("for event that can be enriched")
+        void forEnrichable() {
+            EventEnricher enricher = mock(EventEnricher.class);
+            EventEnvelope event = EventEnvelope.of(GivenEvent.projectCreated());
+            doReturn(true).when(enricher)
+                          .canBeEnriched(any(EventEnvelope.class));
+            doReturn(event).when(enricher)
+                           .enrich(any(EventEnvelope.class));
 
-        eventBus.post(event.getOuterObject());
+            // Close the bounded context, which was previously initialized in `@Before`.
+            closeBoundedContext();
+            setUp(enricher);
+            eventBus.register(new ProjectCreatedSubscriber());
 
-        verify(enricher).enrich(any(EventEnvelope.class));
-    }
+            eventBus.post(event.getOuterObject());
 
-    @Test
-    @DisplayName("not enrich event if it cannot be enriched")
-    void notEnrichEventIfItCannotBeEnriched() {
-        EventEnricher enricher = mock(EventEnricher.class);
-        doReturn(false).when(enricher)
-                       .canBeEnriched(any(EventEnvelope.class));
+            verify(enricher).enrich(any(EventEnvelope.class));
+        }
 
-        // Close the bounded context, which was previously initialized in `@Before`.
-        closeBoundedContext();
-        setUp(enricher);
-        eventBus.register(new ProjectCreatedSubscriber());
+        @Test
+        @DisplayName("for event that cannot be enriched")
+        void forNonEnrichable() {
+            EventEnricher enricher = mock(EventEnricher.class);
+            doReturn(false).when(enricher)
+                           .canBeEnriched(any(EventEnvelope.class));
 
-        eventBus.post(GivenEvent.projectCreated());
+            // Close the bounded context, which was previously initialized in `@Before`.
+            closeBoundedContext();
+            setUp(enricher);
+            eventBus.register(new ProjectCreatedSubscriber());
 
-        verify(enricher, never()).enrich(any(EventEnvelope.class));
+            eventBus.post(GivenEvent.projectCreated());
+
+            verify(enricher, never()).enrich(any(EventEnvelope.class));
+        }
     }
 
     @Test
@@ -318,71 +340,103 @@ public class EventBusTest {
         assertSame(validator, eventBus.getValidator());
     }
 
-    @Test
-    @DisplayName("store event")
-    void storeEvent() {
-        Command command = command(createProject());
-        eventBus.register(new EBProjectCreatedNoOpSubscriber());
-        commandBus.post(command, StreamObservers.noOpObserver());
+    @Nested
+    @DisplayName("store")
+    class Store {
 
-        List<Event> events = readEvents(eventBus);
-        assertSize(1, events);
+        @Test
+        @DisplayName("event")
+        void event() {
+            Command command = command(createProject());
+            eventBus.register(new EBProjectCreatedNoOpSubscriber());
+            commandBus.post(command, StreamObservers.noOpObserver());
+
+            List<Event> events = readEvents(eventBus);
+            assertSize(1, events);
+        }
+
+        @Test
+        @DisplayName("dead event")
+        void deadEvent() {
+            Command command = command(createProject());
+
+            commandBus.post(command, StreamObservers.noOpObserver());
+
+            List<Event> events = readEvents(eventBus);
+            assertSize(1, events);
+        }
+
+        /**
+         * Ensures that events are stored when all of them pass the filters.
+         *
+         * <p> To filter the {@link EBTaskAdded} events the {@linkplain EventBus} has a custom
+         * filter. The {@link TaskCreatedFilter} filters out {@link EBTaskAdded} events with
+         * {@link Task#getDone()} set to {@code true}.
+         *
+         * <p> The {@link EBTaskAddedNoOpSubscriber} is registered so that the event would not get
+         * filtered out by the {@link io.spine.server.bus.DeadMessageFilter}.
+         */
+        @Test
+        @DisplayName("multiple events")
+        void multipleEvents() {
+            eventBus.register(new EBTaskAddedNoOpSubscriber());
+            Command command = command(addTasks(newTask(false), newTask(false), newTask(false)));
+
+            commandBus.post(command, StreamObservers.noOpObserver());
+
+            List<Event> storedEvents = readEvents(eventBus);
+            assertSize(3, storedEvents);
+        }
     }
 
-    @Test
-    @DisplayName("store dead event")
-    void storeDeadEvent() {
-        Command command = command(createProject());
+    @Nested
+    @DisplayName("not store")
+    class NotStore {
 
-        commandBus.post(command, StreamObservers.noOpObserver());
+        @Test
+        @DisplayName("invalid event")
+        void invalidEvent() {
+            Command command = command(invalidArchiveProject());
+            eventBus.register(new EBProjectArchivedSubscriber());
 
-        List<Event> events = readEvents(eventBus);
-        assertSize(1, events);
-    }
+            commandBus.post(command, StreamObservers.noOpObserver());
 
-    @Test
-    @DisplayName("not store invalid event")
-    void notStoreInvalidEvent() {
-        Command command = command(invalidArchiveProject());
-        eventBus.register(new EBProjectArchivedSubscriber());
+            List<Event> events = readEvents(eventBus);
+            assertSize(0, events);
+        }
 
-        commandBus.post(command, StreamObservers.noOpObserver());
+        @Test
+        @DisplayName("invalid dead event")
+        void invalidDeadEvent() {
+            Command command = command(invalidArchiveProject());
 
-        List<Event> events = readEvents(eventBus);
-        assertSize(0, events);
-    }
+            commandBus.post(command, StreamObservers.noOpObserver());
 
-    @Test
-    @DisplayName("not store invalid dead event")
-    void notStoreInvalidDeadEvent() {
-        Command command = command(invalidArchiveProject());
+            List<Event> events = readEvents(eventBus);
+            assertSize(0, events);
+        }
 
-        commandBus.post(command, StreamObservers.noOpObserver());
+        /**
+         * Ensures that events are not stored when none of them pass the filters.
+         *
+         * <p>To filter the {@link EBTaskAdded} events the {@linkplain EventBus} has a custom
+         * filter. The {@link TaskCreatedFilter} filters out {@link EBTaskAdded} events with
+         * {@link Task#getDone()} set to {@code true}.
+         *
+         * <p>The {@link EBTaskAddedNoOpSubscriber} is registered so that the event would not get
+         * filtered out by the {@link io.spine.server.bus.DeadMessageFilter}.
+         */
+        @Test
+        @DisplayName("multiple events failing filters")
+        void multipleEventsFailingFilters() {
+            eventBus.register(new EBTaskAddedNoOpSubscriber());
+            Command command = command(addTasks(newTask(true), newTask(true), newTask(true)));
 
-        List<Event> events = readEvents(eventBus);
-        assertSize(0, events);
-    }
+            commandBus.post(command, StreamObservers.noOpObserver());
 
-    /**
-     * Ensures that events are stored when all of them pass the filters.
-     *
-     * <p> To filter the {@link EBTaskAdded} events the {@linkplain EventBus} has a custom filter.
-     * The {@link TaskCreatedFilter} filters out {@link EBTaskAdded} events with
-     * {@link Task#getDone()} set to {@code true}.
-     *
-     * <p> The {@link EBTaskAddedNoOpSubscriber} is registered so that the event would not get
-     * filtered out by the {@link io.spine.server.bus.DeadMessageFilter}.
-     */
-    @Test
-    @DisplayName("store multiple messages passing filters")
-    void storeMultipleMessages() {
-        eventBus.register(new EBTaskAddedNoOpSubscriber());
-        Command command = command(addTasks(newTask(false), newTask(false), newTask(false)));
-
-        commandBus.post(command, StreamObservers.noOpObserver());
-
-        List<Event> storedEvents = readEvents(eventBus);
-        assertSize(3, storedEvents);
+            List<Event> storedEvents = readEvents(eventBus);
+            assertSize(0, storedEvents);
+        }
     }
 
     /**
@@ -398,7 +452,7 @@ public class EventBusTest {
      */
     @Test
     @DisplayName("store only events passing filters")
-    void storeMultipleEvents() {
+    void filterOutFailingEvents() {
         eventBus.register(new EBTaskAddedNoOpSubscriber());
         Command command = command(addTasks(newTask(false), newTask(true), newTask(false),
                                            newTask(true), newTask(true)));
@@ -413,28 +467,6 @@ public class EventBusTest {
             Task task = contents.getTask();
             assertFalse(task.getDone());
         }
-    }
-
-    /**
-     * Ensures that events are not stored when none of them pass the filters.
-     *
-     * <p> To filter the {@link EBTaskAdded} events the {@linkplain EventBus} has a custom filter.
-     * The {@link TaskCreatedFilter} filters out {@link EBTaskAdded} events with
-     * {@link Task#getDone()} set to {@code true}.
-     *
-     * <p> The {@link EBTaskAddedNoOpSubscriber} is registered so that the event would not get
-     * filtered out by the {@link io.spine.server.bus.DeadMessageFilter}.
-     */
-    @Test
-    @DisplayName("not store any events when they are failing filtering")
-    void notEventsFailingFiltering() {
-        eventBus.register(new EBTaskAddedNoOpSubscriber());
-        Command command = command(addTasks(newTask(true), newTask(true), newTask(true)));
-
-        commandBus.post(command, StreamObservers.noOpObserver());
-
-        List<Event> storedEvents = readEvents(eventBus);
-        assertSize(0, storedEvents);
     }
 
     /**

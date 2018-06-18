@@ -39,6 +39,7 @@ import io.spine.test.event.ProjectCreated;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -61,6 +62,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * @author Mykhailo Drachuk
  */
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("Event root CommandId should")
 public class EventRootCommandIdTest {
 
@@ -88,117 +90,134 @@ public class EventRootCommandIdTest {
         boundedContext.close();
     }
 
-    @Test
-    @DisplayName("match id of command handled by aggregate")
-    void matchIdOfCommandHandledByAggregate() {
-        final Command command = command(createProject(projectId(), teamId()));
+    @Nested
+    @DisplayName("match ID of command handled by")
+    class MatchCommandHandledBy {
 
-        postCommand(command);
+        @Test
+        @DisplayName("aggregate")
+        void aggregate() {
+            final Command command = command(createProject(projectId(), teamId()));
 
-        final List<Event> events = readEvents();
-        assertEquals(command.getId(), getRootCommandId(events.get(0)));
+            postCommand(command);
+
+            final List<Event> events = readEvents();
+            assertEquals(command.getId(), getRootCommandId(events.get(0)));
+        }
+
+        @Test
+        @DisplayName("aggregate and returning multiple events")
+        void aggregateForMultipleEvents() {
+            final Command command = command(addTasks(projectId(), 3));
+
+            postCommand(command);
+
+            final List<Event> events = readEvents();
+            assertSize(3, events);
+            assertEquals(command.getId(), getRootCommandId(events.get(0)));
+            assertEquals(command.getId(), getRootCommandId(events.get(1)));
+            assertEquals(command.getId(), getRootCommandId(events.get(2)));
+        }
+
+        @Test
+        @DisplayName("process manager")
+        void processManager() {
+            final Command command = command(addTeamMember(teamId()));
+
+            postCommand(command);
+
+            final List<Event> events = readEvents();
+            assertSize(1, events);
+
+            final Event event = events.get(0);
+            assertEquals(command.getId(), getRootCommandId(event));
+        }
+
+        @Test
+        @DisplayName("process manager and returning multiple events")
+        void processManagerForMultipleEvents() {
+            final Command command = command(inviteTeamMembers(teamId(), 3));
+
+            postCommand(command);
+
+            final List<Event> events = readEvents();
+            assertSize(3, events);
+            assertEquals(command.getId(), getRootCommandId(events.get(0)));
+            assertEquals(command.getId(), getRootCommandId(events.get(1)));
+            assertEquals(command.getId(), getRootCommandId(events.get(2)));
+        }
+
+        private void postCommand(Command command) {
+            final StreamObserver<Ack> observer = noOpObserver();
+            boundedContext.getCommandBus()
+                          .post(command, observer);
+        }
     }
 
-    @Test
-    @DisplayName("match id of command handled by aggregate for multiple events")
-    void matchTheIdOfACommandHandledByAnAggregateForMultipleEvents() {
-        final Command command = command(addTasks(projectId(), 3));
+    @Nested
+    @DisplayName("match ID of external event handled by")
+    class MatchExternalEventHandledBy {
 
-        postCommand(command);
+        /**
+         * Ensures root command ID is matched by the property of the event which is created as
+         * a reaction to another event.
+         *
+         * <p> Two events are expected to be found in the {@linkplain EventStore} created by
+         * different aggregates:
+         * <ol>
+         *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregate} —
+         *     {@link ProjectCreated}</li>
+         *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregate} —
+         *     {@link EvTeamProjectAdded} created as a reaction to {@link ProjectCreated}</li>
+         * </ol>
+         */
+        @Test
+        @DisplayName("aggregate")
+        void aggregate() {
+            final Command command = command(createProject(projectId(), teamId()));
 
-        final List<Event> events = readEvents();
-        assertSize(3, events);
-        assertEquals(command.getId(), getRootCommandId(events.get(0)));
-        assertEquals(command.getId(), getRootCommandId(events.get(1)));
-        assertEquals(command.getId(), getRootCommandId(events.get(2)));
-    }
+            postCommand(command);
 
-    /**
-     * Ensures root command ID is matched by the property of the event which is created as
-     * a reaction to another event.
-     *
-     * <p> Two events are expected to be found in the {@linkplain EventStore} created by different
-     * aggregates:
-     * <ol>
-     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregate} —
-     *     {@link ProjectCreated}</li>
-     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregate} —
-     *     {@link EvTeamProjectAdded} created as a reaction to {@link ProjectCreated}</li>
-     * </ol>
-     */
-    @Test
-    @DisplayName("match id of external event handled by aggregate")
-    void matchTheIdOfAnExternalEventHandledByAnAggregate() {
-        final Command command = command(createProject(projectId(), teamId()));
+            final List<Event> events = readEvents();
+            assertSize(2, events);
 
-        postCommand(command);
+            final Event reaction = events.get(1);
+            assertEquals(command.getId(), getRootCommandId(reaction));
+        }
 
-        final List<Event> events = readEvents();
-        assertSize(2, events);
+        /**
+         * Ensures root command ID is matched by the property of the event which is created as
+         * a reaction to another event.
+         *
+         * <p> Two events are expected to be found in the {@linkplain EventStore} created by
+         * different process managers:
+         * <ol>
+         *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpProcessManager}
+         *     — {@link EvInvitationAccepted}</li>
+         *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationProcessManager}
+         *     — {@link EvTeamMemberAdded} created as a reaction to {@link EvInvitationAccepted}
+         *     </li>
+         * </ol>
+         */
+        @Test
+        @DisplayName("process manager")
+        void processManager() {
+            final Command command = command(acceptInvitation(teamId()));
 
-        final Event reaction = events.get(1);
-        assertEquals(command.getId(), getRootCommandId(reaction));
-    }
+            postCommand(command);
 
-    @Test
-    @DisplayName("match id of command handled by process manager")
-    void matchIdOfCommandHandledByProcessManager() {
-        final Command command = command(addTeamMember(teamId()));
+            final List<Event> events = readEvents();
+            assertSize(2, events);
 
-        postCommand(command);
+            final Event reaction = events.get(1);
+            assertEquals(command.getId(), getRootCommandId(reaction));
+        }
 
-        final List<Event> events = readEvents();
-        assertSize(1, events);
-
-        final Event event = events.get(0);
-        assertEquals(command.getId(), getRootCommandId(event));
-    }
-
-    @Test
-    @DisplayName("match id of command handled by process manager for multiple events")
-    void matchIdOfCommandHandledByProcessManagerForMultipleEvents() {
-        final Command command = command(inviteTeamMembers(teamId(), 3));
-
-        postCommand(command);
-
-        final List<Event> events = readEvents();
-        assertSize(3, events);
-        assertEquals(command.getId(), getRootCommandId(events.get(0)));
-        assertEquals(command.getId(), getRootCommandId(events.get(1)));
-        assertEquals(command.getId(), getRootCommandId(events.get(2)));
-    }
-
-    /**
-     * Ensures root command ID is matched by the property of the event which is created as
-     * a reaction to another event.
-     *
-     * <p> Two events are expected to be found in the {@linkplain EventStore} created by different
-     * process managers:
-     * <ol>
-     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpProcessManager} —
-     *     {@link EvInvitationAccepted}</li>
-     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationProcessManager} —
-     *     {@link EvTeamMemberAdded} created as a reaction to {@link EvInvitationAccepted}</li>
-     * </ol>
-     */
-    @Test
-    @DisplayName("match id of external event handled by process manager")
-    void matchIdOfExternalEventHandledByProcessManager() {
-        final Command command = command(acceptInvitation(teamId()));
-
-        postCommand(command);
-
-        final List<Event> events = readEvents();
-        assertSize(2, events);
-
-        final Event reaction = events.get(1);
-        assertEquals(command.getId(), getRootCommandId(reaction));
-    }
-
-    private void postCommand(Command command) {
-        final StreamObserver<Ack> observer = noOpObserver();
-        boundedContext.getCommandBus()
-                      .post(command, observer);
+        private void postCommand(Command command) {
+            final StreamObserver<Ack> observer = noOpObserver();
+            boundedContext.getCommandBus()
+                          .post(command, observer);
+        }
     }
 
     /**

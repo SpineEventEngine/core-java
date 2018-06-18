@@ -26,6 +26,7 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.test.Tests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.Executor;
@@ -34,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@DisplayName("EventStore ServiceBuilder")
+@DisplayName("EventStore ServiceBuilder should")
 class EventStoreServiceBuilderTest {
 
     private StorageFactory storageFactory;
@@ -50,45 +51,60 @@ class EventStoreServiceBuilderTest {
         builder = EventStore.newServiceBuilder();
     }
 
-    @Test
-    @DisplayName("throw NPE on null executor")
-    void throwOnNullExecutor() {
-        assertThrows(NullPointerException.class, () -> builder.setStreamExecutor(Tests.nullRef()));
+    @Nested
+    @DisplayName("throw NPE on")
+    class ThrowNpeOn {
+
+        @Test
+        @DisplayName("null stream executor")
+        void nullStreamExecutor() {
+            assertThrows(NullPointerException.class,
+                         () -> builder.setStreamExecutor(Tests.nullRef()));
+        }
+
+        @Test
+        @DisplayName("null event storage")
+        void nullEventStorage() {
+            assertThrows(NullPointerException.class,
+                         () -> builder.setStreamExecutor(Tests.nullRef()));
+        }
+
+        @Test
+        @DisplayName("stream executor not set")
+        void streamExecutorNotSet() {
+            assertThrows(NullPointerException.class,
+                         () -> builder.setStorageFactory(storageFactory)
+                                      .build());
+        }
+
+        @Test
+        @DisplayName("event storage not set")
+        void eventStorageNotSet() {
+            assertThrows(NullPointerException.class,
+                         () -> builder.setStreamExecutor(newExecutor())
+                                      .build());
+        }
     }
 
-    @Test
-    @DisplayName("throw NPE on null EventStorage")
-    void throwOnNullEventStorage() {
-        assertThrows(NullPointerException.class, () -> builder.setStreamExecutor(Tests.nullRef()));
-    }
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
+    @Nested
+    @DisplayName("return set")
+    class ReturnSet {
 
-    @Test
-    @DisplayName("throw NPE on non set streamExecutor")
-    void throwOnNonSetStreamExecutor() {
-        assertThrows(NullPointerException.class, () -> builder.setStorageFactory(storageFactory)
-                                                              .build());
-    }
+        @Test
+        @DisplayName("stream executor")
+        void streamExecutor() {
+            Executor executor = newExecutor();
+            assertEquals(executor, builder.setStreamExecutor(executor)
+                                          .getStreamExecutor());
+        }
 
-    @Test
-    @DisplayName("throw NPE on non set eventStorage")
-    void throwOnNonSetEventStorage() {
-        assertThrows(NullPointerException.class, () -> builder.setStreamExecutor(newExecutor())
-                                                              .build());
-    }
-
-    @Test
-    @DisplayName("return set streamExecutor")
-    void returnSetStreamExecutor() {
-        Executor executor = newExecutor();
-        assertEquals(executor, builder.setStreamExecutor(executor)
-                                      .getStreamExecutor());
-    }
-
-    @Test
-    @DisplayName("return set eventStorage")
-    void returnSetEventStorage() {
-        assertEquals(storageFactory, builder.setStorageFactory(storageFactory)
-                                            .getStorageFactory());
+        @Test
+        @DisplayName("event storage")
+        void eventStorage() {
+            assertEquals(storageFactory, builder.setStorageFactory(storageFactory)
+                                                .getStorageFactory());
+        }
     }
 
     @Test

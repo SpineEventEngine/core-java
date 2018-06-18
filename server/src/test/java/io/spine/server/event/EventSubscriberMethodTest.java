@@ -36,7 +36,9 @@ import io.spine.server.event.given.EventSubscriberMethodTestEnv.ValidOneParam;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.ValidTwoParams;
 import io.spine.server.model.given.Given;
 import io.spine.test.reflect.event.RefProjectCreated;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
@@ -51,6 +53,9 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alexander Litus
  */
+@SuppressWarnings({"DuplicateStringLiteralInspection", /* Common test display names. */
+        "InnerClassMayBeStatic", "ClassCanBeStatic"
+        /* JUnit 5 Nested classes cannot to be static. */})
 @DisplayName("EventSubscriberMethod should")
 class EventSubscriberMethodTest {
 
@@ -78,92 +83,103 @@ class EventSubscriberMethodTest {
                 .handle(msg, EventContext.getDefaultInstance());
     }
 
-    @Test
-    @DisplayName("consider subscriber with one Message param valid")
-    void considerSubscriberWithOneMsgParamValid() {
-        final Method subscriber = new ValidOneParam().getMethod();
+    @Nested
+    @DisplayName("consider subscriber valid with")
+    class ConsiderSubscriberValidWith {
 
-        assertIsEventSubscriber(subscriber, true);
+        @Test
+        @DisplayName("one Message parameter")
+        void oneMsgParam() {
+            final Method subscriber = new ValidOneParam().getMethod();
+
+            assertIsEventSubscriber(subscriber, true);
+        }
+
+        @Test
+        @DisplayName("Message and Context parameters")
+        void msgAndContextParams() {
+            final Method subscriber = new ValidTwoParams().getMethod();
+
+            assertIsEventSubscriber(subscriber, true);
+        }
+
+        @Test
+        @DisplayName("non-public access")
+        void nonPublicAccess() {
+            final Method method = new ValidButPrivate().getMethod();
+
+            assertIsEventSubscriber(method, true);
+        }
     }
 
-    @Test
-    @DisplayName("consider subscriber with Message and Context params valid")
-    void considerSubscriberWithMsgAndContextParamsValid() {
-        final Method subscriber = new ValidTwoParams().getMethod();
+    @Nested
+    @DisplayName("consider subscriber invalid with")
+    class ConsiderSubscriberInvalidWith {
 
-        assertIsEventSubscriber(subscriber, true);
-    }
+        @Test
+        @DisplayName("no annotation")
+        void noAnnotation() {
+            final Method subscriber = new InvalidNoAnnotation().getMethod();
 
-    @Test
-    @DisplayName("consider non-public subscriber valid")
-    void considerNotPublicSubscriberValid() {
-        final Method method = new ValidButPrivate().getMethod();
+            assertIsEventSubscriber(subscriber, false);
+        }
 
-        assertIsEventSubscriber(method, true);
-    }
+        @Test
+        @DisplayName("no params")
+        void noParams() {
+            final Method subscriber = new InvalidNoParams().getMethod();
 
-    @Test
-    @DisplayName("consider not annotated subscriber invalid")
-    void considerNotAnnotatedSubscriberInvalid() {
-        final Method subscriber = new InvalidNoAnnotation().getMethod();
+            assertIsEventSubscriber(subscriber, false);
+        }
 
-        assertIsEventSubscriber(subscriber, false);
-    }
+        @Test
+        @DisplayName("too many params")
+        void tooManyParams() {
+            final Method subscriber = new InvalidTooManyParams().getMethod();
 
-    @Test
-    @DisplayName("consider subscriber without params invalid")
-    void considerSubscriberWithoutParamsInvalid() {
-        final Method subscriber = new InvalidNoParams().getMethod();
+            assertIsEventSubscriber(subscriber, false);
+        }
 
-        assertIsEventSubscriber(subscriber, false);
-    }
+        @Test
+        @DisplayName("one invalid param")
+        void oneInvalidParam() {
+            final Method subscriber = new InvalidOneNotMsgParam().getMethod();
 
-    @Test
-    @DisplayName("consider subscriber with too many params invalid")
-    void considerSubscriberWithTooManyParamsInvalid() {
-        final Method subscriber = new InvalidTooManyParams().getMethod();
+            assertIsEventSubscriber(subscriber, false);
+        }
 
-        assertIsEventSubscriber(subscriber, false);
-    }
+        @Test
+        @DisplayName("first non-Message param")
+        void firstNonMessageParam() {
+            final Method subscriber = new InvalidTwoParamsFirstInvalid().getMethod();
 
-    @Test
-    @DisplayName("consider subscriber with one invalid param invalid")
-    void considerSubscriberWithOneInvalidParamInvalid() {
-        final Method subscriber = new InvalidOneNotMsgParam().getMethod();
+            assertIsEventSubscriber(subscriber, false);
+        }
 
-        assertIsEventSubscriber(subscriber, false);
-    }
+        @Test
+        @DisplayName("second non-Context param")
+        void secondNonContextParam() {
+            final Method subscriber = new InvalidTwoParamsSecondInvalid().getMethod();
 
-    @Test
-    @DisplayName("consider subscriber with first not message param invalid")
-    void considerSubscriberWithFirstNotMessageParamInvalid() {
-        final Method subscriber = new InvalidTwoParamsFirstInvalid().getMethod();
+            assertIsEventSubscriber(subscriber, false);
+        }
 
-        assertIsEventSubscriber(subscriber, false);
-    }
+        @Test
+        @DisplayName("non-void return type")
+        void nonVoidReturnType() {
+            final Method subscriber = new InvalidNotVoid().getMethod();
 
-    @Test
-    @DisplayName("consider subscriber with second not context param invalid")
-    void considerSubscriberWithSecondNotContextParamInvalid() {
-        final Method subscriber = new InvalidTwoParamsSecondInvalid().getMethod();
+            assertIsEventSubscriber(subscriber, false);
+        }
 
-        assertIsEventSubscriber(subscriber, false);
-    }
+        @Test
+        @DisplayName("Rejection class type")
+        void rejectionClassType() {
+            final Method rejectionSubscriber = new ARejectionSubscriber().getMethod();
 
-    @Test
-    @DisplayName("consider not void subscriber invalid")
-    void considerNotVoidSubscriberInvalid() {
-        final Method subscriber = new InvalidNotVoid().getMethod();
+            assertIsEventSubscriber(rejectionSubscriber, false);
+        }
 
-        assertIsEventSubscriber(subscriber, false);
-    }
-
-    @Test
-    @DisplayName("filter out rejection subscribers")
-    void filterOutRejectionSubscribers() {
-        final Method rejectionSubscriber = new ARejectionSubscriber().getMethod();
-
-        assertIsEventSubscriber(rejectionSubscriber, false);
     }
 
     private static void assertIsEventSubscriber(Method subscriber, boolean isSubscriber) {

@@ -67,7 +67,7 @@ class EventFactoryTest {
 
     @Test
     @DisplayName("validate event messages before creation")
-    void validateEventMessages() {
+    void validateCreatedMessages() {
         EventFactory factory = EventFactory.on(origin, producerId);
         assertThrows(ValidationException.class,
                      () -> factory.createEvent(MandatoryFieldEvent.getDefaultInstance(), null));

@@ -28,9 +28,10 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @DisplayName("MatchFilter should")
 class MatchFilterTest {
 
+    @SuppressWarnings("ConstantConditions") // Passing `null` is the purpose of the test.
     @Test
-    @DisplayName("not pass null events")
-    void notPassNullEvents() {
+    @DisplayName("not allow null events to pass")
+    void notAllowNullEvents() {
         final MatchFilter filter = new MatchFilter(EventFilter.getDefaultInstance());
         assertFalse(filter.apply(null));
     }

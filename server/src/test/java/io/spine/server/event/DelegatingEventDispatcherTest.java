@@ -79,7 +79,7 @@ class DelegatingEventDispatcherTest {
 
     @Test
     @DisplayName("expose external dispatcher that delegates `onError`")
-    void exposeDispatcherDelegatingOnError() {
+    void exposeExternalDispatcher() {
         final ExternalMessageDispatcher<String> extMessageDispatcher =
                 delegatingDispatcher.getExternalDispatcher();
 

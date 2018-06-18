@@ -44,7 +44,7 @@ class ERepositoryTest {
 
     @Test
     @DisplayName("convert empty query to empty EntityFilters")
-    void convertEmptyQueryToEmptyEntityFilters() {
+    void convertEmptyToFilters() {
         EventStreamQuery query = EventStreamQuery.newBuilder()
                                                  .build();
         EntityFilters entityFilters = toEntityFilters(query);
@@ -54,7 +54,7 @@ class ERepositoryTest {
 
     @Test
     @DisplayName("convert time query to EntityFilters")
-    void convertTimeQueryToEntityFilters() {
+    void convertTimeToFilters() {
         EventStreamQuery query = EventStreamQuery
                 .newBuilder()
                 .setAfter(Timestamps.MIN_VALUE)
@@ -71,7 +71,7 @@ class ERepositoryTest {
 
     @Test
     @DisplayName("convert type query to EntityFilters")
-    void convertTypeQueryToEntityFilters() {
+    void convertTypeToFilters() {
         String typeName = " com.example.EventType ";
         EventFilter validFilter = filterForType(typeName);
         EventFilter invalidFilter = filterForType("   ");

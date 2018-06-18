@@ -31,6 +31,7 @@ import io.spine.test.Tests;
 import io.spine.validate.MessageValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CountDownLatch;
@@ -46,7 +47,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
+@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions",
+        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("EventBus Builder should")
 class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
                                                  EventEnvelope,
@@ -68,67 +70,22 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
         this.storageFactory = bc.getStorageFactory();
     }
 
-    @Test
-    @DisplayName("not accept null EventStore")
-    void notAcceptNullEventStore() {
-        assertThrows(NullPointerException.class, () -> builder().setEventStore(Tests.nullRef()));
-    }
+    @Nested
+    @DisplayName("not accept null")
+    class NotAcceptNull {
 
-    @Test
-    @DisplayName("return set StorageFactory")
-    void returnSetStorageFactory() {
-        assertEquals(storageFactory, builder().setStorageFactory(storageFactory)
-                                              .getStorageFactory()
-                                              .get());
-    }
+        @Test
+        @DisplayName("EventStore")
+        void eventStore() {
+            assertThrows(NullPointerException.class, () -> builder().setEventStore(Tests.nullRef()));
+        }
 
-    @Test
-    @DisplayName("return EventStore if set")
-    void returnEventStoreIfSet() {
-        EventStore mock = mock(EventStore.class);
-        assertEquals(mock, builder().setEventStore(mock)
-                                    .getEventStore()
-                                    .get());
-    }
-
-    @Test
-    @DisplayName("return stream Executor for EventStore if set")
-    void returnStreamExecutorForEventStoreIfSet() {
-        Executor mock = mock(Executor.class);
-        assertEquals(mock, builder().setEventStoreStreamExecutor(mock)
-                                    .getEventStoreStreamExecutor()
-                                    .get());
-    }
-
-    @Test
-    @DisplayName("not accept null EventValidator")
-    void notAcceptNullEventValidator() {
-        assertThrows(NullPointerException.class,
-                     () -> builder().setEventValidator(Tests.nullRef()));
-    }
-
-    @Test
-    @DisplayName("return set EventValidator")
-    void returnSetEventValidator() {
-        final MessageValidator validator = MessageValidator.newInstance();
-        assertEquals(validator, builder().setEventValidator(validator)
-                                         .getEventValidator()
-                                         .get());
-    }
-
-    @Test
-    @DisplayName("require set EventStore or StorageFactory")
-    void requireSetEventStoreOrStorageFactory() {
-        assertThrows(IllegalStateException.class, () -> EventBus.newBuilder()
-                                                                .build());
-    }
-
-    @Test
-    @DisplayName("set event validator if not set explicitly")
-    void setEventValidatorIfNotSetExplicitly() {
-        assertNotNull(builder().setStorageFactory(storageFactory)
-                               .build()
-                               .getMessageValidator());
+        @Test
+        @DisplayName("EventValidator")
+        void eventValidator() {
+            assertThrows(NullPointerException.class,
+                         () -> builder().setEventValidator(Tests.nullRef()));
+        }
     }
 
     @Test
@@ -139,85 +96,150 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
                             .orNull());
     }
 
-    @Test
-    @DisplayName("return set Enricher")
-    void returnSetEnricher() {
-        EventEnricher enricher = mock(EventEnricher.class);
+    @Nested
+    @DisplayName("return set")
+    class ReturnSet {
 
-        assertEquals(enricher, builder().setStorageFactory(storageFactory)
-                                        .setEnricher(enricher)
-                                        .getEnricher()
+        @Test
+        @DisplayName("StorageFactory")
+        void storageFactory() {
+            assertEquals(storageFactory, builder().setStorageFactory(storageFactory)
+                                                  .getStorageFactory()
+                                                  .get());
+        }
+
+        @Test
+        @DisplayName("EventStore if is present")
+        void eventStore() {
+            EventStore mock = mock(EventStore.class);
+            assertEquals(mock, builder().setEventStore(mock)
+                                        .getEventStore()
                                         .get());
+        }
+
+        @Test
+        @DisplayName("return stream Executor for EventStore if present")
+        void streamExecutor() {
+            Executor mock = mock(Executor.class);
+            assertEquals(mock, builder().setEventStoreStreamExecutor(mock)
+                                        .getEventStoreStreamExecutor()
+                                        .get());
+        }
+
+        @Test
+        @DisplayName("EventValidator")
+        void eventValidator() {
+            final MessageValidator validator = MessageValidator.newInstance();
+            assertEquals(validator, builder().setEventValidator(validator)
+                                             .getEventValidator()
+                                             .get());
+        }
+
+        @Test
+        @DisplayName("Enricher")
+        void enricher() {
+            EventEnricher enricher = mock(EventEnricher.class);
+
+            assertEquals(enricher, builder().setStorageFactory(storageFactory)
+                                            .setEnricher(enricher)
+                                            .getEnricher()
+                                            .get());
+        }
     }
 
     @Test
-    @DisplayName("not accept StorageFactory if EventStore already specified")
-    void notAcceptStorageFactoryIfEventStoreAlreadySpecified() {
-        EventBus.Builder builder = builder().setEventStore(mock(EventStore.class));
-        assertThrows(IllegalStateException.class, () -> builder.setStorageFactory(storageFactory));
+    @DisplayName("throw ISE if neither EventStore nor StorageFactory is set")
+    void requireEventStoreOrStorageFactory() {
+        assertThrows(IllegalStateException.class, () -> EventBus.newBuilder()
+                                                                .build());
     }
 
     @Test
-    @DisplayName("not accept EventStore if StorageFactory already specified")
-    void notAcceptEventStoreIfStorageFactoryAlreadySpecified() {
-        EventBus.Builder builder = builder().setStorageFactory(mock(StorageFactory.class));
-        assertThrows(IllegalStateException.class,
-                     () -> builder.setEventStore(mock(EventStore.class)));
+    @DisplayName("set event validator if it is not specified explicitly")
+    void setDefaultValidator() {
+        assertNotNull(builder().setStorageFactory(storageFactory)
+                               .build()
+                               .getMessageValidator());
     }
 
-    @Test
-    @DisplayName("not accept EventStore if EventStoreStreamExecutor already specified")
-    void notAcceptEventStoreIfEventStoreStreamExecutorAlreadySpecified() {
-        EventBus.Builder builder = builder().setEventStoreStreamExecutor(mock(Executor.class));
-        assertThrows(IllegalStateException.class,
-                     () -> builder.setEventStore(mock(EventStore.class)));
+    @Nested
+    @DisplayName("not allow to override")
+    class NotOverride {
+
+        @Test
+        @DisplayName("EventStore by StorageFactory")
+        void eventStoreByStorageFactory() {
+            EventBus.Builder builder = builder().setEventStore(mock(EventStore.class));
+            assertThrows(IllegalStateException.class, () -> builder.setStorageFactory(storageFactory));
+        }
+
+        @Test
+        @DisplayName("StorageFactory by EventStore")
+        void storageFactoryByEventStore() {
+            EventBus.Builder builder = builder().setStorageFactory(mock(StorageFactory.class));
+            assertThrows(IllegalStateException.class,
+                         () -> builder.setEventStore(mock(EventStore.class)));
+        }
+
+        @Test
+        @DisplayName("EventStoreStreamExecutor by EventStore")
+        void eventExecutorByEventStore() {
+            EventBus.Builder builder = builder().setEventStoreStreamExecutor(mock(Executor.class));
+            assertThrows(IllegalStateException.class,
+                         () -> builder.setEventStore(mock(EventStore.class)));
+        }
+
+        @Test
+        @DisplayName("EventStore by EventStoreStreamExecutor")
+        void eventStoreByEventExecutor() {
+            EventBus.Builder builder = builder().setEventStore(mock(EventStore.class));
+            assertThrows(IllegalStateException.class,
+                         () -> builder.setEventStoreStreamExecutor(mock(Executor.class)));
+        }
     }
 
-    @Test
-    @DisplayName("not accept EventStoreStreamExecutor if EventStore already specified")
-    void notAcceptEventStoreStreamExecutorIfEventStoreAlreadySpecified() {
-        EventBus.Builder builder = builder().setEventStore(mock(EventStore.class));
-        assertThrows(IllegalStateException.class,
-                     () -> builder.setEventStoreStreamExecutor(mock(Executor.class)));
-    }
+    @Nested
+    @DisplayName("use executor")
+    class UseExecutor {
 
-    @Test
-    @DisplayName("use directExecutor if EventStoreStreamExecutor not set")
-    void useDirectExecutorIfEventStoreStreamExecutorNotSet() {
-        EventBus build = builder()
-                .setStorageFactory(storageFactory)
-                .build();
-        Executor streamExecutor = build.getEventStore()
-                                       .getStreamExecutor();
-        ensureExecutorDirect(streamExecutor);
-    }
+        @Test
+        @DisplayName("which is direct if no custom one was passed")
+        void direct() {
+            EventBus build = builder()
+                    .setStorageFactory(storageFactory)
+                    .build();
+            Executor streamExecutor = build.getEventStore()
+                                           .getStreamExecutor();
+            ensureExecutorDirect(streamExecutor);
+        }
 
-    @Test
-    @DisplayName("use passed executor")
-    void usePassedExecutor() {
-        CountDownLatch executorUsageLatch = new CountDownLatch(1);
+        @Test
+        @DisplayName("which was passed to Builder")
+        void passed() {
+            CountDownLatch executorUsageLatch = new CountDownLatch(1);
 
-        // Decrease the counter to ensure this method has been called.
-        Executor simpleExecutor = command -> executorUsageLatch.countDown();
-        EventBus.Builder builder = builder().setStorageFactory(storageFactory)
-                                            .setEventStoreStreamExecutor(simpleExecutor);
-        EventBus build = builder.build();
-        Executor streamExecutor = build.getEventStore()
-                                       .getStreamExecutor();
-        streamExecutor.execute(mock(Runnable.class));
-        try {
+            // Decrease the counter to ensure this method has been called.
+            Executor simpleExecutor = command -> executorUsageLatch.countDown();
+            EventBus.Builder builder = builder().setStorageFactory(storageFactory)
+                                                .setEventStoreStreamExecutor(simpleExecutor);
+            EventBus build = builder.build();
+            Executor streamExecutor = build.getEventStore()
+                                           .getStreamExecutor();
+            streamExecutor.execute(mock(Runnable.class));
+            try {
             /* The executor configured to operate synchronously,
                so the latch should already be zero at this point.
              */
-            executorUsageLatch.await(0, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            fail("The specified executor was not used.");
+                executorUsageLatch.await(0, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                fail("The specified executor was not used.");
+            }
         }
     }
 
     @Test
     @DisplayName("allow custom message validators")
-    void allowCustomMessageValidators() {
+    void allowCustomValidators() {
         StorageFactory storageFactory =
                 StorageFactorySwitch.newInstance(newName("test"), false)
                                     .get();
@@ -231,7 +253,7 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
 
     @Test
     @DisplayName("allow configuring logging level for post operations")
-    void configureLogLevelForPost() {
+    void setLogLevelForPost() {
         // See that the default level is TRACE.
         assertEquals(LoggingObserver.Level.TRACE, builder().getLogLevelForPost());
 
