@@ -451,7 +451,7 @@ public class EventBusTest {
      * <p>To make sure that the chain works fine (i.e. produces no exceptions), we invoke the
      * initialization multiple times from several threads.
      */
-    @SuppressWarnings("MethodWithMultipleLoops") // OK for such test case.
+    @SuppressWarnings({"MethodWithMultipleLoops", "BusyWait"}) // OK for such test case.
     @Disabled // This test is used only to diagnose EventBus malfunctions in concurrent environment.
     // It's too long to execute this test per each build, so we leave it as is for now.
     // Please see build log to find out if there were some errors during the test execution.

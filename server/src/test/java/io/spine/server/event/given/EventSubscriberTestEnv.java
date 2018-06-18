@@ -42,10 +42,8 @@ public class EventSubscriberTestEnv {
     public static class FailingSubscriber extends EventSubscriber {
 
         private boolean methodCalled = false;
-        @Nullable
-        private EventEnvelope lastErrorEnvelope;
-        @Nullable
-        private RuntimeException lastException;
+        private @Nullable EventEnvelope lastErrorEnvelope;
+        private @Nullable RuntimeException lastException;
 
         @Subscribe
         public void on(BoolValue message, EventContext context) {
@@ -76,13 +74,11 @@ public class EventSubscriberTestEnv {
             lastException = exception;
         }
 
-        @Nullable
-        public EventEnvelope getLastErrorEnvelope() {
+        public @Nullable EventEnvelope getLastErrorEnvelope() {
             return lastErrorEnvelope;
         }
 
-        @Nullable
-        public RuntimeException getLastException() {
+        public @Nullable RuntimeException getLastException() {
             return lastException;
         }
     }

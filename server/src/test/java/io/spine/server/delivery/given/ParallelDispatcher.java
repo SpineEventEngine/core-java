@@ -109,12 +109,9 @@ public abstract class ParallelDispatcher<I extends Message, M extends Message> {
         for (int i = 0; i < messageCount; i++) {
             final M message = newMessage();
 
-            builder.add(new Callable<Object>() {
-                @Override
-                public Object call() {
-                    postToBus(boundedContext, message);
-                    return 0;
-                }
+            builder.add(() -> {
+                postToBus(boundedContext, message);
+                return 0;
             });
         }
 

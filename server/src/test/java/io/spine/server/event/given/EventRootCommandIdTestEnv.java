@@ -206,7 +206,7 @@ public class EventRootCommandIdTestEnv {
     /**
      * Routes the {@link EvInvitationAccepted} event to the {@link TeamCreationProcessManager} which
      * created the invitation. This is done for the purposes of the
-     * {@linkplain EventRootCommandIdTest#matchTheIdOfAnExternalEventHandledByAProcessManager()}
+     * {@linkplain EventRootCommandIdTest#matchIdOfExternalEventHandledByProcessManager()}
      * test.
      */
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
