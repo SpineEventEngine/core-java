@@ -35,7 +35,6 @@ import io.spine.core.CommandValidationError;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.grpc.StreamObservers;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.commandstore.CommandStore;
@@ -59,6 +58,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.core.given.GivenTenantId.newUuid;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.BoundedContext.newName;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
@@ -200,7 +200,7 @@ abstract class AbstractCommandBusTestSuite {
                             ? TestActorRequestFactory.newInstance(getClass(), newUuid())
                             : TestActorRequestFactory.newInstance(getClass());
         createProjectHandler = new CreateProjectHandler();
-        observer = StreamObservers.memoizingObserver();
+        observer = memoizingObserver();
     }
 
     @AfterEach
@@ -224,7 +224,7 @@ abstract class AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
 
         final CommandBus spy = spy(commandBus);
-        spy.post(commands, StreamObservers.memoizingObserver());
+        spy.post(commands, memoizingObserver());
 
         @SuppressWarnings("unchecked")
         final ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);
