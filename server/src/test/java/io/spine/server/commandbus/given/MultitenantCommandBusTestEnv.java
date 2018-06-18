@@ -18,57 +18,51 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandbus;
+package io.spine.server.commandbus.given;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.client.TestActorRequestFactory;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import org.junit.Test;
+import io.spine.core.MessageEnvelope;
+import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.test.command.CmdAddTask;
 
 import java.util.Set;
 
-import static org.junit.Assert.assertTrue;
+public class MultitenantCommandBusTestEnv {
 
-public class DelegatingCommandDispatcherShould {
-
-    @Test
-    public void delegate_onError() throws Exception {
-        final EmptyCommandDispatcherDelegate delegate = new EmptyCommandDispatcherDelegate();
-
-        final DelegatingCommandDispatcher<String> delegatingDispatcher =
-                DelegatingCommandDispatcher.of(delegate);
-
-        final CommandEnvelope commandEnvelope =
-                TestActorRequestFactory.newInstance(getClass()).generateEnvelope();
-
-        delegatingDispatcher.onError(commandEnvelope, new RuntimeException(getClass().getName()));
-
-        assertTrue(delegate.onErrorCalled());
+    /** Prevents instantiation of this utility class. */
+    private MultitenantCommandBusTestEnv() {
     }
 
-    private static final class EmptyCommandDispatcherDelegate
-            implements CommandDispatcherDelegate<String> {
+    /**
+     * The dispatcher that remembers that
+     * {@link CommandDispatcher#dispatch(MessageEnvelope) dispatch()}
+     * was called.
+     */
+    public static class AddTaskDispatcher implements CommandDispatcher<Message> {
 
-        private boolean onErrorCalled;
+        private boolean dispatcherInvoked = false;
 
         @Override
-        public Set<CommandClass> getCommandClasses() {
-            return ImmutableSet.of();
+        public Set<CommandClass> getMessageClasses() {
+            return CommandClass.setOf(CmdAddTask.class);
         }
 
         @Override
-        public String dispatchCommand(CommandEnvelope envelope) {
-            return getClass().getName();
+        public Message dispatch(CommandEnvelope envelope) {
+            dispatcherInvoked = true;
+            return Empty.getDefaultInstance();
         }
 
         @Override
         public void onError(CommandEnvelope envelope, RuntimeException exception) {
-            onErrorCalled = true;
+            // Do nothing.
         }
 
-        boolean onErrorCalled() {
-            return onErrorCalled;
+        public boolean wasDispatcherInvoked() {
+            return dispatcherInvoked;
         }
     }
 }

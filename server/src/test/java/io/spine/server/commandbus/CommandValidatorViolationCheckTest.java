@@ -30,7 +30,8 @@ import io.spine.core.CommandId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.validate.ConstraintViolation;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -38,15 +39,17 @@ import static io.spine.core.Commands.generateId;
 import static io.spine.core.given.GivenCommandContext.withRandomActor;
 import static io.spine.server.commandbus.CommandValidator.inspect;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Alexander Litus
  */
-public class CommandValidatorViolationCheckShould {
+@DisplayName("CommandValidator violation check should")
+class CommandValidatorViolationCheckTest {
 
     @Test
-    public void validate_command_and_return_nothing_if_it_is_valid() {
+    @DisplayName("validate command and return empty violations list if command is valid")
+    void returnNothingForValidCmd() {
         final Command cmd = Given.ACommand.createProject();
 
         final List<ConstraintViolation> violations = inspect(CommandEnvelope.of(cmd));
@@ -55,7 +58,8 @@ public class CommandValidatorViolationCheckShould {
     }
 
     @Test
-    public void not_allow_commands_without_IDs() {
+    @DisplayName("not allow commands without IDs")
+    void notAllowDefaultId() {
         final Command cmd = Given.ACommand.createProject();
         final Command unidentifiableCommand = cmd.toBuilder()
                                                  .setId(CommandId.getDefaultInstance())
@@ -67,7 +71,8 @@ public class CommandValidatorViolationCheckShould {
     }
 
     @Test
-    public void validate_command_and_return_violations_if_message_is_NOT_valid() {
+    @DisplayName("return violations if command has invalid Message")
+    void notAllowInvalidMessage() {
         final Any invalidMessagePacked = AnyPacker.pack(CmdCreateProject.getDefaultInstance());
         final Command commandWithEmptyMessage = Command.newBuilder()
                                                        .setId(generateId())
@@ -82,7 +87,8 @@ public class CommandValidatorViolationCheckShould {
     }
 
     @Test
-    public void validate_command_and_return_violations_if_context_is_NOT_valid() {
+    @DisplayName("return violations if command has invalid context")
+    void notAllowInvalidContext() {
         final Command command = TestActorRequestFactory.newInstance(getClass())
                                                        .createCommand(createProjectMessage(),
                                                                       Time.getCurrentTime());

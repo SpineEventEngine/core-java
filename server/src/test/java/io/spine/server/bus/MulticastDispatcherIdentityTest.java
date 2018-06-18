@@ -20,21 +20,35 @@
 
 package io.spine.server.bus;
 
-import com.google.common.collect.Lists;
-import io.spine.core.EventEnvelope;
-import org.junit.Test;
+import io.spine.server.bus.given.MulticastDispatcherIdentityTestEnv.IdentityDispatcher;
+import io.spine.test.Tests;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.util.Set;
+
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class FilterChainShould {
+@DisplayName("MulticastDispatcher.Identity utility should")
+class MulticastDispatcherIdentityTest {
 
-    @Test(expected = IllegalStateException.class)
-    public void not_allow_closing_twice() throws Exception {
-        FilterChain<EventEnvelope, BusFilter<EventEnvelope>> chain =
-                new FilterChain<>(Lists.<BusFilter<EventEnvelope>>newArrayList());
+    @Test
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        Tests.assertHasPrivateParameterlessCtor(MulticastDispatcher.Identity.class);
+    }
 
-        chain.close();
-        chain.close();
+    @Test
+    @DisplayName("return dispatcher identity")
+    void returnDispatcherIdentity() throws Exception {
+        final Set<String> set = MulticastDispatcher.Identity.of(new IdentityDispatcher());
+
+        assertTrue(set.contains(IdentityDispatcher.ID));
+        assertEquals(1, set.size());
     }
 }

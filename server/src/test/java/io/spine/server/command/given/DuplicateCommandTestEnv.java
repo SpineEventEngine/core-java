@@ -96,16 +96,13 @@ public class DuplicateCommandTestEnv {
     public static void runServer(final TestServer server) throws Exception {
         final CountDownLatch serverStartLatch = new CountDownLatch(1);
 
-        final Thread serverThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    server.start();
-                    server.awaitTermination();
-                    serverStartLatch.countDown();
-                } catch (IOException e) {
-                    throw new IllegalStateException(e);
-                }
+        final Thread serverThread = new Thread(() -> {
+            try {
+                server.start();
+                server.awaitTermination();
+                serverStartLatch.countDown();
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
             }
         });
 

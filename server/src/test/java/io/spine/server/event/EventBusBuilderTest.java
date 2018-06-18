@@ -24,7 +24,7 @@ import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.grpc.LoggingObserver;
 import io.spine.server.BoundedContext;
-import io.spine.server.bus.BusBuilderShould;
+import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.Tests;
@@ -48,9 +48,9 @@ import static org.mockito.Mockito.mock;
 
 @SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
 @DisplayName("EventBus Builder should")
-class EventBusBuilderTest extends BusBuilderShould<EventBus.Builder,
-                                                            EventEnvelope,
-                                                            Event> {
+class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
+                                                 EventEnvelope,
+                                                 Event> {
 
     private StorageFactory storageFactory;
 

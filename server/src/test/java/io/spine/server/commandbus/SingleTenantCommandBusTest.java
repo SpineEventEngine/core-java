@@ -24,20 +24,17 @@ import com.google.protobuf.Message;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
 import io.spine.core.Rejection;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.bus.EnvelopeValidator;
-import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
-import io.spine.server.event.EventBus;
-import io.spine.test.command.CmdAddTask;
-import io.spine.test.command.event.CmdTaskAdded;
+import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.FaultyHandler;
 import io.spine.test.reflect.InvalidProjectName;
-import io.spine.test.reflect.ProjectId;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.core.CommandValidationError.TENANT_INAPPLICABLE;
@@ -48,62 +45,72 @@ import static io.spine.server.commandbus.Given.ACommand.addTask;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.tenant.TenantAwareOperation.isTenantSet;
 import static io.spine.validate.Validate.isNotDefault;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
+@DisplayName("Single tenant CommandBus should")
+class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
-    public SingleTenantCommandBusShould() {
+    SingleTenantCommandBusTest() {
         super(false);
     }
 
     @Override
-    @Test
+    @BeforeEach
     public void setUp() {
         super.setUp();
         commandBus.register(createProjectHandler);
     }
 
     @Test
-    public void post_command_and_do_not_set_current_tenant() {
+    @DisplayName("post command and do not set current tenant")
+    void postCommandWithoutTenant() {
         commandBus.post(newCommandWithoutTenantId(), observer);
 
         assertFalse(isTenantSet());
     }
 
-    @Test
-    public void reject_invalid_command() {
-        final Command cmd = newCommandWithoutContext();
+    @Nested
+    @DisplayName("reject")
+    class Reject {
 
-        commandBus.post(cmd, observer);
+        @Test
+        @DisplayName("invalid command")
+        void invalidCmd() {
+            final Command cmd = newCommandWithoutContext();
 
-        checkCommandError(observer.firstResponse(),
-                          INVALID_COMMAND,
-                          CommandValidationError.getDescriptor().getFullName(),
-                          cmd);
+            commandBus.post(cmd, observer);
+
+            checkCommandError(observer.firstResponse(),
+                              INVALID_COMMAND,
+                              CommandValidationError.getDescriptor().getFullName(),
+                              cmd);
+        }
+
+        @Test
+        @DisplayName("multitenant command in single tenant context")
+        void multitenantCmdIfSingleTenant() {
+            // Create a multi-tenant command.
+            final Command cmd = createProject();
+
+            commandBus.post(cmd, observer);
+
+            checkCommandError(observer.firstResponse(),
+                              TENANT_INAPPLICABLE,
+                              InvalidCommandException.class,
+                              cmd);
+        }
     }
 
     @Test
-    public void reject_multitenant_command_in_single_tenant_context() {
-        // Create a multi-tenant command.
-        final Command cmd = createProject();
-
-        commandBus.post(cmd, observer);
-
-        checkCommandError(observer.firstResponse(),
-                          TENANT_INAPPLICABLE,
-                          InvalidCommandException.class,
-                          cmd);
-    }
-
-    @Test
-    public void propagate_rejections_to_rejection_bus() {
+    @DisplayName("propagate rejections to rejection bus")
+    void propagateRejections() {
         final FaultyHandler faultyHandler = new FaultyHandler(eventBus);
         commandBus.register(faultyHandler);
 
@@ -121,7 +128,8 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void create_validator_once() {
+    @DisplayName("create validator once")
+    void createValidatorOnce() {
         final EnvelopeValidator<CommandEnvelope> validator = commandBus.getValidator();
         assertNotNull(validator);
         assertSame(validator, commandBus.getValidator());
@@ -130,30 +138,7 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
     @Override
     protected Command newCommand() {
         final Message commandMessage = Given.CommandMessage.createProjectMessage();
-        return TestActorRequestFactory.newInstance(SingleTenantCommandBusShould.class)
+        return TestActorRequestFactory.newInstance(SingleTenantCommandBusTest.class)
                                       .createCommand(commandMessage);
-    }
-
-    /**
-     * A {@code CommandHandler}, which throws a rejection upon a command.
-     */
-    private static class FaultyHandler extends CommandHandler {
-
-        private final InvalidProjectName rejection =
-                new InvalidProjectName(ProjectId.getDefaultInstance());
-
-        private FaultyHandler(EventBus eventBus) {
-            super(eventBus);
-        }
-
-        @SuppressWarnings("unused")     // does nothing, but throws a rejection.
-        @Assign
-        CmdTaskAdded handle(CmdAddTask msg, CommandContext context) throws InvalidProjectName {
-            throw rejection;
-        }
-
-        private InvalidProjectName getThrowable() {
-            return rejection;
-        }
     }
 }

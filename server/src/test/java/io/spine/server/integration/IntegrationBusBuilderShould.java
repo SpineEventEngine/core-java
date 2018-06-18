@@ -21,7 +21,7 @@ package io.spine.server.integration;
 
 import io.spine.core.BoundedContextName;
 import io.spine.server.BoundedContext;
-import io.spine.server.bus.BusBuilderShould;
+import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.event.EventBus;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.transport.TransportFactory;
@@ -35,7 +35,7 @@ import static org.mockito.Mockito.mock;
  * @author Alex Tymchenko
  */
 public class IntegrationBusBuilderShould
-        extends BusBuilderShould<IntegrationBus.Builder, ExternalMessageEnvelope, ExternalMessage> {
+        extends BusBuilderTest<IntegrationBus.Builder, ExternalMessageEnvelope, ExternalMessage> {
 
     @Override
     protected IntegrationBus.Builder builder() {

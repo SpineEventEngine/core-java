@@ -18,42 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.server.bus.given;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.MessageEnvelope;
-import io.spine.test.Tests;
+import io.spine.server.bus.MulticastDispatcher;
 import io.spine.type.MessageClass;
-import org.junit.Test;
 
 import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
-/**
- * @author Alexander Yevsyukov
- */
-public class MulticastDispatcherIdentityShould {
+public class MulticastDispatcherIdentityTestEnv {
 
-    @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(MulticastDispatcher.Identity.class);
+    /** Prevents instantiation on this utility class. */
+    private MulticastDispatcherIdentityTestEnv() {
     }
 
-    @Test
-    public void return_dispatcher_identity() throws Exception {
-        final Set<String> set = MulticastDispatcher.Identity.of(new IdentityTest());
-
-        assertTrue(set.contains(IdentityTest.ID));
-        assertEquals(1, set.size());
-    }
-
-    private static class IdentityTest
+    public static class IdentityDispatcher
             implements MulticastDispatcher<MessageClass, MessageEnvelope, String> {
 
-        private static final String ID = newUuid();
+        public static final String ID = newUuid();
 
         @Override
         public Set<MessageClass> getMessageClasses() {
