@@ -267,7 +267,7 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
         void commandWithError() {
             final Command command = requestFactory.command()
                                                   .create(createProjectMessage());
-            @SuppressWarnings("ThrowableNotThrown") // Creation without throwing needed for test.
+            @SuppressWarnings("ThrowableNotThrown") // Creation without throwing is needed for test.
             final DuplicateCommandException exception = of(command);
             commandStore.storeWithError(command, exception);
 
@@ -286,7 +286,7 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
         void commandWithException() {
             final Command command = requestFactory.command()
                                                   .create(createProjectMessage());
-            @SuppressWarnings("ThrowableNotThrown") // Creation without throwing needed for test.
+            @SuppressWarnings("ThrowableNotThrown") // Creation without throwing is needed for test.
             final DuplicateCommandException exception = of(command);
             commandStore.store(command, exception);
 
