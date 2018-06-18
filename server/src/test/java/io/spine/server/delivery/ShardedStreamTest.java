@@ -87,7 +87,8 @@ class ShardedStreamTest {
         final Function<StreamObserver<ExternalMessage>, Void> onCompletedCallback =
                 new Function<StreamObserver<ExternalMessage>, Void>() {
                     @Override
-                    public @Nullable Void apply(@Nullable StreamObserver<ExternalMessage> observer) {
+                    public @Nullable Void
+                    apply(@Nullable StreamObserver<ExternalMessage> observer) {
                         observer.onCompleted();
                         return Tests.<Void>nullRef();
                     }
@@ -110,7 +111,8 @@ class ShardedStreamTest {
         final Function<StreamObserver<ExternalMessage>, Void> onErrorCallback =
                 new Function<StreamObserver<ExternalMessage>, Void>() {
                     @Override
-                    public @Nullable Void apply(@Nullable StreamObserver<ExternalMessage> observer) {
+                    public @Nullable Void
+                    apply(@Nullable StreamObserver<ExternalMessage> observer) {
                         observer.onError(new RuntimeException("Something went wrong"));
                         return Tests.<Void>nullRef();
                     }

@@ -169,7 +169,7 @@ public class EventBusTestEnv {
         private ProjectAggregate(ProjectId id) {
             super(id);
         }
-        
+
         @Assign
         EBProjectCreated on(EBCreateProject command, CommandContext ctx) {
             final EBProjectCreated event = projectCreated(command.getProjectId());
@@ -201,7 +201,7 @@ public class EventBusTestEnv {
                     .setId(event.getProjectId())
                     .addTask(event.getTask());
         }
-        
+
         private static EBProjectCreated projectCreated(ProjectId projectId) {
             return EBProjectCreated.newBuilder()
                                    .setProjectId(projectId)
@@ -226,7 +226,7 @@ public class EventBusTestEnv {
     }
 
     /**
-     * Filters out the {@link EBTaskAdded} events which have their {@link Task#getDone()} 
+     * Filters out the {@link EBTaskAdded} events which have their {@link Task#getDone()}
      * property set to {@code true}.
      */
     public static class TaskCreatedFilter extends AbstractBusFilter<EventEnvelope> {
@@ -259,7 +259,8 @@ public class EventBusTestEnv {
 
         private static final ProjectStarted PROJECT_STARTED = projectStarted(PROJECT_ID);
 
-        private EventMessage() {}
+        private EventMessage() {
+        }
 
         private static ProjectStarted projectStarted() {
             return PROJECT_STARTED;
@@ -283,7 +284,8 @@ public class EventBusTestEnv {
         private static final TestEventFactory factory =
                 TestEventFactory.newInstance(pack(PROJECT_ID), GivenEvent.class);
 
-        private GivenEvent() {}
+        private GivenEvent() {
+        }
 
         private static TestEventFactory eventFactory() {
             return factory;

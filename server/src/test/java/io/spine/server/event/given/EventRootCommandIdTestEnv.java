@@ -177,7 +177,8 @@ public class EventRootCommandIdTestEnv {
     }
 
     public static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, ProjectAggregate> { }
+            extends AggregateRepository<ProjectId, ProjectAggregate> {
+    }
 
     /**
      * Routes the {@link ProjectCreated} event to the {@link TeamAggregate} the project belongs to.
@@ -230,7 +231,8 @@ public class EventRootCommandIdTestEnv {
     }
 
     public static class UserSignUpRepository
-            extends ProcessManagerRepository<UserId, UserSignUpProcessManager, EvUserSignUp> { }
+            extends ProcessManagerRepository<UserId, UserSignUpProcessManager, EvUserSignUp> {
+    }
 
     static class ProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 

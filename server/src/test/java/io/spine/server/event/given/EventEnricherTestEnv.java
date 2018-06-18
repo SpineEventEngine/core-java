@@ -74,7 +74,8 @@ public class EventEnricherTestEnv {
         private static final ProjectStarred PROJECT_STARRED = projectStarred(PROJECT_ID);
 
         /** Prevents instantiation of this utility class. */
-        private GivenEventMessage() {}
+        private GivenEventMessage() {
+        }
 
         public static ProjectCreated projectCreated() {
             return PROJECT_CREATED;
@@ -142,7 +143,8 @@ public class EventEnricherTestEnv {
 
         private static final ProjectId PROJECT_ID = newProjectId();
 
-        private GivenEvent() {}
+        private GivenEvent() {
+        }
 
         private static TestEventFactory eventFactory() {
             TestEventFactory result =

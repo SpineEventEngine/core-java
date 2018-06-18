@@ -50,8 +50,8 @@ class ShardedStreamBuilderTest {
     @Test
     @DisplayName("not accept null boundedContextName")
     void notAcceptNullContextName() {
-       assertThrows(NullPointerException.class,
-                    () -> builder().setBoundedContextName(Tests.nullRef()));
+        assertThrows(NullPointerException.class,
+                     () -> builder().setBoundedContextName(Tests.nullRef()));
     }
 
     @Test

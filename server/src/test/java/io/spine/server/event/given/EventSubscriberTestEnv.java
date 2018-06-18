@@ -27,7 +27,6 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.event.EventSubscriber;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -36,7 +35,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class EventSubscriberTestEnv {
 
     /** Prevents instantiation on this utility class. */
-    private EventSubscriberTestEnv() {}
+    private EventSubscriberTestEnv() {
+    }
 
     /** The subscriber which throws exception from the subscriber method. */
     public static class FailingSubscriber extends EventSubscriber {

@@ -165,7 +165,8 @@ class EventEnricherTest {
     void enrichSeveralBoundByFields() {
         final EventEnvelope permissionGranted = EventEnvelope.of(GivenEvent.permissionGranted());
         final EventEnvelope permissionRevoked = EventEnvelope.of(GivenEvent.permissionRevoked());
-        final EventEnvelope sharingRequestApproved = EventEnvelope.of(GivenEvent.sharingRequestApproved());
+        final EventEnvelope sharingRequestApproved =
+                EventEnvelope.of(GivenEvent.sharingRequestApproved());
 
         assertTrue(enricher.canBeEnriched(permissionGranted));
         assertTrue(enricher.canBeEnriched(permissionRevoked));

@@ -62,7 +62,7 @@ class EventSubscriberMethodTest {
                 .setDefault(EventContext.class, EventContext.getDefaultInstance())
                 .testAllPublicStaticMethods(EventSubscriberMethod.class);
     }
-    
+
     @Test
     @DisplayName("invoke subscriber method")
     void invokeSubscriberMethod() throws InvocationTargetException {

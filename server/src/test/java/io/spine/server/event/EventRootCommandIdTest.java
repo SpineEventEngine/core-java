@@ -38,8 +38,8 @@ import io.spine.test.event.EvTeamProjectAdded;
 import io.spine.test.event.ProjectCreated;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -114,15 +114,15 @@ public class EventRootCommandIdTest {
     }
 
     /**
-     * Ensures root command ID is matched by the property of the event which is created as 
+     * Ensures root command ID is matched by the property of the event which is created as
      * a reaction to another event.
      *
-     * <p> Two events are expected to be found in the {@linkplain EventStore} created by different 
+     * <p> Two events are expected to be found in the {@linkplain EventStore} created by different
      * aggregates:
      * <ol>
-     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregate} — 
+     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.ProjectAggregate} —
      *     {@link ProjectCreated}</li>
-     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregate} — 
+     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.TeamAggregate} —
      *     {@link EvTeamProjectAdded} created as a reaction to {@link ProjectCreated}</li>
      * </ol>
      */
@@ -169,15 +169,15 @@ public class EventRootCommandIdTest {
     }
 
     /**
-     * Ensures root command ID is matched by the property of the event which is created as 
+     * Ensures root command ID is matched by the property of the event which is created as
      * a reaction to another event.
      *
-     * <p> Two events are expected to be found in the {@linkplain EventStore} created by different 
+     * <p> Two events are expected to be found in the {@linkplain EventStore} created by different
      * process managers:
      * <ol>
-     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpProcessManager} — 
+     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.UserSignUpProcessManager} —
      *     {@link EvInvitationAccepted}</li>
-     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationProcessManager} — 
+     *     <li>{@link io.spine.server.event.given.EventRootCommandIdTestEnv.TeamCreationProcessManager} —
      *     {@link EvTeamMemberAdded} created as a reaction to {@link EvInvitationAccepted}</li>
      * </ol>
      */

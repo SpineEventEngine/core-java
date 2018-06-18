@@ -35,7 +35,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public class EventSubscriberMethodTestEnv {
 
     /** Prevents instantiation on this utility class. */
-    private EventSubscriberMethodTestEnv() {}
+    private EventSubscriberMethodTestEnv() {
+    }
 
     public static class ValidOneParam extends TestEventSubscriber {
         @Subscribe
@@ -143,7 +144,8 @@ public class EventSubscriberMethodTestEnv {
         public Method getMethod() {
             final Method[] methods = getClass().getDeclaredMethods();
             for (Method method : methods) {
-                if (method.getName().equals(HANDLER_METHOD_NAME)) {
+                if (method.getName()
+                          .equals(HANDLER_METHOD_NAME)) {
                     return method;
                 }
             }

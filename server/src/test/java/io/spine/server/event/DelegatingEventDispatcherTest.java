@@ -97,7 +97,7 @@ class DelegatingEventDispatcherTest {
 
         final RuntimeException exception =
                 new RuntimeException("test external dispatcher delegating onError");
-        extMessageDispatcher.onError(externalMessageEnvelope,exception);
+        extMessageDispatcher.onError(externalMessageEnvelope, exception);
 
         assertTrue(delegate.onErrorCalled());
     }

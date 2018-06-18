@@ -245,10 +245,10 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
 
     private static void ensureExecutorDirect(Executor streamExecutor) {
         long mainThreadId = Thread.currentThread()
-                                        .getId();
+                                  .getId();
         streamExecutor.execute(() -> {
             long runnableThreadId = Thread.currentThread()
-                                                .getId();
+                                          .getId();
             assertEquals(mainThreadId, runnableThreadId);
         });
     }
