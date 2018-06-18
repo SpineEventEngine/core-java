@@ -41,8 +41,8 @@ import java.util.Set;
 
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.TestValues.newUuidValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov

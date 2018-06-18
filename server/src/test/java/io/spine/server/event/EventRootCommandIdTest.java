@@ -56,7 +56,7 @@ import static io.spine.server.event.given.EventRootCommandIdTestEnv.inviteTeamMe
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.projectId;
 import static io.spine.server.event.given.EventRootCommandIdTestEnv.teamId;
 import static io.spine.test.Verify.assertSize;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Mykhailo Drachuk

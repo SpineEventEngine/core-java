@@ -58,11 +58,11 @@ import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.type.TypeName.of;
 import static io.spine.validate.Validate.isDefault;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Dmytro Dashenkov

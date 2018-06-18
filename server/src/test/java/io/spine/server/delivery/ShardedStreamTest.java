@@ -43,8 +43,8 @@ import static io.spine.server.delivery.given.ShardedStreamTestEnv.projectsShardZ
 import static io.spine.server.delivery.given.ShardedStreamTestEnv.streamToShardWithFactory;
 import static io.spine.server.delivery.given.ShardedStreamTestEnv.tasksShardOne;
 import static io.spine.server.delivery.given.ShardedStreamTestEnv.tasksShardZero;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alex Tymchenko

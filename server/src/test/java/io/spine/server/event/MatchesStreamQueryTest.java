@@ -34,8 +34,8 @@ import org.junit.jupiter.api.Test;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.command.TestEventFactory.newInstance;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Dmytro Dashenkov

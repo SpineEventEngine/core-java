@@ -53,10 +53,10 @@ import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetPro
 import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.newEventEnricher;
 import static io.spine.server.event.given.EventEnricherTestEnv.GivenEvent.projectStarted;
 import static io.spine.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("EventEnricher should")
 class EventEnricherTest {

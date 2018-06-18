@@ -23,7 +23,7 @@ package io.spine.server.event;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @DisplayName("MatchFilter should")
 class MatchFilterTest {
