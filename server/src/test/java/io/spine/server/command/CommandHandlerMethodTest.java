@@ -151,7 +151,7 @@ class CommandHandlerMethodTest {
         }
 
         @Test
-        @DisplayName("one Message param and list return type")
+        @DisplayName("one Message param and `List` return type")
         void messageParamAndListReturn() {
             Method handler = new ValidHandlerOneParamReturnsList().getHandler();
 
@@ -167,7 +167,7 @@ class CommandHandlerMethodTest {
         }
 
         @Test
-        @DisplayName("Message and Context params, and list return type")
+        @DisplayName("Message and Context params, and `List` return type")
         void messageAndContextParamAndListReturn() {
             Method handler = new ValidHandlerTwoParamsReturnsList().getHandler();
 
