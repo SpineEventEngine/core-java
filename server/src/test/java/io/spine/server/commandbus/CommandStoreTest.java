@@ -22,35 +22,26 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Error;
-import io.spine.base.ThrowableMessage;
 import io.spine.core.Command;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.CommandStatus;
 import io.spine.core.TenantId;
-import io.spine.protobuf.TypeConverter;
-import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
+import io.spine.server.commandbus.given.CommandStoreTestEnv;
+import io.spine.server.commandbus.given.CommandStoreTestEnv.CommandStoreTestAssets;
+import io.spine.server.commandbus.given.CommandStoreTestEnv.TestRejection;
+import io.spine.server.commandbus.given.CommandStoreTestEnv.ThrowingDispatcher;
 import io.spine.server.model.ModelTests;
 import io.spine.server.tenant.TenantAwareFunction;
 import io.spine.test.TimeTests;
-import io.spine.test.command.CmdAddTask;
-import io.spine.test.command.CmdCreateProject;
-import io.spine.test.command.CmdStartProject;
-import io.spine.test.command.event.CmdProjectCreated;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nonnull;
 import java.util.List;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
@@ -62,6 +53,8 @@ import static io.spine.server.commandbus.Given.ACommand.addTask;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.commandbus.Given.ACommand.startProject;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
+import static io.spine.server.commandbus.given.CommandStoreTestEnv.givenRejectingHandler;
+import static io.spine.server.commandbus.given.CommandStoreTestEnv.givenThrowingHandler;
 import static io.spine.time.Durations2.fromMinutes;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.eq;
@@ -109,13 +102,13 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
 
             // Check that the logging was called.
             final CommandEnvelope envelope = CommandEnvelope.of(command);
-            verify(log).errorHandling(dispatcher.exception,
+            verify(log).errorHandling(dispatcher.exception(),
                                       envelope.getMessage(),
                                       envelope.getId());
 
             // Check that the command status has the correct code,
             // and the error matches the thrown exception.
-            assertHasErrorStatusWithMessage(envelope, dispatcher.exception.getMessage());
+            assertHasErrorStatusWithMessage(envelope, dispatcher.exception().getMessage());
         }
 
         @Test
@@ -124,7 +117,9 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
             ModelTests.clearModel();
 
             final RuntimeException exception = new IllegalStateException("handler throws");
-            final Command command = givenThrowingHandler(exception);
+            final CommandStoreTestAssets assets =
+                    new CommandStoreTestAssets(eventBus, commandBus, requestFactory);
+            final Command command = givenThrowingHandler(exception, assets);
             final CommandEnvelope envelope = CommandEnvelope.of(command);
 
             commandBus.post(command, observer);
@@ -144,7 +139,9 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
             ModelTests.clearModel();
 
             final TestRejection rejection = new TestRejection();
-            final Command command = givenRejectingHandler(rejection);
+            final CommandStoreTestAssets assets =
+                    new CommandStoreTestAssets(eventBus, commandBus, requestFactory);
+            final Command command = givenRejectingHandler(rejection, assets);
             final CommandId commandId = command.getId();
             final Message commandMessage = getMessage(command);
 
@@ -302,118 +299,8 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
     }
 
     private ProcessingStatus getStatus(CommandId commandId, final TenantId tenantId) {
-        final TenantAwareFunction<CommandId, ProcessingStatus> func =
-                new TenantAwareFunction<CommandId, ProcessingStatus>(tenantId) {
-                    @Override
-                    public @Nullable ProcessingStatus apply(@Nullable CommandId input) {
-                        return commandStore.getStatus(checkNotNull(input));
-                    }
-                };
-        return func.execute(commandId);
-    }
-
-    /**
-     * A stub handler that throws passed `ThrowableMessage` in the command handler method,
-     * rejecting the command.
-     *
-     * @see SetCommandStatusTo#rejectionForHandlerRejection()
-     */
-    private class RejectingCreateProjectHandler extends CommandHandler {
-
-        @Nonnull
-        private final ThrowableMessage throwable;
-
-        protected RejectingCreateProjectHandler(@Nonnull ThrowableMessage throwable) {
-            super(eventBus);
-            this.throwable = throwable;
-        }
-
-        @Assign
-        @SuppressWarnings("unused")
-            // Reflective access.
-        CmdProjectCreated handle(CmdCreateProject msg,
-                                 CommandContext context) throws ThrowableMessage {
-            throw throwable;
-        }
-    }
-
-    private <E extends ThrowableMessage> Command givenRejectingHandler(E throwable) {
-        final CommandHandler handler = new RejectingCreateProjectHandler(throwable);
-        commandBus.register(handler);
-        final CmdCreateProject msg = createProjectMessage();
-        final Command command = requestFactory.command()
-                                              .create(msg);
-        return command;
-    }
-
-    /**
-     * A stub handler that throws passed `RuntimeException` in the command handler method.
-     *
-     * @see SetCommandStatusTo#errorForHandlerException()
-     */
-    private class ThrowingCreateProjectHandler extends CommandHandler {
-
-        @Nonnull
-        private final RuntimeException exception;
-
-        protected ThrowingCreateProjectHandler(@Nonnull RuntimeException exception) {
-            super(eventBus);
-            this.exception = exception;
-        }
-
-        @Assign
-        @SuppressWarnings("unused")
-            // Reflective access.
-        CmdProjectCreated handle(CmdCreateProject msg, CommandContext context) {
-            throw exception;
-        }
-    }
-
-    private <E extends RuntimeException> Command givenThrowingHandler(E exception) {
-        final CommandHandler handler = new ThrowingCreateProjectHandler(exception);
-        commandBus.register(handler);
-        final CmdCreateProject msg = createProjectMessage();
-        final Command command = requestFactory.command()
-                                              .create(msg);
-        return command;
-    }
-
-    /**
-     * A stub dispatcher that throws `RuntimeException` in the command dispatching method.
-     *
-     * @see SetCommandStatusTo#errorForDispatcherException()
-     */
-    private static class ThrowingDispatcher implements CommandDispatcher<Message> {
-
-        @SuppressWarnings("ThrowableInstanceNeverThrown")
-        private final RuntimeException exception = new RuntimeException("Dispatching exception.");
-
-        @Override
-        public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(CmdCreateProject.class, CmdStartProject.class,
-                                      CmdAddTask.class);
-        }
-
-        @Override
-        public Message dispatch(CommandEnvelope envelope) {
-            throw exception;
-        }
-
-        @Override
-        public void onError(CommandEnvelope envelope, RuntimeException exception) {
-            // Do nothing.
-        }
-    }
-
-    /*
-     * Throwables
-     ********************/
-
-    private static class TestRejection extends ThrowableMessage {
-        private static final long serialVersionUID = 0L;
-
-        private TestRejection() {
-            super(TypeConverter.<String, StringValue>toMessage(TestRejection.class.getName()));
-        }
+        final ProcessingStatus status =
+                CommandStoreTestEnv.getStatus(commandId, tenantId, commandStore);
+        return status;
     }
 }
