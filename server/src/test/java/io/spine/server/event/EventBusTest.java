@@ -478,8 +478,7 @@ public class EventBusTest {
     // Please see build log to find out if there were some errors during the test execution.
     @Test
     @DisplayName("store filters regarding possible concurrent modifications")
-    void storeFiltersInConcurrentEnv()
-            throws InterruptedException {
+    void storeFiltersInConcurrentEnv() throws InterruptedException {
         int threadCount = 50;
 
         // "Random" more or less valid Event.
