@@ -146,12 +146,6 @@ public class EventRootCommandIdTest {
             assertEquals(command.getId(), getRootCommandId(events.get(1)));
             assertEquals(command.getId(), getRootCommandId(events.get(2)));
         }
-
-        private void postCommand(Command command) {
-            final StreamObserver<Ack> observer = noOpObserver();
-            boundedContext.getCommandBus()
-                          .post(command, observer);
-        }
     }
 
     @Nested
@@ -212,12 +206,12 @@ public class EventRootCommandIdTest {
             final Event reaction = events.get(1);
             assertEquals(command.getId(), getRootCommandId(reaction));
         }
+    }
 
-        private void postCommand(Command command) {
-            final StreamObserver<Ack> observer = noOpObserver();
-            boundedContext.getCommandBus()
-                          .post(command, observer);
-        }
+    private void postCommand(Command command) {
+        final StreamObserver<Ack> observer = noOpObserver();
+        boundedContext.getCommandBus()
+                      .post(command, observer);
     }
 
     /**
