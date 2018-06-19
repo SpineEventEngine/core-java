@@ -20,7 +20,6 @@
 
 package io.spine.server.event;
 
-import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -33,6 +32,7 @@ import io.spine.type.MessageClass;
 import org.slf4j.Logger;
 
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;

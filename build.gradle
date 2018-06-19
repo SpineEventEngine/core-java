@@ -62,13 +62,6 @@ buildscript {
         classpath ("io.spine.tools:spine-model-compiler:$spineBaseVersion") {
             exclude group: 'com.google.guava'
         }
-        /* Uncomment the below statement if you want the dependency to be fetched on each build.
-           Please note that offline builds will not be available then. */
-                                             //, changing: true
-
-        classpath ("io.spine.tools:spine-gcloud-storage:$spineBaseVersion") {
-            exclude group: 'com.google.guava'
-        }
     }
 
     configurations.all({

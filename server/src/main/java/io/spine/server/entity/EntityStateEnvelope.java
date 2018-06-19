@@ -69,8 +69,7 @@ public final class EntityStateEnvelope<I, S extends Message>
      * <p>The value is only present If the entity used for the envelope construction
      * is a {@link VersionableEntity}. Otherwise, this field is {@code null}.
      */
-    @Nullable
-    private final Version entityVersion;
+    private final @Nullable Version entityVersion;
 
     private EntityStateEnvelope(Entity<I, S> entity, TenantId tenantId) {
         this(entity.getId(), entity.getState(),
@@ -114,10 +113,9 @@ public final class EntityStateEnvelope<I, S extends Message>
      *
      * @return {@code null}
      */
-    @SuppressWarnings("ReturnOfNull")
     @Override
-    @Nullable
-    public Entity<I, S> getOuterObject() {
+    @SuppressWarnings("ReturnOfNull")
+    public @Nullable Entity<I, S> getOuterObject() {
         return null;
     }
 
