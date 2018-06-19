@@ -106,7 +106,7 @@ public class CommandHandlerTestEnv {
         }
 
         @SuppressWarnings("CheckReturnValue")
-        // can ignore the returned ID of the command handler in these tests
+        // Can ignore the returned ID of the command handler in these tests.
         public void handle(Command cmd) {
             CommandEnvelope commandEnvelope = CommandEnvelope.of(cmd);
             dispatch(commandEnvelope);
