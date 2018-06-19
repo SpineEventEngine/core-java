@@ -36,11 +36,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class EventStoreTestEnv {
 
-    private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(EventStoreTest.class);
+    private static TestEventFactory eventFactory = null;
 
     /** Prevents instantiation of this utility class. */
     private EventStoreTestEnv() {
+    }
+
+    public static void initEventFactory() {
+        eventFactory = TestEventFactory.newInstance(EventStoreTest.class);
     }
 
     public static Event projectCreated(Timestamp when) {

@@ -36,6 +36,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.event.given.EventStoreTestEnv.ResponseObserver;
 import io.spine.test.event.TaskAdded;
 import io.spine.time.Durations2;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -52,6 +53,7 @@ import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.given.GivenEnrichment.withOneAttribute;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.event.given.EventStoreTestEnv.assertDone;
+import static io.spine.server.event.given.EventStoreTestEnv.initEventFactory;
 import static io.spine.server.event.given.EventStoreTestEnv.projectCreated;
 import static io.spine.server.event.given.EventStoreTestEnv.taskAdded;
 import static io.spine.test.Verify.assertContainsAll;
@@ -81,6 +83,11 @@ public class EventStoreTest {
                          .setStreamExecutor(MoreExecutors.directExecutor())
                          .withDefaultLogger()
                          .build();
+    }
+
+    @BeforeAll
+    static void prepare() {
+        initEventFactory();
     }
 
     @BeforeEach
