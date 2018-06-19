@@ -21,6 +21,7 @@
 package io.spine.server.event;
 
 import com.google.common.base.Function;
+import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
@@ -200,14 +201,16 @@ public class EventEnricherTest {
         @DisplayName("if its enrichment is disabled")
         void withDisabledEnrichment() {
             final Event event = createEvent(toMessage(newUuid()));
+            final Enrichment.Builder enrichment = event.getContext()
+                                                       .getEnrichment()
+                                                       .toBuilder()
+                                                       .setDoNotEnrich(true);
+            final EventContext.Builder context = event.getContext()
+                                                      .toBuilder()
+                                                      .setEnrichment(enrichment);
             final EventEnvelope notEnrichableEvent = EventEnvelope.of(
                     event.toBuilder()
-                         .setContext(event.getContext()
-                                          .toBuilder()
-                                          .setEnrichment(event.getContext()
-                                                              .getEnrichment()
-                                                              .toBuilder()
-                                                              .setDoNotEnrich(true)))
+                         .setContext(context)
                          .build()
             );
 
