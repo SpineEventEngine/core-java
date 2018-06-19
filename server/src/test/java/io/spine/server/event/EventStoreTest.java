@@ -21,7 +21,6 @@
 package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
@@ -32,7 +31,6 @@ import io.spine.core.EventContext;
 import io.spine.core.RejectionContext;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.server.BoundedContext;
 import io.spine.server.event.given.EventStoreTestEnv.ResponseObserver;
 import io.spine.test.event.TaskAdded;
 import io.spine.time.Durations2;
@@ -53,6 +51,7 @@ import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.given.GivenEnrichment.withOneAttribute;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.event.given.EventStoreTestEnv.assertDone;
+import static io.spine.server.event.given.EventStoreTestEnv.eventStore;
 import static io.spine.server.event.given.EventStoreTestEnv.initEventFactory;
 import static io.spine.server.event.given.EventStoreTestEnv.projectCreated;
 import static io.spine.server.event.given.EventStoreTestEnv.taskAdded;
@@ -74,17 +73,6 @@ public class EventStoreTest {
 
     private EventStore eventStore;
 
-    private static EventStore createStore() {
-        final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setMultitenant(false)
-                                                .build();
-        return EventStore.newBuilder()
-                         .setStorageFactory(bc.getStorageFactory())
-                         .setStreamExecutor(MoreExecutors.directExecutor())
-                         .withDefaultLogger()
-                         .build();
-    }
-
     @BeforeAll
     static void prepare() {
         initEventFactory();
@@ -92,7 +80,7 @@ public class EventStoreTest {
 
     @BeforeEach
     void setUp() {
-        eventStore = createStore();
+        eventStore = eventStore();
     }
 
     @Nested

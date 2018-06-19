@@ -48,6 +48,7 @@ import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventBusTest;
 import io.spine.server.event.EventDispatcher;
+import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -64,6 +65,7 @@ import io.spine.test.event.command.EBAddTasks;
 import io.spine.test.event.command.EBArchiveProject;
 import io.spine.test.event.command.EBCreateProject;
 import io.spine.testdata.Sample;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -165,6 +167,17 @@ public class EventBusTestEnv {
 
         final List<Event> results = observer.responses();
         return results;
+    }
+
+    @SuppressWarnings("CheckReturnValue") // conditionally calling builder
+    public static EventBus.Builder eventBusBuilder(@Nullable EventEnricher enricher) {
+        EventBus.Builder busBuilder = EventBus
+                .newBuilder()
+                .appendFilter(new TaskCreatedFilter());
+        if (enricher != null) {
+            busBuilder.setEnricher(enricher);
+        }
+        return busBuilder;
     }
 
     public static class ProjectRepository

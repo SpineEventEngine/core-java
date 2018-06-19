@@ -64,6 +64,7 @@ import static io.spine.server.event.given.EventBusTestEnv.TaskCreatedFilter;
 import static io.spine.server.event.given.EventBusTestEnv.addTasks;
 import static io.spine.server.event.given.EventBusTestEnv.command;
 import static io.spine.server.event.given.EventBusTestEnv.createProject;
+import static io.spine.server.event.given.EventBusTestEnv.eventBusBuilder;
 import static io.spine.server.event.given.EventBusTestEnv.invalidArchiveProject;
 import static io.spine.server.event.given.EventBusTestEnv.newTask;
 import static io.spine.server.event.given.EventBusTestEnv.readEvents;
@@ -92,22 +93,6 @@ public class EventBusTest {
     private CommandBus commandBus;
     private BoundedContext bc;
 
-    @SuppressWarnings("CheckReturnValue") // conditionally calling builder
-    private static EventBus.Builder eventBusBuilder(@Nullable EventEnricher enricher) {
-        EventBus.Builder busBuilder = EventBus
-                .newBuilder()
-                .appendFilter(new TaskCreatedFilter());
-        if (enricher != null) {
-            busBuilder.setEnricher(enricher);
-        }
-        return busBuilder;
-    }
-
-    @BeforeEach
-    void setUp() {
-        setUp(null);
-    }
-
     private void setUp(@Nullable EventEnricher enricher) {
         EventBus.Builder eventBusBuilder = eventBusBuilder(enricher);
 
@@ -121,6 +106,11 @@ public class EventBusTest {
 
         this.commandBus = bc.getCommandBus();
         this.eventBus = bc.getEventBus();
+    }
+
+    @BeforeEach
+    void setUp() {
+        setUp(null);
     }
 
     @AfterEach

@@ -47,12 +47,6 @@ class EventSubscriberTest {
         subscriber = new FailingSubscriber();
     }
 
-    private EventEnvelope createEvent(boolean value) {
-        return EventEnvelope.of(factory.createEvent(BoolValue.newBuilder()
-                                                             .setValue(value)
-                                                             .build()));
-    }
-
     @Test
     @DisplayName("catch exceptions caused by methods")
     void catchMethodExceptions() {
@@ -96,5 +90,11 @@ class EventSubscriberTest {
     void exposeMessageClasses() {
         assertEquals(3, subscriber.getMessageClasses()
                                   .size());
+    }
+
+    private EventEnvelope createEvent(boolean value) {
+        return EventEnvelope.of(factory.createEvent(BoolValue.newBuilder()
+                                                             .setValue(value)
+                                                             .build()));
     }
 }

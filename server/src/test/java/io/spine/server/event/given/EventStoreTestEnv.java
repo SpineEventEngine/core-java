@@ -20,10 +20,13 @@
 
 package io.spine.server.event.given;
 
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
+import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStoreTest;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
@@ -44,6 +47,17 @@ public class EventStoreTestEnv {
 
     public static void initEventFactory() {
         eventFactory = TestEventFactory.newInstance(EventStoreTest.class);
+    }
+
+    public static EventStore eventStore() {
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setMultitenant(false)
+                                                .build();
+        return EventStore.newBuilder()
+                         .setStorageFactory(bc.getStorageFactory())
+                         .setStreamExecutor(MoreExecutors.directExecutor())
+                         .withDefaultLogger()
+                         .build();
     }
 
     public static Event projectCreated(Timestamp when) {

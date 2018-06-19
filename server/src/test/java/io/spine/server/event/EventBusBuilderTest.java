@@ -148,18 +148,18 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
     }
 
     @Test
-    @DisplayName("throw ISE if neither EventStore nor StorageFactory is set")
-    void requireEventStoreOrStorageFactory() {
-        assertThrows(IllegalStateException.class, () -> EventBus.newBuilder()
-                                                                .build());
-    }
-
-    @Test
     @DisplayName("set event validator if it is not specified explicitly")
     void setDefaultValidator() {
         assertNotNull(builder().setStorageFactory(storageFactory)
                                .build()
                                .getMessageValidator());
+    }
+
+    @Test
+    @DisplayName("throw ISE if neither EventStore nor StorageFactory is set")
+    void requireEventStoreOrStorageFactory() {
+        assertThrows(IllegalStateException.class, () -> EventBus.newBuilder()
+                                                                .build());
     }
 
     @Nested
