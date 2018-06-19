@@ -310,7 +310,8 @@ public class EventRootCommandIdTestEnv {
         }
     }
 
-    static class TeamCreationProcessManager extends ProcessManager<EvTeamId, EvTeamCreation, EvTeamCreationVBuilder> {
+    static class TeamCreationProcessManager
+            extends ProcessManager<EvTeamId, EvTeamCreation, EvTeamCreationVBuilder> {
 
         private TeamCreationProcessManager(EvTeamId id) {
             super(id);
@@ -374,7 +375,8 @@ public class EventRootCommandIdTestEnv {
         }
     }
 
-    static class UserSignUpProcessManager extends ProcessManager<UserId, EvUserSignUp, EvUserSignUpVBuilder> {
+    static class UserSignUpProcessManager
+            extends ProcessManager<UserId, EvUserSignUp, EvUserSignUpVBuilder> {
 
         private UserSignUpProcessManager(UserId id) {
             super(id);
