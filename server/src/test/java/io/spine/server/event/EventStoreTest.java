@@ -259,9 +259,10 @@ public class EventStoreTest {
         @Test
         @DisplayName("origin of RejectionContext type")
         void rejectionContextOrigin() {
-            final RejectionContext originContext = RejectionContext.newBuilder()
-                                                                   .setEnrichment(withOneAttribute())
-                                                                   .build();
+            final RejectionContext originContext =
+                    RejectionContext.newBuilder()
+                                    .setEnrichment(withOneAttribute())
+                                    .build();
             final Event event = projectCreated(Time.getCurrentTime());
             final Event enriched = event.toBuilder()
                                         .setContext(event.getContext()
@@ -281,8 +282,9 @@ public class EventStoreTest {
         @Test
         @DisplayName("origin of EventContext type")
         void eventContextOrigin() {
-            final EventContext.Builder originContext = EventContext.newBuilder()
-                                                                   .setEnrichment(withOneAttribute());
+            final EventContext.Builder originContext =
+                    EventContext.newBuilder()
+                                .setEnrichment(withOneAttribute());
             final Event event = projectCreated(Time.getCurrentTime());
             final Event enriched = event.toBuilder()
                                         .setContext(event.getContext()

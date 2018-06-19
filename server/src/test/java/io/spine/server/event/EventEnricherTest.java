@@ -165,8 +165,10 @@ public class EventEnricherTest {
         @Test
         @DisplayName("bound by fields")
         void boundByFields() {
-            final EventEnvelope permissionGranted = EventEnvelope.of(GivenEvent.permissionGranted());
-            final EventEnvelope permissionRevoked = EventEnvelope.of(GivenEvent.permissionRevoked());
+            final EventEnvelope permissionGranted =
+                    EventEnvelope.of(GivenEvent.permissionGranted());
+            final EventEnvelope permissionRevoked =
+                    EventEnvelope.of(GivenEvent.permissionRevoked());
             final EventEnvelope sharingRequestApproved =
                     EventEnvelope.of(GivenEvent.sharingRequestApproved());
 

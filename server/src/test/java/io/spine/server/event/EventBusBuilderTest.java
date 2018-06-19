@@ -77,7 +77,8 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
         @Test
         @DisplayName("EventStore")
         void eventStore() {
-            assertThrows(NullPointerException.class, () -> builder().setEventStore(Tests.nullRef()));
+            assertThrows(NullPointerException.class,
+                         () -> builder().setEventStore(Tests.nullRef()));
         }
 
         @Test
@@ -170,7 +171,8 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
         @DisplayName("EventStore by StorageFactory")
         void eventStoreByStorageFactory() {
             EventBus.Builder builder = builder().setEventStore(mock(EventStore.class));
-            assertThrows(IllegalStateException.class, () -> builder.setStorageFactory(storageFactory));
+            assertThrows(IllegalStateException.class,
+                         () -> builder.setStorageFactory(storageFactory));
         }
 
         @Test

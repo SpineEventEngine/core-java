@@ -65,7 +65,6 @@ class EventValidatorTest {
         final Optional<MessageInvalid> error = eventValidator.validate(EventEnvelope.of(event));
         assertTrue(error.isPresent());
         final Error actualError = error.get().asError();
-        assertEquals(EventValidationError.getDescriptor().getFullName(),
-                     actualError.getType());
+        assertEquals(EventValidationError.getDescriptor().getFullName(), actualError.getType());
     }
 }
