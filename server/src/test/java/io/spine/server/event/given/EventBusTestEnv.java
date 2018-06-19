@@ -169,7 +169,7 @@ public class EventBusTestEnv {
         return results;
     }
 
-    @SuppressWarnings("CheckReturnValue") // conditionally calling builder
+    @SuppressWarnings("CheckReturnValue") // Conditionally calling builder.
     public static EventBus.Builder eventBusBuilder(@Nullable EventEnricher enricher) {
         EventBus.Builder busBuilder = EventBus
                 .newBuilder()
