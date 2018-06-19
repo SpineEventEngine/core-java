@@ -40,7 +40,7 @@ class InvalidEventExceptionTest {
 
     @Test
     @DisplayName("create exception with violations")
-    void createExceptionWithViolations() {
+    void createWithViolations() {
         final StringValue msg = toMessage("");
 
         final InvalidEventException exception = InvalidEventException.onConstraintViolations(

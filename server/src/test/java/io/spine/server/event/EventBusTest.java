@@ -136,7 +136,7 @@ public class EventBusTest {
     }
 
     @Test
-    @DisplayName("reject object with no subscriber methods")
+    @DisplayName("reject object which has no subscriber methods")
     void rejectEmptySubscriber() {
 
         // Pass just String instance.

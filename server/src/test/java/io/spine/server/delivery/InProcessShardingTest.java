@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class InProcessShardingTest {
 
     @Test
-    @DisplayName("throw IAE if register shardable with no consumers")
+    @DisplayName("throw IAE when registering shardable with no consumers")
     void notRegisterEmptyShardable() {
         final InProcessSharding sharding = new InProcessSharding(
                 InMemoryTransportFactory.newInstance());

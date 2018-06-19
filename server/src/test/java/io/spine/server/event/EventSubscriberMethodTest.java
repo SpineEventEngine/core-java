@@ -88,7 +88,7 @@ class EventSubscriberMethodTest {
 
         @Test
         @DisplayName("one Message parameter")
-        void oneMsgParam() {
+        void oneMessageParam() {
             final Method subscriber = new ValidOneParam().getMethod();
 
             assertIsEventSubscriber(subscriber, true);
@@ -96,7 +96,7 @@ class EventSubscriberMethodTest {
 
         @Test
         @DisplayName("Message and Context parameters")
-        void msgAndContextParams() {
+        void messageAndContextParams() {
             final Method subscriber = new ValidTwoParams().getMethod();
 
             assertIsEventSubscriber(subscriber, true);

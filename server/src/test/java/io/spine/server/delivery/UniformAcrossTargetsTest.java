@@ -45,13 +45,13 @@ class UniformAcrossTargetsTest {
 
     @Test
     @DisplayName("not allow negative number of shards")
-    void notAllowNegativeShardCount() {
+    void rejectNegativeShardCount() {
         assertThrows(IllegalArgumentException.class, () -> forNumber(-1));
     }
 
     @Test
     @DisplayName("not allow zero number of shards")
-    void notAllowZeroShardCount() {
+    void rejectZeroShardCount() {
         assertThrows(IllegalArgumentException.class, () -> forNumber(0));
     }
 }

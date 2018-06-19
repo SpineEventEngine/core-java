@@ -110,7 +110,7 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
         }
 
         @Test
-        @DisplayName("EventStore if is present")
+        @DisplayName("EventStore")
         void eventStore() {
             EventStore mock = mock(EventStore.class);
             assertEquals(mock, builder().setEventStore(mock)
@@ -119,7 +119,7 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
         }
 
         @Test
-        @DisplayName("return stream Executor for EventStore if present")
+        @DisplayName("stream Executor for EventStore")
         void streamExecutor() {
             Executor mock = mock(Executor.class);
             assertEquals(mock, builder().setEventStoreStreamExecutor(mock)
