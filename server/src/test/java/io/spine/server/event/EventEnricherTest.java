@@ -222,7 +222,7 @@ public class EventEnricherTest {
      * {@linkplain io.spine.server.event.given.EventEnricherTestEnv environment class} .
      */
     @SuppressWarnings({"OptionalGetWithoutIsPresent", "InstanceVariableNamingConvention",
-            "ConstantConditions"})
+                       "ConstantConditions"})
     private static class TestEventSubscriber extends EventSubscriber {
 
         private ProjectCreated.Enrichment projectCreatedEnrichment;
