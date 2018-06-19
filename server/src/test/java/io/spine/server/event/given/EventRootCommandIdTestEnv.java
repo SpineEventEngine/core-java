@@ -183,8 +183,7 @@ public class EventRootCommandIdTestEnv {
     /**
      * Routes the {@link ProjectCreated} event to the {@link TeamAggregate} the project belongs to.
      * This is done for the purposes of the
-     * {@linkplain EventRootCommandIdTest#matchTheIdOfAnExternalEventHandledByAnAggregate()}
-     * test.
+     * {@linkplain EventRootCommandIdTest.MatchExternalEventHandledBy#aggregate()} test.
      */
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public static class TeamAggregateRepository
@@ -207,8 +206,7 @@ public class EventRootCommandIdTestEnv {
     /**
      * Routes the {@link EvInvitationAccepted} event to the {@link TeamCreationProcessManager} which
      * created the invitation. This is done for the purposes of the
-     * {@linkplain EventRootCommandIdTest#matchIdOfExternalEventHandledByProcessManager()}
-     * test.
+     * {@linkplain EventRootCommandIdTest.MatchExternalEventHandledBy#processManager()} test.
      */
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public static class TeamCreationRepository
