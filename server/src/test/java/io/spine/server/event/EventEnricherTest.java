@@ -179,7 +179,7 @@ public class EventEnricherTest {
     }
 
     @Test
-    @DisplayName("state event can be enriched if it's enrichment is registered")
+    @DisplayName("state event can be enriched if its enrichment is registered")
     void stateEventEnrichable() {
         assertTrue(enricher.canBeEnriched(EventEnvelope.of(projectStarted())));
     }
@@ -197,7 +197,7 @@ public class EventEnricherTest {
         }
 
         @Test
-        @DisplayName("if it's enrichment is disabled")
+        @DisplayName("if its enrichment is disabled")
         void withDisabledEnrichment() {
             final Event event = createEvent(toMessage(newUuid()));
             final EventEnvelope notEnrichableEvent = EventEnvelope.of(
