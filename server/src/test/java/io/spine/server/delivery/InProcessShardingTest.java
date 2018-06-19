@@ -19,39 +19,26 @@
  */
 package io.spine.server.delivery;
 
-import com.google.common.testing.EqualsTester;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import io.spine.server.delivery.given.MessageDeliveryTestEnv.EmptyShardable;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static io.spine.server.delivery.UniformAcrossTargets.forNumber;
-import static io.spine.server.delivery.UniformAcrossTargets.singleShard;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alex Tymchenko
  */
-public class UniformAcrossTargetsShould {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+@DisplayName("InProcessSharding should")
+class InProcessShardingTest {
 
     @Test
-    public void support_equality() {
-        new EqualsTester().addEqualityGroup(singleShard(), singleShard(), forNumber(1))
-                          .addEqualityGroup(forNumber(3), forNumber(3))
-                          .addEqualityGroup(forNumber(42), forNumber(42))
-                          .testEquals();
-    }
+    @DisplayName("throw IAE when registering shardable with no consumers")
+    void notRegisterEmptyShardable() {
+        final InProcessSharding sharding = new InProcessSharding(
+                InMemoryTransportFactory.newInstance());
 
-    @Test
-    public void not_allow_negative_number_of_shards() {
-        thrown.expect(IllegalArgumentException.class);
-        forNumber(-1);
-    }
-
-    @Test
-    public void not_allow_zero_number_of_shards() {
-        thrown.expect(IllegalArgumentException.class);
-        forNumber(0);
+        assertThrows(IllegalArgumentException.class,
+                     () -> sharding.register(new EmptyShardable()));
     }
 }

@@ -37,7 +37,7 @@ import static io.spine.server.model.ModelTests.clearModel;
  *
  * @author Alex Tymchenko
  */
-public abstract class AbstractMessageDeliveryShould {
+public abstract class AbstractMessageDeliveryTest {
 
     @BeforeEach
     public void setUp() {

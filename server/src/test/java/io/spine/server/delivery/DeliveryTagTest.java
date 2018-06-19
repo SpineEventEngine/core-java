@@ -23,21 +23,28 @@ import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.delivery.given.MessageDeliveryTestEnv.DeliveryEqualityRepository;
 import io.spine.server.model.ModelTests;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 
 /**
  * @author Alex Tymchenko
  */
-public class DeliveryTagShould {
+@DisplayName("DeliveryTag should")
+class DeliveryTagTest {
 
     @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester().setDefault(Shardable.class, new DeliveryEqualityRepository())
                                .testAllPublicStaticMethods(DeliveryTag.class);
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
-    public void support_equality() {
+    @DisplayName("support equality")
+    void supportEquality() {
         ModelTests.clearModel();
         final DeliveryEqualityRepository repository = new DeliveryEqualityRepository();
 

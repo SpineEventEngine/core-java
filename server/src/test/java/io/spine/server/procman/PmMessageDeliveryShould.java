@@ -25,7 +25,7 @@ import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
-import io.spine.server.delivery.AbstractMessageDeliveryShould;
+import io.spine.server.delivery.AbstractMessageDeliveryTest;
 import io.spine.server.delivery.given.ParallelDispatcher;
 import io.spine.server.delivery.given.ThreadStats;
 import io.spine.server.procman.given.PmMessageDeliveryTestEnv.DeliveryPm;
@@ -43,7 +43,7 @@ import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.projectStar
 /**
  * @author Alex Tymchenko
  */
-public class PmMessageDeliveryShould extends AbstractMessageDeliveryShould {
+public class PmMessageDeliveryShould extends AbstractMessageDeliveryTest {
 
     @Override
     @BeforeEach

@@ -21,14 +21,13 @@
 package io.spine.server.event;
 
 import com.google.common.base.Function;
-import com.google.protobuf.Message;
+import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.given.EventEnricherTestEnv.GivenEvent;
 import io.spine.server.event.given.EventEnricherTestEnv.GivenEventMessage;
 import io.spine.test.event.ProjectCompleted;
@@ -39,25 +38,28 @@ import io.spine.test.event.ProjectStarred;
 import io.spine.test.event.ProjectStarted;
 import io.spine.test.event.SeparateEnrichmentForMultipleProjectEvents;
 import io.spine.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.server.command.TestEventFactory.newInstance;
 import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectName;
 import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectOwnerId;
 import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.newEventEnricher;
 import static io.spine.server.event.given.EventEnricherTestEnv.GivenEvent.projectStarted;
+import static io.spine.server.event.given.EventEnricherTestEnv.createEvent;
 import static io.spine.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class EventEnricherShould {
+@DisplayName("EventEnricher should")
+public class EventEnricherTest {
 
     private BoundedContext boundedContext;
     private EventBus eventBus;
@@ -66,14 +68,8 @@ public class EventEnricherShould {
     private final Function<ProjectId, String> getProjectName = new GetProjectName();
     private final Function<ProjectId, UserId> getProjectOwnerId = new GetProjectOwnerId();
 
-    private static Event createEvent(Message msg) {
-        final TestEventFactory eventFactory = newInstance(EventEnricherShould.class);
-        final Event event = eventFactory.createEvent(msg);
-        return event;
-    }
-
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         enricher = newEventEnricher();
         boundedContext = newBoundedContext(enricher);
         eventBus = boundedContext.getEventBus();
@@ -81,49 +77,60 @@ public class EventEnricherShould {
         eventBus.register(subscriber);
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() throws Exception {
         boundedContext.close();
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
-    public void have_builder() {
+    @DisplayName("have builder")
+    void haveBuilder() {
         assertNotNull(EventEnricher.newBuilder());
     }
 
-    @Test
-    public void enrich_event_if_enrichment_definition_is_enclosed_to_event() {
-        final ProjectStarted msg = GivenEventMessage.projectStarted();
-        final Event event = createEvent(msg);
+    @Nested
+    @DisplayName("enrich event with enrichment whose definition")
+    class EnrichEventWithEnrichment {
 
-        eventBus.post(event);
+        @Test
+        @DisplayName("is enclosed to event")
+        void enclosedToEvent() {
+            final ProjectStarted msg = GivenEventMessage.projectStarted();
+            final Event event = createEvent(msg);
 
-        assertEquals(getProjectName.apply(msg.getProjectId()),
-                     subscriber.projectStartedEnrichment.getProjectName());
+            eventBus.post(event);
+
+            assertEquals(getProjectName.apply(msg.getProjectId()),
+                         subscriber.projectStartedEnrichment.getProjectName());
+        }
+
+        @Test
+        @DisplayName("is not enclosed to event and is located in same package")
+        void fromSamePackage() {
+            final ProjectCreated msg = GivenEventMessage.projectCreated();
+
+            eventBus.post(createEvent(msg));
+
+            assertEquals(getProjectName.apply(msg.getProjectId()),
+                         subscriber.projectCreatedSeparateEnrichment.getProjectName());
+        }
+
+        @Test
+        @DisplayName("is located in another package")
+        void fromAnotherPackage() {
+            final ProjectCreated msg = GivenEventMessage.projectCreated();
+
+            eventBus.post(createEvent(msg));
+
+            assertEquals(getProjectName.apply(msg.getProjectId()),
+                         subscriber.projectCreatedAnotherPackEnrichment.getProjectName());
+        }
     }
 
     @Test
-    public void enrich_event_if_enrichment_definition_is_not_enclosed_to_event_same_package() {
-        final ProjectCreated msg = GivenEventMessage.projectCreated();
-
-        eventBus.post(createEvent(msg));
-
-        assertEquals(getProjectName.apply(msg.getProjectId()),
-                     subscriber.projectCreatedSeparateEnrichment.getProjectName());
-    }
-
-    @Test
-    public void enrich_event_if_enrichment_definition_is_in_another_package() {
-        final ProjectCreated msg = GivenEventMessage.projectCreated();
-
-        eventBus.post(createEvent(msg));
-
-        assertEquals(getProjectName.apply(msg.getProjectId()),
-                     subscriber.projectCreatedAnotherPackEnrichment.getProjectName());
-    }
-
-    @Test
-    public void enrich_event_with_several_fields_by_same_source_id() {
+    @DisplayName("enrich event with several fields by same source ID")
+    void enrichSeveralFieldsProperly() {
         final ProjectCreated msg = GivenEventMessage.projectCreated();
         final ProjectId projectId = msg.getProjectId();
 
@@ -135,60 +142,80 @@ public class EventEnricherShould {
                      subscriber.projectCreatedEnrichment.getOwnerId());
     }
 
-    @Test
-    public void enrich_several_events_with_same_enrichment_message_with_wildcard_by() {
-        final ProjectCompleted completed = GivenEventMessage.projectCompleted();
-        final ProjectStarred starred = GivenEventMessage.projectStarred();
-        final ProjectId completedProjectId = completed.getProjectId();
-        final ProjectId starredProjectId = starred.getProjectId();
+    @Nested
+    @DisplayName("enrich several events")
+    class EnrichSeveralEvents {
 
-        eventBus.post(createEvent(completed));
-        eventBus.post(createEvent(starred));
+        @Test
+        @DisplayName("with same enrichment message having wildcard")
+        void byMessageWithWildcard() {
+            final ProjectCompleted completed = GivenEventMessage.projectCompleted();
+            final ProjectStarred starred = GivenEventMessage.projectStarred();
+            final ProjectId completedProjectId = completed.getProjectId();
+            final ProjectId starredProjectId = starred.getProjectId();
 
-        assertEquals(getProjectName.apply(completedProjectId),
-                     subscriber.projectCompletedEnrichment.getProjectName());
-        assertEquals(getProjectName.apply(starredProjectId),
-                     subscriber.projectStarredEnrichment.getProjectName());
+            eventBus.post(createEvent(completed));
+            eventBus.post(createEvent(starred));
+
+            assertEquals(getProjectName.apply(completedProjectId),
+                         subscriber.projectCompletedEnrichment.getProjectName());
+            assertEquals(getProjectName.apply(starredProjectId),
+                         subscriber.projectStarredEnrichment.getProjectName());
+        }
+
+        @Test
+        @DisplayName("bound by fields")
+        void boundByFields() {
+            final EventEnvelope permissionGranted =
+                    EventEnvelope.of(GivenEvent.permissionGranted());
+            final EventEnvelope permissionRevoked =
+                    EventEnvelope.of(GivenEvent.permissionRevoked());
+            final EventEnvelope sharingRequestApproved =
+                    EventEnvelope.of(GivenEvent.sharingRequestApproved());
+
+            assertTrue(enricher.canBeEnriched(permissionGranted));
+            assertTrue(enricher.canBeEnriched(permissionRevoked));
+            assertTrue(enricher.canBeEnriched(sharingRequestApproved));
+        }
     }
 
     @Test
-    public void enrich_several_events_bound_by_fields() {
-        final EventEnvelope permissionGranted = EventEnvelope.of(GivenEvent.permissionGranted());
-        final EventEnvelope permissionRevoked = EventEnvelope.of(GivenEvent.permissionRevoked());
-        final EventEnvelope sharingRequestApproved = EventEnvelope.of(GivenEvent.sharingRequestApproved());
-
-        assertTrue(enricher.canBeEnriched(permissionGranted));
-        assertTrue(enricher.canBeEnriched(permissionRevoked));
-        assertTrue(enricher.canBeEnriched(sharingRequestApproved));
-    }
-
-    @Test
-    public void confirm_that_event_can_be_enriched_if_enrichment_registered() {
+    @DisplayName("state event can be enriched if its enrichment is registered")
+    void stateEventEnrichable() {
         assertTrue(enricher.canBeEnriched(EventEnvelope.of(projectStarted())));
     }
 
-    @Test
-    public void confirm_that_event_can_not_be_enriched_if_no_such_enrichment_registered() {
-        final EventEnvelope dummyEvent = EventEnvelope.of(createEvent(toMessage(newUuid())));
+    @Nested
+    @DisplayName("state event cannot be enriched")
+    class StateEventNonEnrichable {
 
-        assertFalse(enricher.canBeEnriched(dummyEvent));
-    }
+        @Test
+        @DisplayName("if there is no enrichment registered for it")
+        void withoutEnrichment() {
+            final EventEnvelope dummyEvent = EventEnvelope.of(createEvent(toMessage(newUuid())));
 
-    @Test
-    public void confirm_that_event_can_not_be_enriched_if_enrichment_disabled() {
-        final Event event = createEvent(toMessage(newUuid()));
-        final EventEnvelope notEnrichableEvent = EventEnvelope.of(
-                event.toBuilder()
-                     .setContext(event.getContext()
-                                      .toBuilder()
-                                      .setEnrichment(event.getContext()
-                                                          .getEnrichment()
-                                                          .toBuilder()
-                                                          .setDoNotEnrich(true)))
-                     .build()
-        );
+            assertFalse(enricher.canBeEnriched(dummyEvent));
+        }
 
-        assertFalse(enricher.canBeEnriched(notEnrichableEvent));
+        @Test
+        @DisplayName("if its enrichment is disabled")
+        void withDisabledEnrichment() {
+            final Event event = createEvent(toMessage(newUuid()));
+            final Enrichment.Builder enrichment = event.getContext()
+                                                       .getEnrichment()
+                                                       .toBuilder()
+                                                       .setDoNotEnrich(true);
+            final EventContext.Builder context = event.getContext()
+                                                      .toBuilder()
+                                                      .setEnrichment(enrichment);
+            final EventEnvelope notEnrichableEvent = EventEnvelope.of(
+                    event.toBuilder()
+                         .setContext(context)
+                         .build()
+            );
+
+            assertFalse(enricher.canBeEnriched(notEnrichableEvent));
+        }
     }
 
     /**

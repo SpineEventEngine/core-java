@@ -26,21 +26,19 @@ import io.spine.core.CommandEnvelope;
 import io.spine.test.Tests;
 import io.spine.test.command.event.MandatoryFieldEvent;
 import io.spine.validate.ValidationException;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.pack;
 import static io.spine.test.TestValues.newUuidValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class EventFactoryShould {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+@DisplayName("EventFactory should")
+class EventFactoryTest {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
@@ -48,28 +46,30 @@ public class EventFactoryShould {
     private Any producerId;
     private CommandEnvelope origin;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         producerId = pack(newUuidValue());
         origin = requestFactory.generateEnvelope();
     }
 
     @Test
-    public void require_producer_id() {
-        thrown.expect(NullPointerException.class);
-        EventFactory.on(origin, Tests.nullRef());
+    @DisplayName("require producer ID")
+    void requireProducerId() {
+        assertThrows(NullPointerException.class, () -> EventFactory.on(origin, Tests.nullRef()));
     }
 
     @Test
-    public void require_origin() {
-        thrown.expect(NullPointerException.class);
-        EventFactory.on(Tests.<CommandEnvelope>nullRef(), producerId);
+    @DisplayName("require origin")
+    void requireOrigin() {
+        assertThrows(NullPointerException.class,
+                     () -> EventFactory.on(Tests.<CommandEnvelope>nullRef(), producerId));
     }
 
     @Test
-    public void validate_event_messages_before_creation() {
+    @DisplayName("validate event messages before creation")
+    void validateCreatedMessages() {
         EventFactory factory = EventFactory.on(origin, producerId);
-        thrown.expect(ValidationException.class);
-        factory.createEvent(MandatoryFieldEvent.getDefaultInstance(), null);
+        assertThrows(ValidationException.class,
+                     () -> factory.createEvent(MandatoryFieldEvent.getDefaultInstance(), null));
     }
 }

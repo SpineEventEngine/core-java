@@ -17,23 +17,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.delivery;
 
-import io.spine.server.delivery.given.MessageDeliveryTestEnv.EmptyShardable;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
-import org.junit.Test;
+package io.spine.server.event;
 
-/**
- * @author Alex Tymchenko
- */
-public class InProcessShardingShould {
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_IAE_if_register_shardable_with_no_consumers() {
-        final InProcessSharding sharding = new InProcessSharding(
-                InMemoryTransportFactory.newInstance());
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-        sharding.register(new EmptyShardable());
+@DisplayName("MatchFilter should")
+class MatchFilterTest {
+
+    @SuppressWarnings("ConstantConditions") // Passing `null` is the purpose of the test.
+    @Test
+    @DisplayName("not allow null events to pass")
+    void notAllowNullEvents() {
+        final MatchFilter filter = new MatchFilter(EventFilter.getDefaultInstance());
+        assertFalse(filter.apply(null));
     }
-
 }

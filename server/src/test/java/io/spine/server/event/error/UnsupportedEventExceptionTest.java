@@ -22,19 +22,22 @@ package io.spine.server.event.error;
 
 import com.google.protobuf.StringValue;
 import io.spine.server.event.UnsupportedEventException;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Alexander Litus
  */
-public class UnsupportedEventExceptionShould {
+@DisplayName("UnsupportedEventException should")
+class UnsupportedEventExceptionTest {
 
     @Test
-    public void have_msg_and_error() {
+    @DisplayName("have message and error")
+    void haveMessageAndError() {
         final StringValue msg = toMessage("");
 
         final UnsupportedEventException exception = new UnsupportedEventException(msg);

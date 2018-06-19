@@ -24,35 +24,32 @@ import com.google.protobuf.BoolValue;
 import io.spine.core.EventEnvelope;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.given.EventSubscriberTestEnv.FailingSubscriber;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class EventSubscriberShould {
+@DisplayName("EventSubscriber should")
+class EventSubscriberTest {
 
     private final TestEventFactory factory = TestEventFactory.newInstance(getClass());
 
     private EventSubscriber subscriber;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         subscriber = new FailingSubscriber();
     }
 
-    private EventEnvelope createEvent(boolean value) {
-        return EventEnvelope.of(factory.createEvent(BoolValue.newBuilder()
-                                                             .setValue(value)
-                                                             .build()));
-    }
-
     @Test
-    public void catch_exceptions_caused_by_methods() {
+    @DisplayName("catch exceptions caused by methods")
+    void catchMethodExceptions() {
         // Create event which should fail.
         final EventEnvelope eventEnvelope = createEvent(false);
 
@@ -66,7 +63,8 @@ public class EventSubscriberShould {
     }
 
     @Test
-    public void dispatch_event() {
+    @DisplayName("dispatch event")
+    void dispatchEvent() {
         final EventEnvelope eventEnvelope = createEvent(true);
 
         final Set<String> dispatchingResult = subscriber.dispatch(eventEnvelope);
@@ -77,8 +75,10 @@ public class EventSubscriberShould {
         assertNull(sub.getLastException());
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
-    public void have_log() {
+    @DisplayName("have log")
+    void haveLog() {
         assertEquals(subscriber.getClass()
                                .getName(),
                      subscriber.log()
@@ -86,8 +86,15 @@ public class EventSubscriberShould {
     }
 
     @Test
-    public void return_handled_message_classes() {
+    @DisplayName("expose handled message classes")
+    void exposeMessageClasses() {
         assertEquals(3, subscriber.getMessageClasses()
                                   .size());
+    }
+
+    private EventEnvelope createEvent(boolean value) {
+        return EventEnvelope.of(factory.createEvent(BoolValue.newBuilder()
+                                                             .setValue(value)
+                                                             .build()));
     }
 }

@@ -23,21 +23,24 @@ package io.spine.server.event.error;
 import com.google.protobuf.StringValue;
 import io.spine.server.event.InvalidEventException;
 import io.spine.validate.ConstraintViolation;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Alexander Litus
  */
 @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-public class InvalidEventExceptionShould {
+@DisplayName("InvalidEventException should")
+class InvalidEventExceptionTest {
 
     @Test
-    public void create_exception_with_violations() {
+    @DisplayName("create exception with violations")
+    void createWithViolations() {
         final StringValue msg = toMessage("");
 
         final InvalidEventException exception = InvalidEventException.onConstraintViolations(

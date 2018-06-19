@@ -20,51 +20,53 @@
 
 package io.spine.server.event;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.event.given.DelegatingEventDispatcherTestEnv.EmptyEventDispatcherDelegate;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.integration.ExternalMessages;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import java.util.Set;
-
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.TestValues.newUuidValue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class DelegatingEventDispatcherShould {
+@DisplayName("DelegatingEventDispatcher should")
+class DelegatingEventDispatcherTest {
 
     private EmptyEventDispatcherDelegate delegate;
     private DelegatingEventDispatcher<String> delegatingDispatcher;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         delegate = new EmptyEventDispatcherDelegate();
         delegatingDispatcher = DelegatingEventDispatcher.of(delegate);
     }
 
     @Test
-    public void pass_null_tolerance_test() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(EventDispatcherDelegate.class, new EmptyEventDispatcherDelegate())
                 .testAllPublicStaticMethods(DelegatingEventDispatcher.class);
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
-    public void delegate_onError() {
+    @DisplayName("delegate `onError`")
+    void delegateOnError() {
         final TestEventFactory factory = TestEventFactory.newInstance(getClass());
         final EventEnvelope envelope = EventEnvelope.of(factory.createEvent(newUuidValue()));
 
@@ -76,7 +78,8 @@ public class DelegatingEventDispatcherShould {
     }
 
     @Test
-    public void expose_external_dispatcher_that_delegates_onError() {
+    @DisplayName("expose external dispatcher that delegates `onError`")
+    void exposeExternalDispatcher() {
         final ExternalMessageDispatcher<String> extMessageDispatcher =
                 delegatingDispatcher.getExternalDispatcher();
 
@@ -91,52 +94,8 @@ public class DelegatingEventDispatcherShould {
 
         final RuntimeException exception =
                 new RuntimeException("test external dispatcher delegating onError");
-        extMessageDispatcher.onError(externalMessageEnvelope,exception);
+        extMessageDispatcher.onError(externalMessageEnvelope, exception);
 
         assertTrue(delegate.onErrorCalled());
-    }
-
-    /*
-     * Test environment
-     ********************/
-
-    private static final class EmptyEventDispatcherDelegate
-            implements EventDispatcherDelegate<String> {
-
-        private boolean onErrorCalled;
-
-        @Nullable
-        private RuntimeException lastException;
-
-        @Override
-        public Set<EventClass> getEventClasses() {
-            return ImmutableSet.of();
-        }
-
-        @Override
-        public Set<EventClass> getExternalEventClasses() {
-            return ImmutableSet.of();
-        }
-
-        @Override
-        public Set<String> dispatchEvent(EventEnvelope envelope) {
-            // Do nothing.
-            return ImmutableSet.of();
-        }
-
-        @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
-            onErrorCalled = true;
-            lastException = exception;
-        }
-
-        private boolean onErrorCalled() {
-            return onErrorCalled;
-        }
-
-        @Nullable
-        private RuntimeException getLastException() {
-            return lastException;
-        }
     }
 }

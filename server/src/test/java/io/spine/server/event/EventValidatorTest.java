@@ -26,17 +26,18 @@ import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.EventValidationError;
+import io.spine.core.MessageInvalid;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.event.ProjectCreated;
 import io.spine.testdata.Sample;
 import io.spine.validate.ConstraintViolation;
-import io.spine.core.MessageInvalid;
 import io.spine.validate.MessageValidator;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -44,13 +45,15 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dmytro Dashenkov
  */
-public class EventValidatorShould {
+@DisplayName("EventValidator should")
+class EventValidatorTest {
 
     private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(EventValidatorShould.class);
+            TestEventFactory.newInstance(EventValidatorTest.class);
 
     @Test
-    public void validate_event_messages() {
+    @DisplayName("validate event messages")
+    void validateEventMessages() {
         final MessageValidator messageValidator = mock(MessageValidator.class);
         when(messageValidator.validate(any(Message.class)))
                 .thenReturn(newArrayList(ConstraintViolation.getDefaultInstance(),
@@ -62,7 +65,6 @@ public class EventValidatorShould {
         final Optional<MessageInvalid> error = eventValidator.validate(EventEnvelope.of(event));
         assertTrue(error.isPresent());
         final Error actualError = error.get().asError();
-        assertEquals(EventValidationError.getDescriptor().getFullName(),
-                     actualError.getType());
+        assertEquals(EventValidationError.getDescriptor().getFullName(), actualError.getType());
     }
 }

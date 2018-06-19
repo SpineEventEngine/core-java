@@ -27,7 +27,6 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.event.EventSubscriber;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -36,16 +35,15 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class EventSubscriberTestEnv {
 
     /** Prevents instantiation on this utility class. */
-    private EventSubscriberTestEnv() {}
+    private EventSubscriberTestEnv() {
+    }
 
     /** The subscriber which throws exception from the subscriber method. */
     public static class FailingSubscriber extends EventSubscriber {
 
         private boolean methodCalled = false;
-        @Nullable
-        private EventEnvelope lastErrorEnvelope;
-        @Nullable
-        private RuntimeException lastException;
+        private @Nullable EventEnvelope lastErrorEnvelope;
+        private @Nullable RuntimeException lastException;
 
         @Subscribe
         public void on(BoolValue message, EventContext context) {
@@ -76,13 +74,11 @@ public class EventSubscriberTestEnv {
             lastException = exception;
         }
 
-        @Nullable
-        public EventEnvelope getLastErrorEnvelope() {
+        public @Nullable EventEnvelope getLastErrorEnvelope() {
             return lastErrorEnvelope;
         }
 
-        @Nullable
-        public RuntimeException getLastException() {
+        public @Nullable RuntimeException getLastException() {
             return lastException;
         }
     }
