@@ -24,6 +24,7 @@ import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.Tests.nullRef;
@@ -49,7 +50,8 @@ public class EntityEqualsShould {
     }
 
     @Test
-    public void assure_same_entities_are_equal() {
+    @DisplayName("assure same entities are equal")
+    void assureSameEntitiesAreEqual() {
         final TestEntity another = TestEntity.withStateOf(entity);
 
         assertEquals(entity, another);
@@ -57,23 +59,27 @@ public class EntityEqualsShould {
 
     @SuppressWarnings("EqualsWithItself") // is the purpose of this method.
     @Test
-    public void assure_entity_is_equal_to_itself() {
+    @DisplayName("assure entity is equal to itself")
+    void assureEntityIsEqualToItself() {
         assertEquals(entity, entity);
     }
 
     @Test
-    public void assure_entity_is_not_equal_to_null() {
+    @DisplayName("assure entity is not equal to null")
+    void assureEntityIsNotEqualToNull() {
         assertNotEquals(entity, nullRef());
     }
 
     @SuppressWarnings("EqualsBetweenInconvertibleTypes") // is the purpose of this method.
     @Test
-    public void assure_entity_is_not_equal_to_object_of_another_class() {
+    @DisplayName("assure entity is not equal to object of another class")
+    void assureEntityIsNotEqualToObjectOfAnotherClass() {
         assertNotEquals(entity, newUuid());
     }
 
     @Test
-    public void assure_entities_with_different_ids_are_not_equal() {
+    @DisplayName("assure entities with different ids are not equal")
+    void assureEntitiesWithDifferentIdsAreNotEqual() {
         final TestEntity another = TestEntity.newInstance(newUuid());
 
         assertNotEquals(entity.getId(), another.getId());
@@ -81,7 +87,8 @@ public class EntityEqualsShould {
     }
 
     @Test
-    public void assure_entities_with_different_states_are_not_equal() {
+    @DisplayName("assure entities with different states are not equal")
+    void assureEntitiesWithDifferentStatesAreNotEqual() {
         final TestEntity another = TestEntity.withStateOf(entity);
         another.updateState(Sample.messageOfType(Project.class), another.getVersion());
 
@@ -91,7 +98,8 @@ public class EntityEqualsShould {
 
     @SuppressWarnings("CheckReturnValue") // The entity version can be ignored in this test.
     @Test
-    public void assure_entities_with_different_versions_are_not_equal() {
+    @DisplayName("assure entities with different versions are not equal")
+    void assureEntitiesWithDifferentVersionsAreNotEqual() {
         final TestEntity another = TestEntity.withStateOf(entity);
         another.incrementVersion();
 

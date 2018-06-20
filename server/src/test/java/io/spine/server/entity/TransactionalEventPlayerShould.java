@@ -26,6 +26,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.server.command.TestEventFactory;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.test.TestValues.newUuidValue;
@@ -45,14 +46,16 @@ public class TransactionalEventPlayerShould {
             TestEventFactory.newInstance(TransactionalEntityShould.class);
 
     @Test(expected = IllegalStateException.class)
-    public void require_active_transaction_to_play_events() {
+    @DisplayName("require active transaction to play events")
+    void requireActiveTransactionToPlayEvents() {
         new TxPlayingEntity().play(
                 newArrayList(eventFactory.createEvent(StringValue.getDefaultInstance()))
         );
     }
 
     @Test
-    public void delegate_applying_events_to_tx_when_playing() {
+    @DisplayName("delegate applying events to tx when playing")
+    void delegateApplyingEventsToTxWhenPlaying() {
         final TxPlayingEntity entity = entityWithActiveTx(false);
         final Transaction txMock = entity.getTransaction();
         assertNotNull(txMock);

@@ -24,6 +24,7 @@ import com.google.common.base.Function;
 import com.google.protobuf.StringValue;
 import io.spine.client.EntityId;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.protobuf.TypeConverter.toAny;
 import static org.junit.Assert.assertEquals;
@@ -35,7 +36,8 @@ import static org.junit.Assert.assertNotNull;
 public class EntityIdFunctionShould {
 
     @Test(expected = IllegalStateException.class)
-    public void do_not_accept_wrong_id_type() {
+    @DisplayName("do not accept wrong id type")
+    void doNotAcceptWrongIdType() {
         final Function<EntityId, StringValue> func =
                 new RecordBasedRepository.EntityIdFunction<>(StringValue.class);
 
@@ -46,7 +48,8 @@ public class EntityIdFunctionShould {
     }
 
     @Test
-    public void accept_proper_id_type() {
+    @DisplayName("accept proper id type")
+    void acceptProperIdType() {
         final Function<EntityId, StringValue> func =
                 new RecordBasedRepository.EntityIdFunction<>(StringValue.class);
 

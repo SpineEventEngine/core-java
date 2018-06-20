@@ -40,6 +40,7 @@ import io.spine.test.storage.ProjectId;
 import io.spine.testdata.Sample;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
@@ -75,14 +76,16 @@ public class EntityQueriesShould {
     }
 
     @Test
-    public void have_private_utility_ctor() {
+    @DisplayName("have private utility ctor")
+    void havePrivateUtilityCtor() {
         assertHasPrivateParameterlessCtor(EntityQueries.class);
     }
 
     @SuppressWarnings("ConstantConditions")
     // The purpose of the check is passing null for @NotNull field.
     @Test
-    public void not_accept_null_filters() {
+    @DisplayName("not accept null filters")
+    void notAcceptNullFilters() {
         thrown.expect(NullPointerException.class);
         from(null, Collections.emptyList());
     }
@@ -90,7 +93,8 @@ public class EntityQueriesShould {
     @SuppressWarnings("ConstantConditions")
     // The purpose of the check is passing null for @NotNull field.
     @Test
-    public void not_accept_null_storage() {
+    @DisplayName("not accept null storage")
+    void notAcceptNullStorage() {
         RecordStorage<?> storage = null;
         thrown.expect(NullPointerException.class);
         from(EntityFilters.getDefaultInstance(), storage);
@@ -99,14 +103,16 @@ public class EntityQueriesShould {
     @SuppressWarnings("ConstantConditions")
     // The purpose of the check is passing null for @NotNull field.
     @Test
-    public void not_accept_null_entity_class() {
+    @DisplayName("not accept null entity class")
+    void notAcceptNullEntityClass() {
         Collection<EntityColumn> entityColumns = null;
         thrown.expect(NullPointerException.class);
         from(EntityFilters.getDefaultInstance(), entityColumns);
     }
 
     @Test
-    public void check_filter_type() {
+    @DisplayName("check filter type")
+    void checkFilterType() {
         // Boolean EntityColumn queried for for an Integer value
         ColumnFilter filter = ColumnFilters.gt(archived.name(), 42);
         CompositeColumnFilter compositeFilter = ColumnFilters.all(filter);
@@ -120,7 +126,8 @@ public class EntityQueriesShould {
     }
 
     @Test
-    public void not_create_query_for_non_existing_column() {
+    @DisplayName("not create query for non existing column")
+    void notCreateQueryForNonExistingColumn() {
         ColumnFilter filter = ColumnFilters.eq("nonExistingColumn", 42);
         CompositeColumnFilter compositeFilter = ColumnFilters.all(filter);
         EntityFilters filters =
@@ -133,7 +140,8 @@ public class EntityQueriesShould {
     }
 
     @Test
-    public void construct_empty_queries() {
+    @DisplayName("construct empty queries")
+    void constructEmptyQueries() {
         EntityFilters filters = EntityFilters.getDefaultInstance();
         EntityQuery<?> query = createEntityQuery(filters, AbstractEntity.class);
         assertNotNull(query);
@@ -144,7 +152,8 @@ public class EntityQueriesShould {
     }
 
     @Test
-    public void construct_non_empty_queries() {
+    @DisplayName("construct non empty queries")
+    void constructNonEmptyQueries() {
         Message someGenericId = Sample.messageOfType(ProjectId.class);
         Any someId = AnyPacker.pack(someGenericId);
         EntityId entityId = EntityId

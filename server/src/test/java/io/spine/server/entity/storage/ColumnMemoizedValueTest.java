@@ -22,7 +22,8 @@ package io.spine.server.entity.storage;
 
 import com.google.common.testing.EqualsTester;
 import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.server.entity.storage.Columns.findColumn;
@@ -33,13 +34,16 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Dmytro Dashenkov
  */
-public class ColumnMemoizedValueShould {
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
+@DisplayName("Column MemoizedValue should")
+class ColumnMemoizedValueTest {
 
     private static final String MUTABLE_STATE_COLUMN = "mutableState";
     private static final String ARCHIVED_COLUMN = archived.name();
 
     @Test
-    public void be_serializable() {
+    @DisplayName("be serializable")
+    void beSerializable() {
         final EntityColumn column = findColumn(TestEntity.class, MUTABLE_STATE_COLUMN);
         final TestEntity entity = new TestEntity("my-id");
         entity.setMutableState(42);
@@ -49,7 +53,8 @@ public class ColumnMemoizedValueShould {
     }
 
     @Test
-    public void support_equality() {
+    @DisplayName("support equality")
+    void supportEquality() {
         /*
         4 equality groups represent following cases:
             A - 3 values of the same column memoized on the same instance of Entity;

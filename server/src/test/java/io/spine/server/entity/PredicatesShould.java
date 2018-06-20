@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordVisible;
@@ -33,7 +34,8 @@ import static org.junit.Assert.assertTrue;
 public class PredicatesShould {
 
     @Test
-    public void consider_archived_entity_invisible() {
+    @DisplayName("consider archived entity invisible")
+    void considerArchivedEntityInvisible() {
         final LifecycleFlags status =
                 LifecycleFlags.newBuilder()
                               .setArchived(true)
@@ -42,7 +44,8 @@ public class PredicatesShould {
     }
 
     @Test
-    public void consider_deleted_entity_invisible() {
+    @DisplayName("consider deleted entity invisible")
+    void considerDeletedEntityInvisible() {
         final LifecycleFlags status =
                 LifecycleFlags.newBuilder()
                               .setDeleted(true)
@@ -51,7 +54,8 @@ public class PredicatesShould {
     }
 
     @Test
-    public void consider_archived_record_invisible() {
+    @DisplayName("consider archived record invisible")
+    void considerArchivedRecordInvisible() {
         final EntityRecord record =
                 EntityRecord
                         .newBuilder()
@@ -62,7 +66,8 @@ public class PredicatesShould {
     }
 
     @Test
-    public void consider_deleted_record_invisible() {
+    @DisplayName("consider deleted record invisible")
+    void considerDeletedRecordInvisible() {
         final EntityRecord record =
                 EntityRecord
                         .newBuilder()
@@ -77,7 +82,8 @@ public class PredicatesShould {
      * but making such records "visible" would help identify possible bugs.
      */
     @Test
-    public void consider_null_records_visible() {
+    @DisplayName("consider null records visible")
+    void considerNullRecordsVisible() {
         assertTrue(isEntityVisible().apply(null));
     }
 }

@@ -26,6 +26,7 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.test.Tests;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -57,12 +58,14 @@ public class ColumnRecordsShould {
             MOCK_COLUMNS_COUNT - MOCK_NULL_COLUMNS_COUNT;
 
     @Test
-    public void have_private_util_ctor() {
+    @DisplayName("have private util ctor")
+    void havePrivateUtilCtor() {
         assertHasPrivateParameterlessCtor(ColumnRecords.class);
     }
 
     @Test
-    public void not_accept_nulls() {
+    @DisplayName("not accept nulls")
+    void notAcceptNulls() {
         final EntityRecordWithColumns record = EntityRecordWithColumns.of(
                 EntityRecord.getDefaultInstance());
         final ColumnTypeRegistry columnTypeRegistry = ColumnTypeRegistry.newBuilder()
@@ -78,7 +81,8 @@ public class ColumnRecordsShould {
     }
 
     @Test
-    public void feed_entity_columns_to_database_record() {
+    @DisplayName("feed entity columns to database record")
+    void feedEntityColumnsToDatabaseRecord() {
         // Set up mocks and arguments
         final List<Object> destination = new ArrayList<>(MOCK_COLUMNS_COUNT);
 

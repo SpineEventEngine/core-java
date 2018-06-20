@@ -34,6 +34,7 @@ import io.spine.validate.ValidationException;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 import org.mockito.ArgumentMatcher;
 
@@ -128,7 +129,8 @@ public abstract class TransactionShould<I,
     }
 
     @Test
-    public void initialize_from_entity() {
+    @DisplayName("initialize from entity")
+    void initializeFromEntity() {
         E entity = createEntity();
         B expectedBuilder = entity.builderFromState();
         Version expectedVersion = entity.getVersion();
@@ -151,7 +153,8 @@ public abstract class TransactionShould<I,
     }
 
     @Test
-    public void propagate_changes_to_entity_applier_methods() {
+    @DisplayName("propagate changes to entity applier methods")
+    void propagateChangesToEntityApplierMethods() {
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
 
@@ -162,7 +165,8 @@ public abstract class TransactionShould<I,
     }
 
     @Test
-    public void create_phase_for_an_applied_event() {
+    @DisplayName("create phase for an applied event")
+    void createPhaseForAnAppliedEvent() {
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
 
@@ -177,7 +181,8 @@ public abstract class TransactionShould<I,
     }
 
     @Test
-    public void propagate_changes_to_entity_upon_commit() {
+    @DisplayName("propagate changes to entity upon commit")
+    void propagateChangesToEntityUponCommit() {
         E entity = createEntity();
 
         Transaction<I, E, S, B> tx = createTx(entity);
@@ -195,7 +200,8 @@ public abstract class TransactionShould<I,
     }
 
     @Test
-    public void not_propagate_changes_to_entity_on_rollback() {
+    @DisplayName("not propagate changes to entity on rollback")
+    void notPropagateChangesToEntityOnRollback() {
         E entity = createEntity();
 
         Transaction<I, E, S, B> tx = createTx(entity);
@@ -213,7 +219,8 @@ public abstract class TransactionShould<I,
     }
 
     @Test
-    public void set_txEntityVersion_from_EventContext() {
+    @DisplayName("set txEntityVersion from EventContext")
+    void setTxEntityVersionFromEventContext() {
         E entity = createEntity();
 
         Transaction<I, E, S, B> tx = createTx(entity);
@@ -228,8 +235,10 @@ public abstract class TransactionShould<I,
         assertEquals(modifiedVersion, tx.getVersion());
     }
 
+    // todo messed up
     @Test
     @SuppressWarnings({"unchecked", "ConstantConditions"})  // OK for a test method.
+    @DisplayName("ssWarnings")
     public void notify_listener_during_transaction_execution() {
         TransactionListener<I, E, S, B> listener = mock(TransactionListener.class);
         E entity = createEntity();
@@ -243,7 +252,8 @@ public abstract class TransactionShould<I,
     }
 
     @Test
-    public void init_state_and_version_if_specified_in_ctor() {
+    @DisplayName("init state and version if specified in ctor")
+    void initStateAndVersionIfSpecifiedInCtor() {
         E entity = createEntity();
         S newState = createNewState();
         Version newVersion = someVersion();
@@ -267,7 +277,8 @@ public abstract class TransactionShould<I,
 
     @SuppressWarnings("CheckReturnValue") // can ignore new entity version in this test.
     @Test
-    public void not_allow_injecting_state_if_entity_has_non_zero_version_already() {
+    @DisplayName("not allow injecting state if entity has non zero version already")
+    void notAllowInjectingStateIfEntityHasNonZeroVersionAlready() {
         E entity = createEntity();
         entity.incrementVersion();
         S newState = createNewState();
@@ -278,7 +289,8 @@ public abstract class TransactionShould<I,
     }
 
     @Test
-    public void propagate_phase_failure_exception_as_ISE() {
+    @DisplayName("propagate phase failure exception as ISE")
+    void propagatePhaseFailureExceptionAsISE() {
         E entity = createEntity();
 
         Transaction<I, E, S, B> tx = createTx(entity);
@@ -290,7 +302,8 @@ public abstract class TransactionShould<I,
     }
 
     @Test
-    public void rollback_automatically_if_phase_failed() {
+    @DisplayName("rollback automatically if phase failed")
+    void rollbackAutomaticallyIfPhaseFailed() {
         E entity = createEntity();
         S originalState = entity.getState();
         Version originalVersion = entity.getVersion();
@@ -307,7 +320,8 @@ public abstract class TransactionShould<I,
     }
 
     @Test
-    public void propagate_exception_wrapped_as_ISE_if_commit_fails() {
+    @DisplayName("propagate exception wrapped as ISE if commit fails")
+    void propagateExceptionWrappedAsISEIfCommitFails() {
         E entity = createEntity(someViolations());
         S newState = createNewState();
         Version version = someVersion();
@@ -323,7 +337,8 @@ public abstract class TransactionShould<I,
     }
 
     @Test
-    public void throw_InvalidEntityStateException_if_constraints_violated_on_commit() {
+    @DisplayName("throw InvalidEntityStateException if constraints violated on commit")
+    void throwInvalidEntityStateExceptionIfConstraintsViolatedOnCommit() {
         E entity = createEntity();
 
         S newState = createNewState();
@@ -338,7 +353,8 @@ public abstract class TransactionShould<I,
     }
 
     @Test
-    public void rollback_automatically_if_commit_failed() {
+    @DisplayName("rollback automatically if commit failed")
+    void rollbackAutomaticallyIfCommitFailed() {
         E entity = createEntity(someViolations());
         S originalState = entity.getState();
         Version originalVersion = entity.getVersion();
@@ -356,7 +372,8 @@ public abstract class TransactionShould<I,
     }
 
     @Test
-    public void advance_version_from_event() {
+    @DisplayName("advance version from event")
+    protected void advanceVersionFromEvent() {
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
         assertEquals(entity.getVersion(), tx.getVersion());

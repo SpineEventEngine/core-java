@@ -24,6 +24,7 @@ import com.google.common.reflect.Invokable;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.lang.reflect.Method;
 
@@ -36,7 +37,8 @@ public class AbstractVersionableEntityShould {
 
     @SuppressWarnings("MagicNumber")
     @Test
-    public void have_equals() throws Exception {
+    @DisplayName("have equals")
+    void haveEquals() throws Exception {
         final AvEntity entity = new AvEntity(88L);
         final AvEntity another = new AvEntity(88L);
         another.updateState(entity.getState(), entity.getVersion());
@@ -47,7 +49,8 @@ public class AbstractVersionableEntityShould {
     }
 
     @Test
-    public void have_updateState_method_visible_to_package_only() throws NoSuchMethodException {
+    @DisplayName("have updateState method visible to package only")
+    void haveUpdateStateMethodVisibleToPackageOnly() throws NoSuchMethodException {
         boolean methodFound = false;
 
         final Method[] methods = AbstractVersionableEntity.class.getDeclaredMethods();

@@ -36,6 +36,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import java.util.List;
@@ -84,7 +85,8 @@ public class VisibilityGuardShould {
     }
 
     @Test
-    public void give_access_to_visible_repos() {
+    @DisplayName("give access to visible repos")
+    void giveAccessToVisibleRepos() {
         assertTrue(guard.getRepository(FullAccessAggregate.class)
                         .isPresent());
         assertTrue(guard.getRepository(SubscribableAggregate.class)
@@ -92,13 +94,15 @@ public class VisibilityGuardShould {
     }
 
     @Test
-    public void deny_access_to_invisible_repos() {
+    @DisplayName("deny access to invisible repos")
+    void denyAccessToInvisibleRepos() {
         assertFalse(guard.getRepository(HiddenAggregate.class)
                          .isPresent());
     }
 
     @Test
-    public void obtain_repos_by_visibility() {
+    @DisplayName("obtain repos by visibility")
+    void obtainReposByVisibility() {
         Set<TypeName> full = guard.getEntityTypes(Visibility.FULL);
         assertEquals(1, full.size());
         assertTrue(full.contains(TypeName.of(FullAccessAggregate.class)));
@@ -113,7 +117,8 @@ public class VisibilityGuardShould {
     }
 
     @Test
-    public void shut_down_repositories() {
+    @DisplayName("shut down repositories")
+    void shutDownRepositories() {
         guard.shutDownRepositories();
 
         for (Repository repository : repositories) {
@@ -122,19 +127,22 @@ public class VisibilityGuardShould {
     }
 
     @Test
-    public void do_not_allow_double_registration() {
+    @DisplayName("do not allow double registration")
+    void doNotAllowDoubleRegistration() {
         thrown.expect(IllegalStateException.class);
         register(new ExposedRepository());
     }
 
     @Test
-    public void reject_unregistered_state_class() {
+    @DisplayName("reject unregistered state class")
+    void rejectUnregisteredStateClass() {
         thrown.expect(IllegalArgumentException.class);
         guard.getRepository(Empty.class);
     }
 
     @Test
-    public void do_not_allow_null_inputs() {
+    @DisplayName("do not allow null inputs")
+    void doNotAllowNullInputs() {
         new NullPointerTester()
                 .setDefault(Repository.class, new ExposedRepository())
                 .setDefault(Class.class, FullAccessAggregate.class)

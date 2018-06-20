@@ -34,6 +34,7 @@ import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -64,7 +65,8 @@ import static org.mockito.Mockito.when;
 public class EntityQueryShould {
 
     @Test
-    public void be_serializable() {
+    @DisplayName("be serializable")
+    void beSerializable() {
         final String columnName = deleted.name();
         final EntityColumn column = findColumn(EntityWithLifecycle.class, columnName);
         final ColumnFilter filter = ColumnFilters.eq(columnName, false);
@@ -79,7 +81,8 @@ public class EntityQueryShould {
     }
 
     @Test
-    public void not_accept_nulls() {
+    @DisplayName("not accept nulls")
+    void notAcceptNulls() {
         new NullPointerTester()
                 .setDefault(EntityIdFilter.class, EntityIdFilter.getDefaultInstance())
                 .setDefault(QueryParameters.class, QueryParameters.newBuilder().build())
@@ -87,7 +90,8 @@ public class EntityQueryShould {
     }
 
     @Test
-    public void support_toString() {
+    @DisplayName("support toString")
+    void supportToString() {
         final Object someId = Sample.messageOfType(ProjectId.class);
         final Collection<Object> ids = singleton(someId);
         final EntityColumn someColumn = mockColumn();
@@ -106,7 +110,8 @@ public class EntityQueryShould {
     }
 
     @Test
-    public void support_equality() {
+    @DisplayName("support equality")
+    void supportEquality() {
         final EqualsTester tester = new EqualsTester();
         addEqualityGroupA(tester);
         addEqualityGroupB(tester);
@@ -116,7 +121,8 @@ public class EntityQueryShould {
     }
 
     @Test
-    public void fail_to_append_lifecycle_columns_if_already_contains() {
+    @DisplayName("fail to append lifecycle columns if already contains")
+    void failToAppendLifecycleColumnsIfAlreadyContains() {
         final EntityColumn deletedColumn = Columns.findColumn(EntityWithLifecycle.class, deleted.name());
         final CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
                 ImmutableMultimap.of(deletedColumn, ColumnFilter.getDefaultInstance()),

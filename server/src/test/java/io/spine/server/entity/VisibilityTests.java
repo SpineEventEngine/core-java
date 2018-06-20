@@ -25,6 +25,7 @@ import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -60,24 +61,28 @@ public class VisibilityTests {
     }
 
     @Test
-    public void return_default_status_after_constructor() {
+    @DisplayName("return default status after constructor")
+    void returnDefaultStatusAfterConstructor() {
         assertEquals(LifecycleFlags.getDefaultInstance(), new MiniEntity(1L).getLifecycleFlags());
     }
 
     @Test
-    public void be_not_archived_when_created() {
+    @DisplayName("be not archived when created")
+    void beNotArchivedWhenCreated() {
         assertFalse(entity.isArchived());
     }
 
     @Test
-    public void support_archiving() {
+    @DisplayName("support archiving")
+    void supportArchiving() {
         entity.setArchived(true);
 
         assertTrue(entity.isArchived());
     }
 
     @Test
-    public void support_un_archiving() {
+    @DisplayName("support un archiving")
+    void supportUnArchiving() {
         entity.setArchived(true);
         entity.setArchived(false);
 
@@ -85,26 +90,30 @@ public class VisibilityTests {
     }
 
     @Test
-    public void be_not_deleted_when_created() {
+    @DisplayName("be not deleted when created")
+    void beNotDeletedWhenCreated() {
         assertFalse(entity.isDeleted());
     }
 
     @Test
-    public void support_deletion() {
+    @DisplayName("support deletion")
+    void supportDeletion() {
         entity.setDeleted(true);
 
         assertTrue(entity.isDeleted());
     }
 
     @Test
-    public void support_restoration() {
+    @DisplayName("support restoration")
+    void supportRestoration() {
         entity.setDeleted(true);
         entity.setDeleted(false);
         assertFalse(entity.isDeleted());
     }
 
     @Test
-    public void assure_entities_with_different_status_are_not_equal() {
+    @DisplayName("assure entities with different status are not equal")
+    void assureEntitiesWithDifferentStatusAreNotEqual() {
         // Create an entity with the same ID and the same (default) state.
         final AbstractVersionableEntity another = new MiniEntity(entity.getId());
 
@@ -114,7 +123,8 @@ public class VisibilityTests {
     }
 
     @Test
-    public void assign_status() {
+    @DisplayName("assign status")
+    void assignStatus() {
         final LifecycleFlags status = LifecycleFlags.newBuilder()
                                                     .setArchived(true)
                                                     .setDeleted(false)
@@ -124,7 +134,8 @@ public class VisibilityTests {
     }
 
     @Test(expected = CannotModifyArchivedEntity.class)
-    public void check_not_archived() throws Throwable {
+    @DisplayName("check not archived")
+    void checkNotArchived() throws Throwable {
         entity.setArchived(true);
 
         // This should pass.
@@ -135,7 +146,8 @@ public class VisibilityTests {
     }
 
     @Test(expected = CannotModifyDeletedEntity.class)
-    public void check_not_deleted() throws Throwable {
+    @DisplayName("check not deleted")
+    void checkNotDeleted() throws Throwable {
         entity.setDeleted(true);
 
         // This should pass.

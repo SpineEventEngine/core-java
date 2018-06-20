@@ -35,6 +35,7 @@ import io.spine.server.entity.storage.given.ColumnTestEnv.EntityWithDefaultColum
 import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Method;
@@ -60,33 +61,38 @@ public class ColumnShould {
     public ExpectedException thrown = ExpectedException.none();
     
     @Test
-    public void be_serializable() {
+    @DisplayName("be serializable")
+    void beSerializable() {
         EntityColumn column = forMethod("getVersion", VersionableEntity.class);
         reserializeAndAssert(column);
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored") // Just check that operation passes without an exception.
     @Test
-    public void restore_getter_when_its_not_null_without_errors() {
+    @DisplayName("restore getter when its not null without errors")
+    void restoreGetterWhenItsNotNullWithoutErrors() {
         final EntityColumn column = forMethod("getVersion", VersionableEntity.class);
         column.restoreGetter();
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored") // Just check that operation passes without an exception.
     @Test
-    public void restore_value_converter_when_its_not_null_without_errors() {
+    @DisplayName("restore value converter when its not null without errors")
+    void restoreValueConverterWhenItsNotNullWithoutErrors() {
         final EntityColumn column = forMethod("getVersion", VersionableEntity.class);
         column.restoreValueConverter();
     }
 
     @Test
-    public void support_toString() {
+    @DisplayName("support toString")
+    void supportToString() {
         EntityColumn column = forMethod("getVersion", VersionableEntity.class);
         assertEquals("VersionableEntity.version", column.toString());
     }
 
     @Test
-    public void invoke_getter() {
+    @DisplayName("invoke getter")
+    void invokeGetter() {
         String entityId = "entity-id";
         int version = 2;
         EntityColumn column = forMethod("getVersion", VersionableEntity.class);
@@ -99,7 +105,8 @@ public class ColumnShould {
     }
 
     @Test
-    public void have_equals_and_hashCode() {
+    @DisplayName("have equals and hashCode")
+    void haveEqualsAndHashCode() {
         EntityColumn col1 = forMethod("getVersion", VersionableEntity.class);
         EntityColumn col2 = forMethod("getVersion", VersionableEntity.class);
         EntityColumn col3 = forMethod("isDeleted", EntityWithLifecycle.class);
@@ -110,7 +117,8 @@ public class ColumnShould {
     }
 
     @Test
-    public void memoize_value_at_at_point_in_time() {
+    @DisplayName("memoize value at at point in time")
+    void memoizeValueAtAtPointInTime() {
         EntityColumn mutableColumn = forMethod("getMutableState", TestEntity.class);
         TestEntity entity = new TestEntity("");
         int initialState = 1;
@@ -127,31 +135,36 @@ public class ColumnShould {
     }
 
     @Test
-    public void not_be_constructed_from_non_getter() {
+    @DisplayName("not be constructed from non getter")
+    void notBeConstructedFromNonGetter() {
         thrown.expect(IllegalArgumentException.class);
         forMethod("toString", Object.class);
     }
 
     @Test
-    public void not_be_constructed_from_non_annotated_getter() {
+    @DisplayName("not be constructed from non annotated getter")
+    void notBeConstructedFromNonAnnotatedGetter() {
         thrown.expect(IllegalArgumentException.class);
         forMethod("getClass", Object.class);
     }
 
     @Test
-    public void not_be_constructed_from_static_method() {
+    @DisplayName("not be constructed from static method")
+    void notBeConstructedFromStaticMethod() {
         thrown.expect(IllegalArgumentException.class);
         forMethod("getStatic", TestEntity.class);
     }
 
     @Test
-    public void not_be_constructed_from_private_getter() {
+    @DisplayName("not be constructed from private getter")
+    void notBeConstructedFromPrivateGetter() {
         thrown.expect(IllegalArgumentException.class);
         forMethod("getFortyTwoLong", TestEntity.class);
     }
 
     @Test
-    public void not_be_constructed_from_getter_with_parameters() throws NoSuchMethodException {
+    @DisplayName("not be constructed from getter with parameters")
+    void notBeConstructedFromGetterWithParameters() throws NoSuchMethodException {
         Method method = TestEntity.class.getDeclaredMethod("getParameter",
                                                                  String.class);
         thrown.expect(IllegalArgumentException.class);
@@ -159,13 +172,15 @@ public class ColumnShould {
     }
 
     @Test
-    public void fail_to_construct_for_non_serializable_column() {
+    @DisplayName("fail to construct for non serializable column")
+    void failToConstructForNonSerializableColumn() {
         thrown.expect(IllegalArgumentException.class);
         forMethod("getFoo", BrokenTestEntity.class);
     }
 
     @Test
-    public void fail_to_get_value_from_wrong_object() {
+    @DisplayName("fail to get value from wrong object")
+    void failToGetValueFromWrongObject() {
         EntityColumn column = forMethod("getMutableState", TestEntity.class);
 
         thrown.expect(IllegalArgumentException.class);
@@ -173,7 +188,8 @@ public class ColumnShould {
     }
 
     @Test
-    public void check_value_if_getter_is_not_null() {
+    @DisplayName("check value if getter is not null")
+    void checkValueIfGetterIsNotNull() {
         EntityColumn column = forMethod("getNotNull", TestEntity.class);
         
         thrown.expect(NullPointerException.class);
@@ -181,14 +197,16 @@ public class ColumnShould {
     }
 
     @Test
-    public void allow_nulls_if_getter_is_nullable() {
+    @DisplayName("allow nulls if getter is nullable")
+    void allowNullsIfGetterIsNullable() {
         EntityColumn column = forMethod("getNull", TestEntity.class);
         Object value = column.getFor(new TestEntity(""));
         assertNull(value);
     }
 
     @Test
-    public void tell_if_property_is_nullable() {
+    @DisplayName("tell if property is nullable")
+    void tellIfPropertyIsNullable() {
         EntityColumn notNullColumn = forMethod("getNotNull", TestEntity.class);
         EntityColumn nullableColumn = forMethod("getNull", TestEntity.class);
 
@@ -197,13 +215,15 @@ public class ColumnShould {
     }
 
     @Test
-    public void contain_property_type() {
+    @DisplayName("contain property type")
+    void containPropertyType() {
         EntityColumn column = forMethod("getLong", TestEntity.class);
         assertEquals(Long.TYPE, column.getType());
     }
 
     @Test
-    public void memoize_value_regarding_nulls() {
+    @DisplayName("memoize value regarding nulls")
+    void memoizeValueRegardingNulls() {
         EntityColumn nullableColumn = forMethod("getNull", TestEntity.class);
         MemoizedValue memoizedNull = nullableColumn.memoizeFor(new TestEntity(""));
         assertTrue(memoizedNull.isNull());
@@ -211,7 +231,8 @@ public class ColumnShould {
     }
 
     @Test
-    public void memoize_value_which_has_reference_on_Column_itself() {
+    @DisplayName("memoize value which has reference on Column itself")
+    void memoizeValueWhichHasReferenceOnColumnItself() {
         EntityColumn column = forMethod("getMutableState", TestEntity.class);
         Entity<String, Any> entity = new TestEntity("");
         MemoizedValue memoizedValue = column.memoizeFor(entity);
@@ -219,7 +240,8 @@ public class ColumnShould {
     }
 
     @Test
-    public void have_valid_name_for_querying_and_storing() {
+    @DisplayName("have valid name for querying and storing")
+    void haveValidNameForQueryingAndStoring() {
         EntityColumn column = forMethod("getValue",
                                               EntityWithCustomColumnNameForStoring.class);
         assertEquals("value", column.getName());
@@ -227,7 +249,8 @@ public class ColumnShould {
     }
 
     @Test
-    public void have_same_names_for_and_querying_storing_if_last_is_not_specified() {
+    @DisplayName("have same names for and querying storing if last is not specified")
+    void haveSameNamesForAndQueryingStoringIfLastIsNotSpecified() {
         EntityColumn column = forMethod("getValue",
                                               EntityWithDefaultColumnNameForStoring.class);
         String expectedName = "value";
@@ -236,13 +259,15 @@ public class ColumnShould {
     }
 
     @Test
-    public void not_allow_redefine_column_annotation() {
+    @DisplayName("not allow redefine column annotation")
+    void notAllowRedefineColumnAnnotation() {
         thrown.expect(IllegalStateException.class);
         forMethod("getVersion", EntityRedefiningColumnAnnotation.class);
     }
 
     @Test
-    public void be_constructed_from_enumerated_type_getter() {
+    @DisplayName("be constructed from enumerated type getter")
+    void beConstructedFromEnumeratedTypeGetter() {
         EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
         Class<?> expectedType = Integer.class;
         Class actualType = column.getPersistedType();
@@ -250,13 +275,15 @@ public class ColumnShould {
     }
 
     @Test
-    public void return_same_persisted_type_for_non_enum_getter() {
+    @DisplayName("return same persisted type for non enum getter")
+    void returnSamePersistedTypeForNonEnumGetter() {
         EntityColumn column = forMethod("getLong", TestEntity.class);
         assertEquals(column.getType(), column.getPersistedType());
     }
 
     @Test
-    public void return_persistence_type_for_ordinal_enumerated_value() {
+    @DisplayName("return persistence type for ordinal enumerated value")
+    void returnPersistenceTypeForOrdinalEnumeratedValue() {
         EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
         Class expectedType = Integer.class;
         Class actualType = column.getPersistedType();
@@ -264,7 +291,8 @@ public class ColumnShould {
     }
 
     @Test
-    public void return_persistence_type_for_string_enumerated_value() {
+    @DisplayName("return persistence type for string enumerated value")
+    void returnPersistenceTypeForStringEnumeratedValue() {
         EntityColumn column = forMethod("getEnumString", TestEntity.class);
         Class expectedType = String.class;
         Class actualType = column.getPersistedType();
@@ -272,7 +300,8 @@ public class ColumnShould {
     }
 
     @Test
-    public void memoize_value_of_enumerated_ordinal_column() {
+    @DisplayName("memoize value of enumerated ordinal column")
+    void memoizeValueOfEnumeratedOrdinalColumn() {
         EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
         TestEntity entity = new TestEntity("");
         MemoizedValue actualValue = column.memoizeFor(entity);
@@ -282,7 +311,8 @@ public class ColumnShould {
     }
 
     @Test
-    public void memoize_value_of_enumerated_string_column() {
+    @DisplayName("memoize value of enumerated string column")
+    void memoizeValueOfEnumeratedStringColumn() {
         EntityColumn column = forMethod("getEnumString", TestEntity.class);
         TestEntity entity = new TestEntity("");
         MemoizedValue actualValue = column.memoizeFor(entity);
@@ -292,7 +322,8 @@ public class ColumnShould {
     }
 
     @Test
-    public void convert_enumerated_value_to_persistence_type() {
+    @DisplayName("convert enumerated value to persistence type")
+    void convertEnumeratedValueToPersistenceType() {
         EntityColumn columnOrdinal = forMethod("getEnumOrdinal", TestEntity.class);
         Object ordinalValue = columnOrdinal.toPersistedValue(SUCCESS);
         assertEquals(SUCCESS.ordinal(), ordinalValue);
@@ -303,7 +334,8 @@ public class ColumnShould {
     }
 
     @Test
-    public void do_identity_conversion_for_non_enum_values() {
+    @DisplayName("do identity conversion for non enum values")
+    void doIdentityConversionForNonEnumValues() {
         EntityColumn column = forMethod("getLong", TestEntity.class);
         Object value = 15L;
         Object converted = column.toPersistedValue(value);
@@ -311,7 +343,8 @@ public class ColumnShould {
     }
 
     @Test
-    public void return_null_on_null_conversion() {
+    @DisplayName("return null on null conversion")
+    void returnNullOnNullConversion() {
         EntityColumn column = forMethod("getLong", TestEntity.class);
         Object value = null;
         Object converted = column.toPersistedValue(value);
@@ -319,7 +352,8 @@ public class ColumnShould {
     }
 
     @Test
-    public void allow_conversion_only_for_type_stored_in_column() {
+    @DisplayName("allow conversion only for type stored in column")
+    void allowConversionOnlyForTypeStoredInColumn() {
         EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
         String value = "test";
         thrown.expect(IllegalArgumentException.class);

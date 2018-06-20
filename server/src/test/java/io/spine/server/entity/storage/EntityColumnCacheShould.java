@@ -26,6 +26,7 @@ import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import java.util.ArrayList;
@@ -59,20 +60,23 @@ public class EntityColumnCacheShould {
     }
 
     @Test
-    public void pass_null_check() {
+    @DisplayName("pass null check")
+    void passNullCheck() {
         new NullPointerTester().testAllPublicStaticMethods(EntityColumnCache.class);
         new NullPointerTester().testAllPublicInstanceMethods(entityColumnCache);
     }
 
     @Test
-    public void stay_empty_after_creation() {
+    @DisplayName("stay empty after creation")
+    void stayEmptyAfterCreation() {
         assertTrue(entityColumnCache.isEmpty());
     }
 
     @SuppressWarnings("CheckReturnValue") 
         // This test does not use the found columns, but simply checks that they are found.
     @Test
-    public void cache_columns_on_first_access() {
+    @DisplayName("cache columns on first access")
+    void cacheColumnsOnFirstAccess() {
         EntityColumnCache cacheForGetAll = EntityColumnCache.initializeFor(entityClass);
         cacheForGetAll.getColumns();
         assertFalse(cacheForGetAll.isEmpty());
@@ -83,13 +87,15 @@ public class EntityColumnCacheShould {
     }
 
     @Test
-    public void allow_to_forcefully_cache_columns() {
+    @DisplayName("allow to forcefully cache columns")
+    void allowToForcefullyCacheColumns() {
         entityColumnCache.ensureColumnsCached();
         assertFalse(entityColumnCache.isEmpty());
     }
 
     @Test
-    public void retrieve_column_metadata_from_given_class() {
+    @DisplayName("retrieve column metadata from given class")
+    void retrieveColumnMetadataFromGivenClass() {
         String existingColumnName = "floatNull";
         EntityColumn retrievedColumn = entityColumnCache.findColumn(existingColumnName);
         assertNotNull(retrievedColumn);
@@ -97,14 +103,16 @@ public class EntityColumnCacheShould {
     }
 
     @Test
-    public void fail_to_retrieve_non_existing_column() {
+    @DisplayName("fail to retrieve non existing column")
+    void failToRetrieveNonExistingColumn() {
         String nonExistingColumnName = "foo";
         thrown.expect(IllegalArgumentException.class);
         entityColumnCache.findColumn(nonExistingColumnName);
     }
 
     @Test
-    public void retain_stored_columns_order() {
+    @DisplayName("retain stored columns order")
+    void retainStoredColumnsOrder() {
         Collection<EntityColumn> columnsFromCache = entityColumnCache.getColumns();
         assertNotNull(columnsFromCache);
 

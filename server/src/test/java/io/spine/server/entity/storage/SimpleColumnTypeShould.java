@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.Assert.assertSame;
 
@@ -30,7 +31,8 @@ import static org.junit.Assert.assertSame;
 public class SimpleColumnTypeShould {
 
     @Test
-    public void perform_identity_conversion_of_given_value() {
+    @DisplayName("perform identity conversion of given value")
+    void performIdentityConversionOfGivenValue() {
         final ColumnType<Object, ?, ?, ?> columnType = new ColumnTypeImpl<>();
         final Object input = new Object();
         final Object output = columnType.convertColumnValue(input);

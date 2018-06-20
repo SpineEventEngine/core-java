@@ -29,6 +29,7 @@ import io.spine.client.ColumnFilter;
 import io.spine.client.ColumnFilters;
 import io.spine.server.entity.VersionableEntity;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.text.ParseException;
 import java.util.Collection;
@@ -61,7 +62,8 @@ import static org.mockito.Mockito.mock;
 public class QueryParametersShould {
 
     @Test
-    public void be_serializable() {
+    @DisplayName("be serializable")
+    void beSerializable() {
         final String columnName = version.name();
         final EntityColumn column = findColumn(VersionableEntity.class, columnName);
         final ColumnFilter filter = ColumnFilters.eq(columnName, 1);
@@ -73,13 +75,15 @@ public class QueryParametersShould {
     }
 
     @Test
-    public void construct_from_empty_builder() {
+    @DisplayName("construct from empty builder")
+    void constructFromEmptyBuilder() {
         final QueryParameters parameters = newBuilder().build();
         assertNotNull(parameters);
     }
 
     @Test
-    public void produce_iterator_over_filters() {
+    @DisplayName("produce iterator over filters")
+    void produceIteratorOverFilters() {
         final ColumnFilter[] filters = {
                 eq("firstFilter", 1),
                 eq("secondFilter", 42),
@@ -98,7 +102,8 @@ public class QueryParametersShould {
     }
 
     @Test
-    public void retrieve_filter_by_column() {
+    @DisplayName("retrieve filter by column")
+    void retrieveFilterByColumn() {
         final ColumnFilter[] filters = {
                 eq("$1nd", 42.0),
                 eq("$2st", "entityColumnValue"),
@@ -123,7 +128,8 @@ public class QueryParametersShould {
     }
 
     @Test
-    public void keep_multiple_filters_for_single_column() throws ParseException {
+    @DisplayName("keep multiple filters for single column")
+    void keepMultipleFiltersForSingleColumn() throws ParseException {
         final String columnName = "time";
         final EntityColumn column = mock(EntityColumn.class);
 
@@ -150,7 +156,8 @@ public class QueryParametersShould {
     }
 
     @Test
-    public void support_equality() {
+    @DisplayName("support equality")
+    void supportEquality() {
         // --- Group A ---
         // Consists of 2 empty instances
         final QueryParameters paramsA1 = newBuilder().build();

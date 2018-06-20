@@ -29,6 +29,7 @@ import io.spine.time.Interval;
 import io.spine.time.Intervals;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Constructor;
@@ -50,20 +51,23 @@ public class EntityClassShould {
     public ExpectedException thrown = ExpectedException.none();
     
     @Test
-    public void return_id_class() {
+    @DisplayName("return id class")
+    void returnIdClass() {
         @SuppressWarnings("unchecked") //
         Class<Long> actual = (Class<Long>) entityClass.getIdClass();
         assertEquals(Long.class, actual);
     }
 
     @Test
-    public void obtain_entity_constructor() {
+    @DisplayName("obtain entity constructor")
+    void obtainEntityConstructor() {
         Constructor<NanoEntity> ctor = entityClass.getConstructor();
         assertNotNull(ctor);
     }
 
     @Test
-    public void create_and_initialize_entity_instance() {
+    @DisplayName("create and initialize entity instance")
+    void createAndInitializeEntityInstance() {
         Long id = 100L;
         Timestamp before = TimeTests.Past.secondsAgo(1);
 
@@ -86,7 +90,8 @@ public class EntityClassShould {
     }
 
     @Test
-    public void complain_when_there_is_no_one_arg_constructor_for_entity_class() {
+    @DisplayName("complain when there is no one arg constructor for entity class")
+    void complainWhenThereIsNoOneArgConstructorForEntityClass() {
         thrown.expect(ModelError.class);
         new EntityClass<>(NoArgEntity.class).getConstructor();
     }

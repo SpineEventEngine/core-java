@@ -25,6 +25,7 @@ import com.google.protobuf.StringValue;
 import io.spine.test.entity.number.NaturalNumber;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import java.lang.reflect.Method;
@@ -49,7 +50,8 @@ public class AbstractEntityShould {
      * it's not possible to override the default behaviour.
      */
     @Test
-    public void prevent_updateState_method_overriding() throws NoSuchMethodException {
+    @DisplayName("prevent updateState method overriding")
+    void preventUpdateStateMethodOverriding() throws NoSuchMethodException {
         final Method updateState =
                 AbstractEntity.class.getDeclaredMethod("updateState", Message.class);
         final int modifiers = updateState.getModifiers();
@@ -61,7 +63,8 @@ public class AbstractEntityShould {
      * it's not possible to override the default behaviour.
      */
     @Test
-    public void prevent_validate_method_overriding() throws NoSuchMethodException {
+    @DisplayName("prevent validate method overriding")
+    void preventValidateMethodOverriding() throws NoSuchMethodException {
         final Method validate =
                 AbstractEntity.class.getDeclaredMethod("validate", Message.class);
         final int modifiers = validate.getModifiers();
@@ -69,7 +72,8 @@ public class AbstractEntityShould {
     }
 
     @Test
-    public void throw_InvalidEntityStateException_if_state_is_invalid() {
+    @DisplayName("throw InvalidEntityStateException if state is invalid")
+    void throwInvalidEntityStateExceptionIfStateIsInvalid() {
         final NaturalNumberEntity entity = new NaturalNumberEntity(0L);
         final NaturalNumber invalidNaturalNumber = newNaturalNumber(-1);
         try {
@@ -89,7 +93,8 @@ public class AbstractEntityShould {
 
     @SuppressWarnings("ConstantConditions") // The goal of the test.
     @Test
-    public void not_accept_null_to_checkEntityState() {
+    @DisplayName("not accept null to checkEntityState")
+    void notAcceptNullToCheckEntityState() {
         AnEntity entity = new AnEntity(0L);
 
         thrown.expect(NullPointerException.class);
@@ -97,14 +102,16 @@ public class AbstractEntityShould {
     }
 
     @Test
-    public void allow_valid_state() {
+    @DisplayName("allow valid state")
+    void allowValidState() {
         final AnEntity entity = new AnEntity(0L);
         assertTrue(entity.checkEntityState(StringValue.getDefaultInstance())
                          .isEmpty());
     }
 
     @Test
-    public void return_sting_ID() {
+    @DisplayName("return sting ID")
+    void returnStingID() {
         final AnEntity entity = new AnEntity(1_234_567L);
 
         assertEquals("1234567", entity.stringId());

@@ -28,6 +28,7 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithNoStorageFields;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.Collection;
 import java.util.Map;
@@ -48,12 +49,14 @@ public class ColumnValueExtractorShould {
     private static final String TEST_ENTITY_ID = "some-string-id-never-used";
 
     @Test
-    public void pass_null_check() {
+    @DisplayName("pass null check")
+    void passNullCheck() {
         new NullPointerTester().testStaticMethods(ColumnValueExtractor.class, Visibility.PACKAGE);
     }
 
     @Test
-    public void extract_column_values_from_entity() {
+    @DisplayName("extract column values from entity")
+    void extractColumnValuesFromEntity() {
         EntityWithManyGetters entity = new EntityWithManyGetters(TEST_ENTITY_ID);
         Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
@@ -64,7 +67,8 @@ public class ColumnValueExtractorShould {
     }
 
     @Test
-    public void handle_null_column_values() {
+    @DisplayName("handle null column values")
+    void handleNullColumnValues() {
         EntityWithManyGetters entity = new EntityWithManyGetters(TEST_ENTITY_ID);
         Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
@@ -74,7 +78,8 @@ public class ColumnValueExtractorShould {
     }
 
     @Test
-    public void allow_to_access_values_by_custom_column_name() {
+    @DisplayName("allow to access values by custom column name")
+    void allowToAccessValuesByCustomColumnName() {
         EntityWithManyGetters entity = new EntityWithManyGetters(TEST_ENTITY_ID);
         Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
@@ -84,7 +89,8 @@ public class ColumnValueExtractorShould {
     }
 
     @Test
-    public void extract_no_fields_if_none_defined() {
+    @DisplayName("extract no fields if none defined")
+    void extractNoFieldsIfNoneDefined() {
         Entity entity = new EntityWithNoStorageFields(TEST_ENTITY_ID);
         Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
@@ -93,7 +99,8 @@ public class ColumnValueExtractorShould {
     }
 
     @Test
-    public void handle_non_public_entity_class() {
+    @DisplayName("handle non public entity class")
+    void handleNonPublicEntityClass() {
         Entity entity = new PrivateEntity(TEST_ENTITY_ID);
         Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 

@@ -24,6 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import java.io.Serializable;
@@ -40,7 +41,8 @@ public class ColumnValueConverterShould {
     public ExpectedException thrown = ExpectedException.none(); 
     
     @Test
-    public void not_accept_nulls() {
+    @DisplayName("not accept nulls")
+    void notAcceptNulls() {
         ColumnValueConverter converter = new IdentityConverter(TaskStatus.class);
         new NullPointerTester().testAllPublicInstanceMethods(converter);
         converter = new OrdinalEnumConverter(TaskStatus.class);
@@ -50,7 +52,8 @@ public class ColumnValueConverterShould {
     }
 
     @Test
-    public void perform_identity_conversion() {
+    @DisplayName("perform identity conversion")
+    void performIdentityConversion() {
         String value = "stringValue";
         ColumnValueConverter converter = new IdentityConverter(value.getClass());
         Serializable convertedObject = converter.convert(value);
@@ -58,7 +61,8 @@ public class ColumnValueConverterShould {
     }
 
     @Test
-    public void convert_enum_to_ordinal_value() {
+    @DisplayName("convert enum to ordinal value")
+    void convertEnumToOrdinalValue() {
         TaskStatus value = SUCCESS;
         ColumnValueConverter converter = new OrdinalEnumConverter(value.getClass());
         Serializable convertedValue = converter.convert(value);
@@ -66,7 +70,8 @@ public class ColumnValueConverterShould {
     }
 
     @Test
-    public void convert_enum_to_string_value() {
+    @DisplayName("convert enum to string value")
+    void convertEnumToStringValue() {
         TaskStatus value = SUCCESS;
         ColumnValueConverter converter = new StringEnumConverter(value.getClass());
         Serializable convertedValue = converter.convert(value);
@@ -74,7 +79,8 @@ public class ColumnValueConverterShould {
     }
 
     @Test
-    public void not_support_wrong_value_type_conversion() {
+    @DisplayName("not support wrong value type conversion")
+    void notSupportWrongValueTypeConversion() {
         String value = "unsupportedValue";
         ColumnValueConverter converter = new OrdinalEnumConverter(TaskStatus.class);
         thrown.expect(IllegalArgumentException.class);

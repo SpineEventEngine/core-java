@@ -25,6 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessageV3;
 import io.spine.test.Verify;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -52,13 +53,15 @@ public class ColumnTypeRegistryShould {
 
 
     @Test
-    public void have_builder() {
+    @DisplayName("have builder")
+    void haveBuilder() {
         ColumnTypeRegistry.Builder builder = ColumnTypeRegistry.newBuilder();
         assertNotNull(builder);
     }
 
     @Test
-    public void have_default_empty_singleton_instance() {
+    @DisplayName("have default empty singleton instance")
+    void haveDefaultEmptySingletonInstance() {
         ColumnTypeRegistry emptyInstance = ColumnTypeRegistry.newBuilder()
                                                              .build();
         assertEmpty(emptyInstance.getColumnTypeMap());
@@ -66,7 +69,8 @@ public class ColumnTypeRegistryShould {
 
     @SuppressWarnings("MethodWithMultipleLoops") // OK for a test
     @Test
-    public void store_column_types() {
+    @DisplayName("store column types")
+    void storeColumnTypes() {
         Collection<Class> classes = Arrays.asList(String.class,
                                                   Integer.class,
                                                   Date.class);
@@ -86,7 +90,8 @@ public class ColumnTypeRegistryShould {
     }
 
     @Test
-    public void find_closest_superclass_column_type() {
+    @DisplayName("find closest superclass column type")
+    void findClosestSuperclassColumnType() {
         ColumnTypeRegistry<?> registry =
                 ColumnTypeRegistry.newBuilder()
                                   .put(GeneratedMessageV3.class, new GeneratedMessageType())
@@ -99,7 +104,8 @@ public class ColumnTypeRegistryShould {
     }
 
     @Test
-    public void map_primitives_autoboxed() {
+    @DisplayName("map primitives autoboxed")
+    void mapPrimitivesAutoboxed() {
         ColumnTypeRegistry<?> registry =
                 ColumnTypeRegistry.newBuilder()
                                   .put(Integer.class, new IntegerType())

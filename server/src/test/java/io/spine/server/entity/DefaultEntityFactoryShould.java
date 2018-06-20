@@ -26,6 +26,7 @@ import com.google.protobuf.DoubleValue;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 /**
  * @author Alexander Yevsyukov
@@ -45,12 +46,14 @@ public class DefaultEntityFactoryShould {
     }
 
     @Test
-    public void serialize() {
+    @DisplayName("serialize")
+    void serialize() {
         SerializableTester.reserializeAndAssert(entityFactory1);
     }
 
     @Test
-    public void have_custom_equals() {
+    @DisplayName("have custom equals")
+    void haveCustomEquals() {
         new EqualsTester()
                 .addEqualityGroup(entityFactory1)
                 .addEqualityGroup(entityFactory2)

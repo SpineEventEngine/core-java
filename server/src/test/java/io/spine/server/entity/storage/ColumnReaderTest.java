@@ -28,8 +28,8 @@ import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithNoStorageFields;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithRepeatedColumnNames;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.RealLifeEntity;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
@@ -39,27 +39,29 @@ import static io.spine.server.entity.storage.ColumnReader.forClass;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Verify.assertFalse;
 import static io.spine.test.Verify.assertNotNull;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.test.Verify.assertTrue;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dmytro Kuzmin
  */
-public class ColumnReaderShould {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+@DisplayName("ColumnReader should")
+class ColumnReaderTest {
 
     @Test
-    public void pass_null_check() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester().testStaticMethods(ColumnReader.class, Visibility.PACKAGE);
     }
 
     @Test
-    public void retrieve_entity_columns_from_class() {
+    @DisplayName("retrieve entity columns from class")
+    void readEntityColumns() {
         ColumnReader columnReader = forClass(EntityWithManyGetters.class);
         Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
@@ -70,7 +72,8 @@ public class ColumnReaderShould {
     }
 
     @Test
-    public void handle_class_without_columns() {
+    @DisplayName("return empty list for class without columns")
+    void handleEmptyClass() {
         ColumnReader columnReader = forClass(EntityWithNoStorageFields.class);
         Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
@@ -79,29 +82,32 @@ public class ColumnReaderShould {
     }
 
     @Test
-    public void throw_error_on_invalid_column_definitions() {
+    @DisplayName("throw ISE on invalid column definitions")
+    void throwOnInvalidColumns() {
         ColumnReader columnReader = forClass(EntityWithRepeatedColumnNames.class);
-        thrown.expect(IllegalStateException.class);
-        columnReader.readColumns();
+        assertThrows(IllegalStateException.class, columnReader::readColumns);
     }
 
 
     @Test
-    public void ignore_non_public_getters_with_column_annotation_from_super_class() {
+    @DisplayName("ignore non-public getters with column annotation from super class")
+    void ignoreNonPublicGettersWithColumnAnnotationFromSuperClass() {
         ColumnReader columnReader = forClass(EntityWithManyGettersDescendant.class);
         Collection<EntityColumn> entityColumns = columnReader.readColumns();
         assertSize(3, entityColumns);
     }
 
     @Test
-    public void ignore_static_members() {
+    @DisplayName("ignore static members")
+    void ignoreStaticMembers() {
         ColumnReader columnReader = forClass(EntityWithManyGetters.class);
         Collection<EntityColumn> entityColumns = columnReader.readColumns();
         assertFalse(containsColumn(entityColumns, "staticMember"));
     }
 
     @Test
-    public void handle_inherited_fields() {
+    @DisplayName("handle inherited fields")
+    void handleInheritedFields() {
         ColumnReader columnReader = forClass(RealLifeEntity.class);
         Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
@@ -114,7 +120,8 @@ public class ColumnReaderShould {
     }
 
     @Test
-    public void obtain_fields_from_implemented_interfaces() {
+    @DisplayName("obtain fields from implemented interfaces")
+    void obtainFieldsFromImplementedInterfaces() {
         ColumnReader columnReader = forClass(EntityWithColumnFromInterface.class);
         Collection<EntityColumn> entityColumns = columnReader.readColumns();
 

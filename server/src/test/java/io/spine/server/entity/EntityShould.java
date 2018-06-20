@@ -34,6 +34,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
@@ -67,18 +68,21 @@ public class EntityShould {
 
     @SuppressWarnings("ResultOfObjectAllocationIgnored") // because we expect the exception.
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_id() {
+    @DisplayName("do not accept null id")
+    void doNotAcceptNullId() {
         new BareBonesEntity(Tests.<Long>nullRef());
     }
 
     @Test
-    public void return_default_state() {
+    @DisplayName("return default state")
+    void returnDefaultState() {
         final Project state = entityNew.getDefaultState();
         assertEquals(Project.getDefaultInstance(), state);
     }
 
     @Test
-    public void return_default_state_for_different_entities() {
+    @DisplayName("return default state for different entities")
+    void returnDefaultStateForDifferentEntities() {
         assertEquals(Project.getDefaultInstance(), entityNew.getDefaultState());
 
         final EntityWithMessageId entityWithMessageId = new EntityWithMessageId();
@@ -87,7 +91,8 @@ public class EntityShould {
     }
 
     @Test
-    public void accept_String_id_to_constructor() {
+    @DisplayName("accept String id to constructor")
+    void acceptStringIdToConstructor() {
         final String stringId = "stringId";
         final TestEntityWithIdString entityWithStringId = new TestEntityWithIdString(stringId);
 
@@ -95,7 +100,8 @@ public class EntityShould {
     }
 
     @Test
-    public void accept_Long_id_to_constructor() {
+    @DisplayName("accept Long id to constructor")
+    void acceptLongIdToConstructor() {
         final Long longId = 12L;
         final TestEntityWithIdLong entityWithLongId = new TestEntityWithIdLong(longId);
 
@@ -103,7 +109,8 @@ public class EntityShould {
     }
 
     @Test
-    public void accept_Integer_id_to_constructor() {
+    @DisplayName("accept Integer id to constructor")
+    void acceptIntegerIdToConstructor() {
         final Integer integerId = 12;
         final TestEntityWithIdInteger entityWithIntegerId = new TestEntityWithIdInteger(integerId);
 
@@ -111,7 +118,8 @@ public class EntityShould {
     }
 
     @Test
-    public void accept_Message_id_to_constructor() {
+    @DisplayName("accept Message id to constructor")
+    void acceptMessageIdToConstructor() {
         final StringValue messageId = toMessage("messageId");
         final TestEntityWithIdMessage entityWithMessageID = new TestEntityWithIdMessage(messageId);
 
@@ -147,7 +155,8 @@ public class EntityShould {
     }
 
     @Test
-    public void have_state() {
+    @DisplayName("have state")
+    void haveState() {
         final Version ver = Versions.newVersion(3, getCurrentTime());
 
         entityNew.updateState(state, ver);
@@ -157,14 +166,16 @@ public class EntityShould {
     }
 
     @Test
-    public void check_entity_state_when_set_it() {
+    @DisplayName("check entity state when set it")
+    void checkEntityStateWhenSetIt() {
         final TestEntity spyEntityNew = spy(entityNew);
         spyEntityNew.updateState(state, Versions.zero());
         verify(spyEntityNew).checkEntityState(eq(state));
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_exception_if_try_to_set_null_state() {
+    @DisplayName("throw exception if try to set null state")
+    void throwExceptionIfTryToSetNullState() {
         entityNew.updateState(Tests.<Project>nullRef(), Versions.zero());
     }
 
@@ -175,20 +186,23 @@ public class EntityShould {
     }
 
     @Test
-    public void have_zero_version_by_default() {
+    @DisplayName("have zero version by default")
+    void haveZeroVersionByDefault() {
         assertEquals(0, entityNew.getVersion()
                                  .getNumber());
     }
 
     @Test
-    public void increment_version_by_one() {
+    @DisplayName("increment version by one")
+    void incrementVersionByOne() {
         final int version = entityNew.incrementVersion();
         assertEquals(1, version);
     }
 
     @SuppressWarnings("CheckReturnValue") // New entity version number can be ignored in this test.
     @Test
-    public void record_modification_time_when_incrementing_version() {
+    @DisplayName("record modification time when incrementing version")
+    void recordModificationTimeWhenIncrementingVersion() {
         final long timeBeforeincrement = TimeTests.currentTimeSeconds();
         entityNew.incrementVersion();
         final long timeAfterIncrement = TimeTests.currentTimeSeconds();
@@ -198,14 +212,16 @@ public class EntityShould {
     }
 
     @Test
-    public void update_state() {
+    @DisplayName("update state")
+    void updateState() {
         entityNew.incrementState(state);
 
         assertEquals(state, entityNew.getState());
     }
 
     @Test
-    public void increment_version_when_updating_state() {
+    @DisplayName("increment version when updating state")
+    void incrementVersionWhenUpdatingState() {
         entityNew.incrementState(state);
 
         assertEquals(1, entityNew.getVersion()
@@ -213,7 +229,8 @@ public class EntityShould {
     }
 
     @Test
-    public void record_modification_time_when_updating_state() {
+    @DisplayName("record modification time when updating state")
+    void recordModificationTimeWhenUpdatingState() {
         entityNew.incrementState(state);
         final long expectedTimeSec = TimeTests.currentTimeSeconds();
 
@@ -222,7 +239,8 @@ public class EntityShould {
     }
 
     @Test
-    public void generate_non_zero_hash_code_if_entity_has_non_empty_id_and_state() {
+    @DisplayName("generate non zero hash code if entity has non empty id and state")
+    void generateNonZeroHashCodeIfEntityHasNonEmptyIdAndState() {
         assertFalse(entityWithState.getId()
                                    .trim()
                                    .isEmpty());
@@ -233,12 +251,14 @@ public class EntityShould {
     }
 
     @Test
-    public void generate_same_hash_code_for_one_instance() {
+    @DisplayName("generate same hash code for one instance")
+    void generateSameHashCodeForOneInstance() {
         assertEquals(entityWithState.hashCode(), entityWithState.hashCode());
     }
 
     @Test
-    public void generate_unique_hash_code_for_different_instances() {
+    @DisplayName("generate unique hash code for different instances")
+    void generateUniqueHashCodeForDifferentInstances() {
         final TestEntity another = TestEntity.withState();
 
         assertNotEquals(entityWithState.hashCode(), another.hashCode());

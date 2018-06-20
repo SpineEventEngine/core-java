@@ -25,6 +25,7 @@ import io.spine.core.Version;
 import io.spine.validate.StringValueVBuilder;
 import io.spine.validate.ValidatingBuilder;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
@@ -48,17 +49,20 @@ public class TransactionalEntityShould {
     }
 
     @Test
-    public void have_private_ctor_for_TypeInfo() {
+    @DisplayName("have private ctor for TypeInfo")
+    void havePrivateCtorForTypeInfo() {
         assertHasPrivateParameterlessCtor(TransactionalEntity.TypeInfo.class);
     }
 
     @Test
-    public void be_non_changed_once_created() {
+    @DisplayName("be non changed once created")
+    void beNonChangedOnceCreated() {
         assertFalse(newEntity().isChanged());
     }
 
     @Test
-    public void become_changed_once_lifecycleFlags_are_updated() {
+    @DisplayName("become changed once lifecycleFlags are updated")
+    void becomeChangedOnceLifecycleFlagsAreUpdated() {
         final TransactionalEntity entity = newEntity();
         entity.setLifecycleFlags(LifecycleFlags.newBuilder()
                                                .setDeleted(true)
@@ -67,17 +71,21 @@ public class TransactionalEntityShould {
     }
 
     @Test
-    public void have_null_transaction_by_default() {
+    @DisplayName("have null transaction by default")
+    void haveNullTransactionByDefault() {
         assertNull(newEntity().getTransaction());
     }
 
     @Test
-    public void have_no_transaction_in_progress_by_default() {
+    @DisplayName("have no transaction in progress by default")
+    void haveNoTransactionInProgressByDefault() {
         assertFalse(newEntity().isTransactionInProgress());
     }
 
+    // todo messed up generation
     @Test
     @SuppressWarnings("unchecked")  // OK for the test.
+    @DisplayName("ssWarnings")
     public void allow_injecting_transaction() {
         final TransactionalEntity entity = newEntity();
         final Transaction tx = mock(Transaction.class);
@@ -89,6 +97,7 @@ public class TransactionalEntityShould {
 
     @Test(expected = IllegalStateException.class)
     @SuppressWarnings("unchecked")  // OK for the test.
+    @DisplayName("ssWarnings")
     public void disallow_injecting_transaction_wrapped_around_another_entity_instance() {
         final TransactionalEntity entity = newEntity();
         final Transaction tx = mock(Transaction.class);
@@ -97,59 +106,68 @@ public class TransactionalEntityShould {
     }
 
     @Test
-    public void have_no_transaction_in_progress_until_tx_started() {
+    @DisplayName("have no transaction in progress until tx started")
+    void haveNoTransactionInProgressUntilTxStarted() {
         final TransactionalEntity entity = entityWithInactiveTx();
 
         assertFalse(entity.isTransactionInProgress());
     }
 
     @Test
-    public void have_transaction_in_progress_when_tx_is_active() {
+    @DisplayName("have transaction in progress when tx is active")
+    void haveTransactionInProgressWhenTxIsActive() {
         final TransactionalEntity entity = entityWithActiveTx(false);
 
         assertTrue(entity.isTransactionInProgress());
     }
 
     @Test
-    public void be_non_changed_if_transaction_isnt_changed() {
+    @DisplayName("be non changed if transaction isnt changed")
+    void beNonChangedIfTransactionIsntChanged() {
         final TransactionalEntity entity = entityWithActiveTx(false);
 
         assertFalse(entity.isChanged());
     }
 
     @Test
-    public void become_changed_if_transaction_state_changed() {
+    @DisplayName("become changed if transaction state changed")
+    void becomeChangedIfTransactionStateChanged() {
         final TransactionalEntity entity = entityWithActiveTx(true);
 
         assertTrue(entity.isChanged());
     }
 
     @Test(expected = IllegalStateException.class)
-    public void fail_to_archive_with_no_transaction() {
+    @DisplayName("fail to archive with no transaction")
+    void failToArchiveWithNoTransaction() {
         newEntity().setArchived(true);
     }
 
     @Test(expected = IllegalStateException.class)
-    public void fail_to_archive_with_inactive_transaction() {
+    @DisplayName("fail to archive with inactive transaction")
+    void failToArchiveWithInactiveTransaction() {
         final TransactionalEntity entity = entityWithInactiveTx();
 
         entity.setArchived(true);
     }
 
     @Test(expected = IllegalStateException.class)
-    public void fail_to_delete_with_no_transaction() {
+    @DisplayName("fail to delete with no transaction")
+    void failToDeleteWithNoTransaction() {
         newEntity().setDeleted(true);
     }
 
     @Test(expected = IllegalStateException.class)
-    public void fail_to_delete_with_inactive_transaction() {
+    @DisplayName("fail to delete with inactive transaction")
+    void failToDeleteWithInactiveTransaction() {
         final TransactionalEntity entity = entityWithInactiveTx();
 
         entity.setDeleted(true);
     }
 
     @Test
-    public void return_tx_lifecycleFlags_if_tx_is_active() {
+    @DisplayName("return tx lifecycleFlags if tx is active")
+    void returnTxLifecycleFlagsIfTxIsActive() {
         final TransactionalEntity entity = entityWithInactiveTx();
         final LifecycleFlags originalFlags = entity.getLifecycleFlags();
 
@@ -169,13 +187,15 @@ public class TransactionalEntityShould {
     }
 
     @Test
-    public void return_non_null_builder_from_state() {
+    @DisplayName("return non null builder from state")
+    void returnNonNullBuilderFromState() {
         final ValidatingBuilder builder = newEntity().builderFromState();
         assertNotNull(builder);
     }
 
     @Test
-    public void return_builder_reflecting_current_state() {
+    @DisplayName("return builder reflecting current state")
+    void returnBuilderReflectingCurrentState() {
         final TransactionalEntity entity = newEntity();
         final Message originalState = entity.builderFromState()
                                             .build();

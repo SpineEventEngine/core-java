@@ -33,6 +33,7 @@ import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
@@ -71,7 +72,8 @@ public class EntityRecordWithColumnsShould {
     }
 
     @Test
-    public void be_serializable() {
+    @DisplayName("be serializable")
+    void beSerializable() {
         EntityRecord record = Sample.messageOfType(EntityRecord.class);
         VersionableEntity<?, ?> entity = Given.entityOfClass(TestEntity.class)
                                               .withVersion(1)
@@ -86,34 +88,39 @@ public class EntityRecordWithColumnsShould {
     }
 
     @Test
-    public void initialize_with_record_and_storage_fields() {
+    @DisplayName("initialize with record and storage fields")
+    void initializeWithRecordAndStorageFields() {
         EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance(),
                                             Collections.emptyMap());
         assertNotNull(record);
     }
 
     @Test
-    public void initialize_with_record_only() {
+    @DisplayName("initialize with record only")
+    void initializeWithRecordOnly() {
         EntityRecordWithColumns record = newEmptyRecord();
         assertNotNull(record);
     }
 
     @Test
-    public void not_accept_nulls_in_ctor() {
+    @DisplayName("not accept nulls in ctor")
+    void notAcceptNullsInCtor() {
         new NullPointerTester()
                 .setDefault(EntityRecord.class, EntityRecord.getDefaultInstance())
                 .testAllPublicConstructors(EntityRecordWithColumns.class);
     }
 
     @Test
-    public void store_record() {
+    @DisplayName("store record")
+    void storeRecord() {
         EntityRecordWithColumns recordWithFields = newRecord();
         EntityRecord record = recordWithFields.getRecord();
         assertNotNull(record);
     }
 
     @Test
-    public void store_column_values() {
+    @DisplayName("store column values")
+    void storeColumnValues() {
         MemoizedValue mockValue = mock(MemoizedValue.class);
         String columnName = "some-key";
         Map<String, MemoizedValue> columnsExpected = singletonMap(columnName, mockValue);
@@ -126,7 +133,8 @@ public class EntityRecordWithColumnsShould {
     }
 
     @Test
-    public void return_empty_names_collection_if_no_storage_fields() {
+    @DisplayName("return empty names collection if no storage fields")
+    void returnEmptyNamesCollectionIfNoStorageFields() {
         EntityRecordWithColumns record = newEmptyRecord();
         assertFalse(record.hasColumns());
         Collection<String> names = record.getColumnNames();
@@ -134,7 +142,8 @@ public class EntityRecordWithColumnsShould {
     }
 
     @Test
-    public void throw_on_attempt_to_get_value_by_non_existent_name() {
+    @DisplayName("throw on attempt to get value by non existent name")
+    void throwOnAttemptToGetValueByNonExistentName() {
         EntityRecordWithColumns record = newEmptyRecord();
 
         thrown.expect(IllegalStateException.class);
@@ -142,7 +151,8 @@ public class EntityRecordWithColumnsShould {
     }
 
     @Test
-    public void not_have_columns_if_values_list_is_empty() {
+    @DisplayName("not have columns if values list is empty")
+    void notHaveColumnsIfValuesListIsEmpty() {
         EntityWithoutColumns entity = new EntityWithoutColumns("ID");
         Class<? extends Entity> entityClass = entity.getClass();
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
@@ -154,7 +164,8 @@ public class EntityRecordWithColumnsShould {
     }
 
     @Test
-    public void have_equals() {
+    @DisplayName("have equals")
+    void haveEquals() {
         MemoizedValue mockValue = mock(MemoizedValue.class);
         EntityRecordWithColumns noFieldsEnvelope = newEmptyRecord();
         EntityRecordWithColumns emptyFieldsEnvelope = of(

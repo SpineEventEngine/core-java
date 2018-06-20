@@ -27,6 +27,7 @@ import io.spine.server.route.DefaultCommandRoute;
 import io.spine.test.entity.command.EntCreateProject;
 import io.spine.testdata.Sample;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -38,7 +39,8 @@ import static org.junit.Assert.assertTrue;
 public class DefaultCommandRouteShould {
 
     @Test
-    public void return_empty_Optional_if_fail_to_get_ID_from_command_message_without_ID_field() {
+    @DisplayName("return empty Optional if fail to get ID from command message without ID field")
+    void returnEmptyOptionalIfFailToGetIDFromCommandMessageWithoutIDField() {
         final Optional id = DefaultCommandRoute.asOptional(Empty.getDefaultInstance());
 
         assertFalse(id.isPresent());
@@ -46,7 +48,8 @@ public class DefaultCommandRouteShould {
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We call isPresent() in assertion.
     @Test
-    public void get_ID_from_command_message() {
+    @DisplayName("get ID from command message")
+    void getIDFromCommandMessage() {
         final EntCreateProject msg = Sample.messageOfType(EntCreateProject.class);
 
         final Optional id = DefaultCommandRoute.asOptional(msg);

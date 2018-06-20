@@ -29,6 +29,7 @@ import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import static com.google.common.collect.ImmutableMultimap.of;
@@ -56,26 +57,30 @@ public class CompositeQueryParameterShould {
     public ExpectedException thrown = ExpectedException.none();
 
     @Test
-    public void not_accept_nulls_on_construction() {
+    @DisplayName("not accept nulls on construction")
+    void notAcceptNullsOnConstruction() {
         new NullPointerTester()
                 .testStaticMethods(CompositeQueryParameter.class, PACKAGE);
     }
 
     @Test
-    public void be_serializable() {
+    @DisplayName("be serializable")
+    void beSerializable() {
         ImmutableMultimap<EntityColumn, ColumnFilter> filters = ImmutableMultimap.of();
         CompositeQueryParameter parameter = from(filters, ALL);
         SerializableTester.reserializeAndAssert(parameter);
     }
 
     @Test
-    public void fail_to_construct_for_invalid_operator() {
+    @DisplayName("fail to construct for invalid operator")
+    void failToConstructForInvalidOperator() {
         thrown.expect(IllegalArgumentException.class);
         from(ImmutableMultimap.of(), CCF_CO_UNDEFINED);
     }
 
     @Test
-    public void merge_with_other_instances() {
+    @DisplayName("merge with other instances")
+    void mergeWithOtherInstances() {
         Class<? extends Entity> cls = AbstractVersionableEntity.class;
 
         String archivedColumnName = archived.name();
@@ -111,7 +116,8 @@ public class CompositeQueryParameterShould {
     }
 
     @Test
-    public void merge_with_single_filter() {
+    @DisplayName("merge with single filter")
+    void mergeWithSingleFilter() {
         Class<? extends Entity> cls = AbstractVersionableEntity.class;
 
         String archivedColumnName = archived.name();

@@ -32,6 +32,7 @@ import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithRepeatedCol
 import io.spine.server.entity.storage.given.ColumnsTestEnv.RealLifeEntity;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
@@ -89,17 +90,20 @@ public class ColumnsShould {
     }
 
     @Test
-    public void have_private_utility_ctor() {
+    @DisplayName("have private utility ctor")
+    void havePrivateUtilityCtor() {
         assertHasPrivateParameterlessCtor(Columns.class);
     }
 
     @Test
-    public void pass_null_check() {
+    @DisplayName("pass null check")
+    void passNullCheck() {
         new NullPointerTester().testStaticMethods(Columns.class, Visibility.PACKAGE);
     }
 
     @Test
-    public void get_all_valid_columns_for_entity_class() {
+    @DisplayName("get all valid columns for entity class")
+    void getAllValidColumnsForEntityClass() {
         Collection<EntityColumn> entityColumns = getAllColumns(EntityWithManyGetters.class);
 
         assertNotNull(entityColumns);
@@ -107,13 +111,15 @@ public class ColumnsShould {
     }
 
     @Test
-    public void fail_to_obtain_columns_for_invalid_entity_class() {
+    @DisplayName("fail to obtain columns for invalid entity class")
+    void failToObtainColumnsForInvalidEntityClass() {
         thrown.expect(IllegalStateException.class);
         getAllColumns(EntityWithRepeatedColumnNames.class);
     }
 
     @Test
-    public void retrieve_specific_column_metadata_from_given_class() {
+    @DisplayName("retrieve specific column metadata from given class")
+    void retrieveSpecificColumnMetadataFromGivenClass() {
         Class<? extends Entity<?, ?>> entityClass = RealLifeEntity.class;
         String existingColumnName = archived.name();
         EntityColumn archivedColumn = findColumn(entityClass, existingColumnName);
@@ -122,7 +128,8 @@ public class ColumnsShould {
     }
 
     @Test
-    public void fail_to_retrieve_non_existing_column() {
+    @DisplayName("fail to retrieve non existing column")
+    void failToRetrieveNonExistingColumn() {
         Class<? extends Entity<?, ?>> entityClass = EntityWithNoStorageFields.class;
         String nonExistingColumnName = "foo";
 
@@ -131,7 +138,8 @@ public class ColumnsShould {
     }
 
     @Test
-    public void extract_column_values_with_names_for_storing() {
+    @DisplayName("extract column values with names for storing")
+    void extractColumnValuesWithNamesForStoring() {
         EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
         Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
         Map<String, MemoizedValue> fields = extractColumnValues(entity, entityColumns);
@@ -140,7 +148,8 @@ public class ColumnsShould {
     }
 
     @Test
-    public void extract_column_values_using_predefined_columns() {
+    @DisplayName("extract column values using predefined columns")
+    void extractColumnValuesUsingPredefinedColumns() {
         EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
         Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
         Map<String, MemoizedValue> fields = extractColumnValues(entity, entityColumns);

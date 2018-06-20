@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.junit.Assert.assertEquals;
@@ -39,7 +40,8 @@ public class ColumnTypeShould {
     private static final String EXPECTED_RESULT = "the Answer: 42";
 
     @Test
-    public void convert_java_type_to_store_as_type() {
+    @DisplayName("convert java type to store as type")
+    void convertJavaTypeToStoreAsType() {
         final String stringValue = String.valueOf(VALUE);
         final ColumnType<Integer, String, ?, ?> type = new TestColumnType<>();
         final String storedValue = type.convertColumnValue(VALUE);
@@ -47,7 +49,8 @@ public class ColumnTypeShould {
     }
 
     @Test
-    public void store_value_to_a_container() {
+    @DisplayName("store value to a container")
+    void storeValueToAContainer() {
         final String stringValue = String.valueOf(VALUE);
         final StringBuilder container = new StringBuilder(16);
         final ColumnType<?, String, StringBuilder, String> type = new TestColumnType<>();
@@ -57,7 +60,8 @@ public class ColumnTypeShould {
     }
 
     @Test
-    public void provide_interface_for_entire_storage_preparation_flow() {
+    @DisplayName("provide interface for entire storage preparation flow")
+    void provideInterfaceForEntireStoragePreparationFlow() {
         final ColumnType<Integer, String, StringBuilder, String> type = new TestColumnType<>();
         final StringBuilder container = new StringBuilder(16);
 

@@ -41,6 +41,7 @@ import io.spine.test.Tests;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -148,7 +149,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     }
 
     @Test
-    public void create_entities() {
+    @DisplayName("create entities")
+    void createEntities() {
         I id = createId(5);
         E projectEntity = repository.create(id);
         assertNotNull(projectEntity);
@@ -156,7 +158,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     }
 
     @Test
-    public void find_single_entity_by_id() {
+    @DisplayName("find single entity by id")
+    void findSingleEntityById() {
         E entity = createEntity();
 
         storeEntity(entity);
@@ -170,7 +173,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
-    public void find_multiple_entities_by_ids() {
+    @DisplayName("find multiple entities by ids")
+    void findMultipleEntitiesByIds() {
         int count = 10;
         List<E> entities = createAndStoreEntities(repository, count);
 
@@ -193,7 +197,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
-    public void find_all_entities() {
+    @DisplayName("find all entities")
+    void findAllEntities() {
         List<E> entities = createAndStoreEntities(repository, 150);
         Collection<E> found = newArrayList(loadAll());
         assertSize(entities.size(), found);
@@ -204,7 +209,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     }
 
     @Test
-    public void find_entities_by_query() {
+    @DisplayName("find entities by query")
+    void findEntitiesByQuery() {
         I id1 = createId(271);
         I id2 = createId(314);
         Class<E> entityClass = repository.getEntityClass();
@@ -240,13 +246,15 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     }
 
     @Test
-    public void find_no_entities_if_empty() {
+    @DisplayName("find no entities if empty")
+    void findNoEntitiesIfEmpty() {
         Collection<E> found = newArrayList(loadAll());
         assertSize(0, found);
     }
 
     @Test
-    public void create_entity_on_loadOrCreate_if_not_found() {
+    @DisplayName("create entity on loadOrCreate if not found")
+    void createEntityOnLoadOrCreateIfNotFound() {
         int count = 3;
         createAndStoreEntities(repository, count);
 
@@ -259,7 +267,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
-    public void handle_wrong_passed_ids() {
+    @DisplayName("handle wrong passed ids")
+    void handleWrongPassedIds() {
         int count = 10;
         List<E> entities = createAndStoreEntities(repository, count);
         List<I> ids = Lists.newLinkedList();
@@ -280,7 +289,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
-    public void retrieve_all_records_with_entity_filters_and_field_mask_applied() {
+    @DisplayName("retrieve all records with entity filters and field mask applied")
+    void retrieveAllRecordsWithEntityFiltersAndFieldMaskApplied() {
         int count = 10;
         List<E> entities = createAndStoreEntities(repository, count);
         List<EntityId> ids = Lists.newLinkedList();
@@ -319,7 +329,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     }
 
     @Test
-    public void mark_records_archived() {
+    @DisplayName("mark records archived")
+    void markRecordsArchived() {
         E entity = createEntity();
         I id = entity.getId();
 
@@ -338,7 +349,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     }
 
     @Test
-    public void mark_records_deleted() {
+    @DisplayName("mark records deleted")
+    void markRecordsDeleted() {
         E entity = createEntity();
         I id = entity.getId();
 
@@ -358,7 +370,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     }
 
     @Test
-    public void exclude_non_active_records_from_entity_query() {
+    @DisplayName("exclude non active records from entity query")
+    void excludeNonActiveRecordsFromEntityQuery() {
         I archivedId = createId(42);
         I deletedId = createId(314);
         I activeId = createId(271);
@@ -384,7 +397,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     }
 
     @Test
-    public void allow_any_lifecycle_if_column_involved() {
+    @DisplayName("allow any lifecycle if column involved")
+    void allowAnyLifecycleIfColumnInvolved() {
         I archivedId = createId(42);
         I deletedId = createId(314);
         I activeId = createId(271);
@@ -414,7 +428,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     }
 
     @Test
-    public void cache_entity_columns_on_registration() {
+    @DisplayName("cache entity columns on registration")
+    void cacheEntityColumnsOnRegistration() {
         if (!repository.isRegistered()) {
             repository.onRegistered();
         }

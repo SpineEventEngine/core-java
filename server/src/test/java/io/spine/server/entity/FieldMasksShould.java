@@ -31,6 +31,7 @@ import io.spine.test.commandservice.customer.Customer;
 import io.spine.type.TypeUrl;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
@@ -57,12 +58,14 @@ public class FieldMasksShould {
     public ExpectedException thrown = ExpectedException.none();
     
     @Test
-    public void have_private_constructor() {
+    @DisplayName("have private constructor")
+    void havePrivateConstructor() {
         assertHasPrivateParameterlessCtor(FieldMasks.class);
     }
 
     @Test
-    public void create_masks_for_given_field_tags() {
+    @DisplayName("create masks for given field tags")
+    void createMasksForGivenFieldTags() {
         Descriptor descriptor = Project.getDescriptor();
         int[] fieldNumbers = {1, 2, 3};
         @SuppressWarnings("DuplicateStringLiteralInspection")
@@ -79,14 +82,16 @@ public class FieldMasksShould {
     }
 
     @Test
-    public void retrieve_default_field_mask_if_no_field_tags_requested() {
+    @DisplayName("retrieve default field mask if no field tags requested")
+    void retrieveDefaultFieldMaskIfNoFieldTagsRequested() {
         Descriptor descriptor = Project.getDescriptor();
         FieldMask mask = FieldMasks.maskOf(descriptor);
         assertEquals(FieldMask.getDefaultInstance(), mask);
     }
 
     @Test
-    public void apply_mask_to_single_message() {
+    @DisplayName("apply mask to single message")
+    void applyMaskToSingleMessage() {
         FieldMask fieldMask = Given.fieldMask(Project.ID_FIELD_NUMBER, Project.NAME_FIELD_NUMBER);
         Project original = Given.newProject("some-string-id");
 
@@ -98,7 +103,8 @@ public class FieldMasksShould {
 
     @SuppressWarnings({"MethodWithMultipleLoops", "ObjectEquality"})
     @Test
-    public void apply_mask_to_message_collections() {
+    @DisplayName("apply mask to message collections")
+    void applyMaskToMessageCollections() {
         FieldMask fieldMask = Given.fieldMask(Project.STATUS_FIELD_NUMBER,
                                                     Project.TASK_FIELD_NUMBER);
         int count = 5;
@@ -127,7 +133,8 @@ public class FieldMasksShould {
     }
 
     @Test
-    public void apply_only_non_empty_mask_to_single_item() {
+    @DisplayName("apply only non empty mask to single item")
+    void applyOnlyNonEmptyMaskToSingleItem() {
         FieldMask emptyMask = Given.fieldMask();
 
         Project origin = Given.newProject("read_whole_message");
@@ -145,7 +152,8 @@ public class FieldMasksShould {
 
     @SuppressWarnings({"ObjectEquality", "MethodWithMultipleLoops"})
     @Test
-    public void apply_only_non_empty_mask_to_collection() {
+    @DisplayName("apply only non empty mask to collection")
+    void applyOnlyNonEmptyMaskToCollection() {
         FieldMask emptyMask = Given.fieldMask();
 
         Collection<Project> original = new LinkedList<>();
@@ -172,7 +180,8 @@ public class FieldMasksShould {
     }
 
     @Test
-    public void fail_to_mask_message_if_passed_type_does_not_match() {
+    @DisplayName("fail to mask message if passed type does not match")
+    void failToMaskMessageIfPassedTypeDoesNotMatch() {
         FieldMask mask = Given.fieldMask(Project.ID_FIELD_NUMBER);
 
         Project origin = Given.newProject("some-string");

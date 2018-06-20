@@ -155,7 +155,7 @@ public class ProjectionTransactionShould
     @Ignore
     @Test
     @Override
-    public void advance_version_from_event() {
+    public void advanceVersionFromEvent() {
     }
 
     /**
@@ -163,7 +163,7 @@ public class ProjectionTransactionShould
      *
      * <p>The versioning strategy is for {@link Projection} is
      * {@link io.spine.server.entity.EntityVersioning#AUTO_INCREMENT AUTO_INCREMENT}. This test
-     * case substitutes {@link #advance_version_from_event()}, which tested the behavior of
+     * case substitutes {@link #advanceVersionFromEvent()}, which tested the behavior of
      * {@link io.spine.server.entity.EntityVersioning#FROM_EVENT FROM_EVENT} strategy.
      */
     @SuppressWarnings("CheckReturnValue") // can ignore value of play() in this test

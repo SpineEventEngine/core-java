@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.lang.reflect.Method;
 
@@ -37,35 +38,41 @@ import static org.junit.Assert.assertEquals;
 public class ColumnValueConvertersShould {
 
     @Test
-    public void have_private_utility_ctor() {
+    @DisplayName("have private utility ctor")
+    void havePrivateUtilityCtor() {
         assertHasPrivateParameterlessCtor(ColumnValueConverters.class);
     }
 
     @Test
-    public void not_accept_nulls() {
+    @DisplayName("not accept nulls")
+    void notAcceptNulls() {
         new NullPointerTester().testAllPublicStaticMethods(ColumnValueConverters.class);
     }
 
     @Test
-    public void create_identity_instance_for_non_enum_type_getter() {
+    @DisplayName("create identity instance for non enum type getter")
+    void createIdentityInstanceForNonEnumTypeGetter() {
         final ColumnValueConverter converter = ofGetter("getLong");
         assertEquals(IdentityConverter.class, converter.getClass());
     }
 
     @Test
-    public void create_ordinal_converter_for_ordinal_enum_getter() {
+    @DisplayName("create ordinal converter for ordinal enum getter")
+    void createOrdinalConverterForOrdinalEnumGetter() {
         final ColumnValueConverter converter = ofGetter("getEnumOrdinal");
         assertEquals(OrdinalEnumConverter.class, converter.getClass());
     }
 
     @Test
-    public void create_string_converter_for_string_enum_getter() {
+    @DisplayName("create string converter for string enum getter")
+    void createStringConverterForStringEnumGetter() {
         final ColumnValueConverter converter = ofGetter("getEnumString");
         assertEquals(StringEnumConverter.class, converter.getClass());
     }
 
     @Test
-    public void create_ordinal_converter_for_not_annotated_enum_getter() {
+    @DisplayName("create ordinal converter for not annotated enum getter")
+    void createOrdinalConverterForNotAnnotatedEnumGetter() {
         final ColumnValueConverter converter = ofGetter("getEnumNotAnnotated");
         assertEquals(OrdinalEnumConverter.class, converter.getClass());
     }

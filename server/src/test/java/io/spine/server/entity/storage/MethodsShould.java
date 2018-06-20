@@ -21,6 +21,7 @@
 package io.spine.server.entity.storage;
 
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
@@ -30,7 +31,8 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 public class MethodsShould {
 
     @Test
-    public void have_utility_ctor() {
+    @DisplayName("have utility ctor")
+    void haveUtilityCtor() {
         assertHasPrivateParameterlessCtor(Methods.class);
     }
 }
