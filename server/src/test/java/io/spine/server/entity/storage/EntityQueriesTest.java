@@ -38,9 +38,8 @@ import io.spine.server.storage.LifecycleFlagField;
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.storage.ProjectId;
 import io.spine.testdata.Sample;
-import org.junit.Rule;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
@@ -53,6 +52,7 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertSize;
@@ -60,14 +60,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class EntityQueriesShould {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+@DisplayName("EntityQueries utility should")
+class EntityQueriesTest {
 
     private static EntityQuery<?> createEntityQuery(EntityFilters filters,
                                                     Class<? extends Entity> entityClass) {
@@ -76,8 +75,8 @@ public class EntityQueriesShould {
     }
 
     @Test
-    @DisplayName("have private utility ctor")
-    void havePrivateUtilityCtor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(EntityQueries.class);
     }
 
@@ -86,8 +85,7 @@ public class EntityQueriesShould {
     @Test
     @DisplayName("not accept null filters")
     void notAcceptNullFilters() {
-        thrown.expect(NullPointerException.class);
-        from(null, Collections.emptyList());
+        assertThrows(NullPointerException.class, () -> from(null, Collections.emptyList()));
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -96,8 +94,8 @@ public class EntityQueriesShould {
     @DisplayName("not accept null storage")
     void notAcceptNullStorage() {
         RecordStorage<?> storage = null;
-        thrown.expect(NullPointerException.class);
-        from(EntityFilters.getDefaultInstance(), storage);
+        assertThrows(NullPointerException.class,
+                     () -> from(EntityFilters.getDefaultInstance(), storage));
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -106,8 +104,8 @@ public class EntityQueriesShould {
     @DisplayName("not accept null entity class")
     void notAcceptNullEntityClass() {
         Collection<EntityColumn> entityColumns = null;
-        thrown.expect(NullPointerException.class);
-        from(EntityFilters.getDefaultInstance(), entityColumns);
+        assertThrows(NullPointerException.class,
+                     () -> from(EntityFilters.getDefaultInstance(), entityColumns));
     }
 
     @Test
@@ -121,13 +119,13 @@ public class EntityQueriesShould {
                              .addFilter(compositeFilter)
                              .build();
 
-        thrown.expect(IllegalArgumentException.class);
-        createEntityQuery(filters, AbstractVersionableEntity.class);
+        assertThrows(IllegalArgumentException.class,
+                     () -> createEntityQuery(filters, AbstractVersionableEntity.class));
     }
 
     @Test
-    @DisplayName("not create query for non existing column")
-    void notCreateQueryForNonExistingColumn() {
+    @DisplayName("not create query for non-existing column")
+    void notCreateForNonExistingColumn() {
         ColumnFilter filter = ColumnFilters.eq("nonExistingColumn", 42);
         CompositeColumnFilter compositeFilter = ColumnFilters.all(filter);
         EntityFilters filters =
@@ -135,8 +133,8 @@ public class EntityQueriesShould {
                              .addFilter(compositeFilter)
                              .build();
 
-        thrown.expect(IllegalArgumentException.class);
-        createEntityQuery(filters, AbstractVersionableEntity.class);
+        assertThrows(IllegalArgumentException.class,
+                     () -> createEntityQuery(filters, AbstractVersionableEntity.class));
     }
 
     @Test
@@ -152,7 +150,7 @@ public class EntityQueriesShould {
     }
 
     @Test
-    @DisplayName("construct non empty queries")
+    @DisplayName("construct non-empty queries")
     void constructNonEmptyQueries() {
         Message someGenericId = Sample.messageOfType(ProjectId.class);
         Any someId = AnyPacker.pack(someGenericId);

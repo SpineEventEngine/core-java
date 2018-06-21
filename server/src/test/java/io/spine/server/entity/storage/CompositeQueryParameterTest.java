@@ -27,10 +27,8 @@ import com.google.common.testing.SerializableTester;
 import io.spine.client.ColumnFilter;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
-import org.junit.Rule;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import static com.google.common.collect.ImmutableMultimap.of;
 import static com.google.common.collect.Lists.newArrayList;
@@ -45,20 +43,20 @@ import static io.spine.server.entity.storage.CompositeQueryParameter.from;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Verify.assertContainsAll;
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class CompositeQueryParameterShould {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+@DisplayName("CompositeQueryParameter should")
+class CompositeQueryParameterTest {
 
     @Test
-    @DisplayName("not accept nulls on construction")
-    void notAcceptNullsOnConstruction() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .testStaticMethods(CompositeQueryParameter.class, PACKAGE);
     }
@@ -73,9 +71,9 @@ public class CompositeQueryParameterShould {
 
     @Test
     @DisplayName("fail to construct for invalid operator")
-    void failToConstructForInvalidOperator() {
-        thrown.expect(IllegalArgumentException.class);
-        from(ImmutableMultimap.of(), CCF_CO_UNDEFINED);
+    void notAcceptInvalidOperator() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> from(ImmutableMultimap.of(), CCF_CO_UNDEFINED));
     }
 
     @Test

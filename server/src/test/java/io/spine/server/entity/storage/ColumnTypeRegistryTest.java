@@ -23,9 +23,14 @@ package io.spine.server.entity.storage;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessageV3;
+import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv;
+import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.AbstractMessageType;
+import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.AnyType;
+import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.GeneratedMessageType;
+import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.IntegerType;
 import io.spine.test.Verify;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -42,7 +47,8 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dmytro Dashenkov
  */
-public class ColumnTypeRegistryShould {
+@DisplayName("ColumnTypeRegistry should")
+class ColumnTypeRegistryTest {
 
     private static <T> EntityColumn mockProperty(Class<T> cls) {
         EntityColumn column = mock(EntityColumn.class);
@@ -51,7 +57,7 @@ public class ColumnTypeRegistryShould {
         return column;
     }
 
-
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
     @DisplayName("have builder")
     void haveBuilder() {
@@ -61,13 +67,13 @@ public class ColumnTypeRegistryShould {
 
     @Test
     @DisplayName("have default empty singleton instance")
-    void haveDefaultEmptySingletonInstance() {
+    void provideEmptyInstance() {
         ColumnTypeRegistry emptyInstance = ColumnTypeRegistry.newBuilder()
                                                              .build();
         assertEmpty(emptyInstance.getColumnTypeMap());
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops") // OK for a test
+    @SuppressWarnings({"MethodWithMultipleLoops", "unchecked"}) // OK for a test.
     @Test
     @DisplayName("store column types")
     void storeColumnTypes() {
@@ -91,7 +97,7 @@ public class ColumnTypeRegistryShould {
 
     @Test
     @DisplayName("find closest superclass column type")
-    void findClosestSuperclassColumnType() {
+    void findClosestSuperclass() {
         ColumnTypeRegistry<?> registry =
                 ColumnTypeRegistry.newBuilder()
                                   .put(GeneratedMessageV3.class, new GeneratedMessageType())
@@ -116,80 +122,5 @@ public class ColumnTypeRegistryShould {
         assertNotNull(intColumnType);
 
         assertEquals(integerColumnType, intColumnType);
-    }
-
-    private static class AnyType extends SimpleColumnType {
-
-        @Override
-        public void setColumnValue(Object storageRecord, Object value, Object columnIdentifier) {
-            // NOP
-        }
-
-        @Override
-        public void setNull(Object storageRecord, Object columnIdentifier) {
-            // NOP
-        }
-    }
-
-    private static class AbstractMessageType
-            implements ColumnType<AbstractMessage, String, StringBuilder, String> {
-
-        @Override
-        public String convertColumnValue(AbstractMessage fieldValue) {
-            return fieldValue.toString();
-        }
-
-        @Override
-        public void setColumnValue(StringBuilder storageRecord,
-                                   String value,
-                                   String columnIdentifier) {
-            storageRecord.append(value);
-        }
-
-        @Override
-        public void setNull(StringBuilder storageRecord, String columnIdentifier) {
-            storageRecord.append(' ');
-        }
-    }
-
-    private static class GeneratedMessageType
-            implements ColumnType<GeneratedMessageV3, String, StringBuilder, String> {
-
-        @Override
-        public String convertColumnValue(GeneratedMessageV3 fieldValue) {
-            return fieldValue.toString();
-        }
-
-        @Override
-        public void setColumnValue(StringBuilder storageRecord,
-                                   String value,
-                                   String columnIdentifier) {
-            storageRecord.append(value);
-        }
-
-        @Override
-        public void setNull(StringBuilder storageRecord, String columnIdentifier) {
-            storageRecord.append(' ');
-        }
-    }
-
-    private static class IntegerType
-            implements ColumnType<Integer, String, StringBuilder, String> {
-
-        @Override
-        public String convertColumnValue(Integer fieldValue) {
-            return String.valueOf(fieldValue);
-        }
-
-        @Override
-        public void setColumnValue(StringBuilder storageRecord, String value,
-                                   String columnIdentifier) {
-            storageRecord.append(value);
-        }
-
-        @Override
-        public void setNull(StringBuilder storageRecord, String columnIdentifier) {
-            storageRecord.append(' ');
-        }
     }
 }

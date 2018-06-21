@@ -22,27 +22,25 @@ package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus;
-import org.junit.Rule;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 
 import static io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus.SUCCESS;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dmytro Kuzmin
  */
-public class ColumnValueConverterShould {
+@DisplayName("ColumnValueConverter should")
+class ColumnValueConverterTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none(); 
-    
     @Test
-    @DisplayName("not accept nulls")
-    void notAcceptNulls() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         ColumnValueConverter converter = new IdentityConverter(TaskStatus.class);
         new NullPointerTester().testAllPublicInstanceMethods(converter);
         converter = new OrdinalEnumConverter(TaskStatus.class);
@@ -79,11 +77,10 @@ public class ColumnValueConverterShould {
     }
 
     @Test
-    @DisplayName("not support wrong value type conversion")
-    void notSupportWrongValueTypeConversion() {
+    @DisplayName("not convert value of wrong type")
+    void notConvertWrongType() {
         String value = "unsupportedValue";
         ColumnValueConverter converter = new OrdinalEnumConverter(TaskStatus.class);
-        thrown.expect(IllegalArgumentException.class);
-        converter.convert(value);
+        assertThrows(IllegalArgumentException.class, () -> converter.convert(value));
     }
 }

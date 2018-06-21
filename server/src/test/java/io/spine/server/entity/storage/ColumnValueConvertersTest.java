@@ -22,12 +22,14 @@ package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 
 import static io.spine.server.entity.storage.ColumnValueConverters.of;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 
@@ -35,44 +37,45 @@ import static org.junit.Assert.assertEquals;
  * @author Dmytro Kuzmin
  */
 @SuppressWarnings("DuplicateStringLiteralInspection") // Many literals for method names.
-public class ColumnValueConvertersShould {
+@DisplayName("ColumnValueConverters utility should")
+class ColumnValueConvertersTest {
 
     @Test
-    @DisplayName("have private utility ctor")
-    void havePrivateUtilityCtor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(ColumnValueConverters.class);
     }
 
     @Test
-    @DisplayName("not accept nulls")
-    void notAcceptNulls() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester().testAllPublicStaticMethods(ColumnValueConverters.class);
     }
 
     @Test
-    @DisplayName("create identity instance for non enum type getter")
-    void createIdentityInstanceForNonEnumTypeGetter() {
+    @DisplayName("create identity instance for non-enum type getter")
+    void createForNonEnum() {
         final ColumnValueConverter converter = ofGetter("getLong");
         assertEquals(IdentityConverter.class, converter.getClass());
     }
 
     @Test
     @DisplayName("create ordinal converter for ordinal enum getter")
-    void createOrdinalConverterForOrdinalEnumGetter() {
+    void createForOrdinalEnum() {
         final ColumnValueConverter converter = ofGetter("getEnumOrdinal");
         assertEquals(OrdinalEnumConverter.class, converter.getClass());
     }
 
     @Test
     @DisplayName("create string converter for string enum getter")
-    void createStringConverterForStringEnumGetter() {
+    void createForStringEnum() {
         final ColumnValueConverter converter = ofGetter("getEnumString");
         assertEquals(StringEnumConverter.class, converter.getClass());
     }
 
     @Test
     @DisplayName("create ordinal converter for not annotated enum getter")
-    void createOrdinalConverterForNotAnnotatedEnumGetter() {
+    void createForNotAnnotated() {
         final ColumnValueConverter converter = ofGetter("getEnumNotAnnotated");
         assertEquals(OrdinalEnumConverter.class, converter.getClass());
     }

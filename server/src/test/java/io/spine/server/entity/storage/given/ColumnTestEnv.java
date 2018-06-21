@@ -26,8 +26,11 @@ import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.Enumerated;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.lang.reflect.Method;
 
 import static io.spine.server.entity.storage.EnumType.STRING;
 import static io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus.SUCCESS;
@@ -39,8 +42,19 @@ import static org.junit.Assert.fail;
  */
 public class ColumnTestEnv {
 
+    public static final String CUSTOM_COLUMN_NAME = " customColumnName ";
+
     private ColumnTestEnv() {
         // Prevent instantiation of this utility class.
+    }
+
+    public static EntityColumn forMethod(String name, Class<?> enclosingClass) {
+        try {
+            Method result = enclosingClass.getDeclaredMethod(name);
+            return EntityColumn.from(result);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @SuppressWarnings("unused") // Reflective access
@@ -143,6 +157,18 @@ public class ColumnTestEnv {
         }
 
         @Column
+        public int getValue() {
+            return 0;
+        }
+    }
+
+    public static class EntityWithCustomColumnNameForStoring
+            extends AbstractVersionableEntity<String, Any> {
+        public EntityWithCustomColumnNameForStoring(String id) {
+            super(id);
+        }
+
+        @Column(name = CUSTOM_COLUMN_NAME)
         public int getValue() {
             return 0;
         }

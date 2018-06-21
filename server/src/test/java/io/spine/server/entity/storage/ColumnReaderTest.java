@@ -91,7 +91,7 @@ class ColumnReaderTest {
 
     @Test
     @DisplayName("ignore non-public getters with column annotation from super class")
-    void ignoreNonPublicGettersWithColumnAnnotationFromSuperClass() {
+    void ignoreInheritedNonPublicColumns() {
         ColumnReader columnReader = forClass(EntityWithManyGettersDescendant.class);
         Collection<EntityColumn> entityColumns = columnReader.readColumns();
         assertSize(3, entityColumns);
@@ -121,7 +121,7 @@ class ColumnReaderTest {
 
     @Test
     @DisplayName("obtain fields from implemented interfaces")
-    void obtainFieldsFromImplementedInterfaces() {
+    void handleInterfaceColumns() {
         ColumnReader columnReader = forClass(EntityWithColumnFromInterface.class);
         Collection<EntityColumn> entityColumns = columnReader.readColumns();
 
