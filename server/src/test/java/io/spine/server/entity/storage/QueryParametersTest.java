@@ -76,7 +76,40 @@ class QueryParametersTest {
     }
 
     @Test
-    @DisplayName("construct from empty builder")
+    @DisplayName("support equality")
+    void supportEquality() {
+        // --- Group A ---
+        // Consists of 2 empty instances
+        final QueryParameters paramsA1 = newBuilder().build();
+        final QueryParameters paramsA2 = newBuilder().build();
+
+        // --- Group B ---
+        // Consists of 3 instances with a single filter targeting a String column
+        final EntityColumn bColumn = mockColumn();
+        final ColumnFilter bFilter = ColumnFilters.eq("b", "c");
+        final QueryParameters paramsB1 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
+                                                     .build();
+        final QueryParameters paramsB2 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
+                                                     .build();
+        final QueryParameters paramsB3 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
+                                                     .build();
+
+        // --- Group C ---
+        // Consists of an instance with a single filter targeting an integer number column
+        final EntityColumn cColumn = mockColumn();
+        final ColumnFilter cFilter = ColumnFilters.eq("a", 42);
+        final QueryParameters paramsC = newBuilder().add(aggregatingParameter(cColumn, cFilter))
+                                                    .build();
+
+        // --- Check ---
+        new EqualsTester().addEqualityGroup(paramsA1, paramsA2)
+                          .addEqualityGroup(paramsB1, paramsB2, paramsB3)
+                          .addEqualityGroup(paramsC)
+                          .testEquals();
+    }
+
+    @Test
+    @DisplayName("be constructed from empty builder")
     void constructFromEmptyBuilder() {
         final QueryParameters parameters = newBuilder().build();
         assertNotNull(parameters);
@@ -84,7 +117,7 @@ class QueryParametersTest {
 
     @Test
     @DisplayName("produce iterator over filters")
-    void produceIteratorOverFilters() {
+    void produceFilterIterator() {
         final ColumnFilter[] filters = {
                 eq("firstFilter", 1),
                 eq("secondFilter", 42),
@@ -130,7 +163,7 @@ class QueryParametersTest {
 
     @Test
     @DisplayName("keep multiple filters for single column")
-    void keepMultipleFiltersForColumn() throws ParseException {
+    void keepManyFiltersForColumn() throws ParseException {
         final String columnName = "time";
         final EntityColumn column = mock(EntityColumn.class);
 
@@ -154,39 +187,6 @@ class QueryParametersTest {
         final Collection<ColumnFilter> timeFilters = actualColumnFilters.get(column);
         assertSize(2, timeFilters);
         assertContainsAll(timeFilters, startTimeFilter, deadlineFilter);
-    }
-
-    @Test
-    @DisplayName("support equality")
-    void supportEquality() {
-        // --- Group A ---
-        // Consists of 2 empty instances
-        final QueryParameters paramsA1 = newBuilder().build();
-        final QueryParameters paramsA2 = newBuilder().build();
-
-        // --- Group B ---
-        // Consists of 3 instances with a single filter targeting a String column
-        final EntityColumn bColumn = mockColumn();
-        final ColumnFilter bFilter = ColumnFilters.eq("b", "c");
-        final QueryParameters paramsB1 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
-                                                     .build();
-        final QueryParameters paramsB2 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
-                                                     .build();
-        final QueryParameters paramsB3 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
-                                                     .build();
-
-        // --- Group C ---
-        // Consists of an instance with a single filter targeting an integer number column
-        final EntityColumn cColumn = mockColumn();
-        final ColumnFilter cFilter = ColumnFilters.eq("a", 42);
-        final QueryParameters paramsC = newBuilder().add(aggregatingParameter(cColumn, cFilter))
-                                                    .build();
-
-        // --- Check ---
-        new EqualsTester().addEqualityGroup(paramsA1, paramsA2)
-                          .addEqualityGroup(paramsB1, paramsB2, paramsB3)
-                          .addEqualityGroup(paramsC)
-                          .testEquals();
     }
 
     private static EntityColumn mockColumn() {

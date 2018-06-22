@@ -23,7 +23,6 @@ package io.spine.server.entity.storage;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessageV3;
-import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv;
 import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.AbstractMessageType;
 import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.AnyType;
 import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.GeneratedMessageType;
@@ -67,7 +66,7 @@ class ColumnTypeRegistryTest {
 
     @Test
     @DisplayName("have default empty singleton instance")
-    void provideEmptyInstance() {
+    void haveEmptyInstance() {
         ColumnTypeRegistry emptyInstance = ColumnTypeRegistry.newBuilder()
                                                              .build();
         assertEmpty(emptyInstance.getColumnTypeMap());
@@ -96,7 +95,7 @@ class ColumnTypeRegistryTest {
     }
 
     @Test
-    @DisplayName("find closest superclass column type")
+    @DisplayName("find closest superclass for column type")
     void findClosestSuperclass() {
         ColumnTypeRegistry<?> registry =
                 ColumnTypeRegistry.newBuilder()
@@ -110,7 +109,7 @@ class ColumnTypeRegistryTest {
     }
 
     @Test
-    @DisplayName("map primitives autoboxed")
+    @DisplayName("autobox primitives when mapping")
     void mapPrimitivesAutoboxed() {
         ColumnTypeRegistry<?> registry =
                 ColumnTypeRegistry.newBuilder()

@@ -74,7 +74,7 @@ class ColumnValueConvertersTest {
     }
 
     @Test
-    @DisplayName("create ordinal converter for not annotated enum getter")
+    @DisplayName("create ordinal converter for non-annotated enum getter")
     void createForNotAnnotated() {
         final ColumnValueConverter converter = ofGetter("getEnumNotAnnotated");
         assertEquals(OrdinalEnumConverter.class, converter.getClass());

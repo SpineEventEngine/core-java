@@ -38,14 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("DefaultCommandRoute should")
 class DefaultCommandRouteTest {
 
-    @Test
-    @DisplayName("return empty Optional if fail to get ID from command message without ID field")
-    void returnEmptyForNoId() {
-        final Optional id = DefaultCommandRoute.asOptional(Empty.getDefaultInstance());
-
-        assertFalse(id.isPresent());
-    }
-
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We call isPresent() in assertion.
     @Test
     @DisplayName("get ID from command message")
@@ -56,5 +48,13 @@ class DefaultCommandRouteTest {
 
         assertTrue(id.isPresent());
         assertEquals(msg.getProjectId(), id.get());
+    }
+
+    @Test
+    @DisplayName("return empty Optional for command message without ID field")
+    void returnEmptyForNoId() {
+        final Optional id = DefaultCommandRoute.asOptional(Empty.getDefaultInstance());
+
+        assertFalse(id.isPresent());
     }
 }

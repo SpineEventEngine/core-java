@@ -65,7 +65,7 @@ class EntityColumnCacheTest {
     }
 
     @Test
-    @DisplayName("be empty after creation")
+    @DisplayName("be empty on creation")
     void beEmptyOnCreation() {
         assertTrue(entityColumnCache.isEmpty());
     }
@@ -110,7 +110,7 @@ class EntityColumnCacheTest {
 
     @Test
     @DisplayName("retain stored columns order")
-    void retainStoredColumnsOrder() {
+    void retainColumnsOrder() {
         Collection<EntityColumn> columnsFromCache = entityColumnCache.getColumns();
         assertNotNull(columnsFromCache);
 

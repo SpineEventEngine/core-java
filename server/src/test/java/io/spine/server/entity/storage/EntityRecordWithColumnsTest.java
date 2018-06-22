@@ -30,6 +30,7 @@ import io.spine.server.entity.storage.given.EntityRecordWithColumnsTestEnv.Entit
 import io.spine.server.entity.storage.given.EntityRecordWithColumnsTestEnv.TestEntity;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -54,6 +55,9 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
+        /* JUnit 5 Nested classes cannot to be static. */,
+        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("EntityRecordWithColumns should")
 class EntityRecordWithColumnsTest {
 
@@ -91,73 +95,6 @@ class EntityRecordWithColumnsTest {
     }
 
     @Test
-    @DisplayName("be initialized with record and storage fields")
-    void beInitializedWithRecordAndColumns() {
-        EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance(),
-                                            Collections.emptyMap());
-        assertNotNull(record);
-    }
-
-    @Test
-    @DisplayName("be initialized with record only")
-    void beInitializedWithRecordOnly() {
-        EntityRecordWithColumns record = newEmptyRecord();
-        assertNotNull(record);
-    }
-
-    @Test
-    @DisplayName("store record")
-    void storeRecord() {
-        EntityRecordWithColumns recordWithFields = newRecord();
-        EntityRecord record = recordWithFields.getRecord();
-        assertNotNull(record);
-    }
-
-    @Test
-    @DisplayName("store column values")
-    void storeColumnValues() {
-        MemoizedValue mockValue = mock(MemoizedValue.class);
-        String columnName = "some-key";
-        Map<String, MemoizedValue> columnsExpected = singletonMap(columnName, mockValue);
-        EntityRecordWithColumns record = of(Sample.messageOfType(EntityRecord.class),
-                                            columnsExpected);
-        Collection<String> columnNames = record.getColumnNames();
-        assertSize(1, columnNames);
-        assertTrue(columnNames.contains(columnName));
-        assertEquals(mockValue, record.getColumnValue(columnName));
-    }
-
-    @Test
-    @DisplayName("return empty names collection if no storage fields are set")
-    void returnEmptyColumns() {
-        EntityRecordWithColumns record = newEmptyRecord();
-        assertFalse(record.hasColumns());
-        Collection<String> names = record.getColumnNames();
-        assertTrue(names.isEmpty());
-    }
-
-    @Test
-    @DisplayName("throw on attempt to get value by non existent name")
-    void throwOnAttemptToGetValueByNonExistentName() {
-        EntityRecordWithColumns record = newEmptyRecord();
-
-        assertThrows(IllegalStateException.class, () -> record.getColumnValue(""));
-    }
-
-    @Test
-    @DisplayName("not have columns if values list is empty")
-    void haveEmptyColumns() {
-        EntityWithoutColumns entity = new EntityWithoutColumns("ID");
-        Class<? extends Entity> entityClass = entity.getClass();
-        Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
-        Map<String, MemoizedValue> columnValues = extractColumnValues(entity, entityColumns);
-        assertTrue(columnValues.isEmpty());
-
-        EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance(), columnValues);
-        assertFalse(record.hasColumns());
-    }
-
-    @Test
     @DisplayName("support equality")
     void supportEquality() {
         MemoizedValue mockValue = mock(MemoizedValue.class);
@@ -176,5 +113,82 @@ class EntityRecordWithColumnsTest {
                 .addEqualityGroup(newRecord())
                 .addEqualityGroup(newRecord()) // Each one has different EntityRecord
                 .testEquals();
+    }
+
+    @Nested
+    @DisplayName("support being initialized with")
+    class BeInitializedWith {
+
+        @Test
+        @DisplayName("record and storage fields")
+        void recordAndColumns() {
+            EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance(),
+                                                Collections.emptyMap());
+            assertNotNull(record);
+        }
+
+        @Test
+        @DisplayName("record only")
+        void recordOnly() {
+            EntityRecordWithColumns record = newEmptyRecord();
+            assertNotNull(record);
+        }
+    }
+
+    @Nested
+    @DisplayName("store")
+    class Store {
+
+        @Test
+        @DisplayName("record")
+        void record() {
+            EntityRecordWithColumns recordWithFields = newRecord();
+            EntityRecord record = recordWithFields.getRecord();
+            assertNotNull(record);
+        }
+
+        @Test
+        @DisplayName("column values")
+        void columnValues() {
+            MemoizedValue mockValue = mock(MemoizedValue.class);
+            String columnName = "some-key";
+            Map<String, MemoizedValue> columnsExpected = singletonMap(columnName, mockValue);
+            EntityRecordWithColumns record = of(Sample.messageOfType(EntityRecord.class),
+                                                columnsExpected);
+            Collection<String> columnNames = record.getColumnNames();
+            assertSize(1, columnNames);
+            assertTrue(columnNames.contains(columnName));
+            assertEquals(mockValue, record.getColumnValue(columnName));
+        }
+    }
+
+    @Test
+    @DisplayName("return empty names collection if no storage fields are set")
+    void returnEmptyColumns() {
+        EntityRecordWithColumns record = newEmptyRecord();
+        assertFalse(record.hasColumns());
+        Collection<String> names = record.getColumnNames();
+        assertTrue(names.isEmpty());
+    }
+
+    @Test
+    @DisplayName("throw on attempt to get value by non existent name")
+    void throwOnNonExistentColumn() {
+        EntityRecordWithColumns record = newEmptyRecord();
+
+        assertThrows(IllegalStateException.class, () -> record.getColumnValue(""));
+    }
+
+    @Test
+    @DisplayName("not have columns if value list is empty")
+    void supportEmptyColumns() {
+        EntityWithoutColumns entity = new EntityWithoutColumns("ID");
+        Class<? extends Entity> entityClass = entity.getClass();
+        Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
+        Map<String, MemoizedValue> columnValues = extractColumnValues(entity, entityColumns);
+        assertTrue(columnValues.isEmpty());
+
+        EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance(), columnValues);
+        assertFalse(record.hasColumns());
     }
 }

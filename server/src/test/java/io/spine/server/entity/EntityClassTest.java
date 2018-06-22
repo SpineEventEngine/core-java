@@ -57,14 +57,14 @@ class EntityClassTest {
 
     @Test
     @DisplayName("obtain entity constructor")
-    void obtainEntityConstructor() {
+    void getEntityConstructor() {
         Constructor<NanoEntity> ctor = entityClass.getConstructor();
         assertNotNull(ctor);
     }
 
     @Test
     @DisplayName("create and initialize entity instance")
-    void createAndInitEntityInstance() {
+    void createEntityInstance() {
         Long id = 100L;
         Timestamp before = TimeTests.Past.secondsAgo(1);
 
@@ -88,7 +88,7 @@ class EntityClassTest {
 
     @Test
     @DisplayName("complain when there is no one-arg constructor for entity class")
-    void acceptOnlyOneArgConstructor() {
+    void searchForOneArgCtor() {
         assertThrows(ModelError.class,
                      () -> new EntityClass<>(NoArgEntity.class).getConstructor());
     }

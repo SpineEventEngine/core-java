@@ -110,13 +110,13 @@ class ColumnsTest {
 
     @Test
     @DisplayName("fail to obtain columns for invalid entity class")
-    void rejectInvalidColumns() {
+    void notGetInvalidColumns() {
         assertThrows(IllegalStateException.class,
                      () -> Columns.getAllColumns(EntityWithRepeatedColumnNames.class));
     }
 
     @Test
-    @DisplayName("retrieve specific column metadata from given class")
+    @DisplayName("get column by name")
     void getColumnByName() {
         Class<? extends Entity<?, ?>> entityClass = RealLifeEntity.class;
         String existingColumnName = archived.name();
@@ -126,7 +126,7 @@ class ColumnsTest {
     }
 
     @Test
-    @DisplayName("fail to retrieve non-existing column")
+    @DisplayName("fail to get non-existing column")
     void notGetNonExisting() {
         Class<? extends Entity<?, ?>> entityClass = EntityWithNoStorageFields.class;
         String nonExistingColumnName = "foo";
@@ -138,16 +138,6 @@ class ColumnsTest {
     @Test
     @DisplayName("extract column values with names for storing")
     void getColumnValues() {
-        EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
-        Collection<EntityColumn> entityColumns = Columns.getAllColumns(entity.getClass());
-        Map<String, MemoizedValue> fields = extractColumnValues(entity, entityColumns);
-
-        checkEntityWithManyGettersFields(entity, fields);
-    }
-
-    @Test
-    @DisplayName("extract column values using predefined columns")
-    void getValuesOfPredefinedColumns() {
         EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(entity.getClass());
         Map<String, MemoizedValue> fields = extractColumnValues(entity, entityColumns);

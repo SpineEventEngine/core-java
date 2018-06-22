@@ -36,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @DisplayName("InvalidEntityStateException should")
 class InvalidEntityStateExceptionTest {
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
     @DisplayName("create exception with violations")
     void createExceptionWithViolations() {

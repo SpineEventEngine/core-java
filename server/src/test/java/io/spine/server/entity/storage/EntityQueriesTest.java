@@ -39,6 +39,7 @@ import io.spine.server.storage.RecordStorage;
 import io.spine.test.storage.ProjectId;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.rules.ExpectedException;
 
@@ -65,6 +66,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
+        /* JUnit 5 Nested classes cannot to be static. */,
+        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("EntityQueries utility should")
 class EntityQueriesTest {
 
@@ -80,32 +84,37 @@ class EntityQueriesTest {
         assertHasPrivateParameterlessCtor(EntityQueries.class);
     }
 
-    @SuppressWarnings("ConstantConditions")
-    // The purpose of the check is passing null for @NotNull field.
-    @Test
-    @DisplayName("not accept null filters")
-    void notAcceptNullFilters() {
-        assertThrows(NullPointerException.class, () -> from(null, Collections.emptyList()));
-    }
+    @Nested
+    @DisplayName("not accept null")
+    class NotAcceptNull {
 
-    @SuppressWarnings("ConstantConditions")
-    // The purpose of the check is passing null for @NotNull field.
-    @Test
-    @DisplayName("not accept null storage")
-    void notAcceptNullStorage() {
-        RecordStorage<?> storage = null;
-        assertThrows(NullPointerException.class,
-                     () -> from(EntityFilters.getDefaultInstance(), storage));
-    }
+        @SuppressWarnings("ConstantConditions")
+        // The purpose of the check is passing null for @NotNull field.
+        @Test
+        @DisplayName("filters")
+        void filters() {
+            assertThrows(NullPointerException.class, () -> from(null, Collections.emptyList()));
+        }
 
-    @SuppressWarnings("ConstantConditions")
-    // The purpose of the check is passing null for @NotNull field.
-    @Test
-    @DisplayName("not accept null entity class")
-    void notAcceptNullEntityClass() {
-        Collection<EntityColumn> entityColumns = null;
-        assertThrows(NullPointerException.class,
-                     () -> from(EntityFilters.getDefaultInstance(), entityColumns));
+        @SuppressWarnings("ConstantConditions")
+        // The purpose of the check is passing null for @NotNull field.
+        @Test
+        @DisplayName("storage")
+        void storage() {
+            RecordStorage<?> storage = null;
+            assertThrows(NullPointerException.class,
+                         () -> from(EntityFilters.getDefaultInstance(), storage));
+        }
+
+        @SuppressWarnings("ConstantConditions")
+        // The purpose of the check is passing null for @NotNull field.
+        @Test
+        @DisplayName("entity class")
+        void entityClass() {
+            Collection<EntityColumn> entityColumns = null;
+            assertThrows(NullPointerException.class,
+                         () -> from(EntityFilters.getDefaultInstance(), entityColumns));
+        }
     }
 
     @Test
@@ -125,7 +134,7 @@ class EntityQueriesTest {
 
     @Test
     @DisplayName("not create query for non-existing column")
-    void notCreateForNonExistingColumn() {
+    void notCreateForNonExisting() {
         ColumnFilter filter = ColumnFilters.eq("nonExistingColumn", 42);
         CompositeColumnFilter compositeFilter = ColumnFilters.all(filter);
         EntityFilters filters =

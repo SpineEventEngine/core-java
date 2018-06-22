@@ -28,7 +28,9 @@ import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithNoStorageFields;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithRepeatedColumnNames;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.RealLifeEntity;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -49,6 +51,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Dmytro Kuzmin
  */
+@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
+        /* JUnit 5 Nested classes cannot to be static. */})
 @DisplayName("ColumnReader should")
 class ColumnReaderTest {
 
@@ -59,73 +63,83 @@ class ColumnReaderTest {
     }
 
     @Test
-    @DisplayName("retrieve entity columns from class")
-    void readEntityColumns() {
-        ColumnReader columnReader = forClass(EntityWithManyGetters.class);
-        Collection<EntityColumn> entityColumns = columnReader.readColumns();
-
-        assertSize(3, entityColumns);
-        assertTrue(containsColumn(entityColumns, "someMessage"));
-        assertTrue(containsColumn(entityColumns, "integerFieldValue"));
-        assertTrue(containsColumn(entityColumns, "floatNull"));
-    }
-
-    @Test
-    @DisplayName("return empty list for class without columns")
-    void handleEmptyClass() {
-        ColumnReader columnReader = forClass(EntityWithNoStorageFields.class);
-        Collection<EntityColumn> entityColumns = columnReader.readColumns();
-
-        assertNotNull(entityColumns);
-        assertTrue(entityColumns.isEmpty());
-    }
-
-    @Test
     @DisplayName("throw ISE on invalid column definitions")
     void throwOnInvalidColumns() {
         ColumnReader columnReader = forClass(EntityWithRepeatedColumnNames.class);
         assertThrows(IllegalStateException.class, columnReader::readColumns);
     }
 
+    @Nested
+    @DisplayName("retrieve entity columns")
+    class RetrieveColumns {
 
-    @Test
-    @DisplayName("ignore non-public getters with column annotation from super class")
-    void ignoreInheritedNonPublicColumns() {
-        ColumnReader columnReader = forClass(EntityWithManyGettersDescendant.class);
-        Collection<EntityColumn> entityColumns = columnReader.readColumns();
-        assertSize(3, entityColumns);
+        @Test
+        @DisplayName("from class having them")
+        void fromClassWithColumns() {
+            ColumnReader columnReader = forClass(EntityWithManyGetters.class);
+            Collection<EntityColumn> entityColumns = columnReader.readColumns();
+
+            assertSize(3, entityColumns);
+            assertTrue(containsColumn(entityColumns, "someMessage"));
+            assertTrue(containsColumn(entityColumns, "integerFieldValue"));
+            assertTrue(containsColumn(entityColumns, "floatNull"));
+        }
+
+        @Test
+        @DisplayName("from class without columns")
+        void fromClassWithoutColumns() {
+            ColumnReader columnReader = forClass(EntityWithNoStorageFields.class);
+            Collection<EntityColumn> entityColumns = columnReader.readColumns();
+
+            assertNotNull(entityColumns);
+            assertTrue(entityColumns.isEmpty());
+        }
+
+        @Test
+        @DisplayName("from class inheriting columns")
+        void fromClassInheritingColumns() {
+            ColumnReader columnReader = forClass(RealLifeEntity.class);
+            Collection<EntityColumn> entityColumns = columnReader.readColumns();
+
+            assertSize(5, entityColumns);
+            assertTrue(containsColumn(entityColumns, archived.name()));
+            assertTrue(containsColumn(entityColumns, deleted.name()));
+            assertTrue(containsColumn(entityColumns, "visible"));
+            assertTrue(containsColumn(entityColumns, version.name()));
+            assertTrue(containsColumn(entityColumns, "someTime"));
+        }
+
+        @Test
+        @DisplayName("from implemented interface")
+        void fromImplementedInterface() {
+            ColumnReader columnReader = forClass(EntityWithColumnFromInterface.class);
+            Collection<EntityColumn> entityColumns = columnReader.readColumns();
+
+            assertSize(1, entityColumns);
+            assertTrue(containsColumn(entityColumns, "integerFieldValue"));
+        }
     }
 
-    @Test
-    @DisplayName("ignore static members")
-    void ignoreStaticMembers() {
-        ColumnReader columnReader = forClass(EntityWithManyGetters.class);
-        Collection<EntityColumn> entityColumns = columnReader.readColumns();
-        assertFalse(containsColumn(entityColumns, "staticMember"));
-    }
+    @Nested
+    @DisplayName("ignore")
+    class Ignore {
 
-    @Test
-    @DisplayName("handle inherited fields")
-    void handleInheritedFields() {
-        ColumnReader columnReader = forClass(RealLifeEntity.class);
-        Collection<EntityColumn> entityColumns = columnReader.readColumns();
+        @Test
+        @DisplayName("non-public getters with column annotation from super class")
+        void inheritedNonPublicColumns() {
+            ColumnReader columnReader = forClass(EntityWithManyGettersDescendant.class);
+            Collection<EntityColumn> entityColumns = columnReader.readColumns();
+            assertSize(3, entityColumns);
+        }
 
-        assertSize(5, entityColumns);
-        assertTrue(containsColumn(entityColumns, archived.name()));
-        assertTrue(containsColumn(entityColumns, deleted.name()));
-        assertTrue(containsColumn(entityColumns, "visible"));
-        assertTrue(containsColumn(entityColumns, version.name()));
-        assertTrue(containsColumn(entityColumns, "someTime"));
-    }
+        @Test
+        @DisplayName("static members")
+        void staticMembers() {
+            ColumnReader columnReader = forClass(EntityWithManyGetters.class);
+            Collection<EntityColumn> entityColumns = columnReader.readColumns();
+            assertFalse(containsColumn(entityColumns, "staticMember"));
+        }
 
-    @Test
-    @DisplayName("obtain fields from implemented interfaces")
-    void handleInterfaceColumns() {
-        ColumnReader columnReader = forClass(EntityWithColumnFromInterface.class);
-        Collection<EntityColumn> entityColumns = columnReader.readColumns();
-
-        assertSize(1, entityColumns);
-        assertTrue(containsColumn(entityColumns, "integerFieldValue"));
     }
 
     private static boolean containsColumn(Iterable<EntityColumn> entityColumns, String columnName) {

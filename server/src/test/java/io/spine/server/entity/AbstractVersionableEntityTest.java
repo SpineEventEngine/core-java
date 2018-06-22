@@ -51,7 +51,7 @@ class AbstractVersionableEntityTest {
 
     @Test
     @DisplayName("have `updateState` method visible to package only")
-    void haveUpdateStateMethodPackagePrivate() throws NoSuchMethodException {
+    void haveUpdateStatePackagePrivate() throws NoSuchMethodException {
         boolean methodFound = false;
 
         final Method[] methods = AbstractVersionableEntity.class.getDeclaredMethods();

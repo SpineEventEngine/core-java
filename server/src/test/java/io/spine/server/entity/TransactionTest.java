@@ -33,6 +33,7 @@ import io.spine.validate.ValidatingBuilder;
 import io.spine.validate.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 
@@ -60,6 +61,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  *
  * @author Alex Tymchenko
  */
+@SuppressWarnings("unused") // JUnit 5 Nested classes considered unused in abstract class.
 public abstract class TransactionTest<I,
         E extends TransactionalEntity<I, S, B>,
         S extends Message,
@@ -124,28 +126,57 @@ public abstract class TransactionTest<I,
         ModelTests.clearModel();
     }
 
-    @Test
-    @DisplayName("initialize from entity")
-    void initializeFromEntity() {
-        E entity = createEntity();
-        B expectedBuilder = entity.builderFromState();
-        Version expectedVersion = entity.getVersion();
-        LifecycleFlags expectedLifecycleFlags = entity.getLifecycleFlags();
+    @Nested
+    @DisplayName("initialize")
+    class Initialize {
 
-        Transaction<I, E, S, B> tx = createTx(entity);
-        assertNotNull(tx);
+        @Test
+        @DisplayName("from entity")
+        void fromEntity() {
+            E entity = createEntity();
+            B expectedBuilder = entity.builderFromState();
+            Version expectedVersion = entity.getVersion();
+            LifecycleFlags expectedLifecycleFlags = entity.getLifecycleFlags();
 
-        assertEquals(entity, tx.getEntity());
-        // Not possible to compare `Message.Builder` instances via `equals`, so trigger `build()`.
-        assertEquals(expectedBuilder.build(), tx.getBuilder()
-                                                .build());
-        assertEquals(expectedVersion, tx.getVersion());
-        assertEquals(expectedLifecycleFlags, tx.getLifecycleFlags());
+            Transaction<I, E, S, B> tx = createTx(entity);
+            assertNotNull(tx);
 
-        assertTrue(tx.isActive());
+            assertEquals(entity, tx.getEntity());
+            // Not possible to compare `Message.Builder` instances via `equals`, so trigger `build()`.
+            assertEquals(expectedBuilder.build(), tx.getBuilder()
+                                                    .build());
+            assertEquals(expectedVersion, tx.getVersion());
+            assertEquals(expectedLifecycleFlags, tx.getLifecycleFlags());
 
-        assertTrue(tx.getPhases()
-                     .isEmpty());
+            assertTrue(tx.isActive());
+
+            assertTrue(tx.getPhases()
+                         .isEmpty());
+        }
+
+        @Test
+        @DisplayName("from entity, state, and version")
+        void fromEntityStateAndVersion() {
+            E entity = createEntity();
+            S newState = createNewState();
+            Version newVersion = someVersion();
+
+            assertNotEquals(entity.getState(), newState);
+            assertNotEquals(entity.getVersion(), newVersion);
+
+            Transaction<I, E, S, B> tx = createTxWithState(entity, newState, newVersion);
+
+            assertEquals(newState, tx.getBuilder()
+                                     .build());
+            assertEquals(newVersion, tx.getVersion());
+            assertNotEquals(entity.getState(), newState);
+            assertNotEquals(entity.getVersion(), newVersion);
+
+            tx.commit();
+
+            assertEquals(entity.getState(), newState);
+            assertEquals(entity.getVersion(), newVersion);
+        }
     }
 
     @Test
@@ -178,7 +209,7 @@ public abstract class TransactionTest<I,
 
     @Test
     @DisplayName("propagate changes to entity upon commit")
-    void propagateChangesToEntityUponCommit() {
+    void propagateChangesToEntityOnCommit() {
         E entity = createEntity();
 
         Transaction<I, E, S, B> tx = createTx(entity);
@@ -215,8 +246,8 @@ public abstract class TransactionTest<I,
     }
 
     @Test
-    @DisplayName("set `txEntityVersion` from EventContext")
-    void setTxEntityVersionFromEventContext() {
+    @DisplayName("set transaction entity version from EventContext")
+    void setVersionFromEventContext() {
         E entity = createEntity();
 
         Transaction<I, E, S, B> tx = createTx(entity);
@@ -234,7 +265,7 @@ public abstract class TransactionTest<I,
     @SuppressWarnings({"unchecked", "ConstantConditions"})  // OK for a test method.
     @Test
     @DisplayName("notify listener during transaction execution")
-    void notifyListenerDuringTransactionExecution() {
+    void notifyListenerDuringExecution() {
         TransactionListener<I, E, S, B> listener = mock(TransactionListener.class);
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTxWithListener(entity, listener);
@@ -246,34 +277,10 @@ public abstract class TransactionTest<I,
         verify(listener).onAfterPhase(argThat(matchesSuccessfulPhaseFor(event)));
     }
 
-    @Test
-    @DisplayName("init state and version if specified in constructor")
-    void initStateAndVersionIfSpecifiedInCtor() {
-        E entity = createEntity();
-        S newState = createNewState();
-        Version newVersion = someVersion();
-
-        assertNotEquals(entity.getState(), newState);
-        assertNotEquals(entity.getVersion(), newVersion);
-
-        Transaction<I, E, S, B> tx = createTxWithState(entity, newState, newVersion);
-
-        assertEquals(newState, tx.getBuilder()
-                                 .build());
-        assertEquals(newVersion, tx.getVersion());
-        assertNotEquals(entity.getState(), newState);
-        assertNotEquals(entity.getVersion(), newVersion);
-
-        tx.commit();
-
-        assertEquals(entity.getState(), newState);
-        assertEquals(entity.getVersion(), newVersion);
-    }
-
     @SuppressWarnings("CheckReturnValue") // can ignore new entity version in this test.
     @Test
     @DisplayName("not allow injecting state if entity has non-zero version already")
-    void notAllowInjectingStateIfEntityHasNonZeroVersionAlready() {
+    void notInjectStateToEntityWithVersion() {
         E entity = createEntity();
         entity.incrementVersion();
         S newState = createNewState();
@@ -283,56 +290,85 @@ public abstract class TransactionTest<I,
                      () -> createTxWithState(entity, newState, newVersion));
     }
 
-    @Test
-    @DisplayName("propagate phase failure exception as ISE")
-    void propagatePhaseFailureExceptionAsISE() {
-        E entity = createEntity();
+    @Nested
+    @DisplayName("propagate exception as ISE")
+    class PropagateExceptionAsIse {
 
-        Transaction<I, E, S, B> tx = createTx(entity);
+        @Test
+        @DisplayName("on phase failure")
+        void onPhaseFailure() {
+            E entity = createEntity();
 
-        Event event = createEvent(createEventMessageThatFailsInHandler());
+            Transaction<I, E, S, B> tx = createTx(entity);
 
-        assertThrows(IllegalStateException.class, () -> applyEvent(tx, event));
+            Event event = createEvent(createEventMessageThatFailsInHandler());
+
+            assertThrows(IllegalStateException.class, () -> applyEvent(tx, event));
+        }
+
+        @Test
+        @DisplayName("on commit failure")
+        void onCommitFailure() {
+            E entity = createEntity(someViolations());
+            S newState = createNewState();
+            Version version = someVersion();
+
+            Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
+            try {
+                tx.commit();
+                fail("Expected an exception due to a failed commit.");
+            } catch (IllegalStateException e) {
+                assertEquals(InvalidEntityStateException.class, e.getCause()
+                                                                 .getClass());
+            }
+        }
     }
 
-    @Test
-    @DisplayName("rollback automatically if phase failed")
-    void rollbackAutomaticallyIfPhaseFailed() {
-        E entity = createEntity();
-        S originalState = entity.getState();
-        Version originalVersion = entity.getVersion();
+    @Nested
+    @DisplayName("rollback automatically")
+    class RollbackAutomatically {
 
-        Transaction<I, E, S, B> tx = createTx(entity);
+        @Test
+        @DisplayName("if phase failed")
+        void ifPhaseFailed() {
+            E entity = createEntity();
+            S originalState = entity.getState();
+            Version originalVersion = entity.getVersion();
 
-        Event event = createEvent(createEventMessageThatFailsInHandler());
-        try {
-            applyEvent(tx, event);
-            fail("Expected an `Exception` due to a failed phase execution.");
-        } catch (Exception e) {
-            checkRollback(entity, originalState, originalVersion);
+            Transaction<I, E, S, B> tx = createTx(entity);
+
+            Event event = createEvent(createEventMessageThatFailsInHandler());
+            try {
+                applyEvent(tx, event);
+                fail("Expected an `Exception` due to a failed phase execution.");
+            } catch (Exception e) {
+                checkRollback(entity, originalState, originalVersion);
+            }
+        }
+
+        @Test
+        @DisplayName("if commit failed")
+        void ifCommitFailed() {
+            E entity = createEntity(someViolations());
+            S originalState = entity.getState();
+            Version originalVersion = entity.getVersion();
+
+            S newState = createNewState();
+            Version version = someVersion();
+
+            Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
+            try {
+                tx.commit();
+                fail("Expected an IllegalStateException due to a failed commit.");
+            } catch (IllegalStateException e) {
+                checkRollback(entity, originalState, originalVersion);
+            }
         }
     }
 
     @Test
-    @DisplayName("propagate exception wrapped as ISE if commit fails")
-    void propagateExceptionWrappedAsISEIfCommitFails() {
-        E entity = createEntity(someViolations());
-        S newState = createNewState();
-        Version version = someVersion();
-
-        Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
-        try {
-            tx.commit();
-            fail("Expected an exception due to a failed commit.");
-        } catch (IllegalStateException e) {
-            assertEquals(InvalidEntityStateException.class, e.getCause()
-                                                             .getClass());
-        }
-    }
-
-    @Test
-    @DisplayName("throw InvalidEntityStateException if constraints violated on commit")
-    void throwInvalidEntityStateExceptionIfConstraintsViolatedOnCommit() {
+    @DisplayName("throw InvalidEntityStateException if constraints are violated on commit")
+    void throwIfViolationOnCommit() {
         E entity = createEntity();
 
         S newState = createNewState();
@@ -343,25 +379,6 @@ public abstract class TransactionTest<I,
         breakEntityValidation(entity, toThrow);
 
         assertThrows(InvalidEntityStateException.class, tx::commit);
-    }
-
-    @Test
-    @DisplayName("rollback automatically if commit failed")
-    void rollbackAutomaticallyIfCommitFailed() {
-        E entity = createEntity(someViolations());
-        S originalState = entity.getState();
-        Version originalVersion = entity.getVersion();
-
-        S newState = createNewState();
-        Version version = someVersion();
-
-        Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
-        try {
-            tx.commit();
-            fail("Expected an IllegalStateException due to a failed commit.");
-        } catch (IllegalStateException e) {
-            checkRollback(entity, originalState, originalVersion);
-        }
     }
 
     @Test

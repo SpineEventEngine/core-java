@@ -35,6 +35,7 @@ import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
@@ -55,6 +56,9 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alexander Litus
  */
+@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
+        /* JUnit 5 Nested classes cannot to be static. */,
+        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("Entity should")
 class EntityTest {
 
@@ -76,57 +80,67 @@ class EntityTest {
         assertThrows(NullPointerException.class, () -> new BareBonesEntity(Tests.<Long>nullRef()));
     }
 
-    @Test
+    @Nested
     @DisplayName("return default state")
-    void returnDefaultState() {
-        final Project state = entityNew.getDefaultState();
-        assertEquals(Project.getDefaultInstance(), state);
+    class ReturnDefaultState {
+
+        @Test
+        @DisplayName("for single entity")
+        void forSingleEntity() {
+            final Project state = entityNew.getDefaultState();
+            assertEquals(Project.getDefaultInstance(), state);
+        }
+
+        @Test
+        @DisplayName("for different entities")
+        void forDifferentEntities() {
+            assertEquals(Project.getDefaultInstance(), entityNew.getDefaultState());
+
+            final EntityWithMessageId entityWithMessageId = new EntityWithMessageId();
+            final StringValue expected = StringValue.getDefaultInstance();
+            assertEquals(expected, entityWithMessageId.getDefaultState());
+        }
     }
 
-    @Test
-    @DisplayName("return default state for different entities")
-    void returnDefaultStateForDifferentEntities() {
-        assertEquals(Project.getDefaultInstance(), entityNew.getDefaultState());
+    @Nested
+    @DisplayName("in constructor, accept ID of type")
+    class AcceptId {
 
-        final EntityWithMessageId entityWithMessageId = new EntityWithMessageId();
-        final StringValue expected = StringValue.getDefaultInstance();
-        assertEquals(expected, entityWithMessageId.getDefaultState());
-    }
+        @Test
+        @DisplayName("String")
+        void ofStringType() {
+            final String stringId = "stringId";
+            final TestEntityWithIdString entityWithStringId = new TestEntityWithIdString(stringId);
 
-    @Test
-    @DisplayName("accept String ID to constructor")
-    void acceptStringIdToConstructor() {
-        final String stringId = "stringId";
-        final TestEntityWithIdString entityWithStringId = new TestEntityWithIdString(stringId);
+            assertEquals(stringId, entityWithStringId.getId());
+        }
 
-        assertEquals(stringId, entityWithStringId.getId());
-    }
+        @Test
+        @DisplayName("Long")
+        void ofLongType() {
+            final Long longId = 12L;
+            final TestEntityWithIdLong entityWithLongId = new TestEntityWithIdLong(longId);
 
-    @Test
-    @DisplayName("accept Long ID to constructor")
-    void acceptLongIdToConstructor() {
-        final Long longId = 12L;
-        final TestEntityWithIdLong entityWithLongId = new TestEntityWithIdLong(longId);
+            assertEquals(longId, entityWithLongId.getId());
+        }
 
-        assertEquals(longId, entityWithLongId.getId());
-    }
+        @Test
+        @DisplayName("Integer")
+        void ofIntegerType() {
+            final Integer integerId = 12;
+            final TestEntityWithIdInteger entityWithIntegerId = new TestEntityWithIdInteger(integerId);
 
-    @Test
-    @DisplayName("accept Integer ID to constructor")
-    void acceptIntegerIdToConstructor() {
-        final Integer integerId = 12;
-        final TestEntityWithIdInteger entityWithIntegerId = new TestEntityWithIdInteger(integerId);
+            assertEquals(integerId, entityWithIntegerId.getId());
+        }
 
-        assertEquals(integerId, entityWithIntegerId.getId());
-    }
+        @Test
+        @DisplayName("Message")
+        void ofMessageType() {
+            final StringValue messageId = toMessage("messageId");
+            final TestEntityWithIdMessage entityWithMessageID = new TestEntityWithIdMessage(messageId);
 
-    @Test
-    @DisplayName("accept Message ID to constructor")
-    void acceptMessageIdToConstructor() {
-        final StringValue messageId = toMessage("messageId");
-        final TestEntityWithIdMessage entityWithMessageID = new TestEntityWithIdMessage(messageId);
-
-        assertEquals(messageId, entityWithMessageID.getId());
+            assertEquals(messageId, entityWithMessageID.getId());
+        }
     }
 
     @Test
@@ -142,7 +156,7 @@ class EntityTest {
 
     @Test
     @DisplayName("check entity state when setting it")
-    void checkEntityStateWhenSetIt() {
+    void checkStateWhenUpdatingIt() {
         final TestEntity spyEntityNew = spy(entityNew);
         spyEntityNew.updateState(state, Versions.zero());
         verify(spyEntityNew).checkEntityState(eq(state));
@@ -150,35 +164,9 @@ class EntityTest {
 
     @Test
     @DisplayName("throw exception if try to set null state")
-    void throwExceptionIfTryToSetNullState() {
+    void throwOnSettingNullState() {
         assertThrows(NullPointerException.class,
                      () -> entityNew.updateState(Tests.nullRef(), Versions.zero()));
-    }
-
-    @Test
-    @DisplayName("have zero version by default")
-    void haveZeroVersionByDefault() {
-        assertEquals(0, entityNew.getVersion()
-                                 .getNumber());
-    }
-
-    @Test
-    @DisplayName("increment version by one")
-    void incrementVersionByOne() {
-        final int version = entityNew.incrementVersion();
-        assertEquals(1, version);
-    }
-
-    @SuppressWarnings("CheckReturnValue") // New entity version number can be ignored in this test.
-    @Test
-    @DisplayName("record modification time when incrementing version")
-    void recordModificationTimeOnVersionIncrement() {
-        final long timeBeforeincrement = TimeTests.currentTimeSeconds();
-        entityNew.incrementVersion();
-        final long timeAfterIncrement = TimeTests.currentTimeSeconds();
-        assertThat(entityNew.whenModified()
-                            .getSeconds(),
-                   isBetween(timeBeforeincrement, timeAfterIncrement));
     }
 
     @Test
@@ -190,48 +178,90 @@ class EntityTest {
     }
 
     @Test
-    @DisplayName("increment version when updating state")
-    void incrementVersionOnStateUpdate() {
-        entityNew.incrementState(state);
-
-        assertEquals(1, entityNew.getVersion()
+    @DisplayName("have zero version by default")
+    void haveZeroVersionByDefault() {
+        assertEquals(0, entityNew.getVersion()
                                  .getNumber());
     }
 
-    @Test
-    @DisplayName("record modification time when updating state")
-    void recordModificationTimeOnStateUpdate() {
-        entityNew.incrementState(state);
-        final long expectedTimeSec = TimeTests.currentTimeSeconds();
+    @Nested
+    @DisplayName("increment version")
+    class IncrementVersion {
 
-        assertSecondsEqual(expectedTimeSec, entityNew.whenModified()
-                                                     .getSeconds(), 1);
+        @Test
+        @DisplayName("when told to do so")
+        void whenAsked() {
+            final int version = entityNew.incrementVersion();
+            assertEquals(1, version);
+        }
+
+        @Test
+        @DisplayName("when updating state")
+        void whenUpdatingState() {
+            entityNew.incrementState(state);
+
+            assertEquals(1, entityNew.getVersion()
+                                     .getNumber());
+        }
     }
 
-    @Test
-    @DisplayName("generate non-zero hash code if entity has non empty id and state")
-    void generateNonZeroHashCodeIfEntityHasNonEmptyIdAndState() {
-        assertFalse(entityWithState.getId()
-                                   .trim()
-                                   .isEmpty());
+    @Nested
+    @DisplayName("record modification time")
+    class RecordModificationTime {
 
-        final int hashCode = entityWithState.hashCode();
+        @SuppressWarnings("CheckReturnValue")
+        // New entity version number can be ignored in this test.
+        @Test
+        @DisplayName("when incrementing version")
+        void onVersionIncrement() {
+            final long timeBeforeIncrement = TimeTests.currentTimeSeconds();
+            entityNew.incrementVersion();
+            final long timeAfterIncrement = TimeTests.currentTimeSeconds();
+            assertThat(entityNew.whenModified()
+                                .getSeconds(),
+                       isBetween(timeBeforeIncrement, timeAfterIncrement));
+        }
 
-        assertTrue(hashCode != 0);
+        @Test
+        @DisplayName("when updating state")
+        void onStateUpdate() {
+            entityNew.incrementState(state);
+            final long expectedTimeSec = TimeTests.currentTimeSeconds();
+
+            assertSecondsEqual(expectedTimeSec, entityNew.whenModified()
+                                                         .getSeconds(), 1);
+        }
     }
 
-    @Test
-    @DisplayName("generate same hash code for one instance")
-    void generateSameHashCodeForOneInstance() {
-        assertEquals(entityWithState.hashCode(), entityWithState.hashCode());
-    }
+    @Nested
+    @DisplayName("provide `hashCode` method such that")
+    class ProvideHashCode {
 
-    @Test
-    @DisplayName("generate unique hash code for different instances")
-    void generateUniqueHashCodeForDifferentInstances() {
-        final TestEntity another = TestEntity.withState();
+        @Test
+        @DisplayName("for entity with non-empty ID and state non-zero hash code is generated")
+        void nonZeroForNonEmptyEntity() {
+            assertFalse(entityWithState.getId()
+                                       .trim()
+                                       .isEmpty());
 
-        assertNotEquals(entityWithState.hashCode(), another.hashCode());
+            final int hashCode = entityWithState.hashCode();
+
+            assertTrue(hashCode != 0);
+        }
+
+        @Test
+        @DisplayName("for same instances same hash code is generated")
+        void sameForSameInstances() {
+            assertEquals(entityWithState.hashCode(), entityWithState.hashCode());
+        }
+
+        @Test
+        @DisplayName("for different instances unique hash code is generated")
+        void uniqueForDifferentInstances() {
+            final TestEntity another = TestEntity.withState();
+
+            assertNotEquals(entityWithState.hashCode(), another.hashCode());
+        }
     }
 }
 

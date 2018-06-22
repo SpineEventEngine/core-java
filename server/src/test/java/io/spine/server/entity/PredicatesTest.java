@@ -36,7 +36,7 @@ class PredicatesTest {
 
     @Test
     @DisplayName("consider archived entity invisible")
-    void considerArchivedEntityInvisible() {
+    void stateArchivedEntityInvisible() {
         final LifecycleFlags status =
                 LifecycleFlags.newBuilder()
                               .setArchived(true)
@@ -46,7 +46,7 @@ class PredicatesTest {
 
     @Test
     @DisplayName("consider deleted entity invisible")
-    void considerDeletedEntityInvisible() {
+    void stateDeletedEntityInvisible() {
         final LifecycleFlags status =
                 LifecycleFlags.newBuilder()
                               .setDeleted(true)
@@ -56,7 +56,7 @@ class PredicatesTest {
 
     @Test
     @DisplayName("consider archived record invisible")
-    void considerArchivedRecordInvisible() {
+    void stateArchivedRecordInvisible() {
         final EntityRecord record =
                 EntityRecord
                         .newBuilder()
@@ -68,7 +68,7 @@ class PredicatesTest {
 
     @Test
     @DisplayName("consider deleted record invisible")
-    void considerDeletedRecordInvisible() {
+    void stateDeletedRecordInvisible() {
         final EntityRecord record =
                 EntityRecord
                         .newBuilder()
@@ -84,7 +84,7 @@ class PredicatesTest {
      */
     @Test
     @DisplayName("consider null records visible")
-    void considerNullRecordsVisible() {
+    void stateNullRecordsVisible() {
         assertTrue(isEntityVisible().apply(null));
     }
 }

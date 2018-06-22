@@ -83,7 +83,7 @@ class ColumnRecordsTest {
 
     @Test
     @DisplayName("feed entity columns to database record")
-    void feedColumnsToRecord() {
+    void feedColumnsToDbRecord() {
         // Set up mocks and arguments
         final List<Object> destination = new ArrayList<>(MOCK_COLUMNS_COUNT);
 

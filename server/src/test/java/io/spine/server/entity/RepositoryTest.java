@@ -77,35 +77,27 @@ class RepositoryTest {
         boundedContext.close();
     }
 
-    /*
-     * Tests of initialization
-     **************************/
-
     @Test
     @DisplayName("check for entity ID class")
-    void checkForEntityIdClass() {
+    void checkEntityIdType() {
         assertThrows(ModelError.class, () -> new RepoForEntityWithUnsupportedId().getIdClass());
     }
 
     @Test
     @DisplayName("report unregistered on init")
-    void reportUnregisteredOnInit() {
+    void beUnregisteredOnInit() {
         assertFalse(new TestRepo().isRegistered());
     }
 
     @Test
     @DisplayName("not allow getting BoundedContext before registration")
-    void notAllowGettingBoundedContextBeforeRegistration() {
+    void notReturnBcWhenUnregistered() {
         assertThrows(IllegalStateException.class, () -> new TestRepo().getBoundedContext());
     }
 
-    /*
-     * Tests of regular work
-     **************************/
-
     @Test
     @DisplayName("reject repeated storage initialization")
-    void notInitRepeatedly() {
+    void notInitStorageRepeatedly() {
         repository.initStorage(storageFactory);
 
         assertThrows(IllegalStateException.class, () -> repository.initStorage(storageFactory));

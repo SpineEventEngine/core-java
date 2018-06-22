@@ -55,13 +55,13 @@ class DefaultEntityStorageConverterTest {
 
     @Test
     @DisplayName("create instance for all fields")
-    void createInstanceForAllFields() throws Exception {
+    void createForAllFields() throws Exception {
         assertEquals(FieldMask.getDefaultInstance(), converter.getFieldMask());
     }
 
     @Test
     @DisplayName("create instance with FieldMask")
-    void createInstanceWithFieldMask() throws Exception {
+    void createWithFieldMask() throws Exception {
         final FieldMask fieldMask = FieldMask.newBuilder()
                                              .addPaths("foo.bar")
                                              .build();

@@ -49,7 +49,7 @@ class TransactionalEventPlayerTest {
 
     @Test
     @DisplayName("require active transaction to play events")
-    void requireActiveTransactionToPlayEvents() {
+    void requireActiveTx() {
         assertThrows(IllegalStateException.class,
                      () -> new TxPlayingEntity().play(
                              newArrayList(

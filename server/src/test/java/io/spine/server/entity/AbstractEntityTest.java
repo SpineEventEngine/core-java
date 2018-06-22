@@ -26,6 +26,7 @@ import io.spine.server.entity.given.AbstractEntityTestEnv.AnEntity;
 import io.spine.server.entity.given.AbstractEntityTestEnv.NaturalNumberEntity;
 import io.spine.test.entity.number.NaturalNumber;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
@@ -35,40 +36,47 @@ import static io.spine.server.entity.given.AbstractEntityTestEnv.newNaturalNumbe
 import static io.spine.test.Verify.assertSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Illia Shepilov
  */
+@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"})
+// JUnit 5 Nested classes cannot to be static.
 @DisplayName("AbstractEntity should")
 class AbstractEntityTest {
 
-    /**
-     * Ensures that {@link AbstractEntity#updateState(Message)} is final so that
-     * it's not possible to override the default behaviour.
-     */
-    @Test
-    @DisplayName("prevent `updateState` method overriding")
-    void haveUpdateStateMethodFinal() throws NoSuchMethodException {
-        final Method updateState =
-                AbstractEntity.class.getDeclaredMethod("updateState", Message.class);
-        final int modifiers = updateState.getModifiers();
-        assertTrue(Modifier.isFinal(modifiers));
-    }
+    @Nested
+    @DisplayName("not allow to override method")
+    class NotAllowToOverride {
 
-    /**
-     * Ensures that {@link AbstractEntity#validate(Message)} is final so that
-     * it's not possible to override the default behaviour.
-     */
-    @Test
-    @DisplayName("prevent `validate` method overriding")
-    void haveValidateMethodFinal() throws NoSuchMethodException {
-        final Method validate =
-                AbstractEntity.class.getDeclaredMethod("validate", Message.class);
-        final int modifiers = validate.getModifiers();
-        assertTrue(Modifier.isPrivate(modifiers) || Modifier.isFinal(modifiers));
+        /**
+         * Ensures that {@link AbstractEntity#updateState(Message)} is final so that
+         * it's not possible to override the default behaviour.
+         */
+        @Test
+        @DisplayName("`updateState`")
+        void updateState() throws NoSuchMethodException {
+            final Method updateState =
+                    AbstractEntity.class.getDeclaredMethod("updateState", Message.class);
+            final int modifiers = updateState.getModifiers();
+            assertTrue(Modifier.isFinal(modifiers));
+        }
+
+        /**
+         * Ensures that {@link AbstractEntity#validate(Message)} is final so that
+         * it's not possible to override the default behaviour.
+         */
+        @Test
+        @DisplayName("`validate`")
+        void validate() throws NoSuchMethodException {
+            final Method validate =
+                    AbstractEntity.class.getDeclaredMethod("validate", Message.class);
+            final int modifiers = validate.getModifiers();
+            assertTrue(Modifier.isPrivate(modifiers) || Modifier.isFinal(modifiers));
+        }
     }
 
     @Test
@@ -93,7 +101,7 @@ class AbstractEntityTest {
 
     @SuppressWarnings("ConstantConditions") // The goal of the test.
     @Test
-    @DisplayName("not accept null to checkEntityState")
+    @DisplayName("not accept null to `checkEntityState`")
     void rejectNullState() {
         AnEntity entity = new AnEntity(0L);
 

@@ -34,13 +34,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Alexander Yevsyukov
  */
-// todo move to record based repository should
-@DisplayName("EntityIdFunction should")
+//todo think more about whether to move to RecordBasedRepositoryTest
+@DisplayName("RecordBasedRepository EntityIdFunction should")
 class EntityIdFunctionTest {
 
     @Test
     @DisplayName("not accept wrong ID type")
-    void notAcceptWrongIdType() {
+    void rejectWrongIdType() {
         final Function<EntityId, StringValue> func =
                 new RecordBasedRepository.EntityIdFunction<>(StringValue.class);
 

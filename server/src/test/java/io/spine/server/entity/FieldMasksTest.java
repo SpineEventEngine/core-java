@@ -25,6 +25,7 @@ import com.google.protobuf.FieldMask;
 import io.spine.server.entity.given.FieldMasksTestEnv.Given;
 import io.spine.test.aggregate.Project;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -47,6 +48,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
+        /* JUnit 5 Nested classes cannot to be static. */,
+        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("FieldMasks utility should")
 class FieldMasksTest {
 
@@ -56,125 +60,140 @@ class FieldMasksTest {
         assertHasPrivateParameterlessCtor(FieldMasks.class);
     }
 
-    @Test
-    @DisplayName("create masks for given field tags")
-    void createMasksForFields() {
-        Descriptor descriptor = Project.getDescriptor();
-        int[] fieldNumbers = {1, 2, 3};
-        @SuppressWarnings("DuplicateStringLiteralInspection")
-        String[] fieldNames = {"id", "name", "task"};
-        FieldMask mask = FieldMasks.maskOf(descriptor, fieldNumbers);
+    @Nested
+    @DisplayName("create masks")
+    class CreateMasks {
 
-        List<String> paths = mask.getPathsList();
-        assertSize(fieldNumbers.length, paths);
+        @Test
+        @DisplayName("for given field tags")
+        void forGivenFields() {
+            Descriptor descriptor = Project.getDescriptor();
+            int[] fieldNumbers = {1, 2, 3};
+            @SuppressWarnings("DuplicateStringLiteralInspection")
+            String[] fieldNames = {"id", "name", "task"};
+            FieldMask mask = FieldMasks.maskOf(descriptor, fieldNumbers);
 
-        for (int i = 0; i < paths.size(); i++) {
-            String expectedPath = descriptor.getFullName() + '.' + fieldNames[i];
-            assertEquals(expectedPath, paths.get(i));
+            List<String> paths = mask.getPathsList();
+            assertSize(fieldNumbers.length, paths);
+
+            for (int i = 0; i < paths.size(); i++) {
+                String expectedPath = descriptor.getFullName() + '.' + fieldNames[i];
+                assertEquals(expectedPath, paths.get(i));
+            }
+        }
+
+        @Test
+        @DisplayName("for no given field tags")
+        void forNoGivenFields() {
+            Descriptor descriptor = Project.getDescriptor();
+            FieldMask mask = FieldMasks.maskOf(descriptor);
+            assertEquals(FieldMask.getDefaultInstance(), mask);
         }
     }
 
-    @Test
-    @DisplayName("retrieve default field mask if no field tags requested")
-    void createDefaultMask() {
-        Descriptor descriptor = Project.getDescriptor();
-        FieldMask mask = FieldMasks.maskOf(descriptor);
-        assertEquals(FieldMask.getDefaultInstance(), mask);
-    }
+    @Nested
+    @DisplayName("apply mask")
+    class ApplyMask {
 
-    @Test
-    @DisplayName("apply mask to single message")
-    void applyMaskToSingleMessage() {
-        FieldMask fieldMask = Given.fieldMask(Project.ID_FIELD_NUMBER, Project.NAME_FIELD_NUMBER);
-        Project original = Given.newProject("some-string-id");
+        @Test
+        @DisplayName("to single message")
+        void toSingleMessage() {
+            FieldMask fieldMask = Given.fieldMask(Project.ID_FIELD_NUMBER, Project.NAME_FIELD_NUMBER);
+            Project original = Given.newProject("some-string-id");
 
-        Project masked = FieldMasks.applyMask(fieldMask, original, Given.TYPE);
+            Project masked = FieldMasks.applyMask(fieldMask, original, Given.TYPE);
 
-        assertNotEquals(original, masked);
-        assertMatchesMask(masked, fieldMask);
-    }
-
-    @SuppressWarnings({"MethodWithMultipleLoops", "ObjectEquality"})
-    @Test
-    @DisplayName("apply mask to message collections")
-    void applyMaskToMessageCollections() {
-        FieldMask fieldMask = Given.fieldMask(Project.STATUS_FIELD_NUMBER,
-                                                    Project.TASK_FIELD_NUMBER);
-        int count = 5;
-
-        Collection<Project> original = new LinkedList<>();
-
-        for (int i = 0; i < count; i++) {
-            Project project = Given.newProject(format("project-%s", i));
-            original.add(project);
+            assertNotEquals(original, masked);
+            assertMatchesMask(masked, fieldMask);
         }
 
-        Collection<Project> masked = FieldMasks.applyMask(fieldMask, original, Given.TYPE);
+        @SuppressWarnings({"MethodWithMultipleLoops", "ObjectEquality"})
+        @Test
+        @DisplayName("to message collection")
+        void toMessageCollections() {
+            FieldMask fieldMask = Given.fieldMask(Project.STATUS_FIELD_NUMBER,
+                                                  Project.TASK_FIELD_NUMBER);
+            int count = 5;
 
-        assertSize(original.size(), masked);
+            Collection<Project> original = new LinkedList<>();
 
-        // Collection references are not the same
-        assertFalse(original == masked);
+            for (int i = 0; i < count; i++) {
+                Project project = Given.newProject(format("project-%s", i));
+                original.add(project);
+            }
 
-        for (Project project : masked) {
-            assertMatchesMask(project, fieldMask);
+            Collection<Project> masked = FieldMasks.applyMask(fieldMask, original, Given.TYPE);
 
-            // Can't check repeated fields with assertMatchesMask
-            assertFalse(project.getTaskList()
-                               .isEmpty());
+            assertSize(original.size(), masked);
+
+            // Collection references are not the same
+            assertFalse(original == masked);
+
+            for (Project project : masked) {
+                assertMatchesMask(project, fieldMask);
+
+                // Can't check repeated fields with assertMatchesMask
+                assertFalse(project.getTaskList()
+                                   .isEmpty());
+            }
         }
     }
 
-    @Test
-    @DisplayName("apply only non-empty mask to single item")
-    void applyOnlyNonEmptyMaskToSingleItem() {
-        FieldMask emptyMask = Given.fieldMask();
+    @Nested
+    @DisplayName("not apply empty mask")
+    class NotApplyEmptyMask {
 
-        Project origin = Given.newProject("read_whole_message");
-        Project clone = Project.newBuilder(origin)
-                                     .build();
+        @Test
+        @DisplayName("to single message")
+        void toSingleMessage() {
+            FieldMask emptyMask = Given.fieldMask();
 
-        Project processed = FieldMasks.applyMask(emptyMask, origin, Given.TYPE);
+            Project origin = Given.newProject("read_whole_message");
+            Project clone = Project.newBuilder(origin)
+                                   .build();
 
-        // Check object itself was returned
-        assertSame(processed, origin);
+            Project processed = FieldMasks.applyMask(emptyMask, origin, Given.TYPE);
 
-        // Check object was not changed
-        assertEquals(processed, clone);
-    }
+            // Check object itself was returned
+            assertSame(processed, origin);
 
-    @SuppressWarnings({"ObjectEquality", "MethodWithMultipleLoops"})
-    @Test
-    @DisplayName("apply only non-empty mask to collection")
-    void applyOnlyNonEmptyMaskToCollection() {
-        FieldMask emptyMask = Given.fieldMask();
-
-        Collection<Project> original = new LinkedList<>();
-        int count = 5;
-
-        for (int i = 0; i < count; i++) {
-            Project project = Given.newProject(format("test-data--%s", i));
-            original.add(project);
+            // Check object was not changed
+            assertEquals(processed, clone);
         }
 
-        Collection<Project> processed = FieldMasks.applyMask(emptyMask, original, Given.TYPE);
+        @SuppressWarnings({"ObjectEquality", "MethodWithMultipleLoops"})
+        @Test
+        @DisplayName("to message collection")
+        void toMessageCollection() {
+            FieldMask emptyMask = Given.fieldMask();
 
-        assertSize(original.size(), processed);
+            Collection<Project> original = new LinkedList<>();
+            int count = 5;
 
-        // The argument is not returned
-        assertNotSame(original, processed);
+            for (int i = 0; i < count; i++) {
+                Project project = Given.newProject(format("test-data--%s", i));
+                original.add(project);
+            }
 
-        // A copy of the argument is returned (Collection type may differ)
-        Iterator<Project> processedProjects = processed.iterator();
+            Collection<Project> processed = FieldMasks.applyMask(emptyMask, original, Given.TYPE);
 
-        for (Project anOriginal : original) {
-            assertEquals(processedProjects.next(), anOriginal);
+            assertSize(original.size(), processed);
+
+            // The argument is not returned
+            assertNotSame(original, processed);
+
+            // A copy of the argument is returned (Collection type may differ)
+            Iterator<Project> processedProjects = processed.iterator();
+
+            for (Project anOriginal : original) {
+                assertEquals(processedProjects.next(), anOriginal);
+            }
         }
     }
 
     @Test
     @DisplayName("fail to mask message if passed type does not match")
-    void failToMaskMessageIfPassedTypeDoesNotMatch() {
+    void notMaskWrongType() {
         FieldMask mask = Given.fieldMask(Project.ID_FIELD_NUMBER);
 
         Project origin = Given.newProject("some-string");
