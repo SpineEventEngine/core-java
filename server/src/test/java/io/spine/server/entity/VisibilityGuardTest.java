@@ -32,19 +32,19 @@ import io.spine.test.entity.FullAccessAggregate;
 import io.spine.test.entity.HiddenAggregate;
 import io.spine.test.entity.SubscribableAggregate;
 import io.spine.type.TypeName;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * See `client/spine/test/option/entity_options_should.proto` for definition of messages
@@ -52,17 +52,15 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Alexander Yevsyukov
  */
-public class VisibilityGuardShould {
+@DisplayName("VisibilityGuard should")
+class VisibilityGuardTest {
 
     private VisibilityGuard guard;
     private List<Repository> repositories;
     private BoundedContext boundedContext;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         boundedContext = BoundedContext.newBuilder()
                                        .build();
         repositories = Lists.newArrayList();
@@ -78,10 +76,20 @@ public class VisibilityGuardShould {
         repositories.add(repository);
     }
 
-    @After
-    public void shutDown() throws Exception {
+    @AfterEach
+    void shutDown() throws Exception {
         boundedContext.close();
         repositories.clear();
+    }
+
+    @Test
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        new NullPointerTester()
+                .setDefault(Repository.class, new ExposedRepository())
+                .setDefault(Class.class, FullAccessAggregate.class)
+                .setDefault(Visibility.class, Visibility.NONE)
+                .testAllPublicInstanceMethods(guard);
     }
 
     @Test
@@ -127,26 +135,14 @@ public class VisibilityGuardShould {
     }
 
     @Test
-    @DisplayName("do not allow double registration")
-    void doNotAllowDoubleRegistration() {
-        thrown.expect(IllegalStateException.class);
-        register(new ExposedRepository());
+    @DisplayName("not allow double registration")
+    void notAllowDoubleRegistration() {
+        assertThrows(IllegalStateException.class, () -> register(new ExposedRepository()));
     }
 
     @Test
     @DisplayName("reject unregistered state class")
     void rejectUnregisteredStateClass() {
-        thrown.expect(IllegalArgumentException.class);
-        guard.getRepository(Empty.class);
-    }
-
-    @Test
-    @DisplayName("do not allow null inputs")
-    void doNotAllowNullInputs() {
-        new NullPointerTester()
-                .setDefault(Repository.class, new ExposedRepository())
-                .setDefault(Class.class, FullAccessAggregate.class)
-                .setDefault(Visibility.class, Visibility.NONE)
-                .testAllPublicInstanceMethods(guard);
+        assertThrows(IllegalArgumentException.class, () -> guard.getRepository(Empty.class));
     }
 }

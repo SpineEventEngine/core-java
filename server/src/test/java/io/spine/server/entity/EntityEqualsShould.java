@@ -22,29 +22,31 @@ package io.spine.server.entity;
 
 import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.Tests.nullRef;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /**
  * This test suite tests {@link AbstractVersionableEntity#equals(Object)}.
  *
  * <p>When migrating to JUnit 5, this class may become a
- * {@code @Nested} class of {@link EntityShould}.
+ * {@code @Nested} class of {@link EntityTest}.
  *
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
+// todo extract to nested class
+@DisplayName("")
 public class EntityEqualsShould {
 
     private TestEntity entity;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         entity = TestEntity.withState();
     }

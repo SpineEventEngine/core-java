@@ -18,34 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.entity.storage;
 
-import com.google.protobuf.StringValue;
-import io.spine.validate.ConstraintViolation;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static io.spine.server.entity.InvalidEntityStateException.onConstraintViolations;
-import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
- * @author Dmytro Grankin
+ * @author Alexander Yevsyukov
  */
-public class InvalidEntityStateExceptionShould {
+@DisplayName("Methods utility should")
+class MethodsTest {
 
     @Test
-    @DisplayName("create exception with violations")
-    void createExceptionWithViolations() {
-        final StringValue entityState = StringValue.getDefaultInstance();
-
-        final InvalidEntityStateException exception = onConstraintViolations(
-                entityState,
-                singletonList(ConstraintViolation.getDefaultInstance()));
-
-        assertNotNull(exception.getMessage());
-        assertNotNull(exception.getError());
-        assertEquals(entityState, exception.getEntityState());
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(Methods.class);
     }
 }

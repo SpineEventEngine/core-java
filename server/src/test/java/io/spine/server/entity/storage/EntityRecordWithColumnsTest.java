@@ -22,19 +22,15 @@ package io.spine.server.entity.storage;
 
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Any;
-import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.given.Given;
-import io.spine.test.entity.Project;
+import io.spine.server.entity.storage.given.EntityRecordWithColumnsTestEnv.EntityWithoutColumns;
+import io.spine.server.entity.storage.given.EntityRecordWithColumnsTestEnv.TestEntity;
 import io.spine.testdata.Sample;
-import org.junit.Rule;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -48,19 +44,18 @@ import static io.spine.server.entity.storage.EntityRecordWithColumns.of;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.test.Verify.assertSize;
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class EntityRecordWithColumnsShould {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+@DisplayName("EntityRecordWithColumns should")
+class EntityRecordWithColumnsTest {
 
     private static EntityRecordWithColumns newRecord() {
         return of(Sample.messageOfType(EntityRecord.class),
@@ -69,6 +64,14 @@ public class EntityRecordWithColumnsShould {
 
     private static EntityRecordWithColumns newEmptyRecord() {
         return of(EntityRecord.getDefaultInstance());
+    }
+
+    @Test
+    @DisplayName("not accept nulls in constructor")
+    void notAcceptNullsInCtor() {
+        new NullPointerTester()
+                .setDefault(EntityRecord.class, EntityRecord.getDefaultInstance())
+                .testAllPublicConstructors(EntityRecordWithColumns.class);
     }
 
     @Test
@@ -88,26 +91,18 @@ public class EntityRecordWithColumnsShould {
     }
 
     @Test
-    @DisplayName("initialize with record and storage fields")
-    void initializeWithRecordAndStorageFields() {
+    @DisplayName("be initialized with record and storage fields")
+    void beInitializedWithRecordAndColumns() {
         EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance(),
                                             Collections.emptyMap());
         assertNotNull(record);
     }
 
     @Test
-    @DisplayName("initialize with record only")
-    void initializeWithRecordOnly() {
+    @DisplayName("be initialized with record only")
+    void beInitializedWithRecordOnly() {
         EntityRecordWithColumns record = newEmptyRecord();
         assertNotNull(record);
-    }
-
-    @Test
-    @DisplayName("not accept nulls in ctor")
-    void notAcceptNullsInCtor() {
-        new NullPointerTester()
-                .setDefault(EntityRecord.class, EntityRecord.getDefaultInstance())
-                .testAllPublicConstructors(EntityRecordWithColumns.class);
     }
 
     @Test
@@ -133,8 +128,8 @@ public class EntityRecordWithColumnsShould {
     }
 
     @Test
-    @DisplayName("return empty names collection if no storage fields")
-    void returnEmptyNamesCollectionIfNoStorageFields() {
+    @DisplayName("return empty names collection if no storage fields are set")
+    void returnEmptyColumns() {
         EntityRecordWithColumns record = newEmptyRecord();
         assertFalse(record.hasColumns());
         Collection<String> names = record.getColumnNames();
@@ -146,13 +141,12 @@ public class EntityRecordWithColumnsShould {
     void throwOnAttemptToGetValueByNonExistentName() {
         EntityRecordWithColumns record = newEmptyRecord();
 
-        thrown.expect(IllegalStateException.class);
-        record.getColumnValue("");
+        assertThrows(IllegalStateException.class, () -> record.getColumnValue(""));
     }
 
     @Test
     @DisplayName("not have columns if values list is empty")
-    void notHaveColumnsIfValuesListIsEmpty() {
+    void haveEmptyColumns() {
         EntityWithoutColumns entity = new EntityWithoutColumns("ID");
         Class<? extends Entity> entityClass = entity.getClass();
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(entityClass);
@@ -164,8 +158,8 @@ public class EntityRecordWithColumnsShould {
     }
 
     @Test
-    @DisplayName("have equals")
-    void haveEquals() {
+    @DisplayName("support equality")
+    void supportEquality() {
         MemoizedValue mockValue = mock(MemoizedValue.class);
         EntityRecordWithColumns noFieldsEnvelope = newEmptyRecord();
         EntityRecordWithColumns emptyFieldsEnvelope = of(
@@ -182,18 +176,5 @@ public class EntityRecordWithColumnsShould {
                 .addEqualityGroup(newRecord())
                 .addEqualityGroup(newRecord()) // Each one has different EntityRecord
                 .testEquals();
-    }
-
-    private static class TestEntity extends AbstractVersionableEntity<String, Project> {
-
-        private TestEntity(String id) {
-            super(id);
-        }
-    }
-
-    private static class EntityWithoutColumns extends AbstractEntity<String, Any> {
-        private EntityWithoutColumns(String id) {
-            super(id);
-        }
     }
 }

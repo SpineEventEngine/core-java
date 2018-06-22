@@ -25,23 +25,24 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.StringValue;
 import io.spine.server.BoundedContext;
 import io.spine.type.TypeUrl;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.entity.DefaultEntityStorageConverter.forAllFields;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class DefaultEntityStorageConverterShould {
+@DisplayName("DefaultEntityStorageConverter should")
+class DefaultEntityStorageConverterTest {
 
     private EntityStorageConverter<Long, TestEntity, StringValue> converter;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         final BoundedContext bc = BoundedContext.newBuilder()
                                                 .build();
         RecordBasedRepository<Long, TestEntity, StringValue> repository = new TestRepository();
@@ -53,8 +54,8 @@ public class DefaultEntityStorageConverterShould {
     }
 
     @Test
-    @DisplayName("create instance for for all fields")
-    void createInstanceForForAllFields() throws Exception {
+    @DisplayName("create instance for all fields")
+    void createInstanceForAllFields() throws Exception {
         assertEquals(FieldMask.getDefaultInstance(), converter.getFieldMask());
     }
 
@@ -90,8 +91,8 @@ public class DefaultEntityStorageConverterShould {
     }
 
     @Test
-    @DisplayName("serialize")
-    void serialize() {
+    @DisplayName("be serializable")
+    void beSerializable() {
         SerializableTester.reserializeAndAssert(converter);
     }
 

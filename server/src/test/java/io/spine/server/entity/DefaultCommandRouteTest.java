@@ -22,25 +22,25 @@ package io.spine.server.entity;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Empty;
-import com.google.protobuf.StringValue;
 import io.spine.server.route.DefaultCommandRoute;
 import io.spine.test.entity.command.EntCreateProject;
 import io.spine.testdata.Sample;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Litus
  */
-public class DefaultCommandRouteShould {
+@DisplayName("DefaultCommandRoute should")
+class DefaultCommandRouteTest {
 
     @Test
     @DisplayName("return empty Optional if fail to get ID from command message without ID field")
-    void returnEmptyOptionalIfFailToGetIDFromCommandMessageWithoutIDField() {
+    void returnEmptyForNoId() {
         final Optional id = DefaultCommandRoute.asOptional(Empty.getDefaultInstance());
 
         assertFalse(id.isPresent());
@@ -49,7 +49,7 @@ public class DefaultCommandRouteShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We call isPresent() in assertion.
     @Test
     @DisplayName("get ID from command message")
-    void getIDFromCommandMessage() {
+    void getIdFromCommand() {
         final EntCreateProject msg = Sample.messageOfType(EntCreateProject.class);
 
         final Optional id = DefaultCommandRoute.asOptional(msg);

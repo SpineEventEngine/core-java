@@ -27,33 +27,30 @@ import io.spine.server.model.ModelError;
 import io.spine.test.TimeTests;
 import io.spine.time.Interval;
 import io.spine.time.Intervals;
-import org.junit.Rule;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class EntityClassShould {
+@DisplayName("EntityClass should")
+class EntityClassTest {
 
     private final EntityClass<NanoEntity> entityClass =
             new EntityClass<>((Class<? extends NanoEntity>) NanoEntity.class);
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-    
     @Test
-    @DisplayName("return id class")
+    @DisplayName("return ID class")
     void returnIdClass() {
-        @SuppressWarnings("unchecked") //
+        @SuppressWarnings("unchecked")
         Class<Long> actual = (Class<Long>) entityClass.getIdClass();
         assertEquals(Long.class, actual);
     }
@@ -67,7 +64,7 @@ public class EntityClassShould {
 
     @Test
     @DisplayName("create and initialize entity instance")
-    void createAndInitializeEntityInstance() {
+    void createAndInitEntityInstance() {
         Long id = 100L;
         Timestamp before = TimeTests.Past.secondsAgo(1);
 
@@ -90,12 +87,11 @@ public class EntityClassShould {
     }
 
     @Test
-    @DisplayName("complain when there is no one arg constructor for entity class")
-    void complainWhenThereIsNoOneArgConstructorForEntityClass() {
-        thrown.expect(ModelError.class);
-        new EntityClass<>(NoArgEntity.class).getConstructor();
+    @DisplayName("complain when there is no one-arg constructor for entity class")
+    void acceptOnlyOneArgConstructor() {
+        assertThrows(ModelError.class,
+                     () -> new EntityClass<>(NoArgEntity.class).getConstructor());
     }
-
 
     /** A test entity which defines ID and state. */
     private static class NanoEntity extends AbstractVersionableEntity<Long, StringValue> {

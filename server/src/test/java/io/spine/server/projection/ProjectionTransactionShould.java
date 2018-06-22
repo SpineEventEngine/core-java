@@ -28,7 +28,7 @@ import io.spine.core.Versions;
 import io.spine.server.entity.ThrowingValidatingBuilder;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
-import io.spine.server.entity.TransactionShould;
+import io.spine.server.entity.TransactionTest;
 import io.spine.server.projection.ProjectionTransactionShould.PatchedProjectBuilder;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -52,10 +52,10 @@ import static org.junit.Assert.assertTrue;
  * @author Alex Tymchenko
  */
 public class ProjectionTransactionShould
-        extends TransactionShould<ProjectId,
-                                  Projection<ProjectId, Project, PatchedProjectBuilder>,
-                                  Project,
-                                  PatchedProjectBuilder> {
+        extends TransactionTest<ProjectId,
+                                          Projection<ProjectId, Project, PatchedProjectBuilder>,
+                                          Project,
+                                          PatchedProjectBuilder> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("projection-transaction-should-project")

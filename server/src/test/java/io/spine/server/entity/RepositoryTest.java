@@ -32,32 +32,29 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.entity.ProjectId;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.given.GivenTenantId.newUuid;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class RepositoryShould {
+@DisplayName("Repository should")
+class RepositoryTest {
 
     private BoundedContext boundedContext;
     private Repository<ProjectId, ProjectEntity> repository;
     private StorageFactory storageFactory;
     private TenantId tenantId;
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     private static ProjectId createId(String value) {
         return ProjectId.newBuilder()
@@ -65,8 +62,8 @@ public class RepositoryShould {
                         .build();
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(true)
                                        .build();
@@ -75,8 +72,8 @@ public class RepositoryShould {
         tenantId = newUuid();
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() throws Exception {
         boundedContext.close();
     }
 
@@ -85,10 +82,9 @@ public class RepositoryShould {
      **************************/
 
     @Test
-    @DisplayName("check for entity id class")
+    @DisplayName("check for entity ID class")
     void checkForEntityIdClass() {
-        thrown.expect(ModelError.class);
-        new RepoForEntityWithUnsupportedId().getIdClass();
+        assertThrows(ModelError.class, () -> new RepoForEntityWithUnsupportedId().getIdClass());
     }
 
     @Test
@@ -100,8 +96,7 @@ public class RepositoryShould {
     @Test
     @DisplayName("not allow getting BoundedContext before registration")
     void notAllowGettingBoundedContextBeforeRegistration() {
-        thrown.expect(IllegalStateException.class);
-        new TestRepo().getBoundedContext();
+        assertThrows(IllegalStateException.class, () -> new TestRepo().getBoundedContext());
     }
 
     /*
@@ -110,11 +105,10 @@ public class RepositoryShould {
 
     @Test
     @DisplayName("reject repeated storage initialization")
-    void rejectRepeatedStorageInitialization() {
+    void notInitRepeatedly() {
         repository.initStorage(storageFactory);
 
-        thrown.expect(IllegalStateException.class);
-        repository.initStorage(storageFactory);
+        assertThrows(IllegalStateException.class, () -> repository.initStorage(storageFactory));
     }
 
     @Test
@@ -125,9 +119,8 @@ public class RepositoryShould {
 
     @Test
     @DisplayName("prohibit obtaining unassigned storage")
-    void prohibitObtainingUnassignedStorage() {
-        thrown.expect(IllegalStateException.class);
-        repository.getStorage();
+    void notGetUnassignedStorage() {
+        assertThrows(IllegalStateException.class, () -> repository.getStorage());
     }
 
     @Test
@@ -152,7 +145,7 @@ public class RepositoryShould {
 
     @Test
     @DisplayName("disconnect from storage on close")
-    void disconnectFromStorageOnClose() {
+    void disconnectStorageOnClose() {
         repository.initStorage(storageFactory);
 
         repository.close();
@@ -203,12 +196,12 @@ public class RepositoryShould {
         return op.execute();
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    @DisplayName("do not allow removal in iterator")
-    void doNotAllowRemovalInIterator() {
+    @Test
+    @DisplayName("not allow removal in iterator")
+    void notAllowRemovalInIterator() {
         createAndStoreEntities();
         final Iterator<ProjectEntity> iterator = getIterator(tenantId);
-        iterator.remove();
+        assertThrows(UnsupportedOperationException.class, iterator::remove);
     }
 
     private void createAndStore(String entityId) {

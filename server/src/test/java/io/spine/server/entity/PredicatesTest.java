@@ -20,18 +20,19 @@
 
 package io.spine.server.entity;
 
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isRecordVisible;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class PredicatesShould {
+@DisplayName("EntityWithLifecycle Predicates should")
+class PredicatesTest {
 
     @Test
     @DisplayName("consider archived entity invisible")

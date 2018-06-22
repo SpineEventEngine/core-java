@@ -25,12 +25,13 @@ import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.command.TestEventFactory;
 import io.spine.validate.StringValueVBuilder;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.test.TestValues.newUuidValue;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -40,22 +41,25 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dmytro Dashenkov
  */
-public class TransactionalEventPlayerShould {
+@DisplayName("TransactionalEventPlayer should")
+class TransactionalEventPlayerTest {
 
     private final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(TransactionalEntityShould.class);
+            TestEventFactory.newInstance(TransactionalEntityTest.class);
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     @DisplayName("require active transaction to play events")
     void requireActiveTransactionToPlayEvents() {
-        new TxPlayingEntity().play(
-                newArrayList(eventFactory.createEvent(StringValue.getDefaultInstance()))
-        );
+        assertThrows(IllegalStateException.class,
+                     () -> new TxPlayingEntity().play(
+                             newArrayList(
+                                     eventFactory.createEvent(StringValue.getDefaultInstance()))
+                     ));
     }
 
     @Test
     @DisplayName("delegate applying events to tx when playing")
-    void delegateApplyingEventsToTxWhenPlaying() {
+    void delegateApplyingEventsToTx() {
         final TxPlayingEntity entity = entityWithActiveTx(false);
         final Transaction txMock = entity.getTransaction();
         assertNotNull(txMock);

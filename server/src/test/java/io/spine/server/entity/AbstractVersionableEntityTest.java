@@ -23,22 +23,23 @@ package io.spine.server.entity;
 import com.google.common.reflect.Invokable;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.StringValue;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class AbstractVersionableEntityShould {
+@DisplayName("AbstractVersionableEntity should")
+class AbstractVersionableEntityTest {
 
     @SuppressWarnings("MagicNumber")
     @Test
-    @DisplayName("have equals")
-    void haveEquals() throws Exception {
+    @DisplayName("support equality")
+    void supportEquality() throws Exception {
         final AvEntity entity = new AvEntity(88L);
         final AvEntity another = new AvEntity(88L);
         another.updateState(entity.getState(), entity.getVersion());
@@ -49,8 +50,8 @@ public class AbstractVersionableEntityShould {
     }
 
     @Test
-    @DisplayName("have updateState method visible to package only")
-    void haveUpdateStateMethodVisibleToPackageOnly() throws NoSuchMethodException {
+    @DisplayName("have `updateState` method visible to package only")
+    void haveUpdateStateMethodPackagePrivate() throws NoSuchMethodException {
         boolean methodFound = false;
 
         final Method[] methods = AbstractVersionableEntity.class.getDeclaredMethods();
@@ -61,8 +62,8 @@ public class AbstractVersionableEntityShould {
                 methodFound = true;
             }
         }
-        assertTrue("Cannot check 'updateState(...)' in " + AbstractVersionableEntity.class,
-                   methodFound);
+        assertTrue(methodFound,
+                   "Cannot check 'updateState(...)' in " + AbstractVersionableEntity.class);
     }
 
     private static class AvEntity extends AbstractVersionableEntity<Long, StringValue> {

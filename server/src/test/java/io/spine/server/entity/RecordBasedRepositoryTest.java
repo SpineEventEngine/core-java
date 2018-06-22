@@ -38,9 +38,9 @@ import io.spine.server.model.ModelTests;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.test.Tests;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 
 import java.util.Collection;
@@ -60,10 +60,10 @@ import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertNotContains;
 import static io.spine.test.Verify.assertSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The abstract test for the {@linkplain RecordBasedRepository} derived classes.
@@ -73,7 +73,7 @@ import static org.junit.Assert.assertTrue;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("ConstantConditions")
-public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableEntity<I, S>,
+public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEntity<I, S>,
         I,
         S extends Message>
         extends TenantAwareTest {
@@ -95,7 +95,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
     protected abstract I createId(int value);
 
-    @Before
+    @BeforeEach
     public void setUp() {
         ModelTests.clearModel();
         this.repository = createRepository();
@@ -106,7 +106,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
      * Store/load functions for working in multi-tenant execution context
      **********************************************************************/
 
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         clearCurrentTenant();
     }
@@ -140,13 +140,13 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         return repository.findOrCreate(id);
     }
 
-    /*
-     * Tests
-     ************/
-
     private Iterator<E> find(EntityFilters filters, FieldMask firstFieldOnly) {
         return repository.find(filters, firstFieldOnly);
     }
+
+    /*
+     * Tests
+     ************/
 
     @Test
     @DisplayName("create entities")
@@ -158,7 +158,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     }
 
     @Test
-    @DisplayName("find single entity by id")
+    @DisplayName("find single entity by ID")
     void findSingleEntityById() {
         E entity = createEntity();
 
@@ -173,7 +173,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
-    @DisplayName("find multiple entities by ids")
+    @DisplayName("find multiple entities by IDs")
     void findMultipleEntitiesByIds() {
         int count = 10;
         List<E> entities = createAndStoreEntities(repository, count);
@@ -253,7 +253,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     }
 
     @Test
-    @DisplayName("create entity on loadOrCreate if not found")
+    @DisplayName("create entity on `loadOrCreate` if not found")
     void createEntityOnLoadOrCreateIfNotFound() {
         int count = 3;
         createAndStoreEntities(repository, count);
@@ -267,7 +267,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
-    @DisplayName("handle wrong passed ids")
+    @DisplayName("handle wrong passed IDs")
     void handleWrongPassedIds() {
         int count = 10;
         List<E> entities = createAndStoreEntities(repository, count);
@@ -290,7 +290,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     @DisplayName("retrieve all records with entity filters and field mask applied")
-    void retrieveAllRecordsWithEntityFiltersAndFieldMaskApplied() {
+    void retrieveAllRecords() {
         int count = 10;
         List<E> entities = createAndStoreEntities(repository, count);
         List<EntityId> ids = Lists.newLinkedList();
@@ -370,8 +370,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     }
 
     @Test
-    @DisplayName("exclude non active records from entity query")
-    void excludeNonActiveRecordsFromEntityQuery() {
+    @DisplayName("exclude non-active records from entity query")
+    void excludeNonActiveRecords() {
         I archivedId = createId(42);
         I deletedId = createId(314);
         I activeId = createId(271);
@@ -429,7 +429,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
     @Test
     @DisplayName("cache entity columns on registration")
-    void cacheEntityColumnsOnRegistration() {
+    void cacheColumnsOnRegister() {
         if (!repository.isRegistered()) {
             repository.onRegistered();
         }

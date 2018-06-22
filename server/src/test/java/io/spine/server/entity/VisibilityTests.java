@@ -23,25 +23,28 @@ package io.spine.server.entity;
 import com.google.protobuf.StringValue;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Tests of working with entity visibility.
  *
  * <p>When migrating to JUnit 5, this class may become a
- * {@code @Nested} class of {@link EntityShould}.
+ * {@code @Nested} class of {@link EntityTest}.
  *
  * @author Alexander Yevsyukov
  */
-public class VisibilityTests {
+// todo move to entity test
+@DisplayName("Entity visibility should")
+class VisibilityTests {
 
     private AbstractVersionableEntity<Long, StringValue> entity;
 
@@ -54,8 +57,8 @@ public class VisibilityTests {
         }
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         entity = new MiniEntity(ThreadLocalRandom.current()
                                                  .nextLong());
     }
@@ -133,7 +136,7 @@ public class VisibilityTests {
         assertEquals(status, entity.getLifecycleFlags());
     }
 
-    @Test(expected = CannotModifyArchivedEntity.class)
+    @Test
     @DisplayName("check not archived")
     void checkNotArchived() throws Throwable {
         entity.setArchived(true);
@@ -141,11 +144,10 @@ public class VisibilityTests {
         // This should pass.
         entity.checkNotDeleted();
 
-        // This should throw.
-        entity.checkNotArchived();
+        assertThrows(CannotModifyArchivedEntity.class, () -> entity.checkNotArchived());
     }
 
-    @Test(expected = CannotModifyDeletedEntity.class)
+    @Test
     @DisplayName("check not deleted")
     void checkNotDeleted() throws Throwable {
         entity.setDeleted(true);
@@ -153,7 +155,6 @@ public class VisibilityTests {
         // This should pass.
         entity.checkNotArchived();
 
-        // This should throw.
-        entity.checkNotDeleted();
+        assertThrows(CannotModifyDeletedEntity.class, () -> entity.checkNotDeleted());
     }
 }

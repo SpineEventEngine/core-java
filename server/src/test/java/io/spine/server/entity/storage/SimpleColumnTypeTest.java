@@ -18,20 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.entity.storage;
 
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.given.SimpleColumnTypeTestEnv.ColumnTypeImpl;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertSame;
 
 /**
- * The contract for the test {@linkplain Entity entities} which serve for testing the subclasses of
- * {@link RecordBasedRepository}.
- *
  * @author Dmytro Dashenkov
- * @see RecordBasedRepositoryTest
  */
-public interface TestEntityWithStringColumn {
+@DisplayName("SimpleColumnType should")
+class SimpleColumnTypeTest {
 
-    @SuppressWarnings("unused") // Reflective access
-    @Column
-    String getIdString();
+    @Test
+    @DisplayName("perform identity conversion of given value")
+    void performIdentityConversion() {
+        final ColumnType<Object, ?, ?, ?> columnType = new ColumnTypeImpl<>();
+        final Object input = new Object();
+        final Object output = columnType.convertColumnValue(input);
+        assertSame(input, output);
+    }
 }

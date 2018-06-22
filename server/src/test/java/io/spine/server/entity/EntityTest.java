@@ -20,32 +20,34 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.Version;
 import io.spine.core.Versions;
+import io.spine.server.entity.given.EntityTestEnv.BareBonesEntity;
+import io.spine.server.entity.given.EntityTestEnv.EntityWithMessageId;
+import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdInteger;
+import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdLong;
+import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdMessage;
+import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdString;
 import io.spine.test.Tests;
 import io.spine.test.TimeTests;
 import io.spine.test.entity.Project;
-import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.TypeConverter.toMessage;
+import static io.spine.server.entity.given.EntityTestEnv.isBetween;
 import static io.spine.test.Tests.assertSecondsEqual;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -53,24 +55,25 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alexander Litus
  */
-public class EntityShould {
+@DisplayName("Entity should")
+class EntityTest {
 
     private Project state = Sample.messageOfType(Project.class);
     private TestEntity entityNew;
     private TestEntity entityWithState;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         state = Sample.messageOfType(Project.class);
         entityNew = TestEntity.newInstance(newUuid());
         entityWithState = TestEntity.withState();
     }
 
-    @SuppressWarnings("ResultOfObjectAllocationIgnored") // because we expect the exception.
-    @Test(expected = NullPointerException.class)
-    @DisplayName("do not accept null id")
-    void doNotAcceptNullId() {
-        new BareBonesEntity(Tests.<Long>nullRef());
+    @SuppressWarnings("ResultOfObjectAllocationIgnored") // Because we expect the exception.
+    @Test
+    @DisplayName("not accept null ID")
+    void notAcceptNullId() {
+        assertThrows(NullPointerException.class, () -> new BareBonesEntity(Tests.<Long>nullRef()));
     }
 
     @Test
@@ -91,7 +94,7 @@ public class EntityShould {
     }
 
     @Test
-    @DisplayName("accept String id to constructor")
+    @DisplayName("accept String ID to constructor")
     void acceptStringIdToConstructor() {
         final String stringId = "stringId";
         final TestEntityWithIdString entityWithStringId = new TestEntityWithIdString(stringId);
@@ -100,7 +103,7 @@ public class EntityShould {
     }
 
     @Test
-    @DisplayName("accept Long id to constructor")
+    @DisplayName("accept Long ID to constructor")
     void acceptLongIdToConstructor() {
         final Long longId = 12L;
         final TestEntityWithIdLong entityWithLongId = new TestEntityWithIdLong(longId);
@@ -109,7 +112,7 @@ public class EntityShould {
     }
 
     @Test
-    @DisplayName("accept Integer id to constructor")
+    @DisplayName("accept Integer ID to constructor")
     void acceptIntegerIdToConstructor() {
         final Integer integerId = 12;
         final TestEntityWithIdInteger entityWithIntegerId = new TestEntityWithIdInteger(integerId);
@@ -118,40 +121,12 @@ public class EntityShould {
     }
 
     @Test
-    @DisplayName("accept Message id to constructor")
+    @DisplayName("accept Message ID to constructor")
     void acceptMessageIdToConstructor() {
         final StringValue messageId = toMessage("messageId");
         final TestEntityWithIdMessage entityWithMessageID = new TestEntityWithIdMessage(messageId);
 
         assertEquals(messageId, entityWithMessageID.getId());
-    }
-
-    private static class TestEntityWithIdString
-            extends AbstractVersionableEntity<String, Project> {
-        private TestEntityWithIdString(String id) {
-            super(id);
-        }
-    }
-
-    private static class TestEntityWithIdMessage
-            extends AbstractVersionableEntity<Message, Project> {
-        private TestEntityWithIdMessage(Message id) {
-            super(id);
-        }
-    }
-
-    private static class TestEntityWithIdInteger
-            extends AbstractVersionableEntity<Integer, Project> {
-        private TestEntityWithIdInteger(Integer id) {
-            super(id);
-        }
-    }
-
-    private static class TestEntityWithIdLong
-            extends AbstractVersionableEntity<Long, Project> {
-        private TestEntityWithIdLong(Long id) {
-            super(id);
-        }
     }
 
     @Test
@@ -166,23 +141,18 @@ public class EntityShould {
     }
 
     @Test
-    @DisplayName("check entity state when set it")
+    @DisplayName("check entity state when setting it")
     void checkEntityStateWhenSetIt() {
         final TestEntity spyEntityNew = spy(entityNew);
         spyEntityNew.updateState(state, Versions.zero());
         verify(spyEntityNew).checkEntityState(eq(state));
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     @DisplayName("throw exception if try to set null state")
     void throwExceptionIfTryToSetNullState() {
-        entityNew.updateState(Tests.<Project>nullRef(), Versions.zero());
-    }
-
-    private static class BareBonesEntity extends AbstractVersionableEntity<Long, StringValue> {
-        private BareBonesEntity(Long id) {
-            super(id);
-        }
+        assertThrows(NullPointerException.class,
+                     () -> entityNew.updateState(Tests.nullRef(), Versions.zero()));
     }
 
     @Test
@@ -202,7 +172,7 @@ public class EntityShould {
     @SuppressWarnings("CheckReturnValue") // New entity version number can be ignored in this test.
     @Test
     @DisplayName("record modification time when incrementing version")
-    void recordModificationTimeWhenIncrementingVersion() {
+    void recordModificationTimeOnVersionIncrement() {
         final long timeBeforeincrement = TimeTests.currentTimeSeconds();
         entityNew.incrementVersion();
         final long timeAfterIncrement = TimeTests.currentTimeSeconds();
@@ -221,7 +191,7 @@ public class EntityShould {
 
     @Test
     @DisplayName("increment version when updating state")
-    void incrementVersionWhenUpdatingState() {
+    void incrementVersionOnStateUpdate() {
         entityNew.incrementState(state);
 
         assertEquals(1, entityNew.getVersion()
@@ -230,7 +200,7 @@ public class EntityShould {
 
     @Test
     @DisplayName("record modification time when updating state")
-    void recordModificationTimeWhenUpdatingState() {
+    void recordModificationTimeOnStateUpdate() {
         entityNew.incrementState(state);
         final long expectedTimeSec = TimeTests.currentTimeSeconds();
 
@@ -239,7 +209,7 @@ public class EntityShould {
     }
 
     @Test
-    @DisplayName("generate non zero hash code if entity has non empty id and state")
+    @DisplayName("generate non-zero hash code if entity has non empty id and state")
     void generateNonZeroHashCodeIfEntityHasNonEmptyIdAndState() {
         assertFalse(entityWithState.getId()
                                    .trim()
@@ -262,30 +232,6 @@ public class EntityShould {
         final TestEntity another = TestEntity.withState();
 
         assertNotEquals(entityWithState.hashCode(), another.hashCode());
-    }
-
-    private static class EntityWithMessageId
-            extends AbstractVersionableEntity<ProjectId, StringValue> {
-
-        protected EntityWithMessageId() {
-            super(Sample.messageOfType(ProjectId.class));
-        }
-    }
-
-    private static Matcher<Long> isBetween(final Long lower, final Long higher) {
-        return new BaseMatcher<Long>() {
-            @Override
-            public boolean matches(Object o) {
-                assertThat(o, instanceOf(Long.class));
-                final Long number = (Long) o;
-                return number >= lower && number <= higher;
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText(" must be between " + lower + " and " + higher + ' ');
-            }
-        };
     }
 }
 

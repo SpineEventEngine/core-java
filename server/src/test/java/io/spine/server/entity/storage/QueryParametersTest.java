@@ -28,8 +28,8 @@ import com.google.protobuf.util.Timestamps;
 import io.spine.client.ColumnFilter;
 import io.spine.client.ColumnFilters;
 import io.spine.server.entity.VersionableEntity;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.text.ParseException;
 import java.util.Collection;
@@ -50,16 +50,17 @@ import static io.spine.server.entity.storage.QueryParameters.newBuilder;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class QueryParametersShould {
+@DisplayName("QueryParameters should")
+class QueryParametersTest {
 
     @Test
     @DisplayName("be serializable")
@@ -129,7 +130,7 @@ public class QueryParametersShould {
 
     @Test
     @DisplayName("keep multiple filters for single column")
-    void keepMultipleFiltersForSingleColumn() throws ParseException {
+    void keepMultipleFiltersForColumn() throws ParseException {
         final String columnName = "time";
         final EntityColumn column = mock(EntityColumn.class);
 

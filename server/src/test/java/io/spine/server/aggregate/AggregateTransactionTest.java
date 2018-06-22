@@ -29,7 +29,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.entity.ThrowingValidatingBuilder;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
-import io.spine.server.entity.TransactionShould;
+import io.spine.server.entity.TransactionTest;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
@@ -49,13 +49,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Alex Tymchenko
  */
-//TODO:2018-05-31:dmytro.kuzmin: Make package-private after TransactionShould migrated to JUnit 5
 @DisplayName("AggregateTransaction should")
-public class AggregateTransactionTest
-        extends TransactionShould<ProjectId,
-        Aggregate<ProjectId, Project, AggregateTransactionTest.PatchedProjectBuilder>,
-        Project,
-        AggregateTransactionTest.PatchedProjectBuilder> {
+class AggregateTransactionTest
+        extends TransactionTest<ProjectId,
+                Aggregate<ProjectId, Project, AggregateTransactionTest.PatchedProjectBuilder>,
+                Project,
+                AggregateTransactionTest.PatchedProjectBuilder> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("aggregate-transaction-should-project")

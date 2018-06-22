@@ -30,7 +30,6 @@ import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithRepeatedCol
 import io.spine.server.entity.storage.given.ColumnsTestEnv.RealLifeEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
 

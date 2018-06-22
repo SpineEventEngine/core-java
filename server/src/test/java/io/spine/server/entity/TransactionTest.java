@@ -31,11 +31,9 @@ import io.spine.server.model.ModelTests;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ValidatingBuilder;
 import io.spine.validate.ValidationException;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 
 import java.util.List;
@@ -44,12 +42,13 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.core.Versions.newVersion;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -61,15 +60,12 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  *
  * @author Alex Tymchenko
  */
-public abstract class TransactionShould<I,
+public abstract class TransactionTest<I,
         E extends TransactionalEntity<I, S, B>,
         S extends Message,
         B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
-    private final EventFactory eventFactory = TestEventFactory.newInstance(TransactionShould.class);
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+    private final EventFactory eventFactory = TestEventFactory.newInstance(TransactionTest.class);
 
     private static ValidationException validationException() {
         ValidationException ex = new ValidationException(Lists.newLinkedList());
@@ -123,8 +119,8 @@ public abstract class TransactionShould<I,
 
     protected abstract void breakEntityValidation(E entity, RuntimeException toThrow);
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ModelTests.clearModel();
     }
 
@@ -154,7 +150,7 @@ public abstract class TransactionShould<I,
 
     @Test
     @DisplayName("propagate changes to entity applier methods")
-    void propagateChangesToEntityApplierMethods() {
+    void propagateChangesToApplierMethods() {
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
 
@@ -165,8 +161,8 @@ public abstract class TransactionShould<I,
     }
 
     @Test
-    @DisplayName("create phase for an applied event")
-    void createPhaseForAnAppliedEvent() {
+    @DisplayName("create phase for applied event")
+    void createPhaseForAppliedEvent() {
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
 
@@ -201,7 +197,7 @@ public abstract class TransactionShould<I,
 
     @Test
     @DisplayName("not propagate changes to entity on rollback")
-    void notPropagateChangesToEntityOnRollback() {
+    void notPropagateChangesOnRollback() {
         E entity = createEntity();
 
         Transaction<I, E, S, B> tx = createTx(entity);
@@ -219,7 +215,7 @@ public abstract class TransactionShould<I,
     }
 
     @Test
-    @DisplayName("set txEntityVersion from EventContext")
+    @DisplayName("set `txEntityVersion` from EventContext")
     void setTxEntityVersionFromEventContext() {
         E entity = createEntity();
 
@@ -235,11 +231,10 @@ public abstract class TransactionShould<I,
         assertEquals(modifiedVersion, tx.getVersion());
     }
 
-    // todo messed up
-    @Test
     @SuppressWarnings({"unchecked", "ConstantConditions"})  // OK for a test method.
-    @DisplayName("ssWarnings")
-    public void notify_listener_during_transaction_execution() {
+    @Test
+    @DisplayName("notify listener during transaction execution")
+    void notifyListenerDuringTransactionExecution() {
         TransactionListener<I, E, S, B> listener = mock(TransactionListener.class);
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTxWithListener(entity, listener);
@@ -252,7 +247,7 @@ public abstract class TransactionShould<I,
     }
 
     @Test
-    @DisplayName("init state and version if specified in ctor")
+    @DisplayName("init state and version if specified in constructor")
     void initStateAndVersionIfSpecifiedInCtor() {
         E entity = createEntity();
         S newState = createNewState();
@@ -277,15 +272,15 @@ public abstract class TransactionShould<I,
 
     @SuppressWarnings("CheckReturnValue") // can ignore new entity version in this test.
     @Test
-    @DisplayName("not allow injecting state if entity has non zero version already")
+    @DisplayName("not allow injecting state if entity has non-zero version already")
     void notAllowInjectingStateIfEntityHasNonZeroVersionAlready() {
         E entity = createEntity();
         entity.incrementVersion();
         S newState = createNewState();
         Version newVersion = someVersion();
 
-        thrown.expect(IllegalStateException.class);
-        createTxWithState(entity, newState, newVersion);
+        assertThrows(IllegalStateException.class,
+                     () -> createTxWithState(entity, newState, newVersion));
     }
 
     @Test
@@ -297,8 +292,7 @@ public abstract class TransactionShould<I,
 
         Event event = createEvent(createEventMessageThatFailsInHandler());
 
-        thrown.expect(IllegalStateException.class);
-        applyEvent(tx, event);
+        assertThrows(IllegalStateException.class, () -> applyEvent(tx, event));
     }
 
     @Test
@@ -348,8 +342,7 @@ public abstract class TransactionShould<I,
         ValidationException toThrow = validationException();
         breakEntityValidation(entity, toThrow);
 
-        thrown.expect(InvalidEntityStateException.class);
-        tx.commit();
+        assertThrows(InvalidEntityStateException.class, tx::commit);
     }
 
     @Test

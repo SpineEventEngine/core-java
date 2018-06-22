@@ -40,7 +40,7 @@ import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContainsAll;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -109,7 +109,7 @@ class ColumnRecordsTest {
         verify(type, times(MOCK_NULL_COLUMNS_COUNT)).setNull(eq(destination), anyString());
 
         final int indexOfNull = destination.indexOf(null);
-        assertTrue("Null value was not saved to the destination", indexOfNull >= 0);
+        assertTrue(indexOfNull >= 0, "Null value was not saved to the destination");
         assertContainsAll(destination, getNonNullColumnValues().toArray());
     }
 }

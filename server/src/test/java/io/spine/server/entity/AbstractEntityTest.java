@@ -22,36 +22,36 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.server.entity.given.AbstractEntityTestEnv.AnEntity;
+import io.spine.server.entity.given.AbstractEntityTestEnv.NaturalNumberEntity;
 import io.spine.test.entity.number.NaturalNumber;
-import org.junit.Rule;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
+import static io.spine.server.entity.given.AbstractEntityTestEnv.newNaturalNumber;
 import static io.spine.test.Verify.assertSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Illia Shepilov
  */
-public class AbstractEntityShould {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+@DisplayName("AbstractEntity should")
+class AbstractEntityTest {
 
     /**
      * Ensures that {@link AbstractEntity#updateState(Message)} is final so that
      * it's not possible to override the default behaviour.
      */
     @Test
-    @DisplayName("prevent updateState method overriding")
-    void preventUpdateStateMethodOverriding() throws NoSuchMethodException {
+    @DisplayName("prevent `updateState` method overriding")
+    void haveUpdateStateMethodFinal() throws NoSuchMethodException {
         final Method updateState =
                 AbstractEntity.class.getDeclaredMethod("updateState", Message.class);
         final int modifiers = updateState.getModifiers();
@@ -63,8 +63,8 @@ public class AbstractEntityShould {
      * it's not possible to override the default behaviour.
      */
     @Test
-    @DisplayName("prevent validate method overriding")
-    void preventValidateMethodOverriding() throws NoSuchMethodException {
+    @DisplayName("prevent `validate` method overriding")
+    void haveValidateMethodFinal() throws NoSuchMethodException {
         final Method validate =
                 AbstractEntity.class.getDeclaredMethod("validate", Message.class);
         final int modifiers = validate.getModifiers();
@@ -73,7 +73,7 @@ public class AbstractEntityShould {
 
     @Test
     @DisplayName("throw InvalidEntityStateException if state is invalid")
-    void throwInvalidEntityStateExceptionIfStateIsInvalid() {
+    void throwOnInvalidState() {
         final NaturalNumberEntity entity = new NaturalNumberEntity(0L);
         final NaturalNumber invalidNaturalNumber = newNaturalNumber(-1);
         try {
@@ -94,11 +94,10 @@ public class AbstractEntityShould {
     @SuppressWarnings("ConstantConditions") // The goal of the test.
     @Test
     @DisplayName("not accept null to checkEntityState")
-    void notAcceptNullToCheckEntityState() {
+    void rejectNullState() {
         AnEntity entity = new AnEntity(0L);
 
-        thrown.expect(NullPointerException.class);
-        entity.checkEntityState(null);
+        assertThrows(NullPointerException.class, () -> entity.checkEntityState(null));
     }
 
     @Test
@@ -111,28 +110,10 @@ public class AbstractEntityShould {
 
     @Test
     @DisplayName("return sting ID")
-    void returnStingID() {
+    void returnStingId() {
         final AnEntity entity = new AnEntity(1_234_567L);
 
         assertEquals("1234567", entity.stringId());
         assertSame(entity.stringId(), entity.stringId());
-    }
-
-    private static class AnEntity extends AbstractEntity<Long, StringValue> {
-        protected AnEntity(Long id) {
-            super(id);
-        }
-    }
-
-    private static class NaturalNumberEntity extends AbstractEntity<Long, NaturalNumber> {
-        private NaturalNumberEntity(Long id) {
-            super(id);
-        }
-    }
-
-    private static NaturalNumber newNaturalNumber(int value) {
-        return NaturalNumber.newBuilder()
-                            .setValue(value)
-                            .build();
     }
 }

@@ -42,7 +42,7 @@ import io.spine.core.given.GivenEvent;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.RecordBasedRepository;
-import io.spine.server.entity.RecordBasedRepositoryShould;
+import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.given.Given;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
@@ -64,11 +64,9 @@ import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Set;
@@ -93,23 +91,22 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Litus
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class ProcessManagerRepositoryShould
-        extends RecordBasedRepositoryShould<TestProcessManager,
-        ProjectId,
-        Project> {
+        extends RecordBasedRepositoryTest<TestProcessManager,
+                ProjectId,
+                Project> {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass(),
                                                 TenantId.newBuilder()
                                                         .setValue(newUuid())
                                                         .build());
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
     private BoundedContext boundedContext;
 
     @Override
@@ -153,7 +150,7 @@ public class ProcessManagerRepositoryShould
      *************/
 
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         super.setUp();
         setCurrentTenant(requestFactory.getTenantId());
@@ -165,7 +162,7 @@ public class ProcessManagerRepositoryShould
     }
 
     @Override
-    @After
+    @AfterEach
     public void tearDown() throws Exception {
         boundedContext.close();
         super.tearDown();
@@ -331,8 +328,7 @@ public class ProcessManagerRepositoryShould
         Command unknownCommand =
                 requestFactory.createCommand(Int32Value.getDefaultInstance());
         CommandEnvelope request = CommandEnvelope.of(unknownCommand);
-        thrown.expect(IllegalArgumentException.class);
-        repository().dispatchCommand(request);
+        assertThrows(IllegalArgumentException.class, () -> repository().dispatchCommand(request));
     }
 
     @Test
@@ -408,8 +404,7 @@ public class ProcessManagerRepositoryShould
                                                       .setMultitenant(false)
                                                       .build();
         repo.setBoundedContext(boundedContext);
-        thrown.expect(IllegalStateException.class);
-        repo.onRegistered();
+        assertThrows(IllegalStateException.class, () -> repo.onRegistered());
     }
 
     /**

@@ -22,50 +22,43 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
+import io.spine.server.entity.given.FieldMasksTestEnv.Given;
 import io.spine.test.aggregate.Project;
-import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.Status;
-import io.spine.test.aggregate.Task;
-import io.spine.test.aggregate.TaskId;
-import io.spine.test.commandservice.customer.Customer;
-import io.spine.type.TypeUrl;
-import org.junit.Rule;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertSize;
 import static java.lang.String.format;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class FieldMasksShould {
+@DisplayName("FieldMasks utility should")
+class FieldMasksTest {
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-    
     @Test
-    @DisplayName("have private constructor")
-    void havePrivateConstructor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(FieldMasks.class);
     }
 
     @Test
     @DisplayName("create masks for given field tags")
-    void createMasksForGivenFieldTags() {
+    void createMasksForFields() {
         Descriptor descriptor = Project.getDescriptor();
         int[] fieldNumbers = {1, 2, 3};
         @SuppressWarnings("DuplicateStringLiteralInspection")
@@ -83,7 +76,7 @@ public class FieldMasksShould {
 
     @Test
     @DisplayName("retrieve default field mask if no field tags requested")
-    void retrieveDefaultFieldMaskIfNoFieldTagsRequested() {
+    void createDefaultMask() {
         Descriptor descriptor = Project.getDescriptor();
         FieldMask mask = FieldMasks.maskOf(descriptor);
         assertEquals(FieldMask.getDefaultInstance(), mask);
@@ -133,7 +126,7 @@ public class FieldMasksShould {
     }
 
     @Test
-    @DisplayName("apply only non empty mask to single item")
+    @DisplayName("apply only non-empty mask to single item")
     void applyOnlyNonEmptyMaskToSingleItem() {
         FieldMask emptyMask = Given.fieldMask();
 
@@ -152,7 +145,7 @@ public class FieldMasksShould {
 
     @SuppressWarnings({"ObjectEquality", "MethodWithMultipleLoops"})
     @Test
-    @DisplayName("apply only non empty mask to collection")
+    @DisplayName("apply only non-empty mask to collection")
     void applyOnlyNonEmptyMaskToCollection() {
         FieldMask emptyMask = Given.fieldMask();
 
@@ -186,47 +179,7 @@ public class FieldMasksShould {
 
         Project origin = Given.newProject("some-string");
 
-        thrown.expect(IllegalArgumentException.class);
-        FieldMasks.applyMask(mask, origin, Given.OTHER_TYPE);
-    }
-
-    private static class Given {
-
-        private static final TypeUrl TYPE = TypeUrl.of(Project.class);
-        private static final TypeUrl OTHER_TYPE = TypeUrl.of(Customer.class);
-
-        private static final Descriptor TYPE_DESCRIPTOR = Project.getDescriptor();
-
-        private static Project newProject(String id) {
-            ProjectId projectId = ProjectId.newBuilder()
-                                                 .setId(id)
-                                                 .build();
-            Task first = Task.newBuilder()
-                                   .setTaskId(TaskId.newBuilder()
-                                                    .setId(1)
-                                                    .build())
-                                   .setTitle("First Task")
-                                   .build();
-
-            Task second = Task.newBuilder()
-                                    .setTaskId(TaskId.newBuilder()
-                                                     .setId(2)
-                                                     .build())
-                                    .setTitle("Second Task")
-                                    .build();
-
-            Project project = Project.newBuilder()
-                                           .setId(projectId)
-                                           .setName(format("Test project : %s", id))
-                                           .addTask(first)
-                                           .addTask(second)
-                                           .setStatus(Status.CREATED)
-                                           .build();
-            return project;
-        }
-
-        private static FieldMask fieldMask(int... fieldIndices) {
-            return FieldMasks.maskOf(TYPE_DESCRIPTOR, fieldIndices);
-        }
+        assertThrows(IllegalArgumentException.class,
+                     () -> FieldMasks.applyMask(mask, origin, Given.OTHER_TYPE));
     }
 }

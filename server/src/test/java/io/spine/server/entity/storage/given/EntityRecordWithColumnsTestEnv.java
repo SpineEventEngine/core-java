@@ -18,37 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.server.entity.storage.given;
 
-import org.junit.Test;
-import org.junit.jupiter.api.DisplayName;
+import com.google.protobuf.Any;
+import io.spine.server.entity.AbstractEntity;
+import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.test.entity.Project;
 
-import static org.junit.Assert.assertSame;
+public class EntityRecordWithColumnsTestEnv {
 
-/**
- * @author Dmytro Dashenkov
- */
-public class SimpleColumnTypeShould {
-
-    @Test
-    @DisplayName("perform identity conversion of given value")
-    void performIdentityConversionOfGivenValue() {
-        final ColumnType<Object, ?, ?, ?> columnType = new ColumnTypeImpl<>();
-        final Object input = new Object();
-        final Object output = columnType.convertColumnValue(input);
-        assertSame(input, output);
+    /** Prevents instantiation of this utility class. */
+    private EntityRecordWithColumnsTestEnv() {
     }
 
-    private static class ColumnTypeImpl<T, R, C> extends SimpleColumnType<T, R, C> {
+    public static class TestEntity extends AbstractVersionableEntity<String, Project> {
 
-        @Override
-        public void setColumnValue(Object storageRecord, Object value, Object columnIdentifier) {
-            // NOP
+        private TestEntity(String id) {
+            super(id);
         }
+    }
 
-        @Override
-        public void setNull(Object storageRecord, Object columnIdentifier) {
-            // NOP
+    public static class EntityWithoutColumns extends AbstractEntity<String, Any> {
+        public EntityWithoutColumns(String id) {
+            super(id);
         }
     }
 }

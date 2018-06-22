@@ -33,8 +33,8 @@ import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -51,18 +51,29 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Verify.assertContains;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class EntityQueryShould {
+@DisplayName("EntityQuery should")
+class EntityQueryTest {
+
+    @Test
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        new NullPointerTester()
+                .setDefault(EntityIdFilter.class, EntityIdFilter.getDefaultInstance())
+                .setDefault(QueryParameters.class, QueryParameters.newBuilder().build())
+                .testStaticMethods(EntityQuery.class, NullPointerTester.Visibility.PACKAGE);
+    }
 
     @Test
     @DisplayName("be serializable")
@@ -81,16 +92,7 @@ public class EntityQueryShould {
     }
 
     @Test
-    @DisplayName("not accept nulls")
-    void notAcceptNulls() {
-        new NullPointerTester()
-                .setDefault(EntityIdFilter.class, EntityIdFilter.getDefaultInstance())
-                .setDefault(QueryParameters.class, QueryParameters.newBuilder().build())
-                .testStaticMethods(EntityQuery.class, NullPointerTester.Visibility.PACKAGE);
-    }
-
-    @Test
-    @DisplayName("support toString")
+    @DisplayName("support `toString`")
     void supportToString() {
         final Object someId = Sample.messageOfType(ProjectId.class);
         final Collection<Object> ids = singleton(someId);
@@ -121,8 +123,8 @@ public class EntityQueryShould {
     }
 
     @Test
-    @DisplayName("fail to append lifecycle columns if already contains")
-    void failToAppendLifecycleColumnsIfAlreadyContains() {
+    @DisplayName("fail to append lifecycle columns if they are already present")
+    void notDuplicateLifecycleColumns() {
         final EntityColumn deletedColumn = Columns.findColumn(EntityWithLifecycle.class, deleted.name());
         final CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
                 ImmutableMultimap.of(deletedColumn, ColumnFilter.getDefaultInstance()),

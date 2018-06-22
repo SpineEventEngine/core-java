@@ -23,32 +23,35 @@ package io.spine.server.entity;
 import com.google.common.base.Function;
 import com.google.protobuf.StringValue;
 import io.spine.client.EntityId;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.protobuf.TypeConverter.toAny;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class EntityIdFunctionShould {
+// todo move to record based repository should
+@DisplayName("EntityIdFunction should")
+class EntityIdFunctionTest {
 
-    @Test(expected = IllegalStateException.class)
-    @DisplayName("do not accept wrong id type")
-    void doNotAcceptWrongIdType() {
+    @Test
+    @DisplayName("not accept wrong ID type")
+    void notAcceptWrongIdType() {
         final Function<EntityId, StringValue> func =
                 new RecordBasedRepository.EntityIdFunction<>(StringValue.class);
 
         final EntityId wrongType = EntityId.newBuilder()
                                            .setId(toAny(100L))
                                            .build();
-        func.apply(wrongType);
+        assertThrows(IllegalStateException.class, () -> func.apply(wrongType));
     }
 
     @Test
-    @DisplayName("accept proper id type")
+    @DisplayName("accept proper ID type")
     void acceptProperIdType() {
         final Function<EntityId, StringValue> func =
                 new RecordBasedRepository.EntityIdFunction<>(StringValue.class);
