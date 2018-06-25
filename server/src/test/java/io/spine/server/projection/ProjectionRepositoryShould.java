@@ -40,7 +40,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.TestEventClasses;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.RecordBasedRepository;
-import io.spine.server.entity.RecordBasedRepositoryShould;
+import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.given.Given;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.GivenEventMessage;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
@@ -56,11 +56,9 @@ import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjProjectDeleted;
 import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 import java.util.List;
@@ -73,16 +71,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
 public class ProjectionRepositoryShould
-        extends RecordBasedRepositoryShould<TestProjection, ProjectId, Project> {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+        extends RecordBasedRepositoryTest<TestProjection, ProjectId, Project> {
 
     private static final Any PRODUCER_ID = Identifier.pack(GivenEventMessage.ENTITY_ID);
 
@@ -161,7 +157,7 @@ public class ProjectionRepositoryShould
     }
 
     @Override
-    @Before
+    @BeforeEach
     public void setUp() {
         boundedContext = BoundedContext
                 .newBuilder()
@@ -185,7 +181,7 @@ public class ProjectionRepositoryShould
      * <p>The {@link #tearDown()} method of the super class will be invoked by JUnit automatically
      * after calling this method.
      */
-    @After
+    @AfterEach
     public void shutDown() throws Exception {
         boundedContext.close();
     }
@@ -387,7 +383,6 @@ public class ProjectionRepositoryShould
                 .build();
         repo.setBoundedContext(boundedContext);
 
-        thrown.expect(IllegalStateException.class);
-        repo.onRegistered();
+        assertThrows(IllegalStateException.class, repo::onRegistered);
     }
 }

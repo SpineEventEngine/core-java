@@ -28,7 +28,7 @@ import io.spine.core.Versions;
 import io.spine.server.entity.ThrowingValidatingBuilder;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
-import io.spine.server.entity.TransactionShould;
+import io.spine.server.entity.TransactionTest;
 import io.spine.server.projection.ProjectionTransactionShould.PatchedProjectBuilder;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -52,10 +52,10 @@ import static org.junit.Assert.assertTrue;
  * @author Alex Tymchenko
  */
 public class ProjectionTransactionShould
-        extends TransactionShould<ProjectId,
-                                  Projection<ProjectId, Project, PatchedProjectBuilder>,
-                                  Project,
-                                  PatchedProjectBuilder> {
+        extends TransactionTest<ProjectId,
+                                Projection<ProjectId, Project, PatchedProjectBuilder>,
+                                Project,
+                                PatchedProjectBuilder> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("projection-transaction-should-project")
@@ -155,7 +155,7 @@ public class ProjectionTransactionShould
     @Ignore
     @Test
     @Override
-    public void advance_version_from_event() {
+    public void advanceVersionFromEvent() {
     }
 
     /**
@@ -163,7 +163,7 @@ public class ProjectionTransactionShould
      *
      * <p>The versioning strategy is for {@link Projection} is
      * {@link io.spine.server.entity.EntityVersioning#AUTO_INCREMENT AUTO_INCREMENT}. This test
-     * case substitutes {@link #advance_version_from_event()}, which tested the behavior of
+     * case substitutes {@link #advanceVersionFromEvent()}, which tested the behavior of
      * {@link io.spine.server.entity.EntityVersioning#FROM_EVENT FROM_EVENT} strategy.
      */
     @SuppressWarnings("CheckReturnValue") // can ignore value of play() in this test

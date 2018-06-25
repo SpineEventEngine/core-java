@@ -18,20 +18,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.entity.storage.given;
 
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.ColumnType;
 
 /**
- * The contract for the test {@linkplain Entity entities} which serve for testing the subclasses of
- * {@link RecordBasedRepository}.
- *
  * @author Dmytro Dashenkov
- * @see RecordBasedRepositoryTest
+ * @author Dmytro Kuzmin
  */
-public interface TestEntityWithStringColumn {
+public class ColumnTypeTestEnv {
 
-    @SuppressWarnings("unused") // Reflective access
-    @Column
-    String getIdString();
+    /** Prevents instantiation of this utility class. */
+    private ColumnTypeTestEnv() {
+    }
+
+    public static class TestColumnType<T> implements ColumnType<T, String, StringBuilder, String> {
+
+        @Override
+        public String convertColumnValue(T fieldValue) {
+            return String.valueOf(fieldValue);
+        }
+
+        @Override
+        public void setColumnValue(StringBuilder storageRecord,
+                                   String value,
+                                   String columnIdentifier) {
+            storageRecord.append(columnIdentifier)
+                         .append(": ")
+                         .append(value);
+        }
+
+        @Override
+        public void setNull(StringBuilder storageRecord, String columnIdentifier) {
+            setColumnValue(storageRecord, "null", columnIdentifier);
+        }
+    }
 }

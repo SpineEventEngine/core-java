@@ -18,20 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.entity.storage.given;
 
-import io.spine.server.entity.storage.Column;
+import com.google.protobuf.Any;
+import io.spine.server.entity.AbstractEntity;
+import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.test.entity.Project;
 
 /**
- * The contract for the test {@linkplain Entity entities} which serve for testing the subclasses of
- * {@link RecordBasedRepository}.
- *
  * @author Dmytro Dashenkov
- * @see RecordBasedRepositoryTest
+ * @author Dmytro Kuzmin
  */
-public interface TestEntityWithStringColumn {
+public class EntityRecordWithColumnsTestEnv {
 
-    @SuppressWarnings("unused") // Reflective access
-    @Column
-    String getIdString();
+    /** Prevents instantiation of this utility class. */
+    private EntityRecordWithColumnsTestEnv() {
+    }
+
+    public static class TestEntity extends AbstractVersionableEntity<String, Project> {
+
+        private TestEntity(String id) {
+            super(id);
+        }
+    }
+
+    public static class EntityWithoutColumns extends AbstractEntity<String, Any> {
+        public EntityWithoutColumns(String id) {
+            super(id);
+        }
+    }
 }

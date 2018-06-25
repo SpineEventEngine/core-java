@@ -24,7 +24,7 @@ import io.spine.core.Event;
 import io.spine.core.Version;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
-import io.spine.server.entity.TransactionShould;
+import io.spine.server.entity.TransactionTest;
 import io.spine.server.procman.given.PmTransactionTestEnv.PatchedProjectBuilder;
 import io.spine.server.procman.given.PmTransactionTestEnv.TestProcessManager;
 import io.spine.test.procman.Project;
@@ -32,8 +32,8 @@ import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.validate.ConstraintViolation;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -44,10 +44,10 @@ import static org.junit.Assert.assertTrue;
  * @author Alex Tymchenko
  */
 public class PmTransactionShould
-        extends TransactionShould<ProjectId,
-                                  ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
-                                  Project,
-                                  PatchedProjectBuilder> {
+        extends TransactionTest<ProjectId,
+                                ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
+                                Project,
+                                PatchedProjectBuilder> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("procman-transaction-should-project")
@@ -136,8 +136,8 @@ public class PmTransactionShould
               .setShouldThrow(toThrow);
     }
 
-    @Ignore // The behavior is changed. The version should be auto incremented.
+    @Disabled // The behavior is changed. The version should be auto incremented.
     @Test
     @Override
-    public void advance_version_from_event() {}
+    protected void advanceVersionFromEvent() {}
 }

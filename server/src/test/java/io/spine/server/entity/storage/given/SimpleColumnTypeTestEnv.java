@@ -18,20 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.entity.storage.given;
 
-import io.spine.server.entity.storage.Column;
+import io.spine.server.entity.storage.SimpleColumnType;
 
 /**
- * The contract for the test {@linkplain Entity entities} which serve for testing the subclasses of
- * {@link RecordBasedRepository}.
- *
  * @author Dmytro Dashenkov
- * @see RecordBasedRepositoryTest
+ * @author Dmytro Kuzmin
  */
-public interface TestEntityWithStringColumn {
+public class SimpleColumnTypeTestEnv {
 
-    @SuppressWarnings("unused") // Reflective access
-    @Column
-    String getIdString();
+    /** Prevents instantiation of this utility class. */
+    private SimpleColumnTypeTestEnv() {
+    }
+
+    public static class ColumnTypeImpl<T, R, C> extends SimpleColumnType<T, R, C> {
+
+        @Override
+        public void setColumnValue(Object storageRecord, Object value, Object columnIdentifier) {
+            // NOP
+        }
+
+        @Override
+        public void setNull(Object storageRecord, Object columnIdentifier) {
+            // NOP
+        }
+    }
 }

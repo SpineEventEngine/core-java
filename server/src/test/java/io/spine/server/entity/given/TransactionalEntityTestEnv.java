@@ -18,20 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity;
+package io.spine.server.entity.given;
 
-import io.spine.server.entity.storage.Column;
+import com.google.protobuf.StringValue;
+import io.spine.server.entity.Entity;
+import io.spine.server.entity.TransactionalEntity;
+import io.spine.validate.StringValueVBuilder;
 
 /**
- * The contract for the test {@linkplain Entity entities} which serve for testing the subclasses of
- * {@link RecordBasedRepository}.
- *
- * @author Dmytro Dashenkov
- * @see RecordBasedRepositoryTest
+ * @author Alex Tymchenko
+ * @author Dmytro Kuzmin
  */
-public interface TestEntityWithStringColumn {
+public class TransactionalEntityTestEnv {
 
-    @SuppressWarnings("unused") // Reflective access
-    @Column
-    String getIdString();
+    /** Prevents instantiation of this utility class. */
+    private TransactionalEntityTestEnv() {
+    }
+
+    public static class TeEntity
+            extends TransactionalEntity<Long, StringValue, StringValueVBuilder> {
+
+        /**
+         * Creates a new instance.
+         *
+         * @param id the ID for the new instance
+         * @throws IllegalArgumentException if the ID is not of one of the
+         *                                  {@linkplain Entity supported types}
+         */
+        public TeEntity(Long id) {
+            super(id);
+        }
+    }
 }
