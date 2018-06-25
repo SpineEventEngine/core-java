@@ -22,7 +22,7 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.Version;
-import io.spine.validate.StringValueVBuilder;
+import io.spine.server.entity.given.TransactionalEntityTestEnv.TeEntity;
 import io.spine.validate.ValidatingBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -263,20 +263,5 @@ class TransactionalEntityTest {
 
         entity.injectTransaction(tx);
         return entity;
-    }
-
-    private static class TeEntity
-            extends TransactionalEntity<Long, StringValue, StringValueVBuilder> {
-
-        /**
-         * Creates a new instance.
-         *
-         * @param id the ID for the new instance
-         * @throws IllegalArgumentException if the ID is not of one of the
-         *                                  {@linkplain Entity supported types}
-         */
-        private TeEntity(Long id) {
-            super(id);
-        }
     }
 }
