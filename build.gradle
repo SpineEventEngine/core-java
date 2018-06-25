@@ -141,7 +141,6 @@ subprojects {
         generatedTestSpineDir = "$generatedRootDir/test/spine"
 
         testArtifactsScript = "${rootDir}/scripts/test-artifacts.gradle"
-        generateDescriptorSetScript = "${rootDir}/scripts/generate-descriptor-set.gradle"
         filterInternalJavadocsScript = "${rootDir}/scripts/no-internal-javadoc.gradle"
         gRpcScript = "${rootDir}/scripts/grpc.gradle"
         updateDocsPlugin = "$rootDir/scripts/update-gh-pages.gradle"
