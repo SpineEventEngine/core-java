@@ -25,11 +25,13 @@ import io.spine.server.command.CommandHandlerMethod;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.command.CreateProject;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 public class MessageHandlerMapShould {
 
     @Test(expected = DuplicateHandlerMethodError.class)
-    public void not_allow_duplicating_message_classes() {
+    @DisplayName("not allow duplicating message classes")
+    void notAllowDuplicatingMessageClasses() {
         new MessageHandlerMap<>
                 (HandlerWithDuplicatingMethods.class, CommandHandlerMethod.factory());
     }

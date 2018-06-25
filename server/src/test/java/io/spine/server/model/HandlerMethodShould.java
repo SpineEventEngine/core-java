@@ -30,6 +30,7 @@ import io.spine.test.Tests;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
@@ -62,34 +63,40 @@ public class HandlerMethodShould {
     }
 
     @Test
-    public void do_not_accept_null_method() {
+    @DisplayName("do not accept null method")
+    void doNotAcceptNullMethod() {
         thrown.expect(NullPointerException.class);
         new TwoParamMethod(Tests.nullRef());
     }
 
     @Test
-    public void return_method() {
+    @DisplayName("return method")
+    void returnMethod() {
         assertEquals(StubHandler.getTwoParameterMethod(), twoParamMethod.getMethod());
     }
 
     @Test
-    public void check_if_public() {
+    @DisplayName("check if public")
+    void checkIfPublic() {
         assertTrue(twoParamMethod.isPublic());
     }
 
     @Test
-    public void check_if_private() {
+    @DisplayName("check if private")
+    void checkIfPrivate() {
         assertTrue(oneParamMethod.isPrivate());
     }
 
     @Test
-    public void return_first_param_type() {
+    @DisplayName("return first param type")
+    void returnFirstParamType() {
         assertEquals(BoolValue.class, HandlerMethod.getFirstParamType(oneParamMethod.getMethod()));
     }
 
     @SuppressWarnings("CheckReturnValue") // can ignore the result in this test
     @Test
-    public void invoke_the_method_with_two_parameters() {
+    @DisplayName("invoke the method with two parameters")
+    void invokeTheMethodWithTwoParameters() {
         twoParamMethod.invoke(target,
                               StringValue.getDefaultInstance(),
                               EventContext.getDefaultInstance());
@@ -99,34 +106,40 @@ public class HandlerMethodShould {
 
     @SuppressWarnings("CheckReturnValue") // can ignore the result in this test
     @Test
-    public void invoke_the_method_with_one_parameter() {
+    @DisplayName("invoke the method with one parameter")
+    void invokeTheMethodWithOneParameter() {
         oneParamMethod.invoke(target, BoolValue.getDefaultInstance(), Empty.getDefaultInstance());
 
         assertTrue(((StubHandler) target).wasHandleInvoked());
     }
 
     @Test
-    public void return_full_name_in_toString() {
+    @DisplayName("return full name in toString")
+    void returnFullNameInToString() {
         assertEquals(twoParamMethod.getFullName(), twoParamMethod.toString());
     }
 
     @Test
-    public void be_equal_to_itself() {
+    @DisplayName("be equal to itself")
+    void beEqualToItself() {
         assertEquals(twoParamMethod, twoParamMethod);
     }
 
     @Test
-    public void be_not_equal_to_null() {
+    @DisplayName("be not equal to null")
+    void beNotEqualToNull() {
         assertNotEquals(null, oneParamMethod);
     }
 
     @Test
-    public void be_not_equal_to_another_class_instance() {
+    @DisplayName("be not equal to another class instance")
+    void beNotEqualToAnotherClassInstance() {
         assertNotEquals(twoParamMethod, oneParamMethod);
     }
 
     @Test
-    public void compare_fields_in_equals() {
+    @DisplayName("compare fields in equals")
+    void compareFieldsInEquals() {
         HandlerMethod<EventClass, EventContext> anotherMethod =
                 new TwoParamMethod(StubHandler.getTwoParameterMethod());
 
@@ -134,18 +147,21 @@ public class HandlerMethodShould {
     }
 
     @Test
-    public void have_hashCode() {
+    @DisplayName("have hashCode")
+    void haveHashCode() {
         assertNotEquals(System.identityHashCode(twoParamMethod), twoParamMethod.hashCode());
     }
 
     @Test
-    public void do_not_be_created_from_method_with_checked_exception() {
+    @DisplayName("do not be created from method with checked exception")
+    void doNotBeCreatedFromMethodWithCheckedException() {
         thrown.expect(IllegalStateException.class);
         factory.create(StubHandler.getMethodWithCheckedException());
     }
 
     @Test
-    public void be_normally_created_from_method_with_runtime_exception() {
+    @DisplayName("be normally created from method with runtime exception")
+    void beNormallyCreatedFromMethodWithRuntimeException() {
         OneParamMethod method = factory.create(StubHandler.getMethodWithRuntimeException());
         assertEquals(StubHandler.getMethodWithRuntimeException(), method.getMethod());
     }

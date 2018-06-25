@@ -22,6 +22,7 @@ package io.spine.server.outbus.enrich;
 
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.Assert.assertFalse;
 
@@ -31,7 +32,8 @@ import static org.junit.Assert.assertFalse;
 public class SupportsFieldConversionShould {
 
     @Test(expected = NullPointerException.class)
-    public void return_false_if_pass_null_to_function_checking_predicate() {
+    @DisplayName("return false if pass null to function checking predicate")
+    void returnFalseIfPassNullToFunctionCheckingPredicate() {
         final boolean result = SupportsFieldConversion.of(StringValue.class,
                                                           String.class)
                                                       .apply(null);

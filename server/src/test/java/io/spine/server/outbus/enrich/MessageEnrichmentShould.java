@@ -28,6 +28,7 @@ import io.spine.server.outbus.enrich.given.EventMessageEnricherTestEnv.Enrichmen
 import io.spine.test.event.ProjectCreated;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.Assert.assertFalse;
 
@@ -48,12 +49,14 @@ public class MessageEnrichmentShould {
     }
 
     @Test
-    public void be_inactive_when_created() {
+    @DisplayName("be inactive when created")
+    void beInactiveWhenCreated() {
         assertFalse(enricher.isActive());
     }
 
     @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName("pass null tolerance check")
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Message.class, Empty.getDefaultInstance())
                 .setDefault(EventContext.class, EventContext.getDefaultInstance())

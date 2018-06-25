@@ -22,6 +22,7 @@ package io.spine.server.model;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -34,7 +35,8 @@ import static io.spine.server.model.MethodExceptionChecker.forMethod;
 public class MethodExceptionCheckerShould {
 
     @Test
-    public void pass_null_check() {
+    @DisplayName("pass null check")
+    void passNullCheck() {
         new NullPointerTester().testAllPublicStaticMethods(MethodExceptionChecker.class);
 
         final Method method = getMethod("methodNoExceptions");
@@ -43,7 +45,8 @@ public class MethodExceptionCheckerShould {
     }
 
     @Test
-    public void pass_check_when_no_checked_exceptions_thrown() {
+    @DisplayName("pass check when no checked exceptions thrown")
+    void passCheckWhenNoCheckedExceptionsThrown() {
         final Method methodNoExceptions = getMethod("methodNoExceptions");
         final MethodExceptionChecker noExceptionsChecker = forMethod(methodNoExceptions);
         noExceptionsChecker.checkThrowsNoCheckedExceptions();
@@ -54,28 +57,32 @@ public class MethodExceptionCheckerShould {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void fail_check_when_checked_exceptions_thrown() {
+    @DisplayName("fail check when checked exceptions thrown")
+    void failCheckWhenCheckedExceptionsThrown() {
         final Method methodCheckedException = getMethod("methodCheckedException");
         final MethodExceptionChecker checker = forMethod(methodCheckedException);
         checker.checkThrowsNoCheckedExceptions();
     }
 
     @Test
-    public void pass_check_for_allowed_custom_exception_types() {
+    @DisplayName("pass check for allowed custom exception types")
+    void passCheckForAllowedCustomExceptionTypes() {
         final Method methodCustomException = getMethod("methodCustomException");
         final MethodExceptionChecker checker = forMethod(methodCustomException);
         checker.checkThrowsNoExceptionsBut(IOException.class);
     }
 
     @Test
-    public void pass_check_for_allowed_exception_types_descendants() {
+    @DisplayName("pass check for allowed exception types descendants")
+    void passCheckForAllowedExceptionTypesDescendants() {
         final Method methodDescendantException = getMethod("methodDescendantException");
         final MethodExceptionChecker checker = forMethod(methodDescendantException);
         checker.checkThrowsNoExceptionsBut(RuntimeException.class);
     }
 
     @Test(expected = IllegalStateException.class)
-    public void fail_check_for_prohibited_custom_exception_types() {
+    @DisplayName("fail check for prohibited custom exception types")
+    void failCheckForProhibitedCustomExceptionTypes() {
         final Method methodCustomException = getMethod("methodCustomException");
         final MethodExceptionChecker checker = forMethod(methodCustomException);
         checker.checkThrowsNoExceptionsBut(RuntimeException.class);

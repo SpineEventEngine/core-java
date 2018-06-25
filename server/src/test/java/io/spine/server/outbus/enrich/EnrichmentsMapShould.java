@@ -51,6 +51,7 @@ import io.spine.test.event.user.sharing.SharingRequestApproved;
 import io.spine.test.event.user.sharing.SharingRequestSent;
 import io.spine.type.TypeName;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.Collection;
 
@@ -67,57 +68,66 @@ import static org.junit.Assert.assertTrue;
 public class EnrichmentsMapShould {
 
     @Test
-    public void have_private_constructor() {
+    @DisplayName("have private constructor")
+    void havePrivateConstructor() {
         assertHasPrivateParameterlessCtor(EnrichmentsMap.class);
     }
 
     @Test
-    public void return_map_instance() {
+    @DisplayName("return map instance")
+    void returnMapInstance() {
         final ImmutableMultimap<String, String> map = EnrichmentsMap.getInstance();
 
         assertFalse(map.isEmpty());
     }
 
     @Test
-    public void contain_ProjectCreated_by_ProjectCreatedEnrichment_type() {
+    @DisplayName("contain ProjectCreated by ProjectCreatedEnrichment type")
+    void containProjectCreatedByProjectCreatedEnrichmentType() {
         assertEnrichmentIsUsedOnlyInEvents(ProjectCreated.Enrichment.class,
                                            ProjectCreated.class);
     }
 
     @Test
-    public void contain_ProjectCreated_by_ProjectCreatedSeparateEnrichment_type() {
+    @DisplayName("contain ProjectCreated by ProjectCreatedSeparateEnrichment type")
+    void containProjectCreatedByProjectCreatedSeparateEnrichmentType() {
         assertEnrichmentIsUsedOnlyInEvents(ProjectCreatedSeparateEnrichment.class,
                                            ProjectCreated.class);
     }
 
     @Test
-    public void contain_ProjectCreated_by_ProjectCreatedEnrichmentAnotherPackage_type() {
+    @DisplayName("contain ProjectCreated by ProjectCreatedEnrichmentAnotherPackage type")
+    void containProjectCreatedByProjectCreatedEnrichmentAnotherPackageType() {
         assertEnrichmentIsUsedOnlyInEvents(ProjectCreatedEnrichmentAnotherPackage.class,
                                            ProjectCreated.class);
     }
 
     @Test
-    public void contain_ProjectCreated_by_ProjectCreatedEnrichmentAnotherPackageFqn_type() {
+    @DisplayName("contain ProjectCreated by ProjectCreatedEnrichmentAnotherPackageFqn type")
+    void containProjectCreatedByProjectCreatedEnrichmentAnotherPackageFqnType() {
         assertEnrichmentIsUsedOnlyInEvents(ProjectCreatedEnrichmentAnotherPackageFqn.class,
                                            ProjectCreated.class);
     }
 
     @Test
-    public void contain_ProjectCreated_by_ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt_type() {
+    @DisplayName("contain ProjectCreated by ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt type")
+    void containProjectCreatedByProjectCreatedEnrichmentAnotherPackageFqnAndMsgOptType() {
         assertEnrichmentIsUsedOnlyInEvents(
                 ProjectCreatedEnrichmentAnotherPackageFqnAndMsgOpt.class,
                 ProjectCreated.class);
     }
 
     @Test
-    public void contain_ProjectStarted_by_ProjectStartedEnrichment_type() {
+    @DisplayName("contain ProjectStarted by ProjectStartedEnrichment type")
+    void containProjectStartedByProjectStartedEnrichmentType() {
         assertEnrichmentIsUsedOnlyInEvents(ProjectStarted.Enrichment.class,
                                            // Event classe
                                            ProjectStarted.class);
     }
 
     @Test
-    public void contain_events_by_EnrichmentForSeveralEvents_type() {
+    @DisplayName("contain events by EnrichmentForSeveralEvents type")
+    void containEventsByEnrichmentForSeveralEventsType() {
         assertEnrichmentIsUsedOnlyInEvents(EnrichmentForSeveralEvents.class,
                                            // Event classes
                                            ProjectStarted.class,
@@ -126,13 +136,15 @@ public class EnrichmentsMapShould {
     }
 
     @Test
-    public void contain_ProjectCreated_by_EnrichmentByContextFields_type() {
+    @DisplayName("contain ProjectCreated by EnrichmentByContextFields type")
+    void containProjectCreatedByEnrichmentByContextFieldsType() {
         assertEnrichmentIsUsedOnlyInEvents(EnrichmentByContextFields.class,
                                            ProjectCreated.class);
     }
 
     @Test
-    public void contain_all_events_from_package_by_one_enrichment() {
+    @DisplayName("contain all events from package by one enrichment")
+    void containAllEventsFromPackageByOneEnrichment() {
         assertEnrichmentIsUsedOnlyInEvents(UserPackageEventsEnrichment.class,
                                            // Event classes
                                            UserLoggedInEvent.class,
@@ -145,7 +157,8 @@ public class EnrichmentsMapShould {
     }
 
     @Test
-    public void contain_events_from_subpackage_by_enrichment_applied_to_root_package() {
+    @DisplayName("contain events from subpackage by enrichment applied to root package")
+    void containEventsFromSubpackageByEnrichmentAppliedToRootPackage() {
         assertEnrichmentIsAvailableForEvents(UserPackageEventsEnrichment.class,
                                              // Event classes
                                              PermissionRevokedEvent.class,
@@ -153,14 +166,16 @@ public class EnrichmentsMapShould {
     }
 
     @Test
-    public void contain_only_events_with_target_field_if_declared_though_package() {
+    @DisplayName("contain only events with target field if declared though package")
+    void containOnlyEventsWithTargetFieldIfDeclaredThoughPackage() {
         assertEnrichmentIsUsedOnlyInEvents(GranterEventsEnrichment.class,
                                            // Event class
                                            PermissionGrantedEvent.class);
     }
 
     @Test
-    public void contain_events_from_package_and_standalone_event() {
+    @DisplayName("contain events from package and standalone event")
+    void containEventsFromPackageAndStandaloneEvent() {
         assertEnrichmentIsUsedOnlyInEvents(SelectiveComplexEnrichment.class,
                                            // Event classes
                                            PermissionGrantedEvent.class,
@@ -169,7 +184,8 @@ public class EnrichmentsMapShould {
     }
 
     @Test
-    public void contain_events_from_multiple_packages() {
+    @DisplayName("contain events from multiple packages")
+    void containEventsFromMultiplePackages() {
         assertEnrichmentIsUsedOnlyInEvents(MultiplePackageEnrichment.class,
                                            // Event classes
                                            PermissionGrantedEvent.class,
@@ -179,7 +195,8 @@ public class EnrichmentsMapShould {
     }
 
     @Test
-    public void contain_enrichments_defined_with_by_with_two_arguments() {
+    @DisplayName("contain enrichments defined with by with two arguments")
+    void containEnrichmentsDefinedWithByWithTwoArguments() {
         assertEnrichmentIsUsedOnlyInEvents(
                 EnrichmentBoundWithFieldsWithDifferentNames.class,
                 // Event classes
@@ -188,7 +205,8 @@ public class EnrichmentsMapShould {
     }
 
     @Test
-    public void contain_enrichments_defined_with_by_with_two_fqn_arguments() {
+    @DisplayName("contain enrichments defined with by with two fqn arguments")
+    void containEnrichmentsDefinedWithByWithTwoFqnArguments() {
         assertEnrichmentIsUsedOnlyInEvents(
                 EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames.class,
                 // Event classes
@@ -197,7 +215,8 @@ public class EnrichmentsMapShould {
     }
 
     @Test
-    public void contain_enrichments_defined_with_by_with_multiple_arguments() {
+    @DisplayName("contain enrichments defined with by with multiple arguments")
+    void containEnrichmentsDefinedWithByWithMultipleArguments() {
         assertEnrichmentIsUsedOnlyInEvents(
                 EnrichmentBoundWithMultipleFieldsWithDifferentNames.class,
                 // Event classes
@@ -207,7 +226,8 @@ public class EnrichmentsMapShould {
     }
 
     @Test
-    public void contain_enrichments_defined_with_by_with_multiple_arguments_using_wildcard() {
+    @DisplayName("contain enrichments defined with by with multiple arguments using wildcard")
+    void containEnrichmentsDefinedWithByWithMultipleArgumentsUsingWildcard() {
         assertEnrichmentIsUsedOnlyInEvents(
                 EnrichmentBoundWithFieldsWithDifferentNamesOfWildcardTypes.class,
                 // Event classes
@@ -217,7 +237,8 @@ public class EnrichmentsMapShould {
     }
 
     @Test
-    public void contain_enrichments_defined_with_by_containing_separating_spaces() {
+    @DisplayName("contain enrichments defined with by containing separating spaces")
+    void containEnrichmentsDefinedWithByContainingSeparatingSpaces() {
         assertEnrichmentIsUsedOnlyInEvents(
                 EnrichmentBoundWithFieldsSeparatedWithSpaces.class,
                 // Event classes

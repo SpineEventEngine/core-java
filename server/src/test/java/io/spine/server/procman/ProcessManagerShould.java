@@ -60,6 +60,7 @@ import io.spine.testdata.Sample;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import java.util.List;
@@ -168,12 +169,14 @@ public class ProcessManagerShould {
     }
 
     @Test
-    public void have_default_state_initially() {
+    @DisplayName("have default state initially")
+    void haveDefaultStateInitially() {
         assertEquals(processManager.getDefaultState(), processManager.getState());
     }
 
     @Test
-    public void dispatch_event() {
+    @DisplayName("dispatch event")
+    void dispatchEvent() {
         List<? extends Message> eventMessages =
                 testDispatchEvent(Sample.messageOfType(PmProjectStarted.class));
 
@@ -182,19 +185,22 @@ public class ProcessManagerShould {
     }
 
     @Test
-    public void dispatch_several_events() {
+    @DisplayName("dispatch several events")
+    void dispatchSeveralEvents() {
         testDispatchEvent(Sample.messageOfType(PmProjectCreated.class));
         testDispatchEvent(Sample.messageOfType(PmTaskAdded.class));
         testDispatchEvent(Sample.messageOfType(PmProjectStarted.class));
     }
 
     @Test
-    public void dispatch_command() {
+    @DisplayName("dispatch command")
+    void dispatchCommand() {
         testDispatchCommand(addTask());
     }
 
     @Test
-    public void dispatch_several_commands() {
+    @DisplayName("dispatch several commands")
+    void dispatchSeveralCommands() {
         commandBus.register(new AddTaskDispatcher());
         processManager.injectCommandBus(commandBus);
 
@@ -204,7 +210,8 @@ public class ProcessManagerShould {
     }
 
     @Test
-    public void dispatch_command_and_return_events() {
+    @DisplayName("dispatch command and return events")
+    void dispatchCommandAndReturnEvents() {
         List<Event> events = testDispatchCommand(createProject());
 
         assertEquals(1, events.size());
@@ -220,7 +227,8 @@ public class ProcessManagerShould {
      * @see TestProcessManager#handle(PmStartProject, CommandContext)
      */
     @Test
-    public void route_commands() {
+    @DisplayName("route commands")
+    void routeCommands() {
         // Add dispatcher for the routed command. Otherwise the command would reject the command.
         AddTaskDispatcher dispatcher = new AddTaskDispatcher();
         commandBus.register(dispatcher);
@@ -253,7 +261,8 @@ public class ProcessManagerShould {
     }
 
     @Test
-    public void throw_exception_if_dispatch_unknown_command() {
+    @DisplayName("throw exception if dispatch unknown command")
+    void throwExceptionIfDispatchUnknownCommand() {
         Int32Value unknownCommand = Int32Value.getDefaultInstance();
 
         CommandEnvelope envelope = CommandEnvelope.of(
@@ -265,7 +274,8 @@ public class ProcessManagerShould {
     }
 
     @Test
-    public void throw_exception_if_dispatch_unknown_event() {
+    @DisplayName("throw exception if dispatch unknown event")
+    void throwExceptionIfDispatchUnknownEvent() {
         StringValue unknownEvent = StringValue.getDefaultInstance();
         EventEnvelope envelope = EventEnvelope.of(eventFactory.createEvent(unknownEvent));
 
@@ -274,7 +284,8 @@ public class ProcessManagerShould {
     }
 
     @Test
-    public void dispatch_rejection_by_rejection_message_only() {
+    @DisplayName("dispatch rejection by rejection message only")
+    void dispatchRejectionByRejectionMessageOnly() {
         RejectionEnvelope rejection = entityAlreadyArchived(StringValue.class);
         dispatch(processManager, rejection);
         assertEquals(rejection.getOuterObject()
@@ -282,14 +293,16 @@ public class ProcessManagerShould {
     }
 
     @Test
-    public void dispatch_rejection_by_rejection_and_command_message() {
+    @DisplayName("dispatch rejection by rejection and command message")
+    void dispatchRejectionByRejectionAndCommandMessage() {
         RejectionEnvelope rejection = entityAlreadyArchived(PmAddTask.class);
         dispatch(processManager, rejection);
         assertEquals(AnyPacker.pack(rejection.getCommandMessage()), processManager.getState());
     }
 
     @Test
-    public void create_iterating_router() {
+    @DisplayName("create iterating router")
+    void createIteratingRouter() {
         StringValue commandMessage = toMessage("create_iterating_router");
         CommandContext commandContext = requestFactory.createCommandContext();
 
@@ -306,14 +319,16 @@ public class ProcessManagerShould {
     }
 
     @Test
-    public void require_command_bus_when_creating_router() {
+    @DisplayName("require command bus when creating router")
+    void requireCommandBusWhenCreatingRouter() {
         thrown.expect(IllegalStateException.class);
         processManager.newRouterFor(StringValue.getDefaultInstance(),
                                     CommandContext.getDefaultInstance());
     }
 
     @Test
-    public void create_router() {
+    @DisplayName("create router")
+    void createRouter() {
         StringValue commandMessage = toMessage("create_router");
         CommandContext commandContext = requestFactory.createCommandContext();
 

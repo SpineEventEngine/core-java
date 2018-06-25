@@ -21,6 +21,7 @@ package io.spine.server.model;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
@@ -30,12 +31,14 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 public class HandlerMethodsShould {
 
     @Test
-    public void have_private_constructor() {
+    @DisplayName("have private constructor")
+    void havePrivateConstructor() {
         assertHasPrivateParameterlessCtor(HandlerMethods.class);
     }
 
     @Test
-    public void pass_the_null_tolerance_check() {
+    @DisplayName("pass the null tolerance check")
+    void passTheNullToleranceCheck() {
         new NullPointerTester().testAllPublicStaticMethods(HandlerMethods.class);
     }
 }

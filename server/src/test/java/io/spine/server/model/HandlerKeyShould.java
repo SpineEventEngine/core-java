@@ -27,6 +27,7 @@ import com.google.protobuf.StringValue;
 import io.spine.core.CommandClass;
 import io.spine.type.MessageClass;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.Assert.assertEquals;
 
@@ -39,14 +40,16 @@ public class HandlerKeyShould {
     private final CommandClass stringClass = CommandClass.of(StringValue.class);
 
     @Test
-    public void not_accept_nulls_on_construction() {
+    @DisplayName("not accept nulls on construction")
+    void notAcceptNullsOnConstruction() {
         new NullPointerTester()
                 .setDefault(MessageClass.class, emptyClass)
                 .testAllPublicStaticMethods(HandlerKey.class);
     }
 
     @Test
-    public void return_command_class_of_empty_if_there_is_no_origin() {
+    @DisplayName("return command class of empty if there is no origin")
+    void returnCommandClassOfEmptyIfThereIsNoOrigin() {
         final CommandClass handledMessage = stringClass;
         final HandlerKey key = HandlerKey.of(handledMessage);
         assertEquals(handledMessage, key.getHandledMessageCls());
@@ -54,7 +57,8 @@ public class HandlerKeyShould {
     }
 
     @Test
-    public void support_equality() {
+    @DisplayName("support equality")
+    void supportEquality() {
         final HandlerKey first = HandlerKey.of(stringClass);
         final HandlerKey second = HandlerKey.of(stringClass, stringClass);
         final HandlerKey third = HandlerKey.of(emptyClass, stringClass);

@@ -33,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import static org.junit.Assert.assertEquals;
@@ -66,7 +67,8 @@ public class EnrichmentFunctionShould {
     }
 
     @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName("pass null tolerance check")
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Message.class, Empty.getDefaultInstance())
                 .setDefault(Class.class, Empty.class)
@@ -75,7 +77,8 @@ public class EnrichmentFunctionShould {
     }
 
     @Test
-    public void do_not_accept_same_source_and_target_class() {
+    @DisplayName("do not accept same source and target class")
+    void doNotAcceptSameSourceAndTargetClass() {
         Function<StringValue, StringValue> func = new Function<StringValue, StringValue>() {
             @Override
             public @Nullable StringValue apply(@Nullable StringValue input) {
@@ -88,24 +91,28 @@ public class EnrichmentFunctionShould {
     }
 
     @Test
-    public void return_sourceClass() {
+    @DisplayName("return sourceClass")
+    void returnSourceClass() {
         assertEquals(ProjectCreated.class, fieldEnrichment.getSourceClass());
     }
 
     @Test
-    public void return_targetClass() {
+    @DisplayName("return targetClass")
+    void returnTargetClass() {
         assertEquals(ProjectCreated.Enrichment.class, fieldEnrichment.getEnrichmentClass());
     }
 
     @Test
-    public void create_custom_instances() {
+    @DisplayName("create custom instances")
+    void createCustomInstances() {
         assertEquals(fieldEnrichment, FieldEnrichment.of(ProjectCreated.class,
                                                          ProjectCreated.Enrichment.class,
                                                          function));
     }
 
     @Test
-    public void apply_enrichment() {
+    @DisplayName("apply enrichment")
+    void applyEnrichment() {
         ProjectCreated event = GivenEventMessage.projectCreated();
 
         ProjectCreated.Enrichment enriched =
@@ -117,19 +124,22 @@ public class EnrichmentFunctionShould {
     }
 
     @Test
-    public void have_hashCode() {
+    @DisplayName("have hashCode")
+    void haveHashCode() {
         assertNotEquals(System.identityHashCode(fieldEnrichment), fieldEnrichment.hashCode());
     }
 
     @Test
-    public void have_toString() {
+    @DisplayName("have toString")
+    void haveToString() {
         final String str = fieldEnrichment.toString();
         assertTrue(str.contains(ProjectCreated.class.getName()));
         assertTrue(str.contains(ProjectCreated.Enrichment.class.getName()));
     }
 
     @Test
-    public void have_smart_equals() {
+    @DisplayName("have smart equals")
+    void haveSmartEquals() {
         FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, EventContext> anotherEnricher =
                 FieldEnrichment.of(ProjectCreated.class,
                                    ProjectCreated.Enrichment.class,

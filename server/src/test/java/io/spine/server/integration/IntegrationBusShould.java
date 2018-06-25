@@ -44,6 +44,7 @@ import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.validate.Validate;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.Set;
 
@@ -82,7 +83,8 @@ public class IntegrationBusShould {
     }
 
     @Test
-    public void dispatch_events_from_one_BC_to_entities_with_ext_subscribers_of_another_BC() {
+    @DisplayName("dispatch events from one BC to entities with ext subscribers of another BC")
+    void dispatchEventsFromOneBCToEntitiesWithExtSubscribersOfAnotherBC() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
@@ -103,7 +105,8 @@ public class IntegrationBusShould {
     }
 
     @Test
-    public void avoid_dispatching_events_from_one_BC_to_domestic_entity_subscribers_of_another_BC() {
+    @DisplayName("avoid dispatching events from one BC to domestic entity subscribers of another BC")
+    void avoidDispatchingEventsFromOneBCToDomesticEntitySubscribersOfAnotherBC() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
@@ -124,7 +127,8 @@ public class IntegrationBusShould {
     }
 
     @Test
-    public void dispatch_events_from_one_BC_to_external_subscribers_of_another_BC() {
+    @DisplayName("dispatch events from one BC to external subscribers of another BC")
+    void dispatchEventsFromOneBCToExternalSubscribersOfAnotherBC() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
@@ -140,7 +144,8 @@ public class IntegrationBusShould {
     }
 
     @Test
-    public void avoid_dispatching_events_from_one_BC_to_domestic_standalone_subscribers_of_another_BC() {
+    @DisplayName("avoid dispatching events from one BC to domestic standalone subscribers of another BC")
+    void avoidDispatchingEventsFromOneBCToDomesticStandaloneSubscribersOfAnotherBC() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
@@ -163,7 +168,8 @@ public class IntegrationBusShould {
     }
 
     @Test
-    public void dispatch_events_from_one_BC_to_entities_with_ext_subscribers_of_multiple_BCs() {
+    @DisplayName("dispatch events from one BC to entities with ext subscribers of multiple BCs")
+    void dispatchEventsFromOneBCToEntitiesWithExtSubscribersOfMultipleBCs() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final Set<BoundedContextName> destinationNames = newHashSet();
@@ -194,7 +200,8 @@ public class IntegrationBusShould {
 
     @SuppressWarnings("unused")     // variables declared for readability.
     @Test
-    public void dispatch_events_from_one_BC_to_two_BCs_with_different_needs() {
+    @DisplayName("dispatch events from one BC to two BCs with different needs")
+    void dispatchEventsFromOneBCToTwoBCsWithDifferentNeeds() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
@@ -218,7 +225,8 @@ public class IntegrationBusShould {
     }
 
     @Test
-    public void update_local_subscriptions_upon_repeated_RequestedMessageTypes() {
+    @DisplayName("update local subscriptions upon repeated RequestedMessageTypes")
+    void updateLocalSubscriptionsUponRepeatedRequestedMessageTypes() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
@@ -274,7 +282,8 @@ public class IntegrationBusShould {
     }
 
     @Test
-    public void dispatch_rejections_from_one_BC_to_external_subscribers_of_another_BC() {
+    @DisplayName("dispatch rejections from one BC to external subscribers of another BC")
+    void dispatchRejectionsFromOneBCToExternalSubscribersOfAnotherBC() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
@@ -295,7 +304,8 @@ public class IntegrationBusShould {
     }
 
     @Test
-    public void throw_on_mismatch_of_external_attribute_during_dispatching() {
+    @DisplayName("throw on mismatch of external attribute during dispatching")
+    void throwOnMismatchOfExternalAttributeDuringDispatching() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithTransport(transportFactory);
@@ -316,7 +326,8 @@ public class IntegrationBusShould {
     }
 
     @Test
-    public void not_dispatch_events_to_domestic_subscribers_if_they_requested_external() {
+    @DisplayName("not dispatch events to domestic subscribers if they requested external")
+    void notDispatchEventsToDomesticSubscribersIfTheyRequestedExternal() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext context = contextWithExtEntitySubscribers(transportFactory);
@@ -339,7 +350,8 @@ public class IntegrationBusShould {
     }
 
     @Test
-    public void not_dispatch_rejections_to_domestic_subscribers_if_they_requested_external() {
+    @DisplayName("not dispatch rejections to domestic subscribers if they requested external")
+    void notDispatchRejectionsToDomesticSubscribersIfTheyRequestedExternal() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         final BoundedContext sourceContext = contextWithExtEntitySubscribers(transportFactory);
@@ -362,7 +374,8 @@ public class IntegrationBusShould {
     }
 
     @Test
-    public void emit_unsupported_external_message_exception_if_message_type_is_unknown() {
+    @DisplayName("emit unsupported external message exception if message type is unknown")
+    void emitUnsupportedExternalMessageExceptionIfMessageTypeIsUnknown() {
         final InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
         final BoundedContext boundedContext = contextWithTransport(transportFactory);
 

@@ -28,6 +28,7 @@ import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.command.RefStartProject;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -51,7 +52,8 @@ public class ModelShould {
 
     @SuppressWarnings("CheckReturnValue") // returned values are not used in this test
     @Test
-    public void not_allow_duplicated_command_handlers() {
+    @DisplayName("not allow duplicated command handlers")
+    void notAllowDuplicatedCommandHandlers() {
         try {
             model.asAggregateClass(MAggregate.class);
             model.asCommandHandlerClass(MCommandHandler.class);
@@ -65,7 +67,8 @@ public class ModelShould {
 
     @SuppressWarnings("CheckReturnValue") // returned values are not used in this test
     @Test
-    public void not_allow_more_than_one_command_duplication() {
+    @DisplayName("not allow more than one command duplication")
+    void notAllowMoreThanOneCommandDuplication() {
         try {
             model.asAggregateClass(MAggregate.class);
             model.asProcessManagerClass(MProcessManager.class);
@@ -79,7 +82,8 @@ public class ModelShould {
     }
 
     @Test
-    public void return_default_state_for_entity_class() {
+    @DisplayName("return default state for entity class")
+    void returnDefaultStateForEntityClass() {
         Message defaultState = model.getDefaultState(MAggregate.class);
         assertNotNull("Default state cannot be null for the entity class.", defaultState);
     }

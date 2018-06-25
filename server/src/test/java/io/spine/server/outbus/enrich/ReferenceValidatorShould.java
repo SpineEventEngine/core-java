@@ -34,6 +34,7 @@ import io.spine.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
 import io.spine.test.event.user.UserDeletedEvent;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import java.util.Collection;
@@ -63,7 +64,8 @@ public class ReferenceValidatorShould {
     public ExpectedException thrown = ExpectedException.none();
 
     @Test
-    public void initialize_with_valid_enricher() {
+    @DisplayName("initialize with valid enricher")
+    void initializeWithValidEnricher() {
         ReferenceValidator validator =
                 new ReferenceValidator(enricher,
                                        ProjectCreated.class,
@@ -72,7 +74,8 @@ public class ReferenceValidatorShould {
     }
 
     @Test
-    public void store_valid_map_of_enrichment_fields_after_validation() {
+    @DisplayName("store valid map of enrichment fields after validation")
+    void storeValidMapOfEnrichmentFieldsAfterValidation() {
         ReferenceValidator validator
                 = new ReferenceValidator(enricher,
                                          UserDeletedEvent.class,
@@ -111,7 +114,8 @@ public class ReferenceValidatorShould {
     }
 
     @Test
-    public void fail_validation_if_enrichment_is_not_declared() {
+    @DisplayName("fail validation if enrichment is not declared")
+    void failValidationIfEnrichmentIsNotDeclared() {
         ReferenceValidator validator = new ReferenceValidator(enricher,
                                                               UserDeletedEvent.class,
                                                               GranterEventsEnrichment.class);
@@ -120,7 +124,8 @@ public class ReferenceValidatorShould {
     }
 
     @Test
-    public void skip_mapping_if_no_mapping_function_is_defined() {
+    @DisplayName("skip mapping if no mapping function is defined")
+    void skipMappingIfNoMappingFunctionIsDefined() {
         Enricher<?, ?> mockEnricher = mock(Enricher.class);
         when(mockEnricher.functionFor(any(Class.class), any(Class.class)))
                 .thenReturn(Optional.absent());
@@ -136,7 +141,8 @@ public class ReferenceValidatorShould {
     }
 
     @Test
-    public void handle_separator_spaces_in_by_argument() {
+    @DisplayName("handle separator spaces in by argument")
+    void handleSeparatorSpacesInByArgument() {
         ReferenceValidator validator
                 = new ReferenceValidator(enricher,
                                          TaskAdded.class,

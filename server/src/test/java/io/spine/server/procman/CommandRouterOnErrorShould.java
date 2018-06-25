@@ -31,6 +31,7 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import java.util.Set;
@@ -58,7 +59,8 @@ public class CommandRouterOnErrorShould extends AbstractCommandRouterShould<Comm
     }
 
     @Test
-    public void throw_IllegalStateException_when_caught_error_when_posting() {
+    @DisplayName("throw IllegalStateException when caught error when posting")
+    void throwIllegalStateExceptionWhenCaughtErrorWhenPosting() {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .build();
         CommandBus commandBus = boundedContext.getCommandBus();

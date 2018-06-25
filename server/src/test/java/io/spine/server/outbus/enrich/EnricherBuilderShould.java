@@ -33,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.Assert.assertFalse;
@@ -50,9 +51,8 @@ public class EnricherBuilderShould {
     public void setUp() {
         this.builder = EventEnricher.newBuilder();
         this.function = new Function<Timestamp, StringValue>() {
-            @Nullable
             @Override
-            public StringValue apply(@Nullable Timestamp input) {
+            public @Nullable StringValue apply(@Nullable Timestamp input) {
                 if (input == null) {
                     return null;
                 }
@@ -63,14 +63,16 @@ public class EnricherBuilderShould {
     }
 
     @Test
-    public void build_enricher_if_all_functions_registered() {
+    @DisplayName("build enricher if all functions registered")
+    void buildEnricherIfAllFunctionsRegistered() {
         final Enricher enricher = Enrichment.newEnricher();
 
         assertNotNull(enricher);
     }
 
     @Test
-    public void add_field_enrichment() {
+    @DisplayName("add field enrichment")
+    void addFieldEnrichment() {
         builder.add(Timestamp.class, StringValue.class, function);
 
         assertTrue(builder.getFunctions()
@@ -78,7 +80,8 @@ public class EnricherBuilderShould {
     }
 
     @Test
-    public void remove_enrichment_function() {
+    @DisplayName("remove enrichment function")
+    void removeEnrichmentFunction() {
         builder.add(Timestamp.class, StringValue.class, function);
 
         builder.remove(fieldEnrichment);
@@ -88,42 +91,48 @@ public class EnricherBuilderShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_source_class_for_field_enrichment() {
+    @DisplayName("do not accept null source class for field enrichment")
+    void doNotAcceptNullSourceClassForFieldEnrichment() {
         builder.add(Tests.<Class<Timestamp>>nullRef(),
                     StringValue.class,
                     function);
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_target_class_for_field_enrichment() {
+    @DisplayName("do not accept null target class for field enrichment")
+    void doNotAcceptNullTargetClassForFieldEnrichment() {
         builder.add(Timestamp.class,
                     Tests.<Class<StringValue>>nullRef(),
                     function);
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_function_for_field_enrichment() {
+    @DisplayName("do not accept null function for field enrichment")
+    void doNotAcceptNullFunctionForFieldEnrichment() {
         builder.add(Timestamp.class,
                     StringValue.class,
                     Tests.<Function<Timestamp, StringValue>>nullRef());
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_duplicates_for_field_enrichment() {
+    @DisplayName("do not accept duplicates for field enrichment")
+    void doNotAcceptDuplicatesForFieldEnrichment() {
         builder.add(Timestamp.class, StringValue.class, function);
         // This should fail.
         builder.add(Timestamp.class, StringValue.class, function);
     }
 
     @Test
-    public void allow_registering_no_functions() {
+    @DisplayName("allow registering no functions")
+    void allowRegisteringNoFunctions() {
         final Enricher enricher = EventEnricher.newBuilder()
                                                .build();
         assertNotNull(enricher);
     }
 
     @Test
-    public void allow_registering_just_some_of_expected_functions() {
+    @DisplayName("allow registering just some of expected functions")
+    void allowRegisteringJustSomeOfExpectedFunctions() {
         builder.add(ProjectId.class, UserId.class,
                     new Enrichment.GetProjectOwnerId())
                .add(ProjectId.class, String.class,
@@ -133,12 +142,14 @@ public class EnricherBuilderShould {
     }
 
     @Test
-    public void assure_that_function_performs_same_transition() {
+    @DisplayName("assure that function performs same transition")
+    void assureThatFunctionPerformsSameTransition() {
         assertTrue(SameTransition.asFor(fieldEnrichment).apply(fieldEnrichment));
     }
 
     @Test
-    public void return_false_if_input_to_SameTransition_predicate_is_null() {
+    @DisplayName("return false if input to SameTransition predicate is null")
+    void returnFalseIfInputToSameTransitionPredicateIsNull() {
         assertFalse(SameTransition.asFor(fieldEnrichment).apply(null));
     }
 }

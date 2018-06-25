@@ -24,6 +24,7 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandEnvelope;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.base.Identifier.newUuid;
 import static org.junit.Assert.assertEquals;
@@ -47,23 +48,27 @@ public class HandlerMethodFailedExceptionTest {
     }
 
     @Test
-    public void return_target() {
+    @DisplayName("return target")
+    void returnTarget() {
         // We passed `this` as the failed object, so we expect its `toString()` as `target`.
         assertEquals(this.toString(), exception.getTarget());
     }
 
     @Test
-    public void return_DispatchedMessage() {
+    @DisplayName("return DispatchedMessage")
+    void returnDispatchedMessage() {
         assertEquals(commandEnvelope.getMessage(), exception.getDispatchedMessage());
     }
 
     @Test
-    public void return_MessageContext() {
+    @DisplayName("return MessageContext")
+    void returnMessageContext() {
         assertEquals(commandEnvelope.getCommandContext(), exception.getMessageContext());
     }
 
     @Test
-    public void have_cause() {
+    @DisplayName("have cause")
+    void haveCause() {
         assertEquals(cause, exception.getCause());
     }
 

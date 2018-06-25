@@ -27,6 +27,7 @@ import io.spine.server.rejection.RejectionBus;
 import io.spine.server.transport.TransportFactory;
 import io.spine.test.Tests;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -43,27 +44,32 @@ public class IntegrationBusBuilderShould
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_TransportFactory() {
+    @DisplayName("do not accept null TransportFactory")
+    void doNotAcceptNullTransportFactory() {
         builder().setTransportFactory(Tests.<TransportFactory>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_EventBus() {
+    @DisplayName("do not accept null EventBus")
+    void doNotAcceptNullEventBus() {
         builder().setEventBus(Tests.<EventBus>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_RejectionBus() {
+    @DisplayName("do not accept null RejectionBus")
+    void doNotAcceptNullRejectionBus() {
         builder().setRejectionBus(Tests.<RejectionBus>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_BoundedContextName() {
+    @DisplayName("do not accept null BoundedContextName")
+    void doNotAcceptNullBoundedContextName() {
         builder().setBoundedContextName(Tests.<BoundedContextName>nullRef());
     }
 
     @Test
-    public void return_previously_set_TransportFactory() {
+    @DisplayName("return previously set TransportFactory")
+    void returnPreviouslySetTransportFactory() {
         final TransportFactory mock = mock(TransportFactory.class);
         assertEquals(mock, builder().setTransportFactory(mock)
                                     .getTransportFactory()
@@ -71,7 +77,8 @@ public class IntegrationBusBuilderShould
     }
 
     @Test
-    public void return_previously_set_EventBus() {
+    @DisplayName("return previously set EventBus")
+    void returnPreviouslySetEventBus() {
         final EventBus mock = mock(EventBus.class);
         assertEquals(mock, builder().setEventBus(mock)
                                     .getEventBus()
@@ -79,7 +86,8 @@ public class IntegrationBusBuilderShould
     }
 
     @Test
-    public void return_previously_set_RejectionBus() {
+    @DisplayName("return previously set RejectionBus")
+    void returnPreviouslySetRejectionBus() {
         final RejectionBus mock = mock(RejectionBus.class);
         assertEquals(mock, builder().setRejectionBus(mock)
                                     .getRejectionBus()
@@ -87,7 +95,8 @@ public class IntegrationBusBuilderShould
     }
 
     @Test
-    public void return_previously_set_BoundedContextName() {
+    @DisplayName("return previously set BoundedContextName")
+    void returnPreviouslySetBoundedContextName() {
         final BoundedContextName name =
                 BoundedContext.newName("Name that is expected back from the Builder");
         assertEquals(name, builder().setBoundedContextName(name)

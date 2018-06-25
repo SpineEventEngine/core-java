@@ -26,6 +26,7 @@ import io.spine.server.entity.TestEntity;
 import io.spine.server.entity.given.Given;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -86,7 +87,8 @@ public class DefaultStateRegistryShould {
         /* We ignore the result of the getDefaultState() because we check the calls to the registry
            via spies. */
     @Test
-    public void invoke_put_once_when_calling_getDefaultState_in_multithreaded_environment() {
+    @DisplayName("invoke put once when calling getDefaultState in multithreaded environment")
+    void invokePutOnceWhenCallingGetDefaultStateInMultithreadedEnvironment() {
         int numberOfEntities = 1000;
         Collection<Callable<Object>> tasks = newArrayListWithExpectedSize(numberOfEntities);
         for (int i = 0; i < numberOfEntities; i++) {
@@ -108,7 +110,8 @@ public class DefaultStateRegistryShould {
         /* We ignore the result of the getDefaultState() because we check the calls to the registry
            via spies. */
     @Test
-    public void invoke_put_once_when_calling_putOrGet_in_multithreaded_environment() {
+    @DisplayName("invoke put once when calling putOrGet in multithreaded environment")
+    void invokePutOnceWhenCallingPutOrGetInMultithreadedEnvironment() {
         int numberOfEntities = 1000;
         Collection<Callable<Object>> tasks = newArrayListWithExpectedSize(numberOfEntities);
         for (int i = 0; i < numberOfEntities; i++) {

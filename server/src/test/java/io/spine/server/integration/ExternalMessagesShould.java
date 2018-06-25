@@ -26,6 +26,7 @@ import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.server.delivery.ShardedMessage;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
@@ -36,12 +37,14 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 public class ExternalMessagesShould {
 
     @Test
-    public void have_private_constructor() {
+    @DisplayName("have private constructor")
+    void havePrivateConstructor() {
         assertHasPrivateParameterlessCtor(ExternalMessages.class);
     }
 
     @Test
-    public void pass_the_null_tolerance_check() {
+    @DisplayName("pass the null tolerance check")
+    void passTheNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(BoundedContextName.class, BoundedContextName.getDefaultInstance())
                 .setDefault(Event.class, Event.getDefaultInstance())

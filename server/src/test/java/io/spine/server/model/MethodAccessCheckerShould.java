@@ -22,6 +22,7 @@ package io.spine.server.model;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.lang.reflect.Method;
 
@@ -39,7 +40,8 @@ public class MethodAccessCheckerShould {
     public static final String STUB_WARNING_MESSAGE = "Stub warning message";
 
     @Test
-    public void pass_null_check() {
+    @DisplayName("pass null check")
+    void passNullCheck() {
         new NullPointerTester().testAllPublicStaticMethods(MethodAccessChecker.class);
 
         final Method method = getMethod("publicMethod");
@@ -48,7 +50,8 @@ public class MethodAccessCheckerShould {
     }
 
     @Test
-    public void do_not_log_warning_on_correct_access_modifier() {
+    @DisplayName("do not log warning on correct access modifier")
+    void doNotLogWarningOnCorrectAccessModifier() {
         final Method publicMethod = getMethod("publicMethod");
         final MethodAccessChecker checkerPublic = spy(forMethod(publicMethod));
         checkerPublic.checkPublic(STUB_WARNING_MESSAGE);
@@ -66,7 +69,8 @@ public class MethodAccessCheckerShould {
     }
 
     @Test
-    public void log_warning_on_incorrect_access_modifier() {
+    @DisplayName("log warning on incorrect access modifier")
+    void logWarningOnIncorrectAccessModifier() {
         final Method method = getMethod("protectedMethod");
         final MethodAccessChecker checker = spy(forMethod(method));
         checker.checkPublic(STUB_WARNING_MESSAGE);

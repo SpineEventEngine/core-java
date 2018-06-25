@@ -33,6 +33,7 @@ import io.spine.server.procman.given.PmMessageDeliveryTestEnv.QuadrupleShardPmRe
 import io.spine.server.procman.given.PmMessageDeliveryTestEnv.SingleShardPmRepository;
 import io.spine.test.procman.ProjectId;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
@@ -54,7 +55,8 @@ public class PmMessageDeliveryShould extends AbstractMessageDeliveryTest {
     }
 
     @Test
-    public void dispatch_commands_to_single_shard_in_multithreaded_env() throws Exception {
+    @DisplayName("dispatch commands to single shard in multithreaded env")
+    void dispatchCommandsToSingleShardInMultithreadedEnv() throws Exception {
         final ParallelDispatcher<ProjectId, Command> dispatcher =
                 new ParallelDispatcher<ProjectId, Command>(
                         42, 400, dispatchWaitTime()) {
@@ -79,7 +81,8 @@ public class PmMessageDeliveryShould extends AbstractMessageDeliveryTest {
     }
 
     @Test
-    public void dispatch_events_to_single_shard_in_multithreaded_env() throws Exception {
+    @DisplayName("dispatch events to single shard in multithreaded env")
+    void dispatchEventsToSingleShardInMultithreadedEnv() throws Exception {
         final ParallelDispatcher<ProjectId, Event> dispatcher =
                 new ParallelDispatcher<ProjectId, Event>(
                         180, 819, dispatchWaitTime()) {
@@ -104,7 +107,8 @@ public class PmMessageDeliveryShould extends AbstractMessageDeliveryTest {
     }
 
     @Test
-    public void dispatch_rejections_to_single_shard_in_multithreaded_env() throws Exception {
+    @DisplayName("dispatch rejections to single shard in multithreaded env")
+    void dispatchRejectionsToSingleShardInMultithreadedEnv() throws Exception {
         final ParallelDispatcher<ProjectId, Rejection> dispatcher =
                 new ParallelDispatcher<ProjectId, Rejection>(
                         30, 619, dispatchWaitTime()) {
@@ -129,7 +133,8 @@ public class PmMessageDeliveryShould extends AbstractMessageDeliveryTest {
     }
 
     @Test
-    public void dispatch_commands_to_several_shard_in_multithreaded_env() throws Exception {
+    @DisplayName("dispatch commands to several shard in multithreaded env")
+    void dispatchCommandsToSeveralShardInMultithreadedEnv() throws Exception {
         final ParallelDispatcher<ProjectId, Command> dispatcher =
                 new ParallelDispatcher<ProjectId, Command>(
                         59, 473, dispatchWaitTime()) {
@@ -154,7 +159,8 @@ public class PmMessageDeliveryShould extends AbstractMessageDeliveryTest {
     }
 
     @Test
-    public void dispatch_events_to_several_shards_in_multithreaded_env() throws Exception {
+    @DisplayName("dispatch events to several shards in multithreaded env")
+    void dispatchEventsToSeveralShardsInMultithreadedEnv() throws Exception {
         final ParallelDispatcher<ProjectId, Event> dispatcher =
                 new ParallelDispatcher<ProjectId, Event>(
                         179, 918, dispatchWaitTime()) {
@@ -179,7 +185,8 @@ public class PmMessageDeliveryShould extends AbstractMessageDeliveryTest {
     }
 
     @Test
-    public void dispatch_rejections_to_several_shards_in_multithreaded_env() throws Exception {
+    @DisplayName("dispatch rejections to several shards in multithreaded env")
+    void dispatchRejectionsToSeveralShardsInMultithreadedEnv() throws Exception {
         final ParallelDispatcher<ProjectId, Rejection> dispatcher =
                 new ParallelDispatcher<ProjectId, Rejection>(
                         43, 719, dispatchWaitTime()) {

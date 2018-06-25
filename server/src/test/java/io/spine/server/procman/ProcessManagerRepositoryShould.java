@@ -66,6 +66,7 @@ import io.spine.test.procman.event.PmTaskAdded;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -206,19 +207,22 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void dispatch_event_and_load_manager() {
+    @DisplayName("dispatch event and load manager")
+    void dispatchEventAndLoadManager() {
         testDispatchEvent(projectCreated());
     }
 
     @Test
-    public void dispatch_several_events() {
+    @DisplayName("dispatch several events")
+    void dispatchSeveralEvents() {
         testDispatchEvent(projectCreated());
         testDispatchEvent(taskAdded());
         testDispatchEvent(projectStarted());
     }
 
     @Test
-    public void dispatch_event_to_archived_process_manager() {
+    @DisplayName("dispatch event to archived process manager")
+    void dispatchEventToArchivedProcessManager() {
         PmArchiveProcess archiveProcess = archiveProcess();
         testDispatchCommand(archiveProcess);
         ProjectId projectId = archiveProcess.getProjectId();
@@ -237,7 +241,8 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void dispatch_event_to_deleted_process_manager() {
+    @DisplayName("dispatch event to deleted process manager")
+    void dispatchEventToDeletedProcessManager() {
         PmDeleteProcess deleteProcess = deleteProcess();
         testDispatchCommand(deleteProcess);
         ProjectId projectId = deleteProcess.getProjectId();
@@ -256,19 +261,22 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void dispatch_command() {
+    @DisplayName("dispatch command")
+    void dispatchCommand() {
         testDispatchCommand(addTask());
     }
 
     @Test
-    public void dispatch_several_commands() {
+    @DisplayName("dispatch several commands")
+    void dispatchSeveralCommands() {
         testDispatchCommand(createProject());
         testDispatchCommand(addTask());
         testDispatchCommand(startProject());
     }
 
     @Test
-    public void dispatch_command_to_archived_process_manager() {
+    @DisplayName("dispatch command to archived process manager")
+    void dispatchCommandToArchivedProcessManager() {
         PmDeleteProcess deleteProcess = deleteProcess();
         testDispatchCommand(deleteProcess);
         ProjectId projectId = deleteProcess.getProjectId();
@@ -287,7 +295,8 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void dispatch_command_to_deleted_process_manager() {
+    @DisplayName("dispatch command to deleted process manager")
+    void dispatchCommandToDeletedProcessManager() {
         PmArchiveProcess archiveProcess = archiveProcess();
         testDispatchCommand(archiveProcess);
         ProjectId projectId = archiveProcess.getProjectId();
@@ -306,12 +315,14 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void allow_ProcMan_have_unmodified_state_after_command_handling() {
+    @DisplayName("allow ProcMan have unmodified state after command handling")
+    void allowProcManHaveUnmodifiedStateAfterCommandHandling() {
         testDispatchCommand(doNothing());
     }
 
     @Test
-    public void dispatch_command_and_post_events() {
+    @DisplayName("dispatch command and post events")
+    void dispatchCommandAndPostEvents() {
         RememberingSubscriber subscriber = new RememberingSubscriber();
         boundedContext.getEventBus()
                       .register(subscriber);
@@ -324,7 +335,8 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void throw_exception_if_dispatch_unknown_command() {
+    @DisplayName("throw exception if dispatch unknown command")
+    void throwExceptionIfDispatchUnknownCommand() {
         Command unknownCommand =
                 requestFactory.createCommand(Int32Value.getDefaultInstance());
         CommandEnvelope request = CommandEnvelope.of(unknownCommand);
@@ -332,7 +344,8 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void return_command_classes() {
+    @DisplayName("return command classes")
+    void returnCommandClasses() {
         Set<CommandClass> commandClasses = repository().getCommandClasses();
 
         assertContains(commandClasses,
@@ -340,7 +353,8 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void return_event_classes() {
+    @DisplayName("return event classes")
+    void returnEventClasses() {
         Set<EventClass> eventClasses = repository().getMessageClasses();
 
         assertContains(eventClasses,
@@ -348,7 +362,8 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void return_rejection_classes() {
+    @DisplayName("return rejection classes")
+    void returnRejectionClasses() {
         Set<RejectionClass> rejectionClasses = repository().getRejectionClasses();
 
         assertContains(rejectionClasses,
@@ -356,7 +371,8 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void post_command_rejections() {
+    @DisplayName("post command rejections")
+    void postCommandRejections() {
         ProjectId id = ProjectId.newBuilder()
                                 .setId(newUuid())
                                 .build();
@@ -374,7 +390,8 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void dispatch_rejection() {
+    @DisplayName("dispatch rejection")
+    void dispatchRejection() {
         CommandEnvelope ce = requestFactory.generateEnvelope();
         EntityAlreadyArchived rejectionMessage =
                 EntityAlreadyArchived.newBuilder()
@@ -398,7 +415,8 @@ public class ProcessManagerRepositoryShould
     }
 
     @Test
-    public void throw_exception_on_attempt_to_register_in_bc_with_no_messages_handled() {
+    @DisplayName("throw exception on attempt to register in bc with no messages handled")
+    void throwExceptionOnAttemptToRegisterInBcWithNoMessagesHandled() {
         SensoryDeprivedPmRepository repo = new SensoryDeprivedPmRepository();
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .setMultitenant(false)

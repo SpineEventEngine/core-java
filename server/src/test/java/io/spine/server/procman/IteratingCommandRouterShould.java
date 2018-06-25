@@ -31,6 +31,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.Commands;
 import io.spine.server.commandbus.CommandBus;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.List;
 
@@ -53,7 +54,8 @@ public class IteratingCommandRouterShould
     }
 
     @Test
-    public void return_CommandRouted_from_routeFirst() throws Exception {
+    @DisplayName("return CommandRouted from routeFirst")
+    void returnCommandRoutedFromRouteFirst() throws Exception {
         final CommandRouted commandRouted = router().routeFirst();
 
         assertSource(commandRouted);
@@ -77,7 +79,8 @@ public class IteratingCommandRouterShould
     }
 
     @Test
-    public void produce_a_command_on_routeNext() throws Exception {
+    @DisplayName("produce a command on routeNext")
+    void produceACommandOnRouteNext() throws Exception {
 
         /*
         This is a hack, aimed to resolve the wall-clock inaccuracy issue, that is randomly
