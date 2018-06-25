@@ -53,9 +53,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class ProjectionTransactionShould
         extends TransactionTest<ProjectId,
-                                          Projection<ProjectId, Project, PatchedProjectBuilder>,
-                                          Project,
-                                          PatchedProjectBuilder> {
+                                Projection<ProjectId, Project, PatchedProjectBuilder>,
+                                Project,
+                                PatchedProjectBuilder> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("projection-transaction-should-project")
