@@ -45,8 +45,7 @@ class DefaultEntityFactoryTest {
     @BeforeEach
     void setUp() {
         RecordBasedRepository<Long, TestEntity1, StringValue> r1 = new TestRepository1();
-        RecordBasedRepository<Long, TestEntity2, DoubleValue> r2 =
-                new TestRepository2();
+        RecordBasedRepository<Long, TestEntity2, DoubleValue> r2 = new TestRepository2();
 
         entityFactory1 = r1.entityFactory();
         entityFactory2 = r2.entityFactory();
