@@ -207,11 +207,10 @@ public class FieldMasks {
         return result;
     }
 
-    @SuppressWarnings("unchecked")
-        // We assume that TypeUrl.getJavaClass() works properly.
-    @Nullable
-    private static <B extends Message.Builder> Class<B> getBuilderForType(TypeUrl typeUrl) {
-        final Class<? extends Message> msgClass = typeUrl.getJavaClass();
+    @SuppressWarnings("unchecked") // We assume that TypeUrl.getMessageClass() works properly.
+    private static @Nullable <B extends Message.Builder> Class<B>
+    getBuilderForType(TypeUrl typeUrl) {
+        final Class<? extends Message> msgClass = typeUrl.getMessageClass();
         Class<B> builderClass;
         try {
             builderClass = (Class<B>) msgClass.getClasses()[0];

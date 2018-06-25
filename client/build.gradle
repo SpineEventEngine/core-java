@@ -39,14 +39,8 @@ dependencies {
 
 apply from: gRpcScript
 
-apply from: generateDescriptorSetScript
-
 apply from: testArtifactsScript
 
 apply from: "../scripts/assemble-proto.gradle"
 
 apply plugin: spineProtobufPluginId
-
-modelCompiler {
-    generateValidatingBuilders = true
-}

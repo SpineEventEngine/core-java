@@ -29,12 +29,10 @@ dependencies {
     }
 }
 
-apply from: generateDescriptorSetScript
-
 apply from: testArtifactsScript
 
 apply plugin: spineProtobufPluginId
 
 modelCompiler {
-    generateValidatingBuilders = true
+    generateBuildersFromClasspath = true
 }

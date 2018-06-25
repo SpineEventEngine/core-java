@@ -39,16 +39,9 @@ dependencies {
 
 apply from: gRpcScript
 
-apply from: generateDescriptorSetScript
-
 apply from: testArtifactsScript
 
 apply plugin: spineProtobufPluginId
-
-modelCompiler {
-    generateValidatingBuilders = true
-}
-
 
 // Copies the documentation files to the Javadoc output folder.
 // Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673
