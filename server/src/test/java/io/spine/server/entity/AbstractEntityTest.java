@@ -117,7 +117,7 @@ class AbstractEntityTest {
     }
 
     @Test
-    @DisplayName("return String ID")
+    @DisplayName("return string ID")
     void returnStringId() {
         final AnEntity entity = new AnEntity(1_234_567L);
 

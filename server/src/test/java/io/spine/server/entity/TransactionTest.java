@@ -246,7 +246,7 @@ public abstract class TransactionTest<I,
     }
 
     @Test
-    @DisplayName("set transaction entity version from EventContext")
+    @DisplayName("set transaction entity version from event context")
     void setVersionFromEventContext() {
         E entity = createEntity();
 

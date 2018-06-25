@@ -349,7 +349,7 @@ class EntityTest {
 
         @Test
         @DisplayName("entity supports archiving")
-        void supportingArchiving() {
+        void supportArchiving() {
             entityNew.setArchived(true);
 
             assertTrue(entityNew.isArchived());
@@ -357,7 +357,7 @@ class EntityTest {
 
         @Test
         @DisplayName("entity supports unarchiving")
-        void supportingUnarchiving() {
+        void supportUnarchiving() {
             entityNew.setArchived(true);
             entityNew.setArchived(false);
 
@@ -372,7 +372,7 @@ class EntityTest {
 
         @Test
         @DisplayName("entity supports deletion")
-        void supportingDeletion() {
+        void supportDeletion() {
             entityNew.setDeleted(true);
 
             assertTrue(entityNew.isDeleted());
@@ -380,7 +380,7 @@ class EntityTest {
 
         @Test
         @DisplayName("entity supports restoration")
-        void supportingRestoration() {
+        void supportRestoration() {
             entityNew.setDeleted(true);
             entityNew.setDeleted(false);
             assertFalse(entityNew.isDeleted());
@@ -399,7 +399,7 @@ class EntityTest {
 
         @Test
         @DisplayName("status can be assigned")
-        void supportingAssignment() {
+        void supportAssignment() {
             final LifecycleFlags status = LifecycleFlags.newBuilder()
                                                         .setArchived(true)
                                                         .setDeleted(false)
@@ -410,7 +410,7 @@ class EntityTest {
 
         @Test
         @DisplayName("entity can be checked for not being archived")
-        void supportingNotArchivedCheck() throws Throwable {
+        void supportNotArchivedCheck() throws Throwable {
             entityNew.setArchived(true);
 
             // This should pass.
@@ -421,7 +421,7 @@ class EntityTest {
 
         @Test
         @DisplayName("entity can be checked for not being deleted")
-        void supportingNotDeletedCheck() throws Throwable {
+        void supportNotDeletedCheck() throws Throwable {
             entityNew.setDeleted(true);
 
             // This should pass.

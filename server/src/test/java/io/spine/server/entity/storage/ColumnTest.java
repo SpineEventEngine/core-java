@@ -319,7 +319,7 @@ class ColumnTest {
     class ReturnPersistedType {
 
         @Test
-        @DisplayName("is same for non-enum getter")
+        @DisplayName("is same as column type for non-enum getter")
         void forNonEnumGetter() {
             EntityColumn column = forMethod("getLong", TestEntity.class);
             assertEquals(column.getType(), column.getPersistedType());

@@ -64,8 +64,8 @@ class ColumnsTest {
      * functionality.
      */
     private
-    static void checkEntityWithManyGettersFields(EntityWithManyGetters entity,
-                                                 Map<String, MemoizedValue> fields) {
+    static void checkFields(EntityWithManyGetters entity,
+                            Map<String, MemoizedValue> fields) {
         assertNotNull(fields);
 
         assertSize(3, fields);
@@ -140,6 +140,6 @@ class ColumnsTest {
         Collection<EntityColumn> entityColumns = Columns.getAllColumns(entity.getClass());
         Map<String, MemoizedValue> fields = extractColumnValues(entity, entityColumns);
 
-        checkEntityWithManyGettersFields(entity, fields);
+        checkFields(entity, fields);
     }
 }
