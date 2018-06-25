@@ -45,9 +45,9 @@ import static org.junit.Assert.assertTrue;
  */
 public class PmTransactionShould
         extends TransactionTest<ProjectId,
-                                          ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
-                                          Project,
-                                          PatchedProjectBuilder> {
+                                ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
+                                Project,
+                                PatchedProjectBuilder> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("procman-transaction-should-project")
