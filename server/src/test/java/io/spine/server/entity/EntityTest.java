@@ -58,6 +58,7 @@ import static org.mockito.Mockito.verify;
 
 /**
  * @author Alexander Litus
+ * @author Dmytro Kuzmin
  */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit 5 Nested classes cannot to be static. */,
