@@ -99,8 +99,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class ProcessManagerRepositoryShould
         extends RecordBasedRepositoryTest<TestProcessManager,
-                ProjectId,
-                Project> {
+                                          ProjectId,
+                                          Project> {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass(),
