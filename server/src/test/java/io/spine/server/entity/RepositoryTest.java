@@ -181,6 +181,14 @@ class RepositoryTest {
         assertEquals(3, numEntities);
     }
 
+    @Test
+    @DisplayName("not allow removal in entities iterator")
+    void notAllowRemovalInIterator() {
+        createAndStoreEntities();
+        final Iterator<ProjectEntity> iterator = getIterator(tenantId);
+        assertThrows(UnsupportedOperationException.class, iterator::remove);
+    }
+
     private Iterator<ProjectEntity> getIterator(TenantId tenantId) {
         final TenantAwareFunction0<Iterator<ProjectEntity>> op =
                 new TenantAwareFunction0<Iterator<ProjectEntity>>(tenantId) {
@@ -190,14 +198,6 @@ class RepositoryTest {
                     }
                 };
         return op.execute();
-    }
-
-    @Test
-    @DisplayName("not allow removal in entities iterator")
-    void notAllowRemovalInIterator() {
-        createAndStoreEntities();
-        final Iterator<ProjectEntity> iterator = getIterator(tenantId);
-        assertThrows(UnsupportedOperationException.class, iterator::remove);
     }
 
     private void createAndStore(String entityId) {
