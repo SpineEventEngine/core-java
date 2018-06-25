@@ -38,7 +38,7 @@ public class DefaultEntityFactoryTestEnv {
         }
     }
 
-    /** A test repository */
+    /** A test repository. */
     public static class TestRepository1
             extends DefaultRecordBasedRepository<Long, TestEntity1, StringValue> {
     }
