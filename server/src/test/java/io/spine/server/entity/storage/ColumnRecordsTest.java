@@ -92,8 +92,8 @@ class ColumnRecordsTest {
         final CollectAnyColumnType type = spy(CollectAnyColumnType.class);
         final ColumnTypeRegistry<CollectAnyColumnType> registry =
                 ColumnTypeRegistry.<CollectAnyColumnType>newBuilder()
-                                  .put(Object.class, type)
-                                  .build();
+                        .put(Object.class, type)
+                        .build();
         final EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.of(
                 EntityRecord.getDefaultInstance(), columns);
 

@@ -176,15 +176,16 @@ class QueryParametersTest {
         final ColumnFilter deadlineFilter = le(columnName, deadline);
         final Multimap<EntityColumn, ColumnFilter> columnFilters =
                 ImmutableMultimap.<EntityColumn, ColumnFilter>builder()
-                                 .put(column, startTimeFilter)
-                                 .put(column, deadlineFilter)
-                                 .build();
+                        .put(column, startTimeFilter)
+                        .put(column, deadlineFilter)
+                        .build();
         final CompositeQueryParameter parameter = from(columnFilters, ALL);
         final QueryParameters parameters = newBuilder().add(parameter)
                                                        .build();
         final List<CompositeQueryParameter> aggregatingParameters = newArrayList(parameters);
         assertSize(1, aggregatingParameters);
-        final Multimap<EntityColumn, ColumnFilter> actualColumnFilters = aggregatingParameters.get(0).getFilters();
+        final Multimap<EntityColumn, ColumnFilter> actualColumnFilters =
+                aggregatingParameters.get(0).getFilters();
         final Collection<ColumnFilter> timeFilters = actualColumnFilters.get(column);
         assertSize(2, timeFilters);
         assertContainsAll(timeFilters, startTimeFilter, deadlineFilter);

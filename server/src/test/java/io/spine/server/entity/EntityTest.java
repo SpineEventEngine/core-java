@@ -131,7 +131,8 @@ class EntityTest {
         @DisplayName("Integer")
         void ofIntegerType() {
             final Integer integerId = 12;
-            final TestEntityWithIdInteger entityWithIntegerId = new TestEntityWithIdInteger(integerId);
+            final TestEntityWithIdInteger entityWithIntegerId =
+                    new TestEntityWithIdInteger(integerId);
 
             assertEquals(integerId, entityWithIntegerId.getId());
         }
@@ -140,7 +141,8 @@ class EntityTest {
         @DisplayName("Message")
         void ofMessageType() {
             final StringValue messageId = toMessage("messageId");
-            final TestEntityWithIdMessage entityWithMessageID = new TestEntityWithIdMessage(messageId);
+            final TestEntityWithIdMessage entityWithMessageID =
+                    new TestEntityWithIdMessage(messageId);
 
             assertEquals(messageId, entityWithMessageID.getId());
         }

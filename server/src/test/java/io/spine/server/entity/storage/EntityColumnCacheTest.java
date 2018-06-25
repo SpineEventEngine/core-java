@@ -71,7 +71,7 @@ class EntityColumnCacheTest {
     }
 
     @SuppressWarnings("CheckReturnValue")
-        // This test does not use the found columns, but simply checks that they are found.
+    // This test does not use the found columns, but simply checks that they are found.
     @Test
     @DisplayName("cache columns on first access")
     void cacheOnFirstAccess() {

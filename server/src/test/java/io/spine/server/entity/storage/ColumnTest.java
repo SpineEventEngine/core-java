@@ -104,9 +104,9 @@ class ColumnTest {
         int version = 2;
         EntityColumn column = forMethod("getVersion", VersionableEntity.class);
         TestEntity entity = Given.entityOfClass(TestEntity.class)
-                                       .withId(entityId)
-                                       .withVersion(version)
-                                       .build();
+                                 .withId(entityId)
+                                 .withVersion(version)
+                                 .build();
         Version actualVersion = (Version) column.getFor(entity);
         assertEquals(version, actualVersion.getNumber());
     }

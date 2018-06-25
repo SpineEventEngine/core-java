@@ -98,7 +98,8 @@ class FieldMasksTest {
         @Test
         @DisplayName("to single message")
         void toSingleMessage() {
-            FieldMask fieldMask = Given.fieldMask(Project.ID_FIELD_NUMBER, Project.NAME_FIELD_NUMBER);
+            FieldMask fieldMask =
+                    Given.fieldMask(Project.ID_FIELD_NUMBER, Project.NAME_FIELD_NUMBER);
             Project original = Given.newProject("some-string-id");
 
             Project masked = FieldMasks.applyMask(fieldMask, original, Given.TYPE);
