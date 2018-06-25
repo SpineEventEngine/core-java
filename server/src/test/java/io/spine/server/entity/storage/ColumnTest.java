@@ -288,7 +288,7 @@ class ColumnTest {
         }
 
         @Test
-        @DisplayName("same as getter name if no custom one was specified ")
+        @DisplayName("same as getter name if no custom one was specified")
         void sameAsGetter() {
             EntityColumn column = forMethod("getValue",
                                             EntityWithDefaultColumnNameForStoring.class);
