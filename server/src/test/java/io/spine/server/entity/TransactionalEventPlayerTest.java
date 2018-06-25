@@ -56,7 +56,7 @@ class TransactionalEventPlayerTest {
     }
 
     @Test
-    @DisplayName("delegate applying events to tx when playing")
+    @DisplayName("delegate applying events to transaction when playing")
     void delegateEventsToTx() {
         final TxPlayingEntity entity = entityWithActiveTx(false);
         final Transaction txMock = entity.getTransaction();
