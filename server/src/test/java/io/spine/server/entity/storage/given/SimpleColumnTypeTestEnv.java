@@ -22,6 +22,10 @@ package io.spine.server.entity.storage.given;
 
 import io.spine.server.entity.storage.SimpleColumnType;
 
+/**
+ * @author Dmytro Dashenkov
+ * @author Dmytro Kuzmin
+ */
 public class SimpleColumnTypeTestEnv {
 
     /** Prevents instantiation of this utility class. */

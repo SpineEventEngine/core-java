@@ -48,6 +48,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * @author Alexander Litus
+ * @author Alexander Yevsyukov
+ */
 @DisplayName("Repository should")
 class RepositoryTest {
 

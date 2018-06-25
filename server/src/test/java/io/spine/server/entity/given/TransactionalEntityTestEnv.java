@@ -25,6 +25,10 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.validate.StringValueVBuilder;
 
+/**
+ * @author Alex Tymchenko
+ * @author Dmytro Kuzmin
+ */
 public class TransactionalEntityTestEnv {
 
     /** Prevents instantiation of this utility class. */

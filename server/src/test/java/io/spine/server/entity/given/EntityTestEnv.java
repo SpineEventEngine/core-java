@@ -33,6 +33,10 @@ import org.hamcrest.Matcher;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 
+/**
+ * @author Alexander Litus
+ * @author Dmytro Kuzmin
+ */
 public class EntityTestEnv {
 
     /** Prevents instantiation of this utility class. */

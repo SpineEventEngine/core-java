@@ -25,6 +25,10 @@ import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.test.entity.Project;
 
+/**
+ * @author Dmytro Dashenkov
+ * @author Dmytro Kuzmin
+ */
 public class EntityRecordWithColumnsTestEnv {
 
     /** Prevents instantiation of this utility class. */

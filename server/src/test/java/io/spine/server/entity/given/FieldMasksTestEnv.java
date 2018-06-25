@@ -33,6 +33,10 @@ import io.spine.type.TypeUrl;
 
 import static java.lang.String.format;
 
+/**
+ * @author Dmytro Dashenkov
+ * @author Dmytro Kuzmin
+ */
 public class FieldMasksTestEnv {
 
     /** Prevents instantiation of this utility class. */

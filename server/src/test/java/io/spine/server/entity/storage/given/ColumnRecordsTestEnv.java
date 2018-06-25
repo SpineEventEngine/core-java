@@ -35,6 +35,10 @@ import java.util.Map;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+/**
+ * @author Dmytro Dashenkov
+ * @author Dmytro Kuzmin
+ */
 public class ColumnRecordsTestEnv {
 
     public static final int MOCK_COLUMNS_COUNT = 3;
