@@ -52,9 +52,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("AggregateTransaction should")
 class AggregateTransactionTest
         extends TransactionTest<ProjectId,
-        Aggregate<ProjectId, Project, AggregateTransactionTest.PatchedProjectBuilder>,
-        Project,
-        AggregateTransactionTest.PatchedProjectBuilder> {
+                                Aggregate<ProjectId,
+                                          Project,
+                                          AggregateTransactionTest.PatchedProjectBuilder>,
+                                Project,
+                                AggregateTransactionTest.PatchedProjectBuilder> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("aggregate-transaction-should-project")
