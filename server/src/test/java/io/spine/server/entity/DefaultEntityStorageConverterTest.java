@@ -81,7 +81,7 @@ class DefaultEntityStorageConverterTest {
 
     @Test
     @DisplayName("convert forward and backward")
-    void convertFwdAndBwd() throws Exception {
+    void convertForwardAndBackward() throws Exception {
         final StringValue entityState = toMessage("back and forth");
         final TestEntity entity = createEntity(100L, entityState);
 
