@@ -72,7 +72,6 @@ import io.spine.type.TypeUrl;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -882,7 +881,6 @@ public class AggregateTest {
          * {@link TaskAggregate#on(AggTaskAssigned) TaskAggregate#on(AggTaskAssigned)}.
          */
         @Test
-        @Disabled
         @DisplayName("in case of event react")
         void fromEventReact() {
             BoundedContext boundedContext = newTaskBoundedContext();
