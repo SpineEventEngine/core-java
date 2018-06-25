@@ -46,6 +46,10 @@ public class FieldMasksTestEnv {
         public static final TypeUrl TYPE = TypeUrl.of(Project.class);
         public static final TypeUrl OTHER_TYPE = TypeUrl.of(Customer.class);
 
+        /** Prevents instantiation of this utility class. */
+        private Given() {
+        }
+
         public static Project newProject(String id) {
             ProjectId projectId = ProjectId.newBuilder()
                                            .setId(id)

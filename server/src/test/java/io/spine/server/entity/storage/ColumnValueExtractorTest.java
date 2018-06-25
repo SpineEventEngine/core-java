@@ -90,6 +90,7 @@ class ColumnValueExtractorTest {
                         .getValue());
     }
 
+    @SuppressWarnings("unchecked") // Okay for test.
     @Test
     @DisplayName("extract no fields if none defined")
     void handleNoneDefined() {
@@ -100,6 +101,7 @@ class ColumnValueExtractorTest {
         assertEmpty(columnValues);
     }
 
+    @SuppressWarnings("unchecked") // Okay for test.
     @Test
     @DisplayName("handle non-public entity class")
     void handleNonPublic() {

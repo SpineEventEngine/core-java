@@ -36,6 +36,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("DefaultEntityStorageConverter should")
 class DefaultEntityStorageConverterTest {
 

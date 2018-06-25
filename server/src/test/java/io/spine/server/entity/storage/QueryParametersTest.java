@@ -59,6 +59,7 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("QueryParameters should")
 class QueryParametersTest {
 

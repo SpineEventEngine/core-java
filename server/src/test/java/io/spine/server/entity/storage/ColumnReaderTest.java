@@ -28,7 +28,6 @@ import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithManyGetters
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithNoStorageFields;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.EntityWithRepeatedColumnNames;
 import io.spine.server.entity.storage.given.ColumnsTestEnv.RealLifeEntity;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

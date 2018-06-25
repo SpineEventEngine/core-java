@@ -25,11 +25,9 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Any;
 import io.spine.client.ColumnFilter;
 import io.spine.client.ColumnFilters;
 import io.spine.client.EntityIdFilter;
-import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
@@ -63,6 +61,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("EntityQuery should")
 class EntityQueryTest {
 

@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 /**
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("DefaultEntityFactory should")
 class DefaultEntityFactoryTest {
 

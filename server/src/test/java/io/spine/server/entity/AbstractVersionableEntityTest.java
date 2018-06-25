@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("AbstractVersionableEntity should")
 class AbstractVersionableEntityTest {
 

@@ -80,9 +80,8 @@ public class ColumnTestEnv {
             return nullRef();
         }
 
-        @Nullable
         @Column
-        public String getNull() {
+        public @Nullable String getNull() {
             return null;
         }
 
