@@ -125,8 +125,8 @@ class VisibilityGuardTest {
     }
 
     @Test
-    @DisplayName("shut down repositories")
-    void shutDownRepositories() {
+    @DisplayName("shutdown repositories")
+    void shutdownRepositories() {
         guard.shutDownRepositories();
 
         for (Repository repository : repositories) {
