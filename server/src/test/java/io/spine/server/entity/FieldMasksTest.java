@@ -83,8 +83,8 @@ class FieldMasksTest {
         }
 
         @Test
-        @DisplayName("for no given field tags")
-        void forNoGivenFields() {
+        @DisplayName("when no field tags are given")
+        void whenNoFieldsAreGiven() {
             Descriptor descriptor = Project.getDescriptor();
             FieldMask mask = FieldMasks.maskOf(descriptor);
             assertEquals(FieldMask.getDefaultInstance(), mask);

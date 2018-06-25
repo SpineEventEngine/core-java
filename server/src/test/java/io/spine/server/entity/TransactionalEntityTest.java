@@ -108,7 +108,7 @@ class TransactionalEntityTest {
 
     @Nested
     @DisplayName("have no transaction in progress")
-    class HaveNoTransactionInProgress {
+    class HaveNoTxInProgress {
 
         @Test
         @DisplayName("by default")

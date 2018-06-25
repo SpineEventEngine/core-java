@@ -42,7 +42,7 @@ class ColumnTypeTest {
     private static final String EXPECTED_RESULT = "the Answer: 42";
 
     @Test
-    @DisplayName("convert java type to storage type")
+    @DisplayName("convert Java type to storage type")
     void convertJavaType() {
         final String stringValue = String.valueOf(VALUE);
         final ColumnType<Integer, String, ?, ?> type = new TestColumnType<>();
@@ -63,7 +63,7 @@ class ColumnTypeTest {
 
     @Test
     @DisplayName("provide interface for entire storage preparation flow")
-    void haveInterfaceForEntireFlow() {
+    void provideFullInterface() {
         final ColumnType<Integer, String, StringBuilder, String> type = new TestColumnType<>();
         final StringBuilder container = new StringBuilder(16);
 

@@ -81,7 +81,7 @@ class AbstractEntityTest {
 
     @Test
     @DisplayName("throw InvalidEntityStateException if state is invalid")
-    void throwOnInvalidState() {
+    void rejectInvalidState() {
         final NaturalNumberEntity entity = new NaturalNumberEntity(0L);
         final NaturalNumber invalidNaturalNumber = newNaturalNumber(-1);
         try {
@@ -117,8 +117,8 @@ class AbstractEntityTest {
     }
 
     @Test
-    @DisplayName("return sting ID")
-    void returnStingId() {
+    @DisplayName("return String ID")
+    void returnStringId() {
         final AnEntity entity = new AnEntity(1_234_567L);
 
         assertEquals("1234567", entity.stringId());

@@ -34,8 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Alexander Yevsyukov
  */
-//todo think more about whether to move to RecordBasedRepositoryTest
-@DisplayName("RecordBasedRepository EntityIdFunction should")
+@DisplayName("EntityIdFunction should")
 class EntityIdFunctionTest {
 
     @Test

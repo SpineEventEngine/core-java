@@ -92,7 +92,7 @@ class ColumnValueExtractorTest {
 
     @Test
     @DisplayName("extract no fields if none defined")
-    void extractIfNoneDefined() {
+    void handleNoneDefined() {
         Entity entity = new EntityWithNoStorageFields(TEST_ENTITY_ID);
         Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
@@ -101,7 +101,7 @@ class ColumnValueExtractorTest {
     }
 
     @Test
-    @DisplayName("handle non public entity class")
+    @DisplayName("handle non-public entity class")
     void handleNonPublic() {
         Entity entity = new PrivateEntity(TEST_ENTITY_ID);
         Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);

@@ -181,7 +181,7 @@ public abstract class TransactionTest<I,
 
     @Test
     @DisplayName("propagate changes to entity applier methods")
-    void propagateChangesToApplierMethods() {
+    void propagateChangesToAppliers() {
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
 
@@ -280,7 +280,7 @@ public abstract class TransactionTest<I,
     @SuppressWarnings("CheckReturnValue") // can ignore new entity version in this test.
     @Test
     @DisplayName("not allow injecting state if entity has non-zero version already")
-    void notInjectStateToEntityWithVersion() {
+    void notInjectToEntityWithVersion() {
         E entity = createEntity();
         entity.incrementVersion();
         S newState = createNewState();

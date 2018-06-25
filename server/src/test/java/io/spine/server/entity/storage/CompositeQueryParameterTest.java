@@ -71,7 +71,7 @@ class CompositeQueryParameterTest {
 
     @Test
     @DisplayName("fail to construct for invalid operator")
-    void notAcceptInvalidOperator() {
+    void rejectInvalidOperator() {
         assertThrows(IllegalArgumentException.class,
                      () -> from(ImmutableMultimap.of(), CCF_CO_UNDEFINED));
     }

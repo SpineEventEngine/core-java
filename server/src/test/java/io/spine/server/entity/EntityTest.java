@@ -29,6 +29,8 @@ import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdInteger;
 import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdLong;
 import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdMessage;
 import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdString;
+import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
+import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 import io.spine.test.Tests;
 import io.spine.test.TimeTests;
 import io.spine.test.entity.Project;
@@ -43,6 +45,7 @@ import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.entity.given.EntityTestEnv.isBetween;
 import static io.spine.test.Tests.assertSecondsEqual;
+import static io.spine.test.Tests.nullRef;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -156,7 +159,7 @@ class EntityTest {
 
     @Test
     @DisplayName("check entity state when setting it")
-    void checkStateWhenUpdatingIt() {
+    void checkStateWhenUpdating() {
         final TestEntity spyEntityNew = spy(entityNew);
         spyEntityNew.updateState(state, Versions.zero());
         verify(spyEntityNew).checkEntityState(eq(state));
@@ -234,11 +237,73 @@ class EntityTest {
     }
 
     @Nested
+    @DisplayName("provide `equals` method such that")
+    class ProvideEqualsSuchThat {
+
+        @Test
+        @DisplayName("same entities are equal")
+        void equalToSame() {
+            final TestEntity another = TestEntity.withStateOf(entityWithState);
+
+            assertEquals(entityWithState, another);
+        }
+
+        @SuppressWarnings("EqualsWithItself") // Is the purpose of this method.
+        @Test
+        @DisplayName("entity is equal to itself")
+        void equalToItself() {
+            assertEquals(entityWithState, entityWithState);
+        }
+
+        @Test
+        @DisplayName("entity is not equal to null")
+        void notEqualToNull() {
+            assertNotEquals(entityWithState, nullRef());
+        }
+
+        @SuppressWarnings("EqualsBetweenInconvertibleTypes") // Is the purpose of this method.
+        @Test
+        @DisplayName("entity is not equal to object of another class")
+        void notEqualToOtherClass() {
+            assertNotEquals(entityWithState, newUuid());
+        }
+
+        @Test
+        @DisplayName("entities with different IDs are not equal")
+        void notEqualToDifferentId() {
+            final TestEntity another = TestEntity.newInstance(newUuid());
+
+            assertNotEquals(entityWithState.getId(), another.getId());
+            assertNotEquals(entityWithState, another);
+        }
+
+        @Test
+        @DisplayName("entities with different states are not equal")
+        void notEqualToDifferentState() {
+            final TestEntity another = TestEntity.withStateOf(entityWithState);
+            another.updateState(Sample.messageOfType(Project.class), another.getVersion());
+
+            assertNotEquals(entityWithState.getState(), another.getState());
+            assertNotEquals(entityWithState, another);
+        }
+
+        @SuppressWarnings("CheckReturnValue") // The entity version can be ignored in this test.
+        @Test
+        @DisplayName("entities with different versions are not equal")
+        void notEqualToDifferentVersion() {
+            final TestEntity another = TestEntity.withStateOf(entityWithState);
+            another.incrementVersion();
+
+            assertNotEquals(entityWithState, another);
+        }
+    }
+
+    @Nested
     @DisplayName("provide `hashCode` method such that")
     class ProvideHashCode {
 
         @Test
-        @DisplayName("for entity with non-empty ID and state non-zero hash code is generated")
+        @DisplayName("for entity with non-empty ID and state, non-zero hash code is generated")
         void nonZeroForNonEmptyEntity() {
             assertFalse(entityWithState.getId()
                                        .trim()
@@ -250,17 +315,117 @@ class EntityTest {
         }
 
         @Test
-        @DisplayName("for same instances same hash code is generated")
+        @DisplayName("for same instances, same hash code is generated")
         void sameForSameInstances() {
             assertEquals(entityWithState.hashCode(), entityWithState.hashCode());
         }
 
         @Test
-        @DisplayName("for different instances unique hash code is generated")
+        @DisplayName("for different instances, unique hash code is generated")
         void uniqueForDifferentInstances() {
             final TestEntity another = TestEntity.withState();
 
             assertNotEquals(entityWithState.hashCode(), another.hashCode());
+        }
+    }
+
+    @Nested
+    @DisplayName("have visibility status such that")
+    class HaveVisibilityStatus {
+
+        @Test
+        @DisplayName("entity has default status after construction")
+        void defaultOnCreation() {
+            assertEquals(LifecycleFlags.getDefaultInstance(), entityNew.getLifecycleFlags());
+        }
+
+        @Test
+        @DisplayName("entity is not archived when created")
+        void notArchivedOnCreation() {
+            assertFalse(entityNew.isArchived());
+        }
+
+        @Test
+        @DisplayName("entity supports archiving")
+        void supportingArchiving() {
+            entityNew.setArchived(true);
+
+            assertTrue(entityNew.isArchived());
+        }
+
+        @Test
+        @DisplayName("entity supports unarchiving")
+        void supportingUnarchiving() {
+            entityNew.setArchived(true);
+            entityNew.setArchived(false);
+
+            assertFalse(entityNew.isArchived());
+        }
+
+        @Test
+        @DisplayName("entity is not deleted when created")
+        void notDeletedOnCreation() {
+            assertFalse(entityNew.isDeleted());
+        }
+
+        @Test
+        @DisplayName("entity supports deletion")
+        void supportingDeletion() {
+            entityNew.setDeleted(true);
+
+            assertTrue(entityNew.isDeleted());
+        }
+
+        @Test
+        @DisplayName("entity supports restoration")
+        void supportingRestoration() {
+            entityNew.setDeleted(true);
+            entityNew.setDeleted(false);
+            assertFalse(entityNew.isDeleted());
+        }
+
+        @Test
+        @DisplayName("entities with different status are not equal")
+        void consideredForEquality() {
+            // Create an entity with the same ID and the same (default) state.
+            final AbstractVersionableEntity another = new TestEntityWithIdString(entityNew.getId());
+
+            another.setArchived(true);
+
+            assertFalse(entityNew.equals(another));
+        }
+
+        @Test
+        @DisplayName("status can be assigned")
+        void supportingAssignment() {
+            final LifecycleFlags status = LifecycleFlags.newBuilder()
+                                                        .setArchived(true)
+                                                        .setDeleted(false)
+                                                        .build();
+            entityNew.setLifecycleFlags(status);
+            assertEquals(status, entityNew.getLifecycleFlags());
+        }
+
+        @Test
+        @DisplayName("entity can be checked for not being archived")
+        void supportingNotArchivedCheck() throws Throwable {
+            entityNew.setArchived(true);
+
+            // This should pass.
+            entityNew.checkNotDeleted();
+
+            assertThrows(CannotModifyArchivedEntity.class, () -> entityNew.checkNotArchived());
+        }
+
+        @Test
+        @DisplayName("entity can be checked for not being deleted")
+        void supportingNotDeletedCheck() throws Throwable {
+            entityNew.setDeleted(true);
+
+            // This should pass.
+            entityNew.checkNotArchived();
+
+            assertThrows(CannotModifyDeletedEntity.class, () -> entityNew.checkNotDeleted());
         }
     }
 }

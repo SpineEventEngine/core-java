@@ -72,7 +72,7 @@ class EntityRecordWithColumnsTest {
 
     @Test
     @DisplayName("not accept nulls in constructor")
-    void notAcceptNullsInCtor() {
+    void rejectNullsInCtor() {
         new NullPointerTester()
                 .setDefault(EntityRecord.class, EntityRecord.getDefaultInstance())
                 .testAllPublicConstructors(EntityRecordWithColumns.class);
@@ -172,7 +172,7 @@ class EntityRecordWithColumnsTest {
     }
 
     @Test
-    @DisplayName("throw on attempt to get value by non existent name")
+    @DisplayName("throw on attempt to get value by non-existent name")
     void throwOnNonExistentColumn() {
         EntityRecordWithColumns record = newEmptyRecord();
 

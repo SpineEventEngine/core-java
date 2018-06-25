@@ -91,7 +91,7 @@ class RepositoryTest {
 
     @Test
     @DisplayName("not allow getting BoundedContext before registration")
-    void notReturnBcWhenUnregistered() {
+    void notGetBcIfUnregistered() {
         assertThrows(IllegalStateException.class, () -> new TestRepo().getBoundedContext());
     }
 
@@ -105,7 +105,7 @@ class RepositoryTest {
 
     @Test
     @DisplayName("have no storage upon creation")
-    void haveNoStorageUponCreation() {
+    void haveNoStorageOnCreation() {
         assertFalse(repository.isStorageAssigned());
     }
 
@@ -189,7 +189,7 @@ class RepositoryTest {
     }
 
     @Test
-    @DisplayName("not allow removal in iterator")
+    @DisplayName("not allow removal in entities iterator")
     void notAllowRemovalInIterator() {
         createAndStoreEntities();
         final Iterator<ProjectEntity> iterator = getIterator(tenantId);

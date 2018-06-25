@@ -121,7 +121,7 @@ class ColumnReaderTest {
     }
 
     @Nested
-    @DisplayName("ignore")
+    @DisplayName("when extracting columns, ignore")
     class Ignore {
 
         @Test

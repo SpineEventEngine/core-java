@@ -94,7 +94,7 @@ class VisibilityGuardTest {
 
     @Test
     @DisplayName("give access to visible repos")
-    void giveAccessToVisibleRepos() {
+    void giveAccessToVisible() {
         assertTrue(guard.getRepository(FullAccessAggregate.class)
                         .isPresent());
         assertTrue(guard.getRepository(SubscribableAggregate.class)
@@ -103,14 +103,14 @@ class VisibilityGuardTest {
 
     @Test
     @DisplayName("deny access to invisible repos")
-    void denyAccessToInvisibleRepos() {
+    void denyAccessToInvisible() {
         assertFalse(guard.getRepository(HiddenAggregate.class)
                          .isPresent());
     }
 
     @Test
     @DisplayName("obtain repos by visibility")
-    void obtainReposByVisibility() {
+    void obtainByVisibility() {
         Set<TypeName> full = guard.getEntityTypes(Visibility.FULL);
         assertEquals(1, full.size());
         assertTrue(full.contains(TypeName.of(FullAccessAggregate.class)));
@@ -136,7 +136,7 @@ class VisibilityGuardTest {
 
     @Test
     @DisplayName("not allow double registration")
-    void notAllowDoubleRegistration() {
+    void forbidDoubleRegistration() {
         assertThrows(IllegalStateException.class, () -> register(new ExposedRepository()));
     }
 

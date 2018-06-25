@@ -86,7 +86,7 @@ class EntityColumnCacheTest {
 
     @Test
     @DisplayName("allow to forcefully cache columns")
-    void forcefullyCacheColumns() {
+    void forcefullyCache() {
         entityColumnCache.ensureColumnsCached();
         assertFalse(entityColumnCache.isEmpty());
     }
@@ -110,7 +110,7 @@ class EntityColumnCacheTest {
 
     @Test
     @DisplayName("retain stored columns order")
-    void retainColumnsOrder() {
+    void retainOrder() {
         Collection<EntityColumn> columnsFromCache = entityColumnCache.getColumns();
         assertNotNull(columnsFromCache);
 

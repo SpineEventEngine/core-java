@@ -199,7 +199,7 @@ class ColumnTest {
 
     @Test
     @DisplayName("tell if property is nullable")
-    void tellIfIsNullable() {
+    void tellIfNullable() {
         EntityColumn notNullColumn = forMethod("getNotNull", TestEntity.class);
         EntityColumn nullableColumn = forMethod("getNull", TestEntity.class);
 
@@ -208,7 +208,7 @@ class ColumnTest {
     }
 
     @Test
-    @DisplayName("check value for null if getter is non-nullable")
+    @DisplayName("check value for null if getter is not nullable")
     void checkNonNullable() {
         EntityColumn column = forMethod("getNotNull", TestEntity.class);
 
@@ -288,7 +288,7 @@ class ColumnTest {
         }
 
         @Test
-        @DisplayName("same as getter name if no custom one specified ")
+        @DisplayName("same as getter name if no custom one was specified ")
         void sameAsGetter() {
             EntityColumn column = forMethod("getValue",
                                             EntityWithDefaultColumnNameForStoring.class);
@@ -299,7 +299,7 @@ class ColumnTest {
     }
 
     @Test
-    @DisplayName("not allow redefine column annotation")
+    @DisplayName("not allow to redefine column annotation")
     void rejectRedefinedAnnotation() {
         assertThrows(IllegalStateException.class,
                      () -> forMethod("getVersion", EntityRedefiningColumnAnnotation.class));

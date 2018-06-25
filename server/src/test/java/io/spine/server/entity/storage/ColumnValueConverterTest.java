@@ -51,7 +51,7 @@ class ColumnValueConverterTest {
 
     @Test
     @DisplayName("perform identity conversion")
-    void performIdentityConversion() {
+    void convertIdentically() {
         String value = "stringValue";
         ColumnValueConverter converter = new IdentityConverter(value.getClass());
         Serializable convertedObject = converter.convert(value);
@@ -60,7 +60,7 @@ class ColumnValueConverterTest {
 
     @Test
     @DisplayName("convert enum to ordinal value")
-    void convertEnumToOrdinalValue() {
+    void convertEnumToOrdinal() {
         TaskStatus value = SUCCESS;
         ColumnValueConverter converter = new OrdinalEnumConverter(value.getClass());
         Serializable convertedValue = converter.convert(value);
@@ -69,7 +69,7 @@ class ColumnValueConverterTest {
 
     @Test
     @DisplayName("convert enum to string value")
-    void convertEnumToStringValue() {
+    void convertEnumToString() {
         TaskStatus value = SUCCESS;
         ColumnValueConverter converter = new StringEnumConverter(value.getClass());
         Serializable convertedValue = converter.convert(value);

@@ -109,7 +109,7 @@ class ColumnTypeRegistryTest {
     }
 
     @Test
-    @DisplayName("autobox primitives when mapping")
+    @DisplayName("map primitives autoboxed")
     void mapPrimitivesAutoboxed() {
         ColumnTypeRegistry<?> registry =
                 ColumnTypeRegistry.newBuilder()

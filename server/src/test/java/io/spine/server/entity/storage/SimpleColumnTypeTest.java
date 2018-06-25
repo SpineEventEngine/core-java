@@ -34,7 +34,7 @@ class SimpleColumnTypeTest {
 
     @Test
     @DisplayName("perform identity conversion of given value")
-    void performIdentityConversion() {
+    void convertIdentically() {
         final ColumnType<Object, ?, ?, ?> columnType = new ColumnTypeImpl<>();
         final Object input = new Object();
         final Object output = columnType.convertColumnValue(input);
