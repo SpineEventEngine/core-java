@@ -114,7 +114,8 @@ class ColumnValueExtractorTest {
     private static <E extends Entity<?, ?>>
     Map<String, EntityColumn.MemoizedValue> extractColumnValues(E entity) {
         Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
-        ColumnValueExtractor columnValueExtractor = ColumnValueExtractor.create(entity, entityColumns);
+        ColumnValueExtractor columnValueExtractor =
+                ColumnValueExtractor.create(entity, entityColumns);
         return columnValueExtractor.extractColumnValues();
     }
 

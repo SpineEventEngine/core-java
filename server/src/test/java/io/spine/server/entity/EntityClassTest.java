@@ -102,7 +102,6 @@ class EntityClassTest {
 
     /** An entity class without ID constructor. */
     private static class NoArgEntity extends AbstractEntity<Long, StringValue> {
-
         private NoArgEntity() {
             super(0L);
         }
