@@ -64,8 +64,7 @@ class ColumnsTest {
      * functionality.
      */
     private
-    static void checkFields(EntityWithManyGetters entity,
-                            Map<String, MemoizedValue> fields) {
+    static void checkFields(EntityWithManyGetters entity, Map<String, MemoizedValue> fields) {
         assertNotNull(fields);
 
         assertSize(3, fields);
