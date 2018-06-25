@@ -22,7 +22,6 @@ package io.spine.server.event;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.FieldFilter;
@@ -38,6 +37,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static io.spine.protobuf.AnyPacker.unpackFunc;
+import static java.util.stream.Collectors.toList;
 
 /**
  * The predicate for filtering events by {@link EventFilter}.
@@ -52,16 +52,14 @@ class MatchFilter implements Predicate<Event> {
      *
      * <p>If null, all events are accepted.
      */
-    @Nullable
-    private final TypeUrl eventTypeUrl;
+    private final @Nullable TypeUrl eventTypeUrl;
 
     /**
      * The list of aggregate IDs of which events to accept.
      *
      * <p>If null, all IDs are accepted.
      */
-    @Nullable
-    private final List<Any> aggregateIds;
+    private final @Nullable List<Any> aggregateIds;
 
     private final Collection<FieldFilter> eventFieldFilters;
     private final Collection<FieldFilter> contextFieldFilters;
@@ -73,8 +71,7 @@ class MatchFilter implements Predicate<Event> {
         this.contextFieldFilters = filter.getContextFieldFilterList();
     }
 
-    @Nullable
-    private static TypeUrl getEventTypeUrl(EventFilter filter) {
+    private static @Nullable TypeUrl getEventTypeUrl(EventFilter filter) {
         final String eventType = filter.getEventType();
         final TypeUrl result = eventType.isEmpty()
                                ? null
@@ -83,8 +80,7 @@ class MatchFilter implements Predicate<Event> {
         return result;
     }
 
-    @Nullable
-    private static List<Any> getAggregateIdentifiers(EventFilter filter) {
+    private static @Nullable List<Any> getAggregateIdentifiers(EventFilter filter) {
         final List<Any> aggregateIdList = filter.getAggregateIdList();
         final List<Any> result = aggregateIdList.isEmpty()
                             ? null
@@ -171,11 +167,10 @@ class MatchFilter implements Predicate<Event> {
             // Wrong Message class -> does not satisfy the criteria.
             return false;
         }
-
-        final Collection<Any> expectedAnys = filter.getValueList();
-        final Collection<Message> expectedValues =
-                Collections2.transform(expectedAnys, unpackFunc());
-
+        final Collection<Message> expectedValues = filter.getValueList()
+                                                         .stream()
+                                                         .map(unpackFunc())
+                                                         .collect(toList());
         if (!value.isPresent()) {
             /* If there is no value in the field return `true`
                if the list of required values is also empty. */
