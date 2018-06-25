@@ -86,7 +86,7 @@ class EntityQueryTest {
         final QueryParameters parameters = QueryParameters.newBuilder()
                                                           .add(parameter)
                                                           .build();
-        final Set<String> ids = singleton("my-awesome-id");
+        final Set<String> ids = singleton("my-awesome-ID");
         final EntityQuery<String> query = EntityQuery.of(ids, parameters);
         reserializeAndAssert(query);
     }

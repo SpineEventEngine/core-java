@@ -110,7 +110,6 @@ class ColumnValueExtractorTest {
         assertEmpty(columnValues);
     }
 
-
     private static <E extends Entity<?, ?>>
     Map<String, EntityColumn.MemoizedValue> extractColumnValues(E entity) {
         Collection<EntityColumn> entityColumns = getAllColumns(entity.getClass());
