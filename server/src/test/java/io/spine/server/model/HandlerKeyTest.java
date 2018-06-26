@@ -34,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * @author Dmytro Grankin
  */
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("HandlerKey should")
 class HandlerKeyTest {
 

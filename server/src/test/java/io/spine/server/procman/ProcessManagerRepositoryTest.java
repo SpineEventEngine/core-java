@@ -96,7 +96,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("ProcessManagerRepository should")
 class ProcessManagerRepositoryTest
         extends RecordBasedRepositoryTest<TestProcessManager,
@@ -165,7 +165,7 @@ class ProcessManagerRepositoryTest
         super.tearDown();
     }
 
-    ProcessManagerRepository<ProjectId, TestProcessManager, Project> repository() {
+    private ProcessManagerRepository<ProjectId, TestProcessManager, Project> repository() {
         return (ProcessManagerRepository<ProjectId, TestProcessManager, Project>) repository;
     }
 

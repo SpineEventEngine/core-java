@@ -71,6 +71,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * @author Alex Tymchenko
  */
+@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
+        /* JUnit 5 Nested classes cannot to be static. */,
+        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("IntegrationBus should")
 class IntegrationBusTest {
 

@@ -85,7 +85,8 @@ import static org.mockito.Mockito.spy;
  * @author Dmytro Dashenkov
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("OverlyCoupledClass")
+@SuppressWarnings({"OverlyCoupledClass",
+        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("ProcessManager should")
 class ProcessManagerTest {
 

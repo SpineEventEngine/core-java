@@ -90,18 +90,15 @@ class IteratingCommandRouterTest
         <p>The idea is to add some randomization to {@code nanoseconds} value of the
         current Timestamp obtained from the wall-clock provider.
         */
-        Time.setProvider(new Time.Provider() {
-            @Override
-            public Timestamp getCurrentTime() {
-                final Timestamp millis = Timestamps.fromMillis(System.currentTimeMillis());
-                final Timestamp nanos = Timestamps.fromNanos(System.nanoTime());
+        Time.setProvider(() -> {
+            final Timestamp millis = Timestamps.fromMillis(System.currentTimeMillis());
+            final Timestamp nanos = Timestamps.fromNanos(System.nanoTime());
 
-                final Timestamp result = millis.toBuilder()
-                                               .setNanos(nanos.toBuilder()
-                                                              .getNanos())
-                                               .build();
-                return result;
-            }
+            final Timestamp result = millis.toBuilder()
+                                           .setNanos(nanos.toBuilder()
+                                                          .getNanos())
+                                           .build();
+            return result;
         });
 
         final CommandRouted firstRouted = router().routeFirst();

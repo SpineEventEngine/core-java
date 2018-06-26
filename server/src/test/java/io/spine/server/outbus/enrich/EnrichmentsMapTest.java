@@ -66,7 +66,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
+                   /* JUnit 5 Nested classes cannot to be static. */})
 @DisplayName("EnrichmentsMap should")
 class EnrichmentsMapTest {
 

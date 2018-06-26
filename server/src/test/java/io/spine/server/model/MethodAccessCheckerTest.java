@@ -37,6 +37,7 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Dmytro Kuzmin
  */
+@SuppressWarnings("DuplicateStringLiteralInspection") // String literals for method names.
 @DisplayName("MethodAccessChecker should")
 class MethodAccessCheckerTest {
 

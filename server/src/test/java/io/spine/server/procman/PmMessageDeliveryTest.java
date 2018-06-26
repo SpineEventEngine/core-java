@@ -19,7 +19,6 @@
  */
 package io.spine.server.procman;
 
-import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
@@ -45,6 +44,9 @@ import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.projectStar
 /**
  * @author Alex Tymchenko
  */
+@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
+        /* JUnit 5 Nested classes cannot to be static. */,
+        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("ProcessManager message delivery should")
 class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
 
@@ -79,7 +81,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
                         @Override
                         protected void postToBus(BoundedContext context, Command command) {
                             context.getCommandBus()
-                                   .post(command, StreamObservers.<Ack>noOpObserver());
+                                   .post(command, StreamObservers.noOpObserver());
                         }
                     };
 
@@ -105,7 +107,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
                         @Override
                         protected void postToBus(BoundedContext context, Command command) {
                             context.getCommandBus()
-                                   .post(command, StreamObservers.<Ack>noOpObserver());
+                                   .post(command, StreamObservers.noOpObserver());
                         }
                     };
 
@@ -136,7 +138,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
                         @Override
                         protected void postToBus(BoundedContext context, Event event) {
                             context.getEventBus()
-                                   .post(event, StreamObservers.<Ack>noOpObserver());
+                                   .post(event, StreamObservers.noOpObserver());
                         }
                     };
 
@@ -219,7 +221,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
                         @Override
                         protected void postToBus(BoundedContext context, Rejection rejection) {
                             context.getRejectionBus()
-                                   .post(rejection, StreamObservers.<Ack>noOpObserver());
+                                   .post(rejection, StreamObservers.noOpObserver());
                         }
                     };
 
