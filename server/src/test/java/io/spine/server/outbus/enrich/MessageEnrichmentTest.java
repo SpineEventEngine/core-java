@@ -26,20 +26,23 @@ import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.server.outbus.enrich.given.EventMessageEnricherTestEnv.Enrichment;
 import io.spine.test.event.ProjectCreated;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * @author Alexander Litus
  */
-public class MessageEnrichmentShould {
+@DisplayName("MessageEnrichment should")
+class MessageEnrichmentTest {
 
     private MessageEnrichment<ProjectCreated, ProjectCreated.Enrichment, ?> enricher;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         final Enricher enricher = Enrichment.newEventEnricher();
         this.enricher = MessageEnrichment.create(
                 enricher,
@@ -48,15 +51,17 @@ public class MessageEnrichmentShould {
     }
 
     @Test
-    public void be_inactive_when_created() {
-        assertFalse(enricher.isActive());
-    }
-
-    @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Message.class, Empty.getDefaultInstance())
                 .setDefault(EventContext.class, EventContext.getDefaultInstance())
                 .testAllPublicInstanceMethods(enricher);
+    }
+
+    @Test
+    @DisplayName("be inactive when created")
+    void beInactiveWhenCreated() {
+        assertFalse(enricher.isActive());
     }
 }

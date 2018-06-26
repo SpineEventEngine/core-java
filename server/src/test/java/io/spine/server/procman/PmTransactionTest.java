@@ -33,17 +33,18 @@ import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static io.spine.protobuf.AnyPacker.unpack;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alex Tymchenko
  */
-public class PmTransactionShould
+class PmTransactionTest
         extends TransactionTest<ProjectId,
                                 ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
                                 Project,
@@ -117,15 +118,15 @@ public class PmTransactionShould
     @Override
     protected Message createEventMessage() {
         return PmProjectCreated.newBuilder()
-                                 .setProjectId(ID)
-                                 .build();
+                               .setProjectId(ID)
+                               .build();
     }
 
     @Override
     protected Message createEventMessageThatFailsInHandler() {
         return PmTaskAdded.newBuilder()
-                            .setProjectId(ID)
-                            .build();
+                          .setProjectId(ID)
+                          .build();
     }
 
     @Override
@@ -136,8 +137,11 @@ public class PmTransactionShould
               .setShouldThrow(toThrow);
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Test case common to ancestor.
     @Disabled // The behavior is changed. The version should be auto incremented.
     @Test
+    @DisplayName("advance version from event")
     @Override
-    protected void advanceVersionFromEvent() {}
+    protected void advanceVersionFromEvent() {
+    }
 }

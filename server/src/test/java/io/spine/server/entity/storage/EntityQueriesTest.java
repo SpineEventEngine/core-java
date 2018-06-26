@@ -66,7 +66,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit 5 Nested classes cannot to be static. */,
+        /* JUnit 5 Nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("EntityQueries utility should")
 class EntityQueriesTest {

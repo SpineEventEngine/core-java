@@ -17,24 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.model;
 
-package io.spine.server.outbus.enrich;
+import com.google.common.testing.NullPointerTester;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import com.google.protobuf.StringValue;
-import org.junit.Test;
-
-import static org.junit.Assert.assertFalse;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
- * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-public class SupportsFieldConversionShould {
+@DisplayName("HandlerMethods utility should")
+class HandlerMethodsTest {
 
-    @Test(expected = NullPointerException.class)
-    public void return_false_if_pass_null_to_function_checking_predicate() {
-        final boolean result = SupportsFieldConversion.of(StringValue.class,
-                                                          String.class)
-                                                      .apply(null);
-        assertFalse(result);
+    @Test
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(HandlerMethods.class);
+    }
+
+    @Test
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        new NullPointerTester().testAllPublicStaticMethods(HandlerMethods.class);
     }
 }

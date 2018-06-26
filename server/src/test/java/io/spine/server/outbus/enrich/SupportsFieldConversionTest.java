@@ -17,25 +17,27 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.model;
+
+package io.spine.server.outbus.enrich;
 
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
+import com.google.protobuf.StringValue;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 
 /**
- * @author Alex Tymchenko
+ * @author Alexander Yevsyukov
  */
-public class HandlerMethodsShould {
+@DisplayName("SupportsFieldConversion should")
+class SupportsFieldConversionTest {
 
     @Test
-    public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(HandlerMethods.class);
-    }
-
-    @Test
-    public void pass_the_null_tolerance_check() {
-        new NullPointerTester().testAllPublicStaticMethods(HandlerMethods.class);
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        final SupportsFieldConversion predicate =
+                SupportsFieldConversion.of(StringValue.class, String.class);
+        new NullPointerTester().testAllPublicInstanceMethods(predicate);
     }
 }

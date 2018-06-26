@@ -18,40 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.outbus.enrich.given;
+package io.spine.server.model;
 
-import io.spine.test.event.ProjectCreated;
-import io.spine.test.event.ProjectId;
+import io.spine.server.command.CommandHandlerMethod;
+import io.spine.server.model.given.MessageHandlerMapTestEnv.HandlerWithDuplicatingMethods;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static io.spine.base.Identifier.newUuid;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class EnrichmentFunctionTestEnv {
+@DisplayName("MessageHandlerMap should")
+class MessageHandlerMapTest {
 
-    private EnrichmentFunctionTestEnv() {
-        // Prevent instantiation of this utility class.
-    }
-
-    public static class GivenEventMessage {
-
-        private static final ProjectId PROJECT_ID = ProjectId.newBuilder()
-                                                             .setId(newUuid())
-                                                             .build();
-        private static final ProjectCreated PROJECT_CREATED = projectCreated(PROJECT_ID);
-
-        private GivenEventMessage() {
-        }
-
-        public static ProjectCreated projectCreated() {
-            return PROJECT_CREATED;
-        }
-
-        private static ProjectCreated projectCreated(ProjectId id) {
-            return ProjectCreated.newBuilder()
-                                 .setProjectId(id)
-                                 .build();
-        }
+    @Test
+    @DisplayName("not allow duplicating message classes in handlers")
+    void rejectDuplicateHandlers() {
+        assertThrows(DuplicateHandlerMethodError.class,
+                     () -> new MessageHandlerMap<>(HandlerWithDuplicatingMethods.class,
+                                                   CommandHandlerMethod.factory()));
     }
 }

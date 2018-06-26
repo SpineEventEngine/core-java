@@ -20,12 +20,12 @@
 
 package io.spine.server.model;
 
-import com.google.protobuf.Timestamp;
-import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.TestEntity;
 import io.spine.server.entity.given.Given;
-import org.junit.Before;
-import org.junit.Test;
+import io.spine.server.model.given.DefaultStateRegistryTestEnv.TimerSnapshot;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -37,8 +37,8 @@ import static com.google.common.collect.Lists.newArrayListWithExpectedSize;
 import static com.google.common.collect.Maps.newConcurrentMap;
 import static java.util.concurrent.Executors.callable;
 import static java.util.concurrent.Executors.newFixedThreadPool;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -48,7 +48,8 @@ import static org.mockito.Mockito.verify;
  * @author Alexander Yevsyukov
  * @author Dmitry Ganzha
  */
-public class DefaultStateRegistryShould {
+@DisplayName("DefaultStateRegistry should")
+class DefaultStateRegistryTest {
 
     private static final String DEFAULT_STATES_FIELD_NAME = "defaultStates";
 
@@ -75,8 +76,8 @@ public class DefaultStateRegistryShould {
         }
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         spyMap = spy(newConcurrentMap());
         registry = DefaultStateRegistry.getInstance();
         injectField(registry, DEFAULT_STATES_FIELD_NAME, spyMap);
@@ -86,7 +87,8 @@ public class DefaultStateRegistryShould {
         /* We ignore the result of the getDefaultState() because we check the calls to the registry
            via spies. */
     @Test
-    public void invoke_put_once_when_calling_getDefaultState_in_multithreaded_environment() {
+    @DisplayName("invoke `put` once when calling `getDefaultState` in multithreaded environment")
+    void putOnceOnGetDefaultState() {
         int numberOfEntities = 1000;
         Collection<Callable<Object>> tasks = newArrayListWithExpectedSize(numberOfEntities);
         for (int i = 0; i < numberOfEntities; i++) {
@@ -108,7 +110,8 @@ public class DefaultStateRegistryShould {
         /* We ignore the result of the getDefaultState() because we check the calls to the registry
            via spies. */
     @Test
-    public void invoke_put_once_when_calling_putOrGet_in_multithreaded_environment() {
+    @DisplayName("invoke `put` once when calling `putOrGet` in multithreaded environment")
+    void putOnceOnPutOrGet() {
         int numberOfEntities = 1000;
         Collection<Callable<Object>> tasks = newArrayListWithExpectedSize(numberOfEntities);
         for (int i = 0; i < numberOfEntities; i++) {
@@ -122,12 +125,5 @@ public class DefaultStateRegistryShould {
         int expected = 1;
         verify(spyMap, times(expected)).put(any(), any());
         assertEquals(expected, spyMap.size());
-    }
-
-    private static class TimerSnapshot extends AbstractEntity<Long, Timestamp> {
-
-        protected TimerSnapshot(Long id) {
-            super(id);
-        }
     }
 }

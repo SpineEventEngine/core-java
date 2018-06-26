@@ -52,7 +52,7 @@ public final class SupportsFieldConversion implements Predicate<EnrichmentFuncti
     }
 
     @Override
-    public boolean apply(@Nullable EnrichmentFunction<?, ?, ?> input) {
+    public boolean apply(EnrichmentFunction<?, ?, ?> input) {
         checkNotNull(input);
         final boolean eventClassMatches =
                 messageFieldClass.equals(input.getSourceClass());

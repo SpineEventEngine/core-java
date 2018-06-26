@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.model.given;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.BoolValue;
@@ -26,136 +26,25 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.test.Tests;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import io.spine.server.model.HandlerKey;
+import io.spine.server.model.HandlerMethod;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-
 /**
  * @author Alexander Litus
  * @author Alexander Yevsyukov
+ * @author Dmytro Kuzmin
  */
-public class HandlerMethodShould {
+public class HandlerMethodTestEnv {
 
-    private final HandlerMethod.Factory<OneParamMethod> factory = OneParamMethod.factory();
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    private HandlerMethod<EventClass, EventContext> twoParamMethod;
-    private HandlerMethod<EventClass, Empty> oneParamMethod;
-    private Object target;
-
-    @Before
-    public void setUp() {
-        target = new StubHandler();
-        twoParamMethod = new TwoParamMethod(StubHandler.getTwoParameterMethod());
-        oneParamMethod = new OneParamMethod(StubHandler.getOneParameterMethod());
+    /** Prevents instantiation of this utility class. */
+    private HandlerMethodTestEnv() {
     }
-
-    @Test
-    public void do_not_accept_null_method() {
-        thrown.expect(NullPointerException.class);
-        new TwoParamMethod(Tests.nullRef());
-    }
-
-    @Test
-    public void return_method() {
-        assertEquals(StubHandler.getTwoParameterMethod(), twoParamMethod.getMethod());
-    }
-
-    @Test
-    public void check_if_public() {
-        assertTrue(twoParamMethod.isPublic());
-    }
-
-    @Test
-    public void check_if_private() {
-        assertTrue(oneParamMethod.isPrivate());
-    }
-
-    @Test
-    public void return_first_param_type() {
-        assertEquals(BoolValue.class, HandlerMethod.getFirstParamType(oneParamMethod.getMethod()));
-    }
-
-    @SuppressWarnings("CheckReturnValue") // can ignore the result in this test
-    @Test
-    public void invoke_the_method_with_two_parameters() {
-        twoParamMethod.invoke(target,
-                              StringValue.getDefaultInstance(),
-                              EventContext.getDefaultInstance());
-
-        assertTrue(((StubHandler) target).wasOnInvoked());
-    }
-
-    @SuppressWarnings("CheckReturnValue") // can ignore the result in this test
-    @Test
-    public void invoke_the_method_with_one_parameter() {
-        oneParamMethod.invoke(target, BoolValue.getDefaultInstance(), Empty.getDefaultInstance());
-
-        assertTrue(((StubHandler) target).wasHandleInvoked());
-    }
-
-    @Test
-    public void return_full_name_in_toString() {
-        assertEquals(twoParamMethod.getFullName(), twoParamMethod.toString());
-    }
-
-    @Test
-    public void be_equal_to_itself() {
-        assertEquals(twoParamMethod, twoParamMethod);
-    }
-
-    @Test
-    public void be_not_equal_to_null() {
-        assertNotEquals(null, oneParamMethod);
-    }
-
-    @Test
-    public void be_not_equal_to_another_class_instance() {
-        assertNotEquals(twoParamMethod, oneParamMethod);
-    }
-
-    @Test
-    public void compare_fields_in_equals() {
-        HandlerMethod<EventClass, EventContext> anotherMethod =
-                new TwoParamMethod(StubHandler.getTwoParameterMethod());
-
-        assertEquals(twoParamMethod, anotherMethod);
-    }
-
-    @Test
-    public void have_hashCode() {
-        assertNotEquals(System.identityHashCode(twoParamMethod), twoParamMethod.hashCode());
-    }
-
-    @Test
-    public void do_not_be_created_from_method_with_checked_exception() {
-        thrown.expect(IllegalStateException.class);
-        factory.create(StubHandler.getMethodWithCheckedException());
-    }
-
-    @Test
-    public void be_normally_created_from_method_with_runtime_exception() {
-        OneParamMethod method = factory.create(StubHandler.getMethodWithRuntimeException());
-        assertEquals(StubHandler.getMethodWithRuntimeException(), method.getMethod());
-    }
-
-    /*
-     * Test environment classes.
-     *****************************/
 
     @SuppressWarnings("UnusedParameters") // OK for test methods.
-    private static class StubHandler {
+    public static class StubHandler {
 
         private boolean onInvoked;
         private boolean handleInvoked;
@@ -168,7 +57,7 @@ public class HandlerMethodShould {
             throw new RuntimeException("Throw new runtime exception");
         }
 
-        private static Method getTwoParameterMethod() {
+        public static Method getTwoParameterMethod() {
             Method method;
             Class<?> clazz = StubHandler.class;
             try {
@@ -179,7 +68,7 @@ public class HandlerMethodShould {
             return method;
         }
 
-        private static Method getOneParameterMethod() {
+        public static Method getOneParameterMethod() {
             Method method;
             Class<?> clazz = StubHandler.class;
             try {
@@ -190,7 +79,7 @@ public class HandlerMethodShould {
             return method;
         }
 
-        private static Method getMethodWithCheckedException() {
+        public static Method getMethodWithCheckedException() {
             Method method;
             Class<?> clazz = StubHandler.class;
             try {
@@ -201,7 +90,7 @@ public class HandlerMethodShould {
             return method;
         }
 
-        private static Method getMethodWithRuntimeException() {
+        public static Method getMethodWithRuntimeException() {
             Method method;
             Class<?> clazz = StubHandler.class;
             try {
@@ -221,18 +110,18 @@ public class HandlerMethodShould {
             handleInvoked = true;
         }
 
-        private boolean wasOnInvoked() {
+        public boolean wasOnInvoked() {
             return onInvoked;
         }
 
-        private boolean wasHandleInvoked() {
+        public boolean wasHandleInvoked() {
             return handleInvoked;
         }
     }
 
-    private static class TwoParamMethod extends HandlerMethod<EventClass, EventContext> {
+    public static class TwoParamMethod extends HandlerMethod<EventClass, EventContext> {
 
-        private TwoParamMethod(Method method) {
+        public TwoParamMethod(Method method) {
             super(method);
         }
 
@@ -247,15 +136,17 @@ public class HandlerMethodShould {
         }
     }
 
-    private static class OneParamMethod extends HandlerMethod<EventClass, Empty> {
+    public static class OneParamMethod extends HandlerMethod<EventClass, Empty> {
 
-        private OneParamMethod(Method method) {
+        public OneParamMethod(Method method) {
             super(method);
         }
 
         public static Factory factory() {
             return Factory.getInstance();
-        }        @Override
+        }
+
+        @Override
         public EventClass getMessageClass() {
             return EventClass.of(rawMessageClass());
         }
@@ -287,7 +178,9 @@ public class HandlerMethodShould {
             protected OneParamMethod createFromMethod(Method method) {
                 return new OneParamMethod(method);
             }
-        }        @Override
+        }
+
+        @Override
         public HandlerKey key() {
             throw new IllegalStateException("The method is not a target of the test.");
         }

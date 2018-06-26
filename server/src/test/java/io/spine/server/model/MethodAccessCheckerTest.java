@@ -21,11 +21,14 @@
 package io.spine.server.model;
 
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
+import io.spine.server.model.given.MethodAccessCheckerTestEnv.StubMethodContainer;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -34,12 +37,15 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Dmytro Kuzmin
  */
-public class MethodAccessCheckerShould {
+@SuppressWarnings("DuplicateStringLiteralInspection") // String literals for method names.
+@DisplayName("MethodAccessChecker should")
+class MethodAccessCheckerTest {
 
-    public static final String STUB_WARNING_MESSAGE = "Stub warning message";
+    private static final String STUB_WARNING_MESSAGE = "Stub warning message";
 
     @Test
-    public void pass_null_check() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester().testAllPublicStaticMethods(MethodAccessChecker.class);
 
         final Method method = getMethod("publicMethod");
@@ -48,7 +54,19 @@ public class MethodAccessCheckerShould {
     }
 
     @Test
-    public void do_not_log_warning_on_correct_access_modifier() {
+    @DisplayName("log warning on incorrect access modifier")
+    void warnOnIncorrectAccess() {
+        final Method method = getMethod("protectedMethod");
+        final MethodAccessChecker checker = spy(forMethod(method));
+        checker.checkPublic(STUB_WARNING_MESSAGE);
+        checker.checkPackagePrivate(STUB_WARNING_MESSAGE);
+        checker.checkPrivate(STUB_WARNING_MESSAGE);
+        verify(checker, times(3)).warnOnWrongModifier(STUB_WARNING_MESSAGE);
+    }
+
+    @Test
+    @DisplayName("not log warning on correct access modifier")
+    void recognizeCorrectAccess() {
         final Method publicMethod = getMethod("publicMethod");
         final MethodAccessChecker checkerPublic = spy(forMethod(publicMethod));
         checkerPublic.checkPublic(STUB_WARNING_MESSAGE);
@@ -65,16 +83,6 @@ public class MethodAccessCheckerShould {
         verify(checkerPrivate, never()).warnOnWrongModifier(STUB_WARNING_MESSAGE);
     }
 
-    @Test
-    public void log_warning_on_incorrect_access_modifier() {
-        final Method method = getMethod("protectedMethod");
-        final MethodAccessChecker checker = spy(forMethod(method));
-        checker.checkPublic(STUB_WARNING_MESSAGE);
-        checker.checkPackagePrivate(STUB_WARNING_MESSAGE);
-        checker.checkPrivate(STUB_WARNING_MESSAGE);
-        verify(checker, times(3)).warnOnWrongModifier(STUB_WARNING_MESSAGE);
-    }
-
     private static Method getMethod(String methodName) {
         final Method method;
         final Class<?> clazz = StubMethodContainer.class;
@@ -84,25 +92,5 @@ public class MethodAccessCheckerShould {
             throw new IllegalStateException(e);
         }
         return method;
-    }
-
-    private static class StubMethodContainer {
-
-        @SuppressWarnings("unused") // Reflective access.
-        public void publicMethod() {
-        }
-
-        @SuppressWarnings("unused") // Reflective access.
-        protected void protectedMethod() {
-        }
-
-        @SuppressWarnings("unused")
-            // Reflective access.
-        void packagePrivateMethod() {
-        }
-
-        @SuppressWarnings("unused") // Reflective access.
-        private void privateMethod() {
-        }
     }
 }

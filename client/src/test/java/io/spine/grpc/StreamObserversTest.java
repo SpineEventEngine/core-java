@@ -60,7 +60,7 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alex Tymchenko
  */
-@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"}) // JUnit 5 Nested classes cannot to be static.
+@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"}) // JUnit 5 Nested classes cannot be static.
 @DisplayName("StreamObservers utility should")
 class StreamObserversTest {
 

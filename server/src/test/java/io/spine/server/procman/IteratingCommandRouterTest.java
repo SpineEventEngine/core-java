@@ -30,20 +30,22 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Commands;
 import io.spine.server.commandbus.CommandBus;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class IteratingCommandRouterShould
-        extends AbstractCommandRouterShould<IteratingCommandRouter> {
+@DisplayName("IteratingCommandRouter should")
+class IteratingCommandRouterTest
+        extends AbstractCommandRouterTest<IteratingCommandRouter> {
 
     @Override
     IteratingCommandRouter createRouter(CommandBus commandBus,
@@ -53,7 +55,8 @@ public class IteratingCommandRouterShould
     }
 
     @Test
-    public void return_CommandRouted_from_routeFirst() throws Exception {
+    @DisplayName("return CommandRouted from `routeFirst`")
+    void returnRoutedFirst() throws Exception {
         final CommandRouted commandRouted = router().routeFirst();
 
         assertSource(commandRouted);
@@ -77,7 +80,8 @@ public class IteratingCommandRouterShould
     }
 
     @Test
-    public void produce_a_command_on_routeNext() throws Exception {
+    @DisplayName("produce command on `routeNext`")
+    void returnRoutedNext() throws Exception {
 
         /*
         This is a hack, aimed to resolve the wall-clock inaccuracy issue, that is randomly
@@ -86,23 +90,20 @@ public class IteratingCommandRouterShould
         <p>The idea is to add some randomization to {@code nanoseconds} value of the
         current Timestamp obtained from the wall-clock provider.
         */
-        Time.setProvider(new Time.Provider() {
-            @Override
-            public Timestamp getCurrentTime() {
-                final Timestamp millis = Timestamps.fromMillis(System.currentTimeMillis());
-                final Timestamp nanos = Timestamps.fromNanos(System.nanoTime());
+        Time.setProvider(() -> {
+            final Timestamp millis = Timestamps.fromMillis(System.currentTimeMillis());
+            final Timestamp nanos = Timestamps.fromNanos(System.nanoTime());
 
-                final Timestamp result = millis.toBuilder()
-                                               .setNanos(nanos.toBuilder()
-                                                              .getNanos())
-                                               .build();
-                return result;
-            }
+            final Timestamp result = millis.toBuilder()
+                                           .setNanos(nanos.toBuilder()
+                                                          .getNanos())
+                                           .build();
+            return result;
         });
 
         final CommandRouted firstRouted = router().routeFirst();
         assertTrue(router().hasNext());
-        
+
         final Command command = router().routeNext();
 
         // Test that 2nd command message is in the next routed command.

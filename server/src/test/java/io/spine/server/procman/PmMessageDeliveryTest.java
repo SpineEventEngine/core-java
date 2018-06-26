@@ -17,45 +17,44 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.aggregate;
+package io.spine.server.procman;
 
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.DeliveryProject;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.SingleShardProjectRepository;
-import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.TripleShardProjectRepository;
 import io.spine.server.delivery.AbstractMessageDeliveryTest;
 import io.spine.server.delivery.given.ParallelDispatcher;
 import io.spine.server.delivery.given.ThreadStats;
-import io.spine.test.aggregate.ProjectId;
+import io.spine.server.procman.given.PmMessageDeliveryTestEnv.DeliveryPm;
+import io.spine.server.procman.given.PmMessageDeliveryTestEnv.QuadrupleShardPmRepository;
+import io.spine.server.procman.given.PmMessageDeliveryTestEnv.SingleShardPmRepository;
+import io.spine.test.procman.ProjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.cannotStartProject;
-import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.projectCancelled;
-import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.startProject;
 import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
+import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.cannotStartProject;
+import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.createProject;
+import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.projectStarted;
 
 /**
  * @author Alex Tymchenko
  */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit 5 Nested classes cannot be static. */,
-        "DuplicateStringLiteralInspection" /* Common test display names */})
-@DisplayName("Aggregate message delivery should")
-class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
+        "DuplicateStringLiteralInspection" /* Common test display names. */})
+@DisplayName("ProcessManager message delivery should")
+class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
 
     @Override
     @BeforeEach
-    public void setUp() {
+    protected void setUp() {
         super.setUp();
-        DeliveryProject.getStats()
-                       .clear();
+        DeliveryPm.getStats().clear();
     }
 
     @Nested
@@ -66,15 +65,16 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
         @DisplayName("to single shard")
         void toSingleShard() throws Exception {
             final ParallelDispatcher<ProjectId, Command> dispatcher =
-                    new ParallelDispatcher<ProjectId, Command>(42, 400, dispatchWaitTime()) {
+                    new ParallelDispatcher<ProjectId, Command>(
+                            42, 400, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {
-                            return DeliveryProject.getStats();
+                            return DeliveryPm.getStats();
                         }
 
                         @Override
                         protected Command newMessage() {
-                            return startProject();
+                            return createProject();
                         }
 
                         @Override
@@ -84,22 +84,23 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
                         }
                     };
 
-            dispatcher.dispatchMessagesTo(new SingleShardProjectRepository());
+            dispatcher.dispatchMessagesTo(new SingleShardPmRepository());
         }
 
         @Test
         @DisplayName("to several shards")
         void toSeveralShards() throws Exception {
             final ParallelDispatcher<ProjectId, Command> dispatcher =
-                    new ParallelDispatcher<ProjectId, Command>(23, 423, dispatchWaitTime()) {
+                    new ParallelDispatcher<ProjectId, Command>(
+                            59, 473, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {
-                            return DeliveryProject.getStats();
+                            return DeliveryPm.getStats();
                         }
 
                         @Override
                         protected Command newMessage() {
-                            return startProject();
+                            return createProject();
                         }
 
                         @Override
@@ -108,9 +109,9 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
                                    .post(command, StreamObservers.noOpObserver());
                         }
                     };
-            dispatcher.dispatchMessagesTo(new TripleShardProjectRepository());
-        }
 
+            dispatcher.dispatchMessagesTo(new QuadrupleShardPmRepository());
+        }
     }
 
     @Nested
@@ -121,15 +122,16 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
         @DisplayName("to single shard")
         void toSingleShard() throws Exception {
             final ParallelDispatcher<ProjectId, Event> dispatcher =
-                    new ParallelDispatcher<ProjectId, Event>(130, 500, dispatchWaitTime()) {
+                    new ParallelDispatcher<ProjectId, Event>(
+                            180, 819, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {
-                            return DeliveryProject.getStats();
+                            return DeliveryPm.getStats();
                         }
 
                         @Override
                         protected Event newMessage() {
-                            return projectCancelled();
+                            return projectStarted();
                         }
 
                         @Override
@@ -139,22 +141,23 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
                         }
                     };
 
-            dispatcher.dispatchMessagesTo(new SingleShardProjectRepository());
+            dispatcher.dispatchMessagesTo(new SingleShardPmRepository());
         }
 
         @Test
         @DisplayName("to several shards")
         void toSeveralShards() throws Exception {
             final ParallelDispatcher<ProjectId, Event> dispatcher =
-                    new ParallelDispatcher<ProjectId, Event>(190, 900, dispatchWaitTime()) {
+                    new ParallelDispatcher<ProjectId, Event>(
+                            179, 918, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {
-                            return DeliveryProject.getStats();
+                            return DeliveryPm.getStats();
                         }
 
                         @Override
                         protected Event newMessage() {
-                            return projectCancelled();
+                            return projectStarted();
                         }
 
                         @Override
@@ -164,7 +167,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
                         }
                     };
 
-            dispatcher.dispatchMessagesTo(new TripleShardProjectRepository());
+            dispatcher.dispatchMessagesTo(new QuadrupleShardPmRepository());
         }
     }
 
@@ -176,10 +179,11 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
         @DisplayName("to single shard")
         void toSingleShard() throws Exception {
             final ParallelDispatcher<ProjectId, Rejection> dispatcher =
-                    new ParallelDispatcher<ProjectId, Rejection>(36, 12, dispatchWaitTime()) {
+                    new ParallelDispatcher<ProjectId, Rejection>(
+                            30, 619, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {
-                            return DeliveryProject.getStats();
+                            return DeliveryPm.getStats();
                         }
 
                         @Override
@@ -194,17 +198,18 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
                         }
                     };
 
-            dispatcher.dispatchMessagesTo(new SingleShardProjectRepository());
+            dispatcher.dispatchMessagesTo(new SingleShardPmRepository());
         }
 
         @Test
         @DisplayName("to several shards")
         void toSeveralShards() throws Exception {
             final ParallelDispatcher<ProjectId, Rejection> dispatcher =
-                    new ParallelDispatcher<ProjectId, Rejection>(40, 603, dispatchWaitTime()) {
+                    new ParallelDispatcher<ProjectId, Rejection>(
+                            43, 719, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {
-                            return DeliveryProject.getStats();
+                            return DeliveryPm.getStats();
                         }
 
                         @Override
@@ -219,7 +224,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
                         }
                     };
 
-            dispatcher.dispatchMessagesTo(new TripleShardProjectRepository());
+            dispatcher.dispatchMessagesTo(new QuadrupleShardPmRepository());
         }
     }
 }

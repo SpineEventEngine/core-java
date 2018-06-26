@@ -18,40 +18,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.outbus.enrich.given;
+package io.spine.server.model.given;
 
-import io.spine.test.event.ProjectCreated;
-import io.spine.test.event.ProjectId;
-
-import static io.spine.base.Identifier.newUuid;
+import java.io.IOException;
 
 /**
- * @author Alexander Yevsyukov
+ * @author Dmytro Kuzmin
  */
-public class EnrichmentFunctionTestEnv {
+public class MethodExceptionCheckerTestEnv {
 
-    private EnrichmentFunctionTestEnv() {
-        // Prevent instantiation of this utility class.
+    /** Prevents instantiation of this utility class. */
+    private MethodExceptionCheckerTestEnv() {
     }
 
-    public static class GivenEventMessage {
+    @SuppressWarnings("unused") // Reflective access.
+    public static class StubMethodContainer {
 
-        private static final ProjectId PROJECT_ID = ProjectId.newBuilder()
-                                                             .setId(newUuid())
-                                                             .build();
-        private static final ProjectCreated PROJECT_CREATED = projectCreated(PROJECT_ID);
-
-        private GivenEventMessage() {
+        private static void methodNoExceptions() {
         }
 
-        public static ProjectCreated projectCreated() {
-            return PROJECT_CREATED;
+        private static void methodCheckedException() throws Exception {
+            throw new IOException("Test checked exception");
         }
 
-        private static ProjectCreated projectCreated(ProjectId id) {
-            return ProjectCreated.newBuilder()
-                                 .setProjectId(id)
-                                 .build();
+        private static void methodRuntimeException() throws RuntimeException {
+            throw new RuntimeException("Test runtime exception");
+        }
+
+        private static void methodCustomException() throws IOException {
+            throw new IOException("Test custom exception");
+        }
+
+        private static void methodDescendantException() throws IllegalStateException {
+            throw new IllegalStateException("Test descendant exception");
         }
     }
 }

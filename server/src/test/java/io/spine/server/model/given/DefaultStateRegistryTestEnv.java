@@ -18,32 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.model.given;
 
-import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandlerMethod;
-import io.spine.test.event.ProjectCreated;
-import io.spine.test.event.command.CreateProject;
-import org.junit.Test;
+import com.google.protobuf.Timestamp;
+import io.spine.server.entity.AbstractEntity;
 
-public class MessageHandlerMapShould {
+/**
+ * @author Alexander Yevsyukov
+ * @author Dmytro Kuzmin
+ */
+public class DefaultStateRegistryTestEnv {
 
-    @Test(expected = DuplicateHandlerMethodError.class)
-    public void not_allow_duplicating_message_classes() {
-        new MessageHandlerMap<>
-                (HandlerWithDuplicatingMethods.class, CommandHandlerMethod.factory());
+    /** Prevents instantiation of this utility class. */
+    private DefaultStateRegistryTestEnv() {
     }
 
-    private static class HandlerWithDuplicatingMethods {
+    public static class TimerSnapshot extends AbstractEntity<Long, Timestamp> {
 
-        @Assign
-        public ProjectCreated on(CreateProject cmd) {
-            return ProjectCreated.getDefaultInstance();
-        }
-
-        @Assign
-        public ProjectCreated handle(CreateProject cmd) {
-            return ProjectCreated.getDefaultInstance();
+        protected TimerSnapshot(Long id) {
+            super(id);
         }
     }
 }

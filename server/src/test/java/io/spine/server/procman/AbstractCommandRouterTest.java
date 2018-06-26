@@ -34,7 +34,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.List;
 import java.util.Set;
@@ -43,13 +43,13 @@ import java.util.stream.Collectors;
 import static io.spine.core.Commands.sameActorAndTenant;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static java.util.Collections.unmodifiableList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-public abstract class AbstractCommandRouterShould<T extends AbstractCommandRouter> {
+abstract class AbstractCommandRouterTest<T extends AbstractCommandRouter> {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
@@ -70,7 +70,8 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
                                                             toMessage("cuatro")
     );
 
-    abstract T createRouter(CommandBus commandBus, Message sourceMessage, CommandContext commandContext);
+    abstract T
+    createRouter(CommandBus commandBus, Message sourceMessage, CommandContext commandContext);
 
     T router() {
         return router;
@@ -84,13 +85,14 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
         return requestFactory;
     }
 
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.
+    @SuppressWarnings("ReturnOfCollectionOrArrayField")
+        // OK as we return immutable impl.
     List<Message> messages() {
         return messages;
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
         final CommandBus commandBus = boundedContext.getCommandBus();

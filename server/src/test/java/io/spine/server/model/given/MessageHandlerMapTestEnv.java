@@ -18,40 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.outbus.enrich.given;
+package io.spine.server.model.given;
 
+import io.spine.server.command.Assign;
 import io.spine.test.event.ProjectCreated;
-import io.spine.test.event.ProjectId;
-
-import static io.spine.base.Identifier.newUuid;
+import io.spine.test.event.command.CreateProject;
 
 /**
  * @author Alexander Yevsyukov
+ * @author Dmytro Kuzmin
  */
-public class EnrichmentFunctionTestEnv {
+public class MessageHandlerMapTestEnv {
 
-    private EnrichmentFunctionTestEnv() {
-        // Prevent instantiation of this utility class.
+    /** Prevents instantiation of this utility class. */
+    private MessageHandlerMapTestEnv() {
     }
 
-    public static class GivenEventMessage {
+    public static class HandlerWithDuplicatingMethods {
 
-        private static final ProjectId PROJECT_ID = ProjectId.newBuilder()
-                                                             .setId(newUuid())
-                                                             .build();
-        private static final ProjectCreated PROJECT_CREATED = projectCreated(PROJECT_ID);
-
-        private GivenEventMessage() {
+        @Assign
+        public ProjectCreated on(CreateProject cmd) {
+            return ProjectCreated.getDefaultInstance();
         }
 
-        public static ProjectCreated projectCreated() {
-            return PROJECT_CREATED;
-        }
-
-        private static ProjectCreated projectCreated(ProjectId id) {
-            return ProjectCreated.newBuilder()
-                                 .setProjectId(id)
-                                 .build();
+        @Assign
+        public ProjectCreated handle(CreateProject cmd) {
+            return ProjectCreated.getDefaultInstance();
         }
     }
 }
