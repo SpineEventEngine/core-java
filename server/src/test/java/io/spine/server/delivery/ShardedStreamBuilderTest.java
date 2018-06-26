@@ -40,7 +40,7 @@ import static org.mockito.Mockito.mock;
  */
 @SuppressWarnings({"DuplicateStringLiteralInspection", /* Common test display names. */
         "InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit 5 Nested classes cannot to be static. */,
+        /* JUnit 5 Nested classes cannot be static. */,
         "unchecked" /* The numerous generic parameters are omitted to simplify tests. */})
 @DisplayName("ShardedStream Builder should")
 class ShardedStreamBuilderTest {
