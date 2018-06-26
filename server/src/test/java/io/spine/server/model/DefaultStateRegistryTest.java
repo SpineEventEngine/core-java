@@ -20,10 +20,9 @@
 
 package io.spine.server.model;
 
-import com.google.protobuf.Timestamp;
-import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.TestEntity;
 import io.spine.server.entity.given.Given;
+import io.spine.server.model.given.DefaultStateRegistryTestEnv.TimerSnapshot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -126,12 +125,5 @@ class DefaultStateRegistryTest {
         int expected = 1;
         verify(spyMap, times(expected)).put(any(), any());
         assertEquals(expected, spyMap.size());
-    }
-
-    private static class TimerSnapshot extends AbstractEntity<Long, Timestamp> {
-
-        protected TimerSnapshot(Long id) {
-            super(id);
-        }
     }
 }

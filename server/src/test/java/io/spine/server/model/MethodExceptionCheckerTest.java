@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.server.model.given.MethodExceptionCheckerTestEnv.StubMethodContainer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -113,32 +114,5 @@ class MethodExceptionCheckerTest {
             throw new IllegalStateException(e);
         }
         return method;
-    }
-
-    private static class StubMethodContainer {
-
-        @SuppressWarnings("unused") // Reflective access.
-        private static void methodNoExceptions() {
-        }
-
-        @SuppressWarnings("unused") // Reflective access.
-        private static void methodCheckedException() throws Exception {
-            throw new IOException("Test checked exception");
-        }
-
-        @SuppressWarnings("unused") // Reflective access.
-        private static void methodRuntimeException() throws RuntimeException {
-            throw new RuntimeException("Test runtime exception");
-        }
-
-        @SuppressWarnings("unused") // Reflective access.
-        private static void methodCustomException() throws IOException {
-            throw new IOException("Test custom exception");
-        }
-
-        @SuppressWarnings("unused") // Reflective access.
-        private static void methodDescendantException() throws IllegalStateException {
-            throw new IllegalStateException("Test descendant exception");
-        }
     }
 }

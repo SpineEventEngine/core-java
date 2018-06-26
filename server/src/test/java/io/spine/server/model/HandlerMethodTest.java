@@ -20,20 +20,19 @@
 
 package io.spine.server.model;
 
-import com.google.common.base.Predicate;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.server.model.given.HandlerMethodTestEnv.OneParamMethod;
+import io.spine.server.model.given.HandlerMethodTestEnv.StubHandler;
+import io.spine.server.model.given.HandlerMethodTestEnv.TwoParamMethod;
 import io.spine.test.Tests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.lang.reflect.Method;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -178,148 +177,5 @@ class HandlerMethodTest {
     void acceptMethodThrowingRuntime() {
         OneParamMethod method = factory.create(StubHandler.getMethodWithRuntimeException());
         assertEquals(StubHandler.getMethodWithRuntimeException(), method.getMethod());
-    }
-
-    /*
-     * Test environment classes.
-     *****************************/
-
-    @SuppressWarnings("UnusedParameters") // OK for test methods.
-    private static class StubHandler {
-
-        private boolean onInvoked;
-        private boolean handleInvoked;
-
-        private static void throwCheckedException(BoolValue message) throws Exception {
-            throw new IOException("Throw new checked exception");
-        }
-
-        private static void throwRuntimeException(BoolValue message) throws RuntimeException {
-            throw new RuntimeException("Throw new runtime exception");
-        }
-
-        private static Method getTwoParameterMethod() {
-            Method method;
-            Class<?> clazz = StubHandler.class;
-            try {
-                method = clazz.getMethod("on", StringValue.class, EventContext.class);
-            } catch (NoSuchMethodException e) {
-                throw new IllegalStateException(e);
-            }
-            return method;
-        }
-
-        private static Method getOneParameterMethod() {
-            Method method;
-            Class<?> clazz = StubHandler.class;
-            try {
-                method = clazz.getDeclaredMethod("handle", BoolValue.class);
-            } catch (NoSuchMethodException e) {
-                throw new IllegalStateException(e);
-            }
-            return method;
-        }
-
-        private static Method getMethodWithCheckedException() {
-            Method method;
-            Class<?> clazz = StubHandler.class;
-            try {
-                method = clazz.getDeclaredMethod("throwCheckedException", BoolValue.class);
-            } catch (NoSuchMethodException e) {
-                throw new IllegalStateException(e);
-            }
-            return method;
-        }
-
-        private static Method getMethodWithRuntimeException() {
-            Method method;
-            Class<?> clazz = StubHandler.class;
-            try {
-                method = clazz.getDeclaredMethod("throwRuntimeException", BoolValue.class);
-            } catch (NoSuchMethodException e) {
-                throw new IllegalStateException(e);
-            }
-            return method;
-        }
-
-        public void on(StringValue message, EventContext context) {
-            onInvoked = true;
-        }
-
-        @SuppressWarnings("unused") // The method is used via reflection.
-        private void handle(BoolValue message) {
-            handleInvoked = true;
-        }
-
-        private boolean wasOnInvoked() {
-            return onInvoked;
-        }
-
-        private boolean wasHandleInvoked() {
-            return handleInvoked;
-        }
-    }
-
-    private static class TwoParamMethod extends HandlerMethod<EventClass, EventContext> {
-
-        private TwoParamMethod(Method method) {
-            super(method);
-        }
-
-        @Override
-        public EventClass getMessageClass() {
-            return EventClass.of(rawMessageClass());
-        }
-
-        @Override
-        public HandlerKey key() {
-            throw new IllegalStateException("The method is not a target of the test.");
-        }
-    }
-
-    private static class OneParamMethod extends HandlerMethod<EventClass, Empty> {
-
-        private OneParamMethod(Method method) {
-            super(method);
-        }
-
-        public static Factory factory() {
-            return Factory.getInstance();
-        }        @Override
-        public EventClass getMessageClass() {
-            return EventClass.of(rawMessageClass());
-        }
-
-        private static class Factory extends HandlerMethod.Factory<OneParamMethod> {
-
-            private static final Factory INSTANCE = new Factory();
-
-            private static Factory getInstance() {
-                return INSTANCE;
-            }
-
-            @Override
-            public Class<OneParamMethod> getMethodClass() {
-                return OneParamMethod.class;
-            }
-
-            @Override
-            public Predicate<Method> getPredicate() {
-                throw new IllegalStateException("The test factory cannot provide the predicate.");
-            }
-
-            @Override
-            public void checkAccessModifier(Method method) {
-                // Any access modifier is accepted for the test method.
-            }
-
-            @Override
-            protected OneParamMethod createFromMethod(Method method) {
-                return new OneParamMethod(method);
-            }
-        }        @Override
-        public HandlerKey key() {
-            throw new IllegalStateException("The method is not a target of the test.");
-        }
     }
 }

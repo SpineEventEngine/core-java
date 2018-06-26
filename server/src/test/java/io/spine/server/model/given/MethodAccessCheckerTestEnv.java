@@ -18,26 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.outbus.enrich;
-
-import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.StringValue;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+package io.spine.server.model.given;
 
 /**
- * @author Alexander Yevsyukov
+ * @author Dmytro Kuzmin
  */
-@DisplayName("SupportsFieldConversion should")
-class SupportsFieldConversionTest {
+public class MethodAccessCheckerTestEnv {
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        final SupportsFieldConversion predicate =
-                SupportsFieldConversion.of(StringValue.class, String.class);
-        new NullPointerTester().testAllPublicInstanceMethods(predicate);
+    /** Prevents instantiation of this utility class. */
+    private MethodAccessCheckerTestEnv() {
+    }
+
+    @SuppressWarnings("unused") // Reflective access.
+    public static class StubMethodContainer {
+
+        public void publicMethod() {
+        }
+
+        protected void protectedMethod() {
+        }
+
+        void packagePrivateMethod() {
+        }
+
+        private void privateMethod() {
+        }
     }
 }

@@ -36,7 +36,6 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
-import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
 import io.spine.core.given.GivenEvent;
 import io.spine.protobuf.AnyPacker;
@@ -47,8 +46,8 @@ import io.spine.server.entity.given.Given;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
-import io.spine.server.event.EventSubscriber;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv;
+import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.RememberingSubscriber;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.SensoryDeprivedPmRepository;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManager;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManagerRepository;
@@ -63,7 +62,6 @@ import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -255,7 +253,7 @@ class ProcessManagerRepositoryTest
 
         testDispatchCommand(addTask());
 
-        PmTaskAdded message = subscriber.remembered;
+        PmTaskAdded message = subscriber.getRemembered();
         assertNotNull(message);
         assertEquals(ID, message.getProjectId());
     }
@@ -445,18 +443,5 @@ class ProcessManagerRepositoryTest
                                                       .build();
         repo.setBoundedContext(boundedContext);
         assertThrows(IllegalStateException.class, repo::onRegistered);
-    }
-
-    /**
-     * Helper event subscriber which remembers an event message.
-     */
-    private static class RememberingSubscriber extends EventSubscriber {
-
-        private @Nullable PmTaskAdded remembered;
-
-        @Subscribe
-        void on(PmTaskAdded msg) {
-            remembered = msg;
-        }
     }
 }

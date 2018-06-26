@@ -27,10 +27,12 @@ import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.core.React;
+import io.spine.core.Subscribe;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
+import io.spine.server.event.EventSubscriber;
 import io.spine.server.procman.CommandRouted;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
@@ -49,6 +51,7 @@ import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testdata.Sample;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
@@ -310,4 +313,22 @@ public class ProcessManagerRepositoryTestEnv {
      */
     public static class SensoryDeprivedPmRepository
             extends ProcessManagerRepository<ProjectId, SensoryDeprivedProcessManager, Project> {}
+
+
+    /**
+     * Helper event subscriber which remembers an event message.
+     */
+    public static class RememberingSubscriber extends EventSubscriber {
+
+        private @Nullable PmTaskAdded remembered;
+
+        @Subscribe
+        void on(PmTaskAdded msg) {
+            remembered = msg;
+        }
+
+        public @Nullable PmTaskAdded getRemembered() {
+            return remembered;
+        }
+    }
 }

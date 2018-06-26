@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.server.model.given.MethodAccessCheckerTestEnv.StubMethodContainer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -90,25 +91,5 @@ class MethodAccessCheckerTest {
             throw new IllegalStateException(e);
         }
         return method;
-    }
-
-    private static class StubMethodContainer {
-
-        @SuppressWarnings("unused") // Reflective access.
-        public void publicMethod() {
-        }
-
-        @SuppressWarnings("unused") // Reflective access.
-        protected void protectedMethod() {
-        }
-
-        @SuppressWarnings("unused")
-            // Reflective access.
-        void packagePrivateMethod() {
-        }
-
-        @SuppressWarnings("unused") // Reflective access.
-        private void privateMethod() {
-        }
     }
 }

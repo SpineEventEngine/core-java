@@ -20,15 +20,16 @@
 
 package io.spine.server.model;
 
-import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandlerMethod;
-import io.spine.test.event.ProjectCreated;
-import io.spine.test.event.command.CreateProject;
+import io.spine.server.model.given.MessageHandlerMapTestEnv.HandlerWithDuplicatingMethods;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 @DisplayName("MessageHandlerMap should")
 class MessageHandlerMapTest {
 
@@ -38,18 +39,5 @@ class MessageHandlerMapTest {
         assertThrows(DuplicateHandlerMethodError.class,
                      () -> new MessageHandlerMap<>(HandlerWithDuplicatingMethods.class,
                                                    CommandHandlerMethod.factory()));
-    }
-
-    private static class HandlerWithDuplicatingMethods {
-
-        @Assign
-        public ProjectCreated on(CreateProject cmd) {
-            return ProjectCreated.getDefaultInstance();
-        }
-
-        @Assign
-        public ProjectCreated handle(CreateProject cmd) {
-            return ProjectCreated.getDefaultInstance();
-        }
     }
 }

@@ -18,26 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.outbus.enrich;
+package io.spine.server.model.given;
 
-import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.StringValue;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import io.spine.server.command.Assign;
+import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.command.CreateProject;
 
 /**
  * @author Alexander Yevsyukov
+ * @author Dmytro Kuzmin
  */
-@DisplayName("SupportsFieldConversion should")
-class SupportsFieldConversionTest {
+public class MessageHandlerMapTestEnv {
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        final SupportsFieldConversion predicate =
-                SupportsFieldConversion.of(StringValue.class, String.class);
-        new NullPointerTester().testAllPublicInstanceMethods(predicate);
+    /** Prevents instantiation of this utility class. */
+    private MessageHandlerMapTestEnv() {
+    }
+
+    public static class HandlerWithDuplicatingMethods {
+
+        @Assign
+        public ProjectCreated on(CreateProject cmd) {
+            return ProjectCreated.getDefaultInstance();
+        }
+
+        @Assign
+        public ProjectCreated handle(CreateProject cmd) {
+            return ProjectCreated.getDefaultInstance();
+        }
     }
 }
