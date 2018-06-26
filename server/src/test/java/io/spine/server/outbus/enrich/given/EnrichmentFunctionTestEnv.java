@@ -41,7 +41,8 @@ public class EnrichmentFunctionTestEnv {
                                                              .build();
         private static final ProjectCreated PROJECT_CREATED = projectCreated(PROJECT_ID);
 
-        private GivenEventMessage() {}
+        private GivenEventMessage() {
+        }
 
         public static ProjectCreated projectCreated() {
             return PROJECT_CREATED;

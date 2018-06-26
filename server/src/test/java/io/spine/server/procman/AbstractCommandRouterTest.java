@@ -70,7 +70,8 @@ abstract class AbstractCommandRouterTest<T extends AbstractCommandRouter> {
                                                             toMessage("cuatro")
     );
 
-    abstract T createRouter(CommandBus commandBus, Message sourceMessage, CommandContext commandContext);
+    abstract T
+    createRouter(CommandBus commandBus, Message sourceMessage, CommandContext commandContext);
 
     T router() {
         return router;
@@ -84,7 +85,8 @@ abstract class AbstractCommandRouterTest<T extends AbstractCommandRouter> {
         return requestFactory;
     }
 
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.
+    @SuppressWarnings("ReturnOfCollectionOrArrayField")
+        // OK as we return immutable impl.
     List<Message> messages() {
         return messages;
     }

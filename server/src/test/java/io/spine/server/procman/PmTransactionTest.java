@@ -118,15 +118,15 @@ class PmTransactionTest
     @Override
     protected Message createEventMessage() {
         return PmProjectCreated.newBuilder()
-                                 .setProjectId(ID)
-                                 .build();
+                               .setProjectId(ID)
+                               .build();
     }
 
     @Override
     protected Message createEventMessageThatFailsInHandler() {
         return PmTaskAdded.newBuilder()
-                            .setProjectId(ID)
-                            .build();
+                          .setProjectId(ID)
+                          .build();
     }
 
     @Override
@@ -142,5 +142,6 @@ class PmTransactionTest
     @Test
     @DisplayName("advance version from event")
     @Override
-    protected void advanceVersionFromEvent() {}
+    protected void advanceVersionFromEvent() {
+    }
 }

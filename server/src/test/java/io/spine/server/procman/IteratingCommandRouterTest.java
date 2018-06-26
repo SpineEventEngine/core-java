@@ -103,7 +103,7 @@ class IteratingCommandRouterTest
 
         final CommandRouted firstRouted = router().routeFirst();
         assertTrue(router().hasNext());
-        
+
         final Command command = router().routeNext();
 
         // Test that 2nd command message is in the next routed command.

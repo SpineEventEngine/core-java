@@ -43,7 +43,8 @@ import io.spine.validate.StringValueVBuilder;
 public class ModelTestEnv {
 
     /** Prevents instantiation on this utility class. */
-    private ModelTestEnv() {}
+    private ModelTestEnv() {
+    }
 
     @SuppressWarnings("MethodMayBeStatic")
     public static class MAggregate extends Aggregate<Long, Project, ProjectVBuilder> {

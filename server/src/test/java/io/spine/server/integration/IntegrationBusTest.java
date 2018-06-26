@@ -115,7 +115,6 @@ class IntegrationBusTest {
             assertEquals(expectedMessage, ProjectCountAggregate.getExternalEvent());
         }
 
-
         @Test
         @DisplayName("to external subscribers of another BC")
         void toBcSubscribers() {

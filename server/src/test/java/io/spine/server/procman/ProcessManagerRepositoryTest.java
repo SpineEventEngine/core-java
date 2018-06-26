@@ -90,8 +90,8 @@ import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Litus
@@ -170,7 +170,7 @@ class ProcessManagerRepositoryTest
     }
 
     @SuppressWarnings("CheckReturnValue")
-        // We can ignore the ID of the PM handling the command in the calling tests.
+    // We can ignore the ID of the PM handling the command in the calling tests.
     private void dispatchCommand(Command command) {
         repository().dispatchCommand(CommandEnvelope.of(command));
     }
@@ -368,6 +368,7 @@ class ProcessManagerRepositoryTest
             assertTrue(processManager.isDeleted());
         }
     }
+
     @Test
     @DisplayName("allow process manager have unmodified state after command handling")
     void notModifyStateIfDoNothing() {

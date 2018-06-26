@@ -37,7 +37,8 @@ import static io.spine.base.Identifier.newUuid;
 public class Given {
 
     /** Prevents instantiation of this utility class. */
-    private Given() {}
+    private Given() {
+    }
 
     static ProjectId newProjectId() {
         final String uuid = newUuid();
@@ -52,7 +53,8 @@ public class Given {
         private static final RefProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
 
         /** Prevents instantiation of this utility class. */
-        private EventMessage() {}
+        private EventMessage() {
+        }
 
         public static RefProjectCreated projectCreated() {
             return PROJECT_CREATED;
@@ -60,26 +62,27 @@ public class Given {
 
         public static RefProjectCreated projectCreated(ProjectId id) {
             return RefProjectCreated.newBuilder()
-                                 .setProjectId(id)
-                                 .build();
+                                    .setProjectId(id)
+                                    .build();
         }
     }
 
     public static class CommandMessage {
 
         /** Prevents instantiation of this utility class. */
-        private CommandMessage() {}
+        private CommandMessage() {
+        }
 
         public static RefCreateProject createProject() {
             return RefCreateProject.newBuilder()
-                                .setProjectId(newProjectId())
-                                .build();
+                                   .setProjectId(newProjectId())
+                                   .build();
         }
 
         public static RefStartProject startProject() {
             return RefStartProject.newBuilder()
-                               .setProjectId(newProjectId())
-                               .build();
+                                  .setProjectId(newProjectId())
+                                  .build();
         }
     }
 
@@ -90,13 +93,14 @@ public class Given {
                 invalidProjectName(DUMMY_PROJECT_ID);
 
         /** Prevents instantiation of this utility class. */
-        private RejectionMessage() {}
+        private RejectionMessage() {
+        }
 
         public static InvalidProjectName invalidProjectName() {
             return INVALID_PROJECT_NAME;
         }
 
-        private static InvalidProjectName  invalidProjectName(ProjectId id) {
+        private static InvalidProjectName invalidProjectName(ProjectId id) {
             final InvalidProjectName invalidProjectName = InvalidProjectName.newBuilder()
                                                                             .setProjectId(id)
                                                                             .build();

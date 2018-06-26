@@ -66,7 +66,8 @@ import static java.util.Collections.emptyList;
 public class ProcessManagerRepositoryTestEnv {
 
     /** Prevents instantiation of this utility class. */
-    private ProcessManagerRepositoryTestEnv() {}
+    private ProcessManagerRepositoryTestEnv() {
+    }
 
     public static class TestProcessManagerRepository
             extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
@@ -317,8 +318,8 @@ public class ProcessManagerRepositoryTestEnv {
      * process manager class}.
      */
     public static class SensoryDeprivedPmRepository
-            extends ProcessManagerRepository<ProjectId, SensoryDeprivedProcessManager, Project> {}
-
+            extends ProcessManagerRepository<ProjectId, SensoryDeprivedProcessManager, Project> {
+    }
 
     /**
      * Helper event subscriber which remembers an event message.
