@@ -145,7 +145,7 @@ class HandlerMethodTest {
         }
 
         @Test
-        @DisplayName("instance is not equal to another class instance")
+        @DisplayName("instance is not equal to another class")
         void notEqualsToOtherClass() {
             assertNotEquals(twoParamMethod, oneParamMethod);
         }
