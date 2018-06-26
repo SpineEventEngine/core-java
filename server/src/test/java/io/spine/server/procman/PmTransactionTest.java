@@ -33,6 +33,7 @@ import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -136,8 +137,10 @@ class PmTransactionTest
               .setShouldThrow(toThrow);
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Test case common to ancestor.
     @Disabled // The behavior is changed. The version should be auto incremented.
     @Test
+    @DisplayName("advance version from event")
     @Override
     protected void advanceVersionFromEvent() {}
 }

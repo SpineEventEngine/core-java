@@ -73,7 +73,7 @@ class EnrichmentsMapTest {
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
+    void haveParameterlessCtor() {
         assertHasPrivateParameterlessCtor(EnrichmentsMap.class);
     }
 

@@ -375,7 +375,7 @@ class ProcessManagerRepositoryTest
     }
 
     @Test
-    @DisplayName("throw exception when dispatching unknown command")
+    @DisplayName("throw IAE when dispatching unknown command")
     void throwOnUnknownCommand() {
         Command unknownCommand =
                 requestFactory.createCommand(Int32Value.getDefaultInstance());
@@ -435,7 +435,7 @@ class ProcessManagerRepositoryTest
     }
 
     @Test
-    @DisplayName("throw exception on attempt to register in BC with no messages handled")
+    @DisplayName("throw ISE on attempt to register in BC when having no messages handled")
     void notRegisterIfNothingHandled() {
         SensoryDeprivedPmRepository repo = new SensoryDeprivedPmRepository();
         BoundedContext boundedContext = BoundedContext.newBuilder()

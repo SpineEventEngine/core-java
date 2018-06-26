@@ -30,7 +30,7 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 /**
  * @author Alex Tymchenko
  */
-@DisplayName("HandlerMethods should")
+@DisplayName("HandlerMethods utility should")
 class HandlerMethodsTest {
 
     @Test
