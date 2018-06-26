@@ -297,11 +297,9 @@ public class RejectionBusTest {
     void notSupportSubscriberMethodsWithWrongParameterSequence() {
         final RejectionDispatcher<?> subscriber = new InvalidOrderSubscriber();
 
-        rejectionBus.register(subscriber);
-
         // In Bus ->  No message types are forwarded by this dispatcher.
         assertThrows(IllegalArgumentException.class,
-                     () -> rejectionBus.post(missingOwnerRejection()));
+                     () -> rejectionBus.register(subscriber));
     }
 
     @Test
