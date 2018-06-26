@@ -58,6 +58,11 @@ import java.util.List;
 import static io.spine.protobuf.AnyPacker.pack;
 import static java.util.Collections.emptyList;
 
+/**
+ * @author Alexander Yevsyukov
+ * @author Dmytro Grankin
+ * @author Alex Tymchenko
+ */
 public class ProcessManagerRepositoryTestEnv {
 
     /** Prevents instantiation of this utility class. */

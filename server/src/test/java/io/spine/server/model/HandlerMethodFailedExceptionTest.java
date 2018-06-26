@@ -29,6 +29,9 @@ import org.junit.jupiter.api.Test;
 import static io.spine.base.Identifier.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 @DisplayName("HandlerMethodFailedException should")
 class HandlerMethodFailedExceptionTest {
 

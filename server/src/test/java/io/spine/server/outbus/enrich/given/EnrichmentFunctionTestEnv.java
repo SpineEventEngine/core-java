@@ -25,6 +25,9 @@ import io.spine.test.event.ProjectId;
 
 import static io.spine.base.Identifier.newUuid;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 public class EnrichmentFunctionTestEnv {
 
     private EnrichmentFunctionTestEnv() {

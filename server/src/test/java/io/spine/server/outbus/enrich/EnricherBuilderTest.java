@@ -41,6 +41,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+/**
+ * @author Alexander Litus
+ * @author Alexander Yevsyukov
+ */
 @SuppressWarnings("ResultOfMethodCallIgnored")
 @DisplayName("Enricher Builder should")
 class EnricherBuilderTest {
