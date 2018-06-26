@@ -33,7 +33,6 @@ import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -44,7 +43,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Alex Tymchenko
  */
-public class PmTransactionShould
+class PmTransactionTest
         extends TransactionTest<ProjectId,
                                 ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
                                 Project,

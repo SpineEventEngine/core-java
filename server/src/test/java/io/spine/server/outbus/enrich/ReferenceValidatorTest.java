@@ -32,10 +32,8 @@ import io.spine.test.event.enrichment.EnrichmentBoundWithMultipleFieldsWithDiffe
 import io.spine.test.event.enrichment.GranterEventsEnrichment;
 import io.spine.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
 import io.spine.test.event.user.UserDeletedEvent;
-import org.junit.Rule;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -48,6 +46,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -55,17 +54,15 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dmytro Dashenkov
  */
-public class ReferenceValidatorShould {
+@DisplayName("ReferenceValidator should")
+class ReferenceValidatorTest {
 
     private static final String USER_GOOGLE_UID_FIELD = "user_google_uid";
     private final Enricher enricher = Enrichment.newEventEnricher();
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Test
     @DisplayName("initialize with valid enricher")
-    void initializeWithValidEnricher() {
+    void initWithValidEnricher() {
         ReferenceValidator validator =
                 new ReferenceValidator(enricher,
                                        ProjectCreated.class,
@@ -75,7 +72,7 @@ public class ReferenceValidatorShould {
 
     @Test
     @DisplayName("store valid map of enrichment fields after validation")
-    void storeValidMapOfEnrichmentFieldsAfterValidation() {
+    void storeFieldsAfterValidation() {
         ReferenceValidator validator
                 = new ReferenceValidator(enricher,
                                          UserDeletedEvent.class,
@@ -115,17 +112,16 @@ public class ReferenceValidatorShould {
 
     @Test
     @DisplayName("fail validation if enrichment is not declared")
-    void failValidationIfEnrichmentIsNotDeclared() {
+    void failIfEnrichmentNotDeclared() {
         ReferenceValidator validator = new ReferenceValidator(enricher,
                                                               UserDeletedEvent.class,
                                                               GranterEventsEnrichment.class);
-        thrown.expect(IllegalStateException.class);
-        validator.validate();
+        assertThrows(IllegalStateException.class, validator::validate);
     }
 
     @Test
     @DisplayName("skip mapping if no mapping function is defined")
-    void skipMappingIfNoMappingFunctionIsDefined() {
+    void skipMappingIfNoFuncDefined() {
         Enricher<?, ?> mockEnricher = mock(Enricher.class);
         when(mockEnricher.functionFor(any(Class.class), any(Class.class)))
                 .thenReturn(Optional.absent());
@@ -141,8 +137,8 @@ public class ReferenceValidatorShould {
     }
 
     @Test
-    @DisplayName("handle separator spaces in by argument")
-    void handleSeparatorSpacesInByArgument() {
+    @DisplayName("handle separator spaces in `by` argument")
+    void handleSeparatorSpaces() {
         ReferenceValidator validator
                 = new ReferenceValidator(enricher,
                                          TaskAdded.class,

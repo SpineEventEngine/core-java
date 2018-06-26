@@ -40,7 +40,7 @@ import static io.spine.server.model.ModelTests.clearModel;
 public abstract class AbstractMessageDeliveryTest {
 
     @BeforeEach
-    public void setUp() {
+    protected void setUp() {
         clearModel();
         switchToShardingWithTransport(getTransport());
     }

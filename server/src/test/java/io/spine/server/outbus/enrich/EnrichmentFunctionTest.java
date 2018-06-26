@@ -30,27 +30,25 @@ import io.spine.core.EventContext;
 import io.spine.server.outbus.enrich.given.EnrichmentFunctionTestEnv.GivenEventMessage;
 import io.spine.test.event.ProjectCreated;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class EnrichmentFunctionShould {
+@DisplayName("EnrichmentFunction should")
+class EnrichmentFunctionTest {
 
     private Function<ProjectCreated, ProjectCreated.Enrichment> function;
     private FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, EventContext> fieldEnrichment;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         this.function = input -> {
             if (input == null) {
                 return null;
@@ -67,7 +65,7 @@ public class EnrichmentFunctionShould {
     }
 
     @Test
-    @DisplayName("pass null tolerance check")
+    @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Message.class, Empty.getDefaultInstance())
@@ -77,8 +75,8 @@ public class EnrichmentFunctionShould {
     }
 
     @Test
-    @DisplayName("do not accept same source and target class")
-    void doNotAcceptSameSourceAndTargetClass() {
+    @DisplayName("not accept same source and target class")
+    void rejectSameSourceAndTarget() {
         Function<StringValue, StringValue> func = new Function<StringValue, StringValue>() {
             @Override
             public @Nullable StringValue apply(@Nullable StringValue input) {
@@ -86,18 +84,18 @@ public class EnrichmentFunctionShould {
             }
         };
 
-        thrown.expect(IllegalArgumentException.class);
-        FieldEnrichment.of(StringValue.class, StringValue.class, func);
+        assertThrows(IllegalArgumentException.class,
+                     () -> FieldEnrichment.of(StringValue.class, StringValue.class, func));
     }
 
     @Test
-    @DisplayName("return sourceClass")
+    @DisplayName("return source class")
     void returnSourceClass() {
         assertEquals(ProjectCreated.class, fieldEnrichment.getSourceClass());
     }
 
     @Test
-    @DisplayName("return targetClass")
+    @DisplayName("return target class")
     void returnTargetClass() {
         assertEquals(ProjectCreated.Enrichment.class, fieldEnrichment.getEnrichmentClass());
     }
@@ -124,13 +122,13 @@ public class EnrichmentFunctionShould {
     }
 
     @Test
-    @DisplayName("have hashCode")
+    @DisplayName("have `hashCode`")
     void haveHashCode() {
         assertNotEquals(System.identityHashCode(fieldEnrichment), fieldEnrichment.hashCode());
     }
 
     @Test
-    @DisplayName("have toString")
+    @DisplayName("have `toString`")
     void haveToString() {
         final String str = fieldEnrichment.toString();
         assertTrue(str.contains(ProjectCreated.class.getName()));
@@ -138,7 +136,7 @@ public class EnrichmentFunctionShould {
     }
 
     @Test
-    @DisplayName("have smart equals")
+    @DisplayName("support equality")
     void haveSmartEquals() {
         FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, EventContext> anotherEnricher =
                 FieldEnrichment.of(ProjectCreated.class,

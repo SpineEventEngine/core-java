@@ -99,20 +99,20 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     protected abstract I createId(int value);
 
     @BeforeEach
-    public void setUp() {
+    protected void setUp() {
         ModelTests.clearModel();
         this.repository = createRepository();
         setCurrentTenant(newUuid());
     }
 
+    @AfterEach
+    protected void tearDown() throws Exception {
+        clearCurrentTenant();
+    }
+
     /*
      * Store/load functions for working in multi-tenant execution context
      **********************************************************************/
-
-    @AfterEach
-    public void tearDown() throws Exception {
-        clearCurrentTenant();
-    }
 
     private void storeEntity(E entity) {
         repository.store(entity);

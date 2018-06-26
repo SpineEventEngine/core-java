@@ -22,14 +22,15 @@ package io.spine.server.model;
 
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandEnvelope;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static org.junit.Assert.assertEquals;
 
-public class HandlerMethodFailedExceptionTest {
+@DisplayName("HandlerMethodFailedException should")
+class HandlerMethodFailedExceptionTest {
 
     private final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
 
@@ -37,8 +38,9 @@ public class HandlerMethodFailedExceptionTest {
 
     private CommandEnvelope commandEnvelope;
     private Exception cause;
-    @Before
-    public void setUp() {
+
+    @BeforeEach
+    void setUp() {
         commandEnvelope = factory.generateEnvelope();
         cause = new IllegalStateException(newUuid());
 

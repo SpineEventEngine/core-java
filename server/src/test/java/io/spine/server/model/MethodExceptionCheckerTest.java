@@ -21,22 +21,26 @@
 package io.spine.server.model;
 
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
 
 import static io.spine.server.model.MethodExceptionChecker.forMethod;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dmytro Kuzmin
  */
-public class MethodExceptionCheckerShould {
+@DisplayName("MethodExceptionChecker should")
+class MethodExceptionCheckerTest {
 
     @Test
-    @DisplayName("pass null check")
-    void passNullCheck() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester().testAllPublicStaticMethods(MethodExceptionChecker.class);
 
         final Method method = getMethod("methodNoExceptions");
@@ -44,48 +48,60 @@ public class MethodExceptionCheckerShould {
         new NullPointerTester().testAllPublicInstanceMethods(checker);
     }
 
-    @Test
-    @DisplayName("pass check when no checked exceptions thrown")
-    void passCheckWhenNoCheckedExceptionsThrown() {
-        final Method methodNoExceptions = getMethod("methodNoExceptions");
-        final MethodExceptionChecker noExceptionsChecker = forMethod(methodNoExceptions);
-        noExceptionsChecker.checkThrowsNoCheckedExceptions();
+    @Nested
+    @DisplayName("pass check when")
+    class PassCheck {
 
-        final Method methodRuntimeExceptions = getMethod("methodRuntimeException");
-        final MethodExceptionChecker runtimeExceptionsChecker = forMethod(methodRuntimeExceptions);
-        runtimeExceptionsChecker.checkThrowsNoCheckedExceptions();
+        @Test
+        @DisplayName("no checked exceptions are thrown by method")
+        void forNoCheckedThrown() {
+            final Method methodNoExceptions = getMethod("methodNoExceptions");
+            final MethodExceptionChecker noExceptionsChecker = forMethod(methodNoExceptions);
+            noExceptionsChecker.checkThrowsNoCheckedExceptions();
+
+            final Method methodRuntimeExceptions = getMethod("methodRuntimeException");
+            final MethodExceptionChecker runtimeExceptionsChecker =
+                    forMethod(methodRuntimeExceptions);
+            runtimeExceptionsChecker.checkThrowsNoCheckedExceptions();
+        }
+
+        @Test
+        @DisplayName("allowed exception types are thrown by method")
+        void forAllowedThrown() {
+            final Method methodCustomException = getMethod("methodCustomException");
+            final MethodExceptionChecker checker = forMethod(methodCustomException);
+            checker.checkThrowsNoExceptionsBut(IOException.class);
+        }
+
+        @Test
+        @DisplayName("allowed exception types descendants are thrown by method")
+        void forAllowedDescendantsThrown() {
+            final Method methodDescendantException = getMethod("methodDescendantException");
+            final MethodExceptionChecker checker = forMethod(methodDescendantException);
+            checker.checkThrowsNoExceptionsBut(RuntimeException.class);
+        }
     }
 
-    @Test(expected = IllegalStateException.class)
-    @DisplayName("fail check when checked exceptions thrown")
-    void failCheckWhenCheckedExceptionsThrown() {
-        final Method methodCheckedException = getMethod("methodCheckedException");
-        final MethodExceptionChecker checker = forMethod(methodCheckedException);
-        checker.checkThrowsNoCheckedExceptions();
-    }
+    @Nested
+    @DisplayName("fail check when")
+    class FailCheck {
 
-    @Test
-    @DisplayName("pass check for allowed custom exception types")
-    void passCheckForAllowedCustomExceptionTypes() {
-        final Method methodCustomException = getMethod("methodCustomException");
-        final MethodExceptionChecker checker = forMethod(methodCustomException);
-        checker.checkThrowsNoExceptionsBut(IOException.class);
-    }
+        @Test
+        @DisplayName("checked exceptions are thrown by method")
+        void forCheckedThrown() {
+            final Method methodCheckedException = getMethod("methodCheckedException");
+            final MethodExceptionChecker checker = forMethod(methodCheckedException);
+            assertThrows(IllegalStateException.class, checker::checkThrowsNoCheckedExceptions);
+        }
 
-    @Test
-    @DisplayName("pass check for allowed exception types descendants")
-    void passCheckForAllowedExceptionTypesDescendants() {
-        final Method methodDescendantException = getMethod("methodDescendantException");
-        final MethodExceptionChecker checker = forMethod(methodDescendantException);
-        checker.checkThrowsNoExceptionsBut(RuntimeException.class);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    @DisplayName("fail check for prohibited custom exception types")
-    void failCheckForProhibitedCustomExceptionTypes() {
-        final Method methodCustomException = getMethod("methodCustomException");
-        final MethodExceptionChecker checker = forMethod(methodCustomException);
-        checker.checkThrowsNoExceptionsBut(RuntimeException.class);
+        @Test
+        @DisplayName("exception types that are not allowed are thrown by method")
+        void forNotAllowedThrown() {
+            final Method methodCustomException = getMethod("methodCustomException");
+            final MethodExceptionChecker checker = forMethod(methodCustomException);
+            assertThrows(IllegalStateException.class,
+                         () -> checker.checkThrowsNoExceptionsBut(RuntimeException.class));
+        }
     }
 
     private static Method getMethod(String methodName) {

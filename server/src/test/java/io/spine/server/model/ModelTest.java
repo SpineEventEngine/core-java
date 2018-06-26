@@ -26,9 +26,9 @@ import io.spine.server.model.given.ModelTestEnv.MCommandHandler;
 import io.spine.server.model.given.ModelTestEnv.MProcessManager;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.command.RefStartProject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -41,19 +41,20 @@ import static org.junit.Assert.fail;
  * @author Dmitry Ganzha
  */
 @SuppressWarnings("ErrorNotRethrown")
-public class ModelShould {
+@DisplayName("Model should")
+class ModelTest {
 
     private final Model model = Model.getInstance();
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         model.clear();
     }
 
     @SuppressWarnings("CheckReturnValue") // returned values are not used in this test
     @Test
-    @DisplayName("not allow duplicated command handlers")
-    void notAllowDuplicatedCommandHandlers() {
+    @DisplayName("check for duplicated command handlers in command handler class")
+    void checkDuplicateCmdHandler() {
         try {
             model.asAggregateClass(MAggregate.class);
             model.asCommandHandlerClass(MCommandHandler.class);
@@ -67,8 +68,8 @@ public class ModelShould {
 
     @SuppressWarnings("CheckReturnValue") // returned values are not used in this test
     @Test
-    @DisplayName("not allow more than one command duplication")
-    void notAllowMoreThanOneCommandDuplication() {
+    @DisplayName("check for duplicated command handlers in process manager class")
+    void checkDuplicateInProcMan() {
         try {
             model.asAggregateClass(MAggregate.class);
             model.asProcessManagerClass(MProcessManager.class);
@@ -83,7 +84,7 @@ public class ModelShould {
 
     @Test
     @DisplayName("return default state for entity class")
-    void returnDefaultStateForEntityClass() {
+    void getDefaultState() {
         Message defaultState = model.getDefaultState(MAggregate.class);
         assertNotNull("Default state cannot be null for the entity class.", defaultState);
     }

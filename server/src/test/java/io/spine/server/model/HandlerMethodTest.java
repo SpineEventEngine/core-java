@@ -27,11 +27,10 @@ import com.google.protobuf.StringValue;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.test.Tests;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -39,34 +38,32 @@ import java.lang.reflect.Method;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
-public class HandlerMethodShould {
+@DisplayName("HandlerMethod should")
+class HandlerMethodTest {
 
     private final HandlerMethod.Factory<OneParamMethod> factory = OneParamMethod.factory();
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
 
     private HandlerMethod<EventClass, EventContext> twoParamMethod;
     private HandlerMethod<EventClass, Empty> oneParamMethod;
     private Object target;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         target = new StubHandler();
         twoParamMethod = new TwoParamMethod(StubHandler.getTwoParameterMethod());
         oneParamMethod = new OneParamMethod(StubHandler.getOneParameterMethod());
     }
 
     @Test
-    @DisplayName("do not accept null method")
-    void doNotAcceptNullMethod() {
-        thrown.expect(NullPointerException.class);
-        new TwoParamMethod(Tests.nullRef());
+    @DisplayName("not accept null method")
+    void notAcceptNullMethod() {
+        assertThrows(NullPointerException.class, () -> new TwoParamMethod(Tests.nullRef()));
     }
 
     @Test
@@ -75,93 +72,110 @@ public class HandlerMethodShould {
         assertEquals(StubHandler.getTwoParameterMethod(), twoParamMethod.getMethod());
     }
 
-    @Test
-    @DisplayName("check if public")
-    void checkIfPublic() {
-        assertTrue(twoParamMethod.isPublic());
+    @Nested
+    @DisplayName("check if method access is")
+    class CheckAccess {
+
+        @Test
+        @DisplayName("`public`")
+        void isPublic() {
+            assertTrue(twoParamMethod.isPublic());
+        }
+
+        @Test
+        @DisplayName("`private`")
+        void isPrivate() {
+            assertTrue(oneParamMethod.isPrivate());
+        }
     }
 
     @Test
-    @DisplayName("check if private")
-    void checkIfPrivate() {
-        assertTrue(oneParamMethod.isPrivate());
-    }
-
-    @Test
-    @DisplayName("return first param type")
+    @DisplayName("obtain first parameter type of method")
     void returnFirstParamType() {
         assertEquals(BoolValue.class, HandlerMethod.getFirstParamType(oneParamMethod.getMethod()));
     }
 
-    @SuppressWarnings("CheckReturnValue") // can ignore the result in this test
-    @Test
-    @DisplayName("invoke the method with two parameters")
-    void invokeTheMethodWithTwoParameters() {
-        twoParamMethod.invoke(target,
-                              StringValue.getDefaultInstance(),
-                              EventContext.getDefaultInstance());
+    @Nested
+    @DisplayName("invoke method")
+    class InvokeMethod {
 
-        assertTrue(((StubHandler) target).wasOnInvoked());
+        @SuppressWarnings("CheckReturnValue") // can ignore the result in this test
+        @Test
+        @DisplayName("with one parameter")
+        void withOneParam() {
+            oneParamMethod.invoke(target,
+                                  BoolValue.getDefaultInstance(),
+                                  Empty.getDefaultInstance());
+
+            assertTrue(((StubHandler) target).wasHandleInvoked());
+        }
+
+        @SuppressWarnings("CheckReturnValue") // can ignore the result in this test
+        @Test
+        @DisplayName("with two parameters")
+        void withTwoParams() {
+            twoParamMethod.invoke(target,
+                                  StringValue.getDefaultInstance(),
+                                  EventContext.getDefaultInstance());
+
+            assertTrue(((StubHandler) target).wasOnInvoked());
+        }
     }
 
-    @SuppressWarnings("CheckReturnValue") // can ignore the result in this test
     @Test
-    @DisplayName("invoke the method with one parameter")
-    void invokeTheMethodWithOneParameter() {
-        oneParamMethod.invoke(target, BoolValue.getDefaultInstance(), Empty.getDefaultInstance());
-
-        assertTrue(((StubHandler) target).wasHandleInvoked());
-    }
-
-    @Test
-    @DisplayName("return full name in toString")
-    void returnFullNameInToString() {
+    @DisplayName("return full name in `toString`")
+    void provideToString() {
         assertEquals(twoParamMethod.getFullName(), twoParamMethod.toString());
     }
 
-    @Test
-    @DisplayName("be equal to itself")
-    void beEqualToItself() {
-        assertEquals(twoParamMethod, twoParamMethod);
+    @Nested
+    @DisplayName("provide `equals` method such that")
+    class ProvideEqualsSuchThat {
+
+        @Test
+        @DisplayName("instance equals to itself")
+        void equalsToItself() {
+            assertEquals(twoParamMethod, twoParamMethod);
+        }
+
+        @Test
+        @DisplayName("instance is not equal to null")
+        void notEqualsToNull() {
+            assertNotEquals(null, oneParamMethod);
+        }
+
+        @Test
+        @DisplayName("instance is not equal to another class instance")
+        void notEqualsToOtherClass() {
+            assertNotEquals(twoParamMethod, oneParamMethod);
+        }
+
+        @Test
+        @DisplayName("all fields are compared")
+        void allFieldsAreCompared() {
+            HandlerMethod<EventClass, EventContext> anotherMethod =
+                    new TwoParamMethod(StubHandler.getTwoParameterMethod());
+
+            assertEquals(twoParamMethod, anotherMethod);
+        }
     }
 
     @Test
-    @DisplayName("be not equal to null")
-    void beNotEqualToNull() {
-        assertNotEquals(null, oneParamMethod);
-    }
-
-    @Test
-    @DisplayName("be not equal to another class instance")
-    void beNotEqualToAnotherClassInstance() {
-        assertNotEquals(twoParamMethod, oneParamMethod);
-    }
-
-    @Test
-    @DisplayName("compare fields in equals")
-    void compareFieldsInEquals() {
-        HandlerMethod<EventClass, EventContext> anotherMethod =
-                new TwoParamMethod(StubHandler.getTwoParameterMethod());
-
-        assertEquals(twoParamMethod, anotherMethod);
-    }
-
-    @Test
-    @DisplayName("have hashCode")
+    @DisplayName("have `hashCode`")
     void haveHashCode() {
         assertNotEquals(System.identityHashCode(twoParamMethod), twoParamMethod.hashCode());
     }
 
     @Test
-    @DisplayName("do not be created from method with checked exception")
-    void doNotBeCreatedFromMethodWithCheckedException() {
-        thrown.expect(IllegalStateException.class);
-        factory.create(StubHandler.getMethodWithCheckedException());
+    @DisplayName("not be created from method throwing checked exception")
+    void rejectMethodThrowingChecked() {
+        assertThrows(IllegalStateException.class,
+                     () -> factory.create(StubHandler.getMethodWithCheckedException()));
     }
 
     @Test
-    @DisplayName("be normally created from method with runtime exception")
-    void beNormallyCreatedFromMethodWithRuntimeException() {
+    @DisplayName("be normally created from method throwing runtime exception")
+    void acceptMethodThrowingRuntime() {
         OneParamMethod method = factory.create(StubHandler.getMethodWithRuntimeException());
         assertEquals(StubHandler.getMethodWithRuntimeException(), method.getMethod());
     }

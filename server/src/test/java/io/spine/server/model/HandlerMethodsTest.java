@@ -17,42 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.integration;
+package io.spine.server.model;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.core.BoundedContextName;
-import io.spine.core.Command;
-import io.spine.core.Event;
-import io.spine.core.Rejection;
-import io.spine.server.delivery.ShardedMessage;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alex Tymchenko
  */
-public class ExternalMessagesShould {
+@DisplayName("HandlerMethods should")
+class HandlerMethodsTest {
 
     @Test
-    @DisplayName("have private constructor")
-    void havePrivateConstructor() {
-        assertHasPrivateParameterlessCtor(ExternalMessages.class);
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(HandlerMethods.class);
     }
 
     @Test
-    @DisplayName("pass the null tolerance check")
-    void passTheNullToleranceCheck() {
-        new NullPointerTester()
-                .setDefault(BoundedContextName.class, BoundedContextName.getDefaultInstance())
-                .setDefault(Event.class, Event.getDefaultInstance())
-                .setDefault(Rejection.class, Rejection.getDefaultInstance())
-                .setDefault(Command.class, Command.getDefaultInstance())
-                .setDefault(RequestForExternalMessages.class,
-                            RequestForExternalMessages.getDefaultInstance())
-                .setDefault(ShardedMessage.class, ShardedMessage.getDefaultInstance())
-                .testStaticMethods(ExternalMessages.class, PACKAGE);
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        new NullPointerTester().testAllPublicStaticMethods(HandlerMethods.class);
     }
 }

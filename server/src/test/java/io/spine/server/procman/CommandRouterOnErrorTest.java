@@ -29,22 +29,19 @@ import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
-import org.junit.Rule;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexaneder Yevsyukov
  */
-public class CommandRouterOnErrorShould extends AbstractCommandRouterShould<CommandRouter> {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+@DisplayName("CommandRouter `onError` should")
+class CommandRouterOnErrorTest extends AbstractCommandRouterTest<CommandRouter> {
 
     /**
      * Creates a router with mocked {@code CommandBus} which always calls
@@ -59,8 +56,8 @@ public class CommandRouterOnErrorShould extends AbstractCommandRouterShould<Comm
     }
 
     @Test
-    @DisplayName("throw IllegalStateException when caught error when posting")
-    void throwIllegalStateExceptionWhenCaughtErrorWhenPosting() {
+    @DisplayName("throw ISE when caught error on posting")
+    void throwOnErrorWhenPosting() {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .build();
         CommandBus commandBus = boundedContext.getCommandBus();
@@ -90,7 +87,6 @@ public class CommandRouterOnErrorShould extends AbstractCommandRouterShould<Comm
         CommandRouter router = createRouter(commandBus, sourceMessage, sourceContext);
         router.addAll(getMessages());
 
-        thrown.expect(IllegalStateException.class);
-        router.routeAll();
+        assertThrows(IllegalStateException.class, router::routeAll);
     }
 }

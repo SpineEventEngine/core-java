@@ -34,7 +34,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
-import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.List;
 import java.util.Set;
@@ -49,7 +49,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Alexander Yevsyukov
  */
-public abstract class AbstractCommandRouterShould<T extends AbstractCommandRouter> {
+abstract class AbstractCommandRouterTest<T extends AbstractCommandRouter> {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
@@ -89,8 +89,8 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
         return messages;
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
         final CommandBus commandBus = boundedContext.getCommandBus();

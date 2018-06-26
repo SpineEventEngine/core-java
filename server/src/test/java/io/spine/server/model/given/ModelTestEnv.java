@@ -36,7 +36,7 @@ import io.spine.test.reflect.event.RefProjectStarted;
 import io.spine.validate.StringValueVBuilder;
 
 /**
- * Test environment for {@linkplain io.spine.server.model.ModelShould Model tests}.
+ * Test environment for {@linkplain io.spine.server.model.ModelTest Model tests}.
  *
  * @author Alexander Yevsyukov
  */

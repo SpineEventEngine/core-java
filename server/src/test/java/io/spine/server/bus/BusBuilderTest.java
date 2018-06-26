@@ -38,7 +38,7 @@ import static org.mockito.Mockito.mock;
  *
  * @author Dmytro Dashenkov
  * @see io.spine.server.commandbus.CommandBusBuilderTest
- * @see io.spine.server.event.EventBusBuilderShould
+ * @see io.spine.server.event.EventBusBuilderTest
  * @see RejectionBusBuilderShould
  */
 public abstract class BusBuilderTest<B extends Bus.AbstractBuilder<E, T, ?>,

@@ -20,23 +20,24 @@
 
 package io.spine.server.outbus.enrich;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class SupportsFieldConversionShould {
+@DisplayName("SupportsFieldConversion should")
+class SupportsFieldConversionTest {
 
-    @Test(expected = NullPointerException.class)
-    @DisplayName("return false if pass null to function checking predicate")
-    void returnFalseIfPassNullToFunctionCheckingPredicate() {
-        final boolean result = SupportsFieldConversion.of(StringValue.class,
-                                                          String.class)
-                                                      .apply(null);
-        assertFalse(result);
+    @Test
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        final SupportsFieldConversion predicate = SupportsFieldConversion.of(StringValue.class,
+                                                                             String.class);
+        new NullPointerTester().testAllPublicInstanceMethods(predicate);
     }
 }

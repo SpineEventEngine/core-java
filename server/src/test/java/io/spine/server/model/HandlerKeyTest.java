@@ -26,30 +26,31 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.spine.core.CommandClass;
 import io.spine.type.MessageClass;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dmytro Grankin
  */
-public class HandlerKeyShould {
+@DisplayName("HandlerKey should")
+class HandlerKeyTest {
 
     private final CommandClass emptyClass = CommandClass.of(Empty.class);
     private final CommandClass stringClass = CommandClass.of(StringValue.class);
 
     @Test
     @DisplayName("not accept nulls on construction")
-    void notAcceptNullsOnConstruction() {
+    void notAcceptNulls() {
         new NullPointerTester()
                 .setDefault(MessageClass.class, emptyClass)
                 .testAllPublicStaticMethods(HandlerKey.class);
     }
 
     @Test
-    @DisplayName("return command class of empty if there is no origin")
-    void returnCommandClassOfEmptyIfThereIsNoOrigin() {
+    @DisplayName("return command class of Empty if there is no origin")
+    void getEmptyClassWhenNoOrigin() {
         final CommandClass handledMessage = stringClass;
         final HandlerKey key = HandlerKey.of(handledMessage);
         assertEquals(handledMessage, key.getHandledMessageCls());

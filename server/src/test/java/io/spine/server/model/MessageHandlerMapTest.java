@@ -17,28 +17,39 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.model;
 
-import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
+import io.spine.server.command.Assign;
+import io.spine.server.command.CommandHandlerMethod;
+import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.command.CreateProject;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * @author Alex Tymchenko
- */
-public class HandlerMethodsShould {
+@DisplayName("MessageHandlerMap should")
+class MessageHandlerMapTest {
 
     @Test
-    @DisplayName("have private constructor")
-    void havePrivateConstructor() {
-        assertHasPrivateParameterlessCtor(HandlerMethods.class);
+    @DisplayName("not allow duplicating message classes in handlers")
+    void rejectDuplicateHandlers() {
+        assertThrows(DuplicateHandlerMethodError.class,
+                     () -> new MessageHandlerMap<>(HandlerWithDuplicatingMethods.class,
+                                                   CommandHandlerMethod.factory()));
     }
 
-    @Test
-    @DisplayName("pass the null tolerance check")
-    void passTheNullToleranceCheck() {
-        new NullPointerTester().testAllPublicStaticMethods(HandlerMethods.class);
+    private static class HandlerWithDuplicatingMethods {
+
+        @Assign
+        public ProjectCreated on(CreateProject cmd) {
+            return ProjectCreated.getDefaultInstance();
+        }
+
+        @Assign
+        public ProjectCreated handle(CreateProject cmd) {
+            return ProjectCreated.getDefaultInstance();
+        }
     }
 }
