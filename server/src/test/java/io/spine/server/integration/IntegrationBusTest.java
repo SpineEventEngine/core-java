@@ -82,6 +82,7 @@ class IntegrationBusTest {
         ContextAwareProjectDetails.clear();
         ProjectEventsSubscriber.clear();
         ProjectStartedExtSubscriber.clear();
+        ProjectRejectionsExtSubscriber.clear();
     }
 
     @Nested
