@@ -46,7 +46,6 @@ class DispatchingQueue<E extends MessageEnvelope> {
         this.dispatchAction = dispatchAction;
     }
 
-    //@formatter:off
     /**
      * Enqueues the envelope for dispatching and dispatches it in its turn.
      *
@@ -62,7 +61,6 @@ class DispatchingQueue<E extends MessageEnvelope> {
      * @param envelope the envelope to dispatch
      * @param observer the observer to receive the outcome of the operation
      */
-    //@formatter:on
     public void add(E envelope, StreamObserver<Ack> observer) {
         checkNotNull(envelope);
         checkNotNull(observer);
