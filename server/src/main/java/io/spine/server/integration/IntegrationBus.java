@@ -23,9 +23,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.bus.Bus;
@@ -53,7 +51,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
-import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.integration.IntegrationChannels.fromId;
 import static io.spine.server.integration.IntegrationChannels.toId;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -213,16 +210,13 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     }
 
     @Override
-    protected Ack doPost(ExternalMessageEnvelope envelope) {
+    protected void dispatch(ExternalMessageEnvelope envelope) {
         final ExternalMessageEnvelope markedEnvelope = markExternal(envelope);
         final int dispatchersCalled = callDispatchers(markedEnvelope);
 
-        final Any packedId = pack(markedEnvelope.getId());
         checkState(dispatchersCalled != 0,
                    format("External message %s has no local dispatchers.",
                           markedEnvelope.getMessage()));
-        final Ack result = acknowledge(packedId);
-        return result;
     }
 
     private  ExternalMessageEnvelope markExternal(ExternalMessageEnvelope envelope) {

@@ -60,8 +60,10 @@ public abstract class Bus<T extends Message,
 
     private final Function<T, E> messageConverter = new MessageToEnvelope();
 
-    @Nullable
-    private DispatcherRegistry<C, D> registry;
+    // A queue of envelopes to post.
+    private final DispatchingQueue<E> envelopeQueue = new DispatchingQueue<>(this::dispatch);
+
+    private @Nullable DispatcherRegistry<C, D> registry;
 
     /**
      * The chain of filters for this bus.
@@ -70,8 +72,7 @@ public abstract class Bus<T extends Message,
      *
      * @see #filterChain() for the non-null filter chain value
      */
-    @Nullable
-    private FilterChain<E, ?> filterChain;
+    private @Nullable FilterChain<E, ?> filterChain;
 
     /**
      * Registers the passed dispatcher.
@@ -208,6 +209,13 @@ public abstract class Bus<T extends Message,
     }
 
     /**
+     * Obtains the queue of the envelopes.
+     */
+    private DispatchingQueue<E> envelopeQueue() {
+        return envelopeQueue;
+    }
+
+    /**
      * Factory method for creating an instance of the registry for dispatchers of the bus.
      */
     protected abstract DispatcherRegistry<C, D> createRegistry();
@@ -258,12 +266,11 @@ public abstract class Bus<T extends Message,
     /**
      * Feeds the given message to the bus filters.
      *
-     * <p>If the given message is completely processed and should not be passed to the dispatchers
-     * via {@link #doPost doPost} method, the returned {@link Optional} contains a value with either
-     * status.
+     * <p>If the given message is completely processed and should not be passed to the dispatchers,
+     * the returned {@link Optional} contains a value with either status.
      *
-     * <p>If the message should be passed to the dispatchers via {@link #doPost doPost}, the result
-     * of this method is {@link Optional#absent() Optional.absent()}.
+     * <p>If the message should be passed to the dispatchers, the result of this method is
+     * {@link Optional#absent() Optional.absent()}.
      *
      * @param message the {@linkplain MessageEnvelope message envelope} to pre-process
      * @return the result of message processing by this bus if any, or
@@ -302,19 +309,18 @@ public abstract class Bus<T extends Message,
      *         </ul>
      * @see #post(Message, StreamObserver) for the public API
      */
-    protected abstract Ack doPost(E envelope);
+    protected abstract void dispatch(E envelope);
 
     /**
      * Posts each of the given envelopes into the bus and notifies the given observer.
      *
      * @param envelopes the envelopes to post
      * @param observer  the observer to be notified of the operation result
-     * @see #doPost(MessageEnvelope)
+     * @see #dispatch(MessageEnvelope)
      */
     private void doPost(Iterable<E> envelopes, StreamObserver<Ack> observer) {
         for (E message : envelopes) {
-            final Ack result = doPost(message);
-            observer.onNext(result);
+             envelopeQueue().add(message, observer);
         }
     }
 
