@@ -127,7 +127,7 @@ class EnrichmentsMapTest {
 
         @Test
         @DisplayName("ProjectStartedEnrichment")
-        void containProjectStartedByProjectStartedEnrichmentType() {
+        void byProjectStartedEnrichment() {
             assertEnrichmentIsUsedOnlyInEvents(ProjectStarted.Enrichment.class,
                                                // Event classe
                                                ProjectStarted.class);

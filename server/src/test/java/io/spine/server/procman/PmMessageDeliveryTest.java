@@ -54,8 +54,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
     @BeforeEach
     protected void setUp() {
         super.setUp();
-        DeliveryPm.getStats()
-                  .clear();
+        DeliveryPm.getStats().clear();
     }
 
     @Nested
@@ -64,7 +63,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
 
         @Test
         @DisplayName("to single shard")
-        void dispatchCommandsToSingleShardInMultithreadedEnv() throws Exception {
+        void toSingleShard() throws Exception {
             final ParallelDispatcher<ProjectId, Command> dispatcher =
                     new ParallelDispatcher<ProjectId, Command>(
                             42, 400, dispatchWaitTime()) {
@@ -90,7 +89,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
 
         @Test
         @DisplayName("to several shards")
-        void dispatchCommandsToSeveralShardInMultithreadedEnv() throws Exception {
+        void toSeveralShards() throws Exception {
             final ParallelDispatcher<ProjectId, Command> dispatcher =
                     new ParallelDispatcher<ProjectId, Command>(
                             59, 473, dispatchWaitTime()) {
@@ -121,7 +120,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
 
         @Test
         @DisplayName("to single shard")
-        void dispatchEventsToSingleShardInMultithreadedEnv() throws Exception {
+        void toSingleShard() throws Exception {
             final ParallelDispatcher<ProjectId, Event> dispatcher =
                     new ParallelDispatcher<ProjectId, Event>(
                             180, 819, dispatchWaitTime()) {
@@ -147,7 +146,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
 
         @Test
         @DisplayName("to several shards")
-        void dispatchEventsToSeveralShardsInMultithreadedEnv() throws Exception {
+        void toSeveralShards() throws Exception {
             final ParallelDispatcher<ProjectId, Event> dispatcher =
                     new ParallelDispatcher<ProjectId, Event>(
                             179, 918, dispatchWaitTime()) {
@@ -178,7 +177,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
 
         @Test
         @DisplayName("to single shard")
-        void dispatchRejectionsToSingleShardInMultithreadedEnv() throws Exception {
+        void toSingleShard() throws Exception {
             final ParallelDispatcher<ProjectId, Rejection> dispatcher =
                     new ParallelDispatcher<ProjectId, Rejection>(
                             30, 619, dispatchWaitTime()) {
@@ -204,7 +203,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
 
         @Test
         @DisplayName("to several shards")
-        void dispatchRejectionsToSeveralShardsInMultithreadedEnv() throws Exception {
+        void toSeveralShards() throws Exception {
             final ParallelDispatcher<ProjectId, Rejection> dispatcher =
                     new ParallelDispatcher<ProjectId, Rejection>(
                             43, 719, dispatchWaitTime()) {

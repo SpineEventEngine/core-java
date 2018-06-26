@@ -69,7 +69,7 @@ class ModelTest {
     @SuppressWarnings("CheckReturnValue") // returned values are not used in this test
     @Test
     @DisplayName("check for duplicated command handlers in process manager class")
-    void checkDuplicateInProcMan() {
+    void checkDuplicateInProcman() {
         try {
             model.asAggregateClass(MAggregate.class);
             model.asProcessManagerClass(MProcessManager.class);

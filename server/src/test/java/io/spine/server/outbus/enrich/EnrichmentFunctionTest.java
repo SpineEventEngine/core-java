@@ -91,13 +91,13 @@ class EnrichmentFunctionTest {
 
     @Test
     @DisplayName("return source class")
-    void returnSourceClass() {
+    void returnSource() {
         assertEquals(ProjectCreated.class, fieldEnrichment.getSourceClass());
     }
 
     @Test
     @DisplayName("return target class")
-    void returnTargetClass() {
+    void returnTarget() {
         assertEquals(ProjectCreated.Enrichment.class, fieldEnrichment.getEnrichmentClass());
     }
 
