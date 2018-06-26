@@ -25,11 +25,11 @@ import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.event.EventBus;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.transport.TransportFactory;
-import io.spine.test.Tests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.test.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -55,28 +55,28 @@ class IntegrationBusBuilderTest
         @DisplayName("TransportFactory")
         void transportFactory() {
             assertThrows(NullPointerException.class,
-                         () -> builder().setTransportFactory(Tests.nullRef()));
+                         () -> builder().setTransportFactory(nullRef()));
         }
 
         @Test
         @DisplayName("EventBus")
         void eventBus() {
             assertThrows(NullPointerException.class,
-                         () -> builder().setEventBus(Tests.nullRef()));
+                         () -> builder().setEventBus(nullRef()));
         }
 
         @Test
         @DisplayName("RejectionBus")
         void rejectionBus() {
             assertThrows(NullPointerException.class,
-                         () -> builder().setRejectionBus(Tests.nullRef()));
+                         () -> builder().setRejectionBus(nullRef()));
         }
 
         @Test
         @DisplayName("BoundedContextName")
         void boundedContextName() {
             assertThrows(NullPointerException.class,
-                         () -> builder().setBoundedContextName(Tests.nullRef()));
+                         () -> builder().setBoundedContextName(nullRef()));
         }
     }
 

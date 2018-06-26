@@ -28,12 +28,12 @@ import io.spine.core.EventContext;
 import io.spine.server.model.given.HandlerMethodTestEnv.OneParamMethod;
 import io.spine.server.model.given.HandlerMethodTestEnv.StubHandler;
 import io.spine.server.model.given.HandlerMethodTestEnv.TwoParamMethod;
-import io.spine.test.Tests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.test.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -63,7 +63,7 @@ class HandlerMethodTest {
     @Test
     @DisplayName("not accept null method")
     void notAcceptNullMethod() {
-        assertThrows(NullPointerException.class, () -> new TwoParamMethod(Tests.nullRef()));
+        assertThrows(NullPointerException.class, () -> new TwoParamMethod(nullRef()));
     }
 
     @Test
