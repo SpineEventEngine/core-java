@@ -37,8 +37,9 @@ import io.spine.server.rejection.given.MultipleRejectionSubscriber;
 import io.spine.server.rejection.given.RejectionMessageSubscriber;
 import io.spine.server.rejection.given.VerifiableSubscriber;
 import io.spine.test.rejection.command.RjStartProject;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.Set;
@@ -54,6 +55,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alex Tymchenko
@@ -62,35 +64,41 @@ import static org.junit.Assert.assertTrue;
         "OverlyCoupledClass",
         "InstanceVariableNamingConvention"})
 // OK as for the test class for one of the primary framework features
-public class RejectionBusShould {
+@DisplayName("RejectionBus should")
+public class RejectionBusTest {
 
     private RejectionBus rejectionBus;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         this.rejectionBus = RejectionBus.newBuilder()
                                         .build();
     }
 
     @Test
-    public void have_builder() {
+    @DisplayName("have builder")
+    void haveBuilder() {
         assertNotNull(RejectionBus.newBuilder());
     }
 
     @Test   // as the RejectionBus instances do not support enrichment yet.
-    public void not_enrich_rejection_messages() {
+    @DisplayName("not enrich rejection messages")
+    void notEnrichRejectionMessages() {
         final Rejection original = invalidProjectNameRejection();
         final RejectionEnvelope enriched = rejectionBus.enrich(RejectionEnvelope.of(original));
         assertEquals(original, enriched.getOuterObject());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void reject_object_with_no_subscriber_methods() {
-        rejectionBus.register(new RejectionSubscriber());
+    @Test
+    @DisplayName("reject object with no subscriber methods")
+    void rejectObjectWithNoSubscriberMethods() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> rejectionBus.register(new RejectionSubscriber()));
     }
 
     @Test
-    public void register_rejection_subscriber() {
+    @DisplayName("register rejection subscriber")
+    void registerRejectionSubscriber() {
         final RejectionSubscriber subscriberOne = new InvalidProjectNameSubscriber();
         final RejectionSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
 
@@ -107,7 +115,8 @@ public class RejectionBusShould {
     }
 
     @Test
-    public void unregister_subscribers() {
+    @DisplayName("unregister subscribers")
+    void unregisterSubscribers() {
         final RejectionSubscriber subscriberOne = new InvalidProjectNameSubscriber();
         final RejectionSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
         rejectionBus.register(subscriberOne);
@@ -132,7 +141,8 @@ public class RejectionBusShould {
     }
 
     @Test
-    public void call_subscriber_when_rejection_posted() {
+    @DisplayName("call subscriber when rejection posted")
+    void callSubscriberWhenRejectionPosted() {
         final InvalidProjectNameSubscriber subscriber = new InvalidProjectNameSubscriber();
         final Rejection rejection = invalidProjectNameRejection();
         rejectionBus.register(subscriber);
@@ -157,7 +167,8 @@ public class RejectionBusShould {
     }
 
     @Test
-    public void call_subscriber_by_rejection_and_command_message_when_rejection_posted() {
+    @DisplayName("call subscriber by rejection and command message when rejection posted")
+    void callSubscriberByRejectionAndCommandMessageWhenRejectionPosted() {
         final MultipleRejectionSubscriber subscriber = new MultipleRejectionSubscriber();
         rejectionBus.register(subscriber);
 
@@ -170,7 +181,8 @@ public class RejectionBusShould {
     }
 
     @Test
-    public void call_subscriber_by_rejection_message_only() {
+    @DisplayName("call subscriber by rejection message only")
+    void callSubscriberByRejectionMessageOnly() {
         final MultipleRejectionSubscriber subscriber = new MultipleRejectionSubscriber();
         rejectionBus.register(subscriber);
 
@@ -182,7 +194,8 @@ public class RejectionBusShould {
     }
 
     @Test
-    public void register_dispatchers() {
+    @DisplayName("register dispatchers")
+    void registerDispatchers() {
         final RejectionDispatcher<?> dispatcher = new BareDispatcher();
 
         rejectionBus.register(dispatcher);
@@ -193,7 +206,8 @@ public class RejectionBusShould {
     }
 
     @Test
-    public void call_dispatchers() {
+    @DisplayName("call dispatchers")
+    void callDispatchers() {
         final BareDispatcher dispatcher = new BareDispatcher();
 
         rejectionBus.register(dispatcher);
@@ -204,7 +218,8 @@ public class RejectionBusShould {
     }
 
     @Test
-    public void unregister_dispatchers() {
+    @DisplayName("unregister dispatchers")
+    void unregisterDispatchers() {
         final RejectionDispatcher<?> dispatcherOne = new BareDispatcher();
         final RejectionDispatcher<?> dispatcherTwo = new BareDispatcher();
         final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
@@ -224,7 +239,8 @@ public class RejectionBusShould {
     }
 
     @Test
-    public void catch_exceptions_caused_by_subscribers() {
+    @DisplayName("catch exceptions caused by subscribers")
+    void catchExceptionsCausedBySubscribers() {
         final VerifiableSubscriber faultySubscriber = new FaultySubscriber();
 
         rejectionBus.register(faultySubscriber);
@@ -234,7 +250,8 @@ public class RejectionBusShould {
     }
 
     @Test
-    public void unregister_registries_on_close() throws Exception {
+    @DisplayName("unregister registries on close")
+    void unregisterRegistriesOnClose() throws Exception {
         final RejectionBus rejectionBus = RejectionBus.newBuilder()
                                                       .build();
         rejectionBus.register(new BareDispatcher());
@@ -248,42 +265,48 @@ public class RejectionBusShould {
     }
 
     @Test
-    public void support_short_form_subscriber_methods() {
+    @DisplayName("support short form subscriber methods")
+    void supportShortFormSubscriberMethods() {
         final RejectionMessageSubscriber subscriber = new RejectionMessageSubscriber();
         checkRejection(subscriber);
     }
 
     @Test
-    public void support_context_aware_subscriber_methods() {
+    @DisplayName("support context aware subscriber methods")
+    void supportContextAwareSubscriberMethods() {
         final ContextAwareSubscriber subscriber = new ContextAwareSubscriber();
         checkRejection(subscriber);
     }
 
     @Test
-    public void support_command_msg_aware_subscriber_methods() {
+    @DisplayName("support command msg aware subscriber methods")
+    void supportCommandMsgAwareSubscriberMethods() {
         final CommandMessageAwareSubscriber subscriber = new CommandMessageAwareSubscriber();
         checkRejection(subscriber);
     }
 
     @Test
-    public void support_command_aware_subscriber_methods() {
+    @DisplayName("support command aware subscriber methods")
+    void supportCommandAwareSubscriberMethods() {
         final CommandAwareSubscriber subscriber = new CommandAwareSubscriber();
         checkRejection(subscriber);
     }
 
-    @Test(
-            expected = IllegalArgumentException.class
-                // In Bus ->  No message types are forwarded by this dispatcher.
-    )
-    public void not_support_subscriber_methods_with_wrong_parameter_sequence() {
+    @Test
+    @DisplayName("not support subscriber methods with wrong parameter sequence")
+    void notSupportSubscriberMethodsWithWrongParameterSequence() {
         final RejectionDispatcher<?> subscriber = new InvalidOrderSubscriber();
 
         rejectionBus.register(subscriber);
-        rejectionBus.post(missingOwnerRejection());
+
+        // In Bus ->  No message types are forwarded by this dispatcher.
+        assertThrows(IllegalArgumentException.class,
+                     () -> rejectionBus.post(missingOwnerRejection()));
     }
 
     @Test
-    public void report_dead_messages() {
+    @DisplayName("report dead messages")
+    void reportDeadMessages() {
         final MemoizingObserver<Ack> observer = memoizingObserver();
         rejectionBus.post(missingOwnerRejection(), observer);
         assertTrue(observer.isCompleted());
@@ -295,7 +318,8 @@ public class RejectionBusShould {
     }
 
     @Test
-    public void have_log() {
+    @DisplayName("have log")
+    void haveLog() {
         assertNotNull(RejectionBus.log());
     }
 

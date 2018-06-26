@@ -22,7 +22,8 @@ package io.spine.server.route;
 
 import com.google.protobuf.Message;
 import io.spine.test.Tests;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -30,21 +31,25 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author Alexander Yevsyukov
  */
-public class EventProducersShould {
+@DisplayName("EventProducers utility should")
+class EventProducersTest {
 
     @Test
-    public void have_utility_ctor() {
+    @DisplayName("have utility ctor")
+    void haveUtilityCtor() {
         Tests.assertHasPrivateParameterlessCtor(EventProducers.class);
     }
 
     @Test
-    public void create_function_for_taking_id_fromContext() {
+    @DisplayName("create function for taking id fromContext")
+    void createFunctionForTakingIdFromContext() {
         final EventRoute<Object, Message> fn = EventProducers.fromContext();
         assertFunction(fn);
     }
 
     @Test
-    public void create_function_for_getting_id_fromFirstMessageField() {
+    @DisplayName("create function for getting id fromFirstMessageField")
+    void createFunctionForGettingIdFromFirstMessageField() {
         final EventRoute<Object, Message> fn = EventProducers.fromFirstMessageField();
         assertFunction(fn);
     }

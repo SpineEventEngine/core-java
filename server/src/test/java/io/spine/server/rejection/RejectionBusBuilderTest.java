@@ -22,11 +22,13 @@ package io.spine.server.rejection;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.bus.BusBuilderTest;
+import org.junit.jupiter.api.DisplayName;
 
 /**
  * @author Alex Tymchenko
  */
-public class RejectionBusBuilderShould extends BusBuilderTest<RejectionBus.Builder,
+@DisplayName("RejectionBus Builder should")
+class RejectionBusBuilderTest extends BusBuilderTest<RejectionBus.Builder,
         RejectionEnvelope,
         Rejection> {
 

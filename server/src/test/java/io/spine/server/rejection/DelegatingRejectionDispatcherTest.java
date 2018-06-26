@@ -32,15 +32,17 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class DelegatingRejectionDispatcherShould {
+@DisplayName("DelegatingRejectionDispatcher should")
+class DelegatingRejectionDispatcherTest {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
@@ -49,8 +51,8 @@ public class DelegatingRejectionDispatcherShould {
     private DelegatingRejectionDispatcher delegatingDispatcher;
     private RejectionEnvelope rejectionEnvelope;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         delegate = new EmptyRejectionDispatcherDelegate();
         delegatingDispatcher = DelegatingRejectionDispatcher.of(delegate);
 
@@ -64,28 +66,32 @@ public class DelegatingRejectionDispatcherShould {
     }
 
     @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName("pass null tolerance check")
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(RejectionDispatcherDelegate.class, delegate)
                 .testAllPublicStaticMethods(DelegatingRejectionDispatcher.class);
     }
 
     @Test
-    public void return_rejection_classes_of_the_delegate() {
+    @DisplayName("return rejection classes of the delegate")
+    void returnRejectionClassesOfTheDelegate() {
         assertEquals(delegatingDispatcher.getMessageClasses(),
                      delegate.getRejectionClasses());
     }
 
     @SuppressWarnings("CheckReturnValue") // can ignore in this test
     @Test
-    public void dispatch_rejection() {
+    @DisplayName("dispatch rejection")
+    void dispatchRejection() {
         delegatingDispatcher.dispatch(rejectionEnvelope);
 
         assertTrue(delegate.dispatchCalled());
     }
 
     @Test
-    public void delegate_onError() {
+    @DisplayName("delegate onError")
+    void delegateOnError() {
         delegatingDispatcher.onError(rejectionEnvelope, new RuntimeException(getClass().getName()));
 
         assertTrue(delegate.onErrorCalled());

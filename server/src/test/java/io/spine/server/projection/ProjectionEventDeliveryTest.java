@@ -31,6 +31,7 @@ import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.SingleSha
 import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.TripleShardProjectRepository;
 import io.spine.test.projection.ProjectId;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
@@ -39,7 +40,8 @@ import static io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.pr
 /**
  * @author Alex Tymchenko
  */
-public class ProjectionEventDeliveryShould extends AbstractMessageDeliveryTest {
+@DisplayName("ProjectionEventDelivery should")
+class ProjectionEventDeliveryTest extends AbstractMessageDeliveryTest {
 
     @Override
     @BeforeEach
@@ -50,7 +52,8 @@ public class ProjectionEventDeliveryShould extends AbstractMessageDeliveryTest {
     }
 
     @Test
-    public void dispatch_events_to_single_shard_in_multithreaded_env() throws Exception {
+    @DisplayName("dispatch events to single shard in multithreaded env")
+    void dispatchEventsToSingleShardInMultithreadedEnv() throws Exception {
         final ParallelDispatcher<ProjectId, Event> dispatcher =
                 new ParallelDispatcher<ProjectId, Event>(
                         180, 819, dispatchWaitTime()) {
@@ -75,7 +78,8 @@ public class ProjectionEventDeliveryShould extends AbstractMessageDeliveryTest {
     }
 
     @Test
-    public void dispatch_events_to_multiple_shard_in_multithreaded_env() throws Exception {
+    @DisplayName("dispatch events to multiple shard in multithreaded env")
+    void dispatchEventsToMultipleShardInMultithreadedEnv() throws Exception {
         final ParallelDispatcher<ProjectId, Event> dispatcher =
                 new ParallelDispatcher<ProjectId, Event>(
                         270, 1637, dispatchWaitTime()) {

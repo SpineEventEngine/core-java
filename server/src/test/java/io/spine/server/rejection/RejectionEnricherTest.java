@@ -28,8 +28,9 @@ import io.spine.core.RejectionContext;
 import io.spine.server.rejection.given.RejectionEnrichmentConsumer;
 import io.spine.test.rejection.ProjectId;
 import io.spine.test.rejection.ProjectRejections;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.server.rejection.given.Given.invalidProjectNameRejection;
 import static org.junit.Assert.assertNotEquals;
@@ -38,15 +39,16 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Alexander Yevsyukov
  */
-public class RejectionEnricherShould {
+@DisplayName("RejectionEnricher should")
+class RejectionEnricherTest {
 
     /** The prefix to be used when converting a project ID to project name. */
     private static final String PROJECT_NAME_PREFIX = "PROJECT:";
 
     private RejectionBus rejectionBus;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         RejectionEnricher.Builder builder = RejectionEnricher
                 .newBuilder()
                 .add(ProjectId.class,
@@ -60,7 +62,8 @@ public class RejectionEnricherShould {
     }
 
     @Test
-    public void boolean_enrich_rejection() {
+    @DisplayName("boolean enrich rejection")
+    void booleanEnrichRejection() {
         RejectionEnrichmentConsumer consumer = new RejectionEnrichmentConsumer();
         rejectionBus.register(consumer);
 

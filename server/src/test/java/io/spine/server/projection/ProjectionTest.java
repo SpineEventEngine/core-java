@@ -34,8 +34,9 @@ import io.spine.protobuf.TypeConverter;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.given.Given;
 import io.spine.validate.StringValueVBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
@@ -44,13 +45,15 @@ import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.projection.ProjectionEventDispatcher.dispatch;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ProjectionShould {
+@DisplayName("Projection should")
+class ProjectionTest {
 
     private TestProjection projection;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         projection = Given.projectionOfClass(TestProjection.class)
                           .withId(newUuid())
                           .withVersion(1)
@@ -59,7 +62,8 @@ public class ProjectionShould {
     }
 
     @Test
-    public void handle_events() {
+    @DisplayName("handle events")
+    void handleEvents() {
         final String stringValue = newUuid();
 
         dispatch(projection, toMessage(stringValue), EventContext.getDefaultInstance());
@@ -78,13 +82,18 @@ public class ProjectionShould {
         assertTrue(projection.isChanged());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_no_handler_for_event() {
-        dispatch(projection, BoolValue.getDefaultInstance(), EventContext.getDefaultInstance());
+    @Test
+    @DisplayName("throw exception if no handler for event")
+    void throwExceptionIfNoHandlerForEvent() {
+        assertThrows(IllegalStateException.class,
+                     () -> dispatch(projection,
+                                    BoolValue.getDefaultInstance(),
+                                    EventContext.getDefaultInstance()));
     }
 
     @Test
-    public void return_event_classes_which_it_handles() {
+    @DisplayName("return event classes which it handles")
+    void returnEventClassesWhichItHandles() {
         final Set<EventClass> classes = ProjectionClass.of(TestProjection.class)
                                                        .getEventSubscriptions();
 
@@ -94,7 +103,8 @@ public class ProjectionShould {
     }
 
     @Test
-    public void expose_playing_events_to_the_package() {
+    @DisplayName("expose playing events to the package")
+    void exposePlayingEventsToThePackage() {
         final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
         final StringValue strValue = StringValue.newBuilder()
                                              .setValue("eins zwei drei")

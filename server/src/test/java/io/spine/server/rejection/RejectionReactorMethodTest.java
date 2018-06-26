@@ -37,22 +37,26 @@ import io.spine.server.rejection.given.RejectionReactorMethodTestEnv.RValidThree
 import io.spine.server.rejection.given.RejectionReactorMethodTestEnv.RValidTwoParams;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.RjUpdateProjectName;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 
 import static io.spine.protobuf.AnyPacker.pack;
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class RejectionReactorMethodShould {
+@DisplayName("RejectionReactorMethod should")
+class RejectionReactorMethodTest {
 
     private static final CommandContext emptyCommandContext = CommandContext.getDefaultInstance();
 
     @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName("pass null tolerance check")
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Any.class, Any.getDefaultInstance())
                 .setDefault(CommandContext.class, emptyCommandContext)
@@ -64,7 +68,8 @@ public class RejectionReactorMethodShould {
             /* 1. Ignore builder method (setCommand()) call result.
                2. Ignore result of invoke() -- we check object internals instead. */)
     @Test
-    public void invoke_reactor_method() {
+    @DisplayName("invoke reactor method")
+    void invokeReactorMethod() {
         RValidThreeParams reactorObject = new RValidThreeParams();
         RejectionReactorMethod reactor =
                 new RejectionReactorMethod(reactorObject.getMethod());
@@ -89,77 +94,89 @@ public class RejectionReactorMethodShould {
     }
 
     @Test
-    public void consider_reactor_with_two_msg_param_valid() {
+    @DisplayName("consider reactor with two msg param valid")
+    void considerReactorWithTwoMsgParamValid() {
         Method reactor = new RValidTwoParams().getMethod();
 
         assertIsRejectionReactor(reactor, true);
     }
 
     @Test
-    public void consider_reactor_with_both_messages_and_context_params_valid() {
+    @DisplayName("consider reactor with both messages and context params valid")
+    void considerReactorWithBothMessagesAndContextParamsValid() {
         Method reactor = new RValidThreeParams().getMethod();
 
         assertIsRejectionReactor(reactor, true);
     }
 
     @Test
-    public void consider_not_public_reactor_valid() {
+    @DisplayName("consider not public reactor valid")
+    void considerNotPublicReactorValid() {
         Method method = new RValidButPrivate().getMethod();
 
         assertIsRejectionReactor(method, true);
     }
 
     @Test
-    public void consider_not_annotated_reactor_invalid() {
+    @DisplayName("consider not annotated reactor invalid")
+    void considerNotAnnotatedReactorInvalid() {
         Method reactor = new RInvalidNoAnnotation().getMethod();
 
         assertIsRejectionReactor(reactor, false);
     }
 
     @Test
-    public void consider_reactor_without_params_invalid() {
+    @DisplayName("consider reactor without params invalid")
+    void considerReactorWithoutParamsInvalid() {
         Method reactor = new RInvalidNoParams().getMethod();
 
         assertIsRejectionReactor(reactor, false);
     }
 
     @Test
-    public void consider_reactor_with_too_many_params_invalid() {
+    @DisplayName("consider reactor with too many params invalid")
+    void considerReactorWithTooManyParamsInvalid() {
         Method reactor = new RInvalidTooManyParams().getMethod();
 
         assertIsRejectionReactor(reactor, false);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_on_attempt_to_create_instance_for_a_method_with_too_many_params() {
+    @Test
+    @DisplayName("throw exception on attempt to create instance for a method with too many params")
+    void throwExceptionOnAttemptToCreateInstanceForAMethodWithTooManyParams() {
         Method illegalMethod = new RInvalidTooManyParams().getMethod();
 
-        new RejectionReactorMethod(illegalMethod);
+        assertThrows(IllegalArgumentException.class,
+                     () -> new RejectionReactorMethod(illegalMethod));
     }
 
     @Test
-    public void consider_reactor_with_one_invalid_param_invalid() {
+    @DisplayName("consider reactor with one invalid param invalid")
+    void considerReactorWithOneInvalidParamInvalid() {
         Method reactor = new RInvalidOneNotMsgParam().getMethod();
 
         assertIsRejectionReactor(reactor, false);
     }
 
     @Test
-    public void consider_reactor_with_first_not_message_param_invalid() {
+    @DisplayName("consider reactor with first not message param invalid")
+    void considerReactorWithFirstNotMessageParamInvalid() {
         Method reactor = new RInvalidTwoParamsFirstInvalid().getMethod();
 
         assertIsRejectionReactor(reactor, false);
     }
 
     @Test
-    public void consider_reactor_with_second_not_context_param_invalid() {
+    @DisplayName("consider reactor with second not context param invalid")
+    void considerReactorWithSecondNotContextParamInvalid() {
         Method reactor = new RInvalidTwoParamsSecondInvalid().getMethod();
 
         assertIsRejectionReactor(reactor, false);
     }
 
     @Test
-    public void consider_not_void_reactor_invalid() {
+    @DisplayName("consider not void reactor invalid")
+    void considerNotVoidReactorInvalid() {
         Method reactor = new RInvalidNotMessage().getMethod();
 
         assertIsRejectionReactor(reactor, false);

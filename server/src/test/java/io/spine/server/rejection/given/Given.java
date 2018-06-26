@@ -30,7 +30,7 @@ import io.spine.core.Rejections;
 import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.rejection.StandardRejections.CannotModifyDeletedEntity;
-import io.spine.server.rejection.RejectionBusShould;
+import io.spine.server.rejection.RejectionBusTest;
 import io.spine.test.rejection.ProjectId;
 import io.spine.test.rejection.ProjectRejections;
 import io.spine.test.rejection.command.RjRemoveOwner;
@@ -63,7 +63,7 @@ public class Given {
                                                    .setValue(newUuid())
                                                    .build();
         final TestActorRequestFactory factory =
-                TestActorRequestFactory.newInstance(RejectionBusShould.class, generatedTenantId);
+                TestActorRequestFactory.newInstance(RejectionBusTest.class, generatedTenantId);
         final Command command = factory.createCommand(updateProjectName);
         return Rejections.createRejection(invalidProjectName, command);
     }

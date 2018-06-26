@@ -41,9 +41,10 @@ import io.spine.server.route.given.switchman.Switchman;
 import io.spine.server.route.given.switchman.SwitchmanBureau;
 import io.spine.server.route.given.switchman.command.SetSwitch;
 import io.spine.server.route.given.switchman.rejection.Rejections;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static org.junit.Assert.assertEquals;
@@ -54,7 +55,8 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Alexander Yevsyukov
  */
-public class CommandRoutingRejectionShould {
+@DisplayName("CommandRouting rejection should")
+class CommandRoutingRejectionTest {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
@@ -65,8 +67,8 @@ public class CommandRoutingRejectionShould {
     private CommandStore commandStore;
     private Log.Repository logRepository;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         boundedContext = BoundedContext.newBuilder()
                                        .setName("Railway Station")
                                        .setMultitenant(false)
@@ -78,8 +80,8 @@ public class CommandRoutingRejectionShould {
         commandStore = commandBus.commandStore();
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() throws Exception {
         boundedContext.close();
     }
 
@@ -93,7 +95,8 @@ public class CommandRoutingRejectionShould {
      * routing function.
      */
     @Test
-    public void result_in_rejected_command() {
+    @DisplayName("result in rejected command")
+    void resultInRejectedCommand() {
         // Post a successful command to make sure general case works.
         final String switchmanName = Switchman.class.getName();
         final Command command = requestFactory.createCommand(

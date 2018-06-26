@@ -31,8 +31,9 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.TestValues;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
@@ -41,13 +42,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     // OK as custom routes do not refer to the test suite.
-public class EventRoutingShould {
+@DisplayName("EventRouting should")
+class EventRoutingTest {
 
     /** The set of IDs returned by the {@link #customRoute}. */
     private static final ImmutableSet<Long> CUSTOM_ROUTE = ImmutableSet.of(5L, 6L, 7L);
@@ -83,18 +86,20 @@ public class EventRoutingShould {
 
     private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
-    @Before
+    @BeforeEach
     public void setUp() {
         eventRouting = EventRouting.withDefault(defaultRoute);
     }
 
     @Test
-    public void have_default_route() throws Exception {
+    @DisplayName("have default route")
+    void haveDefaultRoute() throws Exception {
         assertNotNull(eventRouting.getDefault());
     }
 
     @Test
-    public void allow_replacing_default_route() {
+    @DisplayName("allow replacing default route")
+    void allowReplacingDefaultRoute() {
         final EventRoute<Long, Message> newDefault = new EventRoute<Long, Message>() {
 
             private static final long serialVersionUID = 0L;
@@ -111,7 +116,8 @@ public class EventRoutingShould {
     }
 
     @Test
-    public void set_custom_route() {
+    @DisplayName("set custom route")
+    void setCustomRoute() {
         assertSame(eventRouting, eventRouting.route(StringValue.class, customRoute));
 
         final Optional<EventRoute<Long, StringValue>> route = eventRouting.get(StringValue.class);
@@ -120,14 +126,17 @@ public class EventRoutingShould {
         assertSame(customRoute, route.get());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void not_allow_overwriting_a_set_route() {
+    @Test
+    @DisplayName("not allow overwriting a set route")
+    void notAllowOverwritingASetRoute() {
         eventRouting.route(StringValue.class, customRoute);
-        eventRouting.route(StringValue.class, customRoute);
+        assertThrows(IllegalStateException.class,
+                     () -> eventRouting.route(StringValue.class, customRoute));
     }
 
     @Test
-    public void remove_previously_set_route() {
+    @DisplayName("remove previously set route")
+    void removePreviouslySetRoute() {
         eventRouting.route(StringValue.class, customRoute);
         eventRouting.remove(StringValue.class);
 
@@ -135,13 +144,15 @@ public class EventRoutingShould {
                                 .isPresent());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void complain_on_removal_if_route_was_not_set() {
-        eventRouting.remove(StringValue.class);
+    @Test
+    @DisplayName("complain on removal if route was not set")
+    void complainOnRemovalIfRouteWasNotSet() {
+        assertThrows(IllegalStateException.class, () -> eventRouting.remove(StringValue.class));
     }
 
     @Test
-    public void apply_default_route() {
+    @DisplayName("apply default route")
+    void applyDefaultRoute() {
         // Have custom route too.
         eventRouting.route(StringValue.class, customRoute);
 
@@ -154,7 +165,8 @@ public class EventRoutingShould {
     }
 
     @Test
-    public void apply_custom_route() {
+    @DisplayName("apply custom route")
+    void applyCustomRoute() {
         eventRouting.route(StringValue.class, customRoute);
 
         // An event which has `StringValue` as its message, which should go the custom route.
@@ -166,7 +178,8 @@ public class EventRoutingShould {
     }
 
     @Test
-    public void pass_null_tolerance() {
+    @DisplayName("pass null tolerance")
+    void passNullTolerance() {
         final NullPointerTester nullPointerTester = new NullPointerTester()
                 .setDefault(EventContext.class, EventContext.getDefaultInstance());
 

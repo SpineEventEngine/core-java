@@ -36,6 +36,7 @@ import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -64,7 +65,7 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Alexander Litus
  */
-public abstract class ProjectionStorageShould
+public abstract class ProjectionStorageTest
         extends RecordStorageShould<ProjectId, ProjectionStorage<ProjectId>> {
 
     private ProjectionStorage<ProjectId> storage;
@@ -127,14 +128,16 @@ public abstract class ProjectionStorageShould
     }
 
     @Test
-    public void return_null_if_no_event_time_in_storage() {
+    @DisplayName("return null if no event time in storage")
+    void returnNullIfNoEventTimeInStorage() {
         Timestamp time = storage.readLastHandledEventTime();
 
         assertNull(time);
     }
 
     @Test
-    public void read_all_messages() {
+    @DisplayName("read all messages")
+    void readAllMessages() {
         List<ProjectId> ids = fillStorage(5);
 
         Iterator<EntityRecord> read = storage.readAll();
@@ -148,7 +151,8 @@ public abstract class ProjectionStorageShould
     }
 
     @Test
-    public void read_all_messages_with_field_mask() {
+    @DisplayName("read all messages with field mask")
+    void readAllMessagesWithFieldMask() {
         List<ProjectId> ids = fillStorage(5);
 
         String projectDescriptor = Project.getDescriptor()
@@ -169,7 +173,8 @@ public abstract class ProjectionStorageShould
     }
 
     @Test
-    public void perform_read_bulk_operations() {
+    @DisplayName("perform read bulk operations")
+    void performReadBulkOperations() {
         // Get a subset of IDs
         List<ProjectId> ids = fillStorage(10).subList(0, 5);
 
@@ -184,7 +189,8 @@ public abstract class ProjectionStorageShould
     }
 
     @Test
-    public void perform_bulk_read_with_field_mask_operation() {
+    @DisplayName("perform bulk read with field mask operation")
+    void performBulkReadWithFieldMaskOperation() {
         // Get a subset of IDs
         List<ProjectId> ids = fillStorage(10).subList(0, 5);
 
@@ -205,18 +211,21 @@ public abstract class ProjectionStorageShould
     }
 
     @Test
-    public void throw_exception_if_write_null_event_time() {
+    @DisplayName("throw exception if write null event time")
+    void throwExceptionIfWriteNullEventTime() {
         assertThrows(NullPointerException.class,
                      () -> storage.writeLastHandledEventTime(Tests.nullRef()));
     }
 
     @Test
-    public void write_and_read_last_event_time() {
+    @DisplayName("write and read last event time")
+    void writeAndReadLastEventTime() {
         writeAndReadLastEventTimeTest(getCurrentTime());
     }
 
     @Test
-    public void write_and_read_last_event_time_several_times() {
+    @DisplayName("write and read last event time several times")
+    void writeAndReadLastEventTimeSeveralTimes() {
         Timestamp time1 = getCurrentTime();
         Timestamp time2 = add(time1, fromSeconds(10L));
         writeAndReadLastEventTimeTest(time1);

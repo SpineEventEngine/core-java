@@ -22,7 +22,7 @@ package io.spine.server.storage.memory;
 
 import io.spine.server.entity.Entity;
 import io.spine.server.projection.ProjectionStorage;
-import io.spine.server.projection.ProjectionStorageShould;
+import io.spine.server.projection.ProjectionStorageTest;
 import io.spine.test.storage.ProjectId;
 import io.spine.type.TypeUrl;
 
@@ -31,7 +31,7 @@ import static io.spine.server.BoundedContext.newName;
 /**
  * @author Alexander Litus
  */
-public class InMemoryProjectionStorageShould extends ProjectionStorageShould {
+public class InMemoryProjectionStorageShould extends ProjectionStorageTest {
 
     @Override
     protected ProjectionStorage<ProjectId> newStorage(Class<? extends Entity> cls) {

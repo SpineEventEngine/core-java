@@ -29,15 +29,16 @@ import io.spine.server.entity.ThrowingValidatingBuilder;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
-import io.spine.server.projection.ProjectionTransactionShould.PatchedProjectBuilder;
+import io.spine.server.projection.ProjectionTransactionTest.PatchedProjectBuilder;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.validate.ConstraintViolation;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.List;
@@ -51,7 +52,8 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Alex Tymchenko
  */
-public class ProjectionTransactionShould
+@DisplayName("ProjectionTransaction should")
+class ProjectionTransactionTest
         extends TransactionTest<ProjectId,
                                 Projection<ProjectId, Project, PatchedProjectBuilder>,
                                 Project,
@@ -149,11 +151,12 @@ public class ProjectionTransactionShould
      * This test is ignored as the expected behavior has been changed for the projection
      * transactions.
      *
-     * <p>{@link #increment_version_on_event() Another test method} is created to test the new
+     * <p>{@link #incrementVersionOnEvent() Another test method} is created to test the new
      * behavior. Please refer to it for more details.
      */
-    @Ignore
+    @Disabled
     @Test
+    @DisplayName("advance version from event")
     @Override
     public void advanceVersionFromEvent() {
     }
@@ -168,7 +171,8 @@ public class ProjectionTransactionShould
      */
     @SuppressWarnings("CheckReturnValue") // can ignore value of play() in this test
     @Test
-    public void increment_version_on_event() {
+    @DisplayName("increment version on event")
+    void incrementVersionOnEvent() {
         Projection<ProjectId, Project, PatchedProjectBuilder> entity = createEntity();
         Version oldVersion = entity.getVersion();
         Event event = createEvent(createEventMessage());

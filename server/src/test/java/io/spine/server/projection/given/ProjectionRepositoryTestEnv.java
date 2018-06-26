@@ -80,10 +80,8 @@ public class ProjectionRepositoryTestEnv {
     public static class TestProjectionRepository
             extends ProjectionRepository<ProjectId, TestProjection, Project> {
 
-        @Nullable
-        private MessageEnvelope lastErrorEnvelope;
-        @Nullable
-        private RuntimeException lastException;
+        private @Nullable MessageEnvelope lastErrorEnvelope;
+        private @Nullable RuntimeException lastException;
 
         @Subscribe
         public void apply(PrjProjectCreated event, EventContext eventContext) {
@@ -99,13 +97,11 @@ public class ProjectionRepositoryTestEnv {
             lastException = exception;
         }
 
-        @Nullable
-        public MessageEnvelope getLastErrorEnvelope() {
+        public @Nullable MessageEnvelope getLastErrorEnvelope() {
             return lastErrorEnvelope;
         }
 
-        @Nullable
-        public RuntimeException getLastException() {
+        public @Nullable RuntimeException getLastException() {
             return lastException;
         }
     }
