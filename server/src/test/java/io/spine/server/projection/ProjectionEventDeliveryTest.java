@@ -33,6 +33,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
 import static io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.projectCreated;
 
@@ -69,7 +70,7 @@ class ProjectionEventDeliveryTest extends AbstractMessageDeliveryTest {
                     @Override
                     protected void postToBus(BoundedContext context, Event event) {
                         context.getEventBus()
-                               .post(event, StreamObservers.noOpObserver());
+                               .post(event, noOpObserver());
                     }
                 };
 
@@ -95,7 +96,7 @@ class ProjectionEventDeliveryTest extends AbstractMessageDeliveryTest {
                     @Override
                     protected void postToBus(BoundedContext context, Event event) {
                         context.getEventBus()
-                               .post(event, StreamObservers.noOpObserver());
+                               .post(event, noOpObserver());
                     }
                 };
 

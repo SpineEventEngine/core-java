@@ -47,6 +47,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -60,7 +61,7 @@ class CommandRoutingRejectionTest {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
-    private final StreamObserver<Ack> observer = StreamObservers.noOpObserver();
+    private final StreamObserver<Ack> observer = noOpObserver();
 
     private BoundedContext boundedContext;
     private CommandBus commandBus;
