@@ -329,5 +329,4 @@ public class RejectionBusTest {
         assertTrue(subscriber.isMethodCalled());
         subscriber.verifyGot(rejection);
     }
-
 }
