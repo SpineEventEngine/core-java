@@ -24,7 +24,7 @@ import io.spine.core.Rejection;
 import io.spine.core.Subscribe;
 import io.spine.test.rejection.ProjectRejections;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * The subscriber which throws an exception from the subscriber method.

@@ -58,9 +58,9 @@ import static io.spine.test.Verify.assertSize;
 import static io.spine.test.Verify.assertThrows;
 import static io.spine.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 import static java.lang.String.format;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Projection storage tests.
