@@ -21,16 +21,22 @@
 package io.spine.server.commandbus.given;
 
 import io.spine.core.CommandContext;
+import io.spine.core.Rejection;
+import io.spine.core.Rejections;
+import io.spine.core.Subscribe;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
+import io.spine.server.rejection.given.VerifiableSubscriber;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdRemoveTask;
 import io.spine.test.command.event.CmdTaskAdded;
 import io.spine.test.reflect.InvalidProjectName;
 import io.spine.test.reflect.ProjectId;
+import io.spine.test.reflect.ReflectRejections;
 
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SingleTenantCommandBusTestEnv {
 
@@ -64,6 +70,22 @@ public class SingleTenantCommandBusTestEnv {
 
         public InvalidProjectName getThrowable() {
             return rejection;
+        }
+    }
+
+    public static class MemoizingRejectionSubscriber extends VerifiableSubscriber {
+
+        private ReflectRejections.InvalidProjectName rejection;
+
+        @Subscribe
+        public void on(ReflectRejections.InvalidProjectName rejection) {
+            triggerCall();
+            this.rejection = rejection;
+        }
+
+        @Override
+        public void verifyGot(Rejection rejection) {
+            assertEquals(Rejections.getMessage(rejection), this.rejection);
         }
     }
 }

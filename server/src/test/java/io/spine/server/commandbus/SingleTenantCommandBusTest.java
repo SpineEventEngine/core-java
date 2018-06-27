@@ -30,6 +30,7 @@ import io.spine.core.Rejection;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.FaultyHandler;
+import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.MemoizingRejectionSubscriber;
 import io.spine.test.reflect.InvalidProjectName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,13 +41,10 @@ import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.core.CommandValidationError.TENANT_INAPPLICABLE;
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.commandbus.Given.ACommand.addTask;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.commandbus.Given.ACommand.removeTask;
 import static io.spine.server.tenant.TenantAwareOperation.isTenantSet;
-import static io.spine.validate.Validate.isNotDefault;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -114,6 +112,8 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     void propagateRejections() {
         final FaultyHandler faultyHandler = new FaultyHandler(eventBus);
         commandBus.register(faultyHandler);
+        MemoizingRejectionSubscriber rejectionSubscriber = new MemoizingRejectionSubscriber();
+        rejectionBus.register(rejectionSubscriber);
 
         final Command addTaskCommand = clearTenantId(addTask());
         final MemoizingObserver<Ack> observer = memoizingObserver();
@@ -121,11 +121,11 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
         final InvalidProjectName throwable = faultyHandler.getThrowable();
         final Rejection expectedRejection = toRejection(throwable, addTaskCommand);
+        rejectionSubscriber.verifyGot(expectedRejection);
+
         final Ack ack = observer.firstResponse();
-        final Rejection actualRejection = ack.getStatus()
-                                             .getRejection();
-        assertTrue(isNotDefault(actualRejection));
-        assertEquals(unpack(expectedRejection.getMessage()), unpack(actualRejection.getMessage()));
+        assertTrue(ack.getStatus()
+                      .hasOk());
     }
 
     @Test
