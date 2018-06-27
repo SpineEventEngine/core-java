@@ -52,6 +52,7 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.server.projection.given.ProjectionStorageTestEnv.givenProject;
 import static io.spine.test.Tests.assertMatchesMask;
+import static io.spine.test.Tests.nullRef;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.test.Verify.assertThrows;
@@ -221,7 +222,7 @@ public abstract class ProjectionStorageTest
     @DisplayName("throw exception when writing null event time")
     void notWriteNullEventTime() {
         assertThrows(NullPointerException.class,
-                     () -> storage.writeLastHandledEventTime(Tests.nullRef()));
+                     () -> storage.writeLastHandledEventTime(nullRef()));
     }
 
     @Nested
