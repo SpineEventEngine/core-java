@@ -61,7 +61,7 @@ public abstract class Bus<T extends Message,
     private final Function<T, E> messageConverter = new MessageToEnvelope();
 
     // A queue of envelopes to post.
-    private final DispatchingQueue<E> envelopeQueue = new DispatchingQueue<>(this::dispatch);
+    private @Nullable DispatchingQueue<E> envelopeQueue;
 
     private @Nullable DispatcherRegistry<C, D> registry;
 
@@ -212,6 +212,9 @@ public abstract class Bus<T extends Message,
      * Obtains the queue of the envelopes.
      */
     private DispatchingQueue<E> envelopeQueue() {
+        if (envelopeQueue == null) {
+            envelopeQueue = new DispatchingQueue<>(this::dispatch);
+        }
         return envelopeQueue;
     }
 
