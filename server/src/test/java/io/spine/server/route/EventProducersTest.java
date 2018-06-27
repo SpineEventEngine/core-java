@@ -25,6 +25,7 @@ import io.spine.test.Tests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
@@ -35,8 +36,8 @@ import static org.junit.Assert.assertNotNull;
 class EventProducersTest {
 
     @Test
-    @DisplayName("have utility ctor")
-    void haveUtilityCtor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         Tests.assertHasPrivateParameterlessCtor(EventProducers.class);
     }
 

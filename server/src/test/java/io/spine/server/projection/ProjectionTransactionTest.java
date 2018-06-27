@@ -19,23 +19,20 @@
  */
 package io.spine.server.projection;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
-import io.spine.core.Subscribe;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.server.entity.ThrowingValidatingBuilder;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
-import io.spine.server.projection.ProjectionTransactionTest.PatchedProjectBuilder;
+import io.spine.server.projection.given.ProjectionTransactionTestEnv.PatchedProjectBuilder;
+import io.spine.server.projection.given.ProjectionTransactionTestEnv.TestProjection;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.validate.ConstraintViolation;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,7 +40,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.List;
 
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -182,63 +178,5 @@ class ProjectionTransactionTest
                                                  .getNumber());
         assertNotEquals(event.getContext()
                              .getVersion(), entity.getVersion());
-    }
-
-    @SuppressWarnings({"MethodMayBeStatic", "unused"})  // Methods accessed via reflection.
-    static class TestProjection
-            extends Projection<ProjectId, Project, PatchedProjectBuilder> {
-
-        private final List<Message> receivedEvents = newLinkedList();
-        private final List<ConstraintViolation> violations;
-
-        private TestProjection(ProjectId id) {
-            this(id, null);
-        }
-
-        private TestProjection(ProjectId id, @Nullable List<ConstraintViolation> violations) {
-            super(id);
-            this.violations = violations;
-        }
-
-        @Override
-        protected List<ConstraintViolation> checkEntityState(Project newState) {
-            if (violations != null) {
-                return ImmutableList.copyOf(violations);
-            }
-            return super.checkEntityState(newState);
-        }
-
-        @Subscribe
-        public void event(PrjProjectCreated event) {
-            receivedEvents.add(event);
-            final Project newState = Project.newBuilder(getState())
-                                            .setId(event.getProjectId())
-                                            .build();
-            getBuilder().mergeFrom(newState);
-        }
-
-        @Subscribe
-        public void event(PrjTaskAdded event) {
-            throw new RuntimeException("that tests the projection tx behaviour");
-        }
-
-        private List<Message> getReceivedEvents() {
-            return ImmutableList.copyOf(receivedEvents);
-        }
-    }
-
-    /**
-     * Custom implementation of {@code ValidatingBuilder}, which allows to simulate an error
-     * during the state building.
-     *
-     * <p>Must be declared {@code public} to allow accessing from the
-     * {@linkplain io.spine.validate.ValidatingBuilders#newInstance(Class) factory method}.
-     */
-    public static class PatchedProjectBuilder
-            extends ThrowingValidatingBuilder<Project, Project.Builder> {
-
-        public static PatchedProjectBuilder newBuilder() {
-            return new PatchedProjectBuilder();
-        }
     }
 }

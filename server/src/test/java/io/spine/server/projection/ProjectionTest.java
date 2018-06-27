@@ -33,6 +33,8 @@ import io.spine.core.Versions;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.given.Given;
+import io.spine.server.projection.given.ProjectionTestEnv;
+import io.spine.server.projection.given.ProjectionTestEnv.TestProjection;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -122,38 +124,5 @@ class ProjectionTest {
         assertTrue(projectionChanged);
         assertTrue(projectionState.contains(strValue.getValue()));
         assertTrue(projectionState.contains(String.valueOf(intValue.getValue())));
-    }
-
-    private static class TestProjection
-            extends Projection<String, StringValue, StringValueVBuilder> {
-
-        /** The number of events this class handles. */
-        private static final int HANDLING_EVENT_COUNT = 2;
-
-        protected TestProjection(String id) {
-            super(id);
-        }
-
-        @Subscribe
-        public void on(StringValue event) {
-            final StringValue newState = createNewState("stringState", event.getValue());
-            getBuilder().mergeFrom(newState);
-        }
-
-        @Subscribe
-        public void on(Int32Value event) {
-            final StringValue newState = createNewState("integerState",
-                                                        String.valueOf(event.getValue()));
-            getBuilder().mergeFrom(newState);
-        }
-
-        private StringValue createNewState(String type, String value) {
-            // Get the current state within the transaction.
-            final String currentState = getBuilder().internalBuild()
-                                                    .getValue();
-            final String result = currentState + (currentState.length() > 0 ? " + " : "") +
-                    type + '(' + value + ')' + System.lineSeparator();
-            return toMessage(result);
-        }
     }
 }

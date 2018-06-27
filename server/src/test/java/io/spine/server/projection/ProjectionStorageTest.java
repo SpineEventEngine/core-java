@@ -51,6 +51,7 @@ import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.server.projection.given.ProjectionStorageTestEnv.givenProject;
 import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertSize;
@@ -102,7 +103,7 @@ public abstract class ProjectionStorageTest
     @Override
     protected Message newState(ProjectId id) {
         String uniqueName = format("Projection_name-%s-%s", id.getId(), System.nanoTime());
-        Project state = Given.project(id, uniqueName);
+        Project state = givenProject(id, uniqueName);
         return state;
     }
 
@@ -250,7 +251,7 @@ public abstract class ProjectionStorageTest
 
         for (int i = 0; i < count; i++) {
             ProjectId id = newId();
-            Project state = Given.project(id, format("project-%d", i));
+            Project state = givenProject(id, format("project-%d", i));
             Any packedState = AnyPacker.pack(state);
 
             EntityRecord rawRecord = EntityRecord
@@ -272,19 +273,5 @@ public abstract class ProjectionStorageTest
         Timestamp actual = storage.readLastHandledEventTime();
 
         assertEquals(expected, actual);
-    }
-
-    private static class Given {
-
-        private static Project project(ProjectId id, String name) {
-            Project project = Project
-                    .newBuilder()
-                    .setId(id)
-                    .setName(name)
-                    .setStatus(Project.Status.CREATED)
-                    .addTask(Task.getDefaultInstance())
-                    .build();
-            return project;
-        }
     }
 }

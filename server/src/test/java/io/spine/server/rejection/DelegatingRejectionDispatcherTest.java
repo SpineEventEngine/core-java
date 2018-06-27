@@ -20,23 +20,19 @@
 
 package io.spine.server.rejection;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.Rejection;
-import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
-import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
+import io.spine.server.rejection.given.DelegatingRejectionDispatcherTestEnv.EmptyRejectionDispatcherDelegate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Set;
 
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertEquals;
@@ -96,45 +92,5 @@ class DelegatingRejectionDispatcherTest {
         delegatingDispatcher.onError(rejectionEnvelope, new RuntimeException(getClass().getName()));
 
         assertTrue(delegate.onErrorCalled());
-    }
-
-    /*
-     * Test Environment
-     ****************************/
-
-    private static final class EmptyRejectionDispatcherDelegate
-            implements RejectionDispatcherDelegate<String> {
-
-        private boolean onErrorCalled;
-        private boolean dispatchCalled;
-
-        @Override
-        public Set<RejectionClass> getRejectionClasses() {
-            return ImmutableSet.of(RejectionClass.of(EntityAlreadyArchived.class));
-        }
-
-        @Override
-        public Set<RejectionClass> getExternalRejectionClasses() {
-            return ImmutableSet.of();
-        }
-
-        @Override
-        public Set<String> dispatchRejection(RejectionEnvelope envelope) {
-            dispatchCalled = true;
-            return ImmutableSet.of(toString());
-        }
-
-        @Override
-        public void onError(RejectionEnvelope envelope, RuntimeException exception) {
-            onErrorCalled = true;
-        }
-
-        private boolean onErrorCalled() {
-            return onErrorCalled;
-        }
-
-        private boolean dispatchCalled() {
-            return dispatchCalled;
-        }
     }
 }
