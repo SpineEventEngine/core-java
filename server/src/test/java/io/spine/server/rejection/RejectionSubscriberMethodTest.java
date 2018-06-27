@@ -50,8 +50,8 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.rejection.given.Given.invalidProjectNameRejection;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
@@ -143,6 +143,7 @@ class RejectionSubscriberMethodTest {
             assertIsRejectionSubscriber(method, true);
         }
     }
+
     @Nested
     @DisplayName("consider reactor invalid with")
     class ConsiderReactorInvalidWith {

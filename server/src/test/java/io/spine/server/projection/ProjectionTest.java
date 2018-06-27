@@ -111,9 +111,11 @@ class ProjectionTest {
     void exposePlayingEvents() {
         final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
         final StringValue strValue = StringValue.newBuilder()
-                                             .setValue("eins zwei drei")
-                                             .build();
-        final Int32Value intValue = Int32Value.newBuilder().setValue(123).build();
+                                                .setValue("eins zwei drei")
+                                                .build();
+        final Int32Value intValue = Int32Value.newBuilder()
+                                              .setValue(123)
+                                              .build();
         final Version nextVersion = Versions.increment(projection.getVersion());
         final Event e1 = eventFactory.createEvent(strValue, nextVersion);
         final Event e2 = eventFactory.createEvent(intValue, Versions.increment(nextVersion));

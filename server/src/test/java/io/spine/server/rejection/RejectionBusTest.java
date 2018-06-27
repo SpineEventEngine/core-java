@@ -169,7 +169,8 @@ public class RejectionBusTest {
             rejectionBus.register(dispatcherTwo);
 
             rejectionBus.unregister(dispatcherOne);
-            final Set<RejectionDispatcher<?>> dispatchers = rejectionBus.getDispatchers(rejectionClass);
+            final Set<RejectionDispatcher<?>> dispatchers =
+                    rejectionBus.getDispatchers(rejectionClass);
 
             // Check we don't have 1st dispatcher, but have 2nd.
             assertFalse(dispatchers.contains(dispatcherOne));

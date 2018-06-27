@@ -47,7 +47,8 @@ import static io.spine.base.Identifier.newUuid;
 public class Given {
 
     /** Prevents instantiation of this utility class. */
-    private Given() {}
+    private Given() {
+    }
 
     public static Rejection invalidProjectNameRejection() {
         final ProjectId projectId = newProjectId();
@@ -74,9 +75,10 @@ public class Given {
 
     public static Rejection missingOwnerRejection() {
         final ProjectId projectId = newProjectId();
-        final ProjectRejections.MissingOwner msg = ProjectRejections.MissingOwner.newBuilder()
-                                                                                 .setProjectId(projectId)
-                                                                                 .build();
+        final ProjectRejections.MissingOwner msg =
+                ProjectRejections.MissingOwner.newBuilder()
+                                              .setProjectId(projectId)
+                                              .build();
         final Command command = io.spine.server.commandbus.Given.ACommand.withMessage(
                 Sample.messageOfType(RjRemoveOwner.class));
         return Rejections.createRejection(msg, command);

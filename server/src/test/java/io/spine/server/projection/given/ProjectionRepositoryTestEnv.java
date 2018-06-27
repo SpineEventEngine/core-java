@@ -40,8 +40,8 @@ import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjProjectDeleted;
 import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Set;
 
 /**
@@ -146,7 +146,8 @@ public class ProjectionRepositoryTestEnv {
         public static Set<ProjectId> whoProcessed(Message eventMessage) {
             final ImmutableSet.Builder<ProjectId> builder = ImmutableSet.builder();
             for (ProjectId projectId : eventMessagesDelivered.keySet()) {
-                if(eventMessagesDelivered.get(projectId).contains(eventMessage)) {
+                if(eventMessagesDelivered.get(projectId)
+                                         .contains(eventMessage)) {
                     builder.add(projectId);
                 }
             }
@@ -277,5 +278,6 @@ public class ProjectionRepositoryTestEnv {
      * projection class}.
      */
     public static class SensoryDeprivedProjectionRepository
-            extends ProjectionRepository<ProjectId, SensoryDeprivedProjection, Project> {}
+            extends ProjectionRepository<ProjectId, SensoryDeprivedProjection, Project> {
+    }
 }

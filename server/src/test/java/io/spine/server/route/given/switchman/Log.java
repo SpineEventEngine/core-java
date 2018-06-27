@@ -72,9 +72,9 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
     @React
     SwitchWorkRecorded on(SwitchPositionConfirmed event) {
         return SwitchWorkRecorded.newBuilder()
-                .setSwitchId(event.getSwitchId())
-                .setSwitchmanName(event.getSwitchmanName())
-                .build();
+                                 .setSwitchId(event.getSwitchId())
+                                 .setSwitchmanName(event.getSwitchmanName())
+                                 .build();
     }
 
     @Apply
