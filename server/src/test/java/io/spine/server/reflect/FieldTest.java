@@ -36,14 +36,14 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.FieldFilter;
 import io.spine.core.Command;
-import io.spine.protobuf.Messages;
 import io.spine.test.reflect.MessageWithStringValue;
 import io.spine.test.reflect.TestEnum;
 import io.spine.test.reflect.TestEnumValue;
-import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -51,6 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Alexander Yevsyukov
  */
+@DisplayName("Field should")
 class FieldTest {
 
     private static void assertReturnsFieldClass(Class<?> expectedClass, Descriptor msgDescriptor) {
@@ -61,7 +62,7 @@ class FieldTest {
     }
 
     @Test
-    @DisplayName("pass null tolerance check")
+    @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(FieldFilter.class, FieldFilter.getDefaultInstance())
@@ -79,93 +80,90 @@ class FieldTest {
     }
 
     @Test
-    @DisplayName("return absent for missing field")
-    void returnAbsentForMissingField() {
-        assertFalse(Field.newField(Timestamp.class, "min")
-                         .isPresent());
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // OK since we know the field is present.
-    @Test
-    @DisplayName("return absent for default Any field")
-    void returnAbsentForDefaultAnyField() {
-        Field messageField = Field.newField(Command.class, "message")
-                                  .get();
-        Optional<Message> value = messageField.getValue(Command.getDefaultInstance());
-        assertFalse(value.isPresent());
-    }
-
-    @Test
-    @DisplayName("reject field filter without a field name")
-    void rejectFieldFilterWithoutAFieldName() {
+    @DisplayName("reject field filter without field name")
+    void rejectFilterWithoutName() {
         assertThrows(IllegalArgumentException.class,
                      () -> Field.forFilter(Timestamp.class, FieldFilter.getDefaultInstance()));
     }
 
-    @Test
-    @DisplayName("return int msg field class by descriptor")
-    void returnIntMsgFieldClassByDescriptor() {
-        assertReturnsFieldClass(Integer.class, Int32Value.getDescriptor());
+    @Nested
+    @DisplayName("return absent")
+    class ReturnAbsent {
+
+        @Test
+        @DisplayName("for missing field")
+        void forMissingField() {
+            assertFalse(Field.newField(Timestamp.class, "min")
+                             .isPresent());
+        }
+
+        @SuppressWarnings("OptionalGetWithoutIsPresent") // OK since we know the field is present.
+        @Test
+        @DisplayName("for default Any field")
+        void forDefaultAnyField() {
+            Field messageField = Field.newField(Command.class, "message")
+                                      .get();
+            Optional<Message> value = messageField.getValue(Command.getDefaultInstance());
+            assertFalse(value.isPresent());
+        }
     }
 
-    @Test
-    @DisplayName("return long msg field class by descriptor")
-    void returnLongMsgFieldClassByDescriptor() {
-        assertReturnsFieldClass(Long.class, Int64Value.getDescriptor());
-    }
+    @Nested
+    @DisplayName("via field descriptor, retrieve field Java type")
+    class ReturnFieldClass {
 
-    @Test
-    @DisplayName("return float msg field class by descriptor")
-    void returnFloatMsgFieldClassByDescriptor() {
-        assertReturnsFieldClass(Float.class, FloatValue.getDescriptor());
-    }
+        @Test
+        @DisplayName("Integer")
+        void ofInteger() {
+            assertReturnsFieldClass(Integer.class, Int32Value.getDescriptor());
+        }
 
-    @Test
-    @DisplayName("return double msg field class by descriptor")
-    void returnDoubleMsgFieldClassByDescriptor() {
-        assertReturnsFieldClass(Double.class, DoubleValue.getDescriptor());
-    }
+        @Test
+        @DisplayName("Long")
+        void ofLong() {
+            assertReturnsFieldClass(Long.class, Int64Value.getDescriptor());
+        }
 
-    @Test
-    @DisplayName("return boolean msg field class by descriptor")
-    void returnBooleanMsgFieldClassByDescriptor() {
-        assertReturnsFieldClass(Boolean.class, BoolValue.getDescriptor());
-    }
+        @Test
+        @DisplayName("Float")
+        void ofFloat() {
+            assertReturnsFieldClass(Float.class, FloatValue.getDescriptor());
+        }
 
-    @Test
-    @DisplayName("return string msg field class by descriptor")
-    void returnStringMsgFieldClassByDescriptor() {
-        assertReturnsFieldClass(String.class, StringValue.getDescriptor());
-    }
+        @Test
+        @DisplayName("Double")
+        void ofDouble() {
+            assertReturnsFieldClass(Double.class, DoubleValue.getDescriptor());
+        }
 
-    @Test
-    @DisplayName("return byte string msg field class by descriptor")
-    void returnByteStringMsgFieldClassByDescriptor() {
-        assertReturnsFieldClass(ByteString.class, BytesValue.getDescriptor());
-    }
+        @Test
+        @DisplayName("Boolean")
+        void ofBoolean() {
+            assertReturnsFieldClass(Boolean.class, BoolValue.getDescriptor());
+        }
 
-    @Test
-    @DisplayName("return enum msg field class by descriptor")
-    void returnEnumMsgFieldClassByDescriptor() {
-        assertReturnsFieldClass(TestEnum.class, TestEnumValue.getDescriptor());
-    }
+        @Test
+        @DisplayName("String")
+        void ofString() {
+            assertReturnsFieldClass(String.class, StringValue.getDescriptor());
+        }
 
-    @Test
-    @DisplayName("return msg field class by descriptor")
-    void returnMsgFieldClassByDescriptor() {
-        assertReturnsFieldClass(StringValue.class, MessageWithStringValue.getDescriptor());
-    }
+        @Test
+        @DisplayName("ByteString")
+        void ofByteString() {
+            assertReturnsFieldClass(ByteString.class, BytesValue.getDescriptor());
+        }
 
-    @Test
-    @DisplayName("pass the null tolerance check")
-    void passTheNullToleranceCheck() {
-        FieldDescriptor defaultFieldDescriptor = StringValue.getDefaultInstance()
-                                                            .getDescriptorForType()
-                                                            .getFields()
-                                                            .get(0);
-        new NullPointerTester()
-                .setDefault(TypeUrl.class, TypeUrl.of(StringValue.class))
-                .setDefault(FieldDescriptor.class, defaultFieldDescriptor)
-                .testAllPublicStaticMethods(Messages.class);
+        @Test
+        @DisplayName("Enum")
+        void ofEnum() {
+            assertReturnsFieldClass(TestEnum.class, TestEnumValue.getDescriptor());
+        }
+
+        @Test
+        @DisplayName("Message")
+        void ofMessage() {
+            assertReturnsFieldClass(StringValue.class, MessageWithStringValue.getDescriptor());
+        }
     }
 }

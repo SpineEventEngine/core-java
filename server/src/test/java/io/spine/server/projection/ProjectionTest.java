@@ -83,8 +83,8 @@ class ProjectionTest {
     }
 
     @Test
-    @DisplayName("throw exception if no handler for event")
-    void throwExceptionIfNoHandlerForEvent() {
+    @DisplayName("throw ISE if no handler is present for event")
+    void throwIfNoHandlerForEvent() {
         assertThrows(IllegalStateException.class,
                      () -> dispatch(projection,
                                     BoolValue.getDefaultInstance(),
@@ -93,7 +93,7 @@ class ProjectionTest {
 
     @Test
     @DisplayName("return event classes which it handles")
-    void returnEventClassesWhichItHandles() {
+    void exposeEventClasses() {
         final Set<EventClass> classes = ProjectionClass.of(TestProjection.class)
                                                        .getEventSubscriptions();
 
@@ -103,8 +103,8 @@ class ProjectionTest {
     }
 
     @Test
-    @DisplayName("expose playing events to the package")
-    void exposePlayingEventsToThePackage() {
+    @DisplayName("expose `play events` operation to package")
+    void exposePlayingEvents() {
         final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
         final StringValue strValue = StringValue.newBuilder()
                                              .setValue("eins zwei drei")

@@ -38,11 +38,13 @@ import io.spine.server.rejection.given.RejectionReactorMethodTestEnv.RValidTwoPa
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.RjUpdateProjectName;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -55,7 +57,7 @@ class RejectionReactorMethodTest {
     private static final CommandContext emptyCommandContext = CommandContext.getDefaultInstance();
 
     @Test
-    @DisplayName("pass null tolerance check")
+    @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Any.class, Any.getDefaultInstance())
@@ -93,93 +95,103 @@ class RejectionReactorMethodTest {
         assertEquals(commandContext, reactorObject.getLastCommandContext());
     }
 
-    @Test
-    @DisplayName("consider reactor with two msg param valid")
-    void considerReactorWithTwoMsgParamValid() {
-        Method reactor = new RValidTwoParams().getMethod();
+    @Nested
+    @DisplayName("consider reactor valid with")
+    class ConsiderReactorValidWith {
 
-        assertIsRejectionReactor(reactor, true);
+        @Test
+        @DisplayName("two Message params")
+        void twoMsgParams() {
+            Method reactor = new RValidTwoParams().getMethod();
+
+            assertIsRejectionReactor(reactor, true);
+        }
+
+        @Test
+        @DisplayName("both Messages and Context params")
+        void msgAndContextParams() {
+            Method reactor = new RValidThreeParams().getMethod();
+
+            assertIsRejectionReactor(reactor, true);
+        }
+
+        @Test
+        @DisplayName("non-public access")
+        void nonPublicAccess() {
+            Method method = new RValidButPrivate().getMethod();
+
+            assertIsRejectionReactor(method, true);
+        }
+    }
+
+    @Nested
+    @DisplayName("consider reactor invalid with")
+    class ConsiderReactorInvalidWith {
+
+        @Test
+        @DisplayName("no annotation")
+        void noAnnotation() {
+            Method reactor = new RInvalidNoAnnotation().getMethod();
+
+            assertIsRejectionReactor(reactor, false);
+        }
+
+        @Test
+        @DisplayName("no params")
+        void noParams() {
+            Method reactor = new RInvalidNoParams().getMethod();
+
+            assertIsRejectionReactor(reactor, false);
+        }
+
+        @Test
+        @DisplayName("too many params")
+        void tooManyParams() {
+            Method reactor = new RInvalidTooManyParams().getMethod();
+
+            assertIsRejectionReactor(reactor, false);
+        }
+
+        @Test
+        @DisplayName("one invalid param")
+        void oneInvalidParam() {
+            Method reactor = new RInvalidOneNotMsgParam().getMethod();
+
+            assertIsRejectionReactor(reactor, false);
+        }
+
+        @Test
+        @DisplayName("first non-Message param")
+        void firstNonMessageParam() {
+            Method reactor = new RInvalidTwoParamsFirstInvalid().getMethod();
+
+            assertIsRejectionReactor(reactor, false);
+        }
+
+        @Test
+        @DisplayName("second non-Context param")
+        void secondNonContextParam() {
+            Method reactor = new RInvalidTwoParamsSecondInvalid().getMethod();
+
+            assertIsRejectionReactor(reactor, false);
+        }
+
+        @Test
+        @DisplayName("non-void return type")
+        void nonVoidReturnType() {
+            Method reactor = new RInvalidNotMessage().getMethod();
+
+            assertIsRejectionReactor(reactor, false);
+        }
     }
 
     @Test
-    @DisplayName("consider reactor with both messages and context params valid")
-    void considerReactorWithBothMessagesAndContextParamsValid() {
-        Method reactor = new RValidThreeParams().getMethod();
-
-        assertIsRejectionReactor(reactor, true);
-    }
-
-    @Test
-    @DisplayName("consider not public reactor valid")
-    void considerNotPublicReactorValid() {
-        Method method = new RValidButPrivate().getMethod();
-
-        assertIsRejectionReactor(method, true);
-    }
-
-    @Test
-    @DisplayName("consider not annotated reactor invalid")
-    void considerNotAnnotatedReactorInvalid() {
-        Method reactor = new RInvalidNoAnnotation().getMethod();
-
-        assertIsRejectionReactor(reactor, false);
-    }
-
-    @Test
-    @DisplayName("consider reactor without params invalid")
-    void considerReactorWithoutParamsInvalid() {
-        Method reactor = new RInvalidNoParams().getMethod();
-
-        assertIsRejectionReactor(reactor, false);
-    }
-
-    @Test
-    @DisplayName("consider reactor with too many params invalid")
-    void considerReactorWithTooManyParamsInvalid() {
-        Method reactor = new RInvalidTooManyParams().getMethod();
-
-        assertIsRejectionReactor(reactor, false);
-    }
-
-    @Test
-    @DisplayName("throw exception on attempt to create instance for a method with too many params")
-    void throwExceptionOnAttemptToCreateInstanceForAMethodWithTooManyParams() {
+    @DisplayName("throw IAE on attempt to create instance from invalid method")
+    void throwOnInvalidMethod() {
         Method illegalMethod = new RInvalidTooManyParams().getMethod();
 
         assertThrows(IllegalArgumentException.class,
                      () -> new RejectionReactorMethod(illegalMethod));
-    }
-
-    @Test
-    @DisplayName("consider reactor with one invalid param invalid")
-    void considerReactorWithOneInvalidParamInvalid() {
-        Method reactor = new RInvalidOneNotMsgParam().getMethod();
-
-        assertIsRejectionReactor(reactor, false);
-    }
-
-    @Test
-    @DisplayName("consider reactor with first not message param invalid")
-    void considerReactorWithFirstNotMessageParamInvalid() {
-        Method reactor = new RInvalidTwoParamsFirstInvalid().getMethod();
-
-        assertIsRejectionReactor(reactor, false);
-    }
-
-    @Test
-    @DisplayName("consider reactor with second not context param invalid")
-    void considerReactorWithSecondNotContextParamInvalid() {
-        Method reactor = new RInvalidTwoParamsSecondInvalid().getMethod();
-
-        assertIsRejectionReactor(reactor, false);
-    }
-
-    @Test
-    @DisplayName("consider not void reactor invalid")
-    void considerNotVoidReactorInvalid() {
-        Method reactor = new RInvalidNotMessage().getMethod();
-
-        assertIsRejectionReactor(reactor, false);
     }
 
     private static void assertIsRejectionReactor(Method reactor, boolean isReactor) {

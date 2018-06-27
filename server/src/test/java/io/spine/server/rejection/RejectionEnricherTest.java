@@ -62,8 +62,8 @@ class RejectionEnricherTest {
     }
 
     @Test
-    @DisplayName("boolean enrich rejection")
-    void booleanEnrichRejection() {
+    @DisplayName("enrich rejection")
+    void enrichRejection() {
         RejectionEnrichmentConsumer consumer = new RejectionEnrichmentConsumer();
         rejectionBus.register(consumer);
 

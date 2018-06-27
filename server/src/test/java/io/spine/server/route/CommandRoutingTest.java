@@ -31,6 +31,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -75,8 +76,18 @@ class CommandRoutingTest {
     private CommandRouting<Long> commandRouting;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         commandRouting = CommandRouting.newInstance();
+    }
+
+    @Test
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        final NullPointerTester nullPointerTester = new NullPointerTester()
+                .setDefault(CommandContext.class, CommandContext.getDefaultInstance());
+
+        nullPointerTester.testAllPublicInstanceMethods(commandRouting);
+        nullPointerTester.testAllPublicStaticMethods(CommandRouting.class);
     }
 
     @Test
@@ -103,8 +114,8 @@ class CommandRoutingTest {
     }
 
     @Test
-    @DisplayName("not allow overwriting a set route")
-    void notAllowOverwritingASetRoute() throws Exception {
+    @DisplayName("not allow overwriting set route")
+    void notOverwriteSetRoute() throws Exception {
         commandRouting.route(StringValue.class, customRoute);
         assertThrows(IllegalStateException.class,
                      () -> commandRouting.route(StringValue.class, customRoute));
@@ -119,7 +130,7 @@ class CommandRoutingTest {
 
     @Test
     @DisplayName("complain on removal if route is not set")
-    void complainOnRemovalIfRouteIsNotSet() {
+    void notRemoveIfRouteNotSet() {
         assertThrows(IllegalStateException.class, () -> commandRouting.remove(StringValue.class));
     }
 
@@ -154,15 +165,5 @@ class CommandRoutingTest {
         final long id = commandRouting.apply(command.getMessage(), command.getCommandContext());
 
         assertEquals(CUSTOM_ANSWER, id);
-    }
-
-    @Test
-    @DisplayName("pass null tolerance test")
-    void passNullToleranceTest() {
-        final NullPointerTester nullPointerTester = new NullPointerTester()
-                .setDefault(CommandContext.class, CommandContext.getDefaultInstance());
-
-        nullPointerTester.testAllPublicInstanceMethods(commandRouting);
-        nullPointerTester.testAllPublicStaticMethods(CommandRouting.class);
     }
 }

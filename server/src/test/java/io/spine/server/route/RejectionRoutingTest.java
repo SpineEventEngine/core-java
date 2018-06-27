@@ -35,6 +35,7 @@ import org.junit.jupiter.api.DisplayName;
 
 import java.util.Set;
 
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -89,6 +90,16 @@ class RejectionRoutingTest {
     }
 
     @Test
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        final NullPointerTester nullPointerTester = new NullPointerTester()
+                .setDefault(RejectionContext.class, RejectionContext.getDefaultInstance());
+
+        nullPointerTester.testAllPublicInstanceMethods(rejectionRouting);
+        nullPointerTester.testAllPublicStaticMethods(RejectionRouting.class);
+    }
+
+    @Test
     @DisplayName("have default route")
     void haveDefaultRoute() {
         assertNotNull(rejectionRouting.getDefault());
@@ -127,7 +138,7 @@ class RejectionRoutingTest {
 
     @Test
     @DisplayName("not allow overwriting set route")
-    void notAllowOverwritingSetRoute() {
+    void notOverwriteSetRoute() {
         rejectionRouting.route(EntityAlreadyArchived.class, customRoute);
         assertThrows(IllegalStateException.class,
                      () -> rejectionRouting.route(EntityAlreadyArchived.class, customRoute));
@@ -145,7 +156,7 @@ class RejectionRoutingTest {
 
     @Test
     @DisplayName("complain on removal if route was not set")
-    void complainOnRemovalIfRouteWasNotSet() {
+    void notRemoveIfRouteNotSet() {
         assertThrows(IllegalStateException.class,
                      () -> rejectionRouting.remove(EntityAlreadyArchived.class));
     }
@@ -184,15 +195,5 @@ class RejectionRoutingTest {
 
     private Any thisTestAsEntity() {
         return Identifier.pack(getClass().getName());
-    }
-
-    @Test
-    @DisplayName("pass null tolerance check")
-    void passNullToleranceCheck() {
-        final NullPointerTester nullPointerTester = new NullPointerTester()
-                .setDefault(RejectionContext.class, RejectionContext.getDefaultInstance());
-
-        nullPointerTester.testAllPublicInstanceMethods(rejectionRouting);
-        nullPointerTester.testAllPublicStaticMethods(RejectionRouting.class);
     }
 }

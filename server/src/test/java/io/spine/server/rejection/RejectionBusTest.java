@@ -20,6 +20,7 @@
 package io.spine.server.rejection;
 
 import com.google.protobuf.StringValue;
+import com.oracle.jrockit.jfr.EventDefinition;
 import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.Rejection;
@@ -39,6 +40,7 @@ import io.spine.server.rejection.given.VerifiableSubscriber;
 import io.spine.test.rejection.command.RjStartProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -81,7 +83,7 @@ public class RejectionBusTest {
         assertNotNull(RejectionBus.newBuilder());
     }
 
-    @Test   // as the RejectionBus instances do not support enrichment yet.
+    @Test   // As the RejectionBus instances do not support enrichment yet.
     @DisplayName("not enrich rejection messages")
     void notEnrichRejectionMessages() {
         final Rejection original = invalidProjectNameRejection();
@@ -96,162 +98,139 @@ public class RejectionBusTest {
                      () -> rejectionBus.register(new RejectionSubscriber()));
     }
 
-    @Test
-    @DisplayName("register rejection subscriber")
-    void registerRejectionSubscriber() {
-        final RejectionSubscriber subscriberOne = new InvalidProjectNameSubscriber();
-        final RejectionSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
+    @Nested
+    @DisplayName("register")
+    class Register {
 
-        rejectionBus.register(subscriberOne);
-        rejectionBus.register(subscriberTwo);
+        @Test
+        @DisplayName("subscriber")
+        void subscriber() {
+            final RejectionSubscriber subscriberOne = new InvalidProjectNameSubscriber();
+            final RejectionSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
 
-        final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
-        assertTrue(rejectionBus.hasDispatchers(rejectionClass));
+            rejectionBus.register(subscriberOne);
+            rejectionBus.register(subscriberTwo);
 
-        final Collection<RejectionDispatcher<?>> dispatchers = rejectionBus.getDispatchers(
-                rejectionClass);
-        assertTrue(dispatchers.contains(subscriberOne));
-        assertTrue(dispatchers.contains(subscriberTwo));
+            final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
+            assertTrue(rejectionBus.hasDispatchers(rejectionClass));
+
+            final Collection<RejectionDispatcher<?>> dispatchers = rejectionBus.getDispatchers(
+                    rejectionClass);
+            assertTrue(dispatchers.contains(subscriberOne));
+            assertTrue(dispatchers.contains(subscriberTwo));
+        }
+
+        @Test
+        @DisplayName("dispatcher")
+        void dispatcher() {
+            final RejectionDispatcher<?> dispatcher = new BareDispatcher();
+
+            rejectionBus.register(dispatcher);
+
+            final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
+            assertTrue(rejectionBus.getDispatchers(rejectionClass)
+                                   .contains(dispatcher));
+        }
     }
 
-    @Test
-    @DisplayName("unregister subscribers")
-    void unregisterSubscribers() {
-        final RejectionSubscriber subscriberOne = new InvalidProjectNameSubscriber();
-        final RejectionSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
-        rejectionBus.register(subscriberOne);
-        rejectionBus.register(subscriberTwo);
-        final RejectionClass rejectionClass = RejectionClass.of(
-                InvalidProjectName.class);
+    @Nested
+    @DisplayName("unregister")
+    class Unregister {
 
-        rejectionBus.unregister(subscriberOne);
+        @Test
+        @DisplayName("subscriber")
+        void subscriber() {
+            final RejectionSubscriber subscriberOne = new InvalidProjectNameSubscriber();
+            final RejectionSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
+            rejectionBus.register(subscriberOne);
+            rejectionBus.register(subscriberTwo);
+            final RejectionClass rejectionClass = RejectionClass.of(
+                    InvalidProjectName.class);
 
-        // Check that the 2nd subscriber with the same rejection subscriber method remains
-        // after the 1st subscriber unregisters.
-        final Collection<RejectionDispatcher<?>> subscribers =
-                rejectionBus.getDispatchers(rejectionClass);
-        assertFalse(subscribers.contains(subscriberOne));
-        assertTrue(subscribers.contains(subscriberTwo));
+            rejectionBus.unregister(subscriberOne);
 
-        // Check that after 2nd subscriber us unregisters he's no longer in
-        rejectionBus.unregister(subscriberTwo);
+            // Check that the 2nd subscriber with the same rejection subscriber method remains
+            // after the 1st subscriber unregisters.
+            final Collection<RejectionDispatcher<?>> subscribers =
+                    rejectionBus.getDispatchers(rejectionClass);
+            assertFalse(subscribers.contains(subscriberOne));
+            assertTrue(subscribers.contains(subscriberTwo));
 
-        assertFalse(rejectionBus.getDispatchers(rejectionClass)
-                                .contains(subscriberTwo));
+            // Check that after 2nd subscriber us unregisters he's no longer in
+            rejectionBus.unregister(subscriberTwo);
+
+            assertFalse(rejectionBus.getDispatchers(rejectionClass)
+                                    .contains(subscriberTwo));
+        }
+
+        @Test
+        @DisplayName("dispatcher")
+        void dispatcher() {
+            final RejectionDispatcher<?> dispatcherOne = new BareDispatcher();
+            final RejectionDispatcher<?> dispatcherTwo = new BareDispatcher();
+            final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
+            rejectionBus.register(dispatcherOne);
+            rejectionBus.register(dispatcherTwo);
+
+            rejectionBus.unregister(dispatcherOne);
+            final Set<RejectionDispatcher<?>> dispatchers = rejectionBus.getDispatchers(rejectionClass);
+
+            // Check we don't have 1st dispatcher, but have 2nd.
+            assertFalse(dispatchers.contains(dispatcherOne));
+            assertTrue(dispatchers.contains(dispatcherTwo));
+
+            rejectionBus.unregister(dispatcherTwo);
+            assertFalse(rejectionBus.getDispatchers(rejectionClass)
+                                    .contains(dispatcherTwo));
+        }
     }
 
-    @Test
-    @DisplayName("call subscriber when rejection posted")
-    void callSubscriberWhenRejectionPosted() {
-        final InvalidProjectNameSubscriber subscriber = new InvalidProjectNameSubscriber();
-        final Rejection rejection = invalidProjectNameRejection();
-        rejectionBus.register(subscriber);
+    @Nested
+    @DisplayName("call")
+    class Call {
 
-        rejectionBus.post(rejection);
+        @Test
+        @DisplayName("subscriber")
+        void subscriber() {
+            final InvalidProjectNameSubscriber subscriber = new InvalidProjectNameSubscriber();
+            final Rejection rejection = invalidProjectNameRejection();
+            rejectionBus.register(subscriber);
 
-        final Rejection handled = subscriber.getRejectionHandled();
-        // Compare the content without command ID, which is different in the remembered
-        assertEquals(rejection.getMessage(), handled.getMessage());
-        assertEquals(rejection.getContext()
-                              .getCommand()
-                              .getMessage(),
-                     handled.getContext()
-                            .getCommand()
-                            .getMessage());
-        assertEquals(rejection.getContext()
-                              .getCommand()
-                              .getContext(),
-                     handled.getContext()
-                            .getCommand()
-                            .getContext());
-    }
+            rejectionBus.post(rejection);
 
-    @Test
-    @DisplayName("call subscriber by rejection and command message when rejection posted")
-    void callSubscriberByRejectionAndCommandMessageWhenRejectionPosted() {
-        final MultipleRejectionSubscriber subscriber = new MultipleRejectionSubscriber();
-        rejectionBus.register(subscriber);
+            final Rejection handled = subscriber.getRejectionHandled();
+            // Compare the content without command ID, which is different in the remembered.
+            assertEquals(rejection.getMessage(), handled.getMessage());
+            assertEquals(rejection.getContext()
+                                  .getCommand()
+                                  .getMessage(),
+                         handled.getContext()
+                                .getCommand()
+                                .getMessage());
+            assertEquals(rejection.getContext()
+                                  .getCommand()
+                                  .getContext(),
+                         handled.getContext()
+                                .getCommand()
+                                .getContext());
+        }
 
-        final Class<RjStartProject> commandMessageCls = RjStartProject.class;
-        final Rejection rejection = cannotModifyDeletedEntity(commandMessageCls);
-        rejectionBus.post(rejection);
+        @Test
+        @DisplayName("dispatcher")
+        void dispatcher() {
+            final BareDispatcher dispatcher = new BareDispatcher();
 
-        assertEquals(1, subscriber.numberOfSubscriberCalls());
-        assertEquals(commandMessageCls, subscriber.commandMessageClass());
-    }
+            rejectionBus.register(dispatcher);
 
-    @Test
-    @DisplayName("call subscriber by rejection message only")
-    void callSubscriberByRejectionMessageOnly() {
-        final MultipleRejectionSubscriber subscriber = new MultipleRejectionSubscriber();
-        rejectionBus.register(subscriber);
+            rejectionBus.post(invalidProjectNameRejection());
 
-        final Rejection rejection = cannotModifyDeletedEntity(StringValue.class);
-        rejectionBus.post(rejection);
-
-        assertEquals(1, subscriber.numberOfSubscriberCalls());
-        assertNull(subscriber.commandMessageClass());
-    }
-
-    @Test
-    @DisplayName("register dispatchers")
-    void registerDispatchers() {
-        final RejectionDispatcher<?> dispatcher = new BareDispatcher();
-
-        rejectionBus.register(dispatcher);
-
-        final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
-        assertTrue(rejectionBus.getDispatchers(rejectionClass)
-                               .contains(dispatcher));
-    }
-
-    @Test
-    @DisplayName("call dispatchers")
-    void callDispatchers() {
-        final BareDispatcher dispatcher = new BareDispatcher();
-
-        rejectionBus.register(dispatcher);
-
-        rejectionBus.post(invalidProjectNameRejection());
-
-        assertTrue(dispatcher.isDispatchCalled());
-    }
-
-    @Test
-    @DisplayName("unregister dispatchers")
-    void unregisterDispatchers() {
-        final RejectionDispatcher<?> dispatcherOne = new BareDispatcher();
-        final RejectionDispatcher<?> dispatcherTwo = new BareDispatcher();
-        final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
-        rejectionBus.register(dispatcherOne);
-        rejectionBus.register(dispatcherTwo);
-
-        rejectionBus.unregister(dispatcherOne);
-        final Set<RejectionDispatcher<?>> dispatchers = rejectionBus.getDispatchers(rejectionClass);
-
-        // Check we don't have 1st dispatcher, but have 2nd.
-        assertFalse(dispatchers.contains(dispatcherOne));
-        assertTrue(dispatchers.contains(dispatcherTwo));
-
-        rejectionBus.unregister(dispatcherTwo);
-        assertFalse(rejectionBus.getDispatchers(rejectionClass)
-                                .contains(dispatcherTwo));
-    }
-
-    @Test
-    @DisplayName("catch exceptions caused by subscribers")
-    void catchExceptionsCausedBySubscribers() {
-        final VerifiableSubscriber faultySubscriber = new FaultySubscriber();
-
-        rejectionBus.register(faultySubscriber);
-        rejectionBus.post(invalidProjectNameRejection());
-
-        assertTrue(faultySubscriber.isMethodCalled());
+            assertTrue(dispatcher.isDispatchCalled());
+        }
     }
 
     @Test
     @DisplayName("unregister registries on close")
-    void unregisterRegistriesOnClose() throws Exception {
+    void unregisterAllOnClose() throws Exception {
         final RejectionBus rejectionBus = RejectionBus.newBuilder()
                                                       .build();
         rejectionBus.register(new BareDispatcher());
@@ -264,37 +243,94 @@ public class RejectionBusTest {
                                .isEmpty());
     }
 
-    @Test
-    @DisplayName("support short form subscriber methods")
-    void supportShortFormSubscriberMethods() {
-        final RejectionMessageSubscriber subscriber = new RejectionMessageSubscriber();
-        checkRejection(subscriber);
+    @Nested
+    @DisplayName("call subscriber by")
+    class CallSubscriberBy {
+
+        @Test
+        @DisplayName("rejection message only")
+        void rejectionOnly() {
+            final MultipleRejectionSubscriber subscriber = new MultipleRejectionSubscriber();
+            rejectionBus.register(subscriber);
+
+            final Rejection rejection = cannotModifyDeletedEntity(StringValue.class);
+            rejectionBus.post(rejection);
+
+            assertEquals(1, subscriber.numberOfSubscriberCalls());
+            assertNull(subscriber.commandMessageClass());
+        }
+
+        @Test
+        @DisplayName("rejection and command message")
+        void rejectionAndCommandMessage() {
+            final MultipleRejectionSubscriber subscriber = new MultipleRejectionSubscriber();
+            rejectionBus.register(subscriber);
+
+            final Class<RjStartProject> commandMessageCls = RjStartProject.class;
+            final Rejection rejection = cannotModifyDeletedEntity(commandMessageCls);
+            rejectionBus.post(rejection);
+
+            assertEquals(1, subscriber.numberOfSubscriberCalls());
+            assertEquals(commandMessageCls, subscriber.commandMessageClass());
+        }
     }
 
     @Test
-    @DisplayName("support context aware subscriber methods")
-    void supportContextAwareSubscriberMethods() {
-        final ContextAwareSubscriber subscriber = new ContextAwareSubscriber();
-        checkRejection(subscriber);
+    @DisplayName("catch exceptions caused by subscribers")
+    void catchSubscriberExceptions() {
+        final VerifiableSubscriber faultySubscriber = new FaultySubscriber();
+
+        rejectionBus.register(faultySubscriber);
+        rejectionBus.post(invalidProjectNameRejection());
+
+        assertTrue(faultySubscriber.isMethodCalled());
     }
 
-    @Test
-    @DisplayName("support command msg aware subscriber methods")
-    void supportCommandMsgAwareSubscriberMethods() {
-        final CommandMessageAwareSubscriber subscriber = new CommandMessageAwareSubscriber();
-        checkRejection(subscriber);
-    }
+    @Nested
+    @DisplayName("support subscriber methods which are")
+    class SupportSubscriberMethods {
 
-    @Test
-    @DisplayName("support command aware subscriber methods")
-    void supportCommandAwareSubscriberMethods() {
-        final CommandAwareSubscriber subscriber = new CommandAwareSubscriber();
-        checkRejection(subscriber);
+        @Test
+        @DisplayName("short form")
+        void shortForm() {
+            final RejectionMessageSubscriber subscriber = new RejectionMessageSubscriber();
+            checkRejection(subscriber);
+        }
+
+        @Test
+        @DisplayName("context aware")
+        void contextAware() {
+            final ContextAwareSubscriber subscriber = new ContextAwareSubscriber();
+            checkRejection(subscriber);
+        }
+
+        @Test
+        @DisplayName("command message aware")
+        void commandMessageAware() {
+            final CommandMessageAwareSubscriber subscriber = new CommandMessageAwareSubscriber();
+            checkRejection(subscriber);
+        }
+
+        @Test
+        @DisplayName("command aware")
+        void commandAware() {
+            final CommandAwareSubscriber subscriber = new CommandAwareSubscriber();
+            checkRejection(subscriber);
+        }
+
+        private void checkRejection(VerifiableSubscriber subscriber) {
+            final Rejection rejection = missingOwnerRejection();
+            rejectionBus.register(subscriber);
+            rejectionBus.post(rejection);
+
+            assertTrue(subscriber.isMethodCalled());
+            subscriber.verifyGot(rejection);
+        }
     }
 
     @Test
     @DisplayName("not support subscriber methods with wrong parameter sequence")
-    void notSupportSubscriberMethodsWithWrongParameterSequence() {
+    void rejectWrongArgSequence() {
         final RejectionDispatcher<?> subscriber = new InvalidOrderSubscriber();
 
         // In Bus ->  No message types are forwarded by this dispatcher.
@@ -319,14 +355,5 @@ public class RejectionBusTest {
     @DisplayName("have log")
     void haveLog() {
         assertNotNull(RejectionBus.log());
-    }
-
-    private void checkRejection(VerifiableSubscriber subscriber) {
-        final Rejection rejection = missingOwnerRejection();
-        rejectionBus.register(subscriber);
-        rejectionBus.post(rejection);
-
-        assertTrue(subscriber.isMethodCalled());
-        subscriber.verifyGot(rejection);
     }
 }

@@ -38,6 +38,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -66,7 +67,7 @@ class DelegatingRejectionDispatcherTest {
     }
 
     @Test
-    @DisplayName("pass null tolerance check")
+    @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(RejectionDispatcherDelegate.class, delegate)
@@ -74,8 +75,8 @@ class DelegatingRejectionDispatcherTest {
     }
 
     @Test
-    @DisplayName("return rejection classes of the delegate")
-    void returnRejectionClassesOfTheDelegate() {
+    @DisplayName("return rejection classes of delegate")
+    void getDelegateRejectionTypes() {
         assertEquals(delegatingDispatcher.getMessageClasses(),
                      delegate.getRejectionClasses());
     }
@@ -90,7 +91,7 @@ class DelegatingRejectionDispatcherTest {
     }
 
     @Test
-    @DisplayName("delegate onError")
+    @DisplayName("delegate `onError`")
     void delegateOnError() {
         delegatingDispatcher.onError(rejectionEnvelope, new RuntimeException(getClass().getName()));
 

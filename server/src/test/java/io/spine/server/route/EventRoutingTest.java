@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -87,8 +88,18 @@ class EventRoutingTest {
     private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         eventRouting = EventRouting.withDefault(defaultRoute);
+    }
+
+    @Test
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        final NullPointerTester nullPointerTester = new NullPointerTester()
+                .setDefault(EventContext.class, EventContext.getDefaultInstance());
+
+        nullPointerTester.testAllPublicInstanceMethods(eventRouting);
+        nullPointerTester.testAllPublicStaticMethods(EventRouting.class);
     }
 
     @Test
@@ -127,8 +138,8 @@ class EventRoutingTest {
     }
 
     @Test
-    @DisplayName("not allow overwriting a set route")
-    void notAllowOverwritingASetRoute() {
+    @DisplayName("not allow overwriting set route")
+    void notOverwriteSetRoute() {
         eventRouting.route(StringValue.class, customRoute);
         assertThrows(IllegalStateException.class,
                      () -> eventRouting.route(StringValue.class, customRoute));
@@ -146,7 +157,7 @@ class EventRoutingTest {
 
     @Test
     @DisplayName("complain on removal if route was not set")
-    void complainOnRemovalIfRouteWasNotSet() {
+    void notRemoveIfRouteNotSet() {
         assertThrows(IllegalStateException.class, () -> eventRouting.remove(StringValue.class));
     }
 
@@ -175,15 +186,5 @@ class EventRoutingTest {
 
         final Set<Long> ids = eventRouting.apply(event.getMessage(), event.getEventContext());
         assertEquals(CUSTOM_ROUTE, ids);
-    }
-
-    @Test
-    @DisplayName("pass null tolerance")
-    void passNullTolerance() {
-        final NullPointerTester nullPointerTester = new NullPointerTester()
-                .setDefault(EventContext.class, EventContext.getDefaultInstance());
-
-        nullPointerTester.testAllPublicInstanceMethods(eventRouting);
-        nullPointerTester.testAllPublicStaticMethods(EventRouting.class);
     }
 }

@@ -41,15 +41,15 @@ class EventProducersTest {
     }
 
     @Test
-    @DisplayName("create function for taking id fromContext")
-    void createFunctionForTakingIdFromContext() {
+    @DisplayName("create function for taking ID from context")
+    void getIdFromContext() {
         final EventRoute<Object, Message> fn = EventProducers.fromContext();
         assertFunction(fn);
     }
 
     @Test
-    @DisplayName("create function for getting id fromFirstMessageField")
-    void createFunctionForGettingIdFromFirstMessageField() {
+    @DisplayName("create function for getting ID from first message field")
+    void getIdFromFirstMsgField() {
         final EventRoute<Object, Message> fn = EventProducers.fromFirstMessageField();
         assertFunction(fn);
     }

@@ -151,7 +151,7 @@ class ProjectionTransactionTest
      * This test is ignored as the expected behavior has been changed for the projection
      * transactions.
      *
-     * <p>{@link #incrementVersionOnEvent() Another test method} is created to test the new
+     * <p>{@linkplain #incrementVersionOnEvent() Another test method} is created to test the new
      * behavior. Please refer to it for more details.
      */
     @Disabled
@@ -164,12 +164,12 @@ class ProjectionTransactionTest
     /**
      * Tests the version advancement strategy for the {@link Projection}s.
      *
-     * <p>The versioning strategy is for {@link Projection} is
+     * <p>The versioning strategy for {@link Projection} is
      * {@link io.spine.server.entity.EntityVersioning#AUTO_INCREMENT AUTO_INCREMENT}. This test
      * case substitutes {@link #advanceVersionFromEvent()}, which tested the behavior of
      * {@link io.spine.server.entity.EntityVersioning#FROM_EVENT FROM_EVENT} strategy.
      */
-    @SuppressWarnings("CheckReturnValue") // can ignore value of play() in this test
+    @SuppressWarnings("CheckReturnValue") // Can ignore value of play() in this test.
     @Test
     @DisplayName("increment version on event")
     void incrementVersionOnEvent() {
