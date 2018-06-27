@@ -43,6 +43,7 @@ import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.commandbus.Given.ACommand.addTask;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
+import static io.spine.server.commandbus.Given.ACommand.removeTask;
 import static io.spine.server.tenant.TenantAwareOperation.isTenantSet;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -125,6 +126,21 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
                                              .getRejection();
         assertTrue(isNotDefault(actualRejection));
         assertEquals(unpack(expectedRejection.getMessage()), unpack(actualRejection.getMessage()));
+    }
+
+    @Test
+    @DisplayName("do not propagate dispatching errors")
+    void doNotPropagateExceptions() {
+        final FaultyHandler faultyHandler = new FaultyHandler(eventBus);
+        commandBus.register(faultyHandler);
+
+        final Command remoteTaskCommand = clearTenantId(removeTask());
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+        commandBus.post(remoteTaskCommand, observer);
+
+        final Ack ack = observer.firstResponse();
+        assertTrue(ack.getStatus()
+                      .hasOk());
     }
 
     @Test

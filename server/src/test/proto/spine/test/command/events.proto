@@ -39,6 +39,11 @@ message CmdTaskAdded {
     Task task = 2;
 }
 
+message CmdTaskRemoved {
+    ProjectId project_id = 1;
+    Task task = 2;
+}
+
 message CmdProjectStarted {
     ProjectId project_id = 1;
 }

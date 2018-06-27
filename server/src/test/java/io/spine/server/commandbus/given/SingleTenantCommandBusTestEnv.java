@@ -25,9 +25,12 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
 import io.spine.test.command.CmdAddTask;
+import io.spine.test.command.CmdRemoveTask;
 import io.spine.test.command.event.CmdTaskAdded;
 import io.spine.test.reflect.InvalidProjectName;
 import io.spine.test.reflect.ProjectId;
+
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 public class SingleTenantCommandBusTestEnv {
 
@@ -51,6 +54,12 @@ public class SingleTenantCommandBusTestEnv {
         @Assign
         CmdTaskAdded handle(CmdAddTask msg, CommandContext context) throws InvalidProjectName {
             throw rejection;
+        }
+
+        @SuppressWarnings("unused")     // does nothing, but throws a rejection.
+        @Assign
+        CmdTaskAdded handle(CmdRemoveTask msg, CommandContext context) {
+            throw newIllegalStateException("Command handling failed with unexpected exception");
         }
 
         public InvalidProjectName getThrowable() {

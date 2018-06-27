@@ -43,6 +43,11 @@ message CmdStartProject {
     ProjectId project_id = 1;
 }
 
+message CmdRemoveTask {
+    ProjectId project_id = 1;
+    Task task = 2;
+}
+
 // A command to create a project for duplicate command tests.
 //
 message DCmdCreateProject {

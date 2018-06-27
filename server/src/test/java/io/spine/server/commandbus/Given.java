@@ -33,6 +33,7 @@ import io.spine.core.given.GivenCommandContext;
 import io.spine.core.given.GivenUserId;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
+import io.spine.test.command.CmdRemoveTask;
 import io.spine.test.command.CmdStartProject;
 import io.spine.test.command.ProjectId;
 
@@ -87,6 +88,11 @@ public class Given {
         static Command addTask(UserId userId, ProjectId projectId, Timestamp when) {
             final CmdAddTask command = CommandMessage.addTask(projectId);
             return create(command, userId, when);
+        }
+
+        static Command removeTask() {
+            final CmdRemoveTask command = CommandMessage.removeTask(PROJECT_ID);
+            return create(command, USER_ID, getCurrentTime());
         }
 
         /** Creates a new {@link ACommand} with default properties (current time etc). */
@@ -144,6 +150,12 @@ public class Given {
             return CmdAddTask.newBuilder()
                              .setProjectId(id)
                              .build();
+        }
+
+        static CmdRemoveTask removeTask(ProjectId projectId) {
+            return CmdRemoveTask.newBuilder()
+                                .setProjectId(projectId)
+                                .build();
         }
 
         public static CmdCreateProject createProjectMessage() {
