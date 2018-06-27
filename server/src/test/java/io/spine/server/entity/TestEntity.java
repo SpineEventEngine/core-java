@@ -27,7 +27,7 @@ import io.spine.testdata.Sample;
 import static io.spine.base.Identifier.newUuid;
 
 /**
- * Extracted from {@link EntityShould}
+ * Extracted from {@link EntityTest}
  *
  * @author Mikhail Mikhaylov
  */

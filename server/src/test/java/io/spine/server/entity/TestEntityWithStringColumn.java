@@ -27,7 +27,7 @@ import io.spine.server.entity.storage.Column;
  * {@link RecordBasedRepository}.
  *
  * @author Dmytro Dashenkov
- * @see RecordBasedRepositoryShould
+ * @see RecordBasedRepositoryTest
  */
 public interface TestEntityWithStringColumn {
 

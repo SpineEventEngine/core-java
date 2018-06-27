@@ -39,7 +39,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class ReferenceValidatorTestEnv {
 
-    /**  Prevent instantiation of this utility class. */
+    /** Prevents instantiation of this utility class. */
     private ReferenceValidatorTestEnv() {
     }
 

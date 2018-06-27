@@ -43,7 +43,8 @@ import static com.google.common.collect.Lists.newLinkedList;
 public class PmTransactionTestEnv {
 
     /** Prevents instantiation on this utility class. */
-    private PmTransactionTestEnv() {}
+    private PmTransactionTestEnv() {
+    }
 
     @SuppressWarnings({"MethodMayBeStatic", "unused"})  // Methods accessed via reflection.
     public static class TestProcessManager

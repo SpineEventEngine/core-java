@@ -33,6 +33,7 @@ import io.spine.core.given.GivenUserId;
 import io.spine.people.PersonName;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventEnricher;
+import io.spine.server.event.EventEnricherTest;
 import io.spine.server.outbus.enrich.given.StringToPersonName;
 import io.spine.server.outbus.enrich.given.StringToZoneOffset;
 import io.spine.test.event.ProjectCompleted;
@@ -49,6 +50,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.command.TestEventFactory.newInstance;
 
 /**
  * @author Alexander Yevsyukov
@@ -65,6 +67,12 @@ public class EventEnricherTestEnv {
                         .build();
     }
 
+    public static Event createEvent(Message msg) {
+        final TestEventFactory eventFactory = newInstance(EventEnricherTest.class);
+        final Event event = eventFactory.createEvent(msg);
+        return event;
+    }
+
     public static class GivenEventMessage {
 
         private static final ProjectId PROJECT_ID = newProjectId();
@@ -74,7 +82,8 @@ public class EventEnricherTestEnv {
         private static final ProjectStarred PROJECT_STARRED = projectStarred(PROJECT_ID);
 
         /** Prevents instantiation of this utility class. */
-        private GivenEventMessage() {}
+        private GivenEventMessage() {
+        }
 
         public static ProjectCreated projectCreated() {
             return PROJECT_CREATED;
@@ -142,7 +151,8 @@ public class EventEnricherTestEnv {
 
         private static final ProjectId PROJECT_ID = newProjectId();
 
-        private GivenEvent() {}
+        private GivenEvent() {
+        }
 
         private static TestEventFactory eventFactory() {
             TestEventFactory result =

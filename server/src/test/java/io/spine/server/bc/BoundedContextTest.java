@@ -90,7 +90,7 @@ import static org.mockito.Mockito.when;
  * @author Dmitry Ganzha
  */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit 5 Nested classes cannot to be static. */,
+        /* JUnit 5 Nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("BoundedContext should")
 class BoundedContextTest {
@@ -418,7 +418,7 @@ class BoundedContextTest {
      * Simply checks that the result isn't empty to cover the integration with
      * {@link io.spine.server.entity.VisibilityGuard VisibilityGuard}.
      *
-     * <p>See {@linkplain io.spine.server.entity.VisibilityGuardShould tests of VisibilityGuard}
+     * <p>See {@linkplain io.spine.server.entity.VisibilityGuardTest tests of VisibilityGuard}
      * for how visibility filtering works.
      */
     @Test

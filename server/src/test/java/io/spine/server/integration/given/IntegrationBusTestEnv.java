@@ -78,7 +78,8 @@ public class IntegrationBusTestEnv {
         // Prevent instantiation of this utility class.
     }
 
-    public static BoundedContext contextWithExtEntitySubscribers(TransportFactory transportFactory) {
+    public static BoundedContext
+    contextWithExtEntitySubscribers(TransportFactory transportFactory) {
         final BoundedContext boundedContext = contextWithTransport(transportFactory);
         boundedContext.register(new ProjectDetailsRepository());
         boundedContext.register(new ProjectWizardRepository());
@@ -170,9 +171,7 @@ public class IntegrationBusTestEnv {
 
     private static Command toCommand(ItgStartProject cmdMessage) {
         return TestActorRequestFactory.newInstance(IntegrationBusTestEnv.class)
-                                      .createCommand(
-                                       cmdMessage
-                               );
+                                      .createCommand(cmdMessage);
     }
 
     private static ProjectId projectId() {
