@@ -29,6 +29,9 @@ import io.spine.test.rejection.command.RjRemoveOwner;
 import static io.spine.core.Rejections.getMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 public class CommandMessageAwareSubscriber extends VerifiableSubscriber {
 
     private ProjectRejections.MissingOwner rejection;

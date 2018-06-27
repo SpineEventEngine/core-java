@@ -28,6 +28,10 @@ import io.spine.validate.StringValueVBuilder;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
 
+/**
+ * @author Alex Tymchenko
+ * @author Dmytro Kuzmin
+ */
 public class ProjectionTestEnv {
 
     /** Prevents instantiation of this utility class. */

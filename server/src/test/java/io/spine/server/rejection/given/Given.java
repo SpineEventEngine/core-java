@@ -40,6 +40,10 @@ import io.spine.testdata.Sample;
 
 import static io.spine.base.Identifier.newUuid;
 
+/**
+ * @author Alexander Yevsyukov
+ * @author Dmytro Grankin
+ */
 public class Given {
 
     /** Prevents instantiation of this utility class. */

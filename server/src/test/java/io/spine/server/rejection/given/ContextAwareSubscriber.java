@@ -28,6 +28,9 @@ import io.spine.test.rejection.ProjectRejections;
 import static io.spine.core.Rejections.getMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 public class ContextAwareSubscriber extends VerifiableSubscriber {
 
     private ProjectRejections.MissingOwner rejection;

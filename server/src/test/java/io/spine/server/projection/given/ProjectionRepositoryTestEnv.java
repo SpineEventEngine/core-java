@@ -44,6 +44,12 @@ import io.spine.test.projection.event.PrjTaskAdded;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Set;
 
+/**
+ * @author Alexander Yevsyukov
+ * @author Alexander Aleksandrov
+ * @author Dmytro Grankin
+ * @author Alex Tymchenko
+ */
 public class ProjectionRepositoryTestEnv {
 
     private ProjectionRepositoryTestEnv() {
