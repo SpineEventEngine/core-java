@@ -23,6 +23,7 @@ package io.spine.server.procman;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
+import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -36,6 +37,11 @@ import java.util.Set;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Alexaneder Yevsyukov
@@ -56,8 +62,8 @@ class CommandRouterOnErrorTest extends AbstractCommandRouterTest<CommandRouter> 
     }
 
     @Test
-    @DisplayName("throw ISE when caught error on posting")
-    void throwOnErrorWhenPosting() {
+    @DisplayName("ignore any error occurred on dispatching")
+    void ignoreErrorWhenDispatching() {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .build();
         CommandBus commandBus = boundedContext.getCommandBus();
@@ -86,7 +92,6 @@ class CommandRouterOnErrorTest extends AbstractCommandRouterTest<CommandRouter> 
 
         CommandRouter router = createRouter(commandBus, sourceMessage, sourceContext);
         router.addAll(getMessages());
-
-        assertThrows(IllegalStateException.class, router::routeAll);
+        router.routeAll();
     }
 }
