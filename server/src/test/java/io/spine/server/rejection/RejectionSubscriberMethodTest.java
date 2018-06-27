@@ -107,7 +107,7 @@ class RejectionSubscriberMethodTest {
     @SuppressWarnings("CheckReturnValue") // Can ignore the result of dispatch() in this test.
     @Test
     @DisplayName("catch exceptions caused by subscribers")
-    void catchExceptionsCausedBySubscribers() {
+    void catchSubscriberExceptions() {
         VerifiableSubscriber faultySubscriber = new FaultySubscriber();
 
         faultySubscriber.dispatch(RejectionEnvelope.of(invalidProjectNameRejection()));
