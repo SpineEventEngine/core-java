@@ -202,7 +202,7 @@ class ProjectionRepositoryTest
             // Ensure no instances are present in the repository now.
             assertFalse(repository().loadAll()
                                     .hasNext());
-            // And no instances of `TestProjection` processed the event message we are going to post.
+            // And no instances of `TestProjection` processed the event message we are posting.
             assertTrue(TestProjection.whoProcessed(msg)
                                      .isEmpty());
 
@@ -219,7 +219,7 @@ class ProjectionRepositoryTest
             TestProjection storedProjection = allItems.next();
             assertFalse(allItems.hasNext());
 
-            // Check that the stored instance has the same ID as the instance that handled the event.
+            // Check that the stored instance has the same ID as the instance handling the event.
             assertEquals(storedProjection.getId(), receiverId);
         }
 

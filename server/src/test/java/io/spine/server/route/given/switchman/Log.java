@@ -91,7 +91,7 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
      */
     @SuppressWarnings({
             "SerializableInnerClassWithNonSerializableOuterClass",
-            "AssignmentOrReturnOfFieldWithMutableType" // returning immutable impl.
+            "AssignmentOrReturnOfFieldWithMutableType" // Returning immutable impl.
     })
     public static final class Repository extends AggregateRepository<Long, Log> {
 

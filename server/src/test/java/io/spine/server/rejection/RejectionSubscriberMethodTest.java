@@ -76,7 +76,7 @@ class RejectionSubscriberMethodTest {
                 .testAllPublicStaticMethods(RejectionSubscriberMethod.class);
     }
 
-    @SuppressWarnings("CheckReturnValue") // can ignore the result of invoke() in this test
+    @SuppressWarnings("CheckReturnValue") // Can ignore the result of invoke() in this test.
     @Test
     @DisplayName("invoke subscriber method")
     void invokeSubscriberMethod() {
@@ -104,7 +104,7 @@ class RejectionSubscriberMethodTest {
         assertEquals(commandContext, subscriberObject.getLastCommandContext());
     }
 
-    @SuppressWarnings("CheckReturnValue") // can ignore the result of dispatch() in this test
+    @SuppressWarnings("CheckReturnValue") // Can ignore the result of dispatch() in this test.
     @Test
     @DisplayName("catch exceptions caused by subscribers")
     void catchExceptionsCausedBySubscribers() {
