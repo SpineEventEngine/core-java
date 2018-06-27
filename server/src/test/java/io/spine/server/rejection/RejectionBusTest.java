@@ -20,7 +20,6 @@
 package io.spine.server.rejection;
 
 import com.google.protobuf.StringValue;
-import com.oracle.jrockit.jfr.EventDefinition;
 import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.Rejection;
@@ -56,16 +55,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alex Tymchenko
  */
-@SuppressWarnings({"ClassWithTooManyMethods",
-        "OverlyCoupledClass",
-        "InstanceVariableNamingConvention"})
-// OK as for the test class for one of the primary framework features
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("RejectionBus should")
 public class RejectionBusTest {
 

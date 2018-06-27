@@ -27,15 +27,12 @@ import com.google.protobuf.StringValue;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.core.Subscribe;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.given.Given;
-import io.spine.server.projection.given.ProjectionTestEnv;
 import io.spine.server.projection.given.ProjectionTestEnv.TestProjection;
-import io.spine.validate.StringValueVBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,8 +43,8 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.projection.ProjectionEventDispatcher.dispatch;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("Projection should")
 class ProjectionTest {

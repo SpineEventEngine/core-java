@@ -40,8 +40,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
-// OK as custom routes do not refer to the test suite.
+@SuppressWarnings({"SerializableInnerClassWithNonSerializableOuterClass"
+        /* OK as custom routes do not refer to the test suite. */,
+        "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("CommandRouting should")
 class CommandRoutingTest {
 

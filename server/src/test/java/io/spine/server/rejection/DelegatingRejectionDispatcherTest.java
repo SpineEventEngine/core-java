@@ -77,7 +77,7 @@ class DelegatingRejectionDispatcherTest {
                      delegate.getRejectionClasses());
     }
 
-    @SuppressWarnings("CheckReturnValue") // can ignore in this test
+    @SuppressWarnings("CheckReturnValue") // Can ignore in this test.
     @Test
     @DisplayName("dispatch rejection")
     void dispatchRejection() {
@@ -86,6 +86,7 @@ class DelegatingRejectionDispatcherTest {
         assertTrue(delegate.dispatchCalled());
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
     @DisplayName("delegate `onError`")
     void delegateOnError() {

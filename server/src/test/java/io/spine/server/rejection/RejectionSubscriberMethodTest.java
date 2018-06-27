@@ -57,6 +57,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
+@SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
+        /* JUnit 5 Nested classes cannot be static. */,
+        "DuplicateStringLiteralInspection" /* Common test display names */})
 @DisplayName("RejectionSubscriberMethod should")
 class RejectionSubscriberMethodTest {
 

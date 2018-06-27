@@ -150,6 +150,7 @@ class ProjectionTransactionTest
      * <p>{@linkplain #incrementVersionOnEvent() Another test method} is created to test the new
      * behavior. Please refer to it for more details.
      */
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Same display names to ancestor.
     @Disabled
     @Test
     @DisplayName("advance version from event")

@@ -19,7 +19,6 @@
  */
 package io.spine.server.projection;
 
-import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
@@ -70,7 +69,7 @@ class ProjectionEventDeliveryTest extends AbstractMessageDeliveryTest {
                     @Override
                     protected void postToBus(BoundedContext context, Event event) {
                         context.getEventBus()
-                               .post(event, StreamObservers.<Ack>noOpObserver());
+                               .post(event, StreamObservers.noOpObserver());
                     }
                 };
 
@@ -96,7 +95,7 @@ class ProjectionEventDeliveryTest extends AbstractMessageDeliveryTest {
                     @Override
                     protected void postToBus(BoundedContext context, Event event) {
                         context.getEventBus()
-                               .post(event, StreamObservers.<Ack>noOpObserver());
+                               .post(event, StreamObservers.noOpObserver());
                     }
                 };
 

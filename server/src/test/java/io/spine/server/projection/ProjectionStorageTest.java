@@ -33,7 +33,6 @@ import io.spine.server.storage.RecordStorageShould;
 import io.spine.test.Tests;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
-import io.spine.test.storage.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

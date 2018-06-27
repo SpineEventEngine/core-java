@@ -79,6 +79,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("ProjectionRepository should")
 class ProjectionRepositoryTest
         extends RecordBasedRepositoryTest<TestProjection, ProjectId, Project> {
