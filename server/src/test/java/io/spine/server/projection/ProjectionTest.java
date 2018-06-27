@@ -83,7 +83,7 @@ class ProjectionTest {
 
     @Test
     @DisplayName("throw ISE if no handler is present for event")
-    void throwIfNoHandlerForEvent() {
+    void throwIfNoHandlerPresent() {
         assertThrows(IllegalStateException.class,
                      () -> dispatch(projection,
                                     BoolValue.getDefaultInstance(),
@@ -91,7 +91,7 @@ class ProjectionTest {
     }
 
     @Test
-    @DisplayName("return event classes which it handles")
+    @DisplayName("return handled event classes")
     void exposeEventClasses() {
         final Set<EventClass> classes = ProjectionClass.of(TestProjection.class)
                                                        .getEventSubscriptions();

@@ -156,7 +156,7 @@ class RejectionRoutingTest {
     }
 
     @Test
-    @DisplayName("complain on removal if route was not set")
+    @DisplayName("throw ISE on removal if route is not set")
     void notRemoveIfRouteNotSet() {
         assertThrows(IllegalStateException.class,
                      () -> rejectionRouting.remove(EntityAlreadyArchived.class));

@@ -366,7 +366,7 @@ class ProjectionRepositoryTest
      */
     @Test
     @DisplayName("expose read and write methods for last handled event timestamp")
-    void getSetLastHandledTimestamp() {
+    void getSetLastHandled() {
         assertNotNull(repository().readLastHandledEventTime());
         repository().writeLastHandledEventTime(Time.getCurrentTime());
     }

@@ -89,7 +89,7 @@ public class RejectionBusTest {
 
     @Test
     @DisplayName("reject object with no subscriber methods")
-    void rejectObjectWithNoSubscriberMethods() {
+    void rejectIfNoSubscribers() {
         assertThrows(IllegalArgumentException.class,
                      () -> rejectionBus.register(new RejectionSubscriber()));
     }
@@ -181,6 +181,21 @@ public class RejectionBusTest {
         }
     }
 
+    @Test
+    @DisplayName("unregister registries on close")
+    void unregisterAllOnClose() throws Exception {
+        final RejectionBus rejectionBus = RejectionBus.newBuilder()
+                                                      .build();
+        rejectionBus.register(new BareDispatcher());
+        rejectionBus.register(new InvalidProjectNameSubscriber());
+        final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
+
+        rejectionBus.close();
+
+        assertTrue(rejectionBus.getDispatchers(rejectionClass)
+                               .isEmpty());
+    }
+
     @Nested
     @DisplayName("call")
     class Call {
@@ -222,21 +237,6 @@ public class RejectionBusTest {
 
             assertTrue(dispatcher.isDispatchCalled());
         }
-    }
-
-    @Test
-    @DisplayName("unregister registries on close")
-    void unregisterAllOnClose() throws Exception {
-        final RejectionBus rejectionBus = RejectionBus.newBuilder()
-                                                      .build();
-        rejectionBus.register(new BareDispatcher());
-        rejectionBus.register(new InvalidProjectNameSubscriber());
-        final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
-
-        rejectionBus.close();
-
-        assertTrue(rejectionBus.getDispatchers(rejectionClass)
-                               .isEmpty());
     }
 
     @Nested

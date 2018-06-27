@@ -131,7 +131,7 @@ public abstract class ProjectionStorageTest
 
     @Test
     @DisplayName("return null if no last handled event time is present in storage")
-    void getNullIfNoHandledEventTime() {
+    void getNullLastHandledTime() {
         Timestamp time = storage.readLastHandledEventTime();
 
         assertNull(time);

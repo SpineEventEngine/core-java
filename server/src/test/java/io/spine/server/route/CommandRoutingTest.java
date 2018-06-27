@@ -130,7 +130,7 @@ class CommandRoutingTest {
     }
 
     @Test
-    @DisplayName("complain on removal if route is not set")
+    @DisplayName("throw ISE on removal if route is not set")
     void notRemoveIfRouteNotSet() {
         assertThrows(IllegalStateException.class, () -> commandRouting.remove(StringValue.class));
     }
