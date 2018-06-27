@@ -112,7 +112,7 @@ class FieldTest {
     }
 
     @Nested
-    @DisplayName("via descriptor, retrieve field Java type of")
+    @DisplayName("retrieve field Java type via descriptor for")
     class ReturnFieldClass {
 
         @Test
