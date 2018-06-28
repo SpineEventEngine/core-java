@@ -365,7 +365,7 @@ class ProjectionRepositoryTest
      * Beam-based catch-up are exposed.
      */
     @Test
-    @DisplayName("expose read and write methods for last handled event timestamp")
+    @DisplayName("expose read and write methods for the timestamp of the last handled event")
     void getSetLastHandled() {
         assertNotNull(repository().readLastHandledEventTime());
         repository().writeLastHandledEventTime(Time.getCurrentTime());
@@ -407,7 +407,7 @@ class ProjectionRepositoryTest
     }
 
     @Test
-    @DisplayName("throw exception on attempt to register in BC with no messages handled")
+    @DisplayName("throw ISE on registering to BC if repo is not subscribed to any messages")
     void notRegisterIfNothingHandled() {
         SensoryDeprivedProjectionRepository repo = new SensoryDeprivedProjectionRepository();
         BoundedContext boundedContext = BoundedContext
