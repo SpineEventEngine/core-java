@@ -152,7 +152,7 @@ public class RejectionBusTest {
             assertFalse(subscribers.contains(subscriberOne));
             assertTrue(subscribers.contains(subscriberTwo));
 
-            // Check that after 2nd subscriber us unregisters he's no longer in
+            // Check that after 2nd subscriber is unregistered, he's no longer in.
             rejectionBus.unregister(subscriberTwo);
 
             assertFalse(rejectionBus.getDispatchers(rejectionClass)
