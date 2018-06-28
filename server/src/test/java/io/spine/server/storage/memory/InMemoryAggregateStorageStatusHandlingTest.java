@@ -20,22 +20,22 @@
 
 package io.spine.server.storage.memory;
 
-import io.spine.server.entity.Entity;
-import io.spine.server.stand.StandStorage;
-import io.spine.server.stand.StandStorageShould;
-
-import static io.spine.server.BoundedContext.newName;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateStorage;
+import io.spine.server.aggregate.AggregateStorageVisibilityHandlingTest;
+import io.spine.test.aggregate.ProjectId;
+import org.junit.jupiter.api.DisplayName;
 
 /**
- * @author Dmytro Dashenkov
+ * @author Dmytro Dashenkov.
  */
-public class InMemoryStandStorageShould extends StandStorageShould {
+@DisplayName("InMemoryAggregateStorage, when saving aggregate with lifecycle flags, should")
+public class InMemoryAggregateStorageStatusHandlingTest
+        extends AggregateStorageVisibilityHandlingTest {
 
     @Override
-    protected StandStorage newStorage(Class<? extends Entity> cls) {
-        return InMemoryStandStorage.newBuilder()
-                                   .setBoundedContextName(newName(getClass().getSimpleName()))
-                                   .setMultitenant(false)
-                                   .build();
+    protected AggregateStorage<ProjectId> getAggregateStorage(
+            Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass) {
+        return InMemoryAggregateStorage.newInstance();
     }
 }

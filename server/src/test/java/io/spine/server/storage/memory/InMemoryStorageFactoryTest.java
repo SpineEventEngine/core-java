@@ -18,13 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage;
+package io.spine.server.storage.memory;
 
-/**
- * @author Alexander Yevsyukov
- */
-public class MultiTenantStorageFactorySwitchShould extends StorageFactorySwitchShould {
-    public MultiTenantStorageFactorySwitchShould() {
-        super(true);
+import io.spine.core.BoundedContextName;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static io.spine.server.BoundedContext.newName;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+@DisplayName("InMemoryStorageFactory should")
+class InMemoryStorageFactoryTest {
+
+    private final BoundedContextName boundedContextName = newName(getClass().getSimpleName());
+
+    @Test
+    @DisplayName("have single tenant instance")
+    void haveSingleTenantInstance() {
+        assertFalse(InMemoryStorageFactory.newInstance(boundedContextName, false)
+                                          .isMultitenant());
+    }
+
+    @Test
+    @DisplayName("have multitenant instance")
+    void haveMultitenantInstance() {
+        assertTrue(InMemoryStorageFactory.newInstance(boundedContextName, true)
+                                         .isMultitenant());
     }
 }

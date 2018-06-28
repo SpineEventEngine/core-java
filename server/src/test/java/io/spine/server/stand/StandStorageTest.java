@@ -32,13 +32,14 @@ import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
-import io.spine.server.storage.RecordStorageShould;
+import io.spine.server.storage.RecordStorageTest;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
 import io.spine.test.storage.TaskId;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -56,8 +57,8 @@ import static java.lang.String.format;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class StandStorageShould extends RecordStorageShould<AggregateStateId,
-                                                                     StandStorage> {
+public abstract class StandStorageTest extends RecordStorageTest<AggregateStateId,
+                                                                   StandStorage> {
 
     protected static final Supplier<AggregateStateId<ProjectId>> DEFAULT_ID_SUPPLIER
             = new Supplier<AggregateStateId<ProjectId>>() {
@@ -84,7 +85,8 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
     }
 
     @Test
-    public void retrieve_all_records() {
+    @DisplayName("retrieve all records")
+    void retrieveAllRecords() {
         final StandStorage storage = getStorage();
         final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER);
 
@@ -93,7 +95,8 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
     }
 
     @Test
-    public void retrieve_records_by_ids() {
+    @DisplayName("retrieve records by ids")
+    void retrieveRecordsByIds() {
         final StandStorage storage = getStorage();
         // Use a subset of IDs
         final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER).subList(0, 5);
@@ -103,12 +106,14 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
     }
 
     @Test
-    public void read_all_records_of_given_type() {
+    @DisplayName("read all records of given type")
+    void readAllRecordsOfGivenType() {
         checkByTypeRead(FieldMask.getDefaultInstance());
     }
 
     @Test
-    public void read_all_records_of_given_type_with_field_mask() {
+    @DisplayName("read all records of given type with field mask")
+    void readAllRecordsOfGivenTypeWithFieldMask() {
         final FieldMask mask = FieldMasks.maskOf(Project.getDescriptor(), 1, 2);
         checkByTypeRead(mask);
     }
@@ -157,7 +162,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
     }
 
     /*
-     * Disabled test cases from `RecordStorageShould`.
+     * Disabled test cases from `RecordStorageTest`.
      *
      * These tests check the entity column reads and writes, which are not applicable to
      * `StandStorage`.
@@ -167,49 +172,49 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    public void filter_records_by_columns() {
+    protected void filterRecordsByColumns() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    public void filter_records_by_ordinal_enum_columns() {
+    protected void filterRecordsByOrdinalEnumColumns() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    public void filter_records_by_string_enum_columns() {
+    protected void filterRecordsByStringEnumColumns() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    public void allow_by_single_id_queries_with_no_columns() {
+    protected void allowBySingleIdQueriesWithNoColumns() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    public void read_archived_records_if_specified() {
+    protected void readArchivedRecordsIfSpecified() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    public void filter_archived_or_deleted_records_on_by_ID_bulk_read() {
+    protected void filterArchivedOrDeletedRecordsOnByIDBulkRead() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    public void update_entity_column_values() {
+    protected void updateEntityColumnValues() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    public void read_both_by_columns_and_IDs() {
+    protected void readBothByColumnsAndIDs() {
         // Stand storage does not support entity columns.
     }
 

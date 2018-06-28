@@ -32,7 +32,8 @@ import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.type.TypeUrl;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
@@ -44,10 +45,12 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Dmytro Dashenkov
  */
-public class SubscriptionRecordShould {
+@DisplayName("SubscriptionRecord should")
+class SubscriptionRecordTest {
 
     @Test
-    public void match_record_to_given_parameters() {
+    @DisplayName("match record to given parameters")
+    void matchRecordToGivenParameters() {
         final SubscriptionRecord matchingRecord = new SubscriptionRecord(Given.subscription(),
                                                                          Given.target(),
                                                                          Given.TYPE);
@@ -60,7 +63,8 @@ public class SubscriptionRecordShould {
     }
 
     @Test
-    public void fail_to_match_improper_type() {
+    @DisplayName("fail to match improper type")
+    void failToMatchImproperType() {
         final SubscriptionRecord notMatchingRecord = new SubscriptionRecord(Given.subscription(),
                                                                             Given.target(),
                                                                             Given.TYPE);
@@ -73,7 +77,8 @@ public class SubscriptionRecordShould {
     }
 
     @Test
-    public void fail_to_match_improper_target() {
+    @DisplayName("fail to match improper target")
+    void failToMatchImproperTarget() {
         final ProjectId nonExistingId = ProjectId.newBuilder()
                                                  .setId("never-existed")
                                                  .build();
@@ -89,7 +94,8 @@ public class SubscriptionRecordShould {
     }
 
     @Test
-    public void be_equal_if_has_same_subscription() {
+    @DisplayName("be equal if has same subscription")
+    void beEqualIfHasSameSubscription() {
         final Subscription oneSubscription = Given.subscription();
         final SubscriptionId breakingId = Subscriptions.newId("breaking-id");
         final Subscription otherSubscription = Subscription.newBuilder()

@@ -18,28 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage;
+package io.spine.server.storage.memory;
 
-import com.google.common.testing.EqualsTester;
-import io.spine.test.Tests;
-import org.junit.Test;
+import io.spine.server.entity.Entity;
+import io.spine.server.stand.StandStorage;
+import io.spine.server.stand.StandStorageTest;
+import org.junit.jupiter.api.DisplayName;
+
+import static io.spine.server.BoundedContext.newName;
 
 /**
- * @author Dmytro Grankin
+ * @author Dmytro Dashenkov
  */
-public class RecordReadRequestShould {
+@DisplayName("InMemoryStandStorage should")
+public class InMemoryStandStorageTest extends StandStorageTest {
 
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_ID() {
-        new RecordReadRequest<>(Tests.nullRef());
-    }
-
-    @Test
-    public void consider_request_with_same_id_equal() {
-        final String id = "ID";
-        final RecordReadRequest<String> first = new RecordReadRequest<>(id);
-        final RecordReadRequest<String> second = new RecordReadRequest<>(id);
-        new EqualsTester().addEqualityGroup(first, second)
-                          .testEquals();
+    @Override
+    protected StandStorage newStorage(Class<? extends Entity> cls) {
+        return InMemoryStandStorage.newBuilder()
+                                   .setBoundedContextName(newName(getClass().getSimpleName()))
+                                   .setMultitenant(false)
+                                   .build();
     }
 }

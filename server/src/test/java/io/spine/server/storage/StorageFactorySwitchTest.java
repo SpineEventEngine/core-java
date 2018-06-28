@@ -24,12 +24,12 @@ import com.google.common.base.Supplier;
 import io.spine.base.Environment;
 import io.spine.core.BoundedContextName;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import static io.spine.server.BoundedContext.newName;
@@ -38,6 +38,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -46,7 +47,8 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alexander Yevsyukov
  */
-public class StorageFactorySwitchShould {
+@DisplayName("StorageFactorySwitch should")
+class StorageFactorySwitchTest {
 
     /**
      * Cached {@code Environment value} remembered {@linkplain #storeEnvironment() before all tests}
@@ -72,40 +74,37 @@ public class StorageFactorySwitchShould {
         }
     };
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     private StorageFactorySwitch storageFactorySwitch;
 
-    StorageFactorySwitchShould(boolean multitenant) {
+    StorageFactorySwitchTest(boolean multitenant) {
         this.multitenant = multitenant;
     }
 
-    public StorageFactorySwitchShould() {
+    public StorageFactorySwitchTest() {
         this(false);
     }
 
-    @BeforeClass
-    public static void storeEnvironment() {
+    @BeforeAll
+    static void storeEnvironment() {
         storedEnvironment = Environment.getInstance()
                                        .createCopy();
     }
 
     @SuppressWarnings("StaticVariableUsedBeforeInitialization")
     // OK as we invoke after the initialization in storeEnvironment().
-    @AfterClass
-    public static void restoreEnvironment() {
+    @AfterAll
+    static void restoreEnvironment() {
         Environment.getInstance()
                    .restoreFrom(storedEnvironment);
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         storageFactorySwitch = StorageFactorySwitch.newInstance(boundedContextName, multitenant);
     }
 
-    @After
-    public void cleanUp() {
+    @AfterEach
+    void cleanUp() {
         clearSwitch();
         Environment.getInstance()
                    .reset();
@@ -119,7 +118,8 @@ public class StorageFactorySwitchShould {
     }
 
     @Test
-    public void return_InMemoryStorageFactory_in_tests_if_tests_supplier_was_not_set() {
+    @DisplayName("return InMemoryStorageFactory in tests if tests supplier was not set")
+    void returnInMemoryStorageFactoryInTestsIfTestsSupplierWasNotSet() {
         StorageFactory storageFactory = storageFactorySwitch.get();
 
         assertNotNull(storageFactory);
@@ -127,7 +127,8 @@ public class StorageFactorySwitchShould {
     }
 
     @Test
-    public void return_custom_test_StorageFactory_if_supplier_for_tests_was_set() {
+    @DisplayName("return custom test StorageFactory if supplier for tests was set")
+    void returnCustomTestStorageFactoryIfSupplierForTestsWasSet() {
         // This call avoids the racing conditions anomaly when running
         // the Gradle build from the console.
         // Despite the fact that we reset the switch state in `cleanUp()`, we still
@@ -153,7 +154,8 @@ public class StorageFactorySwitchShould {
 
     @SuppressWarnings("AccessOfSystemProperties") // OK for this test.
     @Test
-    public void throw_IllegalStateException_if_production_supplier_is_non_tests_mode() {
+    @DisplayName("throw IllegalStateException if production supplier is non tests mode")
+    void throwIllegalStateExceptionIfProductionSupplierIsNonTestsMode() {
         // Clear cached value for tests mode that may be left from the previous tests.
         Environment.getInstance()
                    .reset();
@@ -164,13 +166,13 @@ public class StorageFactorySwitchShould {
         assertFalse(storageFactorySwitch.productionSupplier()
                                         .isPresent());
 
-        thrown.expect(IllegalStateException.class);
-        storageFactorySwitch.get();
+        assertThrows(IllegalStateException.class, () -> storageFactorySwitch.get());
     }
 
     @SuppressWarnings("CheckReturnValue") // ignore value of get() since we tests caching
     @Test
-    public void cache_instance_of_StorageFactory_in_testing() {
+    @DisplayName("cache instance of StorageFactory in testing")
+    void cacheInstanceOfStorageFactoryInTesting() {
         Supplier<StorageFactory> testingSupplier = spy(testsSupplier);
 
         storageFactorySwitch.init(productionSupplier, testingSupplier);
@@ -186,7 +188,8 @@ public class StorageFactorySwitchShould {
 
     @SuppressWarnings("CheckReturnValue") // ignore value of get() since we tests caching
     @Test
-    public void cache_instance_of_StorageFactory_in_production() {
+    @DisplayName("cache instance of StorageFactory in production")
+    void cacheInstanceOfStorageFactoryInProduction() {
         Supplier<StorageFactory> prodSupplier = spy(productionSupplier);
 
         storageFactorySwitch.init(prodSupplier, testsSupplier);
@@ -201,7 +204,8 @@ public class StorageFactorySwitchShould {
     }
 
     @Test
-    public void return_itself_on_init() {
+    @DisplayName("return itself on init")
+    void returnItselfOnInit() {
         StorageFactorySwitch result = storageFactorySwitch.init(testsSupplier, testsSupplier);
         assertSame(storageFactorySwitch, result);
     }

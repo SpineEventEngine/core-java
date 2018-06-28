@@ -22,11 +22,12 @@ package io.spine.server.storage.memory;
 
 import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
-import io.spine.server.storage.RecordStorageShould;
+import io.spine.server.storage.RecordStorageTest;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
 import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
@@ -38,8 +39,9 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Dmytro Dashenkov
  */
-public class InMemoryRecordStorageShould
-        extends RecordStorageShould<ProjectId, InMemoryRecordStorage<ProjectId>> {
+@DisplayName("InMemoryRecordStorage should")
+public class InMemoryRecordStorageTest
+        extends RecordStorageTest<ProjectId, InMemoryRecordStorage<ProjectId>> {
 
     @Override
     protected InMemoryRecordStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
@@ -70,7 +72,8 @@ public class InMemoryRecordStorageShould
     }
 
     @Test
-    public void return_storage_spec() {
+    @DisplayName("return storage spec")
+    void returnStorageSpec() {
         final StorageSpec spec = getStorage().getSpec();
         assertEquals(ProjectId.class, spec.getIdClass());
     }

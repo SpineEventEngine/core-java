@@ -58,6 +58,7 @@ import io.spine.server.entity.storage.Enumerated;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 
@@ -107,8 +108,8 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
-        extends AbstractStorageShould<I, EntityRecord, RecordReadRequest<I>, S> {
+public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
+        extends AbstractStorageTest<I, EntityRecord, RecordReadRequest<I>, S> {
 
     private static EntityRecord newStorageRecord(Message state) {
         Any wrappedState = pack(state);
@@ -162,7 +163,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     @SuppressWarnings("ConstantConditions")
     // Converter nullability issues and Optional getting
     @Test
-    public void write_and_read_record_by_Message_id() {
+    @DisplayName("write and read record by Message id")
+    void writeAndReadRecordByMessageId() {
         RecordStorage<I> storage = getStorage();
         I id = newId();
         EntityRecord expected = newStorageRecord(id);
@@ -177,7 +179,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Test
-    public void retrieve_empty_iterator_if_storage_is_empty() {
+    @DisplayName("retrieve empty iterator if storage is empty")
+    void retrieveEmptyIteratorIfStorageIsEmpty() {
         FieldMask nonEmptyFieldMask = FieldMask.newBuilder()
                                                .addPaths("invalid-path")
                                                .build();
@@ -190,7 +193,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
     @SuppressWarnings("ConstantConditions") // Converter nullability issues
     @Test
-    public void read_single_record_with_mask() {
+    @DisplayName("read single record with mask")
+    void readSingleRecordWithMask() {
         I id = newId();
         EntityRecord record = newStorageRecord(id);
         RecordStorage<I> storage = getStorage();
@@ -211,7 +215,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     @SuppressWarnings({"MethodWithMultipleLoops", "ConstantConditions"})
     // Converter nullability issues
     @Test
-    public void read_multiple_records_with_field_mask() {
+    @DisplayName("read multiple records with field mask")
+    void readMultipleRecordsWithFieldMask() {
         RecordStorage<I> storage = getStorage();
         int count = 10;
         List<I> ids = new LinkedList<>();
@@ -244,7 +249,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
     @SuppressWarnings("ConstantConditions") // converter nullability issues
     @Test
-    public void delete_record() {
+    @DisplayName("delete record")
+    void deleteRecord() {
         RecordStorage<I> storage = getStorage();
         I id = newId();
         EntityRecord record = newStorageRecord(id);
@@ -262,7 +268,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Test
-    public void write_none_storage_fields_is_none_passed() {
+    @DisplayName("write none storage fields is none passed")
+    void writeNoneStorageFieldsIsNonePassed() {
         RecordStorage<I> storage = spy(getStorage());
         I id = newId();
         Any state = pack(Sample.messageOfType(Project.class));
@@ -275,7 +282,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Test
-    public void write_record_bulk() {
+    @DisplayName("write record bulk")
+    void writeRecordBulk() {
         RecordStorage<I> storage = getStorage();
         int bulkSize = 5;
 
@@ -307,7 +315,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Test
-    public void rewrite_records_in_bulk() {
+    @DisplayName("rewrite records in bulk")
+    void rewriteRecordsInBulk() {
         int recordCount = 3;
         RecordStorage<I> storage = getStorage();
 
@@ -342,7 +351,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Test
-    public void fail_to_write_visibility_to_non_existing_record() {
+    @DisplayName("fail to write visibility to non existing record")
+    void failToWriteVisibilityToNonExistingRecord() {
         I id = newId();
         RecordStorage<I> storage = getStorage();
 
@@ -351,7 +361,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Test
-    public void return_absent_visibility_for_missing_record() {
+    @DisplayName("return absent visibility for missing record")
+    void returnAbsentVisibilityForMissingRecord() {
         I id = newId();
         RecordStorage<I> storage = getStorage();
         Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
@@ -360,7 +371,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
     @SuppressWarnings("ConstantConditions") // Converter nullability issues
     @Test
-    public void return_default_visibility_for_new_record() {
+    @DisplayName("return default visibility for new record")
+    void returnDefaultVisibilityForNewRecord() {
         I id = newId();
         EntityRecord record = newStorageRecord(id);
         RecordStorage<I> storage = getStorage();
@@ -373,7 +385,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We verify in assertion.
     @Test
-    public void load_visibility_when_updated() {
+    @DisplayName("load visibility when updated")
+    void loadVisibilityWhenUpdated() {
         I id = newId();
         EntityRecord record = newStorageRecord(id);
         RecordStorage<I> storage = getStorage();
@@ -388,7 +401,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Test
-    public void accept_records_with_empty_storage_fields() {
+    @DisplayName("accept records with empty storage fields")
+    void acceptRecordsWithEmptyStorageFields() {
         I id = newId();
         EntityRecord record = newStorageRecord(id);
         EntityRecordWithColumns recordWithStorageFields = EntityRecordWithColumns.of(record);
@@ -403,7 +417,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Test
-    public void write_record_with_columns() {
+    @DisplayName("write record with columns")
+    void writeRecordWithColumns() {
         I id = newId();
         EntityRecord record = newStorageRecord(id);
         TestCounterEntity<I> testEntity = new TestCounterEntity<>(id);
@@ -419,7 +434,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
     @SuppressWarnings("OverlyLongMethod") // Complex test case (still tests a single operation)
     @Test
-    public void filter_records_by_columns() {
+    @DisplayName("filter records by columns")
+    protected void filterRecordsByColumns() {
         Project.Status requiredValue = DONE;
         Int32Value wrappedValue = Int32Value
                 .newBuilder()
@@ -482,65 +498,22 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Test
-    public void filter_records_by_ordinal_enum_columns() {
+    @DisplayName("filter records by ordinal enum columns")
+    protected void filterRecordsByOrdinalEnumColumns() {
         final String columnPath = "projectStatusOrdinal";
         checkEnumColumnFilter(columnPath);
     }
 
     @Test
-    public void filter_records_by_string_enum_columns() {
+    @DisplayName("filter records by string enum columns")
+    protected void filterRecordsByStringEnumColumns() {
         final String columnPath = "projectStatusString";
         checkEnumColumnFilter(columnPath);
     }
 
     @Test
-    public void update_entity_column_values() {
-        Project.Status initialStatus = DONE;
-        @SuppressWarnings("UnnecessaryLocalVariable") // is used for documentation purposes.
-                Project.Status statusAfterUpdate = CANCELLED;
-        Int32Value initialStatusValue = Int32Value.newBuilder()
-                                                  .setValue(initialStatus.getNumber())
-                                                  .build();
-        ColumnFilter status = eq("projectStatusValue", initialStatusValue);
-        CompositeColumnFilter aggregatingFilter = CompositeColumnFilter
-                .newBuilder()
-                .setOperator(ALL)
-                .addFilter(status)
-                .build();
-        EntityFilters filters = EntityFilters
-                .newBuilder()
-                .addFilter(aggregatingFilter)
-                .build();
-
-        RecordStorage<I> storage = getStorage();
-
-        EntityQuery<I> query = EntityQueries.from(filters, storage);
-
-        I id = newId();
-        TestCounterEntity<I> entity = new TestCounterEntity<>(id);
-        entity.setStatus(initialStatus);
-
-        EntityRecord record = newStorageRecord(id, newState(id));
-        EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
-
-        FieldMask fieldMask = FieldMask.getDefaultInstance();
-
-        // Create the record.
-        storage.write(id, recordWithColumns);
-        Iterator<EntityRecord> recordsBefore = storage.readAll(query, fieldMask);
-        assertSingleRecord(record, recordsBefore);
-
-        // Update the entity columns of the record.
-        entity.setStatus(statusAfterUpdate);
-        EntityRecordWithColumns updatedRecordWithColumns = create(record, entity, storage);
-        storage.write(id, updatedRecordWithColumns);
-
-        Iterator<EntityRecord> recordsAfter = storage.readAll(query, fieldMask);
-        assertFalse(recordsAfter.hasNext());
-    }
-
-    @Test
-    public void allow_by_single_id_queries_with_no_columns() {
+    @DisplayName("allow by single id queries with no columns")
+    protected void allowBySingleIdQueriesWithNoColumns() {
         // Create the test data
         I idMatching = newId();
         I idWrong1 = newId();
@@ -589,7 +562,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Test
-    public void read_archived_records_if_specified() {
+    @DisplayName("read archived records if specified")
+    protected void readArchivedRecordsIfSpecified() {
         I activeRecordId = newId();
         I archivedRecordId = newId();
 
@@ -615,7 +589,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Test
-    public void filter_archived_or_deleted_records_on_by_ID_bulk_read() {
+    @DisplayName("filter archived or deleted records on by ID bulk read")
+    protected void filterArchivedOrDeletedRecordsOnByIDBulkRead() {
         I activeId = newId();
         I archivedId = newId();
         I deletedId = newId();
@@ -650,7 +625,55 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Test
-    public void read_both_by_columns_and_IDs() {
+    @DisplayName("update entity column values")
+    protected void updateEntityColumnValues() {
+        Project.Status initialStatus = DONE;
+        @SuppressWarnings("UnnecessaryLocalVariable") // is used for documentation purposes.
+                Project.Status statusAfterUpdate = CANCELLED;
+        Int32Value initialStatusValue = Int32Value.newBuilder()
+                                                  .setValue(initialStatus.getNumber())
+                                                  .build();
+        ColumnFilter status = eq("projectStatusValue", initialStatusValue);
+        CompositeColumnFilter aggregatingFilter = CompositeColumnFilter
+                .newBuilder()
+                .setOperator(ALL)
+                .addFilter(status)
+                .build();
+        EntityFilters filters = EntityFilters
+                .newBuilder()
+                .addFilter(aggregatingFilter)
+                .build();
+
+        RecordStorage<I> storage = getStorage();
+
+        EntityQuery<I> query = EntityQueries.from(filters, storage);
+
+        I id = newId();
+        TestCounterEntity<I> entity = new TestCounterEntity<>(id);
+        entity.setStatus(initialStatus);
+
+        EntityRecord record = newStorageRecord(id, newState(id));
+        EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
+
+        FieldMask fieldMask = FieldMask.getDefaultInstance();
+
+        // Create the record.
+        storage.write(id, recordWithColumns);
+        Iterator<EntityRecord> recordsBefore = storage.readAll(query, fieldMask);
+        assertSingleRecord(record, recordsBefore);
+
+        // Update the entity columns of the record.
+        entity.setStatus(statusAfterUpdate);
+        EntityRecordWithColumns updatedRecordWithColumns = create(record, entity, storage);
+        storage.write(id, updatedRecordWithColumns);
+
+        Iterator<EntityRecord> recordsAfter = storage.readAll(query, fieldMask);
+        assertFalse(recordsAfter.hasNext());
+    }
+
+    @Test
+    @DisplayName("read both by columns and IDs")
+    protected void readBothByColumnsAndIDs() {
         I targetId = newId();
         TestCounterEntity<I> targetEntity = new TestCounterEntity<>(targetId);
         TestCounterEntity<I> noMatchEntity = new TestCounterEntity<>(newId());
@@ -693,14 +716,15 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and
                                                                checking via #contains(Object). */)
     @Test
-    public void create_unique_states_for_same_ID() {
+    @DisplayName("create unique states for same ID")
+    void createUniqueStatesForSameID() {
         int checkCount = 10;
         I id = newId();
         Set<Message> states = newHashSet();
         for (int i = 0; i < checkCount; i++) {
             Message newState = newState(id);
             if (states.contains(newState)) {
-                fail("RecordStorageShould.newState() should return unique messages.");
+                fail("RecordStorageTest.newState() should return unique messages.");
             }
         }
     }

@@ -27,6 +27,7 @@ import io.spine.server.entity.Entity;
 import io.spine.test.Tests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -62,20 +63,20 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author Alexander Litus
  */
 @SuppressWarnings("ClassWithTooManyMethods")
-public abstract class AbstractStorageShould<I,
-                                            M extends Message,
-                                            R extends ReadRequest<I>,
-                                            S extends AbstractStorage<I, M, R>> {
+public abstract class AbstractStorageTest<I,
+                                          M extends Message,
+                                          R extends ReadRequest<I>,
+                                          S extends AbstractStorage<I, M, R>> {
 
     private S storage;
 
     @BeforeEach
-    public void setUpAbstractStorageTest() {
+    protected void setUpAbstractStorageTest() {
         storage = newStorage(getTestEntityClass());
     }
 
     @AfterEach
-    public void tearDownAbstractStorageTest() {
+    protected void tearDownAbstractStorageTest() {
         close(storage);
     }
 
@@ -158,7 +159,8 @@ public abstract class AbstractStorageShould<I,
     }
 
     @Test
-    public void handle_absence_of_record_with_passed_id() {
+    @DisplayName("handle absence of record with passed id")
+    void handleAbsenceOfRecordWithPassedId() {
         R readRequest = newReadRequest(newId());
         Optional<M> record = storage.read(readRequest);
 
@@ -171,48 +173,56 @@ public abstract class AbstractStorageShould<I,
     }
 
     @Test
-    public void throw_exception_if_read_by_null_id() {
+    @DisplayName("throw exception if read by null id")
+    void throwExceptionIfReadByNullId() {
         assertThrows(NullPointerException.class, () -> storage.read(Tests.nullRef()));
     }
 
     @Test
-    public void throw_exception_if_write_by_null_id() {
+    @DisplayName("throw exception if write by null id")
+    void throwExceptionIfWriteByNullId() {
         assertThrows(NullPointerException.class,
                      () -> storage.write(Tests.nullRef(), newStorageRecord()));
     }
 
     @Test
-    public void throw_exception_if_write_null_record() {
+    @DisplayName("throw exception if write null record")
+    void throwExceptionIfWriteNullRecord() {
         assertThrows(NullPointerException.class, () -> storage.write(newId(), Tests.nullRef()));
     }
 
     @Test
-    public void write_and_read_record() {
+    @DisplayName("write and read record")
+    void writeAndReadRecord() {
         writeAndReadRecordTest(newId());
     }
 
     @Test
-    public void write_and_read_several_records_by_different_ids() {
+    @DisplayName("write and read several records by different ids")
+    void writeAndReadSeveralRecordsByDifferentIds() {
         writeAndReadRecordTest(newId());
         writeAndReadRecordTest(newId());
         writeAndReadRecordTest(newId());
     }
 
     @Test
-    public void rewrite_record_if_write_by_the_same_id() {
+    @DisplayName("rewrite record if write by the same id")
+    protected void rewriteRecordIfWriteByTheSameId() {
         I id = newId();
         writeAndReadRecordTest(id);
         writeAndReadRecordTest(id);
     }
 
     @Test
-    public void have_index_on_ID() {
+    @DisplayName("have index on ID")
+    void haveIndexOnID() {
         Iterator<I> index = storage.index();
         assertNotNull(index);
     }
 
     @Test
-    public void index_all_IDs() {
+    @DisplayName("index all IDs")
+    void indexAllIDs() {
         int recordCount = 10;
         Set<I> ids = new HashSet<>(recordCount);
         for (int i = 0; i < recordCount; i++) {
@@ -229,7 +239,8 @@ public abstract class AbstractStorageShould<I,
     }
 
     @Test
-    public void have_immutable_index() {
+    @DisplayName("have immutable index")
+    void haveImmutableIndex() {
         writeRecord(newId());
         Iterator<I> index = storage.index();
         assertTrue(index.hasNext());
@@ -245,43 +256,50 @@ public abstract class AbstractStorageShould<I,
     }
 
     @Test
-    public void assure_it_is_closed() {
+    @DisplayName("assure it is closed")
+    void assureItIsClosed() {
         closeAndFailIfException(storage);
 
         assertThrows(IllegalStateException.class, () -> storage.checkNotClosed());
     }
 
     @Test
-    public void not_throw_exception_if_it_is_not_closed_on_check() {
+    @DisplayName("not throw exception if it is not closed on check")
+    void notThrowExceptionIfItIsNotClosedOnCheck() {
         storage.checkNotClosed();
     }
 
     @Test
-    public void return_true_if_it_is_opened() {
+    @DisplayName("return true if it is opened")
+    void returnTrueIfItIsOpened() {
         assertTrue(storage.isOpen());
     }
 
     @Test
-    public void return_false_if_it_not_opened() {
+    @DisplayName("return false if it not opened")
+    void returnFalseIfItNotOpened() {
         storage.close();
 
         assertFalse(storage.isOpen());
     }
 
     @Test
-    public void return_true_if_it_is_closed() {
+    @DisplayName("return true if it is closed")
+    void returnTrueIfItIsClosed() {
         storage.close();
 
         assertTrue(storage.isClosed());
     }
 
     @Test
-    public void return_false_if_it_not_closed() {
+    @DisplayName("return false if it not closed")
+    void returnFalseIfItNotClosed() {
         assertFalse(storage.isClosed());
     }
 
     @Test
-    public void close_itself_and_throw_exception_if_read_after() {
+    @DisplayName("close itself and throw exception if read after")
+    void closeItselfAndThrowExceptionIfReadAfter() {
         closeAndFailIfException(storage);
 
         R readRequest = newReadRequest(newId());
@@ -289,7 +307,8 @@ public abstract class AbstractStorageShould<I,
     }
 
     @Test
-    public void close_itself_and_throw_exception_if_write_after() {
+    @DisplayName("close itself and throw exception if write after")
+    void closeItselfAndThrowExceptionIfWriteAfter() {
         closeAndFailIfException(storage);
 
         assertThrows(IllegalStateException.class,
@@ -297,7 +316,8 @@ public abstract class AbstractStorageShould<I,
     }
 
     @Test
-    public void throw_exception_if_close_twice() {
+    @DisplayName("throw exception if close twice")
+    void throwExceptionIfCloseTwice() {
         storage.close();
         assertThrows(IllegalStateException.class, () -> storage.close());
     }
@@ -305,13 +325,14 @@ public abstract class AbstractStorageShould<I,
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and
                                                                checking via #contains(Object). */)
     @Test
-    public void return_unique_ID() {
+    @DisplayName("return unique ID")
+    void returnUniqueID() {
         int checkCount = 10;
         Set<I> ids = newHashSet();
         for (int i = 0; i < checkCount; i++) {
             I newId = newId();
             if (ids.contains(newId)) {
-                fail("AbstractStorageShould.newId() should return unique IDs.");
+                fail("AbstractStorageTest.newId() should return unique IDs.");
             }
         }
     }

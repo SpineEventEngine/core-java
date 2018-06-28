@@ -27,11 +27,13 @@ import io.spine.server.aggregate.AggregateStorageTest;
 import io.spine.server.entity.Entity;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.validate.ValidatingBuilder;
+import org.junit.jupiter.api.DisplayName;
 
 /**
  * @author Alexander Litus
  */
-class InMemoryAggregateStorageShould extends AggregateStorageTest {
+@DisplayName("InMemoryAggregateStorage should")
+class InMemoryAggregateStorageTest extends AggregateStorageTest {
 
     @Override
     protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity> cls) {

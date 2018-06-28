@@ -40,7 +40,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author Dmytro Dashenkov.
  */
-@DisplayName("AggregateStorage, when saving aggregate with lifecycle flags, should")
 public abstract class AggregateStorageVisibilityHandlingTest {
 
     protected abstract AggregateStorage<ProjectId> getAggregateStorage(

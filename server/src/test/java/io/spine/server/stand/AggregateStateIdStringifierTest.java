@@ -28,22 +28,26 @@ import io.spine.testdata.Sample;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 import org.hamcrest.CoreMatchers;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.server.stand.AggregateStateId.of;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class AggregateStateIdStringifierShould {
+@DisplayName("AggregateStateIdStringifier should")
+class AggregateStateIdStringifierTest {
 
     private static final TypeUrl ANY_TYPE_URL = TypeUrl.of(Any.class);
 
     @Test
-    public void accept_string_ids() {
+    @DisplayName("accept string IDs")
+    void acceptStringIds() {
         final Stringifier<AggregateStateId> stringifier = stringifier();
         final AggregateStateId id = newStringId();
 
@@ -54,7 +58,8 @@ public class AggregateStateIdStringifierShould {
     }
 
     @Test
-    public void accept_int_ids() {
+    @DisplayName("accept int IDs")
+    void acceptIntIds() {
         final Stringifier<AggregateStateId> stringifier = stringifier();
         final AggregateStateId id = newIntId();
 
@@ -65,7 +70,8 @@ public class AggregateStateIdStringifierShould {
     }
 
     @Test
-    public void accept_long_ids() {
+    @DisplayName("accept long IDs")
+    void acceptLongIds() {
         final Stringifier<AggregateStateId> stringifier = stringifier();
         final AggregateStateId id = newLongId();
 
@@ -76,7 +82,8 @@ public class AggregateStateIdStringifierShould {
     }
 
     @Test
-    public void accept_message_ids_of_registered_types() {
+    @DisplayName("accept message IDs of registered types")
+    void acceptMessageIdsOfRegisteredTypes() {
         final Stringifier<AggregateStateId> stringifier = stringifier();
         final AggregateStateId id = newMessageId();
 
@@ -87,7 +94,8 @@ public class AggregateStateIdStringifierShould {
     }
 
     @Test
-    public void unpack_int_ids() {
+    @DisplayName("unpack int IDs")
+    void unpackIntIds() {
         final int intId = 42;
         final String stringId = ANY_TYPE_URL.value() + "-Integer-" + String.valueOf(intId);
         final Stringifier<AggregateStateId> stringifier = stringifier();
@@ -101,7 +109,8 @@ public class AggregateStateIdStringifierShould {
     }
 
     @Test
-    public void unpack_long_ids() {
+    @DisplayName("unpack long IDs")
+    void unpackLongIds() {
         final long longId = 31415;
         final String stringId = ANY_TYPE_URL.value() + "-Long-" + String.valueOf(longId);
         final Stringifier<AggregateStateId> stringifier = stringifier();
@@ -115,7 +124,8 @@ public class AggregateStateIdStringifierShould {
     }
 
     @Test
-    public void unpack_string_ids() {
+    @DisplayName("unpack string IDs")
+    void unpackStringIds() {
         final String stringIdValue = "abcde";
         final String stringId = ANY_TYPE_URL.value() + "-String-" + stringIdValue;
         final Stringifier<AggregateStateId> stringifier = stringifier();
@@ -129,7 +139,8 @@ public class AggregateStateIdStringifierShould {
     }
 
     @Test
-    public void unpack_registered_message_ids() {
+    @DisplayName("unpack registered message IDs")
+    void unpackRegisteredMessageIds() {
         final ProjectId messageId = Sample.messageOfType(ProjectId.class);
         final String stringMessageId = Stringifiers.toString(messageId);
         final String stringId = ANY_TYPE_URL.value() + '-' + TypeName.of(ProjectId.class)
@@ -144,29 +155,36 @@ public class AggregateStateIdStringifierShould {
         assertEquals(messageId, id.getAggregateId());
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void fail_to_convert_invalid_string() {
+    @Test
+    @DisplayName("fail to convert invalid string")
+    void failToConvertInvalidString() {
         final String invalidId = "I'm invalid!";
-        stringifier().reverse()
-                     .convert(invalidId);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void fail_to_convert_string_with_no_ID_type() {
-        final String invalidId = "google.protobuf/google.protobuf.Any-42";
-        stringifier().reverse()
-                     .convert(invalidId);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void fail_to_convert_string_with_no_state_type_URL() {
-        final String invalidId = "-INT-42";
-        stringifier().reverse()
-                     .convert(invalidId);
+        assertThrows(IllegalArgumentException.class,
+                     () -> stringifier().reverse()
+                                        .convert(invalidId));
     }
 
     @Test
-    public void convert_objects_back_and_forth() {
+    @DisplayName("fail to convert string with no ID type")
+    void failToConvertStringWithNoIDType() {
+        final String invalidId = "google.protobuf/google.protobuf.Any-42";
+        assertThrows(IllegalArgumentException.class,
+                     () -> stringifier().reverse()
+                                        .convert(invalidId));
+    }
+
+    @Test
+    @DisplayName("fail to convert string with no state type URL")
+    void failToConvertStringWithNoStateTypeURL() {
+        final String invalidId = "-INT-42";
+        assertThrows(IllegalArgumentException.class,
+                     () -> stringifier().reverse()
+                                        .convert(invalidId));
+    }
+
+    @Test
+    @DisplayName("convert objects back and forth")
+    void convertObjectsBackAndForth() {
         final Stringifier<AggregateStateId> stringifier = stringifier();
         final AggregateStateId id = newMessageId();
 
@@ -179,7 +197,7 @@ public class AggregateStateIdStringifierShould {
     }
 
     private static AggregateStateId newStringId() {
-        return of("some-aggregate-id", TypeUrl.of(Any.class));
+        return of("some-aggregate-ID", TypeUrl.of(Any.class));
     }
 
     private static AggregateStateId newIntId() {

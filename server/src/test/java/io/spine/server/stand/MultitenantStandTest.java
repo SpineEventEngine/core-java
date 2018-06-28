@@ -34,9 +34,10 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.Map;
 
@@ -49,11 +50,12 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Alexander Yevsyukov
  */
-public class MultiTenantStandShould extends StandShould {
+@DisplayName("Multitenant Stand should")
+class MultitenantStandTest extends StandTest {
 
     @Override
-    @Before
-    public void setUp() {
+    @BeforeEach
+    protected void setUp() {
         super.setUp();
         TenantId tenantId = newUuid();
 
@@ -62,13 +64,14 @@ public class MultiTenantStandShould extends StandShould {
         setRequestFactory(createRequestFactory(tenantId));
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         clearCurrentTenant();
     }
 
     @Test
-    public void not_allow_reading_aggregate_records_for_another_tenant() {
+    @DisplayName("not allow reading aggregate records for another tenant")
+    void notAllowReadingAggregateRecordsForAnotherTenant() {
         Stand stand = doCheckReadingCustomersById(15);
 
         TenantId anotherTenant = newUuid();
@@ -85,7 +88,8 @@ public class MultiTenantStandShould extends StandShould {
     }
 
     @Test
-    public void not_trigger_updates_of_aggregate_records_for_another_tenant_subscriptions() {
+    @DisplayName("not trigger updates of aggregate records for another tenant subscriptions")
+    void notTriggerUpdatesOfAggregateRecordsForAnotherTenantSubscriptions() {
         StandStorage standStorage =
                 InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
                                                    isMultitenant())

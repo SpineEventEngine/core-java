@@ -71,8 +71,9 @@ import io.spine.type.TypeUrl;
 import io.spine.validate.Validate;
 import io.spine.validate.ValidationError;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 
@@ -109,6 +110,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -123,9 +125,11 @@ import static org.mockito.Mockito.when;
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
-//It's OK for a test.
+
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods", "OverlyComplexClass"})
-public class StandShould extends TenantAwareTest {
+//It's OK for a test.
+@DisplayName("Stand should")
+class StandTest extends TenantAwareTest {
     private static final int TOTAL_CUSTOMERS_FOR_BATCH_READING = 10;
     private static final int TOTAL_PROJECTS_FOR_BATCH_READING = 10;
 
@@ -149,8 +153,8 @@ public class StandShould extends TenantAwareTest {
         return multitenant;
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    protected void setUp() {
         setMultitenant(false);
         requestFactory = createRequestFactory(null);
     }
@@ -167,7 +171,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void initialize_with_empty_builder() {
+    @DisplayName("initialize with empty builder")
+    void initializeWithEmptyBuilder() {
         final Stand.Builder builder = Stand.newBuilder()
                                            .setMultitenant(isMultitenant());
         final Stand stand = builder.build();
@@ -182,7 +187,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void register_projection_repositories() {
+    @DisplayName("register projection repositories")
+    void registerProjectionRepositories() {
         final boolean multitenant = isMultitenant();
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .setMultitenant(multitenant)
@@ -208,7 +214,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void register_aggregate_repositories() {
+    @DisplayName("register aggregate repositories")
+    void registerAggregateRepositories() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
         final Stand stand = boundedContext.getStand();
@@ -232,7 +239,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void use_provided_executor_upon_update_of_watched_type() {
+    @DisplayName("use provided executor upon update of watched type")
+    void useProvidedExecutorUponUpdateOfWatchedType() {
         final Executor executor = mock(Executor.class);
         final BoundedContext boundedContext =
                 BoundedContext.newBuilder()
@@ -267,7 +275,8 @@ public class StandShould extends TenantAwareTest {
 
     @SuppressWarnings("OverlyCoupledMethod")
     @Test
-    public void operate_with_storage_provided_through_builder() {
+    @DisplayName("operate with storage provided through builder")
+    void operateWithStorageProvidedThroughBuilder() {
         final StandStorage standStorageMock = mock(StandStorage.class);
         final BoundedContext boundedContext =
                 BoundedContext.newBuilder()
@@ -305,13 +314,15 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void return_empty_list_for_aggregate_read_all_on_empty_stand_storage() {
+    @DisplayName("return empty list for aggregate read all on empty stand storage")
+    void returnEmptyListForAggregateReadAllOnEmptyStandStorage() {
         final Query readAllCustomers = requestFactory.query().all(Customer.class);
         checkEmptyResultForTargetOnEmptyStorage(readAllCustomers);
     }
 
     @Test
-    public void return_empty_list_for_aggregate_read_by_ids_on_empty_stand_storage() {
+    @DisplayName("return empty list for aggregate read by ids on empty stand storage")
+    void returnEmptyListForAggregateReadByIdsOnEmptyStandStorage() {
 
         final Query readCustomersById = requestFactory.query().byIds(Customer.class, newHashSet(
                 customerIdFor(1), customerIdFor(2)
@@ -321,7 +332,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void return_empty_list_for_aggregate_reads_with_filters_not_set() {
+    @DisplayName("return empty list for aggregate reads with filters not set")
+    void returnEmptyListForAggregateReadsWithFiltersNotSet() {
         final StandStorage standStorageMock = mock(StandStorage.class);
 
         // Return non-empty results on any storage read call.
@@ -354,27 +366,32 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void return_single_result_for_aggregate_state_read_by_id() {
+    @DisplayName("return single result for aggregate state read by id")
+    void returnSingleResultForAggregateStateReadById() {
         doCheckReadingCustomersById(1);
     }
 
     @Test
-    public void return_multiple_results_for_aggregate_state_batch_read_by_ids() {
+    @DisplayName("return multiple results for aggregate state batch read by ids")
+    void returnMultipleResultsForAggregateStateBatchReadByIds() {
         doCheckReadingCustomersById(TOTAL_CUSTOMERS_FOR_BATCH_READING);
     }
 
     @Test
-    public void return_single_result_for_projection_read_by_id() {
+    @DisplayName("return single result for projection read by id")
+    void returnSingleResultForProjectionReadById() {
         doCheckReadingProjectsById(1);
     }
 
     @Test
-    public void return_multiple_results_for_projection_batch_read_by_ids() {
+    @DisplayName("return multiple results for projection batch read by ids")
+    void returnMultipleResultsForProjectionBatchReadByIds() {
         doCheckReadingProjectsById(TOTAL_PROJECTS_FOR_BATCH_READING);
     }
 
     @Test
-    public void return_multiple_results_for_projection_batch_read_by_ids_with_field_mask() {
+    @DisplayName("return multiple results for projection batch read by ids with field mask")
+    void returnMultipleResultsForProjectionBatchReadByIdsWithFieldMask() {
         final List<Descriptors.FieldDescriptor> projectFields = Project.getDescriptor()
                                                                        .getFields();
         doCheckReadingCustomersByIdAndFieldMask(
@@ -385,7 +402,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void trigger_subscription_callback_upon_update_of_aggregate() {
+    @DisplayName("trigger subscription callback upon update of aggregate")
+    void triggerSubscriptionCallbackUponUpdateOfAggregate() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final Topic allCustomers = requestFactory.topic().allOf(Customer.class);
 
@@ -407,7 +425,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void trigger_subscription_callback_upon_update_of_projection() {
+    @DisplayName("trigger subscription callback upon update of projection")
+    void triggerSubscriptionCallbackUponUpdateOfProjection() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final Topic allProjects = requestFactory.topic().allOf(Project.class);
 
@@ -428,7 +447,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void allow_cancelling_subscriptions() {
+    @DisplayName("allow cancelling subscriptions")
+    void allowCancellingSubscriptions() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final Topic allCustomers = requestFactory.topic().allOf(Customer.class);
 
@@ -448,19 +468,22 @@ public class StandShould extends TenantAwareTest {
         assertNull(memoizeCallback.newEntityState);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void fail_if_cancelling_inexistent_subscription() {
+    @Test
+    @DisplayName("fail if cancelling inexistent subscription")
+    void failIfCancellingInexistentSubscription() {
         final Stand stand = Stand.newBuilder()
                                  .build();
         final Subscription inexistentSubscription = Subscription.newBuilder()
                                                                 .setId(Subscriptions.generateId())
                                                                 .build();
-        stand.cancel(inexistentSubscription, StreamObservers.<Response>noOpObserver());
+        assertThrows(IllegalArgumentException.class,
+                     () -> stand.cancel(inexistentSubscription, noOpObserver()));
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
-    public void trigger_each_subscription_callback_once_for_multiple_subscriptions() {
+    @DisplayName("trigger each subscription callback once for multiple subscriptions")
+    void triggerEachSubscriptionCallbackOnceForMultipleSubscriptions() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final Target allCustomers = Targets.allOf(Customer.class);
 
@@ -488,7 +511,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void do_not_trigger_subscription_callbacks_in_case_of_another_type_criterion_mismatch() {
+    @DisplayName("do not trigger subscription callbacks in case of another type criterion mismatch")
+    void doNotTriggerSubscriptionCallbacksInCaseOfAnotherTypeCriterionMismatch() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final Target allProjects = Targets.allOf(Project.class);
         final MemoizeEntityUpdateCallback callback = subscribeWithCallback(stand, allProjects);
@@ -505,7 +529,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void trigger_subscription_callbacks_matching_by_id() {
+    @DisplayName("trigger subscription callbacks matching by id")
+    void triggerSubscriptionCallbacksMatchingById() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
 
         final Map<CustomerId, Customer> sampleCustomers = fillSampleCustomers(10);
@@ -558,7 +583,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void retrieve_all_data_if_field_mask_is_not_set() {
+    @DisplayName("retrieve all data if field mask is not set")
+    void retrieveAllDataIfFieldMaskIsNotSet() {
         final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
         final Customer sampleCustomer = getSampleCustomer();
@@ -590,7 +616,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void retrieve_only_selected_param_for_query() {
+    @DisplayName("retrieve only selected param for query")
+    void retrieveOnlySelectedParamForQuery() {
         requestSampleCustomer(new int[]{Customer.NAME_FIELD_NUMBER - 1}, new MemoizeQueryResponseObserver() {
             @Override
             public void onNext(QueryResponse value) {
@@ -611,7 +638,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void retrieve_collection_fields_if_required() {
+    @DisplayName("retrieve collection fields if required")
+    void retrieveCollectionFieldsIfRequired() {
         requestSampleCustomer(
                 new int[]{Customer.NICKNAMES_FIELD_NUMBER - 1},
                 new MemoizeQueryResponseObserver() {
@@ -635,7 +663,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void retrieve_all_requested_fields() {
+    @DisplayName("retrieve all requested fields")
+    void retrieveAllRequestedFields() {
         requestSampleCustomer(
                 new int[]{ Customer.NICKNAMES_FIELD_NUMBER - 1,
                         Customer.ID_FIELD_NUMBER - 1 },
@@ -660,14 +689,16 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void retrieve_whole_entity_if_nothing_is_requested() {
+    @DisplayName("retrieve whole entity if nothing is requested")
+    void retrieveWholeEntityIfNothingIsRequested() {
         //noinspection ZeroLengthArrayAllocation
         requestSampleCustomer(new int[]{}, getDuplicateCostumerStreamObserver());
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
-    public void select_entity_singleton_by_id_and_apply_field_masks() {
+    @DisplayName("select entity singleton by id and apply field masks")
+    void selectEntitySingletonByIdAndApplyFieldMasks() {
         final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
         final String customerDescriptor = Customer.getDescriptor()
                                                   .getFullName();
@@ -707,7 +738,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void handle_mistakes_in_query_silently() {
+    @DisplayName("handle mistakes in query silently")
+    void handleMistakesInQuerySilently() {
         //noinspection ZeroLengthArrayAllocation
         final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
@@ -746,7 +778,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void throw_invalid_query_exception_packed_as_IAE_if_querying_unknown_type() {
+    @DisplayName("throw invalid query exception packed as IAE if querying unknown type")
+    void throwInvalidQueryExceptionPackedAsIAEIfQueryingUnknownType() {
 
         final Stand stand = Stand.newBuilder()
                                  .build();
@@ -768,7 +801,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void throw_invalid_query_exception_packed_as_IAE_if_invalid_query_message_passed() {
+    @DisplayName("throw invalid query exception packed as IAE if invalid query message passed")
+    void throwInvalidQueryExceptionPackedAsIAEIfInvalidQueryMessagePassed() {
 
         final Stand stand = Stand.newBuilder()
                                  .build();
@@ -784,7 +818,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void throw_invalid_topic_ex_packed_as_IAE_if_subscribing_to_unknown_type_changes() {
+    @DisplayName("throw invalid topic ex packed as IAE if subscribing to unknown type changes")
+    void throwInvalidTopicExPackedAsIAEIfSubscribingToUnknownTypeChanges() {
 
         final Stand stand = Stand.newBuilder()
                                  .build();
@@ -805,7 +840,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void throw_invalid_topic_exception_packed_as_IAE_if_invalid_topic_message_passed() {
+    @DisplayName("throw invalid topic exception packed as IAE if invalid topic message passed")
+    void throwInvalidTopicExceptionPackedAsIAEIfInvalidTopicMessagePassed() {
 
         final Stand stand = Stand.newBuilder()
                                  .build();
@@ -822,7 +858,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void throw_invalid_subscription_ex_if_activating_subscription_with_unsupported_target() {
+    @DisplayName("throw invalid subscription ex if activating subscription with unsupported target")
+    void throwInvalidSubscriptionExIfActivatingSubscriptionWithUnsupportedTarget() {
 
         final Stand stand = Stand.newBuilder()
                                  .build();
@@ -840,7 +877,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void throw_invalid_subscription_ex_if_cancelling_subscription_with_unsupported_target() {
+    @DisplayName("throw invalid subscription ex if cancelling subscription with unsupported target")
+    void throwInvalidSubscriptionExIfCancellingSubscriptionWithUnsupportedTarget() {
 
         final Stand stand = Stand.newBuilder()
                                  .build();
@@ -856,7 +894,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void throw_invalid_subscription_ex_if_invalid_subscription_msg_passed_to_activate() {
+    @DisplayName("throw invalid subscription ex if invalid subscription msg passed to activate")
+    void throwInvalidSubscriptionExIfInvalidSubscriptionMsgPassedToActivate() {
 
         final Stand stand = Stand.newBuilder()
                                  .build();
@@ -874,7 +913,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void throw_invalid_subscription_ex_if_invalid_subscription_msg_passed_to_cancel() {
+    @DisplayName("throw invalid subscription ex if invalid subscription msg passed to cancel")
+    void throwInvalidSubscriptionExIfInvalidSubscriptionMsgPassedToCancel() {
 
         final Stand stand = Stand.newBuilder()
                                  .build();

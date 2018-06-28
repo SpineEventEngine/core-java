@@ -23,9 +23,8 @@ package io.spine.server.storage;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static com.google.protobuf.util.Timestamps.add;
@@ -42,6 +41,7 @@ import static io.spine.test.Tests.nullRef;
 import static io.spine.time.Durations2.seconds;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dmytro Dashenkov
@@ -52,20 +52,20 @@ import static org.junit.Assert.assertTrue;
             /* 1 - Comparison tests are similar but cannot be simplified to one.
                2 - Many test cases required. */
 })
-public class OperatorEvaluatorShould {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+@DisplayName("OperatorEvaluator should")
+class OperatorEvaluatorTest {
 
     @Test
-    public void not_accept_nulls() {
+    @DisplayName("not accept nulls")
+    void notAcceptNulls() {
         new NullPointerTester()
                 .testStaticMethods(OperatorEvaluator.class, PACKAGE);
     }
 
     @SuppressWarnings("RedundantStringConstructorCall") // We need an equal but not the same object
     @Test
-    public void compare_equal_instances() {
+    @DisplayName("compare equal instances")
+    void compareEqualInstances() {
         String left = "myobject";
         Object right = new String(left);
         Object third = new String(left);
@@ -80,7 +80,8 @@ public class OperatorEvaluatorShould {
     }
 
     @Test
-    public void compare_not_equal_instances() {
+    @DisplayName("compare not equal instances")
+    void compareNotEqualInstances() {
         Object left = "one!";
         Object right = "another!";
 
@@ -89,7 +90,8 @@ public class OperatorEvaluatorShould {
     }
 
     @Test
-    public void compare_timestamps_by_GT() {
+    @DisplayName("compare timestamps by GT")
+    void compareTimestampsByGT() {
         Duration delta = seconds(5);
         Timestamp small = getCurrentTime();
         Timestamp medium = add(small, delta);
@@ -105,7 +107,8 @@ public class OperatorEvaluatorShould {
     }
 
     @Test
-    public void compare_timestamps_by_GE() {
+    @DisplayName("compare timestamps by GE")
+    void compareTimestampsByGE() {
         Duration delta = seconds(5);
         Timestamp small = getCurrentTime();
         Timestamp medium = add(small, delta);
@@ -121,7 +124,8 @@ public class OperatorEvaluatorShould {
     }
 
     @Test
-    public void compare_timestamps_by_LT() {
+    @DisplayName("compare timestamps by LT")
+    void compareTimestampsByLT() {
         Duration delta = seconds(5);
         Timestamp small = getCurrentTime();
         Timestamp medium = add(small, delta);
@@ -137,7 +141,8 @@ public class OperatorEvaluatorShould {
     }
 
     @Test
-    public void compare_timestamps_by_LE() {
+    @DisplayName("compare timestamps by LE")
+    void compareTimestampsByLE() {
         Duration delta = seconds(5);
         Timestamp small = getCurrentTime();
         Timestamp medium = add(small, delta);
@@ -153,99 +158,123 @@ public class OperatorEvaluatorShould {
     }
 
     @Test
-    public void compare_ints_by_GT() {
+    @DisplayName("compare ints by GT")
+    void compareIntsByGT() {
         assertGreater(42, 31);
     }
 
     @Test
-    public void compare_ints_by_GE() {
+    @DisplayName("compare ints by GE")
+    void compareIntsByGE() {
         assertGreaterOrEqual(42, 41);
     }
 
     @Test
-    public void compare_ints_by_LT() {
+    @DisplayName("compare ints by LT")
+    void compareIntsByLT() {
         assertLess(42, 314);
     }
 
     @Test
-    public void compare_ints_by_LE() {
+    @DisplayName("compare ints by LE")
+    void compareIntsByLE() {
         assertLessOrEqual(42, 43);
     }
 
     @Test
-    public void compare_strings_by_GT() {
+    @DisplayName("compare strings by GT")
+    void compareStringsByGT() {
         assertGreater("a", "!");
     }
 
     @Test
-    public void compare_strings_by_GE() {
+    @DisplayName("compare strings by GE")
+    void compareStringsByGE() {
         assertGreaterOrEqual("d", "c");
     }
 
     @Test
-    public void compare_strings_by_LT() {
+    @DisplayName("compare strings by LT")
+    void compareStringsByLT() {
         assertLess("Z", "a");
     }
 
     @Test
-    public void compare_strings_by_LE() {
+    @DisplayName("compare strings by LE")
+    void compareStringsByLE() {
         assertLessOrEqual("a", "b");
     }
 
     @Test
-    public void compare_doubles_by_GT() {
+    @DisplayName("compare doubles by GT")
+    void compareDoublesByGT() {
         assertGreater(42, 31);
     }
 
     @Test
-    public void compare_doubles_by_GE() {
+    @DisplayName("compare doubles by GE")
+    void compareDoublesByGE() {
         assertGreaterOrEqual(42.1, 42.01);
     }
 
     @Test
-    public void compare_doubles_by_LT() {
+    @DisplayName("compare doubles by LT")
+    void compareDoublesByLT() {
         assertLess(42.81, 314.0);
     }
 
     @Test
-    public void compare_doubles_by_LE() {
+    @DisplayName("compare doubles by LE")
+    void compareDoublesByLE() {
         assertLessOrEqual(42.999, 43.0);
     }
 
     @Test
-    public void fail_to_compare_unsupported_types_by_GT() {
-        thrown.expect(IllegalArgumentException.class);
-        eval(FaultyComparisonType.INSTANCE, GREATER_THAN, FaultyComparisonType.INSTANCE);
+    @DisplayName("fail to compare unsupported types by GT")
+    void failToCompareUnsupportedTypesByGT() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> eval(FaultyComparisonType.INSTANCE,
+                                GREATER_THAN,
+                                FaultyComparisonType.INSTANCE));
     }
 
     @Test
-    public void fail_to_compare_unsupported_types_by_GE() {
-        thrown.expect(IllegalArgumentException.class);
-        eval(FaultyComparisonType.INSTANCE, GREATER_OR_EQUAL, FaultyComparisonType.INSTANCE);
+    @DisplayName("fail to compare unsupported types by GE")
+    void failToCompareUnsupportedTypesByGE() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> eval(FaultyComparisonType.INSTANCE,
+                                GREATER_OR_EQUAL,
+                                FaultyComparisonType.INSTANCE));
     }
 
     @Test
-    public void fail_to_compare_unsupported_types_by_LT() {
-        thrown.expect(IllegalArgumentException.class);
-        eval(FaultyComparisonType.INSTANCE, LESS_THAN, FaultyComparisonType.INSTANCE);
+    @DisplayName("fail to compare unsupported types by LT")
+    void failToCompareUnsupportedTypesByLT() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> eval(FaultyComparisonType.INSTANCE,
+                                LESS_THAN,
+                                FaultyComparisonType.INSTANCE));
     }
 
     @Test
-    public void fail_to_compare_unsupported_types_by_LE() {
-        thrown.expect(IllegalArgumentException.class);
-        eval(FaultyComparisonType.INSTANCE, LESS_OR_EQUAL, FaultyComparisonType.INSTANCE);
+    @DisplayName("fail to compare unsupported types by LE")
+    void failToCompareUnsupportedTypesByLE() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> eval(FaultyComparisonType.INSTANCE,
+                                LESS_OR_EQUAL,
+                                FaultyComparisonType.INSTANCE));
     }
 
     @Test
-    public void fail_to_compare_different_types() {
-        thrown.expect(IllegalArgumentException.class);
-        eval("7", GREATER_THAN, 6);
+    @DisplayName("fail to compare different types")
+    void failToCompareDifferentTypes() {
+        assertThrows(IllegalArgumentException.class, () -> eval("7", GREATER_THAN, 6));
     }
 
     @Test
-    public void fail_to_compare_by_an_invalid_operator() {
-        thrown.expect(IllegalArgumentException.class);
-        eval("a", CFO_UNDEFINED, "b");
+    @DisplayName("fail to compare by an invalid operator")
+    void failToCompareByAnInvalidOperator() {
+        assertThrows(IllegalArgumentException.class, () -> eval("a", CFO_UNDEFINED, "b"));
     }
 
     private static void assertGreater(Object left, Object right) {

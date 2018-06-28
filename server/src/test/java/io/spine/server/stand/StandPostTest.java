@@ -35,8 +35,9 @@ import io.spine.server.stand.Given.StandTestAggregate;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.projection.ProjectId;
 import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.mockito.ArgumentMatcher;
 
 import java.util.Set;
@@ -56,11 +57,12 @@ import static org.mockito.Mockito.verify;
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
-@Ignore //TODO:2017-05-03:alexander.yevsyukov: Enable back when Stand becomes a Bus.
-public class StandPostShould {
+@Disabled //TODO:2017-05-03:alexander.yevsyukov: Enable back when Stand becomes a Bus.
+@DisplayName("Stand `post` should")
+class StandPostTest {
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(StandPostShould.class);
+            TestActorRequestFactory.newInstance(StandPostTest.class);
 
     // **** Positive scenarios (unit) ****
 
@@ -69,8 +71,8 @@ public class StandPostShould {
 
         for (int i = 0; i < result.length; i++) {
             result[i] = ((i % 2) == 0)
-                        ? StandPostShould::aggregateRepositoryDispatch
-                        : StandPostShould::projectionRepositoryDispatch;
+                        ? StandPostTest::aggregateRepositoryDispatch
+                        : StandPostTest::projectionRepositoryDispatch;
         }
 
         return result;
@@ -156,7 +158,8 @@ public class StandPostShould {
     }
 
     @Test
-    public void deliver_updates() {
+    @DisplayName("deliver updates")
+    void deliverUpdates() {
         AggregateRepository<ProjectId, StandTestAggregate> repository = Given.aggregateRepo();
         ProjectId entityId = ProjectId
                 .newBuilder()
@@ -190,27 +193,32 @@ public class StandPostShould {
     }
 
     @Test
-    public void deliver_updates_from_projection_repository() {
-        checkUpdatesDelivery(false, StandPostShould::projectionRepositoryDispatch);
+    @DisplayName("deliver updates from projection repository")
+    void deliverUpdatesFromProjectionRepository() {
+        checkUpdatesDelivery(false, StandPostTest::projectionRepositoryDispatch);
     }
 
     @Test
-    public void deliver_updates_from_aggregate_repository() {
-        checkUpdatesDelivery(false, StandPostShould::aggregateRepositoryDispatch);
+    @DisplayName("deliver updates from aggregate repository")
+    void deliverUpdatesFromAggregateRepository() {
+        checkUpdatesDelivery(false, StandPostTest::aggregateRepositoryDispatch);
     }
 
     @Test
-    public void deliver_updates_from_several_repositories_in_single_thread() {
+    @DisplayName("deliver updates from several repositories in single thread")
+    void deliverUpdatesFromSeveralRepositoriesInSingleThread() {
         checkUpdatesDelivery(false, getSeveralRepositoryDispatchCalls());
     }
 
     @Test
-    public void deliver_updates_from_several_repositories_in_multiple_threads() {
+    @DisplayName("deliver updates from several repositories in multiple threads")
+    void deliverUpdatesFromSeveralRepositoriesInMultipleThreads() {
         checkUpdatesDelivery(true, getSeveralRepositoryDispatchCalls());
     }
 
     @Test
-    public void deliver_updates_through_several_threads() throws InterruptedException {
+    @DisplayName("deliver updates through several threads")
+    void deliverUpdatesThroughSeveralThreads() throws InterruptedException {
         int threadsCount = Given.THREADS_COUNT_IN_POOL_EXECUTOR;
 
         Set<String> threadInvocationRegistry = new ConcurrentSet<>();

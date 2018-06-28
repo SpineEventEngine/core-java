@@ -21,8 +21,9 @@
 package io.spine.server.storage.memory;
 
 import io.spine.test.storage.ProjectId;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.List;
@@ -40,14 +41,15 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Dmytry Ganzha
  */
-public class MultitenantStorageShould {
+@DisplayName("MultitenantStorage should")
+class MultitenantStorageTest {
 
     private static final boolean IS_MULTITENANT = false;
 
     private MultitenantStorage<TenantRecords<ProjectId>> multitenantStorage;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         multitenantStorage = new MultitenantStorage<TenantRecords<ProjectId>>(IS_MULTITENANT) {
             @Override
             TenantRecords<ProjectId> createSlice() {
@@ -57,7 +59,8 @@ public class MultitenantStorageShould {
     }
 
     @Test
-    public void should_return_same_slice_when_single_tenant_and_multithreaded_environment()
+    @DisplayName("should return same slice when single tenant and multithreaded environment")
+    void shouldReturnSameSliceWhenSingleTenantAndMultithreadedEnvironment()
             throws InterruptedException, ExecutionException {
         final int numberOfTasks = 1000;
         final Collection<Callable<TenantRecords>> tasks = newArrayListWithExpectedSize(numberOfTasks);

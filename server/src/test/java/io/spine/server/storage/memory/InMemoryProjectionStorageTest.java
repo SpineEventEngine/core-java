@@ -20,20 +20,30 @@
 
 package io.spine.server.storage.memory;
 
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateStorage;
-import io.spine.server.aggregate.AggregateStorageVisibilityHandlingTest;
-import io.spine.test.aggregate.ProjectId;
+import io.spine.server.entity.Entity;
+import io.spine.server.projection.ProjectionStorage;
+import io.spine.server.projection.ProjectionStorageTest;
+import io.spine.test.storage.ProjectId;
+import io.spine.type.TypeUrl;
+import org.junit.jupiter.api.DisplayName;
+
+import static io.spine.server.BoundedContext.newName;
 
 /**
- * @author Dmytro Dashenkov.
+ * @author Alexander Litus
  */
-public class InMemoryAggregateStorageStatusHandlingShould
-        extends AggregateStorageVisibilityHandlingTest {
+@DisplayName("InMemoryProjectionStorage should")
+class InMemoryProjectionStorageTest extends ProjectionStorageTest {
 
     @Override
-    protected AggregateStorage<ProjectId> getAggregateStorage(
-            Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass) {
-        return InMemoryAggregateStorage.newInstance();
+    protected ProjectionStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
+        final StorageSpec<ProjectId> spec =
+                StorageSpec.of(newName(getClass().getSimpleName()),
+                               TypeUrl.of(io.spine.test.projection.Project.class),
+                               ProjectId.class);
+        final InMemoryProjectionStorage<ProjectId> storage =
+                InMemoryProjectionStorage.newInstance(
+                        InMemoryRecordStorage.newInstance(spec, false, cls));
+        return storage;
     }
 }

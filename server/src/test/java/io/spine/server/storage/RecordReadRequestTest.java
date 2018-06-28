@@ -18,30 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.memory;
+package io.spine.server.storage;
 
-import io.spine.server.entity.Entity;
-import io.spine.server.projection.ProjectionStorage;
-import io.spine.server.projection.ProjectionStorageTest;
-import io.spine.test.storage.ProjectId;
-import io.spine.type.TypeUrl;
+import com.google.common.testing.EqualsTester;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static io.spine.server.BoundedContext.newName;
+import static io.spine.test.Tests.nullRef;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * @author Alexander Litus
+ * @author Dmytro Grankin
  */
-public class InMemoryProjectionStorageShould extends ProjectionStorageTest {
+@DisplayName("RecordReadRequest should")
+class RecordReadRequestTest {
 
-    @Override
-    protected ProjectionStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
-        final StorageSpec<ProjectId> spec =
-                StorageSpec.of(newName(getClass().getSimpleName()),
-                               TypeUrl.of(io.spine.test.projection.Project.class),
-                               ProjectId.class);
-        final InMemoryProjectionStorage<ProjectId> storage =
-                InMemoryProjectionStorage.newInstance(
-                        InMemoryRecordStorage.newInstance(spec, false, cls));
-        return storage;
+    @Test
+    @DisplayName("not accept null ID")
+    void notAcceptNullID() {
+        assertThrows(NullPointerException.class, () -> new RecordReadRequest<>(nullRef()));
+    }
+
+    @Test
+    @DisplayName("consider request with same id equal")
+    void considerRequestWithSameIdEqual() {
+        final String id = "ID";
+        final RecordReadRequest<String> first = new RecordReadRequest<>(id);
+        final RecordReadRequest<String> second = new RecordReadRequest<>(id);
+        new EqualsTester().addEqualityGroup(first, second)
+                          .testEquals();
     }
 }

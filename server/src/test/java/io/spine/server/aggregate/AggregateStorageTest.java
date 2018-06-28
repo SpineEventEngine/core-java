@@ -35,7 +35,7 @@ import io.spine.core.Version;
 import io.spine.server.aggregate.given.StorageRecord;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.LifecycleFlags;
-import io.spine.server.storage.AbstractStorageShould;
+import io.spine.server.storage.AbstractStorageTest;
 import io.spine.test.Tests;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -78,10 +78,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "DuplicateStringLiteralInspection" /* Common test display names */,
         "unused" /* JUnit 5 Nested classes considered unused in abstract test class */})
 public abstract class AggregateStorageTest
-        extends AbstractStorageShould<ProjectId,
-                                      AggregateStateRecord,
-                                      AggregateReadRequest<ProjectId>,
-                                      AggregateStorage<ProjectId>> {
+        extends AbstractStorageTest<ProjectId,
+                                              AggregateStateRecord,
+                                              AggregateReadRequest<ProjectId>,
+                                              AggregateStorage<ProjectId>> {
 
     private static final Function<AggregateEventRecord, Event> TO_EVENT =
             record -> record != null ? record.getEvent() : null;
@@ -145,7 +145,7 @@ public abstract class AggregateStorageTest
             "RefusedBequest",
             "MethodDoesntCallSuperMethod"
     })
-    public void rewrite_record_if_write_by_the_same_id() {
+    protected void rewriteRecordIfWriteByTheSameId() {
     }
 
     /**

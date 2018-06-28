@@ -26,24 +26,28 @@ import com.google.protobuf.Any;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 import io.spine.type.TypeUrl;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class AggregateStateIdShould {
+@DisplayName("AggregateStateId should")
+class AggregateStateIdTest {
 
     @Test
-    public void not_accept_nulls_on_construction() {
+    @DisplayName("not accept nulls on construction")
+    void notAcceptNullsOnConstruction() {
         new NullPointerTester()
                 .setDefault(TypeUrl.class, TypeUrl.of(Any.class))
                 .testStaticMethods(AggregateStateId.class, NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
-    public void have_stringifier() throws ClassNotFoundException {
+    @DisplayName("have stringifier")
+    void haveStringifier() throws ClassNotFoundException {
         // Ensure class loaded
         Class.forName(AggregateStateId.class.getCanonicalName());
 
