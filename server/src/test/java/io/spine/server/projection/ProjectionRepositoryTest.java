@@ -58,6 +58,8 @@ import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
@@ -67,17 +69,19 @@ import java.util.Set;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static java.lang.String.format;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
-public class ProjectionRepositoryShould
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
+@DisplayName("ProjectionRepository should")
+class ProjectionRepositoryTest
         extends RecordBasedRepositoryTest<TestProjection, ProjectId, Project> {
 
     private static final Any PRODUCER_ID = Identifier.pack(GivenEventMessage.ENTITY_ID);
@@ -86,7 +90,7 @@ public class ProjectionRepositoryShould
 
     private static TestEventFactory newEventFactory(TenantId tenantId, Any producerId) {
         TestActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(ProjectionRepositoryShould.class, tenantId);
+                TestActorRequestFactory.newInstance(ProjectionRepositoryTest.class, tenantId);
         return TestEventFactory.newInstance(producerId, requestFactory);
     }
 
@@ -158,7 +162,7 @@ public class ProjectionRepositoryShould
 
     @Override
     @BeforeEach
-    public void setUp() {
+    protected void setUp() {
         boundedContext = BoundedContext
                 .newBuilder()
                 .setName(getClass().getSimpleName())
@@ -171,10 +175,6 @@ public class ProjectionRepositoryShould
         TestProjection.clearMessageDeliveryHistory();
     }
 
-    /*
-     * Tests
-     ************/
-
     /**
      * Closes the BoundedContest and shuts down the gRPC service.
      *
@@ -182,100 +182,114 @@ public class ProjectionRepositoryShould
      * after calling this method.
      */
     @AfterEach
-    public void shutDown() throws Exception {
+    void shutDown() throws Exception {
         boundedContext.close();
     }
 
-    @Test
-    public void dispatch_event_and_load_projection() {
-        PrjProjectStarted msg = GivenEventMessage.projectStarted();
+    /*
+     * Tests
+     ************/
 
-        // Ensure no instances are present in the repository now.
-        assertFalse(repository().loadAll()
-                                .hasNext());
-        // And no instances of `TestProjection` processed the event message we are going to post.
-        assertTrue(TestProjection.whoProcessed(msg)
-                                 .isEmpty());
+    @Nested
+    @DisplayName("dispatch")
+    class Dispatch {
 
-        // Post an event message and grab the ID of the projection, which processed it.
-        checkDispatchesEvent(msg);
-        Set<ProjectId> projectIds = TestProjection.whoProcessed(msg);
-        assertEquals(1, projectIds.size());
-        ProjectId receiverId = projectIds.iterator()
-                                         .next();
+        @Test
+        @DisplayName("event")
+        void event() {
+            PrjProjectStarted msg = GivenEventMessage.projectStarted();
 
-        // Check that the projection item has actually been stored and now can be loaded.
-        Iterator<TestProjection> allItems = repository().loadAll();
-        assertTrue(allItems.hasNext());
-        TestProjection storedProjection = allItems.next();
-        assertFalse(allItems.hasNext());
+            // Ensure no instances are present in the repository now.
+            assertFalse(repository().loadAll()
+                                    .hasNext());
+            // And no instances of `TestProjection` processed the event message we are posting.
+            assertTrue(TestProjection.whoProcessed(msg)
+                                     .isEmpty());
 
-        // Check that the stored instance has the same ID as the instance that handled the event.
-        assertEquals(storedProjection.getId(), receiverId);
+            // Post an event message and grab the ID of the projection, which processed it.
+            checkDispatchesEvent(msg);
+            Set<ProjectId> projectIds = TestProjection.whoProcessed(msg);
+            assertEquals(1, projectIds.size());
+            ProjectId receiverId = projectIds.iterator()
+                                             .next();
+
+            // Check that the projection item has actually been stored and now can be loaded.
+            Iterator<TestProjection> allItems = repository().loadAll();
+            assertTrue(allItems.hasNext());
+            TestProjection storedProjection = allItems.next();
+            assertFalse(allItems.hasNext());
+
+            // Check that the stored instance has the same ID as the instance handling the event.
+            assertEquals(storedProjection.getId(), receiverId);
+        }
+
+        @Test
+        @DisplayName("several events")
+        void severalEvents() {
+            checkDispatchesEvent(GivenEventMessage.projectCreated());
+            checkDispatchesEvent(GivenEventMessage.taskAdded());
+            checkDispatchesEvent(GivenEventMessage.projectStarted());
+        }
+
+        @Test
+        @DisplayName("event to archived projection")
+        void eventToArchived() {
+            PrjProjectArchived projectArchived = GivenEventMessage.projectArchived();
+            checkDispatchesEvent(projectArchived);
+            ProjectId projectId = projectArchived.getProjectId();
+            TestProjection projection = repository().findOrCreate(projectId);
+            assertTrue(projection.isArchived());
+
+            // Dispatch an event to the archived projection.
+            checkDispatchesEvent(GivenEventMessage.taskAdded());
+            projection = repository().findOrCreate(projectId);
+            List<Task> addedTasks = projection.getState()
+                                              .getTaskList();
+            assertFalse(addedTasks.isEmpty());
+
+            // Check that the projection was not re-created before dispatching.
+            assertTrue(projection.isArchived());
+        }
+
+        @Test
+        @DisplayName("event to deleted projection")
+        void eventToDeleted() {
+            PrjProjectDeleted projectDeleted = GivenEventMessage.projectDeleted();
+            checkDispatchesEvent(projectDeleted);
+            ProjectId projectId = projectDeleted.getProjectId();
+            TestProjection projection = repository().findOrCreate(projectId);
+            assertTrue(projection.isDeleted());
+
+            // Dispatch an event to the deleted projection.
+            checkDispatchesEvent(GivenEventMessage.taskAdded());
+            projection = repository().findOrCreate(projectId);
+            List<Task> addedTasks = projection.getState()
+                                              .getTaskList();
+            assertTrue(projection.isDeleted());
+
+            // Check that the projection was not re-created before dispatching.
+            assertFalse(addedTasks.isEmpty());
+        }
+
+        private void checkDispatchesEvent(Message eventMessage) {
+            TestEventFactory eventFactory = newEventFactory(tenantId(), PRODUCER_ID);
+            Event event = eventFactory.createEvent(eventMessage);
+
+            keepTenantIdFromEvent(boundedContext, event);
+
+            dispatchEvent(event);
+            assertTrue(TestProjection.processed(eventMessage));
+        }
     }
 
-    @Test
-    public void dispatch_several_events() {
-        checkDispatchesEvent(GivenEventMessage.projectCreated());
-        checkDispatchesEvent(GivenEventMessage.taskAdded());
-        checkDispatchesEvent(GivenEventMessage.projectStarted());
-    }
-
-    @Test
-    public void dispatch_event_to_archived_projection() {
-        PrjProjectArchived projectArchived = GivenEventMessage.projectArchived();
-        checkDispatchesEvent(projectArchived);
-        ProjectId projectId = projectArchived.getProjectId();
-        TestProjection projection = repository().findOrCreate(projectId);
-        assertTrue(projection.isArchived());
-
-        // Dispatch an event to the archived projection.
-        checkDispatchesEvent(GivenEventMessage.taskAdded());
-        projection = repository().findOrCreate(projectId);
-        List<Task> addedTasks = projection.getState()
-                                          .getTaskList();
-        assertFalse(addedTasks.isEmpty());
-
-        // Check that the projection was not re-created before dispatching.
-        assertTrue(projection.isArchived());
-    }
-
-    @Test
-    public void dispatch_event_to_deleted_projection() {
-        PrjProjectDeleted projectDeleted = GivenEventMessage.projectDeleted();
-        checkDispatchesEvent(projectDeleted);
-        ProjectId projectId = projectDeleted.getProjectId();
-        TestProjection projection = repository().findOrCreate(projectId);
-        assertTrue(projection.isDeleted());
-
-        // Dispatch an event to the deleted projection.
-        checkDispatchesEvent(GivenEventMessage.taskAdded());
-        projection = repository().findOrCreate(projectId);
-        List<Task> addedTasks = projection.getState()
-                                          .getTaskList();
-        assertTrue(projection.isDeleted());
-
-        // Check that the projection was not re-created before dispatching.
-        assertFalse(addedTasks.isEmpty());
-    }
-
-    @SuppressWarnings("CheckReturnValue") // can ignore dispatch() result in this test
+    @SuppressWarnings("CheckReturnValue") // Can ignore dispatch() result in this test.
     private void dispatchEvent(Event event) {
         repository().dispatch(EventEnvelope.of(event));
     }
 
-    private void checkDispatchesEvent(Message eventMessage) {
-        TestEventFactory eventFactory = newEventFactory(tenantId(), PRODUCER_ID);
-        Event event = eventFactory.createEvent(eventMessage);
-
-        keepTenantIdFromEvent(boundedContext, event);
-
-        dispatchEvent(event);
-        assertTrue(TestProjection.processed(eventMessage));
-    }
-
     @Test
-    public void log_error_if_dispatch_unknown_event() {
+    @DisplayName("log error when dispatching unknown event")
+    void logErrorOnUnknownEvent() {
         StringValue unknownEventMessage = StringValue.getDefaultInstance();
 
         Event event = GivenEvent.withMessage(unknownEventMessage);
@@ -295,23 +309,31 @@ public class ProjectionRepositoryShould
         assertTrue(testRepo.getLastException() instanceof IllegalArgumentException);
     }
 
-    @Test
-    public void return_event_classes() {
-        Set<EventClass> eventClasses = repository().getMessageClasses();
-        TestEventClasses.assertContains(eventClasses,
-                                        PrjProjectCreated.class,
-                                        PrjTaskAdded.class,
-                                        PrjProjectStarted.class);
+    @Nested
+    @DisplayName("return")
+    class Return {
+
+        @Test
+        @DisplayName("processed event classes")
+        void eventClasses() {
+            Set<EventClass> eventClasses = repository().getMessageClasses();
+            TestEventClasses.assertContains(eventClasses,
+                                            PrjProjectCreated.class,
+                                            PrjTaskAdded.class,
+                                            PrjProjectStarted.class);
+        }
+
+        @Test
+        @DisplayName("entity storage")
+        void entityStorage() {
+            RecordStorage<ProjectId> recordStorage = repository().recordStorage();
+            assertNotNull(recordStorage);
+        }
     }
 
     @Test
-    public void return_entity_storage() {
-        RecordStorage<ProjectId> recordStorage = repository().recordStorage();
-        assertNotNull(recordStorage);
-    }
-
-    @Test
-    public void convert_null_timestamp_to_default() {
+    @DisplayName("convert null timestamp to default")
+    void convertNullTimestamp() {
         Timestamp timestamp = getCurrentTime();
         assertEquals(timestamp, ProjectionRepository.nullToDefault(timestamp));
         assertEquals(Timestamp.getDefaultInstance(), ProjectionRepository.nullToDefault(null));
@@ -319,7 +341,8 @@ public class ProjectionRepositoryShould
 
     @SuppressWarnings("CheckReturnValue") // can ignore dispatch() result in this test
     @Test
-    public void do_not_create_record_if_entity_is_not_updated() {
+    @DisplayName("not create record if entity is not updated")
+    void notCreateRecordForUnchanged() {
         NoOpTaskNamesRepository repo = new NoOpTaskNamesRepository();
         boundedContext.register(repo);
 
@@ -342,7 +365,8 @@ public class ProjectionRepositoryShould
      * Beam-based catch-up are exposed.
      */
     @Test
-    public void expose_read_and_write_methods_for_last_handled_event_timestamp() {
+    @DisplayName("expose read and write methods for the timestamp of the last handled event")
+    void getSetLastHandled() {
         assertNotNull(repository().readLastHandledEventTime());
         repository().writeLastHandledEventTime(Time.getCurrentTime());
     }
@@ -352,30 +376,39 @@ public class ProjectionRepositoryShould
      * procedures is exposed.
      */
     @Test
-    public void crete_stream_query() {
+    @DisplayName("create stream query")
+    void createStreamQuery() {
         assertNotNull(repository().createStreamQuery());
     }
 
-    /**
-     * Ensures that {@link ProjectionRepository#getEventStore()} which is used by the catch-up
-     * functionality is exposed to the package.
-     */
-    @Test
-    public void expose_event_store_to_package() {
-        assertNotNull(repository().getEventStore());
+    @Nested
+    @DisplayName("provide package-private access to")
+    class ExposeToPackage {
+
+        /**
+         * Ensures that {@link ProjectionRepository#getEventStore()} which is used by the catch-up
+         * functionality is exposed to the package.
+         */
+        @Test
+        @DisplayName("event store")
+        void eventStore() {
+            assertNotNull(repository().getEventStore());
+        }
+
+        /**
+         * Ensures that {@link ProjectionRepository#boundedContext()} which is used by the catch-up
+         * functionality is exposed to the package.
+         */
+        @Test
+        @DisplayName("bounded context")
+        void boundedContext() {
+            assertNotNull(repository().boundedContext());
+        }
     }
 
-    /**
-     * Ensures that {@link ProjectionRepository#boundedContext()} which is used by the catch-up
-     * functionality is exposed to the package.
-     */
     @Test
-    public void expose_bounded_context_to_package() {
-        assertNotNull(repository().boundedContext());
-    }
-
-    @Test
-    public void throw_exception_on_attempt_to_register_in_bc_with_no_messages_handled() {
+    @DisplayName("throw ISE on registering to BC if repo is not subscribed to any messages")
+    void notRegisterIfSubscribedToNothing() {
         SensoryDeprivedProjectionRepository repo = new SensoryDeprivedProjectionRepository();
         BoundedContext boundedContext = BoundedContext
                 .newBuilder()

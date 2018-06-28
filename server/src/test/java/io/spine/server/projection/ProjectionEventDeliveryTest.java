@@ -19,7 +19,6 @@
  */
 package io.spine.server.projection;
 
-import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
@@ -31,26 +30,30 @@ import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.SingleSha
 import io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.TripleShardProjectRepository;
 import io.spine.test.projection.ProjectId;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
 import static io.spine.server.projection.given.ProjectionEventDeliveryTestEnv.projectCreated;
 
 /**
  * @author Alex Tymchenko
  */
-public class ProjectionEventDeliveryShould extends AbstractMessageDeliveryTest {
+@DisplayName("ProjectionEventDelivery should")
+class ProjectionEventDeliveryTest extends AbstractMessageDeliveryTest {
 
     @Override
     @BeforeEach
-    public void setUp() {
+    protected void setUp() {
         super.setUp();
         DeliveryProjection.getStats()
                           .clear();
     }
 
     @Test
-    public void dispatch_events_to_single_shard_in_multithreaded_env() throws Exception {
+    @DisplayName("dispatch events to single shard in multithreaded env")
+    void dispatchToSingleShard() throws Exception {
         final ParallelDispatcher<ProjectId, Event> dispatcher =
                 new ParallelDispatcher<ProjectId, Event>(
                         180, 819, dispatchWaitTime()) {
@@ -67,7 +70,7 @@ public class ProjectionEventDeliveryShould extends AbstractMessageDeliveryTest {
                     @Override
                     protected void postToBus(BoundedContext context, Event event) {
                         context.getEventBus()
-                               .post(event, StreamObservers.<Ack>noOpObserver());
+                               .post(event, noOpObserver());
                     }
                 };
 
@@ -75,7 +78,8 @@ public class ProjectionEventDeliveryShould extends AbstractMessageDeliveryTest {
     }
 
     @Test
-    public void dispatch_events_to_multiple_shard_in_multithreaded_env() throws Exception {
+    @DisplayName("dispatch events to several shards in multithreaded env")
+    void dispatchToSeveralShards() throws Exception {
         final ParallelDispatcher<ProjectId, Event> dispatcher =
                 new ParallelDispatcher<ProjectId, Event>(
                         270, 1637, dispatchWaitTime()) {
@@ -92,7 +96,7 @@ public class ProjectionEventDeliveryShould extends AbstractMessageDeliveryTest {
                     @Override
                     protected void postToBus(BoundedContext context, Event event) {
                         context.getEventBus()
-                               .post(event, StreamObservers.<Ack>noOpObserver());
+                               .post(event, noOpObserver());
                     }
                 };
 

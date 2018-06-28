@@ -20,27 +20,29 @@
 
 package io.spine.server.rejection;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.Rejection;
-import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
-import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
-import org.junit.Before;
-import org.junit.Test;
+import io.spine.server.rejection.given.DelegatingRejectionDispatcherTestEnv.EmptyRejectionDispatcherDelegate;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import java.util.Set;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-public class DelegatingRejectionDispatcherShould {
+/**
+ * @author Alexander Yevsyukov
+ */
+@DisplayName("DelegatingRejectionDispatcher should")
+class DelegatingRejectionDispatcherTest {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
@@ -49,8 +51,8 @@ public class DelegatingRejectionDispatcherShould {
     private DelegatingRejectionDispatcher delegatingDispatcher;
     private RejectionEnvelope rejectionEnvelope;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         delegate = new EmptyRejectionDispatcherDelegate();
         delegatingDispatcher = DelegatingRejectionDispatcher.of(delegate);
 
@@ -64,70 +66,35 @@ public class DelegatingRejectionDispatcherShould {
     }
 
     @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(RejectionDispatcherDelegate.class, delegate)
                 .testAllPublicStaticMethods(DelegatingRejectionDispatcher.class);
     }
 
     @Test
-    public void return_rejection_classes_of_the_delegate() {
+    @DisplayName("return rejection classes of delegate")
+    void getDelegateRejectionTypes() {
         assertEquals(delegatingDispatcher.getMessageClasses(),
                      delegate.getRejectionClasses());
     }
 
-    @SuppressWarnings("CheckReturnValue") // can ignore in this test
+    @SuppressWarnings("CheckReturnValue") // Can ignore in this test.
     @Test
-    public void dispatch_rejection() {
+    @DisplayName("dispatch rejection")
+    void dispatchRejection() {
         delegatingDispatcher.dispatch(rejectionEnvelope);
 
         assertTrue(delegate.dispatchCalled());
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
-    public void delegate_onError() {
+    @DisplayName("delegate `onError`")
+    void delegateOnError() {
         delegatingDispatcher.onError(rejectionEnvelope, new RuntimeException(getClass().getName()));
 
         assertTrue(delegate.onErrorCalled());
-    }
-
-    /*
-     * Test Environment
-     ****************************/
-
-    private static final class EmptyRejectionDispatcherDelegate
-            implements RejectionDispatcherDelegate<String> {
-
-        private boolean onErrorCalled;
-        private boolean dispatchCalled;
-
-        @Override
-        public Set<RejectionClass> getRejectionClasses() {
-            return ImmutableSet.of(RejectionClass.of(EntityAlreadyArchived.class));
-        }
-
-        @Override
-        public Set<RejectionClass> getExternalRejectionClasses() {
-            return ImmutableSet.of();
-        }
-
-        @Override
-        public Set<String> dispatchRejection(RejectionEnvelope envelope) {
-            dispatchCalled = true;
-            return ImmutableSet.of(toString());
-        }
-
-        @Override
-        public void onError(RejectionEnvelope envelope, RuntimeException exception) {
-            onErrorCalled = true;
-        }
-
-        private boolean onErrorCalled() {
-            return onErrorCalled;
-        }
-
-        private boolean dispatchCalled() {
-            return dispatchCalled;
-        }
     }
 }

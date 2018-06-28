@@ -25,8 +25,11 @@ import io.spine.core.Subscribe;
 import io.spine.test.rejection.ProjectRejections;
 
 import static io.spine.core.Rejections.getMessage;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 public class RejectionMessageSubscriber extends VerifiableSubscriber {
 
     private ProjectRejections.MissingOwner rejection;

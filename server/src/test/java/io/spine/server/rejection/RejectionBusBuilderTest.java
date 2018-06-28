@@ -17,42 +17,23 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package io.spine.server.rejection;
 
-package io.spine.server.route;
-
-import com.google.protobuf.Message;
-import io.spine.test.Tests;
-import org.junit.Test;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import io.spine.core.Rejection;
+import io.spine.core.RejectionEnvelope;
+import io.spine.server.bus.BusBuilderTest;
+import org.junit.jupiter.api.DisplayName;
 
 /**
- * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-public class EventProducersShould {
+@DisplayName("RejectionBus Builder should")
+class RejectionBusBuilderTest extends BusBuilderTest<RejectionBus.Builder,
+        RejectionEnvelope,
+        Rejection> {
 
-    @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(EventProducers.class);
-    }
-
-    @Test
-    public void create_function_for_taking_id_fromContext() {
-        final EventRoute<Object, Message> fn = EventProducers.fromContext();
-        assertFunction(fn);
-    }
-
-    @Test
-    public void create_function_for_getting_id_fromFirstMessageField() {
-        final EventRoute<Object, Message> fn = EventProducers.fromFirstMessageField();
-        assertFunction(fn);
-    }
-
-    private static void assertFunction(EventRoute<Object, Message> fn) {
-        assertNotNull(fn);
-
-        // Check that custom toString() is provided.
-        assertFalse(fn.toString().contains(EventRoute.class.getSimpleName()));
+    @Override
+    protected RejectionBus.Builder builder() {
+        return RejectionBus.newBuilder();
     }
 }

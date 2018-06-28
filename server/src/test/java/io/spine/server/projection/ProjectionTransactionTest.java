@@ -19,39 +19,37 @@
  */
 package io.spine.server.projection;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
-import io.spine.core.Subscribe;
 import io.spine.core.Version;
 import io.spine.core.Versions;
-import io.spine.server.entity.ThrowingValidatingBuilder;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionTest;
-import io.spine.server.projection.ProjectionTransactionShould.PatchedProjectBuilder;
+import io.spine.server.projection.given.ProjectionTransactionTestEnv.PatchedProjectBuilder;
+import io.spine.server.projection.given.ProjectionTransactionTestEnv.TestProjection;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.validate.ConstraintViolation;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 import java.util.List;
 
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alex Tymchenko
  */
-public class ProjectionTransactionShould
+@DisplayName("ProjectionTransaction should")
+class ProjectionTransactionTest
         extends TransactionTest<ProjectId,
                                 Projection<ProjectId, Project, PatchedProjectBuilder>,
                                 Project,
@@ -149,11 +147,13 @@ public class ProjectionTransactionShould
      * This test is ignored as the expected behavior has been changed for the projection
      * transactions.
      *
-     * <p>{@link #increment_version_on_event() Another test method} is created to test the new
+     * <p>{@linkplain #incrementVersionOnEvent() Another test method} is created to test the new
      * behavior. Please refer to it for more details.
      */
-    @Ignore
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Same display names to ancestor.
+    @Disabled
     @Test
+    @DisplayName("advance version from event")
     @Override
     public void advanceVersionFromEvent() {
     }
@@ -161,14 +161,15 @@ public class ProjectionTransactionShould
     /**
      * Tests the version advancement strategy for the {@link Projection}s.
      *
-     * <p>The versioning strategy is for {@link Projection} is
+     * <p>The versioning strategy for {@link Projection} is
      * {@link io.spine.server.entity.EntityVersioning#AUTO_INCREMENT AUTO_INCREMENT}. This test
      * case substitutes {@link #advanceVersionFromEvent()}, which tested the behavior of
      * {@link io.spine.server.entity.EntityVersioning#FROM_EVENT FROM_EVENT} strategy.
      */
-    @SuppressWarnings("CheckReturnValue") // can ignore value of play() in this test
+    @SuppressWarnings("CheckReturnValue") // Can ignore value of play() in this test.
     @Test
-    public void increment_version_on_event() {
+    @DisplayName("increment version on event")
+    void incrementVersionOnEvent() {
         Projection<ProjectId, Project, PatchedProjectBuilder> entity = createEntity();
         Version oldVersion = entity.getVersion();
         Event event = createEvent(createEventMessage());
@@ -178,63 +179,5 @@ public class ProjectionTransactionShould
                                                  .getNumber());
         assertNotEquals(event.getContext()
                              .getVersion(), entity.getVersion());
-    }
-
-    @SuppressWarnings({"MethodMayBeStatic", "unused"})  // Methods accessed via reflection.
-    static class TestProjection
-            extends Projection<ProjectId, Project, PatchedProjectBuilder> {
-
-        private final List<Message> receivedEvents = newLinkedList();
-        private final List<ConstraintViolation> violations;
-
-        private TestProjection(ProjectId id) {
-            this(id, null);
-        }
-
-        private TestProjection(ProjectId id, @Nullable List<ConstraintViolation> violations) {
-            super(id);
-            this.violations = violations;
-        }
-
-        @Override
-        protected List<ConstraintViolation> checkEntityState(Project newState) {
-            if (violations != null) {
-                return ImmutableList.copyOf(violations);
-            }
-            return super.checkEntityState(newState);
-        }
-
-        @Subscribe
-        public void event(PrjProjectCreated event) {
-            receivedEvents.add(event);
-            final Project newState = Project.newBuilder(getState())
-                                            .setId(event.getProjectId())
-                                            .build();
-            getBuilder().mergeFrom(newState);
-        }
-
-        @Subscribe
-        public void event(PrjTaskAdded event) {
-            throw new RuntimeException("that tests the projection tx behaviour");
-        }
-
-        private List<Message> getReceivedEvents() {
-            return ImmutableList.copyOf(receivedEvents);
-        }
-    }
-
-    /**
-     * Custom implementation of {@code ValidatingBuilder}, which allows to simulate an error
-     * during the state building.
-     *
-     * <p>Must be declared {@code public} to allow accessing from the
-     * {@linkplain io.spine.validate.ValidatingBuilders#newInstance(Class) factory method}.
-     */
-    public static class PatchedProjectBuilder
-            extends ThrowingValidatingBuilder<Project, Project.Builder> {
-
-        public static PatchedProjectBuilder newBuilder() {
-            return new PatchedProjectBuilder();
-        }
     }
 }

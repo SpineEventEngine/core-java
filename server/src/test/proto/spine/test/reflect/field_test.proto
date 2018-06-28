@@ -31,7 +31,7 @@ option java_outer_classname = "FieldShouldShouldProto";
 import "google/protobuf/wrappers.proto";
 
 
-// Only for usage in `FieldShould` class.
+// Only for usage in `FieldTest` class.
 
 message MessageWithStringValue {
     google.protobuf.StringValue value = 1;
