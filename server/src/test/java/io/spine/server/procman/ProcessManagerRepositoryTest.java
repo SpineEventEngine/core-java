@@ -437,7 +437,7 @@ class ProcessManagerRepositoryTest
 
     @Test
     @DisplayName("throw ISE on registering to BC if repo is not subscribed to any messages")
-    void notRegisterIfNothingHandled() {
+    void notRegisterIfSubscribedToNothing() {
         SensoryDeprivedPmRepository repo = new SensoryDeprivedPmRepository();
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .setMultitenant(false)

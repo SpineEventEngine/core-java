@@ -408,7 +408,7 @@ class ProjectionRepositoryTest
 
     @Test
     @DisplayName("throw ISE on registering to BC if repo is not subscribed to any messages")
-    void notRegisterIfNothingHandled() {
+    void notRegisterIfSubscribedToNothing() {
         SensoryDeprivedProjectionRepository repo = new SensoryDeprivedProjectionRepository();
         BoundedContext boundedContext = BoundedContext
                 .newBuilder()
