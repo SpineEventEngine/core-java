@@ -145,7 +145,7 @@ public abstract class AggregateStorageTest
             "RefusedBequest",
             "MethodDoesntCallSuperMethod"
     })
-    protected void rewriteRecordIfWriteByTheSameId() {
+    protected void rewriteRecord() {
     }
 
     /**
