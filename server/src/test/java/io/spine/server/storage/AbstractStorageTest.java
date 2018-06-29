@@ -61,6 +61,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @param <I> the type of IDs of storage records
  * @param <M> the type of records kept in the storage
  * @param <R> the type of read requests for the storage
+ *
  * @author Alexander Litus
  */
 @SuppressWarnings({"ClassWithTooManyMethods",

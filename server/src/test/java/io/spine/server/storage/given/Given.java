@@ -28,6 +28,11 @@ import io.spine.test.storage.event.StgProjectCreated;
 
 import static io.spine.base.Identifier.newUuid;
 
+/**
+ * @author Alexander Yevsyukov
+ * @author Andrey Lavrov
+ * @author Alexander Aleksandrov
+ */
 public class Given {
 
     private Given() {
