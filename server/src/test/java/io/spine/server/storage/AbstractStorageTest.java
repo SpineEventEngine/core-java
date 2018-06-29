@@ -327,12 +327,12 @@ public abstract class AbstractStorageTest<I,
     }
 
     @Nested
-    @DisplayName("close itself and throw ISE")
-    class CloseAndThrow {
+    @DisplayName("close itself and throw ISE on")
+    class CloseAndThrowOn {
 
         @Test
-        @DisplayName("on read operation")
-        void onRead() {
+        @DisplayName("read operation")
+        void read() {
             closeAndFailIfException(storage);
 
             R readRequest = newReadRequest(newId());
@@ -340,8 +340,8 @@ public abstract class AbstractStorageTest<I,
         }
 
         @Test
-        @DisplayName("on write operation")
-        void onWrite() {
+        @DisplayName("write operation")
+        void write() {
             closeAndFailIfException(storage);
 
             assertThrows(IllegalStateException.class,
@@ -349,8 +349,8 @@ public abstract class AbstractStorageTest<I,
         }
 
         @Test
-        @DisplayName("on close operation")
-        void onClose() {
+        @DisplayName("close operation")
+        void close() {
             storage.close();
             assertThrows(IllegalStateException.class, () -> storage.close());
         }
