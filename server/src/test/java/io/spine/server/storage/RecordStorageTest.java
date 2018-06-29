@@ -156,7 +156,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
     // Converter nullability issues and Optional getting
     @Test
     @DisplayName("write and read record by Message ID")
-    void writeAndReadRecordByMessageId() {
+    void writeAndReadByMessageId() {
         RecordStorage<I> storage = getStorage();
         I id = newId();
         EntityRecord expected = newStorageRecord(id);
@@ -172,7 +172,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
 
     @Test
     @DisplayName("retrieve empty iterator if storage is empty")
-    void retrieveEmptyIteratorIfStorageIsEmpty() {
+    void retrieveEmptyIterator() {
         FieldMask nonEmptyFieldMask = FieldMask.newBuilder()
                                                .addPaths("invalid-path")
                                                .build();
@@ -266,7 +266,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
 
     @Test
     @DisplayName("write none storage fields if none are passed")
-    void writeNoneStorageFieldsIsNonePassed() {
+    void writeNoneFieldsIfNonePassed() {
         RecordStorage<I> storage = spy(getStorage());
         I id = newId();
         Any state = pack(Sample.messageOfType(Project.class));
@@ -354,7 +354,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
 
     @Test
     @DisplayName("fail to write visibility to non-existing record")
-    void failToWriteVisibilityToNonExistingRecord() {
+    void notWriteStatusToNonExistent() {
         I id = newId();
         RecordStorage<I> storage = getStorage();
 

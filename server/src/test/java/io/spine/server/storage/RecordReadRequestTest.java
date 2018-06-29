@@ -36,7 +36,7 @@ class RecordReadRequestTest {
 
     @Test
     @DisplayName("not accept null ID")
-    void notAcceptNullID() {
+    void notAcceptNullId() {
         assertThrows(NullPointerException.class, () -> new RecordReadRequest<>(nullRef()));
     }
 

@@ -477,7 +477,7 @@ class StandTest extends TenantAwareTest {
 
     @Test
     @DisplayName("trigger subscription callbacks matching by ID")
-    void triggerSubscriptionCallbacksMatchingById() {
+    void triggerSubscriptionsMatchingById() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
 
         final Map<CustomerId, Customer> sampleCustomers = fillSampleCustomers(10);
@@ -645,7 +645,7 @@ class StandTest extends TenantAwareTest {
     }
 
     @Test
-    @DisplayName("retrieve only selected param for query")
+    @DisplayName("retrieve only selected parameter for query")
     void readOnlySelectedParam() {
         requestSampleCustomer(new int[]{Customer.NAME_FIELD_NUMBER - 1}, new MemoizeQueryResponseObserver() {
             @Override
@@ -667,7 +667,7 @@ class StandTest extends TenantAwareTest {
     }
 
     @Test
-    @DisplayName("retrieve collection fields if required")
+    @DisplayName("retrieve collection fields if they are required")
     void readCollectionFields() {
         requestSampleCustomer(
                 new int[]{Customer.NICKNAMES_FIELD_NUMBER - 1},
@@ -727,7 +727,7 @@ class StandTest extends TenantAwareTest {
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     @DisplayName("select entity singleton by ID and apply field masks")
-    void selectEntityByIdAndApplyMasks() {
+    void selectByIdAndApplyMasks() {
         final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
         final String customerDescriptor = Customer.getDescriptor()
                                                   .getFullName();
@@ -994,7 +994,7 @@ class StandTest extends TenantAwareTest {
         }
 
         @Test
-        @DisplayName("if invalid subscription message is passed to activate")
+        @DisplayName("if invalid subscription message is passed on activation")
         void ifActivateWithInvalidMessage() {
 
             final Stand stand = Stand.newBuilder()
@@ -1011,7 +1011,7 @@ class StandTest extends TenantAwareTest {
         }
 
         @Test
-        @DisplayName("if invalid subscription message is passed to cancel")
+        @DisplayName("if invalid subscription message is passed on cancel")
         void ifCancelWithInvalidMessage() {
 
             final Stand stand = Stand.newBuilder()

@@ -154,7 +154,7 @@ class StorageFactorySwitchTest {
     @SuppressWarnings("AccessOfSystemProperties") // OK for this test.
     @Test
     @DisplayName("throw ISE if production supplier is not present when in non-test mode")
-    void throwIllegalStateExceptionIfProductionSupplierIsNonTestsMode() {
+    void throwOnNoProductionSupplier() {
         // Clear cached value for tests mode that may be left from the previous tests.
         Environment.getInstance()
                    .reset();

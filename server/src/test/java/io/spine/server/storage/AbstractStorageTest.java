@@ -176,25 +176,25 @@ public abstract class AbstractStorageTest<I,
     }
 
     @Nested
-    @DisplayName("throw NPE")
-    class ThrowNpe {
+    @DisplayName("throw NPE when")
+    class ThrowNpeIf {
 
         @Test
-        @DisplayName("when reading by null ID")
-        void ifReadByNullId() {
+        @DisplayName("reading by null ID")
+        void readByNullId() {
             assertThrows(NullPointerException.class, () -> storage.read(nullRef()));
         }
 
         @Test
-        @DisplayName("when writing by null ID")
-        void ifWriteByNullId() {
+        @DisplayName("writing by null ID")
+        void writeByNullId() {
             assertThrows(NullPointerException.class,
                          () -> storage.write(nullRef(), newStorageRecord()));
         }
 
         @Test
-        @DisplayName("when writing null record")
-        void ifWriteNullRecord() {
+        @DisplayName("writing null record")
+        void writeNullRecord() {
             assertThrows(NullPointerException.class, () -> storage.write(newId(), nullRef()));
         }
     }
@@ -205,13 +205,13 @@ public abstract class AbstractStorageTest<I,
 
         @Test
         @DisplayName("one record")
-        void writeAndReadRecord() {
+        void record() {
             writeAndReadRecordTest(newId());
         }
 
         @Test
         @DisplayName("several records by different IDs")
-        void writeAndReadSeveralRecordsByDifferentIds() {
+        void severalRecords() {
             writeAndReadRecordTest(newId());
             writeAndReadRecordTest(newId());
             writeAndReadRecordTest(newId());
@@ -219,8 +219,8 @@ public abstract class AbstractStorageTest<I,
     }
 
     @Test
-    @DisplayName("rewrite record if write by the same ID")
-    protected void rewriteRecordIfWriteByTheSameId() {
+    @DisplayName("re-write record if writing by the same ID")
+    protected void rewriteRecord() {
         I id = newId();
         writeAndReadRecordTest(id);
         writeAndReadRecordTest(id);
@@ -294,8 +294,8 @@ public abstract class AbstractStorageTest<I,
     }
 
     @Nested
-    @DisplayName("return if storage is")
-    class ReturnIfStorageIs {
+    @DisplayName("tell if storage is")
+    class TellIfStorageIs {
 
         @Test
         @DisplayName("opened")
@@ -347,13 +347,13 @@ public abstract class AbstractStorageTest<I,
             assertThrows(IllegalStateException.class,
                          () -> storage.write(newId(), newStorageRecord()));
         }
-    }
 
-    @Test
-    @DisplayName("throw ISE if closing twice")
-    void notCloseTwice() {
-        storage.close();
-        assertThrows(IllegalStateException.class, () -> storage.close());
+        @Test
+        @DisplayName("on close operation")
+        void onClose() {
+            storage.close();
+            assertThrows(IllegalStateException.class, () -> storage.close());
+        }
     }
 
     @SuppressWarnings("MismatchedQueryAndUpdateOfCollection"/* Storing of generated objects and

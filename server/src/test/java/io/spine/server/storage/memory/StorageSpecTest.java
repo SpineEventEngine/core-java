@@ -33,6 +33,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.BoundedContext.newName;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -42,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class StorageSpecTest {
 
     @Test
-    @DisplayName("pass null tolerance check")
+    @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(TypeUrl.class, TypeUrl.of(Empty.class))
@@ -80,8 +81,8 @@ class StorageSpecTest {
     }
 
     @Test
-    @DisplayName("serialize")
-    void serialize() {
+    @DisplayName("be serialized")
+    void beSerialized() {
         SerializableTester.reserializeAndAssert(
                 StorageSpec.of(newName(getClass().getSimpleName()),
                                TypeUrl.of(DoubleValue.class),

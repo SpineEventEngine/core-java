@@ -40,7 +40,7 @@ class AggregateStateIdTest {
     @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
     @DisplayName("not accept nulls on construction")
-    void rejectNullOnConstruction() {
+    void rejectNullsOnConstruction() {
         new NullPointerTester()
                 .setDefault(TypeUrl.class, TypeUrl.of(Any.class))
                 .testStaticMethods(AggregateStateId.class, NullPointerTester.Visibility.PACKAGE);

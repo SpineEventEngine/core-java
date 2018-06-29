@@ -153,7 +153,7 @@ class AggregateStateIdStringifierTest {
 
         @Test
         @DisplayName("Message, if type is registered")
-        void unpackRegisteredMessageIds() {
+        void ofMessageType() {
             final ProjectId messageId = Sample.messageOfType(ProjectId.class);
             final String stringMessageId = Stringifiers.toString(messageId);
             final String stringId = ANY_TYPE_URL.value() + '-' + TypeName.of(ProjectId.class)
@@ -193,7 +193,7 @@ class AggregateStateIdStringifierTest {
 
         @Test
         @DisplayName("with no state type URL")
-        void withNoStateTypeURL() {
+        void withNoStateTypeUrl() {
             final String invalidId = "-INT-42";
             assertThrows(IllegalArgumentException.class,
                          () -> stringifier().reverse()

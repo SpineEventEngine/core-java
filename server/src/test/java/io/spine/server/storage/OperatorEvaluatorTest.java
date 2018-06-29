@@ -39,6 +39,7 @@ import static io.spine.client.ColumnFilter.Operator.GREATER_THAN;
 import static io.spine.client.ColumnFilter.Operator.LESS_OR_EQUAL;
 import static io.spine.client.ColumnFilter.Operator.LESS_THAN;
 import static io.spine.server.storage.OperatorEvaluator.eval;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.nullRef;
 import static io.spine.time.Durations2.seconds;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -59,8 +60,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class OperatorEvaluatorTest {
 
     @Test
-    @DisplayName("not accept nulls")
-    void notAcceptNulls() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .testStaticMethods(OperatorEvaluator.class, PACKAGE);
     }
@@ -68,7 +69,7 @@ class OperatorEvaluatorTest {
     @SuppressWarnings("RedundantStringConstructorCall") // We need an equal but not the same object
     @Test
     @DisplayName("compare equal instances")
-    void compareEqualInstances() {
+    void compareEqual() {
         String left = "myobject";
         Object right = new String(left);
         Object third = new String(left);
@@ -84,7 +85,7 @@ class OperatorEvaluatorTest {
 
     @Test
     @DisplayName("compare not equal instances")
-    void compareNotEqualInstances() {
+    void compareNotEqual() {
         Object left = "one!";
         Object right = "another!";
 
