@@ -24,7 +24,6 @@ import com.google.common.base.Optional;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
-import io.spine.test.Tests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,13 +36,14 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static io.spine.test.Tests.nullRef;
 import static io.spine.test.Verify.assertContainsAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * An abstract base for test suites testing storages.
@@ -182,20 +182,20 @@ public abstract class AbstractStorageTest<I,
         @Test
         @DisplayName("when reading by null ID")
         void ifReadByNullId() {
-            assertThrows(NullPointerException.class, () -> storage.read(Tests.nullRef()));
+            assertThrows(NullPointerException.class, () -> storage.read(nullRef()));
         }
 
         @Test
         @DisplayName("when writing by null ID")
         void ifWriteByNullId() {
             assertThrows(NullPointerException.class,
-                         () -> storage.write(Tests.nullRef(), newStorageRecord()));
+                         () -> storage.write(nullRef(), newStorageRecord()));
         }
 
         @Test
         @DisplayName("when writing null record")
         void ifWriteNullRecord() {
-            assertThrows(NullPointerException.class, () -> storage.write(newId(), Tests.nullRef()));
+            assertThrows(NullPointerException.class, () -> storage.write(newId(), nullRef()));
         }
     }
 
@@ -350,7 +350,7 @@ public abstract class AbstractStorageTest<I,
     }
 
     @Test
-    @DisplayName("throw exception if close twice")
+    @DisplayName("throw ISE if closing twice")
     void notCloseTwice() {
         storage.close();
         assertThrows(IllegalStateException.class, () -> storage.close());
