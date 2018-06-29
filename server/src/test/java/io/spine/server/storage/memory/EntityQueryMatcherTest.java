@@ -68,7 +68,7 @@ class EntityQueryMatcherTest {
 
     @Test
     @DisplayName("match everything except null to empty query")
-    void matchEverythingExceptNullToEmptyQuery() {
+    void matchEverythingToEmpty() {
         final Collection<Object> idFilter = Collections.emptyList();
         final EntityQuery<?> query = createQuery(idFilter, defaultQueryParameters());
 
@@ -79,7 +79,7 @@ class EntityQueryMatcherTest {
     }
 
     @Test
-    @DisplayName("match ids")
+    @DisplayName("match IDs")
     void matchIds() {
         final Message genericId = Sample.messageOfType(ProjectId.class);
         final Collection<Object> idFilter = Collections.<Object>singleton(genericId);
@@ -180,7 +180,7 @@ class EntityQueryMatcherTest {
 
     @Test
     @DisplayName("not match by wrong field name")
-    void notMatchByWrongFieldName() {
+    void notMatchByWrongField() {
         final String wrongName = "wrong";
         final EntityColumn target = mock(EntityColumn.class);
 

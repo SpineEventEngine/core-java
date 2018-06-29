@@ -24,13 +24,12 @@ import com.google.common.base.Supplier;
 import io.spine.base.Environment;
 import io.spine.core.BoundedContextName;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.server.BoundedContext.newName;
 import static org.junit.Assert.assertEquals;
@@ -58,7 +57,7 @@ class StorageFactorySwitchTest {
     // OK as we use the field after the initialization in storeEnvironment().
     private static Environment storedEnvironment;
 
-    private final boolean multitenant;
+    private boolean multitenant;
     private final BoundedContextName boundedContextName = newName(getClass().getSimpleName());
 
     private final Supplier<StorageFactory> testsSupplier = new Supplier<StorageFactory>() {
@@ -76,12 +75,12 @@ class StorageFactorySwitchTest {
 
     private StorageFactorySwitch storageFactorySwitch;
 
-    StorageFactorySwitchTest(boolean multitenant) {
-        this.multitenant = multitenant;
+    protected StorageFactorySwitchTest() {
+        setMultitenant(false);
     }
 
-    public StorageFactorySwitchTest() {
-        this(false);
+    protected final void setMultitenant(boolean multitenant) {
+        this.multitenant = multitenant;
     }
 
     @BeforeAll
@@ -118,8 +117,8 @@ class StorageFactorySwitchTest {
     }
 
     @Test
-    @DisplayName("return InMemoryStorageFactory in tests if tests supplier was not set")
-    void returnInMemoryStorageFactoryInTestsIfTestsSupplierWasNotSet() {
+    @DisplayName("return InMemoryStorageFactory in tests if test supplier was not set")
+    void returnInMemoryByDefault() {
         StorageFactory storageFactory = storageFactorySwitch.get();
 
         assertNotNull(storageFactory);
@@ -128,7 +127,7 @@ class StorageFactorySwitchTest {
 
     @Test
     @DisplayName("return custom test StorageFactory if supplier for tests was set")
-    void returnCustomTestStorageFactoryIfSupplierForTestsWasSet() {
+    void returnCustomIfSet() {
         // This call avoids the racing conditions anomaly when running
         // the Gradle build from the console.
         // Despite the fact that we reset the switch state in `cleanUp()`, we still
@@ -154,7 +153,7 @@ class StorageFactorySwitchTest {
 
     @SuppressWarnings("AccessOfSystemProperties") // OK for this test.
     @Test
-    @DisplayName("throw IllegalStateException if production supplier is non tests mode")
+    @DisplayName("throw ISE if production supplier is not present when in non-test mode")
     void throwIllegalStateExceptionIfProductionSupplierIsNonTestsMode() {
         // Clear cached value for tests mode that may be left from the previous tests.
         Environment.getInstance()
@@ -171,8 +170,8 @@ class StorageFactorySwitchTest {
 
     @SuppressWarnings("CheckReturnValue") // ignore value of get() since we tests caching
     @Test
-    @DisplayName("cache instance of StorageFactory in testing")
-    void cacheInstanceOfStorageFactoryInTesting() {
+    @DisplayName("cache instance of StorageFactory in tests")
+    void cacheInTest() {
         Supplier<StorageFactory> testingSupplier = spy(testsSupplier);
 
         storageFactorySwitch.init(productionSupplier, testingSupplier);
@@ -189,7 +188,7 @@ class StorageFactorySwitchTest {
     @SuppressWarnings("CheckReturnValue") // ignore value of get() since we tests caching
     @Test
     @DisplayName("cache instance of StorageFactory in production")
-    void cacheInstanceOfStorageFactoryInProduction() {
+    void cacheInProduction() {
         Supplier<StorageFactory> prodSupplier = spy(productionSupplier);
 
         storageFactorySwitch.init(prodSupplier, testsSupplier);

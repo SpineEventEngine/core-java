@@ -65,8 +65,8 @@ class StorageSpecTest {
     }
 
     @Test
-    @DisplayName("provide equals based on values")
-    void provideEqualsBasedOnValues() {
+    @DisplayName("provide `equals` based on values")
+    void provideEquals() {
         final BoundedContextName bcName = newName(getClass().getName());
 
         new EqualsTester()

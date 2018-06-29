@@ -194,31 +194,31 @@ class StandPostTest {
 
     @Test
     @DisplayName("deliver updates from projection repository")
-    void deliverUpdatesFromProjectionRepository() {
+    void deliverFromProjectionRepo() {
         checkUpdatesDelivery(false, StandPostTest::projectionRepositoryDispatch);
     }
 
     @Test
     @DisplayName("deliver updates from aggregate repository")
-    void deliverUpdatesFromAggregateRepository() {
+    void deliverFromAggregateRepo() {
         checkUpdatesDelivery(false, StandPostTest::aggregateRepositoryDispatch);
     }
 
     @Test
     @DisplayName("deliver updates from several repositories in single thread")
-    void deliverUpdatesFromSeveralRepositoriesInSingleThread() {
+    void deliverFromSeveralRepos() {
         checkUpdatesDelivery(false, getSeveralRepositoryDispatchCalls());
     }
 
     @Test
     @DisplayName("deliver updates from several repositories in multiple threads")
-    void deliverUpdatesFromSeveralRepositoriesInMultipleThreads() {
+    void deliverFromConcurrentRepos() {
         checkUpdatesDelivery(true, getSeveralRepositoryDispatchCalls());
     }
 
     @Test
     @DisplayName("deliver updates through several threads")
-    void deliverUpdatesThroughSeveralThreads() throws InterruptedException {
+    void deliverThroughSeveralThreads() throws InterruptedException {
         int threadsCount = Given.THREADS_COUNT_IN_POOL_EXECUTOR;
 
         Set<String> threadInvocationRegistry = new ConcurrentSet<>();

@@ -39,7 +39,7 @@ class AggregateStateIdTest {
 
     @Test
     @DisplayName("not accept nulls on construction")
-    void notAcceptNullsOnConstruction() {
+    void rejectNullOnConstruction() {
         new NullPointerTester()
                 .setDefault(TypeUrl.class, TypeUrl.of(Any.class))
                 .testStaticMethods(AggregateStateId.class, NullPointerTester.Visibility.PACKAGE);
@@ -48,7 +48,7 @@ class AggregateStateIdTest {
     @Test
     @DisplayName("have stringifier")
     void haveStringifier() throws ClassNotFoundException {
-        // Ensure class loaded
+        // Ensure class loaded.
         Class.forName(AggregateStateId.class.getCanonicalName());
 
         final Optional<Stringifier<AggregateStateId>> stringifierOptional =

@@ -40,6 +40,7 @@ import io.spine.test.storage.TaskId;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -57,6 +58,7 @@ import static java.lang.String.format;
 /**
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings("unused") // JUnit Nested classes considered unused in abstract class.
 public abstract class StandStorageTest extends RecordStorageTest<AggregateStateId,
                                                                    StandStorage> {
 
@@ -84,79 +86,84 @@ public abstract class StandStorageTest extends RecordStorageTest<AggregateStateI
         return project;
     }
 
-    @Test
-    @DisplayName("retrieve all records")
-    void retrieveAllRecords() {
-        final StandStorage storage = getStorage();
-        final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER);
+    @Nested
+    @DisplayName("read records")
+    class ReadRecords {
 
-        final Iterator<EntityRecord> allRecords = storage.readAll();
-        checkIds(ids, allRecords);
-    }
+        @Test
+        @DisplayName("all")
+        void all() {
+            final StandStorage storage = getStorage();
+            final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER);
 
-    @Test
-    @DisplayName("retrieve records by ids")
-    void retrieveRecordsByIds() {
-        final StandStorage storage = getStorage();
-        // Use a subset of IDs
-        final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER).subList(0, 5);
-
-        final Iterator<EntityRecord> records = storage.readMultiple(ids);
-        checkIds(ids, records);
-    }
-
-    @Test
-    @DisplayName("read all records of given type")
-    void readAllRecordsOfGivenType() {
-        checkByTypeRead(FieldMask.getDefaultInstance());
-    }
-
-    @Test
-    @DisplayName("read all records of given type with field mask")
-    void readAllRecordsOfGivenTypeWithFieldMask() {
-        final FieldMask mask = FieldMasks.maskOf(Project.getDescriptor(), 1, 2);
-        checkByTypeRead(mask);
-    }
-
-    @SuppressWarnings({"MethodWithMultipleLoops", "ConstantConditions"}) // OK for this test.
-    private void checkByTypeRead(FieldMask fieldMask) {
-        final boolean withFieldMask = !fieldMask.equals(FieldMask.getDefaultInstance());
-        final StandStorage storage = getStorage();
-        final TypeUrl type = TypeUrl.from(Project.getDescriptor());
-
-        final int projectsCount = 4;
-        final List<AggregateStateId> projectIds = fill(storage, projectsCount, DEFAULT_ID_SUPPLIER);
-
-        final int tasksCount = 5;
-        for (int i = 0; i < tasksCount; i++) {
-            final TaskId genericId = TaskId.newBuilder()
-                                           .setId(i)
-                                           .build();
-            final AggregateStateId id = AggregateStateId.of(genericId, TypeUrl.from(Task.getDescriptor()));
-            final Task task = Task.newBuilder()
-                                  .setTaskId(genericId)
-                                  .setTitle("Test task")
-                                  .setDescription("With description")
-                                  .build();
-            final EntityRecord record = newRecord(task);
-            storage.write(id, record);
+            final Iterator<EntityRecord> allRecords = storage.readAll();
+            checkIds(ids, allRecords);
         }
 
-        final Iterator<EntityRecord> readRecords
-                = withFieldMask
-                  ? storage.readAllByType(TypeUrl.from(Project.getDescriptor()), fieldMask)
-                  : storage.readAllByType(TypeUrl.from(Project.getDescriptor()));
-        final Set<EntityRecord> readDistinct = Sets.newHashSet(readRecords);
-        assertSize(projectsCount, readDistinct);
+        @Test
+        @DisplayName("by IDs")
+        void byIds() {
+            final StandStorage storage = getStorage();
+            // Use a subset of IDs
+            final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER).subList(0, 5);
 
-        for (EntityRecord record : readDistinct) {
-            final Any state = record.getState();
-            final Project project = AnyPacker.unpack(state);
-            final AggregateStateId restored = AggregateStateId.of(project.getId(), type);
-            assertContains(restored, projectIds);
+            final Iterator<EntityRecord> records = storage.readMultiple(ids);
+            checkIds(ids, records);
+        }
 
-            if (withFieldMask) {
-                assertMatchesMask(project, fieldMask);
+        @Test
+        @DisplayName("by type")
+        void byType() {
+            checkByTypeRead(FieldMask.getDefaultInstance());
+        }
+
+        @Test
+        @DisplayName("by type with field mask")
+        void byTypeAndFieldMask() {
+            final FieldMask mask = FieldMasks.maskOf(Project.getDescriptor(), 1, 2);
+            checkByTypeRead(mask);
+        }
+
+        @SuppressWarnings({"MethodWithMultipleLoops", "ConstantConditions"}) // OK for this test.
+        private void checkByTypeRead(FieldMask fieldMask) {
+            final boolean withFieldMask = !fieldMask.equals(FieldMask.getDefaultInstance());
+            final StandStorage storage = getStorage();
+            final TypeUrl type = TypeUrl.from(Project.getDescriptor());
+
+            final int projectsCount = 4;
+            final List<AggregateStateId> projectIds = fill(storage, projectsCount, DEFAULT_ID_SUPPLIER);
+
+            final int tasksCount = 5;
+            for (int i = 0; i < tasksCount; i++) {
+                final TaskId genericId = TaskId.newBuilder()
+                                               .setId(i)
+                                               .build();
+                final AggregateStateId id = AggregateStateId.of(genericId, TypeUrl.from(Task.getDescriptor()));
+                final Task task = Task.newBuilder()
+                                      .setTaskId(genericId)
+                                      .setTitle("Test task")
+                                      .setDescription("With description")
+                                      .build();
+                final EntityRecord record = newRecord(task);
+                storage.write(id, record);
+            }
+
+            final Iterator<EntityRecord> readRecords
+                    = withFieldMask
+                      ? storage.readAllByType(TypeUrl.from(Project.getDescriptor()), fieldMask)
+                      : storage.readAllByType(TypeUrl.from(Project.getDescriptor()));
+            final Set<EntityRecord> readDistinct = Sets.newHashSet(readRecords);
+            assertSize(projectsCount, readDistinct);
+
+            for (EntityRecord record : readDistinct) {
+                final Any state = record.getState();
+                final Project project = AnyPacker.unpack(state);
+                final AggregateStateId restored = AggregateStateId.of(project.getId(), type);
+                assertContains(restored, projectIds);
+
+                if (withFieldMask) {
+                    assertMatchesMask(project, fieldMask);
+                }
             }
         }
     }
@@ -172,49 +179,49 @@ public abstract class StandStorageTest extends RecordStorageTest<AggregateStateI
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    protected void filterRecordsByColumns() {
+    protected void filterByColumns() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    protected void filterRecordsByOrdinalEnumColumns() {
+    protected void filterByOrdinalEnumColumns() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    protected void filterRecordsByStringEnumColumns() {
+    protected void filterByStringEnumColumns() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    protected void allowBySingleIdQueriesWithNoColumns() {
+    protected void filterByIdAndNoColumns() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    protected void readArchivedRecordsIfSpecified() {
+    protected void readArchivedRecords() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    protected void filterArchivedOrDeletedRecordsOnByIDBulkRead() {
+    protected void filterByIdAndStatusInBulk() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    protected void updateEntityColumnValues() {
+    protected void updateColumnValues() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    protected void readBothByColumnsAndIDs() {
+    protected void filterByColumnsAndId() {
         // Stand storage does not support entity columns.
     }
 

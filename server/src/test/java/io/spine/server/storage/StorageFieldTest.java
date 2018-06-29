@@ -50,13 +50,13 @@ class StorageFieldTest {
 
     @Test
     @DisplayName("enclose all aggregate fields")
-    void encloseAllAggregateFields() {
+    void encloseAggregateFields() {
         assertField(AggregateField.aggregate_id);
     }
 
     @Test
     @DisplayName("enclose all event fields")
-    void encloseAllEventFields() {
+    void encloseEventFields() {
         assertField(EventField.event_id);
         assertField(EventField.event_type);
         assertField(EventField.producer_id);
@@ -64,7 +64,7 @@ class StorageFieldTest {
 
     @Test
     @DisplayName("enclose all event context fields")
-    void encloseAllEventContextFields() {
+    void encloseEventContextFields() {
         assertField(EventContextField.context_of_command);
         assertField(EventContextField.context_timestamp);
         assertField(EventContextField.context_version);
@@ -72,14 +72,14 @@ class StorageFieldTest {
 
     @Test
     @DisplayName("enclose all entity status fields")
-    void encloseAllEntityStatusFields() {
+    void encloseEntityStatusFields() {
         assertField(LifecycleFlagField.archived);
         assertField(LifecycleFlagField.deleted);
     }
 
     @Test
     @DisplayName("enclose all entity fields")
-    void encloseAllEntityFields() {
+    void encloseEntityFields() {
         assertField(EntityField.timestamp);
         assertField(EntityField.timestamp_nanos);
         assertField(EntityField.type_url);

@@ -59,8 +59,8 @@ class MultitenantStorageTest {
     }
 
     @Test
-    @DisplayName("should return same slice when single tenant and multithreaded environment")
-    void shouldReturnSameSliceWhenSingleTenantAndMultithreadedEnvironment()
+    @DisplayName("return same slice within single tenant and multitenant environment")
+    void returnSameSlice()
             throws InterruptedException, ExecutionException {
         final int numberOfTasks = 1000;
         final Collection<Callable<TenantRecords>> tasks = newArrayListWithExpectedSize(numberOfTasks);

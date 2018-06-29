@@ -73,6 +73,7 @@ import io.spine.validate.ValidationError;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
@@ -186,61 +187,66 @@ class StandTest extends TenantAwareTest {
                         .isEmpty());
     }
 
-    @Test
-    @DisplayName("register projection repositories")
-    void registerProjectionRepositories() {
-        final boolean multitenant = isMultitenant();
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setMultitenant(multitenant)
-                                                            .build();
-        final Stand stand = boundedContext.getStand();
+    @Nested
+    @DisplayName("register")
+    class Register {
 
-        checkTypesEmpty(stand);
+        @Test
+        @DisplayName("projection repositories")
+        void projectionRepositories() {
+            final boolean multitenant = isMultitenant();
+            final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                                .setMultitenant(multitenant)
+                                                                .build();
+            final Stand stand = boundedContext.getStand();
 
-        final StandTestProjectionRepository standTestProjectionRepo =
-                new StandTestProjectionRepository();
-        stand.registerTypeSupplier(standTestProjectionRepo);
-        checkHasExactlyOne(stand.getExposedTypes(), Project.getDescriptor());
+            checkTypesEmpty(stand);
 
-        final ImmutableSet<TypeUrl> knownAggregateTypes = stand.getExposedAggregateTypes();
-        // As we registered a projection repo, known aggregate types should be still empty.
-        assertTrue("For some reason an aggregate type was registered",
-                   knownAggregateTypes.isEmpty());
+            final StandTestProjectionRepository standTestProjectionRepo =
+                    new StandTestProjectionRepository();
+            stand.registerTypeSupplier(standTestProjectionRepo);
+            checkHasExactlyOne(stand.getExposedTypes(), Project.getDescriptor());
 
-        final StandTestProjectionRepository anotherTestProjectionRepo =
-                new StandTestProjectionRepository();
-        stand.registerTypeSupplier(anotherTestProjectionRepo);
-        checkHasExactlyOne(stand.getExposedTypes(), Project.getDescriptor());
-    }
+            final ImmutableSet<TypeUrl> knownAggregateTypes = stand.getExposedAggregateTypes();
+            // As we registered a projection repo, known aggregate types should be still empty.
+            assertTrue("For some reason an aggregate type was registered",
+                       knownAggregateTypes.isEmpty());
 
-    @Test
-    @DisplayName("register aggregate repositories")
-    void registerAggregateRepositories() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .build();
-        final Stand stand = boundedContext.getStand();
+            final StandTestProjectionRepository anotherTestProjectionRepo =
+                    new StandTestProjectionRepository();
+            stand.registerTypeSupplier(anotherTestProjectionRepo);
+            checkHasExactlyOne(stand.getExposedTypes(), Project.getDescriptor());
+        }
 
-        checkTypesEmpty(stand);
+        @Test
+        @DisplayName("aggregate repositories")
+        void aggregateRepositories() {
+            final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                                .build();
+            final Stand stand = boundedContext.getStand();
 
-        final CustomerAggregateRepository customerAggregateRepo =
-                new CustomerAggregateRepository();
-        stand.registerTypeSupplier(customerAggregateRepo);
+            checkTypesEmpty(stand);
 
-        final Descriptors.Descriptor customerEntityDescriptor = Customer.getDescriptor();
-        checkHasExactlyOne(stand.getExposedTypes(), customerEntityDescriptor);
-        checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
+            final CustomerAggregateRepository customerAggregateRepo =
+                    new CustomerAggregateRepository();
+            stand.registerTypeSupplier(customerAggregateRepo);
 
-        @SuppressWarnings("LocalVariableNamingConvention")
-        final CustomerAggregateRepository anotherCustomerAggregateRepo =
-                new CustomerAggregateRepository();
-        stand.registerTypeSupplier(anotherCustomerAggregateRepo);
-        checkHasExactlyOne(stand.getExposedTypes(), customerEntityDescriptor);
-        checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
+            final Descriptors.Descriptor customerEntityDescriptor = Customer.getDescriptor();
+            checkHasExactlyOne(stand.getExposedTypes(), customerEntityDescriptor);
+            checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
+
+            @SuppressWarnings("LocalVariableNamingConvention")
+            final CustomerAggregateRepository anotherCustomerAggregateRepo =
+                    new CustomerAggregateRepository();
+            stand.registerTypeSupplier(anotherCustomerAggregateRepo);
+            checkHasExactlyOne(stand.getExposedTypes(), customerEntityDescriptor);
+            checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
+        }
     }
 
     @Test
     @DisplayName("use provided executor upon update of watched type")
-    void useProvidedExecutorUponUpdateOfWatchedType() {
+    void useProvidedExecutor() {
         final Executor executor = mock(Executor.class);
         final BoundedContext boundedContext =
                 BoundedContext.newBuilder()
@@ -276,7 +282,7 @@ class StandTest extends TenantAwareTest {
     @SuppressWarnings("OverlyCoupledMethod")
     @Test
     @DisplayName("operate with storage provided through builder")
-    void operateWithStorageProvidedThroughBuilder() {
+    void operateWithStorage() {
         final StandStorage standStorageMock = mock(StandStorage.class);
         final BoundedContext boundedContext =
                 BoundedContext.newBuilder()
@@ -313,223 +319,161 @@ class StandTest extends TenantAwareTest {
                 .write(eq(expectedAggregateStateId), recordStateMatcher(expectedRecord));
     }
 
-    @Test
-    @DisplayName("return empty list for aggregate read all on empty stand storage")
-    void returnEmptyListForAggregateReadAllOnEmptyStandStorage() {
-        final Query readAllCustomers = requestFactory.query().all(Customer.class);
-        checkEmptyResultForTargetOnEmptyStorage(readAllCustomers);
-    }
+    @Nested
+    @DisplayName("return empty list")
+    class ReturnEmptyList {
 
-    @Test
-    @DisplayName("return empty list for aggregate read by ids on empty stand storage")
-    void returnEmptyListForAggregateReadByIdsOnEmptyStandStorage() {
-
-        final Query readCustomersById = requestFactory.query().byIds(Customer.class, newHashSet(
-                customerIdFor(1), customerIdFor(2)
-        ));
-
-        checkEmptyResultForTargetOnEmptyStorage(readCustomersById);
-    }
-
-    @Test
-    @DisplayName("return empty list for aggregate reads with filters not set")
-    void returnEmptyListForAggregateReadsWithFiltersNotSet() {
-        final StandStorage standStorageMock = mock(StandStorage.class);
-
-        // Return non-empty results on any storage read call.
-        final EntityRecord someRecord = EntityRecord.getDefaultInstance();
-        final ImmutableList<EntityRecord> nonEmptyList =
-                ImmutableList.<EntityRecord>builder().add(someRecord)
-                                                     .build();
-        when(standStorageMock.readAllByType(any(TypeUrl.class)))
-                .thenReturn(nonEmptyList.iterator());
-        when(standStorageMock.readAll())
-                .thenReturn(Collections.<EntityRecord>emptyIterator());
-        when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable()))
-                .thenReturn(nonEmptyList.iterator());
-        when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable()))
-                .thenReturn(nonEmptyList.iterator());
-
-        final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
-
-        final Query noneOfCustomersQuery = requestFactory.query()
-                                          .byIds(Customer.class, Collections.<Message>emptySet());
-
-        final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
-        stand.execute(noneOfCustomersQuery, responseObserver);
-
-        verifyObserver(responseObserver);
-
-        final List<Any> messageList = checkAndGetMessageList(responseObserver);
-        assertTrue("Query returned a non-empty response message list " +
-                           "though the filter was not set", messageList.isEmpty());
-    }
-
-    @Test
-    @DisplayName("return single result for aggregate state read by id")
-    void returnSingleResultForAggregateStateReadById() {
-        doCheckReadingCustomersById(1);
-    }
-
-    @Test
-    @DisplayName("return multiple results for aggregate state batch read by ids")
-    void returnMultipleResultsForAggregateStateBatchReadByIds() {
-        doCheckReadingCustomersById(TOTAL_CUSTOMERS_FOR_BATCH_READING);
-    }
-
-    @Test
-    @DisplayName("return single result for projection read by id")
-    void returnSingleResultForProjectionReadById() {
-        doCheckReadingProjectsById(1);
-    }
-
-    @Test
-    @DisplayName("return multiple results for projection batch read by ids")
-    void returnMultipleResultsForProjectionBatchReadByIds() {
-        doCheckReadingProjectsById(TOTAL_PROJECTS_FOR_BATCH_READING);
-    }
-
-    @Test
-    @DisplayName("return multiple results for projection batch read by ids with field mask")
-    void returnMultipleResultsForProjectionBatchReadByIdsWithFieldMask() {
-        final List<Descriptors.FieldDescriptor> projectFields = Project.getDescriptor()
-                                                                       .getFields();
-        doCheckReadingCustomersByIdAndFieldMask(
-                projectFields.get(0)
-                             .getFullName(), // ID
-                projectFields.get(1)
-                             .getFullName()); // Name
-    }
-
-    @Test
-    @DisplayName("trigger subscription callback upon update of aggregate")
-    void triggerSubscriptionCallbackUponUpdateOfAggregate() {
-        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
-        final Topic allCustomers = requestFactory.topic().allOf(Customer.class);
-
-        final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
-
-        subscribeAndActivate(stand, allCustomers,memoizeCallback);
-        assertNull(memoizeCallback.newEntityState);
-
-        final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
-                                                                                 .iterator()
-                                                                                 .next();
-        final CustomerId customerId = sampleData.getKey();
-        final Customer customer = sampleData.getValue();
-        final Version stateVersion = GivenVersion.withNumber(1);
-        stand.update(asEnvelope(customerId, customer, stateVersion));
-
-        final Any packedState = AnyPacker.pack(customer);
-        assertEquals(packedState, memoizeCallback.newEntityState);
-    }
-
-    @Test
-    @DisplayName("trigger subscription callback upon update of projection")
-    void triggerSubscriptionCallbackUponUpdateOfProjection() {
-        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
-        final Topic allProjects = requestFactory.topic().allOf(Project.class);
-
-        final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
-        subscribeAndActivate(stand, allProjects, memoizeCallback);
-        assertNull(memoizeCallback.newEntityState);
-
-        final Map.Entry<ProjectId, Project> sampleData = fillSampleProjects(1).entrySet()
-                                                                              .iterator()
-                                                                              .next();
-        final ProjectId projectId = sampleData.getKey();
-        final Project project = sampleData.getValue();
-        final Version stateVersion = GivenVersion.withNumber(1);
-        stand.update(asEnvelope(projectId, project, stateVersion));
-
-        final Any packedState = AnyPacker.pack(project);
-        assertEquals(packedState, memoizeCallback.newEntityState);
-    }
-
-    @Test
-    @DisplayName("allow cancelling subscriptions")
-    void allowCancellingSubscriptions() {
-        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
-        final Topic allCustomers = requestFactory.topic().allOf(Customer.class);
-
-        final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
-        final Subscription subscription = subscribeAndActivate(stand, allCustomers, memoizeCallback);
-
-        stand.cancel(subscription, StreamObservers.<Response>noOpObserver());
-
-        final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
-                                                                                 .iterator()
-                                                                                 .next();
-        final CustomerId customerId = sampleData.getKey();
-        final Customer customer = sampleData.getValue();
-        final Version stateVersion = GivenVersion.withNumber(1);
-        stand.update(asEnvelope(customerId, customer, stateVersion));
-
-        assertNull(memoizeCallback.newEntityState);
-    }
-
-    @Test
-    @DisplayName("fail if cancelling inexistent subscription")
-    void failIfCancellingInexistentSubscription() {
-        final Stand stand = Stand.newBuilder()
-                                 .build();
-        final Subscription inexistentSubscription = Subscription.newBuilder()
-                                                                .setId(Subscriptions.generateId())
-                                                                .build();
-        assertThrows(IllegalArgumentException.class,
-                     () -> stand.cancel(inexistentSubscription, noOpObserver()));
-    }
-
-    @SuppressWarnings("MethodWithMultipleLoops")
-    @Test
-    @DisplayName("trigger each subscription callback once for multiple subscriptions")
-    void triggerEachSubscriptionCallbackOnceForMultipleSubscriptions() {
-        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
-        final Target allCustomers = Targets.allOf(Customer.class);
-
-        final Set<MemoizeEntityUpdateCallback> callbacks = newHashSet();
-        final int totalCallbacks = 100;
-
-        for (int callbackIndex = 0; callbackIndex < totalCallbacks; callbackIndex++) {
-            final MemoizeEntityUpdateCallback callback = subscribeWithCallback(stand, allCustomers);
-            callbacks.add(callback);
+        @Test
+        @DisplayName("on read all when empty")
+        void onReadAllWhenEmpty() {
+            final Query readAllCustomers = requestFactory.query().all(Customer.class);
+            checkEmptyResultForTargetOnEmptyStorage(readAllCustomers);
         }
 
-        final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
-                                                                                 .iterator()
-                                                                                 .next();
-        final CustomerId customerId = sampleData.getKey();
-        final Customer customer = sampleData.getValue();
-        final Version stateVersion = GivenVersion.withNumber(1);
-        stand.update(asEnvelope(customerId, customer, stateVersion));
+        @Test
+        @DisplayName("on read by IDs when empty")
+        void onReadByIdWhenEmpty() {
 
-        final Any packedState = AnyPacker.pack(customer);
-        for (MemoizeEntityUpdateCallback callback : callbacks) {
-            assertEquals(packedState, callback.newEntityState);
-            verify(callback, times(1)).onStateChanged(any(EntityStateUpdate.class));
+            final Query readCustomersById = requestFactory.query().byIds(Customer.class, newHashSet(
+                    customerIdFor(1), customerIdFor(2)
+            ));
+
+            checkEmptyResultForTargetOnEmptyStorage(readCustomersById);
+        }
+
+        @Test
+        @DisplayName("for aggregate reads with filters not set")
+        void onAggregateFiltersNotSet() {
+            final StandStorage standStorageMock = mock(StandStorage.class);
+
+            // Return non-empty results on any storage read call.
+            final EntityRecord someRecord = EntityRecord.getDefaultInstance();
+            final ImmutableList<EntityRecord> nonEmptyList =
+                    ImmutableList.<EntityRecord>builder().add(someRecord)
+                                                         .build();
+            when(standStorageMock.readAllByType(any(TypeUrl.class)))
+                    .thenReturn(nonEmptyList.iterator());
+            when(standStorageMock.readAll())
+                    .thenReturn(Collections.<EntityRecord>emptyIterator());
+            when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable()))
+                    .thenReturn(nonEmptyList.iterator());
+            when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable()))
+                    .thenReturn(nonEmptyList.iterator());
+
+            final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
+
+            final Query noneOfCustomersQuery = requestFactory.query()
+                                                             .byIds(Customer.class, Collections.<Message>emptySet());
+
+            final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
+            stand.execute(noneOfCustomersQuery, responseObserver);
+
+            verifyObserver(responseObserver);
+
+            final List<Any> messageList = checkAndGetMessageList(responseObserver);
+            assertTrue("Query returned a non-empty response message list " +
+                               "though the filter was not set", messageList.isEmpty());
+        }
+    }
+
+    @Nested
+    @DisplayName("return single result")
+    class ReturnSingleResult {
+
+        @Test
+        @DisplayName("for aggregate state read by ID")
+        void forAggregateReadById() {
+            doCheckReadingCustomersById(1);
+        }
+
+        @Test
+        @DisplayName("for projection read by ID")
+        void forProjectionReadById() {
+            doCheckReadingProjectsById(1);
+        }
+    }
+
+    @Nested
+    @DisplayName("return multiple results")
+    class ReturnMultipleResults {
+
+        @Test
+        @DisplayName("for aggregate state batch read by IDs")
+        void forAggregateBatchRead() {
+            doCheckReadingCustomersById(TOTAL_CUSTOMERS_FOR_BATCH_READING);
+        }
+
+        @Test
+        @DisplayName("for projection batch read by IDs")
+        void forProjectionBatchRead() {
+            doCheckReadingProjectsById(TOTAL_PROJECTS_FOR_BATCH_READING);
+        }
+
+        @Test
+        @DisplayName("for projection batch read by IDs with field mask")
+        void forProjectionReadWithMask() {
+            final List<Descriptors.FieldDescriptor> projectFields = Project.getDescriptor()
+                                                                           .getFields();
+            doCheckReadingCustomersByIdAndFieldMask(
+                    projectFields.get(0)
+                                 .getFullName(), // ID
+                    projectFields.get(1)
+                                 .getFullName()); // Name
+        }
+    }
+
+    @Nested
+    @DisplayName("trigger subscription callback")
+    class TriggerSubscriptionCallback {
+
+        @Test
+        @DisplayName("upon update of aggregate")
+        void uponUpdateOfAggregate() {
+            final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
+            final Topic allCustomers = requestFactory.topic().allOf(Customer.class);
+
+            final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
+
+            subscribeAndActivate(stand, allCustomers,memoizeCallback);
+            assertNull(memoizeCallback.newEntityState);
+
+            final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
+                                                                                     .iterator()
+                                                                                     .next();
+            final CustomerId customerId = sampleData.getKey();
+            final Customer customer = sampleData.getValue();
+            final Version stateVersion = GivenVersion.withNumber(1);
+            stand.update(asEnvelope(customerId, customer, stateVersion));
+
+            final Any packedState = AnyPacker.pack(customer);
+            assertEquals(packedState, memoizeCallback.newEntityState);
+        }
+
+        @Test
+        @DisplayName("upon update of projection")
+        void uponUpdateOfProjection() {
+            final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
+            final Topic allProjects = requestFactory.topic().allOf(Project.class);
+
+            final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
+            subscribeAndActivate(stand, allProjects, memoizeCallback);
+            assertNull(memoizeCallback.newEntityState);
+
+            final Map.Entry<ProjectId, Project> sampleData = fillSampleProjects(1).entrySet()
+                                                                                  .iterator()
+                                                                                  .next();
+            final ProjectId projectId = sampleData.getKey();
+            final Project project = sampleData.getValue();
+            final Version stateVersion = GivenVersion.withNumber(1);
+            stand.update(asEnvelope(projectId, project, stateVersion));
+
+            final Any packedState = AnyPacker.pack(project);
+            assertEquals(packedState, memoizeCallback.newEntityState);
         }
     }
 
     @Test
-    @DisplayName("do not trigger subscription callbacks in case of another type criterion mismatch")
-    void doNotTriggerSubscriptionCallbacksInCaseOfAnotherTypeCriterionMismatch() {
-        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
-        final Target allProjects = Targets.allOf(Project.class);
-        final MemoizeEntityUpdateCallback callback = subscribeWithCallback(stand, allProjects);
-
-        final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
-                                                                                 .iterator()
-                                                                                 .next();
-        final CustomerId customerId = sampleData.getKey();
-        final Customer customer = sampleData.getValue();
-        final Version stateVersion = GivenVersion.withNumber(1);
-        stand.update(asEnvelope(customerId, customer, stateVersion));
-
-        verify(callback, never()).onStateChanged(any(EntityStateUpdate.class));
-    }
-
-    @Test
-    @DisplayName("trigger subscription callbacks matching by id")
+    @DisplayName("trigger subscription callbacks matching by ID")
     void triggerSubscriptionCallbacksMatchingById() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
 
@@ -560,6 +504,88 @@ class StandTest extends TenantAwareTest {
         assertEquals(newHashMap(sampleCustomers), callbackStates);
     }
 
+    @Test
+    @DisplayName("allow cancelling subscriptions")
+    void cancelSubscriptions() {
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
+        final Topic allCustomers = requestFactory.topic().allOf(Customer.class);
+
+        final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
+        final Subscription subscription = subscribeAndActivate(stand, allCustomers, memoizeCallback);
+
+        stand.cancel(subscription, StreamObservers.<Response>noOpObserver());
+
+        final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
+                                                                                 .iterator()
+                                                                                 .next();
+        final CustomerId customerId = sampleData.getKey();
+        final Customer customer = sampleData.getValue();
+        final Version stateVersion = GivenVersion.withNumber(1);
+        stand.update(asEnvelope(customerId, customer, stateVersion));
+
+        assertNull(memoizeCallback.newEntityState);
+    }
+
+    @Test
+    @DisplayName("fail if cancelling non-existent subscription")
+    void notCancelNonExistent() {
+        final Stand stand = Stand.newBuilder()
+                                 .build();
+        final Subscription inexistentSubscription = Subscription.newBuilder()
+                                                                .setId(Subscriptions.generateId())
+                                                                .build();
+        assertThrows(IllegalArgumentException.class,
+                     () -> stand.cancel(inexistentSubscription, noOpObserver()));
+    }
+
+    @SuppressWarnings("MethodWithMultipleLoops")
+    @Test
+    @DisplayName("trigger each subscription callback once for multiple subscriptions")
+    void triggerSubscriptionCallbackOnce() {
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
+        final Target allCustomers = Targets.allOf(Customer.class);
+
+        final Set<MemoizeEntityUpdateCallback> callbacks = newHashSet();
+        final int totalCallbacks = 100;
+
+        for (int callbackIndex = 0; callbackIndex < totalCallbacks; callbackIndex++) {
+            final MemoizeEntityUpdateCallback callback = subscribeWithCallback(stand, allCustomers);
+            callbacks.add(callback);
+        }
+
+        final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
+                                                                                 .iterator()
+                                                                                 .next();
+        final CustomerId customerId = sampleData.getKey();
+        final Customer customer = sampleData.getValue();
+        final Version stateVersion = GivenVersion.withNumber(1);
+        stand.update(asEnvelope(customerId, customer, stateVersion));
+
+        final Any packedState = AnyPacker.pack(customer);
+        for (MemoizeEntityUpdateCallback callback : callbacks) {
+            assertEquals(packedState, callback.newEntityState);
+            verify(callback, times(1)).onStateChanged(any(EntityStateUpdate.class));
+        }
+    }
+
+    @Test
+    @DisplayName("not trigger subscription callbacks in case of another type criterion mismatch")
+    void notTriggerOnTypeMismatch() {
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
+        final Target allProjects = Targets.allOf(Project.class);
+        final MemoizeEntityUpdateCallback callback = subscribeWithCallback(stand, allProjects);
+
+        final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
+                                                                                 .iterator()
+                                                                                 .next();
+        final CustomerId customerId = sampleData.getKey();
+        final Customer customer = sampleData.getValue();
+        final Version stateVersion = GivenVersion.withNumber(1);
+        stand.update(asEnvelope(customerId, customer, stateVersion));
+
+        verify(callback, never()).onStateChanged(any(EntityStateUpdate.class));
+    }
+
     private MemoizeEntityUpdateCallback subscribeWithCallback(Stand stand,
                                                               Target subscriptionTarget) {
         final MemoizeEntityUpdateCallback callback = spy(new MemoizeEntityUpdateCallback());
@@ -584,7 +610,7 @@ class StandTest extends TenantAwareTest {
 
     @Test
     @DisplayName("retrieve all data if field mask is not set")
-    void retrieveAllDataIfFieldMaskIsNotSet() {
+    void readAllIfMaskNotSet() {
         final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
         final Customer sampleCustomer = getSampleCustomer();
@@ -617,7 +643,7 @@ class StandTest extends TenantAwareTest {
 
     @Test
     @DisplayName("retrieve only selected param for query")
-    void retrieveOnlySelectedParamForQuery() {
+    void readOnlySelectedParam() {
         requestSampleCustomer(new int[]{Customer.NAME_FIELD_NUMBER - 1}, new MemoizeQueryResponseObserver() {
             @Override
             public void onNext(QueryResponse value) {
@@ -639,7 +665,7 @@ class StandTest extends TenantAwareTest {
 
     @Test
     @DisplayName("retrieve collection fields if required")
-    void retrieveCollectionFieldsIfRequired() {
+    void readCollectionFields() {
         requestSampleCustomer(
                 new int[]{Customer.NICKNAMES_FIELD_NUMBER - 1},
                 new MemoizeQueryResponseObserver() {
@@ -664,7 +690,7 @@ class StandTest extends TenantAwareTest {
 
     @Test
     @DisplayName("retrieve all requested fields")
-    void retrieveAllRequestedFields() {
+    void readAllRequestedFields() {
         requestSampleCustomer(
                 new int[]{ Customer.NICKNAMES_FIELD_NUMBER - 1,
                         Customer.ID_FIELD_NUMBER - 1 },
@@ -688,17 +714,17 @@ class StandTest extends TenantAwareTest {
         );
     }
 
+    @SuppressWarnings("ZeroLengthArrayAllocation") // It is necessary for test.
     @Test
     @DisplayName("retrieve whole entity if nothing is requested")
-    void retrieveWholeEntityIfNothingIsRequested() {
-        //noinspection ZeroLengthArrayAllocation
+    void readEntityIfNothingRequested() {
         requestSampleCustomer(new int[]{}, getDuplicateCostumerStreamObserver());
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
-    @DisplayName("select entity singleton by id and apply field masks")
-    void selectEntitySingletonByIdAndApplyFieldMasks() {
+    @DisplayName("select entity singleton by ID and apply field masks")
+    void selectEntityByIdAndApplyMasks() {
         final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
         final String customerDescriptor = Customer.getDescriptor()
                                                   .getFullName();
@@ -739,7 +765,7 @@ class StandTest extends TenantAwareTest {
 
     @Test
     @DisplayName("handle mistakes in query silently")
-    void handleMistakesInQuerySilently() {
+    void handleMistakesInQuery() {
         //noinspection ZeroLengthArrayAllocation
         final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
@@ -777,254 +803,269 @@ class StandTest extends TenantAwareTest {
         verifyObserver(observer);
     }
 
-    @Test
-    @DisplayName("throw invalid query exception packed as IAE if querying unknown type")
-    void throwInvalidQueryExceptionPackedAsIAEIfQueryingUnknownType() {
+    @Nested
+    @DisplayName("throw invalid query exception packed as IAE")
+    class ThrowInvalidQueryException {
 
-        final Stand stand = Stand.newBuilder()
-                                 .build();
+        @Test
+        @DisplayName("if querying unknown type")
+        void ifQueryingUnknownType() {
 
-        checkTypesEmpty(stand);
+            final Stand stand = Stand.newBuilder()
+                                     .build();
 
-        // Customer type was NOT registered.
-        // So create a query for an unknown type.
-        final Query readAllCustomers = requestFactory.query()
-                                                     .all(Customer.class);
+            checkTypesEmpty(stand);
 
-        try {
-            stand.execute(readAllCustomers, StreamObservers.<QueryResponse>noOpObserver());
-            fail("Expected IllegalArgumentException upon executing query with unknown target," +
-                         " but got nothing");
-        } catch (IllegalArgumentException e) {
-            verifyUnsupportedQueryTargetException(readAllCustomers, e);
+            // Customer type was NOT registered.
+            // So create a query for an unknown type.
+            final Query readAllCustomers = requestFactory.query()
+                                                         .all(Customer.class);
+
+            try {
+                stand.execute(readAllCustomers, StreamObservers.<QueryResponse>noOpObserver());
+                fail("Expected IllegalArgumentException upon executing query with unknown target," +
+                             " but got nothing");
+            } catch (IllegalArgumentException e) {
+                verifyUnsupportedQueryTargetException(readAllCustomers, e);
+            }
+        }
+
+        @Test
+        @DisplayName("if invalid query message is passed")
+        void ifInvalidQueryMessagePassed() {
+
+            final Stand stand = Stand.newBuilder()
+                                     .build();
+            final Query invalidQuery = Query.getDefaultInstance();
+
+            try {
+                stand.execute(invalidQuery, StreamObservers.<QueryResponse>noOpObserver());
+                fail("Expected IllegalArgumentException due to invalid query message passed," +
+                             " but got nothing");
+            } catch (IllegalArgumentException e) {
+                verifyInvalidQueryException(invalidQuery, e);
+            }
+        }
+
+        private void verifyUnsupportedQueryTargetException(Query query,
+                                                                  IllegalArgumentException e) {
+            final Throwable cause = e.getCause();
+            assertTrue(cause instanceof InvalidQueryException);
+
+            final InvalidQueryException queryException = (InvalidQueryException) cause;
+            assertEquals(query, queryException.getRequest());
+
+            assertEquals(UNSUPPORTED_QUERY_TARGET.getNumber(),
+                         queryException.asError()
+                                       .getCode());
+        }
+
+        private void verifyInvalidQueryException(Query invalidQuery,
+                                                        IllegalArgumentException e) {
+            final Throwable cause = e.getCause();
+            assertTrue(cause instanceof InvalidQueryException);
+
+            final InvalidQueryException queryException = (InvalidQueryException) cause;
+            assertEquals(invalidQuery, queryException.getRequest());
+
+            assertEquals(INVALID_QUERY.getNumber(),
+                         queryException.asError()
+                                       .getCode());
+
+            final ValidationError validationError = queryException.asError()
+                                                                  .getValidationError();
+            assertTrue(Validate.isNotDefault(validationError));
         }
     }
 
-    @Test
-    @DisplayName("throw invalid query exception packed as IAE if invalid query message passed")
-    void throwInvalidQueryExceptionPackedAsIAEIfInvalidQueryMessagePassed() {
+    @Nested
+    @DisplayName("throw invalid topic exception packed as IAE")
+    class ThrowInvalidTopicException {
 
-        final Stand stand = Stand.newBuilder()
-                                 .build();
-        final Query invalidQuery = Query.getDefaultInstance();
+        @Test
+        @DisplayName("if subscribing to unknown type changes")
+        void ifSubscribingToUnknownType() {
 
-        try {
-            stand.execute(invalidQuery, StreamObservers.<QueryResponse>noOpObserver());
-            fail("Expected IllegalArgumentException due to invalid query message passed," +
-                         " but got nothing");
-        } catch (IllegalArgumentException e) {
-            verifyInvalidQueryException(invalidQuery, e);
+            final Stand stand = Stand.newBuilder()
+                                     .build();
+            checkTypesEmpty(stand);
+
+            // Customer type was NOT registered.
+            // So create a topic for an unknown type.
+            final Topic allCustomersTopic = requestFactory.topic()
+                                                          .allOf(Customer.class);
+
+            try {
+                stand.subscribe(allCustomersTopic, StreamObservers.<Subscription>noOpObserver());
+                fail("Expected IllegalArgumentException upon subscribing to a topic " +
+                             "with unknown target, but got nothing");
+            } catch (IllegalArgumentException e) {
+                verifyUnsupportedTopicException(allCustomersTopic, e);
+            }
+        }
+
+        @Test
+        @DisplayName("if invalid topic message is passed")
+        void ifInvalidTopicMessagePassed() {
+
+            final Stand stand = Stand.newBuilder()
+                                     .build();
+
+            final Topic invalidTopic = Topic.getDefaultInstance();
+
+            try {
+                stand.subscribe(invalidTopic, StreamObservers.<Subscription>noOpObserver());
+                fail("Expected IllegalArgumentException due to an invalid topic message, " +
+                             "but got nothing");
+            } catch (IllegalArgumentException e) {
+                verifyInvalidTopicException(invalidTopic, e);
+            }
+        }
+
+        private void verifyUnsupportedTopicException(Topic topic, IllegalArgumentException e) {
+            final Throwable cause = e.getCause();
+            assertTrue(cause instanceof InvalidTopicException);
+
+            final InvalidTopicException topicException = (InvalidTopicException) cause;
+            assertEquals(topic, topicException.getRequest());
+
+            assertEquals(UNSUPPORTED_TOPIC_TARGET.getNumber(),
+                         topicException.asError()
+                                       .getCode());
+        }
+
+        private void verifyInvalidTopicException(Topic invalidTopic,
+                                                        IllegalArgumentException e) {
+            final Throwable cause = e.getCause();
+            assertTrue(cause instanceof InvalidTopicException);
+
+            final InvalidTopicException topicException = (InvalidTopicException) cause;
+            assertEquals(invalidTopic, topicException.getRequest());
+
+            assertEquals(INVALID_TOPIC.getNumber(),
+                         topicException.asError()
+                                       .getCode());
+
+            final ValidationError validationError = topicException.asError()
+                                                                  .getValidationError();
+            assertTrue(Validate.isNotDefault(validationError));
         }
     }
 
-    @Test
-    @DisplayName("throw invalid topic ex packed as IAE if subscribing to unknown type changes")
-    void throwInvalidTopicExPackedAsIAEIfSubscribingToUnknownTypeChanges() {
+    @Nested
+    @DisplayName("throw invalid subscription exception packed as IAE")
+    class ThrowInvalidSubscriptionException {
 
-        final Stand stand = Stand.newBuilder()
-                                 .build();
-        checkTypesEmpty(stand);
+        @Test
+        @DisplayName("if activating subscription with unsupported target")
+        void ifActivateWithUnsupportedTarget() {
 
-        // Customer type was NOT registered.
-        // So create a topic for an unknown type.
-        final Topic allCustomersTopic = requestFactory.topic()
-                                                      .allOf(Customer.class);
+            final Stand stand = Stand.newBuilder()
+                                     .build();
+            final Subscription subscription = subscriptionWithUnknownTopic();
 
-        try {
-            stand.subscribe(allCustomersTopic, StreamObservers.<Subscription>noOpObserver());
-            fail("Expected IllegalArgumentException upon subscribing to a topic " +
-                         "with unknown target, but got nothing");
-        } catch (IllegalArgumentException e) {
-            verifyUnsupportedTopicException(allCustomersTopic, e);
+            try {
+                stand.activate(subscription,
+                               emptyUpdateCallback(),
+                               StreamObservers.<Response>noOpObserver());
+                fail("Expected IllegalArgumentException upon activating an unknown subscription, " +
+                             "but got nothing");
+            } catch (IllegalArgumentException e) {
+                verifyUnknownSubscriptionException(e, subscription);
+            }
         }
-    }
 
-    @Test
-    @DisplayName("throw invalid topic exception packed as IAE if invalid topic message passed")
-    void throwInvalidTopicExceptionPackedAsIAEIfInvalidTopicMessagePassed() {
+        @Test
+        @DisplayName("if cancelling subscription with unsupported target")
+        void ifCancelWithUnsupportedTarget() {
 
-        final Stand stand = Stand.newBuilder()
-                                 .build();
+            final Stand stand = Stand.newBuilder()
+                                     .build();
+            final Subscription subscription = subscriptionWithUnknownTopic();
 
-        final Topic invalidTopic = Topic.getDefaultInstance();
-
-        try {
-            stand.subscribe(invalidTopic, StreamObservers.<Subscription>noOpObserver());
-            fail("Expected IllegalArgumentException due to an invalid topic message, " +
-                         "but got nothing");
-        } catch (IllegalArgumentException e) {
-            verifyInvalidTopicException(invalidTopic, e);
+            try {
+                stand.cancel(subscription, StreamObservers.<Response>noOpObserver());
+                fail("Expected IllegalArgumentException upon cancelling an unknown subscription, " +
+                             "but got nothing");
+            } catch (IllegalArgumentException e) {
+                verifyUnknownSubscriptionException(e, subscription);
+            }
         }
-    }
 
-    @Test
-    @DisplayName("throw invalid subscription ex if activating subscription with unsupported target")
-    void throwInvalidSubscriptionExIfActivatingSubscriptionWithUnsupportedTarget() {
+        @Test
+        @DisplayName("if invalid subscription message is passed to activate")
+        void ifActivateWithInvalidMessage() {
 
-        final Stand stand = Stand.newBuilder()
-                                 .build();
-        final Subscription subscription = subscriptionWithUnknownTopic();
+            final Stand stand = Stand.newBuilder()
+                                     .build();
+            final Subscription invalidSubscription = Subscription.getDefaultInstance();
 
-        try {
-            stand.activate(subscription,
-                           emptyUpdateCallback(),
-                           StreamObservers.<Response>noOpObserver());
-            fail("Expected IllegalArgumentException upon activating an unknown subscription, " +
-                         "but got nothing");
-        } catch (IllegalArgumentException e) {
-            verifyUnknownSubscriptionException(e, subscription);
+            try {
+                stand.activate(invalidSubscription,
+                               emptyUpdateCallback(),
+                               StreamObservers.<Response>noOpObserver());
+                fail("Expected IllegalArgumentException due to an invalid subscription message " +
+                             "passed to `activate`, but got nothing");
+            } catch (IllegalArgumentException e) {
+                verifyInvalidSubscriptionException(invalidSubscription, e);
+            }
         }
-    }
 
-    @Test
-    @DisplayName("throw invalid subscription ex if cancelling subscription with unsupported target")
-    void throwInvalidSubscriptionExIfCancellingSubscriptionWithUnsupportedTarget() {
+        @Test
+        @DisplayName("if invalid subscription message is passed to cancel")
+        void ifCancelWithInvalidMessage() {
 
-        final Stand stand = Stand.newBuilder()
-                                 .build();
-        final Subscription subscription = subscriptionWithUnknownTopic();
+            final Stand stand = Stand.newBuilder()
+                                     .build();
+            final Subscription invalidSubscription = Subscription.getDefaultInstance();
 
-        try {
-            stand.cancel(subscription, StreamObservers.<Response>noOpObserver());
-            fail("Expected IllegalArgumentException upon cancelling an unknown subscription, " +
-                         "but got nothing");
-        } catch (IllegalArgumentException e) {
-            verifyUnknownSubscriptionException(e, subscription);
+            try {
+                stand.cancel(invalidSubscription, StreamObservers.<Response>noOpObserver());
+                fail("Expected IllegalArgumentException due to an invalid subscription message " +
+                             "passed to `cancel`, but got nothing");
+            } catch (IllegalArgumentException e) {
+                verifyInvalidSubscriptionException(invalidSubscription, e);
+            }
         }
-    }
 
-    @Test
-    @DisplayName("throw invalid subscription ex if invalid subscription msg passed to activate")
-    void throwInvalidSubscriptionExIfInvalidSubscriptionMsgPassedToActivate() {
+        private void verifyInvalidSubscriptionException(Subscription invalidSubscription,
+                                                               IllegalArgumentException e) {
+            final Throwable cause = e.getCause();
+            assertTrue(cause instanceof InvalidSubscriptionException);
 
-        final Stand stand = Stand.newBuilder()
-                                 .build();
-        final Subscription invalidSubscription = Subscription.getDefaultInstance();
+            final InvalidSubscriptionException exception = (InvalidSubscriptionException) cause;
+            assertEquals(invalidSubscription, exception.getRequest());
 
-        try {
-            stand.activate(invalidSubscription,
-                           emptyUpdateCallback(),
-                           StreamObservers.<Response>noOpObserver());
-            fail("Expected IllegalArgumentException due to an invalid subscription message " +
-                         "passed to `activate`, but got nothing");
-        } catch (IllegalArgumentException e) {
-            verifyInvalidSubscriptionException(invalidSubscription, e);
+            assertEquals(SubscriptionValidationError.INVALID_SUBSCRIPTION.getNumber(),
+                         exception.asError()
+                                  .getCode());
+
+            final ValidationError validationError = exception.asError()
+                                                             .getValidationError();
+            assertTrue(Validate.isNotDefault(validationError));
         }
-    }
 
-    @Test
-    @DisplayName("throw invalid subscription ex if invalid subscription msg passed to cancel")
-    void throwInvalidSubscriptionExIfInvalidSubscriptionMsgPassedToCancel() {
+        private void verifyUnknownSubscriptionException(IllegalArgumentException e,
+                                                               Subscription subscription) {
+            final Throwable cause = e.getCause();
+            assertTrue(cause instanceof InvalidSubscriptionException);
 
-        final Stand stand = Stand.newBuilder()
-                                 .build();
-        final Subscription invalidSubscription = Subscription.getDefaultInstance();
+            final InvalidSubscriptionException exception = (InvalidSubscriptionException) cause;
+            assertEquals(subscription, exception.getRequest());
 
-        try {
-            stand.cancel(invalidSubscription, StreamObservers.<Response>noOpObserver());
-            fail("Expected IllegalArgumentException due to an invalid subscription message " +
-                         "passed to `cancel`, but got nothing");
-        } catch (IllegalArgumentException e) {
-            verifyInvalidSubscriptionException(invalidSubscription, e);
+            assertEquals(SubscriptionValidationError.UNKNOWN_SUBSCRIPTION.getNumber(),
+                         exception.asError()
+                                  .getCode());
         }
-    }
 
-    private static void verifyUnsupportedQueryTargetException(Query query,
-                                                              IllegalArgumentException e) {
-        final Throwable cause = e.getCause();
-        assertTrue(cause instanceof InvalidQueryException);
-
-        final InvalidQueryException queryException = (InvalidQueryException) cause;
-        assertEquals(query, queryException.getRequest());
-
-        assertEquals(UNSUPPORTED_QUERY_TARGET.getNumber(),
-                     queryException.asError()
-                                   .getCode());
-    }
-
-    private static void verifyInvalidQueryException(Query invalidQuery,
-                                                    IllegalArgumentException e) {
-        final Throwable cause = e.getCause();
-        assertTrue(cause instanceof InvalidQueryException);
-
-        final InvalidQueryException queryException = (InvalidQueryException) cause;
-        assertEquals(invalidQuery, queryException.getRequest());
-
-        assertEquals(INVALID_QUERY.getNumber(),
-                     queryException.asError()
-                                   .getCode());
-
-        final ValidationError validationError = queryException.asError()
-                                                              .getValidationError();
-        assertTrue(Validate.isNotDefault(validationError));
-    }
-
-    private static void verifyUnsupportedTopicException(Topic topic, IllegalArgumentException e) {
-        final Throwable cause = e.getCause();
-        assertTrue(cause instanceof InvalidTopicException);
-
-        final InvalidTopicException topicException = (InvalidTopicException) cause;
-        assertEquals(topic, topicException.getRequest());
-
-        assertEquals(UNSUPPORTED_TOPIC_TARGET.getNumber(),
-                     topicException.asError()
-                                   .getCode());
-    }
-
-    private static void verifyInvalidTopicException(Topic invalidTopic,
-                                                    IllegalArgumentException e) {
-        final Throwable cause = e.getCause();
-        assertTrue(cause instanceof InvalidTopicException);
-
-        final InvalidTopicException topicException = (InvalidTopicException) cause;
-        assertEquals(invalidTopic, topicException.getRequest());
-
-        assertEquals(INVALID_TOPIC.getNumber(),
-                     topicException.asError()
-                                   .getCode());
-
-        final ValidationError validationError = topicException.asError()
-                                                              .getValidationError();
-        assertTrue(Validate.isNotDefault(validationError));
-    }
-
-    private static void verifyInvalidSubscriptionException(Subscription invalidSubscription,
-                                                           IllegalArgumentException e) {
-        final Throwable cause = e.getCause();
-        assertTrue(cause instanceof InvalidSubscriptionException);
-
-        final InvalidSubscriptionException exception = (InvalidSubscriptionException) cause;
-        assertEquals(invalidSubscription, exception.getRequest());
-
-        assertEquals(SubscriptionValidationError.INVALID_SUBSCRIPTION.getNumber(),
-                     exception.asError()
-                              .getCode());
-
-        final ValidationError validationError = exception.asError()
-                                                         .getValidationError();
-        assertTrue(Validate.isNotDefault(validationError));
-    }
-
-    private static void verifyUnknownSubscriptionException(IllegalArgumentException e,
-                                                           Subscription subscription) {
-        final Throwable cause = e.getCause();
-        assertTrue(cause instanceof InvalidSubscriptionException);
-
-        final InvalidSubscriptionException exception = (InvalidSubscriptionException) cause;
-        assertEquals(subscription, exception.getRequest());
-
-        assertEquals(SubscriptionValidationError.UNKNOWN_SUBSCRIPTION.getNumber(),
-                     exception.asError()
-                              .getCode());
-    }
-
-    private Subscription subscriptionWithUnknownTopic() {
-        final Topic allCustomersTopic = requestFactory.topic()
-                                                      .allOf(Customer.class);
-        return Subscription.newBuilder()
-                           .setId(Subscriptions.generateId())
-                           .setTopic(allCustomersTopic)
-                           .build();
+        private Subscription subscriptionWithUnknownTopic() {
+            final Topic allCustomersTopic = requestFactory.topic()
+                                                          .allOf(Customer.class);
+            return Subscription.newBuilder()
+                               .setId(Subscriptions.generateId())
+                               .setTopic(allCustomersTopic)
+                               .build();
+        }
     }
 
     @CanIgnoreReturnValue

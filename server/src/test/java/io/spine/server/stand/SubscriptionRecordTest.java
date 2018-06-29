@@ -50,7 +50,7 @@ class SubscriptionRecordTest {
 
     @Test
     @DisplayName("match record to given parameters")
-    void matchRecordToGivenParameters() {
+    void matchRecordToParams() {
         final SubscriptionRecord matchingRecord = new SubscriptionRecord(Given.subscription(),
                                                                          Given.target(),
                                                                          Given.TYPE);
@@ -64,7 +64,7 @@ class SubscriptionRecordTest {
 
     @Test
     @DisplayName("fail to match improper type")
-    void failToMatchImproperType() {
+    void notMatchImproperType() {
         final SubscriptionRecord notMatchingRecord = new SubscriptionRecord(Given.subscription(),
                                                                             Given.target(),
                                                                             Given.TYPE);
@@ -78,7 +78,7 @@ class SubscriptionRecordTest {
 
     @Test
     @DisplayName("fail to match improper target")
-    void failToMatchImproperTarget() {
+    void notMatchImproperTarget() {
         final ProjectId nonExistingId = ProjectId.newBuilder()
                                                  .setId("never-existed")
                                                  .build();
@@ -94,8 +94,8 @@ class SubscriptionRecordTest {
     }
 
     @Test
-    @DisplayName("be equal if has same subscription")
-    void beEqualIfHasSameSubscription() {
+    @DisplayName("be equal only to SubscriptionRecord that has same subscription")
+    void beEqualToSame() {
         final Subscription oneSubscription = Given.subscription();
         final SubscriptionId breakingId = Subscriptions.newId("breaking-id");
         final Subscription otherSubscription = Subscription.newBuilder()

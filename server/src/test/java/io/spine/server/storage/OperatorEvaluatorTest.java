@@ -24,6 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
@@ -89,191 +90,216 @@ class OperatorEvaluatorTest {
         assertFalse("reverse order check", eval(right, EQUAL, left));
     }
 
-    @Test
-    @DisplayName("compare timestamps by GT")
-    void compareTimestampsByGT() {
-        Duration delta = seconds(5);
-        Timestamp small = getCurrentTime();
-        Timestamp medium = add(small, delta);
-        Timestamp big = add(medium, delta);
+    @Nested
+    @DisplayName("compare timestamps by")
+    class CompareTimestampsBy {
 
-        assertTrue(eval(medium, GREATER_THAN, small));
-        assertTrue(eval(big, GREATER_THAN, medium));
-        assertTrue(eval(big, GREATER_THAN, small));
+        @Test
+        @DisplayName("`GREATER_THAN`")
+        void gt() {
+            Duration delta = seconds(5);
+            Timestamp small = getCurrentTime();
+            Timestamp medium = add(small, delta);
+            Timestamp big = add(medium, delta);
 
-        assertFalse(eval(small, GREATER_THAN, small));
-        assertFalse(eval(small, GREATER_THAN, big));
-        assertFalse(eval(nullRef(), GREATER_THAN, small));
+            assertTrue(eval(medium, GREATER_THAN, small));
+            assertTrue(eval(big, GREATER_THAN, medium));
+            assertTrue(eval(big, GREATER_THAN, small));
+
+            assertFalse(eval(small, GREATER_THAN, small));
+            assertFalse(eval(small, GREATER_THAN, big));
+            assertFalse(eval(nullRef(), GREATER_THAN, small));
+        }
+
+        @Test
+        @DisplayName("`GREATER_OR_EQUAL`")
+        void ge() {
+            Duration delta = seconds(5);
+            Timestamp small = getCurrentTime();
+            Timestamp medium = add(small, delta);
+            Timestamp big = add(medium, delta);
+
+            assertTrue(eval(medium, GREATER_OR_EQUAL, small));
+            assertTrue(eval(big, GREATER_OR_EQUAL, medium));
+            assertTrue(eval(big, GREATER_OR_EQUAL, small));
+            assertTrue(eval(small, GREATER_OR_EQUAL, small));
+
+            assertFalse(eval(small, GREATER_OR_EQUAL, big));
+            assertFalse(eval(nullRef(), GREATER_OR_EQUAL, small));
+        }
+
+        @Test
+        @DisplayName("`LESS_THAN`")
+        void lt() {
+            Duration delta = seconds(5);
+            Timestamp small = getCurrentTime();
+            Timestamp medium = add(small, delta);
+            Timestamp big = add(medium, delta);
+
+            assertTrue(eval(medium, LESS_THAN, big));
+            assertTrue(eval(small, LESS_THAN, medium));
+            assertTrue(eval(small, LESS_THAN, big));
+
+            assertFalse(eval(big, LESS_THAN, big));
+            assertFalse(eval(big, LESS_THAN, small));
+            assertFalse(eval(nullRef(), LESS_THAN, nullRef()));
+        }
+
+        @Test
+        @DisplayName("`LESS_OR_EQUAL`")
+        void le() {
+            Duration delta = seconds(5);
+            Timestamp small = getCurrentTime();
+            Timestamp medium = add(small, delta);
+            Timestamp big = add(medium, delta);
+
+            assertTrue(eval(medium, LESS_OR_EQUAL, big));
+            assertTrue(eval(small, LESS_OR_EQUAL, medium));
+            assertTrue(eval(small, LESS_OR_EQUAL, big));
+
+            assertTrue(eval(medium, LESS_OR_EQUAL, medium));
+            assertFalse(eval(big, LESS_OR_EQUAL, small));
+            assertFalse(eval(medium, LESS_OR_EQUAL, nullRef()));
+        }
     }
 
-    @Test
-    @DisplayName("compare timestamps by GE")
-    void compareTimestampsByGE() {
-        Duration delta = seconds(5);
-        Timestamp small = getCurrentTime();
-        Timestamp medium = add(small, delta);
-        Timestamp big = add(medium, delta);
+    @Nested
+    @DisplayName("compare ints by")
+    class CompareIntsBy {
 
-        assertTrue(eval(medium, GREATER_OR_EQUAL, small));
-        assertTrue(eval(big, GREATER_OR_EQUAL, medium));
-        assertTrue(eval(big, GREATER_OR_EQUAL, small));
-        assertTrue(eval(small, GREATER_OR_EQUAL, small));
+        @Test
+        @DisplayName("`GREATER_THAN`")
+        void gt() {
+            assertGreater(42, 31);
+        }
 
-        assertFalse(eval(small, GREATER_OR_EQUAL, big));
-        assertFalse(eval(nullRef(), GREATER_OR_EQUAL, small));
+        @Test
+        @DisplayName("`GREATER_OR_EQUAL`")
+        void ge() {
+            assertGreaterOrEqual(42, 41);
+        }
+
+        @Test
+        @DisplayName("`LESS_THAN`")
+        void lt() {
+            assertLess(42, 314);
+        }
+
+        @Test
+        @DisplayName("`LESS_OR_EQUAL`")
+        void le() {
+            assertLessOrEqual(42, 43);
+        }
     }
 
-    @Test
-    @DisplayName("compare timestamps by LT")
-    void compareTimestampsByLT() {
-        Duration delta = seconds(5);
-        Timestamp small = getCurrentTime();
-        Timestamp medium = add(small, delta);
-        Timestamp big = add(medium, delta);
+    @Nested
+    @DisplayName("compare strings by")
+    class CompareStringsBy {
 
-        assertTrue(eval(medium, LESS_THAN, big));
-        assertTrue(eval(small, LESS_THAN, medium));
-        assertTrue(eval(small, LESS_THAN, big));
+        @Test
+        @DisplayName("`GREATER_THAN`")
+        void gt() {
+            assertGreater("a", "!");
+        }
 
-        assertFalse(eval(big, LESS_THAN, big));
-        assertFalse(eval(big, LESS_THAN, small));
-        assertFalse(eval(nullRef(), LESS_THAN, nullRef()));
+        @Test
+        @DisplayName("`GREATER_OR_EQUAL`")
+        void ge() {
+            assertGreaterOrEqual("d", "c");
+        }
+
+        @Test
+        @DisplayName("`LESS_THAN`")
+        void lt() {
+            assertLess("Z", "a");
+        }
+
+        @Test
+        @DisplayName("`LESS_OR_EQUAL`")
+        void le() {
+            assertLessOrEqual("a", "b");
+        }
     }
 
-    @Test
-    @DisplayName("compare timestamps by LE")
-    void compareTimestampsByLE() {
-        Duration delta = seconds(5);
-        Timestamp small = getCurrentTime();
-        Timestamp medium = add(small, delta);
-        Timestamp big = add(medium, delta);
+    @Nested
+    @DisplayName("compare doubles by")
+    class CompareDoublesBy {
 
-        assertTrue(eval(medium, LESS_OR_EQUAL, big));
-        assertTrue(eval(small, LESS_OR_EQUAL, medium));
-        assertTrue(eval(small, LESS_OR_EQUAL, big));
+        @Test
+        @DisplayName("`GREATER_THAN`")
+        void gt() {
+            assertGreater(42, 31);
+        }
 
-        assertTrue(eval(medium, LESS_OR_EQUAL, medium));
-        assertFalse(eval(big, LESS_OR_EQUAL, small));
-        assertFalse(eval(medium, LESS_OR_EQUAL, nullRef()));
+        @Test
+        @DisplayName("`GREATER_OR_EQUAL`")
+        void ge() {
+            assertGreaterOrEqual(42.1, 42.01);
+        }
+
+        @Test
+        @DisplayName("`LESS_THAN`")
+        void lt() {
+            assertLess(42.81, 314.0);
+        }
+
+        @Test
+        @DisplayName("`LESS_OR_EQUAL`")
+        void le() {
+            assertLessOrEqual(42.999, 43.0);
+        }
     }
 
-    @Test
-    @DisplayName("compare ints by GT")
-    void compareIntsByGT() {
-        assertGreater(42, 31);
-    }
+    @Nested
+    @DisplayName("fail to compare unsupported types by")
+    class NotCompareUnsupportedBy {
 
-    @Test
-    @DisplayName("compare ints by GE")
-    void compareIntsByGE() {
-        assertGreaterOrEqual(42, 41);
-    }
+        @Test
+        @DisplayName("`GREATER_THAN`")
+        void gt() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> eval(FaultyComparisonType.INSTANCE,
+                                    GREATER_THAN,
+                                    FaultyComparisonType.INSTANCE));
+        }
 
-    @Test
-    @DisplayName("compare ints by LT")
-    void compareIntsByLT() {
-        assertLess(42, 314);
-    }
+        @Test
+        @DisplayName("`GREATER_OR_EQUAL`")
+        void ge() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> eval(FaultyComparisonType.INSTANCE,
+                                    GREATER_OR_EQUAL,
+                                    FaultyComparisonType.INSTANCE));
+        }
 
-    @Test
-    @DisplayName("compare ints by LE")
-    void compareIntsByLE() {
-        assertLessOrEqual(42, 43);
-    }
+        @Test
+        @DisplayName("`LESS_THAN`")
+        void lt() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> eval(FaultyComparisonType.INSTANCE,
+                                    LESS_THAN,
+                                    FaultyComparisonType.INSTANCE));
+        }
 
-    @Test
-    @DisplayName("compare strings by GT")
-    void compareStringsByGT() {
-        assertGreater("a", "!");
-    }
-
-    @Test
-    @DisplayName("compare strings by GE")
-    void compareStringsByGE() {
-        assertGreaterOrEqual("d", "c");
-    }
-
-    @Test
-    @DisplayName("compare strings by LT")
-    void compareStringsByLT() {
-        assertLess("Z", "a");
-    }
-
-    @Test
-    @DisplayName("compare strings by LE")
-    void compareStringsByLE() {
-        assertLessOrEqual("a", "b");
-    }
-
-    @Test
-    @DisplayName("compare doubles by GT")
-    void compareDoublesByGT() {
-        assertGreater(42, 31);
-    }
-
-    @Test
-    @DisplayName("compare doubles by GE")
-    void compareDoublesByGE() {
-        assertGreaterOrEqual(42.1, 42.01);
-    }
-
-    @Test
-    @DisplayName("compare doubles by LT")
-    void compareDoublesByLT() {
-        assertLess(42.81, 314.0);
-    }
-
-    @Test
-    @DisplayName("compare doubles by LE")
-    void compareDoublesByLE() {
-        assertLessOrEqual(42.999, 43.0);
-    }
-
-    @Test
-    @DisplayName("fail to compare unsupported types by GT")
-    void failToCompareUnsupportedTypesByGT() {
-        assertThrows(IllegalArgumentException.class,
-                     () -> eval(FaultyComparisonType.INSTANCE,
-                                GREATER_THAN,
-                                FaultyComparisonType.INSTANCE));
-    }
-
-    @Test
-    @DisplayName("fail to compare unsupported types by GE")
-    void failToCompareUnsupportedTypesByGE() {
-        assertThrows(IllegalArgumentException.class,
-                     () -> eval(FaultyComparisonType.INSTANCE,
-                                GREATER_OR_EQUAL,
-                                FaultyComparisonType.INSTANCE));
-    }
-
-    @Test
-    @DisplayName("fail to compare unsupported types by LT")
-    void failToCompareUnsupportedTypesByLT() {
-        assertThrows(IllegalArgumentException.class,
-                     () -> eval(FaultyComparisonType.INSTANCE,
-                                LESS_THAN,
-                                FaultyComparisonType.INSTANCE));
-    }
-
-    @Test
-    @DisplayName("fail to compare unsupported types by LE")
-    void failToCompareUnsupportedTypesByLE() {
-        assertThrows(IllegalArgumentException.class,
-                     () -> eval(FaultyComparisonType.INSTANCE,
-                                LESS_OR_EQUAL,
-                                FaultyComparisonType.INSTANCE));
+        @Test
+        @DisplayName("`LESS_OR_EQUAL`")
+        void le() {
+            assertThrows(IllegalArgumentException.class,
+                         () -> eval(FaultyComparisonType.INSTANCE,
+                                    LESS_OR_EQUAL,
+                                    FaultyComparisonType.INSTANCE));
+        }
     }
 
     @Test
     @DisplayName("fail to compare different types")
-    void failToCompareDifferentTypes() {
+    void notCompareDifferentTypes() {
         assertThrows(IllegalArgumentException.class, () -> eval("7", GREATER_THAN, 6));
     }
 
     @Test
-    @DisplayName("fail to compare by an invalid operator")
-    void failToCompareByAnInvalidOperator() {
+    @DisplayName("fail to compare by invalid operator")
+    void notCompareByInvalidOperator() {
         assertThrows(IllegalArgumentException.class, () -> eval("a", CFO_UNDEFINED, "b"));
     }
 

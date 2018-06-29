@@ -28,6 +28,7 @@ import io.spine.test.Tests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -62,7 +63,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @param <R> the type of read requests for the storage
  * @author Alexander Litus
  */
-@SuppressWarnings("ClassWithTooManyMethods")
+@SuppressWarnings({"ClassWithTooManyMethods",
+        "unused" /* JUnit Nested classes considered unused in the abstract class. */})
 public abstract class AbstractStorageTest<I,
                                           M extends Message,
                                           R extends ReadRequest<I>,
@@ -159,8 +161,8 @@ public abstract class AbstractStorageTest<I,
     }
 
     @Test
-    @DisplayName("handle absence of record with passed id")
-    void handleAbsenceOfRecordWithPassedId() {
+    @DisplayName("handle absence of record with passed ID")
+    void handleAbsenceOfRecord() {
         R readRequest = newReadRequest(newId());
         Optional<M> record = storage.read(readRequest);
 
@@ -172,152 +174,183 @@ public abstract class AbstractStorageTest<I,
         assertFalse(record.isPresent());
     }
 
-    @Test
-    @DisplayName("throw exception if read by null id")
-    void throwExceptionIfReadByNullId() {
-        assertThrows(NullPointerException.class, () -> storage.read(Tests.nullRef()));
+    @Nested
+    @DisplayName("throw NPE")
+    class ThrowNpe {
+
+        @Test
+        @DisplayName("when reading by null ID")
+        void ifReadByNullId() {
+            assertThrows(NullPointerException.class, () -> storage.read(Tests.nullRef()));
+        }
+
+        @Test
+        @DisplayName("when writing by null ID")
+        void ifWriteByNullId() {
+            assertThrows(NullPointerException.class,
+                         () -> storage.write(Tests.nullRef(), newStorageRecord()));
+        }
+
+        @Test
+        @DisplayName("when writing null record")
+        void ifWriteNullRecord() {
+            assertThrows(NullPointerException.class, () -> storage.write(newId(), Tests.nullRef()));
+        }
+    }
+
+    @Nested
+    @DisplayName("write and read")
+    class WriteAndRead {
+
+        @Test
+        @DisplayName("one record")
+        void writeAndReadRecord() {
+            writeAndReadRecordTest(newId());
+        }
+
+        @Test
+        @DisplayName("several records by different IDs")
+        void writeAndReadSeveralRecordsByDifferentIds() {
+            writeAndReadRecordTest(newId());
+            writeAndReadRecordTest(newId());
+            writeAndReadRecordTest(newId());
+        }
     }
 
     @Test
-    @DisplayName("throw exception if write by null id")
-    void throwExceptionIfWriteByNullId() {
-        assertThrows(NullPointerException.class,
-                     () -> storage.write(Tests.nullRef(), newStorageRecord()));
-    }
-
-    @Test
-    @DisplayName("throw exception if write null record")
-    void throwExceptionIfWriteNullRecord() {
-        assertThrows(NullPointerException.class, () -> storage.write(newId(), Tests.nullRef()));
-    }
-
-    @Test
-    @DisplayName("write and read record")
-    void writeAndReadRecord() {
-        writeAndReadRecordTest(newId());
-    }
-
-    @Test
-    @DisplayName("write and read several records by different ids")
-    void writeAndReadSeveralRecordsByDifferentIds() {
-        writeAndReadRecordTest(newId());
-        writeAndReadRecordTest(newId());
-        writeAndReadRecordTest(newId());
-    }
-
-    @Test
-    @DisplayName("rewrite record if write by the same id")
+    @DisplayName("rewrite record if write by the same ID")
     protected void rewriteRecordIfWriteByTheSameId() {
         I id = newId();
         writeAndReadRecordTest(id);
         writeAndReadRecordTest(id);
     }
 
-    @Test
-    @DisplayName("have index on ID")
-    void haveIndexOnID() {
-        Iterator<I> index = storage.index();
-        assertNotNull(index);
-    }
+    @Nested
+    @DisplayName("have index which")
+    class HaveIndex {
 
-    @Test
-    @DisplayName("index all IDs")
-    void indexAllIDs() {
-        int recordCount = 10;
-        Set<I> ids = new HashSet<>(recordCount);
-        for (int i = 0; i < recordCount; i++) {
-            I id = newId();
-            writeRecord(id);
-            ids.add(id);
+        @Test
+        @DisplayName("is non-null")
+        void nonNull() {
+            Iterator<I> index = storage.index();
+            assertNotNull(index);
         }
 
-        Iterator<I> index = storage.index();
-        Collection<I> indexValues = newHashSet(index);
+        @SuppressWarnings("unchecked") // Simplified for test.
+        @Test
+        @DisplayName("counts all IDs")
+        void countingAllIds() {
+            int recordCount = 10;
+            Set<I> ids = new HashSet<>(recordCount);
+            for (int i = 0; i < recordCount; i++) {
+                I id = newId();
+                writeRecord(id);
+                ids.add(id);
+            }
 
-        assertEquals(ids.size(), indexValues.size());
-        assertContainsAll(indexValues, (I[]) ids.toArray());
-    }
+            Iterator<I> index = storage.index();
+            Collection<I> indexValues = newHashSet(index);
 
-    @Test
-    @DisplayName("have immutable index")
-    void haveImmutableIndex() {
-        writeRecord(newId());
-        Iterator<I> index = storage.index();
-        assertTrue(index.hasNext());
-        try {
-            index.remove();
-            fail("Storage#index is mutable");
+            assertEquals(ids.size(), indexValues.size());
+            assertContainsAll(indexValues, (I[]) ids.toArray());
+        }
 
-            // One of collections used in in-memory implementation throws IllegalStateException
-            // but default behavior is UnsupportedOperationException
-        } catch (UnsupportedOperationException | IllegalStateException ignored) {
-            // One of valid exceptions was thrown
+        @Test
+        @DisplayName("is immutable")
+        void immutable() {
+            writeRecord(newId());
+            Iterator<I> index = storage.index();
+            assertTrue(index.hasNext());
+            try {
+                index.remove();
+                fail("Storage#index is mutable");
+
+                // One of collections used in in-memory implementation throws IllegalStateException
+                // but default behavior is UnsupportedOperationException
+            } catch (UnsupportedOperationException | IllegalStateException ignored) {
+                // One of valid exceptions was thrown
+            }
         }
     }
 
-    @Test
-    @DisplayName("assure it is closed")
-    void assureItIsClosed() {
-        closeAndFailIfException(storage);
+    @Nested
+    @DisplayName("check storage")
+    class CheckStorage {
 
-        assertThrows(IllegalStateException.class, () -> storage.checkNotClosed());
+        @Test
+        @DisplayName("not closed")
+        void notClosed() {
+            storage.checkNotClosed();
+        }
+
+        @Test
+        @DisplayName("closed")
+        void closed() {
+            closeAndFailIfException(storage);
+
+            assertThrows(IllegalStateException.class, () -> storage.checkNotClosed());
+        }
     }
 
-    @Test
-    @DisplayName("not throw exception if it is not closed on check")
-    void notThrowExceptionIfItIsNotClosedOnCheck() {
-        storage.checkNotClosed();
+    @Nested
+    @DisplayName("return if storage is")
+    class ReturnIfIs {
+
+        @Test
+        @DisplayName("opened")
+        void opened() {
+            assertTrue(storage.isOpen());
+        }
+
+        @Test
+        @DisplayName("not opened")
+        void notOpened() {
+            storage.close();
+
+            assertFalse(storage.isOpen());
+        }
+
+        @Test
+        @DisplayName("closed")
+        void closed() {
+            storage.close();
+
+            assertTrue(storage.isClosed());
+        }
+
+        @Test
+        @DisplayName("not closed")
+        void notClosed() {
+            assertFalse(storage.isClosed());
+        }
     }
 
-    @Test
-    @DisplayName("return true if it is opened")
-    void returnTrueIfItIsOpened() {
-        assertTrue(storage.isOpen());
-    }
+    @Nested
+    @DisplayName("close itself and throw ISE")
+    class CloseAndThrow {
 
-    @Test
-    @DisplayName("return false if it not opened")
-    void returnFalseIfItNotOpened() {
-        storage.close();
+        @Test
+        @DisplayName("on read operation")
+        void onRead() {
+            closeAndFailIfException(storage);
 
-        assertFalse(storage.isOpen());
-    }
+            R readRequest = newReadRequest(newId());
+            assertThrows(IllegalStateException.class, () -> storage.read(readRequest));
+        }
 
-    @Test
-    @DisplayName("return true if it is closed")
-    void returnTrueIfItIsClosed() {
-        storage.close();
+        @Test
+        @DisplayName("on write operation")
+        void onWrite() {
+            closeAndFailIfException(storage);
 
-        assertTrue(storage.isClosed());
-    }
-
-    @Test
-    @DisplayName("return false if it not closed")
-    void returnFalseIfItNotClosed() {
-        assertFalse(storage.isClosed());
-    }
-
-    @Test
-    @DisplayName("close itself and throw exception if read after")
-    void closeItselfAndThrowExceptionIfReadAfter() {
-        closeAndFailIfException(storage);
-
-        R readRequest = newReadRequest(newId());
-        assertThrows(IllegalStateException.class, () -> storage.read(readRequest));
-    }
-
-    @Test
-    @DisplayName("close itself and throw exception if write after")
-    void closeItselfAndThrowExceptionIfWriteAfter() {
-        closeAndFailIfException(storage);
-
-        assertThrows(IllegalStateException.class,
-                     () -> storage.write(newId(), newStorageRecord()));
+            assertThrows(IllegalStateException.class,
+                         () -> storage.write(newId(), newStorageRecord()));
+        }
     }
 
     @Test
     @DisplayName("throw exception if close twice")
-    void throwExceptionIfCloseTwice() {
+    void notCloseTwice() {
         storage.close();
         assertThrows(IllegalStateException.class, () -> storage.close());
     }

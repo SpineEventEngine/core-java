@@ -70,8 +70,8 @@ class MultitenantStandTest extends StandTest {
     }
 
     @Test
-    @DisplayName("not allow reading aggregate records for another tenant")
-    void notAllowReadingAggregateRecordsForAnotherTenant() {
+    @DisplayName("not allow reading aggregate records from another tenant")
+    void readOnlySameTenant() {
         Stand stand = doCheckReadingCustomersById(15);
 
         TenantId anotherTenant = newUuid();
@@ -89,7 +89,7 @@ class MultitenantStandTest extends StandTest {
 
     @Test
     @DisplayName("not trigger updates of aggregate records for another tenant subscriptions")
-    void notTriggerUpdatesOfAggregateRecordsForAnotherTenantSubscriptions() {
+    void updateOnlySameTenant() {
         StandStorage standStorage =
                 InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
                                                    isMultitenant())

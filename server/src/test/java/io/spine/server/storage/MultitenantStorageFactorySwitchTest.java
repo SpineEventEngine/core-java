@@ -28,6 +28,6 @@ import org.junit.jupiter.api.DisplayName;
 @DisplayName("Multitenant StorageFactorySwitch should")
 class MultitenantStorageFactorySwitchTest extends StorageFactorySwitchTest {
     MultitenantStorageFactorySwitchTest() {
-        super(true);
+        setMultitenant(true);
     }
 }

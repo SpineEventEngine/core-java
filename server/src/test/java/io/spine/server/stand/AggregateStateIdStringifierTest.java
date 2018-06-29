@@ -29,6 +29,7 @@ import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.stand.AggregateStateId.of;
@@ -45,141 +46,156 @@ class AggregateStateIdStringifierTest {
 
     private static final TypeUrl ANY_TYPE_URL = TypeUrl.of(Any.class);
 
-    @Test
-    @DisplayName("accept string IDs")
-    void acceptStringIds() {
-        final Stringifier<AggregateStateId> stringifier = stringifier();
-        final AggregateStateId id = newStringId();
+    @Nested
+    @DisplayName("accept IDs of type")
+    class AcceptIds {
 
-        final String stringAggregateId = stringifier.convert(id);
-        assertNotNull(stringAggregateId);
-        assertThat(stringAggregateId, CoreMatchers.containsString(id.getAggregateId()
-                                                                    .toString()));
+        @Test
+        @DisplayName("String")
+        void ofStringType() {
+            final Stringifier<AggregateStateId> stringifier = stringifier();
+            final AggregateStateId id = newStringId();
+
+            final String stringAggregateId = stringifier.convert(id);
+            assertNotNull(stringAggregateId);
+            assertThat(stringAggregateId, CoreMatchers.containsString(id.getAggregateId()
+                                                                        .toString()));
+        }
+
+        @Test
+        @DisplayName("int")
+        void ofIntType() {
+            final Stringifier<AggregateStateId> stringifier = stringifier();
+            final AggregateStateId id = newIntId();
+
+            final String stringAggregateId = stringifier.convert(id);
+            assertNotNull(stringAggregateId);
+            assertThat(stringAggregateId, CoreMatchers.containsString(id.getAggregateId()
+                                                                        .toString()));
+        }
+
+        @Test
+        @DisplayName("long")
+        void ofLongType() {
+            final Stringifier<AggregateStateId> stringifier = stringifier();
+            final AggregateStateId id = newLongId();
+
+            final String stringAggregateId = stringifier.convert(id);
+            assertNotNull(stringAggregateId);
+            assertThat(stringAggregateId, CoreMatchers.containsString(id.getAggregateId()
+                                                                        .toString()));
+        }
+
+        @Test
+        @DisplayName("Message, if type is registered")
+        void ofMessageType() {
+            final Stringifier<AggregateStateId> stringifier = stringifier();
+            final AggregateStateId id = newMessageId();
+
+            final String stringAggregateId = stringifier.convert(id);
+            assertNotNull(stringAggregateId);
+            assertThat(stringAggregateId,
+                       CoreMatchers.containsString(Stringifiers.toString(id.getAggregateId())));
+        }
     }
 
-    @Test
-    @DisplayName("accept int IDs")
-    void acceptIntIds() {
-        final Stringifier<AggregateStateId> stringifier = stringifier();
-        final AggregateStateId id = newIntId();
+    @Nested
+    @DisplayName("unpack IDs of type")
+    class UnpackIds {
 
-        final String stringAggregateId = stringifier.convert(id);
-        assertNotNull(stringAggregateId);
-        assertThat(stringAggregateId, CoreMatchers.containsString(id.getAggregateId()
-                                                                    .toString()));
+        @Test
+        @DisplayName("String")
+        void ofStringType() {
+            final String stringIdValue = "abcde";
+            final String stringId = ANY_TYPE_URL.value() + "-String-" + stringIdValue;
+            final Stringifier<AggregateStateId> stringifier = stringifier();
+
+            final AggregateStateId id = stringifier.reverse()
+                                                   .convert(stringId);
+
+            assertNotNull(id);
+            assertEquals(ANY_TYPE_URL, id.getStateType());
+            assertEquals(stringIdValue, id.getAggregateId());
+        }
+
+        @Test
+        @DisplayName("int")
+        void ofIntType() {
+            final int intId = 42;
+            final String stringId = ANY_TYPE_URL.value() + "-Integer-" + String.valueOf(intId);
+            final Stringifier<AggregateStateId> stringifier = stringifier();
+
+            final AggregateStateId id = stringifier.reverse()
+                                                   .convert(stringId);
+
+            assertNotNull(id);
+            assertEquals(ANY_TYPE_URL, id.getStateType());
+            assertEquals(intId, id.getAggregateId());
+        }
+
+        @Test
+        @DisplayName("long")
+        void ofLongType() {
+            final long longId = 31415;
+            final String stringId = ANY_TYPE_URL.value() + "-Long-" + String.valueOf(longId);
+            final Stringifier<AggregateStateId> stringifier = stringifier();
+
+            final AggregateStateId id = stringifier.reverse()
+                                                   .convert(stringId);
+
+            assertNotNull(id);
+            assertEquals(ANY_TYPE_URL, id.getStateType());
+            assertEquals(longId, id.getAggregateId());
+        }
+
+        @Test
+        @DisplayName("Message, if type is registered")
+        void unpackRegisteredMessageIds() {
+            final ProjectId messageId = Sample.messageOfType(ProjectId.class);
+            final String stringMessageId = Stringifiers.toString(messageId);
+            final String stringId = ANY_TYPE_URL.value() + '-' + TypeName.of(ProjectId.class)
+                    + '-' + stringMessageId;
+            final Stringifier<AggregateStateId> stringifier = stringifier();
+
+            final AggregateStateId id = stringifier.reverse()
+                                                   .convert(stringId);
+
+            assertNotNull(id);
+            assertEquals(ANY_TYPE_URL, id.getStateType());
+            assertEquals(messageId, id.getAggregateId());
+        }
     }
 
-    @Test
-    @DisplayName("accept long IDs")
-    void acceptLongIds() {
-        final Stringifier<AggregateStateId> stringifier = stringifier();
-        final AggregateStateId id = newLongId();
+    @Nested
+    @DisplayName("fail to convert string")
+    class FailToConvertString {
 
-        final String stringAggregateId = stringifier.convert(id);
-        assertNotNull(stringAggregateId);
-        assertThat(stringAggregateId, CoreMatchers.containsString(id.getAggregateId()
-                                                                    .toString()));
-    }
+        @Test
+        @DisplayName("which is invalid")
+        void invalid() {
+            final String invalidId = "I'm invalid!";
+            assertThrows(IllegalArgumentException.class,
+                         () -> stringifier().reverse()
+                                            .convert(invalidId));
+        }
 
-    @Test
-    @DisplayName("accept message IDs of registered types")
-    void acceptMessageIdsOfRegisteredTypes() {
-        final Stringifier<AggregateStateId> stringifier = stringifier();
-        final AggregateStateId id = newMessageId();
+        @Test
+        @DisplayName("with no ID type")
+        void withNoIdType() {
+            final String invalidId = "google.protobuf/google.protobuf.Any-42";
+            assertThrows(IllegalArgumentException.class,
+                         () -> stringifier().reverse()
+                                            .convert(invalidId));
+        }
 
-        final String stringAggregateId = stringifier.convert(id);
-        assertNotNull(stringAggregateId);
-        assertThat(stringAggregateId,
-                   CoreMatchers.containsString(Stringifiers.toString(id.getAggregateId())));
-    }
-
-    @Test
-    @DisplayName("unpack int IDs")
-    void unpackIntIds() {
-        final int intId = 42;
-        final String stringId = ANY_TYPE_URL.value() + "-Integer-" + String.valueOf(intId);
-        final Stringifier<AggregateStateId> stringifier = stringifier();
-
-        final AggregateStateId id = stringifier.reverse()
-                                               .convert(stringId);
-
-        assertNotNull(id);
-        assertEquals(ANY_TYPE_URL, id.getStateType());
-        assertEquals(intId, id.getAggregateId());
-    }
-
-    @Test
-    @DisplayName("unpack long IDs")
-    void unpackLongIds() {
-        final long longId = 31415;
-        final String stringId = ANY_TYPE_URL.value() + "-Long-" + String.valueOf(longId);
-        final Stringifier<AggregateStateId> stringifier = stringifier();
-
-        final AggregateStateId id = stringifier.reverse()
-                                               .convert(stringId);
-
-        assertNotNull(id);
-        assertEquals(ANY_TYPE_URL, id.getStateType());
-        assertEquals(longId, id.getAggregateId());
-    }
-
-    @Test
-    @DisplayName("unpack string IDs")
-    void unpackStringIds() {
-        final String stringIdValue = "abcde";
-        final String stringId = ANY_TYPE_URL.value() + "-String-" + stringIdValue;
-        final Stringifier<AggregateStateId> stringifier = stringifier();
-
-        final AggregateStateId id = stringifier.reverse()
-                                               .convert(stringId);
-
-        assertNotNull(id);
-        assertEquals(ANY_TYPE_URL, id.getStateType());
-        assertEquals(stringIdValue, id.getAggregateId());
-    }
-
-    @Test
-    @DisplayName("unpack registered message IDs")
-    void unpackRegisteredMessageIds() {
-        final ProjectId messageId = Sample.messageOfType(ProjectId.class);
-        final String stringMessageId = Stringifiers.toString(messageId);
-        final String stringId = ANY_TYPE_URL.value() + '-' + TypeName.of(ProjectId.class)
-                + '-' + stringMessageId;
-        final Stringifier<AggregateStateId> stringifier = stringifier();
-
-        final AggregateStateId id = stringifier.reverse()
-                                               .convert(stringId);
-
-        assertNotNull(id);
-        assertEquals(ANY_TYPE_URL, id.getStateType());
-        assertEquals(messageId, id.getAggregateId());
-    }
-
-    @Test
-    @DisplayName("fail to convert invalid string")
-    void failToConvertInvalidString() {
-        final String invalidId = "I'm invalid!";
-        assertThrows(IllegalArgumentException.class,
-                     () -> stringifier().reverse()
-                                        .convert(invalidId));
-    }
-
-    @Test
-    @DisplayName("fail to convert string with no ID type")
-    void failToConvertStringWithNoIDType() {
-        final String invalidId = "google.protobuf/google.protobuf.Any-42";
-        assertThrows(IllegalArgumentException.class,
-                     () -> stringifier().reverse()
-                                        .convert(invalidId));
-    }
-
-    @Test
-    @DisplayName("fail to convert string with no state type URL")
-    void failToConvertStringWithNoStateTypeURL() {
-        final String invalidId = "-INT-42";
-        assertThrows(IllegalArgumentException.class,
-                     () -> stringifier().reverse()
-                                        .convert(invalidId));
+        @Test
+        @DisplayName("with no state type URL")
+        void withNoStateTypeURL() {
+            final String invalidId = "-INT-42";
+            assertThrows(IllegalArgumentException.class,
+                         () -> stringifier().reverse()
+                                            .convert(invalidId));
+        }
     }
 
     @Test
