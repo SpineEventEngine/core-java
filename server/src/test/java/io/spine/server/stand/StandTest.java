@@ -369,7 +369,8 @@ class StandTest extends TenantAwareTest {
             final Query noneOfCustomersQuery = requestFactory.query()
                                                              .byIds(Customer.class, emptySet());
 
-            final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
+            final MemoizeQueryResponseObserver responseObserver =
+                    new MemoizeQueryResponseObserver();
             stand.execute(noneOfCustomersQuery, responseObserver);
 
             verifyObserver(responseObserver);
@@ -1220,7 +1221,8 @@ class StandTest extends TenantAwareTest {
             ids.add(customer.getId());
         }
 
-        final Query customerQuery = requestFactory.query().byIdsWithMask(Customer.class, ids, paths);
+        final Query customerQuery =
+                requestFactory.query().byIdsWithMask(Customer.class, ids, paths);
 
         final FieldMask fieldMask = FieldMask.newBuilder()
                                              .addAllPaths(Arrays.asList(paths))

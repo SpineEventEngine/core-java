@@ -91,9 +91,9 @@ class MultitenantStorageTest {
 
     private static <R> List<Future<R>>
     executeInMultithreadedEnvironment(Collection<Callable<R>> tasks) throws InterruptedException {
-        final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime()
-                                                                             .availableProcessors() *
-                                                                              2);
+        final ExecutorService executor =
+                Executors.newFixedThreadPool(Runtime.getRuntime()
+                                                    .availableProcessors() * 2);
         final List<Future<R>> futures = executor.invokeAll(tasks);
         return futures;
     }

@@ -77,10 +77,12 @@ public class Given {
 
     public static Event validEvent() {
         final Command cmd = validCommand();
-        final PrjProjectCreated eventMessage = PrjProjectCreated.newBuilder()
-                                                                .setProjectId(ProjectId.newBuilder()
-                                                                                       .setId("12345AD0"))
-                                                                .build();
+        final ProjectId.Builder projectIdBuilder = ProjectId.newBuilder()
+                                                            .setId("12345AD0");
+        final PrjProjectCreated eventMessage =
+                PrjProjectCreated.newBuilder()
+                                 .setProjectId(projectIdBuilder)
+                                 .build();
         final StringValue producerId = toMessage(Given.class.getSimpleName());
         final EventFactory eventFactory = EventFactory.on(CommandEnvelope.of(cmd),
                                                           Identifier.pack(producerId));
