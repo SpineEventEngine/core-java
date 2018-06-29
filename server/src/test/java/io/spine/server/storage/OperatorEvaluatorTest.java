@@ -23,7 +23,6 @@ package io.spine.server.storage;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.server.storage.given.OperatorEvaluatorTestEnv;
 import io.spine.server.storage.given.OperatorEvaluatorTestEnv.FaultyComparisonType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -43,17 +42,18 @@ import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.test.Tests.nullRef;
 import static io.spine.time.Durations2.seconds;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings({
-        "Duplicates",
-        "ClassWithTooManyMethods"
-            /* 1 - Comparison tests are similar but cannot be simplified to one.
-               2 - Many test cases required. */
+        "Duplicates" /* Comparison tests are similar but cannot be simplified to one. */,
+        "ClassWithTooManyMethods" /* Many test cases required. */,
+        "InnerClassMayBeStatic", "ClassCanBeStatic"
+        /* JUnit 5 Nested classes cannot be static. */,
+        "DuplicateStringLiteralInspection" /* Common test display names */
 })
 @DisplayName("OperatorEvaluator should")
 class OperatorEvaluatorTest {

@@ -31,7 +31,6 @@ import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.stand.given.StandTestEnv;
 import io.spine.server.stand.given.StandTestEnv.MemoizeEntityUpdateCallback;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
@@ -39,8 +38,8 @@ import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 

@@ -62,17 +62,14 @@ import static java.lang.String.format;
 public abstract class StandStorageTest extends RecordStorageTest<AggregateStateId,
                                                                    StandStorage> {
 
+    @SuppressWarnings("unchecked") // OK for test.
     protected static final Supplier<AggregateStateId<ProjectId>> DEFAULT_ID_SUPPLIER
-            = new Supplier<AggregateStateId<ProjectId>>() {
-        @SuppressWarnings("unchecked")
-        @Override
-        public AggregateStateId<ProjectId> get() {
-            final ProjectId projectId = ProjectId.newBuilder()
-                                                 .setId(Identifier.newUuid())
-                                                 .build();
-            return AggregateStateId.of(projectId, TypeUrl.of(Project.class));
-        }
-    };
+            = () -> {
+                final ProjectId projectId = ProjectId.newBuilder()
+                                                     .setId(Identifier.newUuid())
+                                                     .build();
+                return AggregateStateId.of(projectId, TypeUrl.of(Project.class));
+            };
 
     @Override
     protected Message newState(AggregateStateId id) {
@@ -260,9 +257,8 @@ public abstract class StandStorageTest extends RecordStorageTest<AggregateStateI
         assertSize(ids.size(), recordsToCheck);
 
         final Collection<ProjectId> projectIds = Collections2.transform(ids, new Function<AggregateStateId, ProjectId>() {
-            @Nullable
             @Override
-            public ProjectId apply(@Nullable AggregateStateId input) {
+            public @Nullable ProjectId apply(@Nullable AggregateStateId input) {
                 if (input == null) {
                     return null;
                 }

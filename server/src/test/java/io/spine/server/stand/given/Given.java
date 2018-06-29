@@ -32,7 +32,6 @@ import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
-import io.spine.core.Version;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
@@ -41,7 +40,6 @@ import io.spine.server.event.EventFactory;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.route.EventRoute;
-import io.spine.test.Tests;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectVBuilder;
@@ -55,6 +53,7 @@ import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
+import static io.spine.test.Tests.nullRef;
 
 /**
  * @author Dmytro Dashenkov
@@ -85,7 +84,7 @@ public class Given {
         final StringValue producerId = toMessage(Given.class.getSimpleName());
         final EventFactory eventFactory = EventFactory.on(CommandEnvelope.of(cmd),
                                                           Identifier.pack(producerId));
-        final Event event = eventFactory.createEvent(eventMessage, Tests.<Version>nullRef());
+        final Event event = eventFactory.createEvent(eventMessage, nullRef());
         final Event result = event.toBuilder()
                                   .setContext(event.getContext()
                                                    .toBuilder()

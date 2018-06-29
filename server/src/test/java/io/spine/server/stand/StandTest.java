@@ -19,7 +19,6 @@
  */
 package io.spine.server.stand;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableCollection;
@@ -49,7 +48,6 @@ import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.core.given.GivenVersion;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.grpc.StreamObservers;
 import io.spine.people.PersonName;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
@@ -61,7 +59,6 @@ import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.given.Given;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
-import io.spine.server.stand.given.StandTestEnv;
 import io.spine.server.stand.given.StandTestEnv.MemoizeEntityUpdateCallback;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
 import io.spine.server.tenant.TenantAwareTest;
@@ -80,7 +77,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
-import org.mockito.ArgumentMatchers;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -108,15 +104,18 @@ import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.stand.given.Given.StandTestProjection;
+import static java.util.Collections.emptyIterator;
+import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyIterable;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -130,9 +129,9 @@ import static org.mockito.Mockito.when;
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
-
-@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods", "OverlyComplexClass"})
 //It's OK for a test.
+@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods", "OverlyComplexClass",
+        "DuplicateStringLiteralInspection" /* Common test display names */})
 @DisplayName("Stand should")
 class StandTest extends TenantAwareTest {
     private static final int TOTAL_CUSTOMERS_FOR_BATCH_READING = 10;
@@ -358,16 +357,16 @@ class StandTest extends TenantAwareTest {
             when(standStorageMock.readAllByType(any(TypeUrl.class)))
                     .thenReturn(nonEmptyList.iterator());
             when(standStorageMock.readAll())
-                    .thenReturn(Collections.<EntityRecord>emptyIterator());
-            when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable()))
+                    .thenReturn(emptyIterator());
+            when(standStorageMock.readMultiple(anyIterable()))
                     .thenReturn(nonEmptyList.iterator());
-            when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable()))
+            when(standStorageMock.readMultiple(anyIterable()))
                     .thenReturn(nonEmptyList.iterator());
 
             final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
 
             final Query noneOfCustomersQuery = requestFactory.query()
-                                                             .byIds(Customer.class, Collections.<Message>emptySet());
+                                                             .byIds(Customer.class, emptySet());
 
             final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
             stand.execute(noneOfCustomersQuery, responseObserver);
@@ -517,7 +516,7 @@ class StandTest extends TenantAwareTest {
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
         final Subscription subscription = subscribeAndActivate(stand, allCustomers, memoizeCallback);
 
-        stand.cancel(subscription, StreamObservers.<Response>noOpObserver());
+        stand.cancel(subscription, noOpObserver());
 
         final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
                                                                                  .iterator()
@@ -809,7 +808,7 @@ class StandTest extends TenantAwareTest {
 
     @Nested
     @DisplayName("throw invalid query exception packed as IAE")
-    class ThrowInvalidQueryException {
+    class ThrowInvalidQueryEx {
 
         @Test
         @DisplayName("if querying unknown type")
@@ -826,7 +825,7 @@ class StandTest extends TenantAwareTest {
                                                          .all(Customer.class);
 
             try {
-                stand.execute(readAllCustomers, StreamObservers.<QueryResponse>noOpObserver());
+                stand.execute(readAllCustomers, noOpObserver());
                 fail("Expected IllegalArgumentException upon executing query with unknown target," +
                              " but got nothing");
             } catch (IllegalArgumentException e) {
@@ -843,7 +842,7 @@ class StandTest extends TenantAwareTest {
             final Query invalidQuery = Query.getDefaultInstance();
 
             try {
-                stand.execute(invalidQuery, StreamObservers.<QueryResponse>noOpObserver());
+                stand.execute(invalidQuery, noOpObserver());
                 fail("Expected IllegalArgumentException due to invalid query message passed," +
                              " but got nothing");
             } catch (IllegalArgumentException e) {
@@ -884,7 +883,7 @@ class StandTest extends TenantAwareTest {
 
     @Nested
     @DisplayName("throw invalid topic exception packed as IAE")
-    class ThrowInvalidTopicException {
+    class ThrowInvalidTopicEx {
 
         @Test
         @DisplayName("if subscribing to unknown type changes")
@@ -900,7 +899,7 @@ class StandTest extends TenantAwareTest {
                                                           .allOf(Customer.class);
 
             try {
-                stand.subscribe(allCustomersTopic, StreamObservers.<Subscription>noOpObserver());
+                stand.subscribe(allCustomersTopic, noOpObserver());
                 fail("Expected IllegalArgumentException upon subscribing to a topic " +
                              "with unknown target, but got nothing");
             } catch (IllegalArgumentException e) {
@@ -918,7 +917,7 @@ class StandTest extends TenantAwareTest {
             final Topic invalidTopic = Topic.getDefaultInstance();
 
             try {
-                stand.subscribe(invalidTopic, StreamObservers.<Subscription>noOpObserver());
+                stand.subscribe(invalidTopic, noOpObserver());
                 fail("Expected IllegalArgumentException due to an invalid topic message, " +
                              "but got nothing");
             } catch (IllegalArgumentException e) {
@@ -958,7 +957,7 @@ class StandTest extends TenantAwareTest {
 
     @Nested
     @DisplayName("throw invalid subscription exception packed as IAE")
-    class ThrowInvalidSubscriptionException {
+    class ThrowInvalidSubscriptionEx {
 
         @Test
         @DisplayName("if activating subscription with unsupported target")
@@ -969,9 +968,7 @@ class StandTest extends TenantAwareTest {
             final Subscription subscription = subscriptionWithUnknownTopic();
 
             try {
-                stand.activate(subscription,
-                               emptyUpdateCallback(),
-                               StreamObservers.<Response>noOpObserver());
+                stand.activate(subscription, emptyUpdateCallback(), noOpObserver());
                 fail("Expected IllegalArgumentException upon activating an unknown subscription, " +
                              "but got nothing");
             } catch (IllegalArgumentException e) {
@@ -988,7 +985,7 @@ class StandTest extends TenantAwareTest {
             final Subscription subscription = subscriptionWithUnknownTopic();
 
             try {
-                stand.cancel(subscription, StreamObservers.<Response>noOpObserver());
+                stand.cancel(subscription, noOpObserver());
                 fail("Expected IllegalArgumentException upon cancelling an unknown subscription, " +
                              "but got nothing");
             } catch (IllegalArgumentException e) {
@@ -1005,9 +1002,7 @@ class StandTest extends TenantAwareTest {
             final Subscription invalidSubscription = Subscription.getDefaultInstance();
 
             try {
-                stand.activate(invalidSubscription,
-                               emptyUpdateCallback(),
-                               StreamObservers.<Response>noOpObserver());
+                stand.activate(invalidSubscription, emptyUpdateCallback(), noOpObserver());
                 fail("Expected IllegalArgumentException due to an invalid subscription message " +
                              "passed to `activate`, but got nothing");
             } catch (IllegalArgumentException e) {
@@ -1024,7 +1019,7 @@ class StandTest extends TenantAwareTest {
             final Subscription invalidSubscription = Subscription.getDefaultInstance();
 
             try {
-                stand.cancel(invalidSubscription, StreamObservers.<Response>noOpObserver());
+                stand.cancel(invalidSubscription, noOpObserver());
                 fail("Expected IllegalArgumentException due to an invalid subscription message " +
                              "passed to `cancel`, but got nothing");
             } catch (IllegalArgumentException e) {
@@ -1079,7 +1074,7 @@ class StandTest extends TenantAwareTest {
         final MemoizingObserver<Subscription> observer = memoizingObserver();
         stand.subscribe(topic, observer);
         final Subscription subscription = observer.firstResponse();
-        stand.activate(subscription, callback, StreamObservers.<Response>noOpObserver());
+        stand.activate(subscription, callback, noOpObserver());
 
         assertNotNull(subscription);
         return subscription;
@@ -1163,7 +1158,7 @@ class StandTest extends TenantAwareTest {
     private void checkEmptyResultForTargetOnEmptyStorage(Query readCustomersQuery) {
         final StandStorage standStorageMock = mock(StandStorage.class);
         when(standStorageMock.readAllByType(any(TypeUrl.class)))
-                .thenReturn(Collections.<EntityRecord>emptyIterator());
+                .thenReturn(emptyIterator());
         when(standStorageMock.readMultiple(any(Iterable.class)))
                 .thenReturn(Collections.<EntityRecord>emptyIterator());
 
@@ -1339,24 +1334,21 @@ class StandTest extends TenantAwareTest {
         // This argument matcher does NOT mimic the exact repository behavior.
         // Instead, it only matches the EntityFilters instance in case it has EntityIdFilter with
         // ALL the expected IDs.
-        return new ArgumentMatcher<EntityFilters>() {
-            @Override
-            public boolean matches(EntityFilters argument) {
-                boolean everyElementPresent = true;
-                for (EntityId entityId : argument.getIdFilter()
-                                                 .getIdsList()) {
-                    final Any idAsAny = entityId.getId();
-                    final Message rawId = unpack(idAsAny);
-                    if (rawId instanceof ProjectId) {
-                        final ProjectId convertedProjectId = (ProjectId) rawId;
-                        everyElementPresent = everyElementPresent
-                                              && projectIds.contains(convertedProjectId);
-                    } else {
-                        everyElementPresent = false;
-                    }
+        return argument -> {
+            boolean everyElementPresent = true;
+            for (EntityId entityId : argument.getIdFilter()
+                                             .getIdsList()) {
+                final Any idAsAny = entityId.getId();
+                final Message rawId = unpack(idAsAny);
+                if (rawId instanceof ProjectId) {
+                    final ProjectId convertedProjectId = (ProjectId) rawId;
+                    everyElementPresent = everyElementPresent
+                                          && projectIds.contains(convertedProjectId);
+                } else {
+                    everyElementPresent = false;
                 }
-                return everyElementPresent;
             }
+            return everyElementPresent;
         };
     }
 
@@ -1364,12 +1356,9 @@ class StandTest extends TenantAwareTest {
             Collection<ProjectId> values) {
         final Collection<Given.StandTestProjection> transformed = Collections2.transform(
                 values,
-                new Function<ProjectId, Given.StandTestProjection>() {
-                    @Override
-                    public StandTestProjection apply(@Nullable ProjectId input) {
-                        checkNotNull(input);
-                        return new StandTestProjection(input);
-                    }
+                input -> {
+                    checkNotNull(input);
+                    return new StandTestProjection(input);
                 });
         final ImmutableList<Given.StandTestProjection> result = ImmutableList.copyOf(transformed);
         return result;
@@ -1377,15 +1366,12 @@ class StandTest extends TenantAwareTest {
 
     private static ArgumentMatcher<Iterable<ProjectId>> projectionIdsIterableMatcher(
             final Set<ProjectId> projectIds) {
-        return new ArgumentMatcher<Iterable<ProjectId>>() {
-            @Override
-            public boolean matches(Iterable<ProjectId> argument) {
-                boolean everyElementPresent = true;
-                for (ProjectId projectId : argument) {
-                    everyElementPresent = everyElementPresent && projectIds.contains(projectId);
-                }
-                return everyElementPresent;
+        return argument -> {
+            boolean everyElementPresent = true;
+            for (ProjectId projectId : argument) {
+                everyElementPresent = everyElementPresent && projectIds.contains(projectId);
             }
+            return everyElementPresent;
         };
     }
 
@@ -1495,13 +1481,10 @@ class StandTest extends TenantAwareTest {
     }
 
     private static EntityRecord recordStateMatcher(final EntityRecord expectedRecord) {
-        return argThat(new ArgumentMatcher<EntityRecord>() {
-            @Override
-            public boolean matches(EntityRecord argument) {
-                final boolean matchResult = Objects.equals(expectedRecord.getState(),
-                                                           argument.getState());
-                return matchResult;
-            }
+        return argThat(argument -> {
+            final boolean matchResult = Objects.equals(expectedRecord.getState(),
+                                                       argument.getState());
+            return matchResult;
         });
     }
 
@@ -1523,11 +1506,8 @@ class StandTest extends TenantAwareTest {
     }
 
     private static Stand.EntityUpdateCallback emptyUpdateCallback() {
-        return new Stand.EntityUpdateCallback() {
-            @Override
-            public void onStateChanged(EntityStateUpdate newEntityState) {
-                //do nothing
-            }
+        return newEntityState -> {
+            //do nothing
         };
     }
 

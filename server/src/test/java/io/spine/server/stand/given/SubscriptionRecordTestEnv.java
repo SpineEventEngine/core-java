@@ -36,29 +36,25 @@ import java.util.Collections;
  */
 public class SubscriptionRecordTestEnv {
 
+    public static final TypeUrl TYPE = TypeUrl.of(Project.class);
+    public static final TypeUrl OTHER_TYPE = TypeUrl.of(Customer.class);
+
     /** Prevents instantiation of this utility class. */
     private SubscriptionRecordTestEnv() {
     }
 
-    @SuppressWarnings("UtilityClass")
-    public static class Given {
+    public static Target target() {
+        final Target target = Targets.allOf(Project.class);
+        return target;
+    }
 
-        public static final TypeUrl TYPE = TypeUrl.of(Project.class);
-        public static final TypeUrl OTHER_TYPE = TypeUrl.of(Customer.class);
+    public static Target target(Message targetId) {
+        final Target target = Targets.someOf(Project.class, Collections.singleton(targetId));
+        return target;
+    }
 
-        public static Target target() {
-            final Target target = Targets.allOf(Project.class);
-            return target;
-        }
-
-        public static Target target(Message targetId) {
-            final Target target = Targets.someOf(Project.class, Collections.singleton(targetId));
-            return target;
-        }
-
-        public static Subscription subscription() {
-            final Subscription subscription = Subscription.getDefaultInstance();
-            return subscription;
-        }
+    public static Subscription subscription() {
+        final Subscription subscription = Subscription.getDefaultInstance();
+        return subscription;
     }
 }

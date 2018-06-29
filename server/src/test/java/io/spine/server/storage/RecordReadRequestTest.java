@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Dmytro Grankin
  */
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("RecordReadRequest should")
 class RecordReadRequestTest {
 

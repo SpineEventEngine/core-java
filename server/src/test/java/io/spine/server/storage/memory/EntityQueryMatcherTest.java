@@ -53,6 +53,7 @@ import static io.spine.server.entity.storage.TestCompositeQueryParameterFactory.
 import static io.spine.server.entity.storage.TestEntityQueryFactory.createQuery;
 import static io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory.createRecord;
 import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -82,7 +83,7 @@ class EntityQueryMatcherTest {
     @DisplayName("match IDs")
     void matchIds() {
         final Message genericId = Sample.messageOfType(ProjectId.class);
-        final Collection<Object> idFilter = Collections.<Object>singleton(genericId);
+        final Collection<Object> idFilter = singleton(genericId);
         final Any entityId = AnyPacker.pack(genericId);
         final EntityQuery<?> query = createQuery(idFilter, defaultQueryParameters());
 

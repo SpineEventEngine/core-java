@@ -84,8 +84,7 @@ public class StandTestEnv {
             this.newEntityState = newEntityState.getState();
         }
 
-        @Nullable
-        public Any newEntityState() {
+        public @Nullable Any newEntityState() {
             return newEntityState;
         }
     }

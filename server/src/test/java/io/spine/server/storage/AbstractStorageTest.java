@@ -64,7 +64,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author Alexander Litus
  */
 @SuppressWarnings({"ClassWithTooManyMethods",
-        "unused" /* JUnit Nested classes considered unused in the abstract class. */})
+        "unused" /* JUnit Nested classes considered unused in the abstract class. */,
+        "DuplicateStringLiteralInspection" /* Common test display names. */})
 public abstract class AbstractStorageTest<I,
                                           M extends Message,
                                           R extends ReadRequest<I>,

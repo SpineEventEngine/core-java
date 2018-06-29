@@ -44,7 +44,6 @@ import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
-import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.given.RecordStorageTestEnv.LifecycleColumns;
@@ -55,7 +54,6 @@ import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentMatcher;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -75,6 +73,7 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.given.GivenLifecycleFlags.archived;
+import static io.spine.server.entity.storage.EntityQueries.from;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory.createRecord;
 import static io.spine.server.storage.LifecycleFlagField.archived;
@@ -87,9 +86,9 @@ import static io.spine.validate.Validate.isDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -469,7 +468,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
 
         RecordStorage<I> storage = getStorage();
 
-        EntityQuery<I> query = EntityQueries.from(filters, storage);
+        EntityQuery<I> query = from(filters, storage);
         I idMatching = newId();
         I idWrong1 = newId();
         I idWrong2 = newId();
@@ -560,7 +559,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
                 .newBuilder()
                 .setIdFilter(idFilter)
                 .build();
-        EntityQuery<I> query = EntityQueries.from(filters, storage);
+        EntityQuery<I> query = from(filters, storage);
 
         // Perform the query
         Iterator<EntityRecord> readRecords =
@@ -591,7 +590,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
                 .newBuilder()
                 .addFilter(all(eq(archived.toString(), true)))
                 .build();
-        EntityQuery<I> query = EntityQueries.from(filters, storage);
+        EntityQuery<I> query = from(filters, storage);
         Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
         assertSingleRecord(archivedRecord, read);
     }
@@ -626,8 +625,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
         EntityFilters filters = EntityFilters.newBuilder()
                                              .setIdFilter(idFilter)
                                              .build();
-        EntityQuery<I> query = EntityQueries.<I>from(filters, storage)
-                .withLifecycleFlags(storage);
+        EntityQuery<I> query = from(filters, storage).withLifecycleFlags(storage);
         Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
         assertSingleRecord(activeRecord, read);
     }
@@ -654,7 +652,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
 
         RecordStorage<I> storage = getStorage();
 
-        EntityQuery<I> query = EntityQueries.from(filters, storage);
+        EntityQuery<I> query = from(filters, storage);
 
         I id = newId();
         TestCounterEntity<I> entity = new TestCounterEntity<>(id);
@@ -711,8 +709,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
                 .addFilter(columnFilter)
                 .build();
         RecordStorage<I> storage = getStorage();
-        EntityQuery<I> query = EntityQueries.<I>from(filters, storage)
-                .withLifecycleFlags(storage);
+        EntityQuery<I> query = from(filters, storage).withLifecycleFlags(storage);
         Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
         List<EntityRecord> readRecords = newArrayList(read);
         assertEquals(1, readRecords.size());
@@ -755,7 +752,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
 
         final RecordStorage<I> storage = getStorage();
 
-        final EntityQuery<I> query = EntityQueries.from(filters, storage);
+        final EntityQuery<I> query = from(filters, storage);
         final I idMatching = newId();
         final I idWrong = newId();
 
@@ -799,14 +796,9 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
     }
 
     private static EntityRecordWithColumns withRecordAndNoFields(final EntityRecord record) {
-        return argThat(new ArgumentMatcher<EntityRecordWithColumns>() {
-            @Override
-            public boolean matches(EntityRecordWithColumns argument) {
-                return argument.getRecord()
-                               .equals(record)
-                        && !argument.hasColumns();
-            }
-        });
+        return argThat(argument -> argument.getRecord()
+                                           .equals(record)
+                && !argument.hasColumns());
     }
 
     private static void assertSingleRecord(EntityRecord expected, Iterator<EntityRecord> actual) {

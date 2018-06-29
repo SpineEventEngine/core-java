@@ -21,24 +21,19 @@
 package io.spine.server.stand;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
 import io.spine.client.Subscriptions;
-import io.spine.client.Target;
-import io.spine.client.Targets;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.stand.given.SubscriptionRecordTestEnv;
-import io.spine.server.stand.given.SubscriptionRecordTestEnv.Given;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.commandservice.customer.Customer;
-import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-
+import static io.spine.server.stand.given.SubscriptionRecordTestEnv.OTHER_TYPE;
+import static io.spine.server.stand.given.SubscriptionRecordTestEnv.TYPE;
+import static io.spine.server.stand.given.SubscriptionRecordTestEnv.subscription;
+import static io.spine.server.stand.given.SubscriptionRecordTestEnv.target;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -53,28 +48,29 @@ class SubscriptionRecordTest {
     @Test
     @DisplayName("match record to given parameters")
     void matchRecordToParams() {
-        final SubscriptionRecord matchingRecord = new SubscriptionRecord(Given.subscription(),
-                                                                         Given.target(),
-                                                                         Given.TYPE);
+        final SubscriptionRecord matchingRecord = new SubscriptionRecord(subscription(),
+                                                                         target(),
+                                                                         TYPE);
         final Project entityState = Project.getDefaultInstance();
         final Any wrappedState = AnyPacker.pack(entityState);
         final ProjectId redundantId = ProjectId.getDefaultInstance();
 
-        final boolean matchResult = matchingRecord.matches(Given.TYPE, redundantId, wrappedState);
+        final boolean matchResult = matchingRecord.matches(TYPE, redundantId, wrappedState);
         assertTrue(matchResult);
     }
 
     @Test
     @DisplayName("fail to match improper type")
     void notMatchImproperType() {
-        final SubscriptionRecord notMatchingRecord = new SubscriptionRecord(Given.subscription(),
-                                                                            Given.target(),
-                                                                            Given.TYPE);
+        final SubscriptionRecord notMatchingRecord = new SubscriptionRecord(subscription(),
+                                                                            target(),
+                                                                            TYPE);
         final Project entityState = Project.getDefaultInstance();
         final Any wrappedState = AnyPacker.pack(entityState);
         final ProjectId redundantId = ProjectId.getDefaultInstance();
 
-        final boolean matchResult = notMatchingRecord.matches(Given.OTHER_TYPE, redundantId, wrappedState);
+        final boolean matchResult = notMatchingRecord.matches(OTHER_TYPE, redundantId,
+                                                              wrappedState);
         assertFalse(matchResult);
     }
 
@@ -84,35 +80,35 @@ class SubscriptionRecordTest {
         final ProjectId nonExistingId = ProjectId.newBuilder()
                                                  .setId("never-existed")
                                                  .build();
-        final SubscriptionRecord notMatchingRecord = new SubscriptionRecord(Given.subscription(),
-                                                                            Given.target(nonExistingId),
-                                                                            Given.TYPE);
+        final SubscriptionRecord notMatchingRecord = new SubscriptionRecord(subscription(),
+                                                                            target(nonExistingId),
+                                                                            TYPE);
         final Project entityState = Project.getDefaultInstance();
         final Any wrappedState = AnyPacker.pack(entityState);
         final ProjectId redundantId = ProjectId.getDefaultInstance();
 
-        final boolean matchResult = notMatchingRecord.matches(Given.TYPE, redundantId, wrappedState);
+        final boolean matchResult = notMatchingRecord.matches(TYPE, redundantId, wrappedState);
         assertFalse(matchResult);
     }
 
     @Test
     @DisplayName("be equal only to SubscriptionRecord that has same subscription")
     void beEqualToSame() {
-        final Subscription oneSubscription = Given.subscription();
+        final Subscription oneSubscription = subscription();
         final SubscriptionId breakingId = Subscriptions.newId("breaking-id");
         final Subscription otherSubscription = Subscription.newBuilder()
                                                            .setId(breakingId)
                                                            .build();
-        @SuppressWarnings("QuestionableName")
-        final SubscriptionRecord one = new SubscriptionRecord(oneSubscription,
-                                                              Given.target(),
-                                                              Given.TYPE);
+        @SuppressWarnings("QuestionableName") final SubscriptionRecord one = new SubscriptionRecord(
+                oneSubscription,
+                target(),
+                TYPE);
         final SubscriptionRecord similar = new SubscriptionRecord(otherSubscription,
-                                                                  Given.target(),
-                                                                  Given.TYPE);
+                                                                  target(),
+                                                                  TYPE);
         final SubscriptionRecord same = new SubscriptionRecord(oneSubscription,
-                                                               Given.target(),
-                                                               Given.TYPE);
+                                                               target(),
+                                                               TYPE);
         assertNotEquals(one, similar);
         assertEquals(one, same);
     }

@@ -37,6 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("AggregateStateId should")
 class AggregateStateIdTest {
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
     @Test
     @DisplayName("not accept nulls on construction")
     void rejectNullOnConstruction() {

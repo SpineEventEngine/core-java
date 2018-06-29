@@ -66,12 +66,9 @@ class MultitenantStorageTest {
         final Collection<Callable<TenantRecords>> tasks = newArrayListWithExpectedSize(numberOfTasks);
 
         for (int i = 0; i < numberOfTasks; i++) {
-            tasks.add(new Callable<TenantRecords>() {
-                @Override
-                public TenantRecords call() throws Exception {
-                    final TenantRecords<ProjectId> storage = multitenantStorage.getStorage();
-                    return storage;
-                }
+            tasks.add(() -> {
+                final TenantRecords<ProjectId> storage = multitenantStorage.getStorage();
+                return storage;
             });
         }
 
@@ -82,7 +79,7 @@ class MultitenantStorageTest {
         assertEquals(expected, tenantRecords.size());
     }
 
-    private <R> Set<R> convertFuturesToSetOfCompletedResults(List<Future<R>> futures)
+    private static <R> Set<R> convertFuturesToSetOfCompletedResults(List<Future<R>> futures)
             throws ExecutionException, InterruptedException {
         final Set<R> tenantRecords = newHashSetWithExpectedSize(futures.size());
         for (Future<R> future : futures) {
@@ -91,8 +88,8 @@ class MultitenantStorageTest {
         return tenantRecords;
     }
 
-    private <R> List<Future<R>> executeInMultithreadedEnvironment(Collection<Callable<R>> tasks)
-            throws InterruptedException {
+    private static <R> List<Future<R>>
+    executeInMultithreadedEnvironment(Collection<Callable<R>> tasks) throws InterruptedException {
         final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime()
                                                                              .availableProcessors() *
                                                                               2);
