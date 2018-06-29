@@ -34,8 +34,8 @@ import io.spine.server.event.EventBus;
 import io.spine.server.rejection.given.VerifiableSubscriber;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdRemoveTask;
-import io.spine.test.command.FIFOCreateProject;
-import io.spine.test.command.FIFOStartProject;
+import io.spine.test.command.FCmdCreateProject;
+import io.spine.test.command.FCmdStartProject;
 import io.spine.test.command.event.CmdTaskAdded;
 import io.spine.test.reflect.InvalidProjectName;
 import io.spine.test.reflect.ProjectId;
@@ -117,14 +117,14 @@ public class SingleTenantCommandBusTestEnv {
         }
 
         @Assign
-        Empty handle(FIFOCreateProject command) {
+        Empty handle(FCmdCreateProject command) {
             commandBus.post(commandToPost, noOpObserver());
             handledCommands.add(command);
             return Empty.getDefaultInstance();
         }
 
         @Assign
-        Empty handle(FIFOStartProject command) {
+        Empty handle(FCmdStartProject command) {
             handledCommands.add(command);
             return Empty.getDefaultInstance();
         }

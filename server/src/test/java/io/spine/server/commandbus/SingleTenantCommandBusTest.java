@@ -32,8 +32,8 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.CommandPostingHandler;
 import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.FaultyHandler;
 import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.MemoizingRejectionSubscriber;
-import io.spine.test.command.FIFOCreateProject;
-import io.spine.test.command.FIFOStartProject;
+import io.spine.test.command.FCmdCreateProject;
+import io.spine.test.command.FCmdStartProject;
 import io.spine.test.reflect.InvalidProjectName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,10 +47,10 @@ import static io.spine.core.CommandValidationError.TENANT_INAPPLICABLE;
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.commandbus.Given.ACommand.addTask;
-import static io.spine.server.commandbus.Given.ACommand.createFifoProject;
+import static io.spine.server.commandbus.Given.ACommand.fCreateProject;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.commandbus.Given.ACommand.removeTask;
-import static io.spine.server.commandbus.Given.ACommand.startFifoProject;
+import static io.spine.server.commandbus.Given.ACommand.fStartProject;
 import static io.spine.server.tenant.TenantAwareOperation.isTenantSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -139,19 +139,19 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("post commands in FIFO order")
     void doPostCommandsInFIFO() {
-        Command nestedCommand = clearTenantId(startFifoProject());
+        Command nestedCommand = clearTenantId(fStartProject());
         CommandPostingHandler handler = new CommandPostingHandler(eventBus, commandBus,
                                                                   nestedCommand);
         commandBus.register(handler);
 
-        final Command createProjectCommand = clearTenantId(createFifoProject());
+        final Command createProjectCommand = clearTenantId(fCreateProject());
         final MemoizingObserver<Ack> observer = memoizingObserver();
         commandBus.post(createProjectCommand, observer);
 
         List<Message> handledCommands = handler.handledCommands();
         assertEquals(2, handledCommands.size());
-        assertTrue(FIFOCreateProject.class.isInstance(handledCommands.get(0)));
-        assertTrue(FIFOStartProject.class.isInstance(handledCommands.get(1)));
+        assertTrue(FCmdCreateProject.class.isInstance(handledCommands.get(0)));
+        assertTrue(FCmdStartProject.class.isInstance(handledCommands.get(1)));
     }
 
     @Test

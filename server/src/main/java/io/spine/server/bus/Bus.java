@@ -293,23 +293,13 @@ public abstract class Bus<T extends Message,
     protected abstract E toEnvelope(T message);
 
     /**
-     * Posts the given envelope to the bus.
+     * Passes the given envelope for dispatching.
      *
      * <p>Finds and invokes the {@linkplain MessageDispatcher MessageDispatcher(s)} for the given
      * message.
      *
      * <p>This method assumes that the given message has passed the filtering.
      *
-     * @return the result of mailing with the Message ID and:
-     *         <ul>
-     *             <li>{@link io.spine.core.Status.StatusCase#OK OK} status if the message has been
-     *                 passed to the dispatcher;
-     *             <li>{@link Rejection} status, if a {@code Rejection} has
-     *                 happened during the message handling (if applicable);
-     *             <li>{@link io.spine.base.Error Error} status if a {@link Throwable}, which is not
-     *                 a {@link io.spine.base.ThrowableMessage ThrowableMessage}, has been thrown
-     *                 during the message posting.
-     *         </ul>
      * @see #post(Message, StreamObserver) for the public API
      */
     protected abstract void dispatch(E envelope);

@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.bus.Buses.acknowledge;
 
 /**
- * The queue of the envelopes that dispatches them strictly in FIFO order.
+ * The queue that dispatches message envelopes in FIFO order.
  *
  * @param <E> the type of envelopes to dispatch
  * @author Vladyslav Lubenskyi
@@ -55,7 +55,7 @@ class DispatchingQueue<E extends MessageEnvelope> {
      *     <li>the queue is empty.</li>
      * </ul>
      *
-     * <p>Otherwise, the envelope is enqueued and will be dispatched according to its position
+     * <p>Otherwise, the envelope is only enqueued and will be dispatched according to its position
      * in the queue.
      *
      * @param envelope the envelope to dispatch

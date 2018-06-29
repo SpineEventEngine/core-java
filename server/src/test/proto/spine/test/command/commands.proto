@@ -54,14 +54,16 @@ message DCmdCreateProject {
     ProjectId project_id = 1;
 }
 
-message FIFOCreateProject {
+// A command to create a project to test the command posting order.
+//
+message FCmdCreateProject {
 
     ProjectId id = 1;
 
     string name = 2;
 }
 
-message FIFOStartProject {
+message FCmdStartProject {
 
     ProjectId id = 1;
 }

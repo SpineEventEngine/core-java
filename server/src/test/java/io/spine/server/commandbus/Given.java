@@ -35,8 +35,8 @@ import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.CmdRemoveTask;
 import io.spine.test.command.CmdStartProject;
-import io.spine.test.command.FIFOCreateProject;
-import io.spine.test.command.FIFOStartProject;
+import io.spine.test.command.FCmdCreateProject;
+import io.spine.test.command.FCmdStartProject;
 import io.spine.test.command.ProjectId;
 
 import static io.spine.base.Identifier.newUuid;
@@ -87,8 +87,13 @@ public class Given {
             return addTask(USER_ID, PROJECT_ID, getCurrentTime());
         }
 
-        public static Command startFifoProject() {
-            FIFOStartProject command = CommandMessage.fifoStartProject(newProjectId());
+        static Command fStartProject() {
+            FCmdStartProject command = CommandMessage.fStartProject(newProjectId());
+            return create(command, USER_ID, getCurrentTime());
+        }
+
+        static Command fCreateProject() {
+            FCmdCreateProject command = CommandMessage.fCreateProject(newProjectId());
             return create(command, USER_ID, getCurrentTime());
         }
 
@@ -99,11 +104,6 @@ public class Given {
 
         static Command removeTask() {
             final CmdRemoveTask command = CommandMessage.removeTask(PROJECT_ID);
-            return create(command, USER_ID, getCurrentTime());
-        }
-
-        static Command createFifoProject() {
-            FIFOCreateProject command = CommandMessage.fifoCreateProject(newProjectId());
             return create(command, USER_ID, getCurrentTime());
         }
 
@@ -192,14 +192,14 @@ public class Given {
                                   .build();
         }
 
-        static FIFOCreateProject fifoCreateProject(ProjectId projectId) {
-            return FIFOCreateProject.newBuilder()
+        static FCmdCreateProject fCreateProject(ProjectId projectId) {
+            return FCmdCreateProject.newBuilder()
                                     .setId(projectId)
                                     .build();
         }
 
-        static FIFOStartProject fifoStartProject(ProjectId projectId) {
-            return FIFOStartProject.newBuilder()
+        static FCmdStartProject fStartProject(ProjectId projectId) {
+            return FCmdStartProject.newBuilder()
                                    .setId(projectId)
                                    .build();
         }
