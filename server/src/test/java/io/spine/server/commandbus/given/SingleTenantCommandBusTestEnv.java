@@ -20,22 +20,33 @@
 
 package io.spine.server.commandbus.given;
 
+import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
+import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Rejection;
 import io.spine.core.Rejections;
 import io.spine.core.Subscribe;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
+import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.rejection.given.VerifiableSubscriber;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdRemoveTask;
+import io.spine.test.command.FIFOCreateProject;
+import io.spine.test.command.FIFOStartProject;
 import io.spine.test.command.event.CmdTaskAdded;
 import io.spine.test.reflect.InvalidProjectName;
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.ReflectRejections;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.util.Collections.unmodifiableList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SingleTenantCommandBusTestEnv {
@@ -86,6 +97,40 @@ public class SingleTenantCommandBusTestEnv {
         @Override
         public void verifyGot(Rejection rejection) {
             assertEquals(Rejections.getMessage(rejection), this.rejection);
+        }
+    }
+
+    /**
+     * A command handler that posts a nested command.
+     */
+    public static class CommandPostingHandler extends CommandHandler {
+
+        private final CommandBus commandBus;
+        private final List<Message> handledCommands = new ArrayList<>();
+        private final Command commandToPost;
+
+        public CommandPostingHandler(EventBus eventBus, CommandBus commandBus,
+                                     Command commandToPost) {
+            super(eventBus);
+            this.commandBus = commandBus;
+            this.commandToPost = commandToPost;
+        }
+
+        @Assign
+        Empty handle(FIFOCreateProject command) {
+            commandBus.post(commandToPost, noOpObserver());
+            handledCommands.add(command);
+            return Empty.getDefaultInstance();
+        }
+
+        @Assign
+        Empty handle(FIFOStartProject command) {
+            handledCommands.add(command);
+            return Empty.getDefaultInstance();
+        }
+
+        public List<Message> handledCommands() {
+            return unmodifiableList(handledCommands);
         }
     }
 }

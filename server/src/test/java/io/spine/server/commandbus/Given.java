@@ -35,6 +35,8 @@ import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.CmdRemoveTask;
 import io.spine.test.command.CmdStartProject;
+import io.spine.test.command.FIFOCreateProject;
+import io.spine.test.command.FIFOStartProject;
 import io.spine.test.command.ProjectId;
 
 import static io.spine.base.Identifier.newUuid;
@@ -85,6 +87,11 @@ public class Given {
             return addTask(USER_ID, PROJECT_ID, getCurrentTime());
         }
 
+        public static Command startFifoProject() {
+            FIFOStartProject command = CommandMessage.fifoStartProject(newProjectId());
+            return create(command, USER_ID, getCurrentTime());
+        }
+
         static Command addTask(UserId userId, ProjectId projectId, Timestamp when) {
             final CmdAddTask command = CommandMessage.addTask(projectId);
             return create(command, userId, when);
@@ -92,6 +99,11 @@ public class Given {
 
         static Command removeTask() {
             final CmdRemoveTask command = CommandMessage.removeTask(PROJECT_ID);
+            return create(command, USER_ID, getCurrentTime());
+        }
+
+        static Command createFifoProject() {
+            FIFOCreateProject command = CommandMessage.fifoCreateProject(newProjectId());
             return create(command, USER_ID, getCurrentTime());
         }
 
@@ -178,6 +190,18 @@ public class Given {
             return CmdStartProject.newBuilder()
                                   .setProjectId(id)
                                   .build();
+        }
+
+        static FIFOCreateProject fifoCreateProject(ProjectId projectId) {
+            return FIFOCreateProject.newBuilder()
+                                    .setId(projectId)
+                                    .build();
+        }
+
+        static FIFOStartProject fifoStartProject(ProjectId projectId) {
+            return FIFOStartProject.newBuilder()
+                                   .setId(projectId)
+                                   .build();
         }
     }
 }
