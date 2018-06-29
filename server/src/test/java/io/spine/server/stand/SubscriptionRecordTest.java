@@ -99,10 +99,8 @@ class SubscriptionRecordTest {
         final Subscription otherSubscription = Subscription.newBuilder()
                                                            .setId(breakingId)
                                                            .build();
-        @SuppressWarnings("QuestionableName") final SubscriptionRecord one = new SubscriptionRecord(
-                oneSubscription,
-                target(),
-                TYPE);
+        @SuppressWarnings("QuestionableName")
+        final SubscriptionRecord one = new SubscriptionRecord(oneSubscription, target(), TYPE);
         final SubscriptionRecord similar = new SubscriptionRecord(otherSubscription,
                                                                   target(),
                                                                   TYPE);

@@ -337,7 +337,8 @@ class StandTest extends TenantAwareTest {
         void onReadByIdWhenEmpty() {
 
             final Query readCustomersById = requestFactory.query()
-                                                          .byIds(Customer.class, newHashSet(
+                                                          .byIds(Customer.class,
+                                                                 newHashSet(
                                                                   customerIdFor(1),
                                                                   customerIdFor(2)
                                                           ));
