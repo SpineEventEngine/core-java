@@ -66,7 +66,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author Alexander Litus
  */
-@SuppressWarnings("unused") // JUnit 5 Nested classes considered unused in abstract class.
+@SuppressWarnings("unused") // JUnit Nested classes considered unused in abstract class.
 public abstract class ProjectionStorageTest
         extends RecordStorageTest<ProjectId, ProjectionStorage<ProjectId>> {
 

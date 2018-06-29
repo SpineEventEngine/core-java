@@ -61,7 +61,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
                    "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */,
                    "ClassWithTooManyMethods",
                    "OverlyCoupledClass" /* we test many data types and utility methods */,
-                   "InnerClassMayBeStatic" /* JUnit 5 Nested classes cannot be static */,
+                   "InnerClassMayBeStatic" /* JUnit Nested classes cannot be static */,
                    "DuplicateStringLiteralInspection" /* A lot of similar test display names */})
 @DisplayName("Changes utility should")
 class ChangesTest {

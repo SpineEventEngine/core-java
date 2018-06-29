@@ -60,7 +60,7 @@ class MessageMismatchTest {
                 .testAllPublicStaticMethods(MessageMismatch.class);
     }
 
-    @SuppressWarnings({"InnerClassMayBeStatic" /* JUnit 5 Nested classes cannot be static */,
+    @SuppressWarnings({"InnerClassMayBeStatic" /* JUnit Nested classes cannot be static */,
                        "DuplicateStringLiteralInspection" /* Nested class display name similar to
                                                           others */})
     @Nested

@@ -90,7 +90,7 @@ import static org.mockito.Mockito.when;
  * @author Dmitry Ganzha
  */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit 5 Nested classes cannot be static. */,
+        /* JUnit Nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("BoundedContext should")
 class BoundedContextTest {

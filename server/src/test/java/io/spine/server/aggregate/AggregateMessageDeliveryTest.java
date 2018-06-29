@@ -45,7 +45,7 @@ import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWait
  * @author Alex Tymchenko
  */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit 5 Nested classes cannot be static. */,
+        /* JUnit Nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names */})
 @DisplayName("Aggregate message delivery should")
 class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {

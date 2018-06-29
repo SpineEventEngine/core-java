@@ -53,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "Duplicates" /* Comparison tests are similar but cannot be simplified to one. */,
         "ClassWithTooManyMethods" /* Many test cases required. */,
         "InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit 5 Nested classes cannot be static. */,
+        /* JUnit Nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names */
 })
 @DisplayName("OperatorEvaluator should")

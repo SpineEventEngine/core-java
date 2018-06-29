@@ -74,9 +74,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Alexander Litus
  */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit 5 Nested classes cannot be static. */,
+        /* JUnit Nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names */,
-        "unused" /* JUnit 5 Nested classes considered unused in abstract test class */})
+        "unused" /* JUnit Nested classes considered unused in abstract test class */})
 public abstract class AggregateStorageTest
         extends AbstractStorageTest<ProjectId,
                                               AggregateStateRecord,

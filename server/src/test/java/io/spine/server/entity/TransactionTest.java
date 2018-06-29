@@ -61,7 +61,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
  *
  * @author Alex Tymchenko
  */
-@SuppressWarnings("unused") // JUnit 5 Nested classes considered unused in abstract class.
+@SuppressWarnings("unused") // JUnit Nested classes considered unused in abstract class.
 public abstract class TransactionTest<I,
         E extends TransactionalEntity<I, S, B>,
         S extends Message,

@@ -60,7 +60,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings("InnerClassMayBeStatic") // JUnit 5 Nested classes cannot be static.
+@SuppressWarnings("InnerClassMayBeStatic") // JUnit Nested classes cannot be static.
 @DisplayName("ColumnFilters utility should")
 class ColumnFiltersTest {
 
