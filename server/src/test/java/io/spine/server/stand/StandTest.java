@@ -59,7 +59,11 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityStateEnvelope;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.server.stand.Given.StandTestProjectionRepository;
+import io.spine.server.stand.given.Given;
+import io.spine.server.stand.given.Given.StandTestProjectionRepository;
+import io.spine.server.stand.given.StandTestEnv;
+import io.spine.server.stand.given.StandTestEnv.MemoizeEntityUpdateCallback;
+import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.test.Verify;
 import io.spine.test.commandservice.customer.Customer;
@@ -103,7 +107,7 @@ import static io.spine.core.given.GivenUserId.of;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.stand.Given.StandTestProjection;
+import static io.spine.server.stand.given.Given.StandTestProjection;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -435,7 +439,7 @@ class StandTest extends TenantAwareTest {
             final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
 
             subscribeAndActivate(stand, allCustomers,memoizeCallback);
-            assertNull(memoizeCallback.newEntityState);
+            assertNull(memoizeCallback.newEntityState());
 
             final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
                                                                                      .iterator()
@@ -446,7 +450,7 @@ class StandTest extends TenantAwareTest {
             stand.update(asEnvelope(customerId, customer, stateVersion));
 
             final Any packedState = AnyPacker.pack(customer);
-            assertEquals(packedState, memoizeCallback.newEntityState);
+            assertEquals(packedState, memoizeCallback.newEntityState());
         }
 
         @Test
@@ -457,7 +461,7 @@ class StandTest extends TenantAwareTest {
 
             final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
             subscribeAndActivate(stand, allProjects, memoizeCallback);
-            assertNull(memoizeCallback.newEntityState);
+            assertNull(memoizeCallback.newEntityState());
 
             final Map.Entry<ProjectId, Project> sampleData = fillSampleProjects(1).entrySet()
                                                                                   .iterator()
@@ -468,7 +472,7 @@ class StandTest extends TenantAwareTest {
             stand.update(asEnvelope(projectId, project, stateVersion));
 
             final Any packedState = AnyPacker.pack(project);
-            assertEquals(packedState, memoizeCallback.newEntityState);
+            assertEquals(packedState, memoizeCallback.newEntityState());
         }
     }
 
@@ -523,7 +527,7 @@ class StandTest extends TenantAwareTest {
         final Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(customerId, customer, stateVersion));
 
-        assertNull(memoizeCallback.newEntityState);
+        assertNull(memoizeCallback.newEntityState());
     }
 
     @Test
@@ -563,7 +567,7 @@ class StandTest extends TenantAwareTest {
 
         final Any packedState = AnyPacker.pack(customer);
         for (MemoizeEntityUpdateCallback callback : callbacks) {
-            assertEquals(packedState, callback.newEntityState);
+            assertEquals(packedState, callback.newEntityState());
             verify(callback, times(1)).onStateChanged(any(EntityStateUpdate.class));
         }
     }
@@ -587,12 +591,12 @@ class StandTest extends TenantAwareTest {
     }
 
     private MemoizeEntityUpdateCallback subscribeWithCallback(Stand stand,
-                                                              Target subscriptionTarget) {
+                                                                           Target subscriptionTarget) {
         final MemoizeEntityUpdateCallback callback = spy(new MemoizeEntityUpdateCallback());
         final Topic topic = requestFactory.topic().forTarget(subscriptionTarget);
         subscribeAndActivate(stand, topic, callback);
 
-        assertNull(callback.newEntityState);
+        assertNull(callback.newEntityState());
         return callback;
     }
 
@@ -753,7 +757,7 @@ class StandTest extends TenantAwareTest {
         final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver();
         stand.execute(customerQuery, observer);
 
-        final List<Any> read = observer.responseHandled.getMessagesList();
+        final List<Any> read = observer.responseHandled().getMessagesList();
         Verify.assertSize(1, read);
 
         final Customer customer = unpack(read.get(0));
@@ -1090,9 +1094,9 @@ class StandTest extends TenantAwareTest {
     }
 
     private static void verifyObserver(MemoizeQueryResponseObserver observer) {
-        assertNotNull(observer.responseHandled);
-        assertTrue(observer.isCompleted);
-        assertNull(observer.throwable);
+        assertNotNull(observer.responseHandled());
+        assertTrue(observer.isCompleted());
+        assertNull(observer.throwable());
     }
 
     private static MemoizeQueryResponseObserver getDuplicateCostumerStreamObserver() {
@@ -1450,10 +1454,10 @@ class StandTest extends TenantAwareTest {
     }
 
     private static List<Any> checkAndGetMessageList(MemoizeQueryResponseObserver responseObserver) {
-        assertTrue(responseObserver.isCompleted, "Query has not completed successfully");
-        assertNull(responseObserver.throwable, "Throwable has been caught upon query execution");
+        assertTrue(responseObserver.isCompleted(), "Query has not completed successfully");
+        assertNull(responseObserver.throwable(), "Throwable has been caught upon query execution");
 
-        final QueryResponse response = responseObserver.responseHandled;
+        final QueryResponse response = responseObserver.responseHandled();
         assertEquals(Responses.ok(), response.getResponse(), "Query response is not OK");
         assertNotNull(response, "Query response must not be null");
 
@@ -1550,55 +1554,5 @@ class StandTest extends TenantAwareTest {
                                            Version entityVersion) {
         final TenantId tenantId = isMultitenant() ? tenantId() : TenantId.getDefaultInstance();
         return EntityStateEnvelope.of(entityId, entityState, entityVersion, tenantId);
-    }
-
-    // ***** Inner classes used for tests. *****
-
-    /**
-     * A {@link StreamObserver} storing the state of {@link Query} execution.
-     */
-    protected static class MemoizeQueryResponseObserver implements StreamObserver<QueryResponse> {
-
-        private QueryResponse responseHandled;
-        private Throwable throwable;
-        private boolean isCompleted = false;
-
-        @Override
-        public void onNext(QueryResponse response) {
-            this.responseHandled = response;
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-            this.throwable = throwable;
-        }
-
-        @Override
-        public void onCompleted() {
-            this.isCompleted = true;
-        }
-
-        public QueryResponse getResponseHandled() {
-            return responseHandled;
-        }
-
-        public Throwable getThrowable() {
-            return throwable;
-        }
-    }
-
-    protected static class MemoizeEntityUpdateCallback implements Stand.EntityUpdateCallback {
-
-        private Any newEntityState = null;
-
-        @Override
-        public void onStateChanged(EntityStateUpdate newEntityState) {
-            this.newEntityState = newEntityState.getState();
-        }
-
-        @Nullable
-        public Any getNewEntityState() {
-            return newEntityState;
-        }
     }
 }

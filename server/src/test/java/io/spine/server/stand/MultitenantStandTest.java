@@ -31,6 +31,9 @@ import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.stand.given.StandTestEnv;
+import io.spine.server.stand.given.StandTestEnv.MemoizeEntityUpdateCallback;
+import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
@@ -82,7 +85,7 @@ class MultitenantStandTest extends StandTest {
 
         MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readAllCustomers, responseObserver);
-        QueryResponse response = responseObserver.getResponseHandled();
+        QueryResponse response = responseObserver.responseHandled();
         assertTrue(Responses.isOk(response.getResponse()));
         assertEquals(0, response.getMessagesCount());
     }
@@ -119,21 +122,21 @@ class MultitenantStandTest extends StandTest {
 
         Any packedState = AnyPacker.pack(customer);
         // Verify that Default Tenant callback has got the update.
-        assertEquals(packedState, defaultTenantCallback.getNewEntityState());
+        assertEquals(packedState, defaultTenantCallback.newEntityState());
 
         // And Another Tenant callback has not been called.
-        assertNull(anotherCallback.getNewEntityState());
+        assertNull(anotherCallback.newEntityState());
     }
 
     protected MemoizeEntityUpdateCallback subscribeToAllOf(Stand stand,
-                                                           ActorRequestFactory requestFactory,
-                                                           Class<? extends Message> entityClass) {
+                                                                        ActorRequestFactory requestFactory,
+                                                                        Class<? extends Message> entityClass) {
         Topic allCustomers = requestFactory.topic()
                                            .allOf(entityClass);
         MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback();
         subscribeAndActivate(stand, allCustomers, callback);
 
-        assertNull(callback.getNewEntityState());
+        assertNull(callback.newEntityState());
         return callback;
     }
 }

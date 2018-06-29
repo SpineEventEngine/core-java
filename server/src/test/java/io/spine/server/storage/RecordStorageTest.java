@@ -24,15 +24,12 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
-import io.spine.base.Time;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
@@ -43,20 +40,17 @@ import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
-import io.spine.server.entity.TestTransaction;
-import io.spine.server.entity.TransactionalEntity;
-import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.entity.storage.Enumerated;
+import io.spine.server.storage.given.RecordStorageTestEnv.LifecycleColumns;
+import io.spine.server.storage.given.RecordStorageTestEnv.ProjectStatus;
+import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
 import io.spine.test.storage.Project;
-import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -80,10 +74,8 @@ import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.entity.TestTransaction.injectState;
 import static io.spine.server.entity.given.GivenLifecycleFlags.archived;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
-import static io.spine.server.entity.storage.EnumType.STRING;
 import static io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory.createRecord;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.test.Tests.assertMatchesMask;
@@ -91,7 +83,6 @@ import static io.spine.test.Verify.assertIteratorsEqual;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.test.storage.Project.Status.CANCELLED;
 import static io.spine.test.storage.Project.Status.DONE;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.validate.Validate.isDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -488,9 +479,9 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
         TestCounterEntity<I> wrongEntity2 = new TestCounterEntity<>(idWrong2);
 
         // 2 of 3 have required values
-        matchingEntity.setStatus(requiredValue);
-        wrongEntity1.setStatus(requiredValue);
-        wrongEntity2.setStatus(CANCELLED);
+        matchingEntity.assignStatus(requiredValue);
+        wrongEntity1.assignStatus(requiredValue);
+        wrongEntity2.assignStatus(CANCELLED);
 
         // Change internal Entity state
         wrongEntity1.getCounter();
@@ -667,7 +658,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
 
         I id = newId();
         TestCounterEntity<I> entity = new TestCounterEntity<>(id);
-        entity.setStatus(initialStatus);
+        entity.assignStatus(initialStatus);
 
         EntityRecord record = newStorageRecord(id, newState(id));
         EntityRecordWithColumns recordWithColumns = create(record, entity, storage);
@@ -680,7 +671,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
         assertSingleRecord(record, recordsBefore);
 
         // Update the entity columns of the record.
-        entity.setStatus(statusAfterUpdate);
+        entity.assignStatus(statusAfterUpdate);
         EntityRecordWithColumns updatedRecordWithColumns = create(record, entity, storage);
         storage.write(id, updatedRecordWithColumns);
 
@@ -697,11 +688,11 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
         TestCounterEntity<I> noMatchIdEntity = new TestCounterEntity<>(newId());
         TestCounterEntity<I> deletedEntity = new TestCounterEntity<>(newId());
 
-        targetEntity.setStatus(CANCELLED);
-        deletedEntity.setStatus(CANCELLED);
+        targetEntity.assignStatus(CANCELLED);
+        deletedEntity.assignStatus(CANCELLED);
         deletedEntity.delete();
-        noMatchIdEntity.setStatus(CANCELLED);
-        noMatchEntity.setStatus(DONE);
+        noMatchIdEntity.assignStatus(CANCELLED);
+        noMatchEntity.assignStatus(DONE);
 
         write(targetEntity);
         write(noMatchEntity);
@@ -771,8 +762,8 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
         final TestCounterEntity<I> matchingEntity = new TestCounterEntity<>(idMatching);
         final TestCounterEntity<I> wrongEntity = new TestCounterEntity<>(idWrong);
 
-        matchingEntity.setStatus(requiredValue);
-        wrongEntity.setStatus(CANCELLED);
+        matchingEntity.assignStatus(requiredValue);
+        wrongEntity.assignStatus(CANCELLED);
 
         final EntityRecord fineRecord = newStorageRecord(idMatching, newState(idMatching));
         final EntityRecord notFineRecord = newStorageRecord(idWrong, newState(idWrong));
@@ -837,141 +828,5 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
         RecordStorage<I> storage = getStorage();
         EntityRecord record = newStorageRecord(entity.getId(), entity.getState());
         storage.write(entity.getId(), create(record, entity, storage));
-    }
-
-    @SuppressWarnings("unused") // Reflective access
-    public static class TestCounterEntity<I> extends TransactionalEntity<I,
-                                                                         Project,
-                                                                         ProjectVBuilder> {
-
-        private int counter = 0;
-
-        protected TestCounterEntity(I id) {
-            super(id);
-        }
-
-        @CanIgnoreReturnValue
-        @Column
-        public int getCounter() {
-            counter++;
-            return counter;
-        }
-
-        @Column
-        public long getBigCounter() {
-            return getCounter();
-        }
-
-        @Column
-        public boolean isCounterEven() {
-            return counter % 2 == 0;
-        }
-
-        @Column
-        public String getCounterName() {
-            return getId().toString();
-        }
-
-        @Column(name = "COUNTER_VERSION" /* Custom name for storing
-                                            to check that querying is correct. */)
-        public Version getCounterVersion() {
-            return Version.newBuilder()
-                          .setNumber(counter)
-                          .build();
-        }
-
-        @Column
-        public Timestamp getNow() {
-            return Time.getCurrentTime();
-        }
-
-        @Column
-        public Project getCounterState() {
-            return getState();
-        }
-
-        @Column
-        public int getProjectStatusValue() {
-            return getState().getStatusValue();
-        }
-
-        @Column
-        public ProjectStatus getProjectStatusOrdinal() {
-            return Enum.valueOf(ProjectStatus.class, getState().getStatus().name());
-        }
-
-        @Column
-        @Enumerated(STRING)
-        public ProjectStatus getProjectStatusString() {
-            return Enum.valueOf(ProjectStatus.class, getState().getStatus().name());
-        }
-
-        private void setStatus(Project.Status status) {
-            final Project newState = Project.newBuilder(getState())
-                                            .setStatus(status)
-                                            .build();
-            injectState(this, newState, getCounterVersion());
-        }
-
-        private void archive() {
-            TestTransaction.archive(this);
-        }
-
-        private void delete() {
-            TestTransaction.delete(this);
-        }
-    }
-
-    /**
-     * The {@link TestCounterEntity} {@linkplain Project.Status project status} represented by the
-     * {@linkplain Enum Java Enum}.
-     *
-     * <p>Needed to check filtering by the {@link Enumerated} entity columns.
-     */
-    enum ProjectStatus {
-        UNDEFINED ,
-        CREATED,
-        STARTED,
-        DONE,
-        CANCELLED,
-        UNRECOGNIZED
-    }
-
-    /**
-     * Entity columns representing lifecycle flags, {@code archived} and {@code deleted}.
-     *
-     * <p>These columns are present in each {@link EntityWithLifecycle} entity. For the purpose of
-     * tests being as close to the real production environment as possible, these columns are stored
-     * with the entity records, even if an actual entity is missing.
-     *
-     * <p>Note that there are cases, when a {@code RecordStorage} stores entity records with no such
-     * columns, e.g. the {@linkplain io.spine.server.event.EEntity event entity}. Thus, do not rely
-     * on these columns being present in all the entities by default when implementing
-     * a {@code RecordStorage}.
-     */
-    enum LifecycleColumns {
-
-        ARCHIVED("isArchived"),
-        DELETED("isDeleted");
-
-        private final EntityColumn column;
-
-        LifecycleColumns(String getterName) {
-            try {
-                this.column = EntityColumn.from(
-                        EntityWithLifecycle.class.getDeclaredMethod(getterName)
-                );
-            } catch (NoSuchMethodException e) {
-                throw illegalStateWithCauseOf(e);
-            }
-        }
-
-        EntityColumn column() {
-            return column;
-        }
-
-        String columnName() {
-            return column.getStoredName();
-        }
     }
 }

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.stand;
+package io.spine.server.stand.given;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
@@ -59,24 +59,24 @@ import static io.spine.protobuf.TypeConverter.toMessage;
 /**
  * @author Dmytro Dashenkov
  */
-class Given {
+public class Given {
 
-    static final int THREADS_COUNT_IN_POOL_EXECUTOR = 10;
-    static final int SEVERAL = THREADS_COUNT_IN_POOL_EXECUTOR;
-    static final int AWAIT_SECONDS = 6;
+    public static final int THREADS_COUNT_IN_POOL_EXECUTOR = 10;
+    public static final int SEVERAL = THREADS_COUNT_IN_POOL_EXECUTOR;
+    public static final int AWAIT_SECONDS = 6;
     private static final String PROJECT_UUID = newUuid();
 
     private Given() {
     }
 
-    static Command validCommand() {
+    public static Command validCommand() {
         final TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(Given.class);
         return requestFactory.command()
                              .create(PrjCreateProject.getDefaultInstance());
     }
 
-    static Event validEvent() {
+    public static Event validEvent() {
         final Command cmd = validCommand();
         final PrjProjectCreated eventMessage = PrjProjectCreated.newBuilder()
                                                                 .setProjectId(ProjectId.newBuilder()
@@ -96,15 +96,15 @@ class Given {
         return result;
     }
 
-    static ProjectionRepository<?, ?, ?> projectionRepo() {
+    public static ProjectionRepository<?, ?, ?> projectionRepo() {
         return new StandTestProjectionRepository();
     }
 
-    static AggregateRepository<ProjectId, StandTestAggregate> aggregateRepo() {
+    public static AggregateRepository<ProjectId, StandTestAggregate> aggregateRepo() {
         return new StandTestAggregateRepository();
     }
 
-    static class StandTestProjectionRepository
+    public static class StandTestProjectionRepository
             extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
 
         private static final EventRoute<ProjectId, PrjProjectCreated> EVENT_TARGETS_FN =
@@ -119,20 +119,20 @@ class Given {
                     }
                 };
 
-        StandTestProjectionRepository() {
+        public StandTestProjectionRepository() {
             super();
             getEventRouting().route(PrjProjectCreated.class, EVENT_TARGETS_FN);
         }
     }
 
-    static class StandTestAggregateRepository
+    public static class StandTestAggregateRepository
             extends AggregateRepository<ProjectId, StandTestAggregate> {
         private StandTestAggregateRepository() {
             super();
         }
     }
 
-    static class StandTestAggregate
+    public static class StandTestAggregate
             extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
 
         /**
@@ -158,7 +158,7 @@ class Given {
         }
     }
 
-    static class StandTestProjection
+    public static class StandTestProjection
             extends Projection<ProjectId, Project, ProjectVBuilder> {
 
         public StandTestProjection(ProjectId id) {

@@ -23,6 +23,8 @@ package io.spine.server.storage;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import io.spine.server.storage.given.OperatorEvaluatorTestEnv;
+import io.spine.server.storage.given.OperatorEvaluatorTestEnv.FaultyComparisonType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -333,14 +335,5 @@ class OperatorEvaluatorTest {
 
         assertTrue(eval(obj, operator, obj));
         assertTrue(eval(obj, EQUAL, obj));
-    }
-
-    private static class FaultyComparisonType {
-        @SuppressWarnings("InstantiationOfUtilityClass") // Not a utility class
-        private static final FaultyComparisonType INSTANCE = new FaultyComparisonType();
-
-        private FaultyComparisonType() {
-            // Singleton type
-        }
     }
 }

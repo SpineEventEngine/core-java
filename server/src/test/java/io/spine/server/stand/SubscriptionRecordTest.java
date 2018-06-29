@@ -28,6 +28,8 @@ import io.spine.client.Subscriptions;
 import io.spine.client.Target;
 import io.spine.client.Targets;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.stand.given.SubscriptionRecordTestEnv;
+import io.spine.server.stand.given.SubscriptionRecordTestEnv.Given;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.commandservice.customer.Customer;
@@ -113,27 +115,5 @@ class SubscriptionRecordTest {
                                                                Given.TYPE);
         assertNotEquals(one, similar);
         assertEquals(one, same);
-    }
-
-    @SuppressWarnings("UtilityClass")
-    private static class Given {
-
-        private static final TypeUrl TYPE = TypeUrl.of(Project.class);
-        private static final TypeUrl OTHER_TYPE = TypeUrl.of(Customer.class);
-
-        private static Target target() {
-            final Target target = Targets.allOf(Project.class);
-            return target;
-        }
-
-        private static Target target(Message targetId) {
-            final Target target = Targets.someOf(Project.class, Collections.singleton(targetId));
-            return target;
-        }
-
-        private static Subscription subscription() {
-            final Subscription subscription = Subscription.getDefaultInstance();
-            return subscription;
-        }
     }
 }

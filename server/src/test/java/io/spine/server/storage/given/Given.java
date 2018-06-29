@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage;
+package io.spine.server.storage.given;
 
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.command.StgAddTask;

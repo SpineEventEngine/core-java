@@ -294,7 +294,7 @@ public abstract class AbstractStorageTest<I,
 
     @Nested
     @DisplayName("return if storage is")
-    class ReturnIfIs {
+    class ReturnIfStorageIs {
 
         @Test
         @DisplayName("opened")
