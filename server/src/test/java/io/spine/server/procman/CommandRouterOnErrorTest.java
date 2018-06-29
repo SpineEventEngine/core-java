@@ -61,6 +61,7 @@ class CommandRouterOnErrorTest extends AbstractCommandRouterTest<CommandRouter> 
         return new CommandRouter(commandBus, sourceMessage, commandContext);
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored") // We're not interested in routing results.
     @Test
     @DisplayName("ignore any error occurred on dispatching")
     void ignoreErrorWhenDispatching() {

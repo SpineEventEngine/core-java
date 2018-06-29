@@ -808,6 +808,8 @@ public class AggregateTest {
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+        // We're not interested in what dispatch() returns
     @Test
     @DisplayName("throw DuplicateCommandException for a duplicated command")
     void acknowledgeExceptionForDuplicateCommand() {
