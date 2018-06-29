@@ -33,9 +33,10 @@ import io.spine.server.storage.RecordStorageShould;
 import io.spine.test.Tests;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
-import io.spine.test.storage.Task;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -49,22 +50,25 @@ import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.server.projection.given.ProjectionStorageTestEnv.givenProject;
 import static io.spine.test.Tests.assertMatchesMask;
+import static io.spine.test.Tests.nullRef;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.test.Verify.assertThrows;
 import static io.spine.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 import static java.lang.String.format;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Projection storage tests.
  *
  * @author Alexander Litus
  */
-public abstract class ProjectionStorageShould
+@SuppressWarnings("unused") // JUnit 5 Nested classes considered unused in abstract class.
+public abstract class ProjectionStorageTest
         extends RecordStorageShould<ProjectId, ProjectionStorage<ProjectId>> {
 
     private ProjectionStorage<ProjectId> storage;
@@ -99,7 +103,7 @@ public abstract class ProjectionStorageShould
     @Override
     protected Message newState(ProjectId id) {
         String uniqueName = format("Projection_name-%s-%s", id.getId(), System.nanoTime());
-        Project state = Given.project(id, uniqueName);
+        Project state = givenProject(id, uniqueName);
         return state;
     }
 
@@ -117,110 +121,128 @@ public abstract class ProjectionStorageShould
     }
 
     @BeforeEach
-    public void setUpProjectionStorageTest() {
+    void setUpProjectionStorageTest() {
         storage = getStorage();
     }
 
     @AfterEach
-    public void tearDownProjectionStorageTest() {
+    void tearDownProjectionStorageTest() {
         close(storage);
     }
 
     @Test
-    public void return_null_if_no_event_time_in_storage() {
+    @DisplayName("return null if no last handled event time is present in storage")
+    void getNullLastHandledTime() {
         Timestamp time = storage.readLastHandledEventTime();
 
         assertNull(time);
     }
 
-    @Test
-    public void read_all_messages() {
-        List<ProjectId> ids = fillStorage(5);
+    @Nested
+    @DisplayName("read")
+    class ReadMessages {
 
-        Iterator<EntityRecord> read = storage.readAll();
-        Collection<EntityRecord> readRecords = newArrayList(read);
-        assertSize(ids.size(), readRecords);
-        for (EntityRecord record : readRecords) {
-            Project state = AnyPacker.unpack(record.getState());
-            ProjectId id = state.getId();
-            assertContains(id, ids);
+        @Test
+        @DisplayName("all messages")
+        void all() {
+            List<ProjectId> ids = fillStorage(5);
+
+            Iterator<EntityRecord> read = storage.readAll();
+            Collection<EntityRecord> readRecords = newArrayList(read);
+            assertSize(ids.size(), readRecords);
+            for (EntityRecord record : readRecords) {
+                Project state = AnyPacker.unpack(record.getState());
+                ProjectId id = state.getId();
+                assertContains(id, ids);
+            }
+        }
+
+        @Test
+        @DisplayName("all messages with field mask")
+        void allWithFieldMask() {
+            List<ProjectId> ids = fillStorage(5);
+
+            String projectDescriptor = Project.getDescriptor()
+                                              .getFullName();
+            @SuppressWarnings("DuplicateStringLiteralInspection")
+            // clashes with non-related tests.
+                    FieldMask fieldMask = maskForPaths(projectDescriptor + ".id",
+                                                       projectDescriptor + ".name");
+
+            Iterator<EntityRecord> read = storage.readAll(fieldMask);
+            Collection<EntityRecord> readRecords = newArrayList(read);
+            assertSize(ids.size(), readRecords);
+            for (EntityRecord record : readRecords) {
+                Any packedState = record.getState();
+                Project state = AnyPacker.unpack(packedState);
+                assertMatchesMask(state, fieldMask);
+            }
+        }
+
+        @Test
+        @DisplayName("bulk of messages")
+        void bulk() {
+            // Get a subset of IDs
+            List<ProjectId> ids = fillStorage(10).subList(0, 5);
+
+            Iterator<EntityRecord> read = storage.readMultiple(ids);
+            Collection<EntityRecord> readRecords = newArrayList(read);
+            assertSize(ids.size(), readRecords);
+
+            // Check data consistency
+            for (EntityRecord record : readRecords) {
+                checkProjectIdIsInList(record, ids);
+            }
+        }
+
+        @Test
+        @DisplayName("bulk of messages with field mask")
+        void bulkWithFieldMask() {
+            // Get a subset of IDs
+            List<ProjectId> ids = fillStorage(10).subList(0, 5);
+
+            String projectDescriptor = Project.getDescriptor()
+                                              .getFullName();
+            FieldMask fieldMask = maskForPaths(projectDescriptor + ".id",
+                                               projectDescriptor + ".status");
+
+            Iterator<EntityRecord> read = storage.readMultiple(ids, fieldMask);
+            Collection<EntityRecord> readRecords = newArrayList(read);
+            assertSize(ids.size(), readRecords);
+
+            // Check data consistency
+            for (EntityRecord record : readRecords) {
+                Project state = checkProjectIdIsInList(record, ids);
+                assertMatchesMask(state, fieldMask);
+            }
         }
     }
 
     @Test
-    public void read_all_messages_with_field_mask() {
-        List<ProjectId> ids = fillStorage(5);
-
-        String projectDescriptor = Project.getDescriptor()
-                                          .getFullName();
-        @SuppressWarnings("DuplicateStringLiteralInspection")
-        // clashes with non-related tests.
-                FieldMask fieldMask = maskForPaths(projectDescriptor + ".id",
-                                                   projectDescriptor + ".name");
-
-        Iterator<EntityRecord> read = storage.readAll(fieldMask);
-        Collection<EntityRecord> readRecords = newArrayList(read);
-        assertSize(ids.size(), readRecords);
-        for (EntityRecord record : readRecords) {
-            Any packedState = record.getState();
-            Project state = AnyPacker.unpack(packedState);
-            assertMatchesMask(state, fieldMask);
-        }
-    }
-
-    @Test
-    public void perform_read_bulk_operations() {
-        // Get a subset of IDs
-        List<ProjectId> ids = fillStorage(10).subList(0, 5);
-
-        Iterator<EntityRecord> read = storage.readMultiple(ids);
-        Collection<EntityRecord> readRecords = newArrayList(read);
-        assertSize(ids.size(), readRecords);
-
-        // Check data consistency
-        for (EntityRecord record : readRecords) {
-            checkProjectIdIsInList(record, ids);
-        }
-    }
-
-    @Test
-    public void perform_bulk_read_with_field_mask_operation() {
-        // Get a subset of IDs
-        List<ProjectId> ids = fillStorage(10).subList(0, 5);
-
-        String projectDescriptor = Project.getDescriptor()
-                                          .getFullName();
-        FieldMask fieldMask = maskForPaths(projectDescriptor + ".id",
-                                           projectDescriptor + ".status");
-
-        Iterator<EntityRecord> read = storage.readMultiple(ids, fieldMask);
-        Collection<EntityRecord> readRecords = newArrayList(read);
-        assertSize(ids.size(), readRecords);
-
-        // Check data consistency
-        for (EntityRecord record : readRecords) {
-            Project state = checkProjectIdIsInList(record, ids);
-            assertMatchesMask(state, fieldMask);
-        }
-    }
-
-    @Test
-    public void throw_exception_if_write_null_event_time() {
+    @DisplayName("throw exception when writing null event time")
+    void notWriteNullEventTime() {
         assertThrows(NullPointerException.class,
-                     () -> storage.writeLastHandledEventTime(Tests.nullRef()));
+                     () -> storage.writeLastHandledEventTime(nullRef()));
     }
 
-    @Test
-    public void write_and_read_last_event_time() {
-        writeAndReadLastEventTimeTest(getCurrentTime());
-    }
+    @Nested
+    @DisplayName("write and read last event time")
+    class GetSetLastEventTime {
 
-    @Test
-    public void write_and_read_last_event_time_several_times() {
-        Timestamp time1 = getCurrentTime();
-        Timestamp time2 = add(time1, fromSeconds(10L));
-        writeAndReadLastEventTimeTest(time1);
-        writeAndReadLastEventTimeTest(time2);
+        @Test
+        @DisplayName("once")
+        void once() {
+            writeAndReadLastEventTimeTest(getCurrentTime());
+        }
+
+        @Test
+        @DisplayName("several times")
+        void severalTimes() {
+            Timestamp time1 = getCurrentTime();
+            Timestamp time2 = add(time1, fromSeconds(10L));
+            writeAndReadLastEventTimeTest(time1);
+            writeAndReadLastEventTimeTest(time2);
+        }
     }
 
     @SuppressWarnings("ConstantConditions") // Converter nullability issues
@@ -229,7 +251,7 @@ public abstract class ProjectionStorageShould
 
         for (int i = 0; i < count; i++) {
             ProjectId id = newId();
-            Project state = Given.project(id, format("project-%d", i));
+            Project state = givenProject(id, format("project-%d", i));
             Any packedState = AnyPacker.pack(state);
 
             EntityRecord rawRecord = EntityRecord
@@ -251,19 +273,5 @@ public abstract class ProjectionStorageShould
         Timestamp actual = storage.readLastHandledEventTime();
 
         assertEquals(expected, actual);
-    }
-
-    private static class Given {
-
-        private static Project project(ProjectId id, String name) {
-            Project project = Project
-                    .newBuilder()
-                    .setId(id)
-                    .setName(name)
-                    .setStatus(Project.Status.CREATED)
-                    .addTask(Task.getDefaultInstance())
-                    .build();
-            return project;
-        }
     }
 }

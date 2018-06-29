@@ -17,21 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.rejection;
 
-import io.spine.core.Rejection;
-import io.spine.core.RejectionEnvelope;
-import io.spine.server.bus.BusBuilderTest;
+package io.spine.server.projection.given;
+
+import io.spine.test.storage.Project;
+import io.spine.test.storage.ProjectId;
+import io.spine.test.storage.Task;
 
 /**
- * @author Alex Tymchenko
+ * @author Alexander Litus
+ * @author Dmytro Kuzmin
  */
-public class RejectionBusBuilderShould extends BusBuilderTest<RejectionBus.Builder,
-        RejectionEnvelope,
-        Rejection> {
+public class ProjectionStorageTestEnv {
 
-    @Override
-    protected RejectionBus.Builder builder() {
-        return RejectionBus.newBuilder();
+    /** Prevents instantiation of this utility class. */
+    private ProjectionStorageTestEnv() {
+    }
+
+    public static Project givenProject(ProjectId id, String name) {
+        Project project = Project
+                .newBuilder()
+                .setId(id)
+                .setName(name)
+                .setStatus(Project.Status.CREATED)
+                .addTask(Task.getDefaultInstance())
+                .build();
+        return project;
     }
 }

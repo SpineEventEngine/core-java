@@ -41,7 +41,8 @@ import static io.spine.protobuf.AnyPacker.pack;
 public class ProjectionEventDeliveryTestEnv {
 
     /** Prevents instantiation of this utility class. */
-    private ProjectionEventDeliveryTestEnv() {}
+    private ProjectionEventDeliveryTestEnv() {
+    }
 
     public static Event projectCreated() {
         final ProjectId projectId = projectId();

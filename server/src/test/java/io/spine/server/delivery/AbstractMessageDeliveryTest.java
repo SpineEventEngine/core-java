@@ -46,7 +46,7 @@ public abstract class AbstractMessageDeliveryTest {
     }
 
     @AfterEach
-    public void tearDown() {
+    protected void tearDown() {
         switchToShardingWithTransport(InMemoryTransportFactory.newInstance());
     }
 

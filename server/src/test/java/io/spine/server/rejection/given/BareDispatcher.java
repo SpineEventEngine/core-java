@@ -30,6 +30,8 @@ import java.util.Set;
 /**
  * A simple dispatcher class, which only dispatch and does not have own rejection subscribing
  * methods.
+ *
+ * @author Alexander Yevsyukov
  */
 public class BareDispatcher implements RejectionDispatcher<String> {
 

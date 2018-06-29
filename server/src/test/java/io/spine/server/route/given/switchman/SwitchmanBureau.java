@@ -29,6 +29,8 @@ import io.spine.server.route.given.switchman.rejection.SwitchmanUnavailable;
 /**
  * A repository which fires a rejection in response to a command with a particular value of the
  * target aggregate ID.
+ *
+ * @author Alexander Yevsyukov
  */
 @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
 public final class SwitchmanBureau extends AggregateRepository<String, Switchman> {
@@ -37,7 +39,7 @@ public final class SwitchmanBureau extends AggregateRepository<String, Switchman
     public static final String MISSING_SWITCHMAN_NAME = "Petrovich";
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-        // can ignore the value since we're calling own builder-like method
+    // Can ignore the value since we're calling own builder-like method.
     public SwitchmanBureau() {
         super();
         getCommandRouting().route(SetSwitch.class, new CommandRoute<String, SetSwitch>() {

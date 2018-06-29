@@ -27,19 +27,24 @@ import io.spine.base.Time;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
-// OK as custom routes do not refer to the test suite.
-public class CommandRoutingShould {
+@SuppressWarnings({"SerializableInnerClassWithNonSerializableOuterClass"
+        /* OK as custom routes do not refer to the test suite. */,
+        "DuplicateStringLiteralInspection" /* Common test display names. */})
+@DisplayName("CommandRouting should")
+class CommandRoutingTest {
 
     /** Default result of the command routing function. */
     private static final long DEFAULT_ANSWER = 42L;
@@ -71,50 +76,68 @@ public class CommandRoutingShould {
     /** The object under tests. */
     private CommandRouting<Long> commandRouting;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         commandRouting = CommandRouting.newInstance();
     }
 
     @Test
-    public void have_default_route() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        final NullPointerTester nullPointerTester = new NullPointerTester()
+                .setDefault(CommandContext.class, CommandContext.getDefaultInstance());
+
+        nullPointerTester.testAllPublicInstanceMethods(commandRouting);
+        nullPointerTester.testAllPublicStaticMethods(CommandRouting.class);
+    }
+
+    @Test
+    @DisplayName("have default route")
+    void haveDefaultRoute() {
         assertNotNull(commandRouting.getDefault());
         assertTrue(commandRouting.getDefault() instanceof DefaultCommandRoute);
     }
 
     @Test
-    public void replace_default_route() throws Exception {
+    @DisplayName("replace default route")
+    void replaceDefaultRoute() throws Exception {
         assertEquals(commandRouting, commandRouting.replaceDefault(customDefault));
         assertEquals(customDefault, commandRouting.getDefault());
     }
 
     @Test
-    public void add_custom_route() throws Exception {
+    @DisplayName("add custom route")
+    void addCustomRoute() throws Exception {
         assertEquals(commandRouting, commandRouting.route(StringValue.class, customRoute));
 
         assertEquals(customRoute, commandRouting.get(StringValue.class)
                                                 .get());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void not_allow_overwriting_a_set_route() throws Exception {
+    @Test
+    @DisplayName("not allow overwriting set route")
+    void notOverwriteSetRoute() throws Exception {
         commandRouting.route(StringValue.class, customRoute);
-        commandRouting.route(StringValue.class, customRoute);
+        assertThrows(IllegalStateException.class,
+                     () -> commandRouting.route(StringValue.class, customRoute));
     }
 
     @Test
-    public void remove_previously_set_route() {
+    @DisplayName("remove previously set route")
+    void removePreviouslySetRoute() {
         commandRouting.route(StringValue.class, customRoute);
         commandRouting.remove(StringValue.class);
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void complain_on_removal_if_route_is_not_set() {
-        commandRouting.remove(StringValue.class);
+    @Test
+    @DisplayName("throw ISE on removal if route is not set")
+    void notRemoveIfRouteNotSet() {
+        assertThrows(IllegalStateException.class, () -> commandRouting.remove(StringValue.class));
     }
 
     @Test
-    public void apply_default_route() {
+    @DisplayName("apply default route")
+    void applyDefaultRoute() {
         final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
 
         // Replace the default route since we have custom command message.
@@ -131,7 +154,8 @@ public class CommandRoutingShould {
     }
 
     @Test
-    public void apply_custom_route() {
+    @DisplayName("apply custom route")
+    void applyCustomRoute() {
         final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
 
         // Have custom route.
@@ -142,14 +166,5 @@ public class CommandRoutingShould {
         final long id = commandRouting.apply(command.getMessage(), command.getCommandContext());
 
         assertEquals(CUSTOM_ANSWER, id);
-    }
-
-    @Test
-    public void pass_null_tolerance_test() {
-        final NullPointerTester nullPointerTester = new NullPointerTester()
-                .setDefault(CommandContext.class, CommandContext.getDefaultInstance());
-
-        nullPointerTester.testAllPublicInstanceMethods(commandRouting);
-        nullPointerTester.testAllPublicStaticMethods(CommandRouting.class);
     }
 }

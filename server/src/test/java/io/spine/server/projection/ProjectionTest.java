@@ -27,30 +27,37 @@ import com.google.protobuf.StringValue;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.core.Subscribe;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.given.Given;
-import io.spine.validate.StringValueVBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import io.spine.server.projection.given.ProjectionTestEnv.TestProjection;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.projection.ProjectionEventDispatcher.dispatch;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ProjectionShould {
+/**
+ * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
+ */
+@DisplayName("Projection should")
+class ProjectionTest {
 
     private TestProjection projection;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         projection = Given.projectionOfClass(TestProjection.class)
                           .withId(newUuid())
                           .withVersion(1)
@@ -59,7 +66,8 @@ public class ProjectionShould {
     }
 
     @Test
-    public void handle_events() {
+    @DisplayName("handle events")
+    void handleEvents() {
         final String stringValue = newUuid();
 
         dispatch(projection, toMessage(stringValue), EventContext.getDefaultInstance());
@@ -78,13 +86,18 @@ public class ProjectionShould {
         assertTrue(projection.isChanged());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_no_handler_for_event() {
-        dispatch(projection, BoolValue.getDefaultInstance(), EventContext.getDefaultInstance());
+    @Test
+    @DisplayName("throw ISE if no handler is present for event")
+    void throwIfNoHandlerPresent() {
+        assertThrows(IllegalStateException.class,
+                     () -> dispatch(projection,
+                                    BoolValue.getDefaultInstance(),
+                                    EventContext.getDefaultInstance()));
     }
 
     @Test
-    public void return_event_classes_which_it_handles() {
+    @DisplayName("return handled event classes")
+    void exposeEventClasses() {
         final Set<EventClass> classes = ProjectionClass.of(TestProjection.class)
                                                        .getEventSubscriptions();
 
@@ -94,12 +107,15 @@ public class ProjectionShould {
     }
 
     @Test
-    public void expose_playing_events_to_the_package() {
+    @DisplayName("expose `play events` operation to package")
+    void exposePlayingEvents() {
         final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
         final StringValue strValue = StringValue.newBuilder()
-                                             .setValue("eins zwei drei")
-                                             .build();
-        final Int32Value intValue = Int32Value.newBuilder().setValue(123).build();
+                                                .setValue("eins zwei drei")
+                                                .build();
+        final Int32Value intValue = Int32Value.newBuilder()
+                                              .setValue(123)
+                                              .build();
         final Version nextVersion = Versions.increment(projection.getVersion());
         final Event e1 = eventFactory.createEvent(strValue, nextVersion);
         final Event e2 = eventFactory.createEvent(intValue, Versions.increment(nextVersion));
@@ -112,38 +128,5 @@ public class ProjectionShould {
         assertTrue(projectionChanged);
         assertTrue(projectionState.contains(strValue.getValue()));
         assertTrue(projectionState.contains(String.valueOf(intValue.getValue())));
-    }
-
-    private static class TestProjection
-            extends Projection<String, StringValue, StringValueVBuilder> {
-
-        /** The number of events this class handles. */
-        private static final int HANDLING_EVENT_COUNT = 2;
-
-        protected TestProjection(String id) {
-            super(id);
-        }
-
-        @Subscribe
-        public void on(StringValue event) {
-            final StringValue newState = createNewState("stringState", event.getValue());
-            getBuilder().mergeFrom(newState);
-        }
-
-        @Subscribe
-        public void on(Int32Value event) {
-            final StringValue newState = createNewState("integerState",
-                                                        String.valueOf(event.getValue()));
-            getBuilder().mergeFrom(newState);
-        }
-
-        private StringValue createNewState(String type, String value) {
-            // Get the current state within the transaction.
-            final String currentState = getBuilder().internalBuild()
-                                                    .getValue();
-            final String result = currentState + (currentState.length() > 0 ? " + " : "") +
-                    type + '(' + value + ')' + System.lineSeparator();
-            return toMessage(result);
-        }
     }
 }

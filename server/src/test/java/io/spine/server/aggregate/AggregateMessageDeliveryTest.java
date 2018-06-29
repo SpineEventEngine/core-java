@@ -52,7 +52,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
 
     @Override
     @BeforeEach
-    public void setUp() {
+    protected void setUp() {
         super.setUp();
         DeliveryProject.getStats()
                        .clear();
