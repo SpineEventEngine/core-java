@@ -43,9 +43,9 @@ import java.util.Map;
 
 import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.server.BoundedContext.newName;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov

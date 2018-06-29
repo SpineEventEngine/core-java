@@ -36,7 +36,7 @@ import java.util.concurrent.Future;
 
 import static com.google.common.collect.Lists.newArrayListWithExpectedSize;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Dmytry Ganzha

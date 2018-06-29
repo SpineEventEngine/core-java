@@ -34,10 +34,9 @@ import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.Given.StandTestAggregate;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.projection.ProjectId;
-import org.junit.Assert;
 import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatcher;
 
 import java.util.Set;
@@ -47,6 +46,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.spy;
@@ -231,7 +232,7 @@ class StandPostTest {
         Runnable task = () -> {
             String threadName = Thread.currentThread()
                                       .getName();
-            Assert.assertFalse(threadInvocationRegistry.contains(threadName));
+            assertFalse(threadInvocationRegistry.contains(threadName));
             ProjectId entityId = ProjectId
                     .newBuilder()
                     .setId(Identifier.newUuid())
@@ -251,7 +252,7 @@ class StandPostTest {
 
         executor.awaitTermination(Given.AWAIT_SECONDS, TimeUnit.SECONDS);
 
-        Assert.assertEquals(threadInvocationRegistry.size(), threadsCount);
+        assertEquals(threadInvocationRegistry.size(), threadsCount);
     }
 
     private interface BoundedContextAction {

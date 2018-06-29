@@ -40,8 +40,8 @@ import static io.spine.client.ColumnFilter.Operator.LESS_THAN;
 import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.test.Tests.nullRef;
 import static io.spine.time.Durations2.seconds;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -72,12 +72,12 @@ class OperatorEvaluatorTest {
         Object third = new String(left);
 
         // The checks taken from the java.lang.Object.equals Javadoc
-        assertTrue("basic", eval(left, EQUAL, right));
-        assertTrue("symmetric", eval(right, EQUAL, left));
-        assertTrue("reflective", eval(left, EQUAL, left));
-        assertTrue("transitive", eval(left, EQUAL, third) || eval(third, EQUAL, right));
-        assertTrue("nullable", eval(null, EQUAL, null));
-        assertTrue("consistent", eval(left, EQUAL, right));
+        assertTrue(eval(left, EQUAL, right), "basic");
+        assertTrue(eval(right, EQUAL, left), "symmetric");
+        assertTrue(eval(left, EQUAL, left), "reflective");
+        assertTrue(eval(left, EQUAL, third) || eval(third, EQUAL, right), "transitive");
+        assertTrue(eval(null, EQUAL, null), "nullable");
+        assertTrue(eval(left, EQUAL, right), "consistent");
     }
 
     @Test
@@ -86,8 +86,8 @@ class OperatorEvaluatorTest {
         Object left = "one!";
         Object right = "another!";
 
-        assertFalse("direct order check", eval(left, EQUAL, right));
-        assertFalse("reverse order check", eval(right, EQUAL, left));
+        assertFalse(eval(left, EQUAL, right), "direct order check");
+        assertFalse(eval(right, EQUAL, left), "reverse order check");
     }
 
     @Nested

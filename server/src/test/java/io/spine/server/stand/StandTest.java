@@ -104,13 +104,13 @@ import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.stand.Given.StandTestProjection;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -179,12 +179,12 @@ class StandTest extends TenantAwareTest {
         final Stand stand = builder.build();
 
         assertNotNull(stand);
-        assertTrue("Exposed types must be empty after the initialization.",
-                   stand.getExposedTypes()
-                        .isEmpty());
-        assertTrue("Exposed aggregate types must be empty after the initialization",
-                   stand.getExposedAggregateTypes()
-                        .isEmpty());
+        assertTrue(stand.getExposedTypes()
+                        .isEmpty(),
+                   "Exposed types must be empty after the initialization.");
+        assertTrue(stand.getExposedAggregateTypes()
+                        .isEmpty(),
+                   "Exposed aggregate types must be empty after the initialization");
     }
 
     @Nested
@@ -209,8 +209,8 @@ class StandTest extends TenantAwareTest {
 
             final ImmutableSet<TypeUrl> knownAggregateTypes = stand.getExposedAggregateTypes();
             // As we registered a projection repo, known aggregate types should be still empty.
-            assertTrue("For some reason an aggregate type was registered",
-                       knownAggregateTypes.isEmpty());
+            assertTrue(knownAggregateTypes.isEmpty(),
+                       "For some reason an aggregate type was registered");
 
             final StandTestProjectionRepository anotherTestProjectionRepo =
                     new StandTestProjectionRepository();
@@ -371,8 +371,8 @@ class StandTest extends TenantAwareTest {
             verifyObserver(responseObserver);
 
             final List<Any> messageList = checkAndGetMessageList(responseObserver);
-            assertTrue("Query returned a non-empty response message list " +
-                               "though the filter was not set", messageList.isEmpty());
+            assertTrue(messageList.isEmpty(), "Query returned a non-empty response message list " +
+                               "though the filter was not set");
         }
     }
 
@@ -1169,8 +1169,8 @@ class StandTest extends TenantAwareTest {
         stand.execute(readCustomersQuery, responseObserver);
 
         final List<Any> messageList = checkAndGetMessageList(responseObserver);
-        assertTrue("Query returned a non-empty response message list though the target was empty",
-                   messageList.isEmpty());
+        assertTrue(messageList.isEmpty(),
+                   "Query returned a non-empty response message list though the target was empty");
     }
 
     private void doCheckReadingProjectsById(int numberOfProjects) {
@@ -1450,15 +1450,15 @@ class StandTest extends TenantAwareTest {
     }
 
     private static List<Any> checkAndGetMessageList(MemoizeQueryResponseObserver responseObserver) {
-        assertTrue("Query has not completed successfully", responseObserver.isCompleted);
-        assertNull("Throwable has been caught upon query execution", responseObserver.throwable);
+        assertTrue(responseObserver.isCompleted, "Query has not completed successfully");
+        assertNull(responseObserver.throwable, "Throwable has been caught upon query execution");
 
         final QueryResponse response = responseObserver.responseHandled;
-        assertEquals("Query response is not OK", Responses.ok(), response.getResponse());
-        assertNotNull("Query response must not be null", response);
+        assertEquals(Responses.ok(), response.getResponse(), "Query response is not OK");
+        assertNotNull(response, "Query response must not be null");
 
         final List<Any> messageList = response.getMessagesList();
-        assertNotNull("Query response has null message list", messageList);
+        assertNotNull(messageList, "Query response has null message list");
         return messageList;
     }
 
@@ -1515,7 +1515,7 @@ class StandTest extends TenantAwareTest {
         final TypeUrl actualTypeUrl = availableTypes.iterator()
                                                     .next();
         final TypeUrl expectedTypeUrl = TypeUrl.from(expectedType);
-        assertEquals("Type was registered incorrectly", expectedTypeUrl, actualTypeUrl);
+        assertEquals(expectedTypeUrl, actualTypeUrl, "Type was registered incorrectly");
     }
 
     private static Stand.EntityUpdateCallback emptyUpdateCallback() {
