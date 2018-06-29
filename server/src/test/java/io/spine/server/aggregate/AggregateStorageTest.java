@@ -79,9 +79,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "unused" /* JUnit Nested classes considered unused in abstract test class */})
 public abstract class AggregateStorageTest
         extends AbstractStorageTest<ProjectId,
-                                              AggregateStateRecord,
-                                              AggregateReadRequest<ProjectId>,
-                                              AggregateStorage<ProjectId>> {
+                                    AggregateStateRecord,
+                                    AggregateReadRequest<ProjectId>,
+                                    AggregateStorage<ProjectId>> {
 
     private static final Function<AggregateEventRecord, Event> TO_EVENT =
             record -> record != null ? record.getEvent() : null;
