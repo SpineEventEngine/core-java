@@ -65,26 +65,26 @@ public class Given {
 
         public static StgCreateProject createProject() {
             return StgCreateProject.newBuilder()
-                                .setProjectId(newProjectId())
-                                .build();
+                                   .setProjectId(newProjectId())
+                                   .build();
         }
 
         public static StgCreateProject createProject(ProjectId id) {
             return StgCreateProject.newBuilder()
-                                .setProjectId(id)
-                                .build();
+                                   .setProjectId(id)
+                                   .build();
         }
 
         public static StgAddTask addTask(ProjectId id) {
             return StgAddTask.newBuilder()
-                          .setProjectId(id)
-                          .build();
+                             .setProjectId(id)
+                             .build();
         }
 
         public static StgStartProject startProject(ProjectId id) {
             return StgStartProject.newBuilder()
-                               .setProjectId(id)
-                               .build();
+                                  .setProjectId(id)
+                                  .build();
         }
     }
 }

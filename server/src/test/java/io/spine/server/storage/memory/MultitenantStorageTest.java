@@ -63,7 +63,8 @@ class MultitenantStorageTest {
     void returnSameSlice()
             throws InterruptedException, ExecutionException {
         final int numberOfTasks = 1000;
-        final Collection<Callable<TenantRecords>> tasks = newArrayListWithExpectedSize(numberOfTasks);
+        final Collection<Callable<TenantRecords>> tasks =
+                newArrayListWithExpectedSize(numberOfTasks);
 
         for (int i = 0; i < numberOfTasks; i++) {
             tasks.add(() -> {

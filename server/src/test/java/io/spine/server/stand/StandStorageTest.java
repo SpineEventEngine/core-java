@@ -59,17 +59,16 @@ import static java.lang.String.format;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("unused") // JUnit Nested classes considered unused in abstract class.
-public abstract class StandStorageTest extends RecordStorageTest<AggregateStateId,
-                                                                   StandStorage> {
+public abstract class StandStorageTest extends RecordStorageTest<AggregateStateId, StandStorage> {
 
     @SuppressWarnings("unchecked") // OK for test.
     protected static final Supplier<AggregateStateId<ProjectId>> DEFAULT_ID_SUPPLIER
             = () -> {
-                final ProjectId projectId = ProjectId.newBuilder()
-                                                     .setId(Identifier.newUuid())
-                                                     .build();
-                return AggregateStateId.of(projectId, TypeUrl.of(Project.class));
-            };
+        final ProjectId projectId = ProjectId.newBuilder()
+                                             .setId(Identifier.newUuid())
+                                             .build();
+        return AggregateStateId.of(projectId, TypeUrl.of(Project.class));
+    };
 
     @Override
     protected Message newState(AggregateStateId id) {
@@ -128,14 +127,16 @@ public abstract class StandStorageTest extends RecordStorageTest<AggregateStateI
             final TypeUrl type = TypeUrl.from(Project.getDescriptor());
 
             final int projectsCount = 4;
-            final List<AggregateStateId> projectIds = fill(storage, projectsCount, DEFAULT_ID_SUPPLIER);
+            final List<AggregateStateId> projectIds =
+                    fill(storage, projectsCount, DEFAULT_ID_SUPPLIER);
 
             final int tasksCount = 5;
             for (int i = 0; i < tasksCount; i++) {
                 final TaskId genericId = TaskId.newBuilder()
                                                .setId(i)
                                                .build();
-                final AggregateStateId id = AggregateStateId.of(genericId, TypeUrl.from(Task.getDescriptor()));
+                final AggregateStateId id =
+                        AggregateStateId.of(genericId, TypeUrl.from(Task.getDescriptor()));
                 final Task task = Task.newBuilder()
                                       .setTaskId(genericId)
                                       .setTitle("Test task")
@@ -256,15 +257,16 @@ public abstract class StandStorageTest extends RecordStorageTest<AggregateStateI
         final Collection<EntityRecord> recordsToCheck = newArrayList(records);
         assertSize(ids.size(), recordsToCheck);
 
-        final Collection<ProjectId> projectIds = Collections2.transform(ids, new Function<AggregateStateId, ProjectId>() {
-            @Override
-            public @Nullable ProjectId apply(@Nullable AggregateStateId input) {
-                if (input == null) {
-                    return null;
-                }
-                return (ProjectId) input.getAggregateId();
-            }
-        });
+        final Collection<ProjectId> projectIds =
+                Collections2.transform(ids, new Function<AggregateStateId, ProjectId>() {
+                    @Override
+                    public @Nullable ProjectId apply(@Nullable AggregateStateId input) {
+                        if (input == null) {
+                            return null;
+                        }
+                        return (ProjectId) input.getAggregateId();
+                    }
+                });
 
         for (EntityRecord record : recordsToCheck) {
             final Any packedState = record.getState();

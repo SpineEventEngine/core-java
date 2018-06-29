@@ -258,7 +258,6 @@ class StandTest extends TenantAwareTest {
                               .build();
         final Stand stand = boundedContext.getStand();
 
-
         final StandTestProjectionRepository standTestProjectionRepo =
                 new StandTestProjectionRepository();
         stand.registerTypeSupplier(standTestProjectionRepo);
@@ -296,7 +295,6 @@ class StandTest extends TenantAwareTest {
 
         assertNotNull(stand);
 
-
         final CustomerAggregateRepository customerAggregateRepo =
                 new CustomerAggregateRepository();
         stand.registerTypeSupplier(customerAggregateRepo);
@@ -308,7 +306,8 @@ class StandTest extends TenantAwareTest {
         final TypeUrl customerType = TypeUrl.of(Customer.class);
         final Version stateVersion = GivenVersion.withNumber(1);
 
-        verify(standStorageMock, never()).write(any(AggregateStateId.class), any(EntityRecordWithColumns.class));
+        verify(standStorageMock, never()).write(any(AggregateStateId.class),
+                                                any(EntityRecordWithColumns.class));
 
         stand.update(asEnvelope(customerId, customerState, stateVersion));
 
@@ -337,9 +336,11 @@ class StandTest extends TenantAwareTest {
         @DisplayName("on read by IDs when empty")
         void onReadByIdWhenEmpty() {
 
-            final Query readCustomersById = requestFactory.query().byIds(Customer.class, newHashSet(
-                    customerIdFor(1), customerIdFor(2)
-            ));
+            final Query readCustomersById = requestFactory.query()
+                                                          .byIds(Customer.class, newHashSet(
+                                                                  customerIdFor(1),
+                                                                  customerIdFor(2)
+                                                          ));
 
             checkEmptyResultForTargetOnEmptyStorage(readCustomersById);
         }
@@ -375,7 +376,7 @@ class StandTest extends TenantAwareTest {
 
             final List<Any> messageList = checkAndGetMessageList(responseObserver);
             assertTrue(messageList.isEmpty(), "Query returned a non-empty response message list " +
-                               "though the filter was not set");
+                    "though the filter was not set");
         }
     }
 
@@ -437,7 +438,7 @@ class StandTest extends TenantAwareTest {
 
             final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
 
-            subscribeAndActivate(stand, allCustomers,memoizeCallback);
+            subscribeAndActivate(stand, allCustomers, memoizeCallback);
             assertNull(memoizeCallback.newEntityState());
 
             final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
@@ -514,7 +515,8 @@ class StandTest extends TenantAwareTest {
         final Topic allCustomers = requestFactory.topic().allOf(Customer.class);
 
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
-        final Subscription subscription = subscribeAndActivate(stand, allCustomers, memoizeCallback);
+        final Subscription subscription =
+                subscribeAndActivate(stand, allCustomers, memoizeCallback);
 
         stand.cancel(subscription, noOpObserver());
 
@@ -589,8 +591,8 @@ class StandTest extends TenantAwareTest {
         verify(callback, never()).onStateChanged(any(EntityStateUpdate.class));
     }
 
-    private MemoizeEntityUpdateCallback subscribeWithCallback(Stand stand,
-                                                                           Target subscriptionTarget) {
+    private MemoizeEntityUpdateCallback
+    subscribeWithCallback(Stand stand, Target subscriptionTarget) {
         final MemoizeEntityUpdateCallback callback = spy(new MemoizeEntityUpdateCallback());
         final Topic topic = requestFactory.topic().forTarget(subscriptionTarget);
         subscribeAndActivate(stand, topic, callback);
@@ -695,8 +697,8 @@ class StandTest extends TenantAwareTest {
     @DisplayName("retrieve all requested fields")
     void readAllRequestedFields() {
         requestSampleCustomer(
-                new int[]{ Customer.NICKNAMES_FIELD_NUMBER - 1,
-                        Customer.ID_FIELD_NUMBER - 1 },
+                new int[]{Customer.NICKNAMES_FIELD_NUMBER - 1,
+                        Customer.ID_FIELD_NUMBER - 1},
                 new MemoizeQueryResponseObserver() {
                     @Override
                     public void onNext(QueryResponse value) {
@@ -851,7 +853,7 @@ class StandTest extends TenantAwareTest {
         }
 
         private void verifyUnsupportedQueryTargetException(Query query,
-                                                                  IllegalArgumentException e) {
+                                                           IllegalArgumentException e) {
             final Throwable cause = e.getCause();
             assertTrue(cause instanceof InvalidQueryException);
 
@@ -864,7 +866,7 @@ class StandTest extends TenantAwareTest {
         }
 
         private void verifyInvalidQueryException(Query invalidQuery,
-                                                        IllegalArgumentException e) {
+                                                 IllegalArgumentException e) {
             final Throwable cause = e.getCause();
             assertTrue(cause instanceof InvalidQueryException);
 
@@ -938,7 +940,7 @@ class StandTest extends TenantAwareTest {
         }
 
         private void verifyInvalidTopicException(Topic invalidTopic,
-                                                        IllegalArgumentException e) {
+                                                 IllegalArgumentException e) {
             final Throwable cause = e.getCause();
             assertTrue(cause instanceof InvalidTopicException);
 
@@ -1028,7 +1030,7 @@ class StandTest extends TenantAwareTest {
         }
 
         private void verifyInvalidSubscriptionException(Subscription invalidSubscription,
-                                                               IllegalArgumentException e) {
+                                                        IllegalArgumentException e) {
             final Throwable cause = e.getCause();
             assertTrue(cause instanceof InvalidSubscriptionException);
 
@@ -1045,7 +1047,7 @@ class StandTest extends TenantAwareTest {
         }
 
         private void verifyUnknownSubscriptionException(IllegalArgumentException e,
-                                                               Subscription subscription) {
+                                                        Subscription subscription) {
             final Throwable cause = e.getCause();
             assertTrue(cause instanceof InvalidSubscriptionException);
 
@@ -1069,8 +1071,8 @@ class StandTest extends TenantAwareTest {
 
     @CanIgnoreReturnValue
     protected static Subscription subscribeAndActivate(Stand stand,
-                                                     Topic topic,
-                                                     Stand.EntityUpdateCallback callback) {
+                                                       Topic topic,
+                                                       Stand.EntityUpdateCallback callback) {
         final MemoizingObserver<Subscription> observer = memoizingObserver();
         stand.subscribe(topic, observer);
         final Subscription subscription = observer.firstResponse();
@@ -1303,8 +1305,7 @@ class StandTest extends TenantAwareTest {
 
     @SuppressWarnings("ConstantConditions")
     private static void setupExpectedFindAllBehaviour(
-            Map<ProjectId,
-            Project> sampleProjects,
+            Map<ProjectId, Project> sampleProjects,
             StandTestProjectionRepository projectionRepository) {
 
         final Set<ProjectId> projectIds = sampleProjects.keySet();
@@ -1343,7 +1344,7 @@ class StandTest extends TenantAwareTest {
                 if (rawId instanceof ProjectId) {
                     final ProjectId convertedProjectId = (ProjectId) rawId;
                     everyElementPresent = everyElementPresent
-                                          && projectIds.contains(convertedProjectId);
+                            && projectIds.contains(convertedProjectId);
                 } else {
                     everyElementPresent = false;
                 }
@@ -1375,9 +1376,7 @@ class StandTest extends TenantAwareTest {
         };
     }
 
-    private void triggerMultipleUpdates(Map<CustomerId,
-                                               Customer> sampleCustomers,
-                                               Stand stand) {
+    private void triggerMultipleUpdates(Map<CustomerId, Customer> sampleCustomers, Stand stand) {
         // Trigger the aggregate state updates.
         for (CustomerId id : sampleCustomers.keySet()) {
             final Customer sampleCustomer = sampleCustomers.get(id);
@@ -1412,7 +1411,7 @@ class StandTest extends TenantAwareTest {
 
         @SuppressWarnings("UnsecureRandomNumberGeneration")
         final Random randomizer = new Random(Integer.MAX_VALUE);
-            // force non-negative numeric ID values.
+        // Force non-negative numeric ID values.
 
         for (int projectIndex = 0; projectIndex < numberOfProjects; projectIndex++) {
 
@@ -1530,8 +1529,8 @@ class StandTest extends TenantAwareTest {
      * bounded by the current {@linkplain #tenantId() tenant ID}.
      */
     protected EntityStateEnvelope asEnvelope(Object entityId,
-                                           Message entityState,
-                                           Version entityVersion) {
+                                             Message entityState,
+                                             Version entityVersion) {
         final TenantId tenantId = isMultitenant() ? tenantId() : TenantId.getDefaultInstance();
         return EntityStateEnvelope.of(entityId, entityState, entityVersion, tenantId);
     }

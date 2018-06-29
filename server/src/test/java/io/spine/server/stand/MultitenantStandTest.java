@@ -128,8 +128,8 @@ class MultitenantStandTest extends StandTest {
     }
 
     protected MemoizeEntityUpdateCallback subscribeToAllOf(Stand stand,
-                                                                        ActorRequestFactory requestFactory,
-                                                                        Class<? extends Message> entityClass) {
+                                                           ActorRequestFactory requestFactory,
+                                                           Class<? extends Message> entityClass) {
         Topic allCustomers = requestFactory.topic()
                                            .allOf(entityClass);
         MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback();

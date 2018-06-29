@@ -137,7 +137,7 @@ public class RecordStorageTestEnv {
      * <p>Needed to check filtering by the {@link Enumerated} entity columns.
      */
     public enum ProjectStatus {
-        UNDEFINED ,
+        UNDEFINED,
         CREATED,
         STARTED,
         DONE,
