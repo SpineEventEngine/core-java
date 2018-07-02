@@ -49,22 +49,18 @@ class DispatchingQueue<E extends MessageEnvelope> {
     /**
      * Enqueues the envelope for dispatching and dispatches it in its turn.
      *
-     * <p>Otherwise, the envelope is only enqueued and will be dispatched according to its position
-     * in the queue.
-     *
-     * <p>Once an envelope is added to the queue, a number of actions may be performed.
+     * <p>Once an envelope is added to the queue, the following happens: .
      * <ul>
-     *      <li>Queue is empty and nothing is being dispatched at the moment -> the envelope is
-     *          dispatched right away;
-     *      <li>Queue is non-empty and nothing is being dispatched at the moment ->
-     *          the envelope is enqueued as the first item, and the queue starts to dispatch the
-     *          last item.
-     *      <li>Another envelope is being dispatched at the moment ->
-     *          the given envelope is enqueued as the first item and its dispatching is postponed.
+     *     <li>if another envelope is currently being dispatched, the given envelope is enqueued
+     *         as the first item and its dispatching is postponed.
+     *     <li>if nothing is being dispatched and the queue is empty the envelope is dispatched
+     *         right away;
+     *     <li>if nothing is being dispatched and the queue is non-empty the envelope is enqueued
+     *         as the first item, and the queue dispatches the last item.
      * </ul>
      *
-     * <p>Once the envelope dispatching action is finished, the next available item is picked from
-     * the queue and its dispatching is started.
+     * <p>Once the envelope dispatching action is finished, the queue picks the next available item
+     * and starts to dispatch it, until the queue is empty.
      *
      * @param envelope the envelope to dispatch
      * @param observer the observer to receive the outcome of the operation

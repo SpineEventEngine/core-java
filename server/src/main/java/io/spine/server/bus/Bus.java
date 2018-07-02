@@ -211,7 +211,7 @@ public abstract class Bus<T extends Message,
     /**
      * Obtains the queue of the envelopes.
      *
-     * <p>Posted envelopes are organized into a queue to maintain dispatching order.
+     * <p>Posted envelopes are organized into a queue to maintain the order of dispatching.
      *
      * @see DispatchingQueue
      */
