@@ -1173,7 +1173,8 @@ class StandTest extends TenantAwareTest {
 
         final List<Any> messageList = checkAndGetMessageList(responseObserver);
         assertTrue(messageList.isEmpty(),
-                   "Query returned a non-empty response message list though the target was empty");
+                   "Query returned a non-empty response message list though the target had been " +
+                           "empty");
     }
 
     private void doCheckReadingProjectsById(int numberOfProjects) {
