@@ -56,15 +56,20 @@ message DCmdCreateProject {
 
 // A command to create a project to test the command posting order.
 //
-message FCmdCreateProject {
+// This command is to be sent first.
+//
+message FirstCmdCreateProject {
 
     ProjectId id = 1;
 
     string name = 2;
 }
 
-message FCmdStartProject {
+// A command to start a project to test the command posting order.
+//
+// This command is to be sent second, as a part of the `FirstCmdCreateProject` handling.
+//
+message SecondCmdStartProject {
 
     ProjectId id = 1;
 }
-

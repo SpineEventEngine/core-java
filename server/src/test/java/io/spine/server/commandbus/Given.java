@@ -35,9 +35,9 @@ import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.CmdRemoveTask;
 import io.spine.test.command.CmdStartProject;
-import io.spine.test.command.FCmdCreateProject;
-import io.spine.test.command.FCmdStartProject;
+import io.spine.test.command.FirstCmdCreateProject;
 import io.spine.test.command.ProjectId;
+import io.spine.test.command.SecondCmdStartProject;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
@@ -48,7 +48,7 @@ public class Given {
         // Prevent construction from outside.
     }
 
-    static ProjectId newProjectId() {
+    private static ProjectId newProjectId() {
         final String uuid = newUuid();
         return ProjectId.newBuilder()
                         .setId(uuid)
@@ -87,13 +87,13 @@ public class Given {
             return addTask(USER_ID, PROJECT_ID, getCurrentTime());
         }
 
-        static Command fStartProject() {
-            FCmdStartProject command = CommandMessage.fStartProject(newProjectId());
+        static Command secondStartProject() {
+            SecondCmdStartProject command = CommandMessage.secondStartProject(newProjectId());
             return create(command, USER_ID, getCurrentTime());
         }
 
-        static Command fCreateProject() {
-            FCmdCreateProject command = CommandMessage.fCreateProject(newProjectId());
+        static Command firstCreateProject() {
+            FirstCmdCreateProject command = CommandMessage.firstCreateProject(newProjectId());
             return create(command, USER_ID, getCurrentTime());
         }
 
@@ -192,16 +192,16 @@ public class Given {
                                   .build();
         }
 
-        static FCmdCreateProject fCreateProject(ProjectId projectId) {
-            return FCmdCreateProject.newBuilder()
+        static FirstCmdCreateProject firstCreateProject(ProjectId projectId) {
+            return FirstCmdCreateProject.newBuilder()
                                     .setId(projectId)
                                     .build();
         }
 
-        static FCmdStartProject fStartProject(ProjectId projectId) {
-            return FCmdStartProject.newBuilder()
-                                   .setId(projectId)
-                                   .build();
+        static SecondCmdStartProject secondStartProject(ProjectId projectId) {
+            return SecondCmdStartProject.newBuilder()
+                                        .setId(projectId)
+                                        .build();
         }
     }
 }
