@@ -33,7 +33,7 @@ import java.util.List;
 import static io.spine.server.BoundedContext.newName;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Alexander Yevsyukov
