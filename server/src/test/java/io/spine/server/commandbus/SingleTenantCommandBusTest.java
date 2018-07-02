@@ -139,14 +139,14 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("post commands in FIFO order")
     void doPostCommandsInFIFO() {
-        Command nestedCommand = clearTenantId(secondStartProject());
+        Command secondCommand = clearTenantId(secondStartProject());
         CommandPostingHandler handler = new CommandPostingHandler(eventBus, commandBus,
-                                                                  nestedCommand);
+                                                                  secondCommand);
         commandBus.register(handler);
 
-        final Command createProjectCommand = clearTenantId(firstCreateProject());
+        final Command firstCommand = clearTenantId(firstCreateProject());
         final MemoizingObserver<Ack> observer = memoizingObserver();
-        commandBus.post(createProjectCommand, observer);
+        commandBus.post(firstCommand, observer);
 
         List<Message> handledCommands = handler.handledCommands();
         assertEquals(2, handledCommands.size());
