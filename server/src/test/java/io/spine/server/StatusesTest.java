@@ -24,44 +24,56 @@ import com.google.common.testing.NullPointerTester;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.spine.base.Error;
+import io.spine.core.MessageRejection;
 import io.spine.grpc.MetadataConverter;
 import io.spine.server.event.UnsupportedEventException;
-import io.spine.core.MessageRejection;
 import io.spine.server.transport.Statuses;
 import io.spine.test.event.ProjectCreated;
 import io.spine.testdata.Sample;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class StatusesShould {
+/**
+ * @author Alexander Litus
+ * @author Dmytro Grankin
+ * @author Dmytro Dashenkov
+ */
+@DisplayName("Statuses utility should")
+class StatusesTest {
 
     @Test
-    public void have_private_constructor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(Statuses.class);
     }
 
     @Test
-    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
-    public void create_invalid_argument_status_exception() {
-        final MessageRejection rejection =
-                new UnsupportedEventException(Sample.messageOfType(ProjectCreated.class));
-        final StatusRuntimeException statusRuntimeEx = invalidArgumentWithCause(rejection);
-        final Error actualError = MetadataConverter.toError(statusRuntimeEx.getTrailers())
-                                                   .get();
-        assertEquals(Status.INVALID_ARGUMENT.getCode(), statusRuntimeEx.getStatus()
-                                                                       .getCode());
-        assertEquals(rejection, statusRuntimeEx.getCause());
-        assertEquals(rejection.asError(), actualError);
-    }
-
-    @Test
-    public void pass_the_null_tolerance_check() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Exception.class, new RuntimeException("Statuses test"))
                 .setDefault(Error.class, Error.getDefaultInstance())
                 .testAllPublicStaticMethods(Statuses.class);
+    }
+
+    @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+    @Test
+    @DisplayName("create invalid argument status exception")
+    void createInvalidArgumentStatusEx() {
+        MessageRejection rejection =
+                new UnsupportedEventException(Sample.messageOfType(ProjectCreated.class));
+        StatusRuntimeException statusRuntimeEx = invalidArgumentWithCause(rejection);
+        Error actualError = MetadataConverter.toError(statusRuntimeEx.getTrailers())
+                                             .get();
+        assertEquals(Status.INVALID_ARGUMENT.getCode(), statusRuntimeEx.getStatus()
+                                                                       .getCode());
+        assertEquals(rejection, statusRuntimeEx.getCause());
+        assertEquals(rejection.asError(), actualError);
     }
 }

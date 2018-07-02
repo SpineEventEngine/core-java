@@ -22,26 +22,26 @@ package io.spine.server.tenant;
 
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class TenantAwareFunction0Should {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+@DisplayName("TenantAwareFunction0 should")
+class TenantAwareFunction0Test {
 
     @Test
-    public void require_current_tenant_set() {
-        thrown.expect(IllegalStateException.class);
-        new TenantAwareFunction0<Timestamp>() {
-            @Override
-            public Timestamp apply() {
-                return Time.getCurrentTime();
-            }
-        };
+    @DisplayName("require current tenant set")
+    void requireCurrentTenantSet() {
+        assertThrows(IllegalStateException.class,
+                     () -> new TenantAwareFunction0<Timestamp>() {
+                         @Override
+                         public Timestamp apply() {
+                             return Time.getCurrentTime();
+                         }
+                     });
     }
 }

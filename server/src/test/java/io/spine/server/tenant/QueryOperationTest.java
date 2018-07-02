@@ -23,33 +23,39 @@ package io.spine.server.tenant;
 import io.spine.client.Queries;
 import io.spine.client.Query;
 import io.spine.client.QueryId;
-import io.spine.test.Tests;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static io.spine.test.Tests.nullRef;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class QueryOperationShould {
+@DisplayName("QueryOperation should")
+class QueryOperationTest {
 
-    @Test(expected = NullPointerException.class)
-    public void reject_null_input() {
-        final Query nullQuery = Tests.nullRef();
-        new QueryOperation(nullQuery) {
-            @Override
-            public void run() {
-                // Do nothing;
-            }
-        };
+    @Test
+    @DisplayName("reject null input")
+    void rejectNullInput() {
+        Query nullQuery = nullRef();
+        assertThrows(NullPointerException.class,
+                     () -> new QueryOperation(nullQuery) {
+                         @Override
+                         public void run() {
+                             // Do nothing;
+                         }
+                     });
     }
 
     @Test
-    public void return_query() {
-        final Query query = Query.newBuilder()
-                                 .build();
+    @DisplayName("return query")
+    void returnQuery() {
+        Query query = Query.newBuilder()
+                           .build();
 
-        final QueryOperation op = new QueryOperation(query) {
+        QueryOperation op = new QueryOperation(query) {
             @Override
             public void run() {
                 // Do nothing.
@@ -60,13 +66,14 @@ public class QueryOperationShould {
     }
 
     @Test
-    public void return_query_id() {
-        final QueryId id = Queries.generateId();
-        final Query query = Query.newBuilder()
-                                 .setId(id)
-                                 .build();
+    @DisplayName("return query ID")
+    void returnQueryId() {
+        QueryId id = Queries.generateId();
+        Query query = Query.newBuilder()
+                           .setId(id)
+                           .build();
 
-        final QueryOperation op = new QueryOperation(query) {
+        QueryOperation op = new QueryOperation(query) {
             @Override
             public void run() {
                 // Do nothing.
