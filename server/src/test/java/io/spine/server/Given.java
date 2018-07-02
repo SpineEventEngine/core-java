@@ -299,7 +299,7 @@ public class Given {
     }
 
     /*
-     * QueryServiceTest environment.
+     * `QueryServiceTest` environment.
      ***************************************************/
 
     static final String PROJECTS_CONTEXT_NAME = "Projects";
@@ -342,7 +342,7 @@ public class Given {
     }
 
     /*
-     * SubscriptionServiceTest environment.
+     * `SubscriptionServiceTest` environment.
      ***************************************************/
 
     static class MemoizeStreamObserver<T> implements StreamObserver<T> {
@@ -387,6 +387,5 @@ public class Given {
         boolean isCompleted() {
             return isCompleted;
         }
-
     }
 }
