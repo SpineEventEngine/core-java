@@ -39,6 +39,11 @@ import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * @author Alexander Litus
+ * @author Dmytro Grankin
+ * @author Dmytro Dashenkov
+ */
 @DisplayName("Statuses utility should")
 class StatusesTest {
 

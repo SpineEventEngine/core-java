@@ -51,6 +51,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 
+/**
+ * @author Alexander Yevsyukov
+ * @author Alexander Litus
+ * @author Dmytro Dashenkov
+ * @author Alex Tymchenko
+ */
 @DisplayName("CommandService should")
 class CommandServiceTest {
 

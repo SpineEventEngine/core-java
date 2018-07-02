@@ -72,6 +72,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
+/**
+ * @author Alexander Yevsyukov
+ * @author Alexander Litus
+ * @author Andrey Lavrov
+ * @author Alexander Aleksandrov
+ * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
+ */
 public class Given {
 
     private Given() {

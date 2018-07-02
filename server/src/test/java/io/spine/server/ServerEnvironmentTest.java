@@ -27,6 +27,9 @@ import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 @DisplayName("ServerEnvironment utility should")
 class ServerEnvironmentTest {
 
