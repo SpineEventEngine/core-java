@@ -29,16 +29,20 @@ import io.spine.test.tuple.quartet.Donkey;
 import io.spine.test.tuple.quartet.Goat;
 import io.spine.test.tuple.quartet.Instrument;
 import io.spine.test.tuple.quartet.Monkey;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class QuartetShould {
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
+@DisplayName("Quartet should")
+class QuartetTest {
 
     private final Monkey monkey = Monkey.newBuilder()
                                         .setMessage("Show must go on!")
@@ -62,20 +66,22 @@ public class QuartetShould {
 
     private Quartet<Monkey, Donkey, Goat, Bear> quartet;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         quartet = Quartet.of(monkey, donkey, goat, bear);
     }
 
     @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester().setDefault(Message.class, goat)
                                .setDefault(Optional.class, Optional.of(goat))
                                .testAllPublicStaticMethods(Quartet.class);
     }
 
     @Test
-    public void serialize() {
+    @DisplayName("be serializable")
+    void serialize() {
         reserializeAndAssert(Quartet.of(monkey, donkey, goat, bear));
 
         reserializeAndAssert(Quartet.withNullable(monkey, donkey, goat, bear));
@@ -94,7 +100,8 @@ public class QuartetShould {
     }
 
     @Test
-    public void support_equality() {
+    @DisplayName("support equality")
+    void supportEquality() {
         new EqualsTester().addEqualityGroup(Quartet.of(monkey, donkey, goat, bear),
                                             Quartet.of(monkey, donkey, goat, bear))
 
@@ -112,7 +119,8 @@ public class QuartetShould {
     }
 
     @Test
-    public void return_elements() {
+    @DisplayName("return elements")
+    void returnElements() {
         assertEquals(monkey, quartet.getA());
         assertEquals(donkey, quartet.getB());
         assertEquals(goat, quartet.getC());

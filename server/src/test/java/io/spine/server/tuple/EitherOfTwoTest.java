@@ -27,22 +27,27 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.test.TestValues;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("FieldNamingConvention") // short vars are OK for tuple tests.
-public class EitherOfTwoShould {
+@SuppressWarnings({"FieldNamingConvention", "InstanceVariableNamingConvention",
+        /* Short vars are OK for tuple tests. */
+        "DuplicateStringLiteralInspection" /* Common test display names. */,
+        "ResultOfMethodCallIgnored" /* Methods are called to throw exception. */})
+@DisplayName("EitherOfTwo should")
+class EitherOfTwoTest {
 
     private final StringValue a = TestValues.newUuidValue();
     private final Timestamp b = Time.getCurrentTime();
@@ -50,41 +55,43 @@ public class EitherOfTwoShould {
     private EitherOfTwo<StringValue, Timestamp> eitherWithA;
     private EitherOfTwo<StringValue, Timestamp> eitherWithB;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         eitherWithA = EitherOfTwo.withA(a);
         eitherWithB = EitherOfTwo.withB(b);
     }
 
     @Test
-    public void support_equality() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        new NullPointerTester().testAllPublicStaticMethods(EitherOfTwo.class);
+    }
+
+    @Test
+    @DisplayName("support equality")
+    void supportEquality() {
         new EqualsTester().addEqualityGroup(eitherWithA, EitherOfTwo.withA(a))
                           .addEqualityGroup(eitherWithB)
                           .testEquals();
     }
 
     @Test
-    public void pass_null_tolerance_check() {
-        new NullPointerTester().testAllPublicStaticMethods(EitherOfTwo.class);
-    }
-
-    @Test
-    public void return_values() {
+    @DisplayName("return values")
+    void returnValues() {
         assertEquals(a, eitherWithA.getA());
         assertEquals(b, eitherWithB.getB());
     }
 
     @Test
-    public void return_value_index() {
+    @DisplayName("return value index")
+    void returnValueIndex() {
         assertEquals(0, eitherWithA.getIndex());
         assertEquals(1, eitherWithB.getIndex());
     }
 
     @Test
-    public void return_only_one_value_in_iteration() {
+    @DisplayName("return only one value in iteration")
+    void returnOnlyOneValueInIteration() {
         final Iterator<Message> iteratorA = eitherWithA.iterator();
 
         assertEquals(a, iteratorA.next());
@@ -97,20 +104,21 @@ public class EitherOfTwoShould {
     }
 
     @Test
-    public void prohibit_obtaining_the_other_value_B() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithA.getB();
-    }
-
-    @Test
-    public void prohibit_obtaining_the_other_value_A() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithB.getA();
-    }
-
-    @Test
-    public void serialize() {
+    @DisplayName("be serializable")
+    void serialize() {
         reserializeAndAssert(eitherWithA);
         reserializeAndAssert(eitherWithB);
+    }
+
+    @Test
+    @DisplayName("prohibit obtaining B when A is set")
+    void notGetBForA() {
+        assertThrows(IllegalStateException.class, () -> eitherWithA.getB());
+    }
+
+    @Test
+    @DisplayName("prohibit obtaining A when B is set")
+    void notGetAForB() {
+        assertThrows(IllegalStateException.class, () -> eitherWithB.getA());
     }
 }

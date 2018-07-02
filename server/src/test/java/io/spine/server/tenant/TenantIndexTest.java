@@ -25,26 +25,25 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.core.TenantId;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static io.spine.server.BoundedContext.newName;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class TenantIndexShould {
+@DisplayName("TenantIndex should")
+class TenantIndexTest {
 
     @Test
-    public void provide_utility_factory() {
-        assertHasPrivateParameterlessCtor(TenantIndex.Factory.class);
-    }
-
-    @Test
-    public void pass_null_tolerance_test() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         final InMemoryStorageFactory storageFactory =
                 InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()), false);
         new NullPointerTester()
@@ -53,7 +52,14 @@ public class TenantIndexShould {
     }
 
     @Test
-    public void provide_tenant_index_for_single_tenant_context() {
+    @DisplayName("provide utility factory")
+    void provideUtilityFactory() {
+        assertHasPrivateParameterlessCtor(TenantIndex.Factory.class);
+    }
+
+    @Test
+    @DisplayName("provide tenant index for single tenant context")
+    void getIndexForSingleTenantContext() {
         final TenantIndex index = TenantIndex.Factory.singleTenant();
 
         final List<TenantId> items = ImmutableList.copyOf(index.getAll());

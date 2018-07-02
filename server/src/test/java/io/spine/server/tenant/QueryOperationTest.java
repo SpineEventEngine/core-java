@@ -23,29 +23,35 @@ package io.spine.server.tenant;
 import io.spine.client.Queries;
 import io.spine.client.Query;
 import io.spine.client.QueryId;
-import io.spine.test.Tests;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
+import static io.spine.test.Tests.nullRef;
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class QueryOperationShould {
+@DisplayName("QueryOperation should")
+class QueryOperationTest {
 
-    @Test(expected = NullPointerException.class)
-    public void reject_null_input() {
-        final Query nullQuery = Tests.nullRef();
-        new QueryOperation(nullQuery) {
-            @Override
-            public void run() {
-                // Do nothing;
-            }
-        };
+    @Test
+    @DisplayName("reject null input")
+    void rejectNullInput() {
+        final Query nullQuery = nullRef();
+        assertThrows(NullPointerException.class,
+                     () -> new QueryOperation(nullQuery) {
+                         @Override
+                         public void run() {
+                             // Do nothing;
+                         }
+                     });
     }
 
     @Test
-    public void return_query() {
+    @DisplayName("return query")
+    void returnQuery() {
         final Query query = Query.newBuilder()
                                  .build();
 
@@ -60,7 +66,8 @@ public class QueryOperationShould {
     }
 
     @Test
-    public void return_query_id() {
+    @DisplayName("return query ID")
+    void returnQueryId() {
         final QueryId id = Queries.generateId();
         final Query query = Query.newBuilder()
                                  .setId(id)

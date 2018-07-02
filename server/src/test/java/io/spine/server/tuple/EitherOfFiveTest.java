@@ -30,22 +30,28 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import io.spine.base.Time;
 import io.spine.test.TestValues;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("FieldNamingConvention") // short vars are OK for tuple tests.
-public class EitherOfFiveShould {
+@SuppressWarnings({"FieldNamingConvention", "InstanceVariableNamingConvention",
+        /* Short vars are OK for tuple tests. */
+        "DuplicateStringLiteralInspection" /* Common test display names. */,
+        "ResultOfMethodCallIgnored" /* Methods are called to throw exception. */})
+@DisplayName("EitherOfFive should")
+class EitherOfFiveTest {
 
     private final StringValue a = TestValues.newUuidValue();
     private final BoolValue b = BoolValue.of(true);
@@ -63,11 +69,8 @@ public class EitherOfFiveShould {
     private EitherOfFive<StringValue, BoolValue, Timestamp, UInt32Value, FloatValue> eitherWithD;
     private EitherOfFive<StringValue, BoolValue, Timestamp, UInt32Value, FloatValue> eitherWithE;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-    
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         eitherWithA = EitherOfFive.withA(a);
         eitherWithB = EitherOfFive.withB(b);
         eitherWithC = EitherOfFive.withC(c);
@@ -76,7 +79,14 @@ public class EitherOfFiveShould {
     }
 
     @Test
-    public void support_equality() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        new NullPointerTester().testAllPublicStaticMethods(EitherOfFive.class);
+    }
+
+    @Test
+    @DisplayName("support equality")
+    void supportEquality() {
         new EqualsTester().addEqualityGroup(eitherWithA, EitherOfFive.withA(a))
                           .addEqualityGroup(eitherWithB)
                           .addEqualityGroup(eitherWithC)
@@ -86,12 +96,8 @@ public class EitherOfFiveShould {
     }
 
     @Test
-    public void pass_null_tolerance_check() {
-        new NullPointerTester().testAllPublicStaticMethods(EitherOfFive.class);
-    }
-
-    @Test
-    public void return_values() {
+    @DisplayName("return values")
+    void returnValues() {
         assertEquals(a, eitherWithA.getA());
         assertEquals(b, eitherWithB.getB());
         assertEquals(c, eitherWithC.getC());
@@ -100,7 +106,8 @@ public class EitherOfFiveShould {
     }
 
     @Test
-    public void return_value_index() {
+    @DisplayName("return value index")
+    void returnValueIndex() {
         assertEquals(0, eitherWithA.getIndex());
         assertEquals(1, eitherWithB.getIndex());
         assertEquals(2, eitherWithC.getIndex());
@@ -109,7 +116,8 @@ public class EitherOfFiveShould {
     }
 
     @Test
-    public void return_only_one_value_in_iteration() {
+    @DisplayName("return only one value in iteration")
+    void provideIterator() {
         final Iterator<Message> iteratorA = eitherWithA.iterator();
 
         assertEquals(a, iteratorA.next());
@@ -137,7 +145,8 @@ public class EitherOfFiveShould {
     }
 
     @Test
-    public void serialize() {
+    @DisplayName("be serializable")
+    void serialize() {
         reserializeAndAssert(eitherWithA);
         reserializeAndAssert(eitherWithB);
         reserializeAndAssert(eitherWithC);
@@ -145,99 +154,148 @@ public class EitherOfFiveShould {
         reserializeAndAssert(eitherWithE);
     }
 
-    @Test
-    public void prohibit_obtaining_the_other_value_A_B() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithA.getB();
+    @Nested
+    @DisplayName("when A is set, prohibit obtaining")
+    class ProhibitObtainingForA {
+
+        @Test
+        @DisplayName("B")
+        void b() {
+            assertThrows(IllegalStateException.class, () -> eitherWithA.getB());
+        }
+
+        @Test
+        @DisplayName("C")
+        void c() {
+            assertThrows(IllegalStateException.class, () -> eitherWithA.getC());
+        }
+
+        @Test
+        @DisplayName("D")
+        void d() {
+            assertThrows(IllegalStateException.class, () -> eitherWithA.getD());
+        }
+
+        @Test
+        @DisplayName("E")
+        void e() {
+            assertThrows(IllegalStateException.class, () -> eitherWithA.getE());
+        }
     }
 
-    @Test
-    public void prohibit_obtaining_the_other_value_A_C() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithA.getC();
+    @Nested
+    @DisplayName("when B is set, prohibit obtaining")
+    class ProhibitObtainingForB {
+
+        @Test
+        @DisplayName("A")
+        void a() {
+            assertThrows(IllegalStateException.class, () -> eitherWithB.getA());
+        }
+
+        @Test
+        @DisplayName("C")
+        void c() {
+            assertThrows(IllegalStateException.class, () -> eitherWithB.getC());
+        }
+
+        @Test
+        @DisplayName("D")
+        void d() {
+            assertThrows(IllegalStateException.class, () -> eitherWithB.getD());
+        }
+
+        @Test
+        @DisplayName("E")
+        void e() {
+            assertThrows(IllegalStateException.class, () -> eitherWithB.getE());
+        }
     }
 
-    @Test
-    public void prohibit_obtaining_the_other_value_A_D() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithA.getD();
+    @Nested
+    @DisplayName("when C is set, prohibit obtaining")
+    class ProhibitObtainingForC {
+
+        @Test
+        @DisplayName("A")
+        void a() {
+            assertThrows(IllegalStateException.class, () -> eitherWithC.getA());
+        }
+
+        @Test
+        @DisplayName("B")
+        void b() {
+            assertThrows(IllegalStateException.class, () -> eitherWithC.getB());
+        }
+
+        @Test
+        @DisplayName("D")
+        void d() {
+            assertThrows(IllegalStateException.class, () -> eitherWithC.getD());
+        }
+
+        @Test
+        @DisplayName("E")
+        void e() {
+            assertThrows(IllegalStateException.class, () -> eitherWithC.getE());
+        }
     }
 
-    @Test
-    public void prohibit_obtaining_the_other_value_A_E() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithA.getE();
+    @Nested
+    @DisplayName("when D is set, prohibit obtaining")
+    class ProhibitObtainingForD {
+
+        @Test
+        @DisplayName("A")
+        void a() {
+            assertThrows(IllegalStateException.class, () -> eitherWithD.getA());
+        }
+
+        @Test
+        @DisplayName("B")
+        void b() {
+            assertThrows(IllegalStateException.class, () -> eitherWithD.getB());
+        }
+
+        @Test
+        @DisplayName("C")
+        void c() {
+            assertThrows(IllegalStateException.class, () -> eitherWithD.getC());
+        }
+
+        @Test
+        @DisplayName("E")
+        void e() {
+            assertThrows(IllegalStateException.class, () -> eitherWithD.getE());
+        }
     }
 
-    @Test
-    public void prohibit_obtaining_the_other_value_B_A() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithB.getA();
-    }
+    @Nested
+    @DisplayName("when E is set, prohibit obtaining")
+    class ProhibitObtainingForE {
 
-    @Test
-    public void prohibit_obtaining_the_other_value_B_C() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithB.getC();
-    }
+        @Test
+        @DisplayName("A")
+        void a() {
+            assertThrows(IllegalStateException.class, () -> eitherWithE.getA());
+        }
 
-    @Test
-    public void prohibit_obtaining_the_other_value_B_D() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithB.getD();
-    }
+        @Test
+        @DisplayName("B")
+        void b() {
+            assertThrows(IllegalStateException.class, () -> eitherWithE.getB());
+        }
 
-    @Test
-    public void prohibit_obtaining_the_other_value_B_E() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithB.getE();
-    }
+        @Test
+        @DisplayName("C")
+        void c() {
+            assertThrows(IllegalStateException.class, () -> eitherWithE.getC());
+        }
 
-    @Test
-    public void prohibit_obtaining_the_other_value_C_A() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithC.getA();
-    }
-
-    @Test
-    public void prohibit_obtaining_the_other_value_C_B() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithC.getB();
-    }
-
-    @Test
-    public void prohibit_obtaining_the_other_value_C_D() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithC.getD();
-    }
-
-    @Test
-    public void prohibit_obtaining_the_other_value_C_E() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithC.getE();
-    }
-
-    @Test
-    public void prohibit_obtaining_the_other_value_D_A() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithD.getA();
-    }
-
-    @Test
-    public void prohibit_obtaining_the_other_value_D_B() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithD.getB();
-    }
-
-    @Test
-    public void prohibit_obtaining_the_other_value_D_C() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithD.getC();
-    }
-
-    @Test
-    public void prohibit_obtaining_the_other_value_D_E() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithD.getE();
+        @Test
+        @DisplayName("D")
+        void d() {
+            assertThrows(IllegalStateException.class, () -> eitherWithE.getD());
+        }
     }
 }

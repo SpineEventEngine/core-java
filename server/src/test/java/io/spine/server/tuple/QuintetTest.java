@@ -24,7 +24,8 @@ import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.server.tuple.given.QuintetTestEnv.InstrumentFactory.newViola;
@@ -34,32 +35,38 @@ import static io.spine.server.tuple.given.QuintetTestEnv.QuintetFactory.NUM_1;
 import static io.spine.server.tuple.given.QuintetTestEnv.QuintetFactory.NUM_2;
 import static io.spine.server.tuple.given.QuintetTestEnv.QuintetFactory.newCelloQuintet;
 import static io.spine.server.tuple.given.QuintetTestEnv.QuintetFactory.newViolaQuintet;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertEquals;
 
 /**
  * Tests {@link Quintet} tuple.
  *
- * <p>This test suite uses <a href="https://en.wikipedia.org/wiki/String_quintet">String quintets</a>
- * types just to have test data other than default Protobuf types, and for some fun.
+ * <p>This test suite uses
+ * <a href="https://en.wikipedia.org/wiki/String_quintet">String quintets</a> types just to have
+ * test data other than default Protobuf types, and for some fun.
  *
  * <p>In a real app a {@link Quintet} should have only event messages, and not value objects.
  *
  * @author Alexander Yevsyukov
  */
-public class QuintetShould {
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
+@DisplayName("Quintet should")
+class QuintetTest {
 
     private final Quintet celloQuintet = newCelloQuintet();
     private final Quintet violaQuintet = newViolaQuintet();
 
     @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester().setDefault(Message.class, newViola())
                                .setDefault(Optional.class, Optional.of(newViolinCello()))
                                .testAllPublicStaticMethods(Quintet.class);
     }
 
     @Test
-    public void serialize() {
+    @DisplayName("be serializable")
+    void serialize() {
         reserializeAndAssert(celloQuintet);
         reserializeAndAssert(violaQuintet);
 
@@ -72,14 +79,16 @@ public class QuintetShould {
     }
 
     @Test
-    public void support_equality() {
+    @DisplayName("support equality")
+    void supportEquality() {
         new EqualsTester().addEqualityGroup(newCelloQuintet(), newCelloQuintet())
                           .addEqualityGroup(newViolaQuintet())
                           .testEquals();
     }
 
     @Test
-    public void return_elements() {
+    @DisplayName("return elements")
+    void returnElements() {
         assertEquals(newViolin(NUM_1), celloQuintet.getA());
         assertEquals(newViolin(NUM_2), celloQuintet.getB());
         assertEquals(newViola(), celloQuintet.getC());

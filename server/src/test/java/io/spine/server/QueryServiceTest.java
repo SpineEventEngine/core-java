@@ -22,34 +22,27 @@ package io.spine.server;
 import com.google.common.collect.Sets;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
-import io.spine.core.BoundedContextName;
-import io.spine.core.EventContext;
 import io.spine.core.Responses;
-import io.spine.core.Subscribe;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
+import io.spine.server.Given.ProjectDetailsRepository;
 import io.spine.server.model.ModelTests;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.Stand;
 import io.spine.test.Spy;
-import io.spine.test.bc.event.BcProjectCreated;
-import io.spine.test.commandservice.ProjectId;
-import io.spine.test.projection.Project;
-import io.spine.test.projection.ProjectVBuilder;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
+import static io.spine.server.Given.PROJECTS_CONTEXT_NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -58,9 +51,8 @@ import static org.mockito.Mockito.when;
 /**
  * @author Alex Tymchenko
  */
-public class QueryServiceShould {
-
-    private static final String PROJECTS_CONTEXT_NAME = "Projects";
+@DisplayName("QueryService should")
+class QueryServiceTest {
 
     private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
 
@@ -74,11 +66,8 @@ public class QueryServiceShould {
             StreamObservers.memoizingObserver();
     private ProjectDetailsRepository projectDetailsRepository;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ModelTests.clearModel();
         // Create Projects Bounded Context with one repository and one projection.
         projectsContext = BoundedContext.newBuilder()
@@ -120,22 +109,24 @@ public class QueryServiceShould {
         service = spy(builder.build());
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() throws Exception {
         for (BoundedContext boundedContext : boundedContexts) {
             boundedContext.close();
         }
     }
 
     @Test
-    public void execute_queries() {
+    @DisplayName("execute queries")
+    void executeQueries() {
         final Query query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
         checkOkResponse(responseObserver);
     }
 
     @Test
-    public void dispatch_queries_to_proper_bounded_context() {
+    @DisplayName("dispatch queries to proper bounded context")
+    void dispatchQueriesToBc() {
         final Query query = Given.AQuery.readAllProjects();
         final Stand stand = projectsContext.getStand();
         service.read(query, responseObserver);
@@ -147,28 +138,29 @@ public class QueryServiceShould {
     }
 
     @Test
-    public void fail_to_create_with_removed_bounded_context_from_builder() {
+    @DisplayName("fail to create with bounded context removed from builder")
+    void notCreateWithRemovedBc() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
 
         final QueryService.Builder builder = QueryService.newBuilder();
 
-        thrown.expect(IllegalStateException.class);
-        builder.add(boundedContext)
-               .remove(boundedContext)
-               .build();
+        assertThrows(IllegalStateException.class, () -> builder.add(boundedContext)
+                                                               .remove(boundedContext)
+                                                               .build());
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test
-    public void fail_to_create_with_no_bounded_context() {
-        thrown.expect(IllegalStateException.class);
-        QueryService.newBuilder()
-                    .build();
+    @DisplayName("fail to create with no bounded context")
+    void notCreateWithNoBc() {
+        assertThrows(IllegalStateException.class, () -> QueryService.newBuilder()
+                                                                    .build());
     }
 
     @Test
-    public void return_error_if_query_failed_to_execute() {
+    @DisplayName("return error if query failed to execute")
+    void returnErrorOnQueryFail() {
         when(projectDetailsRepository.loadAll()).thenThrow(RuntimeException.class);
         final Query query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
@@ -187,42 +179,5 @@ public class QueryServiceShould {
         assertTrue(responseObserver.responses().isEmpty());
         assertFalse(responseObserver.isCompleted());
         assertNotNull(responseObserver.getError());
-    }
-
-    /*
-     * Stub repositories and projections
-     ***************************************************/
-
-    private static class ProjectDetailsRepository
-            extends ProjectionRepository<ProjectId, ProjectDetails, Project> {
-
-        /**
-         * {@inheritDoc}
-         *
-         * This method is overridden to overcome the Mockito restrictions, since Mockit does not
-         * propagate all the changes into the spied object (and {@code ProjectDetailsRepository}
-         * instance is spied within this test suite). In turn that leads to the failures in
-         * delivery initialization, since it requires non-{@code null} bounded context name.
-         *
-         * @return the name of the bounded context for this repository
-         */
-        @Override
-        public BoundedContextName getBoundedContextName() {
-            return BoundedContext.newName(PROJECTS_CONTEXT_NAME);
-        }
-    }
-
-    private static class ProjectDetails
-            extends Projection<ProjectId, Project, ProjectVBuilder> {
-
-        private ProjectDetails(ProjectId id) {
-            super(id);
-        }
-
-        @SuppressWarnings("UnusedParameters") // OK for test method.
-        @Subscribe
-        public void on(BcProjectCreated event, EventContext context) {
-            // Do nothing.
-        }
     }
 }

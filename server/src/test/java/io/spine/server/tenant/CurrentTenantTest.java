@@ -22,35 +22,44 @@ package io.spine.server.tenant;
 
 import com.google.common.base.Optional;
 import io.spine.core.TenantId;
-import io.spine.test.Tests;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.core.given.GivenTenantId.nameOf;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Tests.nullRef;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class CurrentTenantShould {
+@DisplayName("CurrentTenant should")
+class CurrentTenantTest {
 
     @Test
-    public void have_private_constructor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         assertHasPrivateParameterlessCtor(CurrentTenant.class);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void reject_null_value() {
-        CurrentTenant.set(Tests.<TenantId>nullRef());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void reject_default_value() {
-        CurrentTenant.set(TenantId.getDefaultInstance());
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // we check isPresent() in assertion
     @Test
-    public void keep_set_value() {
+    @DisplayName("reject null value")
+    void rejectNullValue() {
+        assertThrows(NullPointerException.class, () -> CurrentTenant.set(nullRef()));
+    }
+
+    @Test
+    @DisplayName("reject default value")
+    void rejectDefaultValue() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> CurrentTenant.set(TenantId.getDefaultInstance()));
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We check isPresent() in assertion.
+    @Test
+    @DisplayName("keep set value")
+    void keepSetValue() {
         final TenantId expected = nameOf(getClass());
 
         CurrentTenant.set(expected);
@@ -61,7 +70,8 @@ public class CurrentTenantShould {
     }
 
     @Test
-    public void clear_set_value() {
+    @DisplayName("clear set value")
+    void clearSetValue() {
         final TenantId value = nameOf(getClass());
         CurrentTenant.set(value);
 

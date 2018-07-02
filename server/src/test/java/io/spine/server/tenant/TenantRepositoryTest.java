@@ -23,8 +23,9 @@ package io.spine.server.tenant;
 import com.google.protobuf.Timestamp;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.core.given.GivenTenantId.newUuid;
 import static org.junit.Assert.assertFalse;
@@ -36,12 +37,13 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alexander Yevsyukov
  */
-public class TenantRepositoryShould {
+@DisplayName("TenantRepository should")
+class TenantRepositoryTest {
 
     private TenantRepository<?, ?> repository;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         final BoundedContext bc = BoundedContext.newBuilder().build();
         TenantRepository<?, ?> impl = new TenantRepositoryImpl();
         impl.initStorage(bc.getStorageFactory());
@@ -49,7 +51,8 @@ public class TenantRepositoryShould {
     }
 
     @Test
-    public void cache_passed_value() {
+    @DisplayName("cache passed value")
+    void cachePassedValue() {
         final TenantId tenantId = newUuid();
 
         repository.keep(tenantId);
@@ -59,7 +62,8 @@ public class TenantRepositoryShould {
     }
 
     @Test
-    public void un_cache_values() {
+    @DisplayName("un-cache values")
+    void unCacheValues() {
         final TenantId tenantId = newUuid();
 
         repository.keep(tenantId);
@@ -68,7 +72,8 @@ public class TenantRepositoryShould {
     }
 
     @Test
-    public void clear_cache() {
+    @DisplayName("clear cache")
+    void clearCache() {
         final TenantId tenantId = newUuid();
 
         repository.keep(tenantId);
@@ -77,7 +82,6 @@ public class TenantRepositoryShould {
 
         assertFalse(repository.unCache(tenantId));
     }
-
 
     private static class TenantRepositoryImpl
             extends TenantRepository<Timestamp, DefaultTenantRepository.Entity> {

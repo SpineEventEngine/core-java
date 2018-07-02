@@ -21,39 +21,39 @@
 package io.spine.server.tenant;
 
 import io.spine.core.TenantId;
-import io.spine.test.Tests;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.core.given.GivenTenantId.newUuid;
+import static io.spine.test.Tests.nullRef;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
 // OK for the tests. We set right before we get().
-public class TenantAwareOperationShould {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+@DisplayName("TenantAwareOperation should")
+class TenantAwareOperationTest {
 
     @Test
-    public void do_not_accept_null_tenant() {
-        thrown.expect(NullPointerException.class);
-        createOperation(Tests.nullRef());
+    @DisplayName("not accept null tenant")
+    void notAcceptNullTenant() {
+        assertThrows(NullPointerException.class, () -> createOperation(nullRef()));
     }
 
     @Test
-    public void substitute_single_tenant_for_default_value() {
+    @DisplayName("substitute single tenant for default value")
+    void useSingleTenantId() {
         final TenantAwareOperation op = createOperation(TenantId.getDefaultInstance());
         assertEquals(CurrentTenant.singleTenant(), op.tenantId());
     }
 
     @Test
-    public void remember_and_restore_current_tenant() {
+    @DisplayName("remember and restore current tenant")
+    void rememberCurrentTenant() {
         final TenantId previousTenant = newUuid();
         CurrentTenant.set(previousTenant);
 
@@ -75,7 +75,8 @@ public class TenantAwareOperationShould {
     }
 
     @Test
-    public void clear_current_tenant_on_restore_if_no_tenant_was_set() {
+    @DisplayName("clear current tenant on restore if no tenant was set")
+    void clearCurrentTenant() {
         // Make sure there's not current tenant.
         CurrentTenant.clear();
 
@@ -98,7 +99,8 @@ public class TenantAwareOperationShould {
     }
 
     @Test
-    public void create_instance_for_non_command_execution_context() {
+    @DisplayName("create instance for non-command execution context")
+    void createForNonCommand() {
         final TenantId tenant = newUuid();
         CurrentTenant.set(tenant);
 
@@ -112,12 +114,11 @@ public class TenantAwareOperationShould {
     }
 
     @Test
-    public void do_not_allow_creating_instance_in_non_command_execution_without_current_tenant() {
+    @DisplayName("not allow creating instance for non-command execution without current tenant")
+    void rejectNonCommandIfNoCurrentTenant() {
         CurrentTenant.clear();
 
-        thrown.expect(IllegalStateException.class);
-        // This should fail.
-        createOperation();
+        assertThrows(IllegalStateException.class, TenantAwareOperationTest::createOperation);
     }
 
     /*
