@@ -138,16 +138,6 @@ public abstract class AggregateStorageTest
         return TestAggregate.class;
     }
 
-    // Ignore this test because several records can be stored by an aggregate ID.
-    @Override
-    @SuppressWarnings({
-            "NoopMethodInAbstractClass",
-            "RefusedBequest",
-            "MethodDoesntCallSuperMethod"
-    })
-    protected void rewriteRecord() {
-    }
-
     /**
      * Creates the storage for the specified ID and aggregate class.
      *
@@ -274,6 +264,18 @@ public abstract class AggregateStorageTest
         AggregateEventRecord actual = iterator.next();
         assertEquals(expected, actual);
         assertFalse(iterator.hasNext());
+    }
+
+    // Ignore this test because several records can be stored by an aggregate ID.
+    @Override
+    @Test
+    @DisplayName("re-write record if writing by the same ID")
+    @SuppressWarnings({
+            "NoopMethodInAbstractClass",
+            "RefusedBequest",
+            "MethodDoesntCallSuperMethod"
+    })
+    protected void rewriteRecord() {
     }
 
     @Nested
