@@ -60,7 +60,7 @@ class DispatchingQueue<E extends MessageEnvelope> {
      * </ul>
      *
      * <p>Once the envelope dispatching action is finished, the queue picks the next available item
-     * and starts to dispatch it, until the queue is empty.
+     * and starts to dispatch it until the queue is empty.
      *
      * @param envelope the envelope to dispatch
      * @param observer the observer to receive the outcome of the operation
