@@ -368,15 +368,15 @@ public class Given {
             assertEquals(this.isCompleted, isCompleted);
         }
 
-        public T streamFlowValue() {
+        T streamFlowValue() {
             return streamFlowValue;
         }
 
-        public Throwable throwable() {
+        Throwable throwable() {
             return throwable;
         }
 
-        public boolean isCompleted() {
+        boolean isCompleted() {
             return isCompleted;
         }
 
