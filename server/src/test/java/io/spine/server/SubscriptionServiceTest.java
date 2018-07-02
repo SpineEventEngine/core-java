@@ -208,12 +208,14 @@ class SubscriptionServiceTest {
         final Topic topic = requestFactory.topic().forTarget(target);
 
         // Subscribe to the topic.
-        final MemoizeStreamObserver<Subscription> subscriptionObserver = new MemoizeStreamObserver<>();
+        final MemoizeStreamObserver<Subscription> subscriptionObserver =
+                new MemoizeStreamObserver<>();
         subscriptionService.subscribe(topic, subscriptionObserver);
         subscriptionObserver.verifyState();
 
         // Activate subscription.
-        final MemoizeStreamObserver<SubscriptionUpdate> activationObserver = new MemoizeStreamObserver<>();
+        final MemoizeStreamObserver<SubscriptionUpdate> activationObserver =
+                new MemoizeStreamObserver<>();
         subscriptionService.activate(subscriptionObserver.streamFlowValue(), activationObserver);
 
         // Post update to Stand directly.
@@ -305,17 +307,18 @@ class SubscriptionServiceTest {
         }
 
         @SuppressWarnings("ConstantConditions")
-
         // As `null` is intentionally passed as a method param.
         @Test
         @DisplayName("activation process")
         void activation() {
             final BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
 
-            final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                               .add(boundedContext)
-                                                                               .build();
-            final MemoizeStreamObserver<SubscriptionUpdate> observer = new MemoizeStreamObserver<>();
+            final SubscriptionService subscriptionService =
+                    SubscriptionService.newBuilder()
+                                       .add(boundedContext)
+                                       .build();
+            final MemoizeStreamObserver<SubscriptionUpdate> observer =
+                    new MemoizeStreamObserver<>();
             // Causes NPE.
             subscriptionService.activate(null, observer);
             assertNull(observer.streamFlowValue());
