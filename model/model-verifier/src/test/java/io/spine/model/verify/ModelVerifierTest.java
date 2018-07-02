@@ -31,17 +31,19 @@ import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.internal.impldep.com.google.common.collect.Iterators;
 import org.gradle.testfixtures.ProjectBuilder;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Collections;
 
 import static io.spine.tools.gradle.TaskName.COMPILE_JAVA;
+import static java.util.Collections.emptySet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -50,16 +52,18 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dmytro Dashenkov
  */
-public class ModelVerifierShould {
+@DisplayName("ModelVerifier should")
+class ModelVerifierTest {
 
     private static final Object[] EMPTY_ARRAY = new Object[0];
 
     private Project project = null;
 
-    @Before
-    public void setUp() {
+    @SuppressWarnings("unchecked") // OK for test mocks.
+    @BeforeEach
+    void setUp() {
         project = mock(Project.class);
-        when(project.getSubprojects()).thenReturn(Collections.<Project>emptySet());
+        when(project.getSubprojects()).thenReturn(emptySet());
         when(project.getRootProject()).thenReturn(project);
         final TaskContainer tasks = mock(TaskContainer.class);
         final TaskCollection emptyTaskCollection = mock(TaskCollection.class);
@@ -70,7 +74,8 @@ public class ModelVerifierShould {
     }
 
     @Test
-    public void verify_model_from_classpath() {
+    @DisplayName("verify model from classpath")
+    void verifyModelFromClasspath() {
         final ModelVerifier verifier = new ModelVerifier(project);
 
         verify(project).getSubprojects();
@@ -86,8 +91,9 @@ public class ModelVerifierShould {
         verifier.verify(spineModel);
     }
 
-    @Test(expected = DuplicateCommandHandlerError.class)
-    public void fail_on_duplicate_command_handlers() {
+    @Test
+    @DisplayName("fail on duplicate command handlers")
+    void failOnDuplicateHandlers() {
         final ModelVerifier verifier = new ModelVerifier(project);
         final String firstType = ModelVerifierTestEnv.AnyCommandHandler.class.getName();
         final String secondType = ModelVerifierTestEnv.DuplicateAnyCommandHandler.class.getName();
@@ -96,11 +102,12 @@ public class ModelVerifierShould {
                                                 .addCommandHandlingTypes(firstType)
                                                 .addCommandHandlingTypes(secondType)
                                                 .build();
-        verifier.verify(spineModel);
+        assertThrows(DuplicateCommandHandlerError.class, () -> verifier.verify(spineModel));
     }
 
     @Test
-    public void ignore_invalid_class_names() {
+    @DisplayName("ignore invalid class names")
+    void ignoreInvalidClassNames() {
         final String invalidClassname = "non.existing.class.Name";
         final CommandHandlers spineModel = CommandHandlers.newBuilder()
                                                 .addCommandHandlingTypes(invalidClassname)
@@ -108,17 +115,20 @@ public class ModelVerifierShould {
         new ModelVerifier(project).verify(spineModel);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void not_accept_non_command_handler_types() {
-        final String invalidClassname = ModelVerifierShould.class.getName();
+    @Test
+    @DisplayName("not accept non-CommandHandler types")
+    void notAcceptNonCommandHandlerTypes() {
+        final String invalidClassname = ModelVerifierTest.class.getName();
         final CommandHandlers spineModel = CommandHandlers.newBuilder()
                                                 .addCommandHandlingTypes(invalidClassname)
                                                 .build();
-        new ModelVerifier(project).verify(spineModel);
+        assertThrows(IllegalArgumentException.class,
+                     () -> new ModelVerifier(project).verify(spineModel));
     }
 
     @Test
-    public void retrieve_compilation_dest_dir_from_task() throws MalformedURLException {
+    @DisplayName("retrieve compilation destination directory from task")
+    void getCompilationDestDir() throws MalformedURLException {
         final JavaCompile compileTask = actualProject().getTasks()
                                                        .withType(JavaCompile.class)
                                                        .getByName(COMPILE_JAVA.getValue());
@@ -130,7 +140,8 @@ public class ModelVerifierShould {
     }
 
     @Test
-    public void retrieve_null_if_dest_dir_is_null() {
+    @DisplayName("retrieve null if destination directory is null")
+    void getNullDestDir() {
         final JavaCompile compileTask = mock(JavaCompile.class);
         final Function<JavaCompile, URL> func = ModelVerifier.GetDestinationDir.FUNCTION;
         assertNull(func.apply(compileTask));

@@ -22,6 +22,7 @@ package io.spine.server;
 
 import io.spine.test.Tests;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 /**
  * @author Alexander Yevsyukov
@@ -29,7 +30,8 @@ import org.junit.Test;
 public class TestCommandClassesShould {
 
     @Test
-    public void have_utility_ctor() {
+    @DisplayName("have utility ctor")
+    void haveUtilityCtor() {
         Tests.assertHasPrivateParameterlessCtor(TestCommandClasses.class);
     }
 }

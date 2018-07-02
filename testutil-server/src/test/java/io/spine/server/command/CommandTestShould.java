@@ -34,6 +34,7 @@ import io.spine.time.ZoneOffsets;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.rules.ExpectedException;
 
 import static io.spine.core.given.GivenUserId.newUuid;
@@ -93,19 +94,22 @@ public class CommandTestShould {
     }
 
     @Test
-    public void initialize_with_default_ActorRequestFactory_and_produce_commands() {
+    @DisplayName("initialize with default ActorRequestFactory and produce commands")
+    void initializeWithDefaultActorRequestFactoryAndProduceCommands() {
         createAndAssertCommand(commandTest);
     }
 
     @SuppressWarnings({"ConstantConditions" /* Passing `null` is the purpose of this test. */,
             "ResultOfObjectAllocationIgnored" /* because the constructor should fail. */})
     @Test(expected = NullPointerException.class)
-    public void do_not_allow_null_ActorRequestFactory() {
+    @DisplayName("do not allow null ActorRequestFactory")
+    void doNotAllowNullActorRequestFactory() {
         new TestCommandTest(null);
     }
 
     @Test
-    public void accept_custom_ActorRequestFactory() {
+    @DisplayName("accept custom ActorRequestFactory")
+    void acceptCustomActorRequestFactory() {
         Class<? extends CommandTestShould> clazz = getClass();
         CommandTest<StringValue> commandTestWithFactory =
                 new TestCommandTest(newRequestFactory(clazz));
@@ -114,7 +118,8 @@ public class CommandTestShould {
     }
 
     @Test
-    public void have_empty_state_before_command_creation() {
+    @DisplayName("have empty state before command creation")
+    void haveEmptyStateBeforeCommandCreation() {
         assertFalse(commandTest.commandMessage()
                                .isPresent());
         assertFalse(commandTest.commandContext()
@@ -126,7 +131,8 @@ public class CommandTestShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // This test verifies that Optionals
     // are initialized.
     @Test
-    public void stores_command_after_creation() {
+    @DisplayName("stores command after creation")
+    void storesCommandAfterCreation() {
         StringValue commandMessage = newUuidValue();
         Command command = commandTest.createCommand(commandMessage);
 
@@ -139,7 +145,8 @@ public class CommandTestShould {
     }
 
     @Test
-    public void create_command_with_custom_Timestamp() {
+    @DisplayName("create command with custom Timestamp")
+    void createCommandWithCustomTimestamp() {
         StringValue commandMessage = newUuidValue();
         Timestamp timestamp = TimeTests.Past.minutesAgo(5);
         Command command = commandTest.createCommand(commandMessage, timestamp);
@@ -150,13 +157,15 @@ public class CommandTestShould {
     }
 
     @Test
-    public void do_not_accept_null_command_message_for_different_command() {
+    @DisplayName("do not accept null command message for different command")
+    void doNotAcceptNullCommandMessageForDifferentCommand() {
         thrown.expect(NullPointerException.class);
         commandTest.createDifferentCommand(Tests.nullRef());
     }
 
     @Test
-    public void create_different_command() {
+    @DisplayName("create different command")
+    void createDifferentCommand() {
         Message anotherCommandMsg = Time.getCurrentTime();
         Command anotherCommand = commandTest.createDifferentCommand(anotherCommandMsg);
 
@@ -164,7 +173,8 @@ public class CommandTestShould {
     }
 
     @Test
-    public void create_different_command_with_timestamp() {
+    @DisplayName("create different command with timestamp")
+    void createDifferentCommandWithTimestamp() {
         Message anotherCommandMsg = Time.getCurrentTime();
         Timestamp timestamp = TimeTests.Past.minutesAgo(30);
         Command anotherCommand =

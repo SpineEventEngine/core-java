@@ -29,6 +29,7 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.Tests;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.core.Rejections.createRejection;
 import static io.spine.test.TestValues.newUuidValue;
@@ -40,12 +41,14 @@ import static org.mockito.Mockito.mock;
 public class ProcessManagerDispatcherShould {
 
     @Test
-    public void have_utility_ctor() {
+    @DisplayName("have utility ctor")
+    void haveUtilityCtor() {
         Tests.assertHasPrivateParameterlessCtor(ProcessManagerDispatcher.class);
     }
 
     @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName("pass null tolerance check")
+    void passNullToleranceCheck() {
         TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(getClass());
         TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());

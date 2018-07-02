@@ -34,6 +34,7 @@ import io.spine.time.ZoneOffsets;
 import io.spine.validate.UInt32ValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.core.given.GivenUserId.newUuid;
 import static org.junit.Assert.assertFalse;
@@ -63,7 +64,8 @@ public class AggregatePartCommandTestShould {
     }
 
     @Test
-    public void create_an_aggregate_part_in_setUp() {
+    @DisplayName("create an aggregate part in setUp")
+    void createAnAggregatePartInSetUp() {
         assertFalse(aggregatePartCommandTest.aggregatePart()
                                             .isPresent());
 
@@ -82,7 +84,8 @@ public class AggregatePartCommandTestShould {
      */
     @SuppressWarnings("ResultOfObjectAllocationIgnored") // because we don't need the result.
     @Test
-    public void has_constructor_with_ActorRequestFactory() {
+    @DisplayName("has constructor with ActorRequestFactory")
+    void hasConstructorWithActorRequestFactory() {
         new TimerCountingTest(newRequestFactory(getClass()));
     }
 

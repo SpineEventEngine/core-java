@@ -18,30 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model.assemble;
+package io.spine.core.given;
 
-import org.junit.Test;
+import com.google.protobuf.Any;
+import io.spine.core.Enrichment;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import java.util.Set;
+import java.util.Map;
 
-import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static io.spine.core.given.GivenEnrichment.withOneAttribute;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Verify.assertSize;
 
 /**
- * @author Dmytro Dashenkov
+ * @author Dmytro Grankin
  */
-public class AssignLookupShould extends SpineAnnotationProcessorShould {
+@DisplayName("GivenEnrichment should")
+class GivenEnrichmentTest {
 
-    @Override
-    protected SpineAnnotationProcessor processor() {
-        return new AssignLookup();
+    @Test
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(GivenEnrichment.class);
     }
 
     @Test
-    public void support_spineDirRoot_option() {
-        final Set<String> opts = processor().getSupportedOptions();
-        assertEquals(1, opts.size());
-        assertThat(opts, contains(AssignLookup.OUTPUT_OPTION_NAME));
+    @DisplayName("create enrichment with one attribute")
+    void createWithOneAttribute() {
+        final Enrichment enrichment = withOneAttribute();
+        final Map<String, Any> enrichmentAttributes = enrichment.getContainer()
+                                                                .getItems();
+        assertSize(1, enrichmentAttributes);
     }
 }

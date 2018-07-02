@@ -18,20 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.server.aggregate.given;
 
-import io.spine.test.Tests;
-import org.junit.Test;
-import org.junit.jupiter.api.DisplayName;
+import com.google.protobuf.Timestamp;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateBuilder;
+import io.spine.validate.TimestampVBuilder;
 
-/**
- * @author Alexander Yevsyukov
- */
-public class TestRejectionClassesShould {
+public class AggregateBuilderTestEnv {
 
-    @Test
-    @DisplayName("have utility ctor")
-    void haveUtilityCtor() {
-        Tests.assertHasPrivateParameterlessCtor(TestRejectionClasses.class);
+    /** Prevents instantiation on this utility class. */
+    private AggregateBuilderTestEnv() {
+    }
+
+    public static AggregateBuilder<TestAggregate, Integer, Timestamp> givenAggregate() {
+        final AggregateBuilder<TestAggregate, Integer, Timestamp> result = new AggregateBuilder<>();
+        result.setResultClass(TestAggregate.class);
+        return result;
+    }
+
+    public static class TestAggregate extends Aggregate<Integer, Timestamp, TimestampVBuilder> {
+        protected TestAggregate(Integer id) {
+            super(id);
+        }
     }
 }

@@ -38,6 +38,8 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author Dmytro Dashenkov
  */
+// TODO:2018-07-02:dmytro.kuzmin: Migrate to JUnit 5 when GradleProject class from
+// spine-plugin-testlib will no longer require JUnit 4 TemporaryFolder class.
 public class ModelVerifierPluginShould {
 
     private static final String PROJECT_NAME = "model-verifier-test";
@@ -48,7 +50,7 @@ public class ModelVerifierPluginShould {
     public final TemporaryFolder testProjectDir = new TemporaryFolder();
 
     @Test
-    public void pass_valid_model_classes() {
+    void passValidModelClasses() {
         newProjectWithJava(COMPILING_TEST_ENTITY_PATH,
                            "io/spine/model/verify/ValidProcMan.java",
                            "io/spine/model/verify/ValidCommandHandler.java")
@@ -56,7 +58,7 @@ public class ModelVerifierPluginShould {
     }
 
     @Test
-    public void halt_build_on_duplicate_command_handling_methods() {
+    void haltBuildOnDuplicateCommandHandlingMethods() {
         final BuildResult result = newProjectWithJava(
                 "io/spine/model/verify/DuplicateAggregate.java",
                 "io/spine/model/verify/DuplicateCommandHandler.java")
@@ -68,17 +70,17 @@ public class ModelVerifierPluginShould {
     }
 
     @Test
-    public void ignore_duplicate_entries() {
+    void ignoreDuplicateEntries() {
         final GradleProject project = newProjectWithJava(COMPILING_TEST_ENTITY_PATH);
         project.executeTask(VERIFY_MODEL);
         project.executeTask(VERIFY_MODEL);
     }
 
     @Ignore // TODO:2017-08-25:dmytro.dashenkov: Re-enable when Model is capable of
-            // checking the handler methods.
-            // https://github.com/SpineEventEngine/base/issues/49
+              // checking the handler methods.
+              // https://github.com/SpineEventEngine/base/issues/49
     @Test
-    public void halt_build_on_malformed_command_handling_methods() {
+    void haltBuildOnMalformedCommandHandlingMethods() {
         final BuildResult result =
                 newProjectWithJava("io/spine/model/verify/MalformedAggregate.java")
                 .executeAndFail(VERIFY_MODEL);

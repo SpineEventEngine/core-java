@@ -22,6 +22,7 @@ package io.spine.server.entity.given;
 
 import io.spine.test.Tests;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.Assert.assertTrue;
 
@@ -31,17 +32,20 @@ import static org.junit.Assert.assertTrue;
 public class GivenLifecycleFlagsShould {
 
     @Test
-    public void create_archived_visibility() {
+    @DisplayName("create archived visibility")
+    void createArchivedVisibility() {
         assertTrue(GivenLifecycleFlags.archived().getArchived());
     }
 
     @Test
-    public void create_deleted_visibility() {
+    @DisplayName("create deleted visibility")
+    void createDeletedVisibility() {
         assertTrue(GivenLifecycleFlags.deleted().getDeleted());
     }
 
     @Test
-    public void have_utility_ctor() {
+    @DisplayName("have utility ctor")
+    void haveUtilityCtor() {
         Tests.assertHasPrivateParameterlessCtor(GivenLifecycleFlags.class);
     }
 }

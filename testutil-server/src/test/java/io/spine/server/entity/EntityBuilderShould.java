@@ -25,6 +25,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.Assert.assertEquals;
@@ -42,27 +43,32 @@ public class EntityBuilderShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_ID() {
+    @DisplayName("do not accept null ID")
+    void doNotAcceptNullID() {
         givenEntity().withId(null);
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_state() {
+    @DisplayName("do not accept null state")
+    void doNotAcceptNullState() {
         givenEntity().withState(null);
     }
 
     @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_timestamp() {
+    @DisplayName("do not accept null timestamp")
+    void doNotAcceptNullTimestamp() {
         givenEntity().modifiedOn(null);
     }
 
     @Test
-    public void obtain_entity_id_class() {
+    @DisplayName("obtain entity id class")
+    void obtainEntityIdClass() {
         assertEquals(Long.class, givenEntity().getIdClass());
     }
 
     @Test
-    public void create_entity() {
+    @DisplayName("create entity")
+    void createEntity() {
         final long id = 1024L;
         final int version = 100500;
         final StringValue state = toMessage(getClass().getName());
@@ -83,7 +89,8 @@ public class EntityBuilderShould {
     }
 
     @Test
-    public void create_entity_with_default_values() {
+    @DisplayName("create entity with default values")
+    void createEntityWithDefaultValues() {
         final VersionableEntity entity = givenEntity().build();
 
         assertEquals(TestEntity.class, entity.getClass());
@@ -93,7 +100,8 @@ public class EntityBuilderShould {
     }
 
     @Test
-    public void pass_the_check() {
+    @DisplayName("pass the check")
+    void passTheCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(EntityBuilder.class);
     }

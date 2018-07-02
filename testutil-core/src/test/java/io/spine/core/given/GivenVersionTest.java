@@ -20,31 +20,34 @@
 
 package io.spine.core.given;
 
-import com.google.protobuf.Any;
-import io.spine.core.Enrichment;
-import org.junit.Test;
+import io.spine.core.Version;
+import io.spine.test.Tests;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
-import static io.spine.core.given.GivenEnrichment.withOneAttribute;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Verify.assertSize;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.TestValues.random;
+import static org.junit.Assert.assertEquals;
 
 /**
- * @author Dmytro Grankin
+ * @author Alexander Yevsyukov
  */
-public class GivenEnrichmentShould {
+@DisplayName("GivenVersion should")
+class GivenVersionTest {
 
     @Test
-    public void have_private_utility_ctor() {
-        assertHasPrivateParameterlessCtor(GivenEnrichment.class);
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        Tests.assertHasPrivateParameterlessCtor(GivenVersion.class);
     }
 
     @Test
-    public void create_enrichment_with_one_attribute() {
-        final Enrichment enrichment = withOneAttribute();
-        final Map<String, Any> enrichmentAttributes = enrichment.getContainer()
-                                                                .getItems();
-        assertSize(1, enrichmentAttributes);
+    @DisplayName("generate version by number")
+    void generateByNumber() {
+        final int number = random(100);
+
+        final Version version = GivenVersion.withNumber(number);
+
+        assertEquals(number, version.getNumber());
     }
 }

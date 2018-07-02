@@ -31,6 +31,7 @@ import io.spine.server.aggregate.given.AggregateMessageDispatcherTestEnv.Message
 import io.spine.server.command.TestEventFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import java.util.List;
 
@@ -52,7 +53,8 @@ public class AggregateMessageDispatcherShould {
     }
 
     @Test
-    public void dispatch_command() {
+    @DisplayName("dispatch command")
+    void dispatchCommandTest() {
         final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
         final int messageValue = 2017_07_28;
         final UInt32Value message = UInt32Value.newBuilder()
@@ -70,7 +72,8 @@ public class AggregateMessageDispatcherShould {
     }
 
     @Test
-    public void dispatch_event() {
+    @DisplayName("dispatch event")
+    void dispatchEventTest() {
         final TestEventFactory factory = TestEventFactory.newInstance(getClass());
         final float messageValue = 2017.0729f;
         final FloatValue message = FloatValue.newBuilder()

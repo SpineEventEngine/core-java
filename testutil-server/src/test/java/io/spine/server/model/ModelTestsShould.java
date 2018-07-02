@@ -29,6 +29,7 @@ import io.spine.server.event.EventBus;
 import io.spine.test.Tests;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -47,12 +48,14 @@ public class ModelTestsShould {
     }
 
     @Test
-    public void have_utility_ctor() {
+    @DisplayName("have utility ctor")
+    void haveUtilityCtor() {
         Tests.assertHasPrivateParameterlessCtor(ModelTests.class);
     }
 
     @Test
-    public void clear_the_model() {
+    @DisplayName("clear the model")
+    void clearTheModel() {
         // This adds a command handler for `com.google.protobuf.Timestamp`.
         final CommandHandlerClass cls1 = model.asCommandHandlerClass(TestCommandHandler.class);
         assertNotNull(cls1);

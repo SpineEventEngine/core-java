@@ -35,6 +35,7 @@ import io.spine.validate.StringValueVBuilder;
 import io.spine.validate.TimestampVBuilder;
 import io.spine.validate.UInt32ValueVBuilder;
 import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
@@ -42,12 +43,14 @@ import static org.junit.Assert.assertEquals;
 public class GivenShould {
 
     @Test
-    public void have_private_constructor() {
+    @DisplayName("have private constructor")
+    void havePrivateConstructor() {
         assertHasPrivateParameterlessCtor(Given.class);
     }
 
     @Test
-    public void create_entity_builder() {
+    @DisplayName("create entity builder")
+    void createEntityBuilder() {
         assertEquals(AnEntity.class, Given.entityOfClass(AnEntity.class)
                                           .getResultClass());
     }
@@ -59,7 +62,8 @@ public class GivenShould {
     }
 
     @Test
-    public void create_aggregate_builder() {
+    @DisplayName("create aggregate builder")
+    void createAggregateBuilder() {
         assertEquals(AnAggregate.class, Given.aggregateOfClass(AnAggregate.class)
                                              .getResultClass());
     }
@@ -72,7 +76,8 @@ public class GivenShould {
     }
 
     @Test
-    public void create_aggregate_part_builder() {
+    @DisplayName("create aggregate part builder")
+    void createAggregatePartBuilder() {
         assertEquals(AnAggregatePart.class, Given.aggregatePartOfClass(AnAggregatePart.class)
                                                  .getResultClass());
     }
@@ -87,7 +92,8 @@ public class GivenShould {
     }
 
     @Test
-    public void create_projection_builder() {
+    @DisplayName("create projection builder")
+    void createProjectionBuilder() {
         assertEquals(AProjection.class, Given.projectionOfClass(AProjection.class)
                                              .getResultClass());
     }
@@ -101,13 +107,15 @@ public class GivenShould {
     }
 
     @Test
-    public void create_builder_for_process_managers() {
+    @DisplayName("create builder for process managers")
+    void createBuilderForProcessManagers() {
         assertEquals(AProcessManager.class, Given.processManagerOfClass(AProcessManager.class)
                                                  .getResultClass());
     }
 
     @Test
-    public void pass_the_null_tolerance_check() {
+    @DisplayName("pass the null tolerance check")
+    void passTheNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(Given.class);
     }

@@ -23,28 +23,35 @@ package io.spine.core.given;
 import com.google.common.testing.NullPointerTester;
 import io.spine.base.Identifier;
 import io.spine.test.Tests;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class GivenTenantIdShould {
+@DisplayName("GivenTenantId should")
+class GivenTenantIdTest {
 
     @Test
-    public void have_utility_ctor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         Tests.assertHasPrivateParameterlessCtor(GivenTenantId.class);
     }
 
     @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(GivenTenantId.class);
     }
 
     @Test
-    public void create_by_string_value() {
+    @DisplayName("create TenantId by string value")
+    void createByStringValue() {
         final String expected = Identifier.newUuid();
 
         assertEquals(expected, GivenTenantId.of(expected)
@@ -52,7 +59,8 @@ public class GivenTenantIdShould {
     }
 
     @Test
-    public void create_by_test_class_name() {
+    @DisplayName("create TenantId by test class name")
+    void createByTestClassName() {
         assertEquals(getClass().getSimpleName(), GivenTenantId.nameOf(getClass())
                                                               .getValue());
     }

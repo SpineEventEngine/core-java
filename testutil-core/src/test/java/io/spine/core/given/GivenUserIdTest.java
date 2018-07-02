@@ -23,30 +23,37 @@ package io.spine.core.given;
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.UserId;
 import io.spine.test.Tests;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.core.given.GivenUserId.of;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class GivenUserIdShould {
+@DisplayName("GivenUserId should")
+class GivenUserIdTest {
 
     @Test
-    public void have_utility_ctor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         Tests.assertHasPrivateParameterlessCtor(GivenUserId.class);
     }
 
     @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(GivenUserId.class);
     }
 
     @Test
-    public void create_UserId_by_string() {
+    @DisplayName("create UserId by string")
+    void createByString() {
         final String testIdString = "12345";
         final UserId userId = of(testIdString);
 
@@ -58,7 +65,8 @@ public class GivenUserIdShould {
     }
 
     @Test
-    public void create_new_UUID_based_UserId() {
+    @DisplayName("create new UUID based UserId")
+    void createNewUUIDBased() {
         assertFalse(GivenUserId.newUuid()
                                .getValue()
                                .isEmpty());

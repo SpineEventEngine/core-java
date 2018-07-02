@@ -26,13 +26,16 @@ import io.spine.core.ActorContext;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
 import io.spine.core.UserId;
-import io.spine.test.Tests;
 import io.spine.time.Durations2;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.given.GivenUserId.newUuid;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.time.Durations2.fromMinutes;
 import static io.spine.validate.Validate.checkValid;
 import static org.junit.Assert.assertEquals;
@@ -41,15 +44,18 @@ import static org.junit.Assert.assertNotEquals;
 /**
  * @author Alex Tymchenko
  */
-public class GivenCommandContextShould {
+@DisplayName("GivenCommandContext should")
+class GivenCommandContextTest {
 
     @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(GivenCommandContext.class);
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(GivenCommandContext.class);
     }
 
     @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(UserId.class, UserId.getDefaultInstance())
                 .setDefault(Timestamp.class, Timestamp.getDefaultInstance())
@@ -57,7 +63,8 @@ public class GivenCommandContextShould {
     }
 
     @Test
-    public void create_with_random_actor() {
+    @DisplayName("create CommandContext with random actor")
+    void createWithRandomActor() {
         final CommandContext first = GivenCommandContext.withRandomActor();
         final CommandContext second = GivenCommandContext.withRandomActor();
 
@@ -70,7 +77,8 @@ public class GivenCommandContextShould {
     }
 
     @Test
-    public void create_with_actor_and_time() {
+    @DisplayName("create CommandContext with actor and time")
+    void createWithActorAndTime() {
         final UserId actorId = newUuid();
         final Timestamp when = add(getCurrentTime(), fromMinutes(42));
 
@@ -84,7 +92,8 @@ public class GivenCommandContextShould {
     }
 
     @Test
-    public void create_with_scheduled_delay() {
+    @DisplayName("create CommandContext with scheduled delay")
+    void createWithScheduledDelay() {
         final Duration delay = Durations2.fromHours(42);
         final Schedule expectedSchedule = Schedule.newBuilder()
                                                   .setDelay(delay)
