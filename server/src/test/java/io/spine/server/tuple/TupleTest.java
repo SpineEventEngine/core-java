@@ -97,12 +97,12 @@ class TupleTest {
 
         @Override
         public A getA() {
-            return (A)get(0);
+            return (A) get(0);
         }
 
         @Override
         public B getB() {
-            return (B)get(1);
+            return (B) get(1);
         }
     }
 }

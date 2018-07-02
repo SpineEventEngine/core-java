@@ -46,12 +46,12 @@ public class QuintetTestEnv {
     public static class QuintetFactory {
 
         public static final InstrumentNumber NUM_1 = InstrumentNumber.newBuilder()
-                                                              .setValue(1)
-                                                              .build();
+                                                                     .setValue(1)
+                                                                     .build();
 
         public static final InstrumentNumber NUM_2 = InstrumentNumber.newBuilder()
-                                                              .setValue(2)
-                                                              .build();
+                                                                     .setValue(2)
+                                                                     .build();
 
         /** Prevents instantiation of this utility class. */
         private QuintetFactory() {

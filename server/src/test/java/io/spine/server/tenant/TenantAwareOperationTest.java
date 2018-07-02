@@ -134,7 +134,7 @@ class TenantAwareOperationTest {
     }
 
     private static TenantId getTenantFromRun(TenantAwareOperation op) {
-        return ((TestOp)op).tenantInRun;
+        return ((TestOp) op).tenantInRun;
     }
 
     /**
