@@ -158,7 +158,7 @@ class CommandServiceTest {
     }
 
     @Test
-    @DisplayName("deploy to grpc container")
+    @DisplayName("deploy to gRPC container")
     void deployToGrpcContainer() throws IOException {
         final GrpcContainer grpcContainer = GrpcContainer.newBuilder()
                                                          .addService(service)
