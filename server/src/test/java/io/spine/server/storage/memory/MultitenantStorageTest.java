@@ -21,8 +21,9 @@
 package io.spine.server.storage.memory;
 
 import io.spine.test.storage.ProjectId;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.List;
@@ -35,19 +36,20 @@ import java.util.concurrent.Future;
 
 import static com.google.common.collect.Lists.newArrayListWithExpectedSize;
 import static com.google.common.collect.Sets.newHashSetWithExpectedSize;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Dmytry Ganzha
  */
-public class MultitenantStorageShould {
+@DisplayName("MultitenantStorage should")
+class MultitenantStorageTest {
 
     private static final boolean IS_MULTITENANT = false;
 
     private MultitenantStorage<TenantRecords<ProjectId>> multitenantStorage;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         multitenantStorage = new MultitenantStorage<TenantRecords<ProjectId>>(IS_MULTITENANT) {
             @Override
             TenantRecords<ProjectId> createSlice() {
@@ -57,18 +59,17 @@ public class MultitenantStorageShould {
     }
 
     @Test
-    public void should_return_same_slice_when_single_tenant_and_multithreaded_environment()
+    @DisplayName("return same slice within single tenant and multitenant environment")
+    void returnSameSlice()
             throws InterruptedException, ExecutionException {
         final int numberOfTasks = 1000;
-        final Collection<Callable<TenantRecords>> tasks = newArrayListWithExpectedSize(numberOfTasks);
+        final Collection<Callable<TenantRecords>> tasks =
+                newArrayListWithExpectedSize(numberOfTasks);
 
         for (int i = 0; i < numberOfTasks; i++) {
-            tasks.add(new Callable<TenantRecords>() {
-                @Override
-                public TenantRecords call() throws Exception {
-                    final TenantRecords<ProjectId> storage = multitenantStorage.getStorage();
-                    return storage;
-                }
+            tasks.add(() -> {
+                final TenantRecords<ProjectId> storage = multitenantStorage.getStorage();
+                return storage;
             });
         }
 
@@ -79,7 +80,7 @@ public class MultitenantStorageShould {
         assertEquals(expected, tenantRecords.size());
     }
 
-    private <R> Set<R> convertFuturesToSetOfCompletedResults(List<Future<R>> futures)
+    private static <R> Set<R> convertFuturesToSetOfCompletedResults(List<Future<R>> futures)
             throws ExecutionException, InterruptedException {
         final Set<R> tenantRecords = newHashSetWithExpectedSize(futures.size());
         for (Future<R> future : futures) {
@@ -88,11 +89,11 @@ public class MultitenantStorageShould {
         return tenantRecords;
     }
 
-    private <R> List<Future<R>> executeInMultithreadedEnvironment(Collection<Callable<R>> tasks)
-            throws InterruptedException {
-        final ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime()
-                                                                             .availableProcessors() *
-                                                                              2);
+    private static <R> List<Future<R>>
+    executeInMultithreadedEnvironment(Collection<Callable<R>> tasks) throws InterruptedException {
+        final ExecutorService executor =
+                Executors.newFixedThreadPool(Runtime.getRuntime()
+                                                    .availableProcessors() * 2);
         final List<Future<R>> futures = executor.invokeAll(tasks);
         return futures;
     }

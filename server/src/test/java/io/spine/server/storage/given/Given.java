@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage;
+package io.spine.server.storage.given;
 
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.command.StgAddTask;
@@ -28,6 +28,11 @@ import io.spine.test.storage.event.StgProjectCreated;
 
 import static io.spine.base.Identifier.newUuid;
 
+/**
+ * @author Alexander Yevsyukov
+ * @author Andrey Lavrov
+ * @author Alexander Aleksandrov
+ */
 public class Given {
 
     private Given() {
@@ -60,26 +65,26 @@ public class Given {
 
         public static StgCreateProject createProject() {
             return StgCreateProject.newBuilder()
-                                .setProjectId(newProjectId())
-                                .build();
+                                   .setProjectId(newProjectId())
+                                   .build();
         }
 
         public static StgCreateProject createProject(ProjectId id) {
             return StgCreateProject.newBuilder()
-                                .setProjectId(id)
-                                .build();
+                                   .setProjectId(id)
+                                   .build();
         }
 
         public static StgAddTask addTask(ProjectId id) {
             return StgAddTask.newBuilder()
-                          .setProjectId(id)
-                          .build();
+                             .setProjectId(id)
+                             .build();
         }
 
         public static StgStartProject startProject(ProjectId id) {
             return StgStartProject.newBuilder()
-                               .setProjectId(id)
-                               .build();
+                                  .setProjectId(id)
+                                  .build();
         }
     }
 }

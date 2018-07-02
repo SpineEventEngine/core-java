@@ -18,22 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.memory;
+package io.spine.server.storage;
 
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateStorage;
-import io.spine.server.aggregate.AggregateStorageVisibilityHandlingTest;
-import io.spine.test.aggregate.ProjectId;
+import org.junit.jupiter.api.DisplayName;
 
 /**
- * @author Dmytro Dashenkov.
+ * @author Alexander Yevsyukov
  */
-public class InMemoryAggregateStorageStatusHandlingShould
-        extends AggregateStorageVisibilityHandlingTest {
-
-    @Override
-    protected AggregateStorage<ProjectId> getAggregateStorage(
-            Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass) {
-        return InMemoryAggregateStorage.newInstance();
+@DisplayName("Multitenant StorageFactorySwitch should")
+class MultitenantStorageFactorySwitchTest extends StorageFactorySwitchTest {
+    MultitenantStorageFactorySwitchTest() {
+        setMultitenant(true);
     }
 }

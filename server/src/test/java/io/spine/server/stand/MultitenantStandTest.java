@@ -31,29 +31,33 @@ import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.stand.given.StandTestEnv.MemoizeEntityUpdateCallback;
+import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
 import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.server.BoundedContext.newName;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class MultiTenantStandShould extends StandShould {
+@DisplayName("Multitenant Stand should")
+class MultitenantStandTest extends StandTest {
 
     @Override
-    @Before
-    public void setUp() {
+    @BeforeEach
+    protected void setUp() {
         super.setUp();
         TenantId tenantId = newUuid();
 
@@ -62,13 +66,14 @@ public class MultiTenantStandShould extends StandShould {
         setRequestFactory(createRequestFactory(tenantId));
     }
 
-    @After
-    public void tearDown() {
+    @AfterEach
+    void tearDown() {
         clearCurrentTenant();
     }
 
     @Test
-    public void not_allow_reading_aggregate_records_for_another_tenant() {
+    @DisplayName("not allow reading aggregate records from another tenant")
+    void readOnlySameTenant() {
         Stand stand = doCheckReadingCustomersById(15);
 
         TenantId anotherTenant = newUuid();
@@ -79,13 +84,14 @@ public class MultiTenantStandShould extends StandShould {
 
         MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readAllCustomers, responseObserver);
-        QueryResponse response = responseObserver.getResponseHandled();
+        QueryResponse response = responseObserver.responseHandled();
         assertTrue(Responses.isOk(response.getResponse()));
         assertEquals(0, response.getMessagesCount());
     }
 
     @Test
-    public void not_trigger_updates_of_aggregate_records_for_another_tenant_subscriptions() {
+    @DisplayName("not trigger updates of aggregate records for another tenant subscriptions")
+    void updateOnlySameTenant() {
         StandStorage standStorage =
                 InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
                                                    isMultitenant())
@@ -115,10 +121,10 @@ public class MultiTenantStandShould extends StandShould {
 
         Any packedState = AnyPacker.pack(customer);
         // Verify that Default Tenant callback has got the update.
-        assertEquals(packedState, defaultTenantCallback.getNewEntityState());
+        assertEquals(packedState, defaultTenantCallback.newEntityState());
 
         // And Another Tenant callback has not been called.
-        assertNull(anotherCallback.getNewEntityState());
+        assertNull(anotherCallback.newEntityState());
     }
 
     protected MemoizeEntityUpdateCallback subscribeToAllOf(Stand stand,
@@ -129,7 +135,7 @@ public class MultiTenantStandShould extends StandShould {
         MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback();
         subscribeAndActivate(stand, allCustomers, callback);
 
-        assertNull(callback.getNewEntityState());
+        assertNull(callback.newEntityState());
         return callback;
     }
 }

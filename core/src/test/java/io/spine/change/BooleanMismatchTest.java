@@ -36,7 +36,7 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings({"InnerClassMayBeStatic" /* JUnit 5 Nested classes cannot be static */,
+@SuppressWarnings({"InnerClassMayBeStatic" /* JUnit nested classes cannot be static */,
                    "DuplicateStringLiteralInspection" /* A lot of similar test display names */})
 @DisplayName("BooleanMismatch should")
 class BooleanMismatchTest {

@@ -18,28 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage;
+package io.spine.server.storage.memory;
 
-import com.google.common.testing.EqualsTester;
-import io.spine.test.Tests;
-import org.junit.Test;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateStorage;
+import io.spine.server.aggregate.AggregateStorageVisibilityHandlingTest;
+import io.spine.test.aggregate.ProjectId;
+import org.junit.jupiter.api.DisplayName;
 
 /**
- * @author Dmytro Grankin
+ * @author Dmytro Dashenkov.
  */
-public class RecordReadRequestShould {
+@DisplayName("InMemoryAggregateStorage, when saving aggregate with lifecycle flags, should")
+public class InMemoryAggregateStorageStatusHandlingTest
+        extends AggregateStorageVisibilityHandlingTest {
 
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_ID() {
-        new RecordReadRequest<>(Tests.nullRef());
-    }
-
-    @Test
-    public void consider_request_with_same_id_equal() {
-        final String id = "ID";
-        final RecordReadRequest<String> first = new RecordReadRequest<>(id);
-        final RecordReadRequest<String> second = new RecordReadRequest<>(id);
-        new EqualsTester().addEqualityGroup(first, second)
-                          .testEquals();
+    @Override
+    protected AggregateStorage<ProjectId> getAggregateStorage(
+            Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass) {
+        return InMemoryAggregateStorage.newInstance();
     }
 }

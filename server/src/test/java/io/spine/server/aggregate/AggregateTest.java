@@ -124,8 +124,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @author Alexander Yevsyukkov
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass",
-        "InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit 5 Nested classes cannot to be static. */,
+        "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names */})
 @DisplayName("Aggregate should")
 public class AggregateTest {

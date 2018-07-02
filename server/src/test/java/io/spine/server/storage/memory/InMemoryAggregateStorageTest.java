@@ -20,22 +20,32 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.protobuf.Message;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateStorage;
+import io.spine.server.aggregate.AggregateStorageTest;
 import io.spine.server.entity.Entity;
-import io.spine.server.stand.StandStorage;
-import io.spine.server.stand.StandStorageShould;
-
-import static io.spine.server.BoundedContext.newName;
+import io.spine.test.aggregate.ProjectId;
+import io.spine.validate.ValidatingBuilder;
+import org.junit.jupiter.api.DisplayName;
 
 /**
- * @author Dmytro Dashenkov
+ * @author Alexander Litus
  */
-public class InMemoryStandStorageShould extends StandStorageShould {
+@DisplayName("InMemoryAggregateStorage should")
+class InMemoryAggregateStorageTest extends AggregateStorageTest {
 
     @Override
-    protected StandStorage newStorage(Class<? extends Entity> cls) {
-        return InMemoryStandStorage.newBuilder()
-                                   .setBoundedContextName(newName(getClass().getSimpleName()))
-                                   .setMultitenant(false)
-                                   .build();
+    protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
+        return InMemoryAggregateStorage.newInstance();
+    }
+
+    @Override
+    protected <I> AggregateStorage<I> newStorage(
+            Class<? extends I> idClass,
+            Class<? extends Aggregate<I,
+                                      ? extends Message,
+                                      ? extends ValidatingBuilder<?, ?>>> aggregateClass) {
+        return InMemoryAggregateStorage.newInstance();
     }
 }

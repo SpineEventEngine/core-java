@@ -75,7 +75,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @SuppressWarnings({"ConstantConditions",
         "DuplicateStringLiteralInspection" /* Common test display names. */,
-        "unused" /* JUnit 5 Nested classes considered unused in abstract class. */})
+        "unused" /* JUnit nested classes considered unused in abstract class. */})
 public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEntity<I, S>,
         I,
         S extends Message>

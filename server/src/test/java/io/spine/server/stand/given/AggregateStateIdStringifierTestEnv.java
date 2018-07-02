@@ -18,13 +18,39 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage;
+package io.spine.server.stand.given;
+
+import com.google.protobuf.Any;
+import io.spine.server.stand.AggregateStateId;
+import io.spine.test.projection.ProjectId;
+import io.spine.testdata.Sample;
+import io.spine.type.TypeUrl;
+
+import static io.spine.server.stand.AggregateStateId.of;
 
 /**
- * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
+ * @author Dmytro Kuzmin
  */
-public class MultiTenantStorageFactorySwitchShould extends StorageFactorySwitchShould {
-    public MultiTenantStorageFactorySwitchShould() {
-        super(true);
+public class AggregateStateIdStringifierTestEnv {
+
+    /** Prevents instantiation of this utility class. */
+    private AggregateStateIdStringifierTestEnv() {
+    }
+
+    public static AggregateStateId newStringId() {
+        return of("some-aggregate-ID", TypeUrl.of(Any.class));
+    }
+
+    public static AggregateStateId newIntId() {
+        return of(42, TypeUrl.of(Any.class));
+    }
+
+    public static AggregateStateId newLongId() {
+        return of(42L, TypeUrl.of(Any.class));
+    }
+
+    public static AggregateStateId newMessageId() {
+        return of(Sample.messageOfType(ProjectId.class), TypeUrl.of(Any.class));
     }
 }

@@ -36,7 +36,8 @@ import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 import io.spine.test.entity.TaskId;
 import io.spine.testdata.Sample;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -52,9 +53,10 @@ import static io.spine.server.entity.storage.TestCompositeQueryParameterFactory.
 import static io.spine.server.entity.storage.TestEntityQueryFactory.createQuery;
 import static io.spine.server.entity.storage.TestEntityRecordWithColumnsFactory.createRecord;
 import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -62,10 +64,12 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dmytro Dashenkov
  */
-public class EntityQueryMatcherShould {
+@DisplayName("EntityQueryMatcher should")
+class EntityQueryMatcherTest {
 
     @Test
-    public void match_everything_except_null_to_empty_query() {
+    @DisplayName("match everything except null to empty query")
+    void matchEverythingToEmpty() {
         final Collection<Object> idFilter = Collections.emptyList();
         final EntityQuery<?> query = createQuery(idFilter, defaultQueryParameters());
 
@@ -76,9 +80,10 @@ public class EntityQueryMatcherShould {
     }
 
     @Test
-    public void match_ids() {
+    @DisplayName("match IDs")
+    void matchIds() {
         final Message genericId = Sample.messageOfType(ProjectId.class);
-        final Collection<Object> idFilter = Collections.<Object>singleton(genericId);
+        final Collection<Object> idFilter = singleton(genericId);
         final Any entityId = AnyPacker.pack(genericId);
         final EntityQuery<?> query = createQuery(idFilter, defaultQueryParameters());
 
@@ -99,7 +104,8 @@ public class EntityQueryMatcherShould {
     @SuppressWarnings({"unchecked",           // Mocks <-> reflection issues
                        "ConstantConditions"}) // Test data is constant
     @Test
-    public void match_columns() {
+    @DisplayName("match columns")
+    void matchColumns() {
         final String targetName = "feature";
         final Serializable acceptedValue = true;
         final EntityColumn target = mock(EntityColumn.class);
@@ -141,7 +147,8 @@ public class EntityQueryMatcherShould {
     }
 
     @Test
-    public void match_Any_instances() {
+    @DisplayName("match Any instances")
+    void matchAnyInstances() {
         final String columnName = "column";
 
         final Project someMessage = Sample.messageOfType(Project.class);
@@ -173,7 +180,8 @@ public class EntityQueryMatcherShould {
     }
 
     @Test
-    public void not_match_by_wrong_field_name() {
+    @DisplayName("not match by wrong field name")
+    void notMatchByWrongField() {
         final String wrongName = "wrong";
         final EntityColumn target = mock(EntityColumn.class);
 

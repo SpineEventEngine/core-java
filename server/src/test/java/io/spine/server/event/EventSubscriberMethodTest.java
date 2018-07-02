@@ -53,8 +53,7 @@ import static org.mockito.Mockito.verify;
  * @author Alexander Litus
  */
 @SuppressWarnings({"DuplicateStringLiteralInspection", /* Common test display names. */
-        "InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit 5 Nested classes cannot be static. */})
+        "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */})
 @DisplayName("EventSubscriberMethod should")
 class EventSubscriberMethodTest {
 
