@@ -234,7 +234,7 @@ abstract class AbstractCommandBusTestSuite {
         assertContainsAll(storingArgs, first, second);
 
         final ArgumentCaptor<CommandEnvelope> postingCaptor = forClass(CommandEnvelope.class);
-        verify(spy, times(2)).doPost(postingCaptor.capture());
+        verify(spy, times(2)).dispatch(postingCaptor.capture());
         final List<CommandEnvelope> postingArgs = postingCaptor.getAllValues();
         assertSize(commands.size(), postingArgs);
         assertEquals(commands.get(0), postingArgs.get(0).getCommand());
