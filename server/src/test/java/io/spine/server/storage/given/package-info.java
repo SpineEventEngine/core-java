@@ -21,8 +21,10 @@
 /**
  * Test environment classes for the {@code io.spine.server.storage} package.
  */
-
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.storage.given;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;
