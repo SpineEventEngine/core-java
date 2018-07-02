@@ -62,8 +62,8 @@ class TenantRepositoryTest {
     }
 
     @Test
-    @DisplayName("un-cache values")
-    void unCacheValues() {
+    @DisplayName("evict from cache")
+    void evictFromCache() {
         TenantId tenantId = newUuid();
 
         repository.keep(tenantId);
