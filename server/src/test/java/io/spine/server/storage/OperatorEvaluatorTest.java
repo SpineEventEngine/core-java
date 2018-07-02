@@ -83,8 +83,8 @@ class OperatorEvaluatorTest {
     }
 
     @Test
-    @DisplayName("compare not equal instances")
-    void compareNotEqual() {
+    @DisplayName("compare non-equal instances")
+    void compareNonEqual() {
         Object left = "one!";
         Object right = "another!";
 
