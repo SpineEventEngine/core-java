@@ -47,7 +47,6 @@ import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.given.RecordStorageTestEnv.LifecycleColumns;
-import io.spine.server.storage.given.RecordStorageTestEnv.ProjectStatus;
 import io.spine.server.storage.given.RecordStorageTestEnv.TestCounterEntity;
 import io.spine.test.storage.Project;
 import io.spine.testdata.Sample;
@@ -736,11 +735,11 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
 
     /**
      * A complex test case to check the correct {@link TestCounterEntity} filtering by the
-     * enumerated column returning {@link ProjectStatus}.
+     * enumerated column returning {@link Project.Status}.
      */
     private void checkEnumColumnFilter(String columnPath) {
         final Project.Status requiredValue = DONE;
-        final ProjectStatus value = Enum.valueOf(ProjectStatus.class, requiredValue.name());
+        final Project.Status value = Enum.valueOf(Project.Status.class, requiredValue.name());
         final ColumnFilter status = eq(columnPath, value);
         final CompositeColumnFilter aggregatingFilter = CompositeColumnFilter.newBuilder()
                                                                              .setOperator(ALL)

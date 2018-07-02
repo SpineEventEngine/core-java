@@ -104,14 +104,14 @@ public class RecordStorageTestEnv {
         }
 
         @Column
-        public ProjectStatus getProjectStatusOrdinal() {
-            return Enum.valueOf(ProjectStatus.class, getState().getStatus().name());
+        public Project.Status getProjectStatusOrdinal() {
+            return Enum.valueOf(Project.Status.class, getState().getStatus().name());
         }
 
         @Column
         @Enumerated(STRING)
-        public ProjectStatus getProjectStatusString() {
-            return Enum.valueOf(ProjectStatus.class, getState().getStatus().name());
+        public Project.Status getProjectStatusString() {
+            return Enum.valueOf(Project.Status.class, getState().getStatus().name());
         }
 
         public void assignStatus(Project.Status status) {
@@ -128,21 +128,6 @@ public class RecordStorageTestEnv {
         public void delete() {
             TestTransaction.delete(this);
         }
-    }
-
-    /**
-     * The {@link TestCounterEntity} {@linkplain Project.Status project status} represented by the
-     * {@linkplain Enum Java Enum}.
-     *
-     * <p>Needed to check filtering by the {@link Enumerated} entity columns.
-     */
-    public enum ProjectStatus {
-        UNDEFINED,
-        CREATED,
-        STARTED,
-        DONE,
-        CANCELLED,
-        UNRECOGNIZED
     }
 
     /**
