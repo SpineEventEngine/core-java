@@ -60,7 +60,7 @@ class StatusesTest {
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     @Test
     @DisplayName("create invalid argument status exception")
-    void createInvalidArgumentStatusException() {
+    void createInvalidArgumentStatusEx() {
         final MessageRejection rejection =
                 new UnsupportedEventException(Sample.messageOfType(ProjectCreated.class));
         final StatusRuntimeException statusRuntimeEx = invalidArgumentWithCause(rejection);

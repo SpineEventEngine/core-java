@@ -282,7 +282,7 @@ class SubscriptionServiceTest {
     }
 
     @Nested
-    @DisplayName("handle exceptions and call observer error callback of")
+    @DisplayName("handle exceptions and call observer error callback for")
     class HandleExceptionsOf {
 
         @SuppressWarnings("ConstantConditions")

@@ -108,7 +108,7 @@ class EitherOfFourTest {
 
     @Test
     @DisplayName("return only one value in iteration")
-    void provideIterator() {
+    void provideProperIterator() {
         final Iterator<Message> iteratorA = eitherWithA.iterator();
 
         assertEquals(a, iteratorA.next());

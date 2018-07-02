@@ -225,8 +225,8 @@ class GrpcContainerTest {
         }
 
         @Test
-        @DisplayName("not shut down")
-        void notShutDown() throws IOException {
+        @DisplayName("not shutdown")
+        void notShutdown() throws IOException {
             grpcContainer.start();
 
             assertFalse(grpcContainer.isShutdown());

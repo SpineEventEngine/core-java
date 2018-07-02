@@ -45,7 +45,7 @@ class ServerEnvironmentTest {
 
     @Test
     @DisplayName("obtain AppEngine version as optional string")
-    void getOptionalGcloudVersion() {
+    void getGcloudVersion() {
         // By default we're not running under AppEngine.
         assertFalse(ServerEnvironment.getInstance().appEngineVersion()
                                      .isPresent());

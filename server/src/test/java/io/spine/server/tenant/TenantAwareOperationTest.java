@@ -75,7 +75,7 @@ class TenantAwareOperationTest {
     }
 
     @Test
-    @DisplayName("clear current tenant on restore if no tenant was set")
+    @DisplayName("clear current tenant on restoring if no tenant was set")
     void clearCurrentTenant() {
         // Make sure there's not current tenant.
         CurrentTenant.clear();
