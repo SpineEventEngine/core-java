@@ -32,7 +32,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.stand.AggregateStateId.of;
+import static io.spine.server.stand.given.AggregateStateIdStringifierTestEnv.newIntId;
+import static io.spine.server.stand.given.AggregateStateIdStringifierTestEnv.newLongId;
+import static io.spine.server.stand.given.AggregateStateIdStringifierTestEnv.newMessageId;
+import static io.spine.server.stand.given.AggregateStateIdStringifierTestEnv.newStringId;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -213,22 +216,6 @@ class AggregateStateIdStringifierTest {
         final AggregateStateId restored = stringifier.reverse()
                                                      .convert(stringAggregateId);
         assertEquals(id, restored);
-    }
-
-    private static AggregateStateId newStringId() {
-        return of("some-aggregate-ID", TypeUrl.of(Any.class));
-    }
-
-    private static AggregateStateId newIntId() {
-        return of(42, TypeUrl.of(Any.class));
-    }
-
-    private static AggregateStateId newLongId() {
-        return of(42L, TypeUrl.of(Any.class));
-    }
-
-    private static AggregateStateId newMessageId() {
-        return of(Sample.messageOfType(ProjectId.class), TypeUrl.of(Any.class));
     }
 
     private static Stringifier<AggregateStateId> stringifier() {
