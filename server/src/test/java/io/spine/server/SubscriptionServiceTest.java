@@ -90,15 +90,15 @@ class SubscriptionServiceTest {
         @Test
         @DisplayName("one bounded context")
         void oneBc() {
-            final BoundedContext oneContext = ctx("One");
+            BoundedContext oneContext = ctx("One");
 
-            final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
-                                                                           .add(oneContext);
+            SubscriptionService.Builder builder = SubscriptionService.newBuilder()
+                                                                     .add(oneContext);
 
-            final SubscriptionService subscriptionService = builder.build();
+            SubscriptionService subscriptionService = builder.build();
             assertNotNull(subscriptionService);
 
-            final List<BoundedContext> boundedContexts = builder.getBoundedContexts();
+            List<BoundedContext> boundedContexts = builder.getBoundedContexts();
             assertSize(1, boundedContexts);
             assertTrue(boundedContexts.contains(oneContext));
         }
@@ -106,19 +106,18 @@ class SubscriptionServiceTest {
         @Test
         @DisplayName("several bounded contexts")
         void severalBcs() {
-            final BoundedContext firstBoundedContext = ctx("First");
-            final BoundedContext secondBoundedContext = ctx("Second");
-            final BoundedContext thirdBoundedContext = ctx("Third");
+            BoundedContext firstBoundedContext = ctx("First");
+            BoundedContext secondBoundedContext = ctx("Second");
+            BoundedContext thirdBoundedContext = ctx("Third");
 
-            final SubscriptionService.Builder builder =
-                    SubscriptionService.newBuilder()
-                                       .add(firstBoundedContext)
-                                       .add(secondBoundedContext)
-                                       .add(thirdBoundedContext);
-            final SubscriptionService service = builder.build();
+            SubscriptionService.Builder builder = SubscriptionService.newBuilder()
+                                                                     .add(firstBoundedContext)
+                                                                     .add(secondBoundedContext)
+                                                                     .add(thirdBoundedContext);
+            SubscriptionService service = builder.build();
             assertNotNull(service);
 
-            final List<BoundedContext> boundedContexts = builder.getBoundedContexts();
+            List<BoundedContext> boundedContexts = builder.getBoundedContexts();
             assertSize(3, boundedContexts);
             assertTrue(boundedContexts.contains(firstBoundedContext));
             assertTrue(boundedContexts.contains(secondBoundedContext));
@@ -129,21 +128,20 @@ class SubscriptionServiceTest {
     @Test
     @DisplayName("be able to remove bounded context from builder")
     void removeBcFromBuilder() {
-        final BoundedContext firstBoundedContext = ctx("Removed");
-        final BoundedContext secondBoundedContext = ctx("Also removed");
-        final BoundedContext thirdBoundedContext = ctx("The one to stay");
+        BoundedContext firstBoundedContext = ctx("Removed");
+        BoundedContext secondBoundedContext = ctx("Also removed");
+        BoundedContext thirdBoundedContext = ctx("The one to stay");
 
-        final SubscriptionService.Builder builder =
-                SubscriptionService.newBuilder()
-                                   .add(firstBoundedContext)
-                                   .add(secondBoundedContext)
-                                   .add(thirdBoundedContext)
-                                   .remove(secondBoundedContext)
-                                   .remove(firstBoundedContext);
-        final SubscriptionService subscriptionService = builder.build();
+        SubscriptionService.Builder builder = SubscriptionService.newBuilder()
+                                                                 .add(firstBoundedContext)
+                                                                 .add(secondBoundedContext)
+                                                                 .add(thirdBoundedContext)
+                                                                 .remove(secondBoundedContext)
+                                                                 .remove(firstBoundedContext);
+        SubscriptionService subscriptionService = builder.build();
         assertNotNull(subscriptionService);
 
-        final List<BoundedContext> boundedContexts = builder.getBoundedContexts();
+        List<BoundedContext> boundedContexts = builder.getBoundedContexts();
         assertSize(1, boundedContexts);
         assertFalse(boundedContexts.contains(firstBoundedContext));
         assertFalse(boundedContexts.contains(secondBoundedContext));
@@ -165,23 +163,23 @@ class SubscriptionServiceTest {
     @Test
     @DisplayName("subscribe to topic")
     void subscribeToTopic() {
-        final BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+        BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
 
-        final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                           .add(boundedContext)
-                                                                           .build();
-        final String type = boundedContext.getStand()
-                                          .getExposedTypes()
-                                          .iterator()
-                                          .next()
-                                          .value();
-        final Target target = getProjectQueryTarget();
+        SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+                                                                     .add(boundedContext)
+                                                                     .build();
+        String type = boundedContext.getStand()
+                                    .getExposedTypes()
+                                    .iterator()
+                                    .next()
+                                    .value();
+        Target target = getProjectQueryTarget();
 
         assertEquals(type, target.getType());
 
-        final Topic topic = requestFactory.topic().forTarget(target);
+        Topic topic = requestFactory.topic().forTarget(target);
 
-        final MemoizeStreamObserver<Subscription> observer = new MemoizeStreamObserver<>();
+        MemoizeStreamObserver<Subscription> observer = new MemoizeStreamObserver<>();
 
         subscriptionService.subscribe(topic, observer);
 
@@ -198,36 +196,35 @@ class SubscriptionServiceTest {
     @Test
     @DisplayName("activate subscription")
     void activateSubscription() {
-        final BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+        BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
 
-        final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                           .add(boundedContext)
-                                                                           .build();
-        final Target target = getProjectQueryTarget();
+        SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+                                                                     .add(boundedContext)
+                                                                     .build();
+        Target target = getProjectQueryTarget();
 
-        final Topic topic = requestFactory.topic().forTarget(target);
+        Topic topic = requestFactory.topic().forTarget(target);
 
         // Subscribe to the topic.
-        final MemoizeStreamObserver<Subscription> subscriptionObserver =
-                new MemoizeStreamObserver<>();
+        MemoizeStreamObserver<Subscription> subscriptionObserver = new MemoizeStreamObserver<>();
         subscriptionService.subscribe(topic, subscriptionObserver);
         subscriptionObserver.verifyState();
 
         // Activate subscription.
-        final MemoizeStreamObserver<SubscriptionUpdate> activationObserver =
+        MemoizeStreamObserver<SubscriptionUpdate> activationObserver =
                 new MemoizeStreamObserver<>();
         subscriptionService.activate(subscriptionObserver.streamFlowValue(), activationObserver);
 
         // Post update to Stand directly.
-        final ProjectId projectId = ProjectId.newBuilder()
-                                             .setId("some-id")
-                                             .build();
-        final Message projectState = Project.newBuilder()
-                                            .setId(projectId)
-                                            .build();
-        final int version = 1;
+        ProjectId projectId = ProjectId.newBuilder()
+                                       .setId("some-id")
+                                       .build();
+        Message projectState = Project.newBuilder()
+                                      .setId(projectId)
+                                      .build();
+        int version = 1;
 
-        final VersionableEntity entity = mockEntity(projectId, projectState, version);
+        VersionableEntity entity = mockEntity(projectId, projectState, version);
         boundedContext.getStand()
                       .post(requestFactory.createCommandContext()
                                           .getActorContext()
@@ -241,22 +238,22 @@ class SubscriptionServiceTest {
     @Test
     @DisplayName("cancel subscription")
     void cancelSubscription() {
-        final BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+        BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
 
-        final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                           .add(boundedContext)
-                                                                           .build();
+        SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+                                                                     .add(boundedContext)
+                                                                     .build();
 
-        final Target target = getProjectQueryTarget();
+        Target target = getProjectQueryTarget();
 
-        final Topic topic = requestFactory.topic().forTarget(target);
+        Topic topic = requestFactory.topic().forTarget(target);
 
         // Subscribe.
-        final MemoizeStreamObserver<Subscription> subscribeObserver = new MemoizeStreamObserver<>();
+        MemoizeStreamObserver<Subscription> subscribeObserver = new MemoizeStreamObserver<>();
         subscriptionService.subscribe(topic, subscribeObserver);
 
         // Activate subscription.
-        final MemoizeStreamObserver<SubscriptionUpdate> activateSubscription =
+        MemoizeStreamObserver<SubscriptionUpdate> activateSubscription =
                 spy(new MemoizeStreamObserver<SubscriptionUpdate>());
         subscriptionService.activate(subscribeObserver.streamFlowValue(), activateSubscription);
 
@@ -265,14 +262,14 @@ class SubscriptionServiceTest {
                                    new MemoizeStreamObserver<>());
 
         // Post update to Stand.
-        final ProjectId projectId = ProjectId.newBuilder()
-                                             .setId("some-other-id")
-                                             .build();
-        final Message projectState = Project.newBuilder()
-                                            .setId(projectId)
-                                            .build();
-        final int version = 1;
-        final VersionableEntity entity = mockEntity(projectId, projectState, version);
+        ProjectId projectId = ProjectId.newBuilder()
+                                       .setId("some-other-id")
+                                       .build();
+        Message projectState = Project.newBuilder()
+                                      .setId(projectId)
+                                      .build();
+        int version = 1;
+        VersionableEntity entity = mockEntity(projectId, projectState, version);
         boundedContext.getStand()
                       .post(requestFactory.createCommandContext()
                                           .getActorContext()
@@ -292,12 +289,12 @@ class SubscriptionServiceTest {
         @Test
         @DisplayName("subscription process")
         void subscription() {
-            final BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+            BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
 
-            final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                               .add(boundedContext)
-                                                                               .build();
-            final MemoizeStreamObserver<Subscription> observer = new MemoizeStreamObserver<>();
+            SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+                                                                         .add(boundedContext)
+                                                                         .build();
+            MemoizeStreamObserver<Subscription> observer = new MemoizeStreamObserver<>();
             // Causes NPE.
             subscriptionService.subscribe(null, observer);
             assertNull(observer.streamFlowValue());
@@ -311,14 +308,12 @@ class SubscriptionServiceTest {
         @Test
         @DisplayName("activation process")
         void activation() {
-            final BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+            BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
 
-            final SubscriptionService subscriptionService =
-                    SubscriptionService.newBuilder()
-                                       .add(boundedContext)
-                                       .build();
-            final MemoizeStreamObserver<SubscriptionUpdate> observer =
-                    new MemoizeStreamObserver<>();
+            SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+                                                                         .add(boundedContext)
+                                                                         .build();
+            MemoizeStreamObserver<SubscriptionUpdate> observer = new MemoizeStreamObserver<>();
             // Causes NPE.
             subscriptionService.activate(null, observer);
             assertNull(observer.streamFlowValue());
@@ -330,21 +325,21 @@ class SubscriptionServiceTest {
         @Test
         @DisplayName("cancellation process")
         void cancellation() {
-            final BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
+            BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
 
-            final SubscriptionService subscriptionService = SubscriptionService.newBuilder()
-                                                                               .add(boundedContext)
-                                                                               .build();
-            final Target target = getProjectQueryTarget();
+            SubscriptionService subscriptionService = SubscriptionService.newBuilder()
+                                                                         .add(boundedContext)
+                                                                         .build();
+            Target target = getProjectQueryTarget();
 
-            final Topic topic = requestFactory.topic().forTarget(target);
+            Topic topic = requestFactory.topic().forTarget(target);
 
-            final MemoizeStreamObserver<Subscription> subscriptionObserver =
+            MemoizeStreamObserver<Subscription> subscriptionObserver =
                     new MemoizeStreamObserver<>();
             subscriptionService.subscribe(topic, subscriptionObserver);
 
-            final String rejectionMessage = "Execution breaking exception";
-            final MemoizeStreamObserver<Response> observer = new MemoizeStreamObserver<Response>() {
+            String rejectionMessage = "Execution breaking exception";
+            MemoizeStreamObserver<Response> observer = new MemoizeStreamObserver<Response>() {
                 @Override
                 public void onNext(Response value) {
                     super.onNext(value);
@@ -362,7 +357,7 @@ class SubscriptionServiceTest {
 
     private static VersionableEntity mockEntity(ProjectId projectId, Message projectState,
                                                 int version) {
-        final VersionableEntity entity = mock(AbstractVersionableEntity.class);
+        VersionableEntity entity = mock(AbstractVersionableEntity.class);
         when(entity.getState()).thenReturn(projectState);
         when(entity.getId()).thenReturn(projectId);
         when(entity.getVersion()).thenReturn(newVersion(version, Time.getCurrentTime()));
@@ -370,10 +365,10 @@ class SubscriptionServiceTest {
     }
 
     private static BoundedContext setupBoundedContextWithProjectAggregateRepo() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setStand(Stand.newBuilder())
-                                                            .build();
-        final Stand stand = boundedContext.getStand();
+        BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                      .setStand(Stand.newBuilder())
+                                                      .build();
+        Stand stand = boundedContext.getStand();
 
         stand.registerTypeSupplier(new Given.ProjectAggregateRepository());
 
