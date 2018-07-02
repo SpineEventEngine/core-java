@@ -61,7 +61,7 @@ public abstract class Bus<T extends Message,
     private final Function<T, E> messageConverter = new MessageToEnvelope();
 
     // A queue of envelopes to post.
-    private @Nullable DispatchingQueue<E> envelopeQueue;
+    private @Nullable DispatchingQueue<E> queue;
 
     private @Nullable DispatcherRegistry<C, D> registry;
 
@@ -210,12 +210,16 @@ public abstract class Bus<T extends Message,
 
     /**
      * Obtains the queue of the envelopes.
+     *
+     * <p>Posted envelopes are organized into a queue to maintain dispatching order.
+     *
+     * @see DispatchingQueue
      */
-    private DispatchingQueue<E> envelopeQueue() {
-        if (envelopeQueue == null) {
-            envelopeQueue = new DispatchingQueue<>(this::dispatch);
+    private DispatchingQueue<E> queue() {
+        if (queue == null) {
+            queue = new DispatchingQueue<>(this::dispatch);
         }
-        return envelopeQueue;
+        return queue;
     }
 
     /**
@@ -313,7 +317,7 @@ public abstract class Bus<T extends Message,
      */
     private void doPost(Iterable<E> envelopes, StreamObserver<Ack> observer) {
         for (E message : envelopes) {
-             envelopeQueue().add(message, observer);
+            queue().add(message, observer);
         }
     }
 
