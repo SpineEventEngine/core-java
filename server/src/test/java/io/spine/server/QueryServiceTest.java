@@ -78,8 +78,7 @@ class QueryServiceTest {
         Spy.ofClass(Stand.class)
            .on(projectsContext);
 
-        final Given.ProjectAggregateRepository projectRepo =
-                new Given.ProjectAggregateRepository();
+        Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository();
         projectsContext.register(projectRepo);
         projectDetailsRepository = spy(new ProjectDetailsRepository());
         projectsContext.register(projectDetailsRepository);
@@ -95,12 +94,11 @@ class QueryServiceTest {
         Spy.ofClass(Stand.class)
            .on(customersContext);
 
-        final Given.CustomerAggregateRepository customerRepo =
-                new Given.CustomerAggregateRepository();
+        Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository();
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
 
-        final QueryService.Builder builder = QueryService.newBuilder();
+        QueryService.Builder builder = QueryService.newBuilder();
 
         for (BoundedContext context : boundedContexts) {
             builder.add(context);
@@ -119,7 +117,7 @@ class QueryServiceTest {
     @Test
     @DisplayName("execute queries")
     void executeQueries() {
-        final Query query = Given.AQuery.readAllProjects();
+        Query query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
         checkOkResponse(responseObserver);
     }
@@ -127,8 +125,8 @@ class QueryServiceTest {
     @Test
     @DisplayName("dispatch queries to proper bounded context")
     void dispatchQueriesToBc() {
-        final Query query = Given.AQuery.readAllProjects();
-        final Stand stand = projectsContext.getStand();
+        Query query = Given.AQuery.readAllProjects();
+        Stand stand = projectsContext.getStand();
         service.read(query, responseObserver);
 
         checkOkResponse(responseObserver);
@@ -140,10 +138,10 @@ class QueryServiceTest {
     @Test
     @DisplayName("fail to create with bounded context removed from builder")
     void notCreateWithRemovedBc() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .build();
+        BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                      .build();
 
-        final QueryService.Builder builder = QueryService.newBuilder();
+        QueryService.Builder builder = QueryService.newBuilder();
 
         assertThrows(IllegalStateException.class, () -> builder.add(boundedContext)
                                                                .remove(boundedContext)
@@ -162,13 +160,13 @@ class QueryServiceTest {
     @DisplayName("return error if query failed to execute")
     void returnErrorOnQueryFail() {
         when(projectDetailsRepository.loadAll()).thenThrow(RuntimeException.class);
-        final Query query = Given.AQuery.readAllProjects();
+        Query query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
         checkFailureResponse(responseObserver);
     }
 
     private static void checkOkResponse(MemoizingObserver<QueryResponse> responseObserver) {
-        final QueryResponse responseHandled = responseObserver.firstResponse();
+        QueryResponse responseHandled = responseObserver.firstResponse();
         assertNotNull(responseHandled);
         assertEquals(Responses.ok(), responseHandled.getResponse());
         assertTrue(responseObserver.isCompleted());

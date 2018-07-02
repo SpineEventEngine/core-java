@@ -75,8 +75,7 @@ class CommandServiceTest {
         projectsContext = BoundedContext.newBuilder()
                                         .setMultitenant(true)
                                         .build();
-        final Given.ProjectAggregateRepository projectRepo =
-                new Given.ProjectAggregateRepository();
+        Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository();
         projectsContext.register(projectRepo);
         boundedContexts.add(projectsContext);
 
@@ -84,13 +83,12 @@ class CommandServiceTest {
         customersContext = BoundedContext.newBuilder()
                                          .setMultitenant(true)
                                          .build();
-        final Given.CustomerAggregateRepository customerRepo =
-                new Given.CustomerAggregateRepository();
+        Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository();
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
 
         // Expose two Bounded Contexts via an instance of {@code CommandService}.
-        final CommandService.Builder builder = CommandService.newBuilder();
+        CommandService.Builder builder = CommandService.newBuilder();
         for (BoundedContext context : boundedContexts) {
             builder.add(context);
         }
@@ -114,13 +112,13 @@ class CommandServiceTest {
     @Test
     @DisplayName("never retrieve removed bounded contexts from builder")
     void notRetrieveRemovedBc() {
-        final CommandService.Builder builder = CommandService.newBuilder()
-                                                             .add(projectsContext)
-                                                             .add(customersContext)
-                                                             .remove(projectsContext);
+        CommandService.Builder builder = CommandService.newBuilder()
+                                                       .add(projectsContext)
+                                                       .add(customersContext)
+                                                       .remove(projectsContext);
 
         // Create BoundedContext map.
-        final CommandService service = builder.build();
+        CommandService service = builder.build();
         assertNotNull(service);
 
         assertTrue(builder.contains(customersContext));
@@ -128,41 +126,41 @@ class CommandServiceTest {
     }
 
     private void verifyPostsCommand(Command cmd) {
-        final MemoizingObserver<Ack> observer = memoizingObserver();
+        MemoizingObserver<Ack> observer = memoizingObserver();
         service.post(cmd, observer);
 
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
-        final Ack acked = observer.firstResponse();
-        final CommandId id = AnyPacker.unpack(acked.getMessageId());
+        Ack acked = observer.firstResponse();
+        CommandId id = AnyPacker.unpack(acked.getMessageId());
         assertEquals(cmd.getId(), id);
     }
 
     @Test
     @DisplayName("return error status if command is unsupported")
     void returnCommandUnsupportedError() {
-        final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
+        TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
 
-        final Command unsupportedCmd = factory.createCommand(StringValue.getDefaultInstance());
+        Command unsupportedCmd = factory.createCommand(StringValue.getDefaultInstance());
 
         service.post(unsupportedCmd, responseObserver);
 
         assertTrue(responseObserver.isCompleted());
-        final Ack result = responseObserver.firstResponse();
+        Ack result = responseObserver.firstResponse();
         assertNotNull(result);
         assertTrue(isNotDefault(result));
-        final Status status = result.getStatus();
+        Status status = result.getStatus();
         assertEquals(ERROR, status.getStatusCase());
-        final Error error = status.getError();
+        Error error = status.getError();
         assertEquals(CommandValidationError.getDescriptor().getFullName(), error.getType());
     }
 
     @Test
     @DisplayName("deploy to gRPC container")
     void deployToGrpcContainer() throws IOException {
-        final GrpcContainer grpcContainer = GrpcContainer.newBuilder()
-                                                         .addService(service)
-                                                         .build();
+        GrpcContainer grpcContainer = GrpcContainer.newBuilder()
+                                                   .addService(service)
+                                                   .build();
         try {
             assertTrue(grpcContainer.isScheduledForDeployment(service));
 

@@ -66,11 +66,11 @@ class StatusesTest {
     @Test
     @DisplayName("create invalid argument status exception")
     void createInvalidArgumentStatusEx() {
-        final MessageRejection rejection =
+        MessageRejection rejection =
                 new UnsupportedEventException(Sample.messageOfType(ProjectCreated.class));
-        final StatusRuntimeException statusRuntimeEx = invalidArgumentWithCause(rejection);
-        final Error actualError = MetadataConverter.toError(statusRuntimeEx.getTrailers())
-                                                   .get();
+        StatusRuntimeException statusRuntimeEx = invalidArgumentWithCause(rejection);
+        Error actualError = MetadataConverter.toError(statusRuntimeEx.getTrailers())
+                                             .get();
         assertEquals(Status.INVALID_ARGUMENT.getCode(), statusRuntimeEx.getStatus()
                                                                        .getCode());
         assertEquals(rejection, statusRuntimeEx.getCause());
