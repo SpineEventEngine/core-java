@@ -44,7 +44,7 @@ class TenantIndexTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        final InMemoryStorageFactory storageFactory =
+        InMemoryStorageFactory storageFactory =
                 InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()), false);
         new NullPointerTester()
                 .setDefault(StorageFactory.class, storageFactory)
@@ -60,9 +60,9 @@ class TenantIndexTest {
     @Test
     @DisplayName("provide tenant index for single tenant context")
     void getIndexForSingleTenantContext() {
-        final TenantIndex index = TenantIndex.Factory.singleTenant();
+        TenantIndex index = TenantIndex.Factory.singleTenant();
 
-        final List<TenantId> items = ImmutableList.copyOf(index.getAll());
+        List<TenantId> items = ImmutableList.copyOf(index.getAll());
 
         assertEquals(1, items.size());
         assertEquals(CurrentTenant.singleTenant(), items.get(0));

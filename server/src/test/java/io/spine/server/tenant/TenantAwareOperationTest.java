@@ -47,18 +47,18 @@ class TenantAwareOperationTest {
     @Test
     @DisplayName("substitute single tenant for default value")
     void useSingleTenantId() {
-        final TenantAwareOperation op = createOperation(TenantId.getDefaultInstance());
+        TenantAwareOperation op = createOperation(TenantId.getDefaultInstance());
         assertEquals(CurrentTenant.singleTenant(), op.tenantId());
     }
 
     @Test
     @DisplayName("remember and restore current tenant")
     void rememberCurrentTenant() {
-        final TenantId previousTenant = newUuid();
+        TenantId previousTenant = newUuid();
         CurrentTenant.set(previousTenant);
 
-        final TenantId newTenant = newUuid();
-        final TenantAwareOperation op = createOperation(newTenant);
+        TenantId newTenant = newUuid();
+        TenantAwareOperation op = createOperation(newTenant);
 
         // Check that the construction of the operation does not change the current tenant.
         assertEquals(previousTenant, CurrentTenant.get()
@@ -81,8 +81,8 @@ class TenantAwareOperationTest {
         CurrentTenant.clear();
 
         // Create new operation.
-        final TenantId newTenant = newUuid();
-        final TenantAwareOperation op = createOperation(newTenant);
+        TenantId newTenant = newUuid();
+        TenantAwareOperation op = createOperation(newTenant);
 
         // Check that the construction did not set the tenant.
         assertFalse(CurrentTenant.get()
@@ -101,10 +101,10 @@ class TenantAwareOperationTest {
     @Test
     @DisplayName("create instance for non-command execution context")
     void createForNonCommand() {
-        final TenantId tenant = newUuid();
+        TenantId tenant = newUuid();
         CurrentTenant.set(tenant);
 
-        final TenantAwareOperation op = createOperation();
+        TenantAwareOperation op = createOperation();
 
         assertEquals(tenant, op.tenantId());
 

@@ -74,7 +74,7 @@ class TupleTest {
     @Test
     @DisplayName("return value from Either on iteration")
     void returnValueOnIteration() {
-        final Iterator<Message> iterator = tuple.iterator();
+        Iterator<Message> iterator = tuple.iterator();
 
         assertEquals(a, iterator.next());
         assertEquals(b.getA(), iterator.next());

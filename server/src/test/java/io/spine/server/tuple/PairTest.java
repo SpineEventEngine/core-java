@@ -62,12 +62,12 @@ class PairTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        final StringValue v1 = TestValues.newUuidValue();
-        final StringValue v2 = TestValues.newUuidValue();
+        StringValue v1 = TestValues.newUuidValue();
+        StringValue v2 = TestValues.newUuidValue();
 
-        final Pair<StringValue, StringValue> p1 = Pair.of(v1, v2);
-        final Pair<StringValue, StringValue> p1a = Pair.of(v1, v2);
-        final Pair<StringValue, StringValue> p2 = Pair.of(v2, v1);
+        Pair<StringValue, StringValue> p1 = Pair.of(v1, v2);
+        Pair<StringValue, StringValue> p1a = Pair.of(v1, v2);
+        Pair<StringValue, StringValue> p2 = Pair.of(v2, v1);
 
         new EqualsTester().addEqualityGroup(p1, p1a)
                           .addEqualityGroup(p2)
@@ -159,7 +159,7 @@ class PairTest {
         StringValue a = TestValues.newUuidValue();
         Pair<StringValue, Optional<BoolValue>> pair = Pair.withNullable(a, null);
 
-        final Iterator<Message> iterator = pair.iterator();
+        Iterator<Message> iterator = pair.iterator();
 
         assertEquals(a, iterator.next());
         assertEquals(Empty.getDefaultInstance(), iterator.next());

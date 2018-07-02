@@ -109,22 +109,22 @@ class EitherOfFourTest {
     @Test
     @DisplayName("return only one value in iteration")
     void provideProperIterator() {
-        final Iterator<Message> iteratorA = eitherWithA.iterator();
+        Iterator<Message> iteratorA = eitherWithA.iterator();
 
         assertEquals(a, iteratorA.next());
         assertFalse(iteratorA.hasNext());
 
-        final Iterator<Message> iteratorB = eitherWithB.iterator();
+        Iterator<Message> iteratorB = eitherWithB.iterator();
 
         assertEquals(b, iteratorB.next());
         assertFalse(iteratorB.hasNext());
 
-        final Iterator<Message> iteratorC = eitherWithC.iterator();
+        Iterator<Message> iteratorC = eitherWithC.iterator();
 
         assertEquals(c, iteratorC.next());
         assertFalse(iteratorC.hasNext());
 
-        final Iterator<Message> iteratorD = eitherWithD.iterator();
+        Iterator<Message> iteratorD = eitherWithD.iterator();
 
         assertEquals(d, iteratorD.next());
         assertFalse(iteratorD.hasNext());

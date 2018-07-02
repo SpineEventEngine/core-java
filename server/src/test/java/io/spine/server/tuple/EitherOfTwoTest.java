@@ -92,12 +92,12 @@ class EitherOfTwoTest {
     @Test
     @DisplayName("return only one value in iteration")
     void provideProperIterator() {
-        final Iterator<Message> iteratorA = eitherWithA.iterator();
+        Iterator<Message> iteratorA = eitherWithA.iterator();
 
         assertEquals(a, iteratorA.next());
         assertFalse(iteratorA.hasNext());
 
-        final Iterator<Message> iteratorB = eitherWithB.iterator();
+        Iterator<Message> iteratorB = eitherWithB.iterator();
 
         assertEquals(b, iteratorB.next());
         assertFalse(iteratorB.hasNext());

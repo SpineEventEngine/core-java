@@ -44,7 +44,7 @@ class TenantRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        final BoundedContext bc = BoundedContext.newBuilder().build();
+        BoundedContext bc = BoundedContext.newBuilder().build();
         TenantRepository<?, ?> impl = new TenantRepositoryImpl();
         impl.initStorage(bc.getStorageFactory());
         repository = spy(impl);
@@ -53,7 +53,7 @@ class TenantRepositoryTest {
     @Test
     @DisplayName("cache passed value")
     void cachePassedValue() {
-        final TenantId tenantId = newUuid();
+        TenantId tenantId = newUuid();
 
         repository.keep(tenantId);
         repository.keep(tenantId);
@@ -64,7 +64,7 @@ class TenantRepositoryTest {
     @Test
     @DisplayName("un-cache values")
     void unCacheValues() {
-        final TenantId tenantId = newUuid();
+        TenantId tenantId = newUuid();
 
         repository.keep(tenantId);
         assertTrue(repository.unCache(tenantId));
@@ -74,7 +74,7 @@ class TenantRepositoryTest {
     @Test
     @DisplayName("clear cache")
     void clearCache() {
-        final TenantId tenantId = newUuid();
+        TenantId tenantId = newUuid();
 
         repository.keep(tenantId);
 

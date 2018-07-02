@@ -39,7 +39,7 @@ class QueryOperationTest {
     @Test
     @DisplayName("reject null input")
     void rejectNullInput() {
-        final Query nullQuery = nullRef();
+        Query nullQuery = nullRef();
         assertThrows(NullPointerException.class,
                      () -> new QueryOperation(nullQuery) {
                          @Override
@@ -52,10 +52,10 @@ class QueryOperationTest {
     @Test
     @DisplayName("return query")
     void returnQuery() {
-        final Query query = Query.newBuilder()
-                                 .build();
+        Query query = Query.newBuilder()
+                           .build();
 
-        final QueryOperation op = new QueryOperation(query) {
+        QueryOperation op = new QueryOperation(query) {
             @Override
             public void run() {
                 // Do nothing.
@@ -68,12 +68,12 @@ class QueryOperationTest {
     @Test
     @DisplayName("return query ID")
     void returnQueryId() {
-        final QueryId id = Queries.generateId();
-        final Query query = Query.newBuilder()
-                                 .setId(id)
-                                 .build();
+        QueryId id = Queries.generateId();
+        Query query = Query.newBuilder()
+                           .setId(id)
+                           .build();
 
-        final QueryOperation op = new QueryOperation(query) {
+        QueryOperation op = new QueryOperation(query) {
             @Override
             public void run() {
                 // Do nothing.

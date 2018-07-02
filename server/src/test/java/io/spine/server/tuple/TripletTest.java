@@ -157,7 +157,7 @@ class TripletTest {
         @Test
         @DisplayName("ordinary values")
         void ordinary() {
-            final Iterator<Message> iterator = triplet.iterator();
+            Iterator<Message> iterator = triplet.iterator();
 
             assertEquals(a, iterator.next());
             assertEquals(b, iterator.next());
@@ -171,7 +171,7 @@ class TripletTest {
             Triplet<StringValue, Optional<BoolValue>, Optional<UInt32Value>> optTriplet =
                     Triplet.withNullable2(a, null, null);
 
-            final Iterator<Message> iterator = optTriplet.iterator();
+            Iterator<Message> iterator = optTriplet.iterator();
 
             assertEquals(a, iterator.next());
             assertEquals(Empty.getDefaultInstance(), iterator.next());
@@ -185,7 +185,7 @@ class TripletTest {
             Triplet<StringValue, Optional<BoolValue>, Optional<UInt32Value>> optTriplet =
                     Triplet.withNullable2(a, b, c);
 
-            final Iterator<Message> iterator = optTriplet.iterator();
+            Iterator<Message> iterator = optTriplet.iterator();
 
             assertEquals(a, iterator.next());
             assertEquals(b, iterator.next());

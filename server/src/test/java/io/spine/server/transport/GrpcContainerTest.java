@@ -59,7 +59,7 @@ class GrpcContainerTest {
 
     @BeforeEach
     void setUp() {
-        final GrpcContainer.Builder builder = GrpcContainer.newBuilder();
+        GrpcContainer.Builder builder = GrpcContainer.newBuilder();
         grpcContainer = spy(builder.build());
 
         server = mock(Server.class);
@@ -78,17 +78,17 @@ class GrpcContainerTest {
     @Test
     @DisplayName("add and remove parameters from builder")
     void setParamsInBuilder() {
-        final GrpcContainer.Builder builder = GrpcContainer.newBuilder()
-                                                           .setPort(8080)
-                                                           .setPort(60);
+        GrpcContainer.Builder builder = GrpcContainer.newBuilder()
+                                                     .setPort(8080)
+                                                     .setPort(60);
         assertEquals(60, builder.getPort());
 
         int count = 3;
-        final List<ServerServiceDefinition> definitions = new ArrayList<>(count);
+        List<ServerServiceDefinition> definitions = new ArrayList<>(count);
 
         for (int i = 0; i < count; i++) {
-            final BindableService mockService = mock(BindableService.class);
-            final ServerServiceDefinition mockDefinition = ServerServiceDefinition
+            BindableService mockService = mock(BindableService.class);
+            ServerServiceDefinition mockDefinition = ServerServiceDefinition
                     .builder(format("service-%s", i))
                     .build();
             when(mockService.bindService()).thenReturn(mockDefinition);
@@ -101,10 +101,10 @@ class GrpcContainerTest {
         // Perform removal and check that the return value is builder itself.
         assertEquals(builder, builder.removeService(definitions.get(count)));
 
-        final Set<ServerServiceDefinition> serviceSet = builder.getServices();
+        Set<ServerServiceDefinition> serviceSet = builder.getServices();
         assertSize(count, serviceSet);
 
-        final GrpcContainer container = builder.build();
+        GrpcContainer container = builder.build();
         assertNotNull(container);
     }
 
@@ -138,17 +138,17 @@ class GrpcContainerTest {
     @DisplayName("stop properly upon application shutdown")
     void stopUponAppShutdown()
             throws NoSuchFieldException, IllegalAccessException, IOException {
-        final Class<Runtime> runtimeClass = Runtime.class;
+        Class<Runtime> runtimeClass = Runtime.class;
         // Field signature: private static Runtime currentRuntime
         // Origin class: {@code java.lang.Runtime}.
-        final Field currentRuntimeValue = runtimeClass.getDeclaredField("currentRuntime");
+        Field currentRuntimeValue = runtimeClass.getDeclaredField("currentRuntime");
         currentRuntimeValue.setAccessible(true);
-        final Runtime runtimeSpy = (Runtime) spy(currentRuntimeValue.get(null));
+        Runtime runtimeSpy = (Runtime) spy(currentRuntimeValue.get(null));
         currentRuntimeValue.set(null, runtimeSpy);
 
-        final GrpcContainer container = spy(GrpcContainer.newBuilder()
-                                                         .setPort(8080)
-                                                         .build());
+        GrpcContainer container = spy(GrpcContainer.newBuilder()
+                                                   .setPort(8080)
+                                                   .build());
         container.addShutdownHook();
         verify(runtimeSpy).addShutdownHook(any(Thread.class));
 

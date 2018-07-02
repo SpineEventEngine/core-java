@@ -84,41 +84,41 @@ public class QuintetTestEnv {
         }
 
         public static Violin newViolin(InstrumentNumber number) {
-            final Violin result = Violin.newBuilder()
-                                        .setNumber(number)
-                                        .build();
+            Violin result = Violin.newBuilder()
+                                  .setNumber(number)
+                                  .build();
             Validate.checkValid(result);
             return result;
         }
 
         public static Viola newViola() {
-            final Viola result = Viola.newBuilder()
-                                      .setSingle(true)
-                                      .build();
+            Viola result = Viola.newBuilder()
+                                .setSingle(true)
+                                .build();
             Validate.checkValid(result);
             return result;
         }
 
         public static Viola newViola(InstrumentNumber number) {
-            final Viola result = Viola.newBuilder()
-                                      .setNumber(number)
-                                      .build();
+            Viola result = Viola.newBuilder()
+                                .setNumber(number)
+                                .build();
             Validate.checkValid(result);
             return result;
         }
 
         public static ViolinCello newViolinCello(InstrumentNumber number) {
-            final ViolinCello result = ViolinCello.newBuilder()
-                                                  .setNumber(number)
-                                                  .build();
+            ViolinCello result = ViolinCello.newBuilder()
+                                            .setNumber(number)
+                                            .build();
             Validate.checkValid(result);
             return result;
         }
 
         public static ViolinCello newViolinCello() {
-            final ViolinCello result = ViolinCello.newBuilder()
-                                                  .setSingle(true)
-                                                  .build();
+            ViolinCello result = ViolinCello.newBuilder()
+                                            .setSingle(true)
+                                            .build();
             Validate.checkValid(result);
             return result;
         }

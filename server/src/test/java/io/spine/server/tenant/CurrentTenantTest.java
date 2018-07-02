@@ -64,11 +64,11 @@ class CurrentTenantTest {
     @Test
     @DisplayName("keep set value")
     void keepSetValue() {
-        final TenantId expected = nameOf(getClass());
+        TenantId expected = nameOf(getClass());
 
         CurrentTenant.set(expected);
 
-        final Optional<TenantId> currentTenant = CurrentTenant.get();
+        Optional<TenantId> currentTenant = CurrentTenant.get();
         assertTrue(currentTenant.isPresent());
         assertEquals(expected, currentTenant.get());
     }
@@ -76,7 +76,7 @@ class CurrentTenantTest {
     @Test
     @DisplayName("clear set value")
     void clearSetValue() {
-        final TenantId value = nameOf(getClass());
+        TenantId value = nameOf(getClass());
         CurrentTenant.set(value);
 
         CurrentTenant.clear();
