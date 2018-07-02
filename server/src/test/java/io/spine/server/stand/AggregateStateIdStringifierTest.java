@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit Nested classes cannot be static. */,
+        /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names */})
 @DisplayName("AggregateStateIdStringifier should")
 class AggregateStateIdStringifierTest {

@@ -52,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit Nested classes cannot be static. */,
+        /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names */})
 @DisplayName("Field should")
 class FieldTest {

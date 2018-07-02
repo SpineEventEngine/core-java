@@ -58,7 +58,7 @@ import static java.lang.String.format;
 /**
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings("unused") // JUnit Nested classes considered unused in abstract class.
+@SuppressWarnings("unused") // JUnit nested classes considered unused in abstract class.
 public abstract class StandStorageTest extends RecordStorageTest<AggregateStateId, StandStorage> {
 
     @SuppressWarnings("unchecked") // OK for test.

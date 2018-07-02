@@ -61,7 +61,7 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 
 @SuppressWarnings({"DuplicateStringLiteralInspection" /* Common test display names. */,
-        "unused" /* JUnit Nested classes considered unused in abstract test class */})
+        "unused" /* JUnit nested classes considered unused in abstract test class */})
 abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
 
     CommandStoreTest(boolean multitenant) {

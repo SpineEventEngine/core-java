@@ -38,7 +38,7 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings({"InnerClassMayBeStatic" /* JUnit Nested classes cannot be static */,
+@SuppressWarnings({"InnerClassMayBeStatic" /* JUnit nested classes cannot be static */,
                    "DuplicateStringLiteralInspection" /* A lot of similar test display names */})
 @DisplayName("FloatMismatch should")
 class FloatMismatchTest {

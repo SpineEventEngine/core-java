@@ -37,7 +37,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author Dmytro Kuzmin
  */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit Nested classes cannot be static. */,
+        /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* String literals for method names. */})
 @DisplayName("MethodExceptionChecker should")
 class MethodExceptionCheckerTest {

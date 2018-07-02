@@ -99,7 +99,7 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings("unused") // JUnit Nested classes considered unused in abstract class.
+@SuppressWarnings("unused") // JUnit nested classes considered unused in abstract class.
 public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
         extends AbstractStorageTest<I, EntityRecord, RecordReadRequest<I>, S> {
 

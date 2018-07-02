@@ -61,7 +61,7 @@ import static org.mockito.Mockito.verify;
  * @author Dmytro Kuzmin
  */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit Nested classes cannot be static. */,
+        /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("Entity should")
 class EntityTest {

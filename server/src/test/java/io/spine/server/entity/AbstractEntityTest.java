@@ -44,7 +44,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @author Illia Shepilov
  */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"})
-// JUnit Nested classes cannot be static.
+// JUnit nested classes cannot be static.
 @DisplayName("AbstractEntity should")
 class AbstractEntityTest {
 

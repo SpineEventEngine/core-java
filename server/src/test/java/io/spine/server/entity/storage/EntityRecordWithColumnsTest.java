@@ -56,7 +56,7 @@ import static org.mockito.Mockito.mock;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit Nested classes cannot be static. */,
+        /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("EntityRecordWithColumns should")
 class EntityRecordWithColumnsTest {

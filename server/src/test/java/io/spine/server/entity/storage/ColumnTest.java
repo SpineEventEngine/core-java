@@ -55,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit Nested classes cannot be static. */,
+        /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Many string literals for method names. */})
 @DisplayName("Column should")
 class ColumnTest {
