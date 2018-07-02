@@ -18,30 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.memory;
-
-import io.spine.server.entity.Entity;
-import io.spine.server.projection.ProjectionStorage;
-import io.spine.server.projection.ProjectionStorageTest;
-import io.spine.test.storage.ProjectId;
-import io.spine.type.TypeUrl;
-
-import static io.spine.server.BoundedContext.newName;
-
 /**
- * @author Alexander Litus
+ * Test environment classes for the {@code io.spine.server.storage} package.
  */
-public class InMemoryProjectionStorageShould extends ProjectionStorageTest {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.storage.given;
 
-    @Override
-    protected ProjectionStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
-        final StorageSpec<ProjectId> spec =
-                StorageSpec.of(newName(getClass().getSimpleName()),
-                               TypeUrl.of(io.spine.test.projection.Project.class),
-                               ProjectId.class);
-        final InMemoryProjectionStorage<ProjectId> storage =
-                InMemoryProjectionStorage.newInstance(
-                        InMemoryRecordStorage.newInstance(spec, false, cls));
-        return storage;
-    }
-}
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -23,22 +23,25 @@ package io.spine.server.storage;
 import io.spine.server.aggregate.storage.AggregateField;
 import io.spine.server.event.storage.EventContextField;
 import io.spine.server.event.storage.EventField;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Dmytro Dashenkov.
  */
-public class StorageFieldShould {
+@DisplayName("StorageField should")
+class StorageFieldTest {
 
     @Test
-    public void declare_no_methods() {
+    @DisplayName("declare no methods")
+    void declareNoMethods() {
         final Class<?> clazz = StorageField.class;
         final Method[] methods = clazz.getDeclaredMethods();
 
@@ -46,32 +49,37 @@ public class StorageFieldShould {
     }
 
     @Test
-    public void enclose_all_aggregate_fields() {
+    @DisplayName("enclose all aggregate fields")
+    void encloseAggregateFields() {
         assertField(AggregateField.aggregate_id);
     }
 
     @Test
-    public void enclose_all_event_fields() {
+    @DisplayName("enclose all event fields")
+    void encloseEventFields() {
         assertField(EventField.event_id);
         assertField(EventField.event_type);
         assertField(EventField.producer_id);
     }
 
     @Test
-    public void enclose_all_event_context_fields() {
+    @DisplayName("enclose all event context fields")
+    void encloseEventContextFields() {
         assertField(EventContextField.context_of_command);
         assertField(EventContextField.context_timestamp);
         assertField(EventContextField.context_version);
     }
 
     @Test
-    public void enclose_all_entity_status_fields() {
+    @DisplayName("enclose all entity status fields")
+    void encloseEntityStatusFields() {
         assertField(LifecycleFlagField.archived);
         assertField(LifecycleFlagField.deleted);
     }
 
     @Test
-    public void enclose_all_entity_fields() {
+    @DisplayName("enclose all entity fields")
+    void encloseEntityFields() {
         assertField(EntityField.timestamp);
         assertField(EntityField.timestamp_nanos);
         assertField(EntityField.type_url);

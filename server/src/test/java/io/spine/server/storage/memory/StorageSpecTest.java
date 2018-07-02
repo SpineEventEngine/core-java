@@ -29,18 +29,22 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.core.BoundedContextName;
 import io.spine.type.TypeUrl;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.server.BoundedContext.newName;
-import static org.junit.Assert.assertEquals;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class StorageSpecShould {
+@DisplayName("StorageSpec should")
+class StorageSpecTest {
 
     @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(TypeUrl.class, TypeUrl.of(Empty.class))
                 .setDefault(BoundedContextName.class, newName("default"))
@@ -48,7 +52,8 @@ public class StorageSpecShould {
     }
 
     @Test
-    public void create_new_instances() {
+    @DisplayName("create new instances")
+    void createNewInstances() {
         final BoundedContextName bcName = newName(getClass().getName());
         final TypeUrl stateUrl = TypeUrl.of(StringValue.class);
         final Class<Long> idClass = Long.class;
@@ -61,7 +66,8 @@ public class StorageSpecShould {
     }
 
     @Test
-    public void provide_equals_based_on_values() {
+    @DisplayName("provide `equals` based on values")
+    void provideEquals() {
         final BoundedContextName bcName = newName(getClass().getName());
 
         new EqualsTester()
@@ -75,7 +81,8 @@ public class StorageSpecShould {
     }
 
     @Test
-    public void serialize() {
+    @DisplayName("be serialized")
+    void beSerialized() {
         SerializableTester.reserializeAndAssert(
                 StorageSpec.of(newName(getClass().getSimpleName()),
                                TypeUrl.of(DoubleValue.class),

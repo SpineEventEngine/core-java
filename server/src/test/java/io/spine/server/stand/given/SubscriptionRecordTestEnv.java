@@ -18,38 +18,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.stand;
+package io.spine.server.stand.given;
 
-import com.google.common.base.Optional;
-import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Any;
-import io.spine.string.Stringifier;
-import io.spine.string.StringifierRegistry;
+import com.google.protobuf.Message;
+import io.spine.client.Subscription;
+import io.spine.client.Target;
+import io.spine.client.Targets;
+import io.spine.test.aggregate.Project;
+import io.spine.test.commandservice.customer.Customer;
 import io.spine.type.TypeUrl;
-import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
+import java.util.Collections;
 
 /**
  * @author Dmytro Dashenkov
+ * @author Dmytro Kuzmin
  */
-public class AggregateStateIdShould {
+public class SubscriptionRecordTestEnv {
 
-    @Test
-    public void not_accept_nulls_on_construction() {
-        new NullPointerTester()
-                .setDefault(TypeUrl.class, TypeUrl.of(Any.class))
-                .testStaticMethods(AggregateStateId.class, NullPointerTester.Visibility.PACKAGE);
+    public static final TypeUrl TYPE = TypeUrl.of(Project.class);
+    public static final TypeUrl OTHER_TYPE = TypeUrl.of(Customer.class);
+
+    /** Prevents instantiation of this utility class. */
+    private SubscriptionRecordTestEnv() {
     }
 
-    @Test
-    public void have_stringifier() throws ClassNotFoundException {
-        // Ensure class loaded
-        Class.forName(AggregateStateId.class.getCanonicalName());
+    public static Target target() {
+        final Target target = Targets.allOf(Project.class);
+        return target;
+    }
 
-        final Optional<Stringifier<AggregateStateId>> stringifierOptional =
-                StringifierRegistry.getInstance()
-                                   .get(AggregateStateId.class);
-        assertTrue(stringifierOptional.isPresent());
+    public static Target target(Message targetId) {
+        final Target target = Targets.someOf(Project.class, Collections.singleton(targetId));
+        return target;
+    }
+
+    public static Subscription subscription() {
+        final Subscription subscription = Subscription.getDefaultInstance();
+        return subscription;
     }
 }

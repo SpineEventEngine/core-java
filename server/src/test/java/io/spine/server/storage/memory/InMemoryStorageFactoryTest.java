@@ -20,30 +20,33 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.protobuf.Message;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateStorage;
-import io.spine.server.aggregate.AggregateStorageTest;
-import io.spine.server.entity.Entity;
-import io.spine.test.aggregate.ProjectId;
-import io.spine.validate.ValidatingBuilder;
+import io.spine.core.BoundedContextName;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static io.spine.server.BoundedContext.newName;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
-class InMemoryAggregateStorageShould extends AggregateStorageTest {
+@DisplayName("InMemoryStorageFactory should")
+class InMemoryStorageFactoryTest {
 
-    @Override
-    protected AggregateStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
-        return InMemoryAggregateStorage.newInstance();
+    private final BoundedContextName boundedContextName = newName(getClass().getSimpleName());
+
+    @Test
+    @DisplayName("have single tenant instance")
+    void haveSingleTenantInstance() {
+        assertFalse(InMemoryStorageFactory.newInstance(boundedContextName, false)
+                                          .isMultitenant());
     }
 
-    @Override
-    protected <I> AggregateStorage<I> newStorage(
-            Class<? extends I> idClass,
-            Class<? extends Aggregate<I,
-                                      ? extends Message,
-                                      ? extends ValidatingBuilder<?, ?>>> aggregateClass) {
-        return InMemoryAggregateStorage.newInstance();
+    @Test
+    @DisplayName("have multitenant instance")
+    void haveMultitenantInstance() {
+        assertTrue(InMemoryStorageFactory.newInstance(boundedContextName, true)
+                                         .isMultitenant());
     }
 }

@@ -51,7 +51,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author Dmytro Kuzmin
  */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit 5 Nested classes cannot be static. */})
+        /* JUnit nested classes cannot be static. */})
 @DisplayName("ColumnReader should")
 class ColumnReaderTest {
 

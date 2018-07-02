@@ -32,13 +32,15 @@ import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
-import io.spine.server.storage.RecordStorageShould;
+import io.spine.server.storage.RecordStorageTest;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
 import io.spine.test.storage.TaskId;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
@@ -56,19 +58,16 @@ import static java.lang.String.format;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class StandStorageShould extends RecordStorageShould<AggregateStateId,
-                                                                     StandStorage> {
+@SuppressWarnings("unused") // JUnit nested classes considered unused in abstract class.
+public abstract class StandStorageTest extends RecordStorageTest<AggregateStateId, StandStorage> {
 
+    @SuppressWarnings("unchecked") // OK for test.
     protected static final Supplier<AggregateStateId<ProjectId>> DEFAULT_ID_SUPPLIER
-            = new Supplier<AggregateStateId<ProjectId>>() {
-        @SuppressWarnings("unchecked")
-        @Override
-        public AggregateStateId<ProjectId> get() {
-            final ProjectId projectId = ProjectId.newBuilder()
-                                                 .setId(Identifier.newUuid())
-                                                 .build();
-            return AggregateStateId.of(projectId, TypeUrl.of(Project.class));
-        }
+            = () -> {
+        final ProjectId projectId = ProjectId.newBuilder()
+                                             .setId(Identifier.newUuid())
+                                             .build();
+        return AggregateStateId.of(projectId, TypeUrl.of(Project.class));
     };
 
     @Override
@@ -83,81 +82,92 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         return project;
     }
 
-    @Test
-    public void retrieve_all_records() {
-        final StandStorage storage = getStorage();
-        final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER);
+    @Nested
+    @DisplayName("read records")
+    class ReadRecords {
 
-        final Iterator<EntityRecord> allRecords = storage.readAll();
-        checkIds(ids, allRecords);
-    }
+        @Test
+        @DisplayName("all")
+        void all() {
+            final StandStorage storage = getStorage();
+            final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER);
 
-    @Test
-    public void retrieve_records_by_ids() {
-        final StandStorage storage = getStorage();
-        // Use a subset of IDs
-        final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER).subList(0, 5);
-
-        final Iterator<EntityRecord> records = storage.readMultiple(ids);
-        checkIds(ids, records);
-    }
-
-    @Test
-    public void read_all_records_of_given_type() {
-        checkByTypeRead(FieldMask.getDefaultInstance());
-    }
-
-    @Test
-    public void read_all_records_of_given_type_with_field_mask() {
-        final FieldMask mask = FieldMasks.maskOf(Project.getDescriptor(), 1, 2);
-        checkByTypeRead(mask);
-    }
-
-    @SuppressWarnings({"MethodWithMultipleLoops", "ConstantConditions"}) // OK for this test.
-    private void checkByTypeRead(FieldMask fieldMask) {
-        final boolean withFieldMask = !fieldMask.equals(FieldMask.getDefaultInstance());
-        final StandStorage storage = getStorage();
-        final TypeUrl type = TypeUrl.from(Project.getDescriptor());
-
-        final int projectsCount = 4;
-        final List<AggregateStateId> projectIds = fill(storage, projectsCount, DEFAULT_ID_SUPPLIER);
-
-        final int tasksCount = 5;
-        for (int i = 0; i < tasksCount; i++) {
-            final TaskId genericId = TaskId.newBuilder()
-                                           .setId(i)
-                                           .build();
-            final AggregateStateId id = AggregateStateId.of(genericId, TypeUrl.from(Task.getDescriptor()));
-            final Task task = Task.newBuilder()
-                                  .setTaskId(genericId)
-                                  .setTitle("Test task")
-                                  .setDescription("With description")
-                                  .build();
-            final EntityRecord record = newRecord(task);
-            storage.write(id, record);
+            final Iterator<EntityRecord> allRecords = storage.readAll();
+            checkIds(ids, allRecords);
         }
 
-        final Iterator<EntityRecord> readRecords
-                = withFieldMask
-                  ? storage.readAllByType(TypeUrl.from(Project.getDescriptor()), fieldMask)
-                  : storage.readAllByType(TypeUrl.from(Project.getDescriptor()));
-        final Set<EntityRecord> readDistinct = Sets.newHashSet(readRecords);
-        assertSize(projectsCount, readDistinct);
+        @Test
+        @DisplayName("by IDs")
+        void byIds() {
+            final StandStorage storage = getStorage();
+            // Use a subset of IDs
+            final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER).subList(0, 5);
 
-        for (EntityRecord record : readDistinct) {
-            final Any state = record.getState();
-            final Project project = AnyPacker.unpack(state);
-            final AggregateStateId restored = AggregateStateId.of(project.getId(), type);
-            assertContains(restored, projectIds);
+            final Iterator<EntityRecord> records = storage.readMultiple(ids);
+            checkIds(ids, records);
+        }
 
-            if (withFieldMask) {
-                assertMatchesMask(project, fieldMask);
+        @Test
+        @DisplayName("by type")
+        void byType() {
+            checkByTypeRead(FieldMask.getDefaultInstance());
+        }
+
+        @Test
+        @DisplayName("by type with field mask")
+        void byTypeAndFieldMask() {
+            final FieldMask mask = FieldMasks.maskOf(Project.getDescriptor(), 1, 2);
+            checkByTypeRead(mask);
+        }
+
+        @SuppressWarnings({"MethodWithMultipleLoops", "ConstantConditions"}) // OK for this test.
+        private void checkByTypeRead(FieldMask fieldMask) {
+            final boolean withFieldMask = !fieldMask.equals(FieldMask.getDefaultInstance());
+            final StandStorage storage = getStorage();
+            final TypeUrl type = TypeUrl.from(Project.getDescriptor());
+
+            final int projectsCount = 4;
+            final List<AggregateStateId> projectIds =
+                    fill(storage, projectsCount, DEFAULT_ID_SUPPLIER);
+
+            final int tasksCount = 5;
+            for (int i = 0; i < tasksCount; i++) {
+                final TaskId genericId = TaskId.newBuilder()
+                                               .setId(i)
+                                               .build();
+                final AggregateStateId id =
+                        AggregateStateId.of(genericId, TypeUrl.from(Task.getDescriptor()));
+                final Task task = Task.newBuilder()
+                                      .setTaskId(genericId)
+                                      .setTitle("Test task")
+                                      .setDescription("With description")
+                                      .build();
+                final EntityRecord record = newRecord(task);
+                storage.write(id, record);
+            }
+
+            final Iterator<EntityRecord> readRecords
+                    = withFieldMask
+                      ? storage.readAllByType(TypeUrl.from(Project.getDescriptor()), fieldMask)
+                      : storage.readAllByType(TypeUrl.from(Project.getDescriptor()));
+            final Set<EntityRecord> readDistinct = Sets.newHashSet(readRecords);
+            assertSize(projectsCount, readDistinct);
+
+            for (EntityRecord record : readDistinct) {
+                final Any state = record.getState();
+                final Project project = AnyPacker.unpack(state);
+                final AggregateStateId restored = AggregateStateId.of(project.getId(), type);
+                assertContains(restored, projectIds);
+
+                if (withFieldMask) {
+                    assertMatchesMask(project, fieldMask);
+                }
             }
         }
     }
 
     /*
-     * Disabled test cases from `RecordStorageShould`.
+     * Disabled test cases from `RecordStorageTest`.
      *
      * These tests check the entity column reads and writes, which are not applicable to
      * `StandStorage`.
@@ -167,49 +177,49 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    public void filter_records_by_columns() {
+    protected void filterByColumns() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    public void filter_records_by_ordinal_enum_columns() {
+    protected void filterByOrdinalEnumColumns() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    public void filter_records_by_string_enum_columns() {
+    protected void filterByStringEnumColumns() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    public void allow_by_single_id_queries_with_no_columns() {
+    protected void filterByIdAndNoColumns() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    public void read_archived_records_if_specified() {
+    protected void readArchivedRecords() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    public void filter_archived_or_deleted_records_on_by_ID_bulk_read() {
+    protected void filterByIdAndStatusInBulk() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    public void update_entity_column_values() {
+    protected void updateColumnValues() {
         // Stand storage does not support entity columns.
     }
 
     @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
-    public void read_both_by_columns_and_IDs() {
+    protected void filterByColumnsAndId() {
         // Stand storage does not support entity columns.
     }
 
@@ -247,16 +257,16 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         final Collection<EntityRecord> recordsToCheck = newArrayList(records);
         assertSize(ids.size(), recordsToCheck);
 
-        final Collection<ProjectId> projectIds = Collections2.transform(ids, new Function<AggregateStateId, ProjectId>() {
-            @Nullable
-            @Override
-            public ProjectId apply(@Nullable AggregateStateId input) {
-                if (input == null) {
-                    return null;
-                }
-                return (ProjectId) input.getAggregateId();
-            }
-        });
+        final Collection<ProjectId> projectIds =
+                Collections2.transform(ids, new Function<AggregateStateId, ProjectId>() {
+                    @Override
+                    public @Nullable ProjectId apply(@Nullable AggregateStateId input) {
+                        if (input == null) {
+                            return null;
+                        }
+                        return (ProjectId) input.getAggregateId();
+                    }
+                });
 
         for (EntityRecord record : recordsToCheck) {
             final Any packedState = record.getState();

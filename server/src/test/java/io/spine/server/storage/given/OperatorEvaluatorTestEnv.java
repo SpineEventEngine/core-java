@@ -18,28 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.memory;
+package io.spine.server.storage.given;
 
-import io.spine.core.BoundedContextName;
-import org.junit.Test;
+/**
+ * @author Dmytro Dashenkov
+ * @author Dmytro Kuzmin
+ */
+public class OperatorEvaluatorTestEnv {
 
-import static io.spine.server.BoundedContext.newName;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-public class InMemoryStorageFactoryShould {
-
-    private final BoundedContextName boundedContextName = newName(getClass().getSimpleName());
-
-    @Test
-    public void have_single_tenant_instance() {
-        assertFalse(InMemoryStorageFactory.newInstance(boundedContextName, false)
-                                          .isMultitenant());
+    /** Prevents instantiation of this utility class. */
+    private OperatorEvaluatorTestEnv() {
     }
 
-    @Test
-    public void have_multitenant_instance() {
-        assertTrue(InMemoryStorageFactory.newInstance(boundedContextName, true)
-                                         .isMultitenant());
+    public static class FaultyComparisonType {
+
+        @SuppressWarnings("InstantiationOfUtilityClass") // Not a utility class
+        public static final FaultyComparisonType INSTANCE = new FaultyComparisonType();
+
+        private FaultyComparisonType() {
+            // Singleton type.
+        }
     }
 }

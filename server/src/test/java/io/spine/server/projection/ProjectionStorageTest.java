@@ -29,8 +29,7 @@ import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.server.storage.RecordStorageShould;
-import io.spine.test.Tests;
+import io.spine.server.storage.RecordStorageTest;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import org.junit.jupiter.api.AfterEach;
@@ -67,9 +66,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author Alexander Litus
  */
-@SuppressWarnings("unused") // JUnit 5 Nested classes considered unused in abstract class.
+@SuppressWarnings("unused") // JUnit nested classes considered unused in abstract class.
 public abstract class ProjectionStorageTest
-        extends RecordStorageShould<ProjectId, ProjectionStorage<ProjectId>> {
+        extends RecordStorageTest<ProjectId, ProjectionStorage<ProjectId>> {
 
     private ProjectionStorage<ProjectId> storage;
 
