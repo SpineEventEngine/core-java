@@ -31,6 +31,9 @@ import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.test.rejection.ProjectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.RjUpdateProjectName;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 public class InvalidProjectNameSubscriber extends RejectionSubscriber {
 
     private Rejection rejectionHandled;

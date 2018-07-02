@@ -40,12 +40,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public class EnricherBuilderTestEnv {
 
     /** Prevent instantiation of this utility class. */
-    private EnricherBuilderTestEnv() {}
+    private EnricherBuilderTestEnv() {
+    }
 
     public static class Enrichment {
 
         /** Prevent instantiation of this utility class. */
-        private Enrichment() {}
+        private Enrichment() {
+        }
 
         /** Creates a new enricher with all required enrichment functions set. */
         public static Enricher newEnricher() {

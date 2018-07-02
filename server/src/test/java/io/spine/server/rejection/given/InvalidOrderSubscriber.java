@@ -26,8 +26,11 @@ import io.spine.core.Subscribe;
 import io.spine.test.rejection.ProjectRejections;
 import io.spine.test.rejection.command.RjRemoveOwner;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 public class InvalidOrderSubscriber extends VerifiableSubscriber {
 
     @SuppressWarnings("unused") // The method should never be invoked, so the params are unused.

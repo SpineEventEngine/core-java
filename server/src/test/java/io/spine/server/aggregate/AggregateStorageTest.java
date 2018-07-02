@@ -35,7 +35,7 @@ import io.spine.core.Version;
 import io.spine.server.aggregate.given.StorageRecord;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.LifecycleFlags;
-import io.spine.server.storage.AbstractStorageShould;
+import io.spine.server.storage.AbstractStorageTest;
 import io.spine.test.Tests;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -74,14 +74,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Alexander Litus
  */
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
-        /* JUnit 5 Nested classes cannot to be static. */,
+        /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names */,
-        "unused" /* JUnit 5 Nested classes considered unused in abstract test class */})
+        "unused" /* JUnit nested classes considered unused in abstract test class */})
 public abstract class AggregateStorageTest
-        extends AbstractStorageShould<ProjectId,
-                                      AggregateStateRecord,
-                                      AggregateReadRequest<ProjectId>,
-                                      AggregateStorage<ProjectId>> {
+        extends AbstractStorageTest<ProjectId,
+                                    AggregateStateRecord,
+                                    AggregateReadRequest<ProjectId>,
+                                    AggregateStorage<ProjectId>> {
 
     private static final Function<AggregateEventRecord, Event> TO_EVENT =
             record -> record != null ? record.getEvent() : null;
@@ -136,16 +136,6 @@ public abstract class AggregateStorageTest
     @Override
     protected Class<? extends TestAggregate> getTestEntityClass() {
         return TestAggregate.class;
-    }
-
-    // Ignore this test because several records can be stored by an aggregate ID.
-    @Override
-    @SuppressWarnings({
-            "NoopMethodInAbstractClass",
-            "RefusedBequest",
-            "MethodDoesntCallSuperMethod"
-    })
-    public void rewrite_record_if_write_by_the_same_id() {
     }
 
     /**
@@ -274,6 +264,18 @@ public abstract class AggregateStorageTest
         AggregateEventRecord actual = iterator.next();
         assertEquals(expected, actual);
         assertFalse(iterator.hasNext());
+    }
+
+    // Ignore this test because several records can be stored by an aggregate ID.
+    @SuppressWarnings({
+            "NoopMethodInAbstractClass",
+            "RefusedBequest",
+            "MethodDoesntCallSuperMethod"
+    })
+    @Override
+    @Test
+    @DisplayName("re-write record if writing by the same ID")
+    protected void rewriteRecord() {
     }
 
     @Nested

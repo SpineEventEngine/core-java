@@ -24,7 +24,6 @@ import io.spine.core.RejectionContext;
 import io.spine.core.Subscribe;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.test.rejection.ProjectRejections.InvalidProjectName;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -35,16 +34,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class RejectionEnrichmentConsumer extends RejectionSubscriber {
 
-    @Nullable
-    private RejectionContext context;
+    private @Nullable RejectionContext context;
 
     @Subscribe
     public void on(InvalidProjectName rejection, RejectionContext context) {
         this.context = context;
     }
 
-    @Nullable
-    public RejectionContext getContext() {
+    public @Nullable RejectionContext getContext() {
         return context;
     }
 }

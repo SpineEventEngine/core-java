@@ -22,7 +22,6 @@ package io.spine.server.bus;
 
 import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
-import io.spine.server.rejection.RejectionBusBuilderShould;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -38,8 +37,8 @@ import static org.mockito.Mockito.mock;
  *
  * @author Dmytro Dashenkov
  * @see io.spine.server.commandbus.CommandBusBuilderTest
- * @see io.spine.server.event.EventBusBuilderShould
- * @see RejectionBusBuilderShould
+ * @see io.spine.server.event.EventBusBuilderTest
+ * @see io.spine.server.rejection.RejectionBusBuilderTest
  */
 public abstract class BusBuilderTest<B extends Bus.AbstractBuilder<E, T, ?>,
                                      E extends MessageEnvelope<?, T, ?>,

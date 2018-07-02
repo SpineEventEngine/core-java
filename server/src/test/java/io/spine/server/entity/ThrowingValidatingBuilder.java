@@ -39,7 +39,7 @@ public abstract class ThrowingValidatingBuilder<M extends Message, B extends Mes
 
     @Override
     public M build() throws ValidationException {
-        if(shouldThrow != null) {
+        if (shouldThrow != null) {
             throw shouldThrow;
         } else {
             return super.build();

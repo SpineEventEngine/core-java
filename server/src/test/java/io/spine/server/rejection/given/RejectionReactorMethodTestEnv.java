@@ -26,8 +26,8 @@ import io.spine.core.CommandContext;
 import io.spine.core.React;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.RjUpdateProjectName;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.lang.reflect.Method;
 
 /**
@@ -73,12 +73,9 @@ public class RejectionReactorMethodTestEnv {
 
     public static class RValidThreeParams extends TestRejectionReactor {
 
-        @Nullable
-        private Message lastRejectionMessage;
-        @Nullable
-        private Message lastCommandMessage;
-        @Nullable
-        private CommandContext lastCommandContext;
+        private @Nullable Message lastRejectionMessage;
+        private @Nullable Message lastCommandMessage;
+        private @Nullable CommandContext lastCommandContext;
 
         @React
         public Empty handle(InvalidProjectName rejection,
@@ -91,18 +88,15 @@ public class RejectionReactorMethodTestEnv {
             return Empty.getDefaultInstance();
         }
 
-        @Nullable
-        public Message getLastRejectionMessage() {
+        public @Nullable Message getLastRejectionMessage() {
             return lastRejectionMessage;
         }
 
-        @Nullable
-        public Message getLastCommandMessage() {
+        public @Nullable Message getLastCommandMessage() {
             return lastCommandMessage;
         }
 
-        @Nullable
-        public CommandContext getLastCommandContext() {
+        public @Nullable CommandContext getLastCommandContext() {
             return lastCommandContext;
         }
     }
