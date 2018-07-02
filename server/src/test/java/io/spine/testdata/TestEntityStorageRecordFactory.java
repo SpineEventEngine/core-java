@@ -39,10 +39,10 @@ public class TestEntityStorageRecordFactory {
     /** Creates a new record with all fields set. */
     public static EntityRecord newEntityStorageRecord() {
         final EntityRecord.Builder builder =
+                // Set any non-default (non-zero) value for version.
                 EntityRecord.newBuilder()
-                         .setState(toAny(newUuid()))
-                         .setVersion(GivenVersion.withNumber(5));
-                            // set any non-default (non-zero) value
+                            .setState(toAny(newUuid()))
+                            .setVersion(GivenVersion.withNumber(5));
         return builder.build();
     }
 }

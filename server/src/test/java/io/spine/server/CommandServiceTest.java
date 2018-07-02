@@ -33,9 +33,10 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.model.ModelTests;
 import io.spine.server.transport.GrpcContainer;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Set;
@@ -43,14 +44,21 @@ import java.util.Set;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.validate.Validate.isNotDefault;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 
-public class CommandServiceShould {
+/**
+ * @author Alexander Yevsyukov
+ * @author Alexander Litus
+ * @author Dmytro Dashenkov
+ * @author Alex Tymchenko
+ */
+@DisplayName("CommandService should")
+class CommandServiceTest {
 
     private CommandService service;
 
@@ -60,15 +68,14 @@ public class CommandServiceShould {
     private BoundedContext customersContext;
     private final MemoizingObserver<Ack> responseObserver = memoizingObserver();
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ModelTests.clearModel();
         // Create Projects Bounded Context with one repository.
         projectsContext = BoundedContext.newBuilder()
                                         .setMultitenant(true)
                                         .build();
-        final Given.ProjectAggregateRepository projectRepo =
-                new Given.ProjectAggregateRepository();
+        Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository();
         projectsContext.register(projectRepo);
         boundedContexts.add(projectsContext);
 
@@ -76,40 +83,42 @@ public class CommandServiceShould {
         customersContext = BoundedContext.newBuilder()
                                          .setMultitenant(true)
                                          .build();
-        final Given.CustomerAggregateRepository customerRepo =
-                new Given.CustomerAggregateRepository();
+        Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository();
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
 
         // Expose two Bounded Contexts via an instance of {@code CommandService}.
-        final CommandService.Builder builder = CommandService.newBuilder();
+        CommandService.Builder builder = CommandService.newBuilder();
         for (BoundedContext context : boundedContexts) {
             builder.add(context);
         }
         service = spy(builder.build());
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() throws Exception {
         for (BoundedContext boundedContext : boundedContexts) {
             boundedContext.close();
         }
     }
 
     @Test
-    public void post_commands_to_appropriate_bounded_context() {
+    @DisplayName("post commands to appropriate bounded context")
+    void postCommandsToBc() {
         verifyPostsCommand(Given.ACommand.createProject());
         verifyPostsCommand(Given.ACommand.createCustomer());
     }
 
     @Test
-    public void never_retrieve_removed_bounded_contexts_from_builder() {
-        final CommandService.Builder builder = CommandService.newBuilder()
-                                                             .add(projectsContext)
-                                                             .add(customersContext)
-                                                             .remove(projectsContext);
+    @DisplayName("never retrieve removed bounded contexts from builder")
+    void notRetrieveRemovedBc() {
+        CommandService.Builder builder = CommandService.newBuilder()
+                                                       .add(projectsContext)
+                                                       .add(customersContext)
+                                                       .remove(projectsContext);
 
-        final CommandService service = builder.build(); // Creates BoundedContext map
+        // Create BoundedContext map.
+        CommandService service = builder.build();
         assertNotNull(service);
 
         assertTrue(builder.contains(customersContext));
@@ -117,39 +126,41 @@ public class CommandServiceShould {
     }
 
     private void verifyPostsCommand(Command cmd) {
-        final MemoizingObserver<Ack> observer = memoizingObserver();
+        MemoizingObserver<Ack> observer = memoizingObserver();
         service.post(cmd, observer);
 
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
-        final Ack acked = observer.firstResponse();
-        final CommandId id = AnyPacker.unpack(acked.getMessageId());
+        Ack acked = observer.firstResponse();
+        CommandId id = AnyPacker.unpack(acked.getMessageId());
         assertEquals(cmd.getId(), id);
     }
 
     @Test
-    public void return_error_status_if_command_is_unsupported() {
-        final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
+    @DisplayName("return error status if command is unsupported")
+    void returnCommandUnsupportedError() {
+        TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
 
-        final Command unsupportedCmd = factory.createCommand(StringValue.getDefaultInstance());
+        Command unsupportedCmd = factory.createCommand(StringValue.getDefaultInstance());
 
         service.post(unsupportedCmd, responseObserver);
 
         assertTrue(responseObserver.isCompleted());
-        final Ack result = responseObserver.firstResponse();
+        Ack result = responseObserver.firstResponse();
         assertNotNull(result);
         assertTrue(isNotDefault(result));
-        final Status status = result.getStatus();
+        Status status = result.getStatus();
         assertEquals(ERROR, status.getStatusCase());
-        final Error error = status.getError();
+        Error error = status.getError();
         assertEquals(CommandValidationError.getDescriptor().getFullName(), error.getType());
     }
 
     @Test
-    public void deploy_to_grpc_container() throws IOException {
-        final GrpcContainer grpcContainer = GrpcContainer.newBuilder()
-                                                         .addService(service)
-                                                         .build();
+    @DisplayName("deploy to gRPC container")
+    void deployToGrpcContainer() throws IOException {
+        GrpcContainer grpcContainer = GrpcContainer.newBuilder()
+                                                   .addService(service)
+                                                   .build();
         try {
             assertTrue(grpcContainer.isScheduledForDeployment(service));
 

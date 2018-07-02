@@ -23,12 +23,13 @@ package io.spine.server.tenant;
 import com.google.protobuf.Timestamp;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.core.given.GivenTenantId.newUuid;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -36,21 +37,23 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alexander Yevsyukov
  */
-public class TenantRepositoryShould {
+@DisplayName("TenantRepository should")
+class TenantRepositoryTest {
 
     private TenantRepository<?, ?> repository;
 
-    @Before
-    public void setUp() {
-        final BoundedContext bc = BoundedContext.newBuilder().build();
+    @BeforeEach
+    void setUp() {
+        BoundedContext bc = BoundedContext.newBuilder().build();
         TenantRepository<?, ?> impl = new TenantRepositoryImpl();
         impl.initStorage(bc.getStorageFactory());
         repository = spy(impl);
     }
 
     @Test
-    public void cache_passed_value() {
-        final TenantId tenantId = newUuid();
+    @DisplayName("cache passed value")
+    void cachePassedValue() {
+        TenantId tenantId = newUuid();
 
         repository.keep(tenantId);
         repository.keep(tenantId);
@@ -59,8 +62,9 @@ public class TenantRepositoryShould {
     }
 
     @Test
-    public void un_cache_values() {
-        final TenantId tenantId = newUuid();
+    @DisplayName("evict from cache")
+    void evictFromCache() {
+        TenantId tenantId = newUuid();
 
         repository.keep(tenantId);
         assertTrue(repository.unCache(tenantId));
@@ -68,8 +72,9 @@ public class TenantRepositoryShould {
     }
 
     @Test
-    public void clear_cache() {
-        final TenantId tenantId = newUuid();
+    @DisplayName("clear cache")
+    void clearCache() {
+        TenantId tenantId = newUuid();
 
         repository.keep(tenantId);
 
@@ -77,7 +82,6 @@ public class TenantRepositoryShould {
 
         assertFalse(repository.unCache(tenantId));
     }
-
 
     private static class TenantRepositoryImpl
             extends TenantRepository<Timestamp, DefaultTenantRepository.Entity> {

@@ -22,12 +22,16 @@ package io.spine.server;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Query;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.core.EventContext;
+import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.core.given.GivenUserId;
@@ -36,6 +40,8 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.projection.Projection;
+import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
@@ -46,6 +52,7 @@ import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
+import io.spine.test.bc.event.BcProjectCreated;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.test.commandservice.customer.CustomerVBuilder;
@@ -61,7 +68,18 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.given.GivenUserId.of;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+/**
+ * @author Alexander Yevsyukov
+ * @author Alexander Litus
+ * @author Andrey Lavrov
+ * @author Alexander Aleksandrov
+ * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
+ */
 public class Given {
 
     private Given() {
@@ -189,7 +207,7 @@ public class Given {
 
         static Query readAllProjects() {
             // DO NOT replace the type name with another Project class.
-            final Query result = requestFactory.query()
+            Query result = requestFactory.query()
                                                .all(io.spine.test.projection.Project.class);
             return result;
         }
@@ -277,6 +295,97 @@ public class Given {
         @Apply
         void event(CustomerCreated event) {
             getBuilder().mergeFrom(event.getCustomer());
+        }
+    }
+
+    /*
+     * `QueryServiceTest` environment.
+     ***************************************************/
+
+    static final String PROJECTS_CONTEXT_NAME = "Projects";
+
+    static class ProjectDetailsRepository
+            extends ProjectionRepository<io.spine.test.commandservice.ProjectId,
+                                         ProjectDetails,
+                                         io.spine.test.projection.Project> {
+
+        /**
+         * {@inheritDoc}
+         *
+         * This method is overridden to overcome the Mockito restrictions, since Mockit does not
+         * propagate all the changes into the spied object (and {@code ProjectDetailsRepository}
+         * instance is spied within this test suite). In turn that leads to the failures in
+         * delivery initialization, since it requires non-{@code null} bounded context name.
+         *
+         * @return the name of the bounded context for this repository
+         */
+        @Override
+        public BoundedContextName getBoundedContextName() {
+            return BoundedContext.newName(PROJECTS_CONTEXT_NAME);
+        }
+    }
+
+    static class ProjectDetails
+            extends Projection<io.spine.test.commandservice.ProjectId,
+                               io.spine.test.projection.Project,
+                               io.spine.test.projection.ProjectVBuilder> {
+
+        private ProjectDetails(io.spine.test.commandservice.ProjectId id) {
+            super(id);
+        }
+
+        @SuppressWarnings("UnusedParameters") // OK for test method.
+        @Subscribe
+        public void on(BcProjectCreated event, EventContext context) {
+            // Do nothing.
+        }
+    }
+
+    /*
+     * `SubscriptionServiceTest` environment.
+     ***************************************************/
+
+    static class MemoizeStreamObserver<T> implements StreamObserver<T> {
+
+        private T streamFlowValue;
+        private Throwable throwable;
+        private boolean isCompleted;
+
+        @Override
+        public void onNext(T value) {
+            this.streamFlowValue = value;
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            this.throwable = t;
+        }
+
+        @Override
+        public void onCompleted() {
+            this.isCompleted = true;
+        }
+
+        void verifyState() {
+            verifyState(true);
+        }
+
+        void verifyState(boolean isCompleted) {
+            assertNotNull(streamFlowValue);
+            assertNull(throwable);
+            assertEquals(this.isCompleted, isCompleted);
+        }
+
+        T streamFlowValue() {
+            return streamFlowValue;
+        }
+
+        Throwable throwable() {
+            return throwable;
+        }
+
+        boolean isCompleted() {
+            return isCompleted;
         }
     }
 }

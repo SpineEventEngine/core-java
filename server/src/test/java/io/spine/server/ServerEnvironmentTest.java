@@ -20,26 +20,35 @@
 
 package io.spine.server;
 
-import io.spine.test.Tests;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class ServerEnvironmentShould {
+/**
+ * @author Alexander Yevsyukov
+ */
+@DisplayName("ServerEnvironment utility should")
+class ServerEnvironmentTest {
 
     @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(ServerEnvironment.class);
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(ServerEnvironment.class);
     }
 
     @Test
-    public void tell_when_not_running_under_AppEngine() {
+    @DisplayName("tell when not running under AppEngine")
+    void tellIfNotInAppEngine() {
         // Tests are not run by AppEngine by default.
         assertFalse(ServerEnvironment.getInstance().isAppEngine());
     }
 
     @Test
-    public void obtain_AppEngine_version_as_optional_string() {
+    @DisplayName("obtain AppEngine version as optional string")
+    void getAppEngineVersion() {
         // By default we're not running under AppEngine.
         assertFalse(ServerEnvironment.getInstance().appEngineVersion()
                                      .isPresent());

@@ -25,17 +25,22 @@ import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.test.TestValues;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class ElementShould {
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
+@DisplayName("Element should")
+class ElementTest {
 
     @Test
-    public void support_equality() {
+    @DisplayName("support equality")
+    void supportEquality() {
         Timestamp time = Time.getCurrentTime();
         new EqualsTester().addEqualityGroup(new Element(time), new Element(time))
                           .addEqualityGroup(new Element(TestValues.newUuidValue()))
@@ -44,14 +49,16 @@ public class ElementShould {
     }
 
     @Test
-    public void serialize() {
+    @DisplayName("be serializable")
+    void serialize() {
         reserializeAndAssert(new Element(Time.getCurrentTime()));
         reserializeAndAssert(new Element(Optional.of(Time.getCurrentTime())));
         reserializeAndAssert(new Element(Optional.absent()));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void restrict_possible_value_types() {
-        new Element(getClass());
+    @Test
+    @DisplayName("restrict possible value types")
+    void restrictPossibleValueTypes() {
+        assertThrows(IllegalArgumentException.class, () -> new Element(getClass()));
     }
 }
