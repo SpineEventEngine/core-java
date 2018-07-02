@@ -267,14 +267,14 @@ public abstract class AggregateStorageTest
     }
 
     // Ignore this test because several records can be stored by an aggregate ID.
-    @Override
-    @Test
-    @DisplayName("re-write record if writing by the same ID")
     @SuppressWarnings({
             "NoopMethodInAbstractClass",
             "RefusedBequest",
             "MethodDoesntCallSuperMethod"
     })
+    @Override
+    @Test
+    @DisplayName("re-write record if writing by the same ID")
     protected void rewriteRecord() {
     }
 
