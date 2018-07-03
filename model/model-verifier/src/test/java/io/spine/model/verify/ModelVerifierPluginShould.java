@@ -77,8 +77,8 @@ public class ModelVerifierPluginShould {
     }
 
     @Ignore // TODO:2017-08-25:dmytro.dashenkov: Re-enable when Model is capable of
-    // checking the handler methods.
-    // https://github.com/SpineEventEngine/base/issues/49
+            // checking the handler methods.
+            // https://github.com/SpineEventEngine/base/issues/49
     @Test
     public void halt_build_on_malformed_command_handling_methods() {
         final BuildResult result =
