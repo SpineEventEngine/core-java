@@ -44,10 +44,7 @@ dependencies {
     compile project(':model-assembler')
 
     testCompile gradleTestKit()
-    testCompile group: 'io.spine.tools',
-                name: 'spine-plugin-base',
-                version: spineBaseVersion,
-                classifier: 'test'
+    testCompile "io.spine.tools:spine-plugin-testlib:$spineBaseVersion"
     testCompile "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
 
     testRuntime "org.junit.jupiter:junit-jupiter-engine:$jUnitVersion"
