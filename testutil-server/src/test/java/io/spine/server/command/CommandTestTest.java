@@ -39,8 +39,8 @@ import static io.spine.core.given.GivenUserId.newUuid;
 import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.nullRef;
 import static io.spine.validate.Validate.checkNotDefault;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
