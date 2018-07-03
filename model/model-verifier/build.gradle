@@ -48,8 +48,8 @@ dependencies {
                 name: 'spine-plugin-base',
                 version: spineBaseVersion,
                 classifier: 'test'
-    testCompile "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
 
+    testCompile "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
     testRuntime "org.junit.jupiter:junit-jupiter-engine:$jUnitVersion"
     testRuntime "org.junit.vintage:junit-vintage-engine:$jUnitVersion"
 }
