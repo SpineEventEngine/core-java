@@ -29,7 +29,7 @@ import java.util.List;
 import static com.google.common.collect.FluentIterable.from;
 
 /**
- * Performs filtering of the events emitted during {@link Dispatch dispatchs}.
+ * Performs filtering of the events emitted during {@link Dispatch dispatch}.
  *
  * @author Mykhailo Drachuk
  */
