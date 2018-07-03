@@ -20,13 +20,14 @@
 
 package io.spine.server.command.dispatch;
 
-import com.google.common.base.Predicate;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Predicate;
 
-import static com.google.common.collect.FluentIterable.from;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Performs filtering of the events emitted during {@link Dispatch dispatch}.
@@ -35,16 +36,16 @@ import static com.google.common.collect.FluentIterable.from;
  */
 class Filtering {
 
-    private final Iterable<? extends Message> messages;
+    private final Collection<? extends Message> messages;
 
     /**
-     * A private constructor preventing instantiation outside of {@link #of(Iterable) factory 
+     * A private constructor preventing instantiation outside of {@link #of(Collection) factory
      * method}.
      *
      * @param messages event messages which were emitted by a command handling entity and
      *                 require filtering
      */
-    private Filtering(Iterable<? extends Message> messages) {
+    private Filtering(Collection<? extends Message> messages) {
         this.messages = messages;
     }
 
@@ -54,7 +55,9 @@ class Filtering {
      * @return provided messages with an exception of those not passing filter
      */
     List<? extends Message> perform() {
-        return from(messages).filter(nonEmpty()).toList();
+        return messages.stream()
+                       .filter(nonEmpty())
+                       .collect(toList());
     }
 
     /**
@@ -62,7 +65,7 @@ class Filtering {
      *                 require filtering
      * @return an instance of an {@link Filtering event filter} processing provided messages
      */
-    static Filtering of(Iterable<? extends Message> messages) {
+    static Filtering of(Collection<? extends Message> messages) {
         return new Filtering(messages);
     }
 
@@ -70,7 +73,7 @@ class Filtering {
      * @return an instance of a {@linkplain NonEmpty non-empty predicate}
      */
     private static Predicate<Message> nonEmpty() {
-        return NonEmpty.INSTANCE;
+        return NonEmpty.PREDICATE;
     }
 
     /**
@@ -78,7 +81,7 @@ class Filtering {
      */
     private enum NonEmpty implements Predicate<Message> {
 
-        INSTANCE;
+        PREDICATE;
 
         private static final Empty EMPTY = Empty.getDefaultInstance();
 
@@ -89,7 +92,7 @@ class Filtering {
          * @return {@code true} if the message is not empty, {@code false} otherwise
          */
         @Override
-        public boolean apply(Message message) {
+        public boolean test(Message message) {
             return !message.equals(EMPTY);
         }
     }
