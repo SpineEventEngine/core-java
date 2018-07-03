@@ -48,13 +48,14 @@ import static java.util.Collections.singletonList;
 
 @VisibleForTesting
 public class BlackBoxBoundedContext {
+
     private final BoundedContext boundedContext;
     private final TestActorRequestFactory requestFactory;
     private final TestEventFactory eventFactory;
     private final CommandBus commandBus;
     private final EventBus eventBus;
     private final TenantId tenantId;
-    private MemoizingObserver<Ack> observer;
+    private final MemoizingObserver<Ack> observer;
 
     private BlackBoxBoundedContext() {
         this.boundedContext = newBoundedContext();
