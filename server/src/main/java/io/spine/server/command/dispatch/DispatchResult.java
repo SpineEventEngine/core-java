@@ -31,10 +31,10 @@ import io.spine.server.model.HandlerMethod;
 import java.util.List;
 
 /**
- * The events emitted as a result of message dispatch. 
+ * The events emitted as a result of message dispatch.
  *
- * <p>Dispatch result can be treated in different forms. 
- * (e.g. {@link #asMessages() as messages} or {@link #asEvents(Any, Version) as events}). 
+ * <p>Dispatch result can be treated in different forms.
+ * (e.g. {@link #asMessages() as messages} or {@link #asEvents(Any, Version) as events}).
  *
  * @author Mykhailo Drachuk
  */
@@ -45,8 +45,8 @@ public final class DispatchResult {
 
     /**
      * @param messages messages which were emitted by the dispatch
-     * @param origin a message that was dispatched
-     * @param <E> {@link MessageEnvelope} dispatched message type
+     * @param origin   a message that was dispatched
+     * @param <E>      {@link MessageEnvelope} dispatched message type
      */
     <E extends MessageEnvelope> DispatchResult(List<? extends Message> messages, E origin) {
         this.messages = ImmutableList.copyOf(messages);

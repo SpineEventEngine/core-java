@@ -66,24 +66,24 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
     @Assign
     @SuppressWarnings("Duplicates")
     EitherOfThree<PmQuestionSolved, PmQuestionFailed, Empty> handle(PmAnswerQuestion command) {
-        final PmAnswer answer = command.getAnswer();
-        final PmQuizId examId = command.getQuizId();
-        final PmQuestionId questionId = answer.getQuestionId();
+        PmAnswer answer = command.getAnswer();
+        PmQuizId examId = command.getQuizId();
+        PmQuestionId questionId = answer.getQuestionId();
 
         if (questionIsClosed(questionId)) {
             return EitherOfThree.withC(Empty.getDefaultInstance());
         }
 
-        final boolean answerIsCorrect = answer.getCorrect();
+        boolean answerIsCorrect = answer.getCorrect();
         if (answerIsCorrect) {
-            final PmQuestionSolved reaction =
+            PmQuestionSolved reaction =
                     PmQuestionSolved.newBuilder()
                                     .setQuizId(examId)
                                     .setQuestionId(questionId)
                                     .build();
             return EitherOfThree.withA(reaction);
         } else {
-            final PmQuestionFailed reaction =
+            PmQuestionFailed reaction =
                     PmQuestionFailed.newBuilder()
                                     .setQuizId(examId)
                                     .setQuestionId(questionId)
@@ -92,9 +92,9 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
         }
     }
 
-    private boolean questionIsClosed(final PmQuestionId questionId) {
-        final List<PmQuestionId> openQuestions = getBuilder().getOpenQuestion();
-        final boolean containedInOpenQuestions = openQuestions.contains(questionId);
+    private boolean questionIsClosed(PmQuestionId questionId) {
+        List<PmQuestionId> openQuestions = getBuilder().getOpenQuestion();
+        boolean containedInOpenQuestions = openQuestions.contains(questionId);
         return !containedInOpenQuestions;
     }
 
@@ -105,21 +105,21 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
 
     @React
     void on(PmQuestionSolved event) {
-        final PmQuestionId questionId = event.getQuestionId();
+        PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         getBuilder().addSolvedQuestion(questionId);
     }
 
     @React
     void on(PmQuestionFailed event) {
-        final PmQuestionId questionId = event.getQuestionId();
+        PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         getBuilder().addFailedQuestion(questionId);
     }
 
     private void removeOpenQuestion(PmQuestionId questionId) {
-        final List<PmQuestionId> openQuestions = getBuilder().getOpenQuestion();
-        final int index = openQuestions.indexOf(questionId);
+        List<PmQuestionId> openQuestions = getBuilder().getOpenQuestion();
+        int index = openQuestions.indexOf(questionId);
         getBuilder().removeOpenQuestion(index);
     }
 }

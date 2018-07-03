@@ -214,9 +214,9 @@ public abstract class Aggregate<I,
     @Override
     protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
         idempotencyGuard.check(command);
-        final CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
-        final Dispatch<CommandEnvelope> dispatch = Dispatch.of(command).to(this, method);
-        final DispatchResult dispatchResult = dispatch.perform();
+        CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
+        Dispatch<CommandEnvelope> dispatch = Dispatch.of(command).to(this, method);
+        DispatchResult dispatchResult = dispatch.perform();
         return dispatchResult.asMessages(); 
     }
 
@@ -231,9 +231,9 @@ public abstract class Aggregate<I,
      *         an empty list if the aggregate state does not change in reaction to the event
      */
     List<? extends Message> reactOn(EventEnvelope event) {
-        final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
-        final Dispatch<EventEnvelope> dispatch = Dispatch.of(event).to(this, method);
-        final DispatchResult dispatchResult = dispatch.perform();
+        EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
+        Dispatch<EventEnvelope> dispatch = Dispatch.of(event).to(this, method);
+        DispatchResult dispatchResult = dispatch.perform();
         return dispatchResult.asMessages();
     }
 
@@ -249,11 +249,11 @@ public abstract class Aggregate<I,
      *         response to this rejection
      */
     List<? extends Message> reactOn(RejectionEnvelope rejection) {
-        final CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
-        final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
+        CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
+        RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
                                                                      commandClass);
-        final Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection).to(this, method);
-        final DispatchResult dispatchResult = dispatch.perform();
+        Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection).to(this, method);
+        DispatchResult dispatchResult = dispatch.perform();
         return dispatchResult.asMessages();
     }
 

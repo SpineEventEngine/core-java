@@ -64,8 +64,8 @@ public abstract class Dispatch<E extends MessageEnvelope> {
      * @return the events emitted after dispatching a message
      */
     public DispatchResult perform() {
-        final List<? extends Message> messages = dispatch();
-        final List<? extends Message> filtered = Filtering.of(messages).perform();
+        List<? extends Message> messages = dispatch();
+        List<? extends Message> filtered = Filtering.of(messages).perform();
         return new DispatchResult(filtered, envelope);
     }
 

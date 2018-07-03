@@ -42,18 +42,18 @@ class AckedCommands {
     private final List<Rejection> rejections = newArrayList();
 
     AckedCommands(MemoizingObserver<Ack> observer) {
-        final List<Ack> responses = observer.responses();
+        List<Ack> responses = observer.responses();
         for (Ack response : responses) {
             acks.add(response);
 
-            final Status status = response.getStatus();
+            Status status = response.getStatus();
          
-            final Error error = status.getError();
+            Error error = status.getError();
             if (!error.equals(EMPTY_ERROR)) {
                 errors.add(error);
             }
 
-            final Rejection rejection = status.getRejection();
+            Rejection rejection = status.getRejection();
             if (!rejection.equals(EMPTY_REJECTION)) {
                 rejections.add(rejection);
             }

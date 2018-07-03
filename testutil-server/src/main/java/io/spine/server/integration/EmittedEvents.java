@@ -81,16 +81,11 @@ class EmittedEvents {
      * @return a mapping of Event classes to its count
      */
     private static Map<EventClass, Integer> countEventTypes(List<Event> events) {
-        final Map<EventClass, Integer> countForType = new HashMap<>();
+        Map<EventClass, Integer> countForType = new HashMap<>();
         for (Event event : events) {
-            final Message message = unpack(event.getMessage());
-            final EventClass type = EventClass.of(message);
-            final int currentCount;
-            if (countForType.containsKey(type)) {
-                currentCount = countForType.get(type);
-            } else {
-                currentCount = 0;
-            }
+            Message message = unpack(event.getMessage());
+            EventClass type = EventClass.of(message);
+            int currentCount = countForType.getOrDefault(type, 0);
             countForType.put(type, currentCount + 1);
         }
         return ImmutableMap.copyOf(countForType);

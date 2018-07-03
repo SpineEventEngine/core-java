@@ -122,10 +122,10 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
      */
     @Override
     public String dispatch(CommandEnvelope envelope) {
-        final CommandHandlerMethod method = thisClass.getHandler(envelope.getMessageClass());
-        final Dispatch<CommandEnvelope> dispatch = Dispatch.of(envelope).to(this, method);
-        final DispatchResult dispatchResult = dispatch.perform();
-        final List<Event> events = dispatchResult.asEvents(producerId, null);
+        CommandHandlerMethod method = thisClass.getHandler(envelope.getMessageClass());
+        Dispatch<CommandEnvelope> dispatch = Dispatch.of(envelope).to(this, method);
+        DispatchResult dispatchResult = dispatch.perform();
+        List<Event> events = dispatchResult.asEvents(producerId, null);
         postEvents(events);
         return getId();
     }

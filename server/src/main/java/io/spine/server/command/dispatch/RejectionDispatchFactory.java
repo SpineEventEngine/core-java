@@ -66,7 +66,7 @@ public final class RejectionDispatchFactory extends MessageDispatchFactory<Rejec
 
         @Override
         protected List<? extends Message> dispatch() {
-            final RejectionEnvelope rejection = envelope();
+            RejectionEnvelope rejection = envelope();
             return method.invoke(context, rejection.getMessage(), rejection.getRejectionContext());
         }
     }

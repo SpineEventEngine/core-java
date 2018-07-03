@@ -133,9 +133,9 @@ public abstract class ProcessManager<I,
      */
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope command) {
-        final CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
-        final Dispatch<CommandEnvelope> dispatch = Dispatch.of(command).to(this, method);
-        final DispatchResult dispatchResult = dispatch.perform();
+        CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
+        Dispatch<CommandEnvelope> dispatch = Dispatch.of(command).to(this, method);
+        DispatchResult dispatchResult = dispatch.perform();
         return toEvents(dispatchResult);
     }
 
@@ -147,9 +147,9 @@ public abstract class ProcessManager<I,
      *         produce new events because of the passed event
      */
     List<Event> dispatchEvent(EventEnvelope event) {
-        final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
-        final Dispatch<EventEnvelope> dispatch = Dispatch.of(event).to(this, method);
-        final DispatchResult dispatchResult = dispatch.perform();
+        EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
+        Dispatch<EventEnvelope> dispatch = Dispatch.of(event).to(this, method);
+        DispatchResult dispatchResult = dispatch.perform();
         return toEvents(dispatchResult);
     }
 
@@ -161,11 +161,11 @@ public abstract class ProcessManager<I,
      *         produce new events because of the passed event
      */
     List<Event> dispatchRejection(RejectionEnvelope rejection) {
-        final CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
-        final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
+        CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
+        RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
                                                                      commandClass);
-        final Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection).to(this, method);
-        final DispatchResult dispatchResult = dispatch.perform();
+        Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection).to(this, method);
+        DispatchResult dispatchResult = dispatch.perform();
         return toEvents(dispatchResult);
     }
 

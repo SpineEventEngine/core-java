@@ -125,7 +125,7 @@ public class BlackBoxBoundedContext {
      * @return a newly created {@link BlackBoxBoundedContext Bounded Context black box}
      */
     public static BlackBoxBoundedContext with(Repository... repositories) {
-        final BlackBoxBoundedContext blackBox = new BlackBoxBoundedContext();
+        BlackBoxBoundedContext blackBox = new BlackBoxBoundedContext();
         return blackBox.andWith(repositories);
     }
 
@@ -155,7 +155,7 @@ public class BlackBoxBoundedContext {
     }
 
     private BlackBoxBoundedContext receivesCommands(Collection<Message> domainCommands) {
-        final List<Command> commands = newArrayListWithCapacity(domainCommands.size());
+        List<Command> commands = newArrayListWithCapacity(domainCommands.size());
         for (Message domainCommand : domainCommands) {
             commands.add(command(domainCommand));
         }
@@ -187,11 +187,11 @@ public class BlackBoxBoundedContext {
     }
 
     private BlackBoxBoundedContext receivesEvents(Collection<Message> domainEvents) {
-        final List<Event> events = newArrayListWithCapacity(domainEvents.size());
+        List<Event> events = newArrayListWithCapacity(domainEvents.size());
         for (Message domainEvent : domainEvents) {
             events.add(event(domainEvent));
         }
-        final MemoizingObserver<Ack> observer = memoizingObserver();
+        MemoizingObserver<Ack> observer = memoizingObserver();
         eventBus.post(events, observer);
         return this;
     }
@@ -211,13 +211,13 @@ public class BlackBoxBoundedContext {
      ******************************************************************************/
 
     public BlackBoxBoundedContext verify(EmittedEventsVerifier verifier) {
-        final EmittedEvents events = emittedEvents();
+        EmittedEvents events = emittedEvents();
         verifier.verify(events);
         return this;
     }
     
     public BlackBoxBoundedContext verify(AckedCommandsVerifier verifier) {
-        final AckedCommands acks = ackedCommands();
+        AckedCommands acks = ackedCommands();
         verifier.verify(acks);
         return this;
     }
@@ -231,7 +231,7 @@ public class BlackBoxBoundedContext {
      ******************************************************************************/
 
     private EmittedEvents emittedEvents() {
-        final List<Event> events = readAllEvents();
+        List<Event> events = readAllEvents();
         return new EmittedEvents(events);
     }
 
@@ -239,8 +239,8 @@ public class BlackBoxBoundedContext {
      * Reads all events from the bounded context for the provided tenant.
      */
     private List<Event> readAllEvents() {
-        final MemoizingObserver<Event> queryObserver = memoizingObserver();
-        final TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
+        MemoizingObserver<Event> queryObserver = memoizingObserver();
+        TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
                 eventBus.getEventStore()
@@ -249,7 +249,7 @@ public class BlackBoxBoundedContext {
         };
         operation.execute();
 
-        final List<Event> responses = queryObserver.responses();
+        List<Event> responses = queryObserver.responses();
         return responses;
     }
 

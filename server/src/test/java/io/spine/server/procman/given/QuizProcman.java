@@ -61,7 +61,7 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
 
     @Assign
     PmQuestionAnswered handle(PmAnswerQuestion command) {
-        final PmQuestionAnswered event =
+        PmQuestionAnswered event =
                 PmQuestionAnswered.newBuilder()
                                   .setQuizId(command.getQuizId())
                                   .setAnswer(command.getAnswer())
@@ -76,24 +76,24 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
 
     @React
     EitherOfThree<PmQuestionSolved, PmQuestionFailed, Empty> on(PmQuestionAnswered event) {
-        final PmAnswer answer = event.getAnswer();
-        final PmQuizId examId = event.getQuizId();
-        final PmQuestionId questionId = answer.getQuestionId();
+        PmAnswer answer = event.getAnswer();
+        PmQuizId examId = event.getQuizId();
+        PmQuestionId questionId = answer.getQuestionId();
 
         if (questionIsClosed(questionId)) {
             return EitherOfThree.withC(Empty.getDefaultInstance());
         }
 
-        final boolean answerIsCorrect = answer.getCorrect();
+        boolean answerIsCorrect = answer.getCorrect();
         if (answerIsCorrect) {
-            final PmQuestionSolved reaction =
+            PmQuestionSolved reaction =
                     PmQuestionSolved.newBuilder()
                                     .setQuizId(examId)
                                     .setQuestionId(questionId)
                                     .build();
             return EitherOfThree.withA(reaction);
         } else {
-            final PmQuestionFailed reaction =
+            PmQuestionFailed reaction =
                     PmQuestionFailed.newBuilder()
                                     .setQuizId(examId)
                                     .setQuestionId(questionId)
@@ -102,29 +102,29 @@ class QuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder> {
         }
     }
 
-    private boolean questionIsClosed(final PmQuestionId questionId) {
-        final List<PmQuestionId> openQuestions = getBuilder().getOpenQuestion();
-        final boolean containedInOpenQuestions = openQuestions.contains(questionId);
+    private boolean questionIsClosed(PmQuestionId questionId) {
+        List<PmQuestionId> openQuestions = getBuilder().getOpenQuestion();
+        boolean containedInOpenQuestions = openQuestions.contains(questionId);
         return !containedInOpenQuestions;
     }
 
     @React
     void on(PmQuestionSolved event) {
-        final PmQuestionId questionId = event.getQuestionId();
+        PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         getBuilder().addSolvedQuestion(questionId);
     }
 
     @React
     void on(PmQuestionFailed event) {
-        final PmQuestionId questionId = event.getQuestionId();
+        PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         getBuilder().addFailedQuestion(questionId);
     }
 
     private void removeOpenQuestion(PmQuestionId questionId) {
-        final List<PmQuestionId> openQuestions = getBuilder().getOpenQuestion();
-        final int index = openQuestions.indexOf(questionId);
+        List<PmQuestionId> openQuestions = getBuilder().getOpenQuestion();
+        int index = openQuestions.indexOf(questionId);
         getBuilder().removeOpenQuestion(index);
     }
 }

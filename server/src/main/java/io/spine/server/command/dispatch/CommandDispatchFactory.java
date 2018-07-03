@@ -67,7 +67,7 @@ public final class CommandDispatchFactory extends MessageDispatchFactory<Command
 
         @Override
         protected List<? extends Message> dispatch() {
-            final CommandEnvelope command = envelope();
+            CommandEnvelope command = envelope();
             return method.invoke(context, command.getMessage(), command.getCommandContext());
         }
     }

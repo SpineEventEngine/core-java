@@ -36,15 +36,15 @@ public abstract class EmittedEventsVerifier {
 
     public abstract void verify(EmittedEvents events);
 
-    public static EmittedEventsVerifier emitted(final int expectedCount) {
+    public static EmittedEventsVerifier emitted(int expectedCount) {
         checkArgument(expectedCount >= 0, "0 or more emitted events must be expected.");
 
         return new EmittedEventsVerifier() {
 
             @Override
             public void verify(EmittedEvents events) {
-                final int actualCount = events.count();
-                final String moreOrLess = compare(actualCount, expectedCount);
+                int actualCount = events.count();
+                String moreOrLess = compare(actualCount, expectedCount);
                 assertEquals("Bounded Context emitted " + moreOrLess + " events than expected",
                              expectedCount, actualCount);
             }
@@ -57,13 +57,13 @@ public abstract class EmittedEventsVerifier {
         return emitted(asList(eventTypes));
     }
 
-    private static EmittedEventsVerifier emitted(final List<Class<? extends Message>> eventTypes) {
+    private static EmittedEventsVerifier emitted(List<Class<? extends Message>> eventTypes) {
         return new EmittedEventsVerifier() {
 
             @Override
             public void verify(EmittedEvents events) {
                 for (Class<? extends Message> eventType : eventTypes) {
-                    final String eventName = eventType.getName();
+                    String eventName = eventType.getName();
                     assertTrue(format("Bounded Context did not emit %s event", eventName),
                                events.contain(eventType));
                 }
@@ -72,15 +72,15 @@ public abstract class EmittedEventsVerifier {
     }
 
     public static EmittedEventsVerifier
-    emitted(final int expectedCount, final Class<? extends Message> eventType) {
+    emitted(int expectedCount, Class<? extends Message> eventType) {
         checkArgument(expectedCount >= 0);
         return new EmittedEventsVerifier() {
 
             @Override
             public void verify(EmittedEvents events) {
-                final String eventName = eventType.getName();
-                final int actualCount = events.count(eventType);
-                final String moreOrLess = compare(actualCount, expectedCount);
+                String eventName = eventType.getName();
+                int actualCount = events.count(eventType);
+                String moreOrLess = compare(actualCount, expectedCount);
                 assertEquals(
                         format("Bounded Context emitted %s %s events than expected",
                                moreOrLess, eventName),

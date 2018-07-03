@@ -31,14 +31,14 @@ public abstract class AckedCommandsVerifier {
 
     abstract void verify(AckedCommands acks);
 
-    public static AckedCommandsVerifier acked(final int expectedCount) {
+    public static AckedCommandsVerifier acked(int expectedCount) {
         checkArgument(expectedCount >= 0, "0 or more acknowledgements must be expected.");
 
         return new AckedCommandsVerifier() {
             @Override
             void verify(AckedCommands acks) {
-                final int actualCount = acks.count();
-                final String moreOrLess = compare(actualCount, expectedCount);
+                int actualCount = acks.count();
+                String moreOrLess = compare(actualCount, expectedCount);
                 assertEquals(
                         "Bounded Context acknowledged " + moreOrLess + " commands than expected",
                         expectedCount, actualCount);
@@ -70,9 +70,9 @@ public abstract class AckedCommandsVerifier {
     }
 
     public AckedCommandsVerifier withoutErrorsOrRejections() {
-        final AckedCommandsVerifier current = this;
-        final AckedCommandsVerifier noRejections = ackedWithoutRejections();
-        final AckedCommandsVerifier noErrors = ackedWithoutErrors();
+        AckedCommandsVerifier current = this;
+        AckedCommandsVerifier noRejections = ackedWithoutRejections();
+        AckedCommandsVerifier noErrors = ackedWithoutErrors();
 
         return new AckedCommandsVerifier() {
             @Override
