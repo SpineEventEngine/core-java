@@ -22,12 +22,12 @@ package io.spine.core.given;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.base.Identifier;
-import io.spine.test.Tests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -39,7 +39,7 @@ class GivenTenantIdTest {
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
-        Tests.assertHasPrivateParameterlessCtor(GivenTenantId.class);
+        assertHasPrivateParameterlessCtor(GivenTenantId.class);
     }
 
     @Test
