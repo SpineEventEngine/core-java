@@ -44,9 +44,9 @@ class GivenVersionTest {
     @Test
     @DisplayName("generate version by number")
     void generateByNumber() {
-        final int number = random(100);
+        int number = random(100);
 
-        final Version version = GivenVersion.withNumber(number);
+        Version version = GivenVersion.withNumber(number);
 
         assertEquals(number, version.getNumber());
     }

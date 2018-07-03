@@ -47,9 +47,9 @@ class GivenEnrichmentTest {
     @Test
     @DisplayName("create enrichment with one attribute")
     void createWithOneAttribute() {
-        final Enrichment enrichment = withOneAttribute();
-        final Map<String, Any> enrichmentAttributes = enrichment.getContainer()
-                                                                .getItems();
+        Enrichment enrichment = withOneAttribute();
+        Map<String, Any> enrichmentAttributes = enrichment.getContainer()
+                                                          .getItems();
         assertSize(1, enrichmentAttributes);
     }
 }

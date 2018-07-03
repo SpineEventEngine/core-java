@@ -65,27 +65,27 @@ class GivenCommandContextTest {
     @Test
     @DisplayName("create CommandContext with random actor")
     void createWithRandomActor() {
-        final CommandContext first = GivenCommandContext.withRandomActor();
-        final CommandContext second = GivenCommandContext.withRandomActor();
+        CommandContext first = GivenCommandContext.withRandomActor();
+        CommandContext second = GivenCommandContext.withRandomActor();
 
         checkValid(first);
         checkValid(second);
 
-        final ActorContext firstActorContext = first.getActorContext();
-        final ActorContext secondActorContext = second.getActorContext();
+        ActorContext firstActorContext = first.getActorContext();
+        ActorContext secondActorContext = second.getActorContext();
         assertNotEquals(firstActorContext.getActor(), secondActorContext.getActor());
     }
 
     @Test
     @DisplayName("create CommandContext with actor and time")
     void createWithActorAndTime() {
-        final UserId actorId = newUuid();
-        final Timestamp when = add(getCurrentTime(), fromMinutes(42));
+        UserId actorId = newUuid();
+        Timestamp when = add(getCurrentTime(), fromMinutes(42));
 
-        final CommandContext context = GivenCommandContext.withActorAndTime(actorId, when);
+        CommandContext context = GivenCommandContext.withActorAndTime(actorId, when);
         checkValid(context);
 
-        final ActorContext actualActorContext = context.getActorContext();
+        ActorContext actualActorContext = context.getActorContext();
 
         assertEquals(actorId, actualActorContext.getActor());
         assertEquals(when, actualActorContext.getTimestamp());
@@ -94,15 +94,15 @@ class GivenCommandContextTest {
     @Test
     @DisplayName("create CommandContext with scheduled delay")
     void createWithScheduledDelay() {
-        final Duration delay = Durations2.fromHours(42);
-        final Schedule expectedSchedule = Schedule.newBuilder()
-                                                  .setDelay(delay)
-                                                  .build();
+        Duration delay = Durations2.fromHours(42);
+        Schedule expectedSchedule = Schedule.newBuilder()
+                                            .setDelay(delay)
+                                            .build();
 
-        final CommandContext context = GivenCommandContext.withScheduledDelayOf(delay);
+        CommandContext context = GivenCommandContext.withScheduledDelayOf(delay);
         checkValid(context);
 
-        final Schedule actualSchedule = context.getSchedule();
+        Schedule actualSchedule = context.getSchedule();
         assertEquals(expectedSchedule, actualSchedule);
     }
 }

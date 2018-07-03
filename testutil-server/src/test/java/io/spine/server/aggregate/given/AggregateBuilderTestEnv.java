@@ -36,7 +36,7 @@ public class AggregateBuilderTestEnv {
     }
 
     public static AggregateBuilder<TestAggregate, Integer, Timestamp> givenAggregate() {
-        final AggregateBuilder<TestAggregate, Integer, Timestamp> result = new AggregateBuilder<>();
+        AggregateBuilder<TestAggregate, Integer, Timestamp> result = new AggregateBuilder<>();
         result.setResultClass(TestAggregate.class);
         return result;
     }

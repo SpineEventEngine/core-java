@@ -56,7 +56,7 @@ class ModelTestsTest {
     @DisplayName("clear model")
     void clearModel() {
         // This adds a command handler for `com.google.protobuf.Timestamp`.
-        final CommandHandlerClass cls1 = model.asCommandHandlerClass(TestCommandHandler.class);
+        CommandHandlerClass cls1 = model.asCommandHandlerClass(TestCommandHandler.class);
         assertNotNull(cls1);
 
         ModelTests.clearModel();

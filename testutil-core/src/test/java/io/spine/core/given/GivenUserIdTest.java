@@ -54,12 +54,12 @@ class GivenUserIdTest {
     @Test
     @DisplayName("create UserId by string")
     void createByString() {
-        final String testIdString = "12345";
-        final UserId userId = of(testIdString);
+        String testIdString = "12345";
+        UserId userId = of(testIdString);
 
-        final UserId expected = UserId.newBuilder()
-                                      .setValue(testIdString)
-                                      .build();
+        UserId expected = UserId.newBuilder()
+                                .setValue(testIdString)
+                                .build();
 
         assertEquals(expected, userId);
     }

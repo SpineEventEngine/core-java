@@ -45,7 +45,7 @@ class EntityBuilderTest {
      * Convenience method that mimics the way tests would call creation of an entity.
      */
     private static EntityBuilder<TestEntity, Long, StringValue> givenEntity() {
-        final EntityBuilder<TestEntity, Long, StringValue> builder = new EntityBuilder<>();
+        EntityBuilder<TestEntity, Long, StringValue> builder = new EntityBuilder<>();
         return builder.setResultClass(TestEntity.class);
     }
 
@@ -84,12 +84,12 @@ class EntityBuilderTest {
     @Test
     @DisplayName("create entity")
     void createEntity() {
-        final long id = 1024L;
-        final int version = 100500;
-        final StringValue state = toMessage(getClass().getName());
-        final Timestamp timestamp = Time.getCurrentTime();
+        long id = 1024L;
+        int version = 100500;
+        StringValue state = toMessage(getClass().getName());
+        Timestamp timestamp = Time.getCurrentTime();
 
-        final VersionableEntity entity = givenEntity()
+        VersionableEntity entity = givenEntity()
                 .withId(id)
                 .withVersion(version)
                 .withState(state)
@@ -106,7 +106,7 @@ class EntityBuilderTest {
     @Test
     @DisplayName("create entity with default values")
     void createWithDefaultValues() {
-        final VersionableEntity entity = givenEntity().build();
+        VersionableEntity entity = givenEntity().build();
 
         assertEquals(TestEntity.class, entity.getClass());
         assertEquals(0L, entity.getId());

@@ -43,7 +43,7 @@ class AssignLookupTest extends SpineAnnotationProcessorTest {
     @Test
     @DisplayName("support `spineDirRoot` option")
     void supportSpineDirRoot() {
-        final Set<String> opts = processor().getSupportedOptions();
+        Set<String> opts = processor().getSupportedOptions();
         assertEquals(1, opts.size());
         assertThat(opts, contains(AssignLookup.OUTPUT_OPTION_NAME));
     }

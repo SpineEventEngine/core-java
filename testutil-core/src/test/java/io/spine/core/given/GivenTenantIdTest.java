@@ -52,7 +52,7 @@ class GivenTenantIdTest {
     @Test
     @DisplayName("create TenantId by string value")
     void createByStringValue() {
-        final String expected = Identifier.newUuid();
+        String expected = Identifier.newUuid();
 
         assertEquals(expected, GivenTenantId.of(expected)
                                             .getValue());

@@ -65,8 +65,8 @@ class ModelVerifierTest {
         project = mock(Project.class);
         when(project.getSubprojects()).thenReturn(emptySet());
         when(project.getRootProject()).thenReturn(project);
-        final TaskContainer tasks = mock(TaskContainer.class);
-        final TaskCollection emptyTaskCollection = mock(TaskCollection.class);
+        TaskContainer tasks = mock(TaskContainer.class);
+        TaskCollection emptyTaskCollection = mock(TaskCollection.class);
         when(emptyTaskCollection.iterator()).thenReturn(Iterators.emptyIterator());
         when(emptyTaskCollection.toArray()).thenReturn(EMPTY_ARRAY);
         when(tasks.withType(any(Class.class))).thenReturn(emptyTaskCollection);
@@ -76,54 +76,52 @@ class ModelVerifierTest {
     @Test
     @DisplayName("verify model from classpath")
     void verifyModelFromClasspath() {
-        final ModelVerifier verifier = new ModelVerifier(project);
+        ModelVerifier verifier = new ModelVerifier(project);
 
         verify(project).getSubprojects();
 
-        final String commandHandlerTypeName =
-                ModelVerifierTestEnv.AnyCommandHandler.class.getName();
-        final String aggregateTypeName = ModelVerifierTestEnv.Int32HandlerAggregate.class.getName();
-        final String procManTypeName = ModelVerifierTestEnv.Int64HandlerProcMan.class.getName();
-        final CommandHandlers spineModel =
-                CommandHandlers.newBuilder()
-                               .addCommandHandlingTypes(commandHandlerTypeName)
-                               .addCommandHandlingTypes(aggregateTypeName)
-                               .addCommandHandlingTypes(procManTypeName)
-                               .build();
+        String commandHandlerTypeName = ModelVerifierTestEnv.AnyCommandHandler.class.getName();
+        String aggregateTypeName = ModelVerifierTestEnv.Int32HandlerAggregate.class.getName();
+        String procManTypeName = ModelVerifierTestEnv.Int64HandlerProcMan.class.getName();
+        CommandHandlers spineModel = CommandHandlers.newBuilder()
+                                                    .addCommandHandlingTypes(commandHandlerTypeName)
+                                                    .addCommandHandlingTypes(aggregateTypeName)
+                                                    .addCommandHandlingTypes(procManTypeName)
+                                                    .build();
         verifier.verify(spineModel);
     }
 
     @Test
     @DisplayName("fail on duplicate command handlers")
     void failOnDuplicateHandlers() {
-        final ModelVerifier verifier = new ModelVerifier(project);
-        final String firstType = ModelVerifierTestEnv.AnyCommandHandler.class.getName();
-        final String secondType = ModelVerifierTestEnv.DuplicateAnyCommandHandler.class.getName();
+        ModelVerifier verifier = new ModelVerifier(project);
+        String firstType = ModelVerifierTestEnv.AnyCommandHandler.class.getName();
+        String secondType = ModelVerifierTestEnv.DuplicateAnyCommandHandler.class.getName();
 
-        final CommandHandlers spineModel = CommandHandlers.newBuilder()
-                                                          .addCommandHandlingTypes(firstType)
-                                                          .addCommandHandlingTypes(secondType)
-                                                          .build();
+        CommandHandlers spineModel = CommandHandlers.newBuilder()
+                                                    .addCommandHandlingTypes(firstType)
+                                                    .addCommandHandlingTypes(secondType)
+                                                    .build();
         assertThrows(DuplicateCommandHandlerError.class, () -> verifier.verify(spineModel));
     }
 
     @Test
     @DisplayName("ignore invalid class names")
     void ignoreInvalidClassNames() {
-        final String invalidClassname = "non.existing.class.Name";
-        final CommandHandlers spineModel = CommandHandlers.newBuilder()
-                                                          .addCommandHandlingTypes(invalidClassname)
-                                                          .build();
+        String invalidClassname = "non.existing.class.Name";
+        CommandHandlers spineModel = CommandHandlers.newBuilder()
+                                                    .addCommandHandlingTypes(invalidClassname)
+                                                    .build();
         new ModelVerifier(project).verify(spineModel);
     }
 
     @Test
     @DisplayName("not accept non-CommandHandler types")
     void notAcceptNonCommandHandlerTypes() {
-        final String invalidClassname = ModelVerifierTest.class.getName();
-        final CommandHandlers spineModel = CommandHandlers.newBuilder()
-                                                          .addCommandHandlingTypes(invalidClassname)
-                                                          .build();
+        String invalidClassname = ModelVerifierTest.class.getName();
+        CommandHandlers spineModel = CommandHandlers.newBuilder()
+                                                    .addCommandHandlingTypes(invalidClassname)
+                                                    .build();
         assertThrows(IllegalArgumentException.class,
                      () -> new ModelVerifier(project).verify(spineModel));
     }
@@ -131,26 +129,26 @@ class ModelVerifierTest {
     @Test
     @DisplayName("retrieve compilation destination directory from task")
     void getCompilationDestDir() throws MalformedURLException {
-        final JavaCompile compileTask = actualProject().getTasks()
-                                                       .withType(JavaCompile.class)
-                                                       .getByName(COMPILE_JAVA.getValue());
-        final File dest = Files.createTempDir();
+        JavaCompile compileTask = actualProject().getTasks()
+                                                 .withType(JavaCompile.class)
+                                                 .getByName(COMPILE_JAVA.getValue());
+        File dest = Files.createTempDir();
         compileTask.setDestinationDir(dest);
-        final Function<JavaCompile, URL> func = ModelVerifier.GetDestinationDir.FUNCTION;
-        final URL destUrl = dest.toURI().toURL();
+        Function<JavaCompile, URL> func = ModelVerifier.GetDestinationDir.FUNCTION;
+        URL destUrl = dest.toURI().toURL();
         assertEquals(destUrl, func.apply(compileTask));
     }
 
     @Test
     @DisplayName("retrieve null if destination directory is null")
     void getNullDestDir() {
-        final JavaCompile compileTask = mock(JavaCompile.class);
-        final Function<JavaCompile, URL> func = ModelVerifier.GetDestinationDir.FUNCTION;
+        JavaCompile compileTask = mock(JavaCompile.class);
+        Function<JavaCompile, URL> func = ModelVerifier.GetDestinationDir.FUNCTION;
         assertNull(func.apply(compileTask));
     }
 
     private static Project actualProject() {
-        final Project result = ProjectBuilder.builder().build();
+        Project result = ProjectBuilder.builder().build();
         result.getPluginManager().apply("java");
         return result;
     }

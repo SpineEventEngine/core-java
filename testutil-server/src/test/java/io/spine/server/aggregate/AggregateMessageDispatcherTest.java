@@ -55,14 +55,14 @@ class AggregateMessageDispatcherTest {
     @Test
     @DisplayName("dispatch command")
     void dispatchCommand() {
-        final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
-        final int messageValue = 2017_07_28;
-        final UInt32Value message = UInt32Value.newBuilder()
-                                               .setValue(messageValue)
-                                               .build();
-        final CommandEnvelope commandEnvelope = CommandEnvelope.of(factory.createCommand(message));
+        TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
+        int messageValue = 2017_07_28;
+        UInt32Value message = UInt32Value.newBuilder()
+                                         .setValue(messageValue)
+                                         .build();
+        CommandEnvelope commandEnvelope = CommandEnvelope.of(factory.createCommand(message));
 
-        final List<? extends Message> eventMessages =
+        List<? extends Message> eventMessages =
                 AggregateMessageDispatcher.dispatchCommand(aggregate, commandEnvelope);
 
         assertTrue(aggregate.getState()
@@ -75,14 +75,14 @@ class AggregateMessageDispatcherTest {
     @Test
     @DisplayName("dispatch event")
     void dispatchEvent() {
-        final TestEventFactory factory = TestEventFactory.newInstance(getClass());
-        final float messageValue = 2017.0729f;
-        final FloatValue message = FloatValue.newBuilder()
-                                             .setValue(messageValue)
-                                             .build();
-        final EventEnvelope eventEnvelope = EventEnvelope.of(factory.createEvent(message));
+        TestEventFactory factory = TestEventFactory.newInstance(getClass());
+        float messageValue = 2017.0729f;
+        FloatValue message = FloatValue.newBuilder()
+                                       .setValue(messageValue)
+                                       .build();
+        EventEnvelope eventEnvelope = EventEnvelope.of(factory.createEvent(message));
 
-        final List<? extends Message> eventMessages =
+        List<? extends Message> eventMessages =
                 AggregateMessageDispatcher.dispatchEvent(aggregate, eventEnvelope);
 
         assertTrue(aggregate.getState()

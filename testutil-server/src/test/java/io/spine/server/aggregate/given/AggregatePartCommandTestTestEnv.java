@@ -82,15 +82,15 @@ public class AggregatePartCommandTestTestEnv {
 
         @Override
         protected TimerCounter createAggregatePart() {
-            final TimerCounterRoot root = new TimerCounterRoot(boundedContext, Identifier.newUuid());
-            final TimerCounter result = Given.aggregatePartOfClass(TimerCounter.class)
-                                             .withRoot(root)
-                                             .withId(getClass().getName())
-                                             .withVersion(5)
-                                             .withState(UInt32Value.newBuilder()
-                                                                   .setValue(42)
-                                                                   .build())
-                                             .build();
+            TimerCounterRoot root = new TimerCounterRoot(boundedContext, Identifier.newUuid());
+            TimerCounter result = Given.aggregatePartOfClass(TimerCounter.class)
+                                       .withRoot(root)
+                                       .withId(getClass().getName())
+                                       .withVersion(5)
+                                       .withState(UInt32Value.newBuilder()
+                                                             .setValue(42)
+                                                             .build())
+                                       .build();
             return result;
         }
     }

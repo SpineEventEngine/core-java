@@ -39,12 +39,12 @@ class AggregateBuilderTest {
     @Test
     @DisplayName("create aggregate")
     void createAggregate() {
-        final int id = 2048;
-        final int version = 2017;
-        final Timestamp whenModified = Time.getCurrentTime();
-        final Timestamp state = TimeTests.Past.minutesAgo(60);
+        int id = 2048;
+        int version = 2017;
+        Timestamp whenModified = Time.getCurrentTime();
+        Timestamp state = TimeTests.Past.minutesAgo(60);
 
-        final Aggregate aggregate = givenAggregate()
+        Aggregate aggregate = givenAggregate()
                 .withId(id)
                 .withVersion(version)
                 .withState(state)

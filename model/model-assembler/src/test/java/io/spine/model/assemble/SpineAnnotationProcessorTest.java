@@ -56,7 +56,7 @@ abstract class SpineAnnotationProcessorTest {
     @Test
     @DisplayName("have constant annotation type")
     void getAnnotationType() {
-        final Class<?> target = processor.getAnnotationType();
+        Class<?> target = processor.getAnnotationType();
         assertNotNull(target);
         assertTrue(target.isAnnotation());
 
@@ -71,8 +71,8 @@ abstract class SpineAnnotationProcessorTest {
     @Test
     @DisplayName("generate supported annotation names based on target annotation")
     void getSupportedAnnotationTypes() {
-        final Class<?> targetType = processor.getAnnotationType();
-        final Set<String> supportedAnnotations = processor.getSupportedAnnotationTypes();
+        Class<?> targetType = processor.getAnnotationType();
+        Set<String> supportedAnnotations = processor.getSupportedAnnotationTypes();
 
         assertNotNull(supportedAnnotations);
         assertEquals(targetType.getName(), supportedAnnotations.iterator().next());
@@ -81,13 +81,13 @@ abstract class SpineAnnotationProcessorTest {
     @Test
     @DisplayName("print error message")
     void printErrorMessage() {
-        final ProcessingEnvironment environment = mock(ProcessingEnvironment.class);
-        final Messager messager = mock(Messager.class);
+        ProcessingEnvironment environment = mock(ProcessingEnvironment.class);
+        Messager messager = mock(Messager.class);
         when(environment.getMessager()).thenReturn(messager);
 
         processor.init(environment);
 
-        final String errorMessage = "custom error";
+        String errorMessage = "custom error";
         processor.error(errorMessage);
         verify(messager).printMessage(eq(ERROR), eq(errorMessage));
     }
@@ -95,13 +95,13 @@ abstract class SpineAnnotationProcessorTest {
     @Test
     @DisplayName("print warning message")
     void printWarningMessage() {
-        final ProcessingEnvironment environment = mock(ProcessingEnvironment.class);
-        final Messager messager = mock(Messager.class);
+        ProcessingEnvironment environment = mock(ProcessingEnvironment.class);
+        Messager messager = mock(Messager.class);
         when(environment.getMessager()).thenReturn(messager);
 
         processor.init(environment);
 
-        final String message = "custom warning";
+        String message = "custom warning";
         processor.warn(message);
         verify(messager).printMessage(eq(WARNING), eq(message));
     }
