@@ -32,7 +32,7 @@ public abstract class AckedCommandsVerifier {
     abstract void verify(AckedCommands acks);
 
     public static AckedCommandsVerifier acked(final int expectedCount) {
-        checkArgument(expectedCount >= 0);
+        checkArgument(expectedCount >= 0, "0 or more acknowledgements must be expected.");
 
         return new AckedCommandsVerifier() {
             @Override

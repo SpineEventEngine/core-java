@@ -37,7 +37,7 @@ public abstract class EmittedEventsVerifier {
     public abstract void verify(EmittedEvents events);
 
     public static EmittedEventsVerifier emitted(final int expectedCount) {
-        checkArgument(expectedCount >= 0);
+        checkArgument(expectedCount >= 0, "0 or more emitted events must be expected.");
 
         return new EmittedEventsVerifier() {
 
