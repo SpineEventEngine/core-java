@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,7 +23,6 @@ package io.spine.server.entity;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 
-import javax.annotation.CheckReturnValue;
 import java.util.Iterator;
 
 /**
@@ -48,7 +47,6 @@ public interface RepositoryView<I, E extends Entity<I, ?>> {
      * @param id the ID of the entity to load
      * @return the entity or {@link Optional#absent()} if there's no entity with such ID
      */
-    @CheckReturnValue
     Optional<E> find(I id);
 
     /**
@@ -58,6 +56,5 @@ public interface RepositoryView<I, E extends Entity<I, ?>> {
      * @param filter the {@linkplain Predicate#apply(Object) filtering} predicate
      * @return new iterator
      */
-    @CheckReturnValue
     Iterator<E> iterator(Predicate<E> filter);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,13 +24,13 @@ import com.google.protobuf.Message;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
+import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.model.Model;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.server.rejection.RejectionSubscriberClass;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
-import io.spine.util.Logging;
 import org.slf4j.Logger;
 
 import java.util.Objects;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,7 +23,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.Event;
@@ -59,7 +59,8 @@ import static java.util.Collections.emptyList;
 public class AggregateMessageDeliveryTestEnv {
 
     /** Prevents instantiation of this test environment class. */
-    private AggregateMessageDeliveryTestEnv() {}
+    private AggregateMessageDeliveryTestEnv() {
+    }
 
     public static Command startProject() {
         final ProjectId projectId = projectId();
@@ -110,7 +111,6 @@ public class AggregateMessageDeliveryTestEnv {
     public static Rejection cannotStartProject() {
         final ProjectId projectId = projectId();
 
-
         final AggStartProject cmdMessage = AggStartProject.newBuilder()
                                                           .setProjectId(projectId)
                                                           .build();
@@ -118,7 +118,7 @@ public class AggregateMessageDeliveryTestEnv {
 
         final Rejection result = Rejections.toRejection(
                 new io.spine.test.aggregate.rejection.AggCannotStartArchivedProject(
-                        projectId, Lists.<ProjectId>newArrayList()),
+                        projectId, Lists.newArrayList()),
                 command);
         return result;
     }

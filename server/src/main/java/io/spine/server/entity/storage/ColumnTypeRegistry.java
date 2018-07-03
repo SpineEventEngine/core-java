@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Primitives;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -78,7 +79,7 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
      * Retrieves the {@link ColumnType} for specified {@link EntityColumn}.
      *
      * <p>By default, this method returns the {@link ColumnType} for the
-     * {@linkplain EntityColumn column's} {@linkplain EntityColumn#getType() type}.
+     * {@linkplain EntityColumn column's} {@linkplain EntityColumn#getPersistedType() type}.
      *
      * <p>If the {@link ColumnType} was not found by the {@code class} of the {@link EntityColumn},
      * its superclasses are checked one by one until a {@link ColumnType} is found or until
@@ -92,7 +93,7 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
     public C get(EntityColumn field) {
         checkNotNull(field);
 
-        Class javaType = field.getType();
+        Class javaType = field.getPersistedType();
         javaType = Primitives.wrap(javaType);
         C type = null;
 
@@ -103,7 +104,7 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
 
         checkState(type != null,
                    "Could not find storage type for %s.",
-                   field.getType());
+                   field.getPersistedType());
         return type;
     }
 
@@ -116,9 +117,11 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
         return new Builder<>();
     }
 
-    @SuppressWarnings("unchecked")
-        // Unchecked copying from the src instance
-        // Never leads to a failure, since checked while writing into the instance itself
+    @SuppressWarnings({
+            "unchecked" /* Unchecked copying from the src instance never leads to a failure,
+                           since checked while writing into the instance itself.  */,
+            "CheckReturnValue" // calling builder
+    })
     public static <C extends ColumnType> Builder<C> newBuilder(ColumnTypeRegistry<C> src) {
         final Builder<C> builder = newBuilder();
         for (Map.Entry<Class, C> typeMapping : src.columnTypeMap.entrySet()) {
@@ -131,6 +134,7 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
 
         private final Map<Class, C> columnTypeMap = new HashMap<>();
 
+        /** Prevents instantiation from outside. */
         private Builder() {
         }
 
@@ -144,13 +148,14 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
          * @param <J>        the Java type
          * @return self for call chaining
          */
+        @CanIgnoreReturnValue
         public <J> Builder<C> put(Class<J> javaType, ColumnType<J, ?, ?, ?> columnType) {
             checkNotNull(javaType);
             checkNotNull(columnType);
 
             @SuppressWarnings("unchecked")
-            final C columnTypeResolved = (C) columnType;
-            final Class<J> wrapped = Primitives.wrap(javaType);
+            C columnTypeResolved = (C) columnType;
+            Class<J> wrapped = Primitives.wrap(javaType);
             columnTypeMap.put(wrapped, columnTypeResolved);
             return this;
         }

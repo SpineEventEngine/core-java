@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,15 +21,15 @@
 package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.test.ReflectiveBuilder;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -52,23 +52,19 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
      *
      * <p>Is null until {@link #setResultClass(Class)} is called.
      */
-    @Nullable
-    private EntityClass<E> entityClass;
+    private @Nullable EntityClass<E> entityClass;
 
     /** The ID of the entity. If not set, a value default to the type will be used. */
-    @Nullable
-    private I id;
+    private @Nullable I id;
 
     /** The entity state. If not set, a default instance will be used. */
-    @Nullable
-    private S state;
+    private @Nullable S state;
 
     /** The entity version. Or zero if not set. */
     private int version;
 
     /** The entity timestamp or default {@code Timestamp} if not set. */
-    @Nullable
-    private Timestamp whenModified;
+    private @Nullable Timestamp whenModified;
 
     /**
      * Creates new instance of the builder.
@@ -78,7 +74,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
         // Have the constructor for finding usages easier.
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // fix IDEA bug
+    @CanIgnoreReturnValue
     @Override
     public EntityBuilder<E, I, S> setResultClass(Class<E> entityClass) {
         super.setResultClass(entityClass);
@@ -117,7 +113,6 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
 
     /** Returns the class of IDs used by entities. */
     @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the builder.
-    @CheckReturnValue
     protected Class<I> getIdClass() {
         return (Class<I>) entityClass().getIdClass();
     }
@@ -128,12 +123,12 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
 
     @Override
     public E build() {
-        final I id = id();
-        final E result = createEntity(id);
-        final S state = state(result);
-        final Timestamp timestamp = timestamp();
+        I id = id();
+        E result = createEntity(id);
+        S state = state(result);
+        Timestamp timestamp = timestamp();
 
-        final Version version = Versions.newVersion(this.version, timestamp);
+        Version version = Versions.newVersion(this.version, timestamp);
         setState(result, state, version);
         return result;
     }
@@ -171,7 +166,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
 
     @Override
     protected Constructor<E> getConstructor() {
-        final Constructor<E> constructor = entityClass().getConstructor();
+        Constructor<E> constructor = entityClass().getConstructor();
         constructor.setAccessible(true);
         return constructor;
     }
@@ -180,7 +175,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
      * Creates an empty entity instance.
      */
     protected E createEntity(I id) {
-        final E result = entityClass().createEntity(id);
+        E result = entityClass().createEntity(id);
         return result;
     }
 }

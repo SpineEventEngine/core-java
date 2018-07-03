@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,7 +23,7 @@ package io.spine.server.aggregate.given.aggregate;
 import io.spine.test.aggregate.ProjectId;
 
 /**
- * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardShould
+ * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardTest
  * IdempotencyGuard tests}.
  *
  * @author Mykhailo Drachuk

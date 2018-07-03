@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -30,7 +30,7 @@ import io.spine.core.Rejections;
 import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.rejection.StandardRejections.CannotModifyDeletedEntity;
-import io.spine.server.rejection.RejectionBusShould;
+import io.spine.server.rejection.RejectionBusTest;
 import io.spine.test.rejection.ProjectId;
 import io.spine.test.rejection.ProjectRejections;
 import io.spine.test.rejection.command.RjRemoveOwner;
@@ -38,12 +38,17 @@ import io.spine.test.rejection.command.RjUpdateProjectName;
 import io.spine.test.rejection.command.RjUpdateProjectNameVBuilder;
 import io.spine.testdata.Sample;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 
+/**
+ * @author Alexander Yevsyukov
+ * @author Dmytro Grankin
+ */
 public class Given {
 
     /** Prevents instantiation of this utility class. */
-    private Given() {}
+    private Given() {
+    }
 
     public static Rejection invalidProjectNameRejection() {
         final ProjectId projectId = newProjectId();
@@ -63,16 +68,17 @@ public class Given {
                                                    .setValue(newUuid())
                                                    .build();
         final TestActorRequestFactory factory =
-                TestActorRequestFactory.newInstance(RejectionBusShould.class, generatedTenantId);
+                TestActorRequestFactory.newInstance(RejectionBusTest.class, generatedTenantId);
         final Command command = factory.createCommand(updateProjectName);
         return Rejections.createRejection(invalidProjectName, command);
     }
 
     public static Rejection missingOwnerRejection() {
         final ProjectId projectId = newProjectId();
-        final ProjectRejections.MissingOwner msg = ProjectRejections.MissingOwner.newBuilder()
-                                                                                 .setProjectId(projectId)
-                                                                                 .build();
+        final ProjectRejections.MissingOwner msg =
+                ProjectRejections.MissingOwner.newBuilder()
+                                              .setProjectId(projectId)
+                                              .build();
         final Command command = io.spine.server.commandbus.Given.ACommand.withMessage(
                 Sample.messageOfType(RjRemoveOwner.class));
         return Rejections.createRejection(msg, command);

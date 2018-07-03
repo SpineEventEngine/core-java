@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,7 +22,10 @@
  * This package contains classes and interfaces for working with
  * {@link io.spine.server.entity.Entity entity} storage representation.
  */
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.entity.storage;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

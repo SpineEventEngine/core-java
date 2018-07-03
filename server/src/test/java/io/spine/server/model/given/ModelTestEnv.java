@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -36,14 +36,15 @@ import io.spine.test.reflect.event.RefProjectStarted;
 import io.spine.validate.StringValueVBuilder;
 
 /**
- * Test environment for {@linkplain io.spine.server.model.ModelShould Model tests}.
+ * Test environment for {@linkplain io.spine.server.model.ModelTest Model tests}.
  *
  * @author Alexander Yevsyukov
  */
 public class ModelTestEnv {
 
     /** Prevents instantiation on this utility class. */
-    private ModelTestEnv() {}
+    private ModelTestEnv() {
+    }
 
     @SuppressWarnings("MethodMayBeStatic")
     public static class MAggregate extends Aggregate<Long, Project, ProjectVBuilder> {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,8 +23,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import io.spine.string.StringifierRegistry;
 import io.spine.type.TypeUrl;
-
-import javax.annotation.CheckReturnValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -55,7 +53,6 @@ public final class AggregateStateId<I> {
         this.stateType = checkNotNull(stateType);
     }
 
-    @CheckReturnValue
     public static <I> AggregateStateId of(I aggregateId, TypeUrl stateType) {
         return new AggregateStateId<>(aggregateId, stateType);
     }

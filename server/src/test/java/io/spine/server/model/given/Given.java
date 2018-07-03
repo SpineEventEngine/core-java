@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,12 +26,19 @@ import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.command.RefStartProject;
 import io.spine.test.reflect.event.RefProjectCreated;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 
+/**
+ * @author Andrey Lavrov
+ * @author Alex Tymchenko
+ * @author Alexander Aleksandrov
+ * @author Alexander Yevsyukov
+ */
 public class Given {
 
     /** Prevents instantiation of this utility class. */
-    private Given() {}
+    private Given() {
+    }
 
     static ProjectId newProjectId() {
         final String uuid = newUuid();
@@ -46,7 +53,8 @@ public class Given {
         private static final RefProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
 
         /** Prevents instantiation of this utility class. */
-        private EventMessage() {}
+        private EventMessage() {
+        }
 
         public static RefProjectCreated projectCreated() {
             return PROJECT_CREATED;
@@ -54,26 +62,27 @@ public class Given {
 
         public static RefProjectCreated projectCreated(ProjectId id) {
             return RefProjectCreated.newBuilder()
-                                 .setProjectId(id)
-                                 .build();
+                                    .setProjectId(id)
+                                    .build();
         }
     }
 
     public static class CommandMessage {
 
         /** Prevents instantiation of this utility class. */
-        private CommandMessage() {}
+        private CommandMessage() {
+        }
 
         public static RefCreateProject createProject() {
             return RefCreateProject.newBuilder()
-                                .setProjectId(newProjectId())
-                                .build();
+                                   .setProjectId(newProjectId())
+                                   .build();
         }
 
         public static RefStartProject startProject() {
             return RefStartProject.newBuilder()
-                               .setProjectId(newProjectId())
-                               .build();
+                                  .setProjectId(newProjectId())
+                                  .build();
         }
     }
 
@@ -84,13 +93,14 @@ public class Given {
                 invalidProjectName(DUMMY_PROJECT_ID);
 
         /** Prevents instantiation of this utility class. */
-        private RejectionMessage() {}
+        private RejectionMessage() {
+        }
 
         public static InvalidProjectName invalidProjectName() {
             return INVALID_PROJECT_NAME;
         }
 
-        private static InvalidProjectName  invalidProjectName(ProjectId id) {
+        private static InvalidProjectName invalidProjectName(ProjectId id) {
             final InvalidProjectName invalidProjectName = InvalidProjectName.newBuilder()
                                                                             .setProjectId(id)
                                                                             .build();

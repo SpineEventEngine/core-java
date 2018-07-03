@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,7 +23,6 @@ package io.spine.server.model;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
@@ -49,6 +48,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.intersection;
 
 /**
  * Stores information of message handling classes.
@@ -70,7 +70,8 @@ public class Model {
     }
 
     /** Prevent instantiation from outside. */
-    private Model() {}
+    private Model() {
+    }
 
     @VisibleForTesting
     void clear() {
@@ -213,23 +214,21 @@ public class Model {
 
     private void checkDuplicates(CommandHandlingClass candidate)
         throws DuplicateCommandHandlerError {
-        final Set<CommandClass> candidateCommands = candidate.getCommands();
-        final ImmutableMap.Builder<Set<CommandClass>, CommandHandlingClass> map =
-                ImmutableMap.builder();
+        Set<CommandClass> candidateCommands = candidate.getCommands();
+        ImmutableMap.Builder<Set<CommandClass>, CommandHandlingClass> map = ImmutableMap.builder();
 
         for (ModelClass<?> modelClass : classes.values()) {
             if (modelClass instanceof CommandHandlingClass) {
-                final CommandHandlingClass commandHandler = (CommandHandlingClass) modelClass;
-                final Set<CommandClass> commandClasses = commandHandler.getCommands();
-                final Sets.SetView<CommandClass> intersection =
-                        Sets.intersection(commandClasses, candidateCommands);
+                CommandHandlingClass commandHandler = (CommandHandlingClass) modelClass;
+                Set<CommandClass> commandClasses = commandHandler.getCommands();
+                Set<CommandClass> intersection = intersection(commandClasses, candidateCommands);
                 if (intersection.size() > 0) {
                     map.put(intersection, commandHandler);
                 }
             }
         }
 
-        final ImmutableMap<Set<CommandClass>, CommandHandlingClass> currentHandlers = map.build();
+        ImmutableMap<Set<CommandClass>, CommandHandlingClass> currentHandlers = map.build();
         if (!currentHandlers.isEmpty()) {
             throw new DuplicateCommandHandlerError(candidate, currentHandlers);
         }
@@ -258,8 +257,8 @@ public class Model {
      */
     public Message getDefaultState(Class<? extends Entity> cls) {
         checkNotNull(cls);
-        final DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
-        final Message result = registry.putOrGet(cls);
+        DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
+        Message result = registry.get(cls);
         return result;
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,10 +22,11 @@ package io.spine.server.event.given;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
 import io.spine.base.Error;
+import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
@@ -33,7 +34,9 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
+import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.aggregate.Aggregate;
@@ -43,9 +46,13 @@ import io.spine.server.bus.AbstractBusFilter;
 import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.EventBusShould;
+import io.spine.server.event.EventBusTest;
+import io.spine.server.event.EventDispatcher;
+import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.event.EventSubscriber;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.test.event.EBProjectArchived;
 import io.spine.test.event.EBProjectCreated;
 import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.Project;
@@ -58,11 +65,13 @@ import io.spine.test.event.command.EBAddTasks;
 import io.spine.test.event.command.EBArchiveProject;
 import io.spine.test.event.command.EBCreateProject;
 import io.spine.testdata.Sample;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
+import java.util.Set;
 
 import static com.google.common.base.Optional.absent;
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.bus.Buses.reject;
@@ -76,7 +85,7 @@ public class EventBusTestEnv {
     private static final ProjectId PROJECT_ID = projectId();
 
     public static final ActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(EventBusShould.class, TENANT_ID);
+            TestActorRequestFactory.newInstance(EventBusTest.class, TENANT_ID);
 
     private EventBusTestEnv() {
         // Prevent instantiation.
@@ -160,6 +169,17 @@ public class EventBusTestEnv {
         return results;
     }
 
+    @SuppressWarnings("CheckReturnValue") // Conditionally calling builder.
+    public static EventBus.Builder eventBusBuilder(@Nullable EventEnricher enricher) {
+        EventBus.Builder busBuilder = EventBus
+                .newBuilder()
+                .appendFilter(new TaskCreatedFilter());
+        if (enricher != null) {
+            busBuilder.setEnricher(enricher);
+        }
+        return busBuilder;
+    }
+
     public static class ProjectRepository
             extends AggregateRepository<ProjectId, ProjectAggregate> {
     }
@@ -169,7 +189,7 @@ public class EventBusTestEnv {
         private ProjectAggregate(ProjectId id) {
             super(id);
         }
-        
+
         @Assign
         EBProjectCreated on(EBCreateProject command, CommandContext ctx) {
             final EBProjectCreated event = projectCreated(command.getProjectId());
@@ -201,7 +221,7 @@ public class EventBusTestEnv {
                     .setId(event.getProjectId())
                     .addTask(event.getTask());
         }
-        
+
         private static EBProjectCreated projectCreated(ProjectId projectId) {
             return EBProjectCreated.newBuilder()
                                    .setProjectId(projectId)
@@ -226,7 +246,7 @@ public class EventBusTestEnv {
     }
 
     /**
-     * Filters out the {@link EBTaskAdded} events which have their {@link Task#getDone()} 
+     * Filters out the {@link EBTaskAdded} events which have their {@link Task#getDone()}
      * property set to {@code true}.
      */
     public static class TaskCreatedFilter extends AbstractBusFilter<EventEnvelope> {
@@ -255,11 +275,100 @@ public class EventBusTestEnv {
         }
     }
 
-    private static class EventMessage {
+    /**
+     * {@link EBProjectCreated} subscriber that does nothing.
+     *
+     * <p>Can be used for the event to get pass the {@link io.spine.server.bus.DeadMessageFilter}.
+     */
+    public static class EBProjectCreatedNoOpSubscriber extends EventSubscriber {
+
+        @Subscribe
+        public void on(EBProjectCreated message, EventContext context) {
+            // Do nothing.
+        }
+    }
+
+    public static class EBProjectArchivedSubscriber extends EventSubscriber {
+
+        private Message eventMessage;
+
+        @Subscribe
+        public void on(EBProjectArchived message, EventContext ignored) {
+            this.eventMessage = message;
+        }
+
+        public Message getEventMessage() {
+            return eventMessage;
+        }
+    }
+
+    public static class ProjectCreatedSubscriber extends EventSubscriber {
+
+        private Message eventMessage;
+        private EventContext eventContext;
+
+        @Subscribe
+        public void on(ProjectCreated eventMsg, EventContext context) {
+            this.eventMessage = eventMsg;
+            this.eventContext = context;
+        }
+
+        public Message getEventMessage() {
+            return eventMessage;
+        }
+
+        public EventContext getEventContext() {
+            return eventContext;
+        }
+    }
+
+    /**
+     * {@link EBTaskAdded} subscriber that does nothing. Can be used for the event to get pass the
+     * {@link io.spine.server.bus.DeadMessageFilter}.
+     */
+    public static class EBTaskAddedNoOpSubscriber extends EventSubscriber {
+
+        @Subscribe
+        public void on(EBTaskAdded message, EventContext context) {
+            // Do nothing.
+        }
+    }
+
+    /**
+     * A simple dispatcher class, which only dispatch and does not have own event
+     * subscribing methods.
+     */
+    public static class BareDispatcher implements EventDispatcher<String> {
+
+        private boolean dispatchCalled = false;
+
+        @Override
+        public Set<EventClass> getMessageClasses() {
+            return ImmutableSet.of(EventClass.of(ProjectCreated.class));
+        }
+
+        @Override
+        public Set<String> dispatch(EventEnvelope event) {
+            dispatchCalled = true;
+            return Identity.of(this);
+        }
+
+        @Override
+        public void onError(EventEnvelope envelope, RuntimeException exception) {
+            // Do nothing.
+        }
+
+        public boolean isDispatchCalled() {
+            return dispatchCalled;
+        }
+    }
+
+    public static class EventMessage {
 
         private static final ProjectStarted PROJECT_STARTED = projectStarted(PROJECT_ID);
 
-        private EventMessage() {}
+        private EventMessage() {
+        }
 
         private static ProjectStarted projectStarted() {
             return PROJECT_STARTED;
@@ -283,7 +392,8 @@ public class EventBusTestEnv {
         private static final TestEventFactory factory =
                 TestEventFactory.newInstance(pack(PROJECT_ID), GivenEvent.class);
 
-        private GivenEvent() {}
+        private GivenEvent() {
+        }
 
         private static TestEventFactory eventFactory() {
             return factory;

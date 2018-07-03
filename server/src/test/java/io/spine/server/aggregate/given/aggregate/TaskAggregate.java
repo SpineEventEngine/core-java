@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -38,17 +38,14 @@ import io.spine.test.aggregate.rejection.Rejections;
 import io.spine.test.aggregate.task.AggTask;
 import io.spine.test.aggregate.task.AggTaskId;
 import io.spine.test.aggregate.task.AggTaskVBuilder;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * An aggregate that fires a {@linkplain Pair pair} with an optional upon handling a command,
  * an event or a rejection.
  *
  * @author Alexander Yevsyukkov
- * @see io.spine.server.aggregate.AggregateShould#create_single_event_for_a_pair_of_events_with_empty_for_a_command_dispatch
- * @see io.spine.server.aggregate.AggregateShould#create_single_event_for_a_pair_of_events_with_empty_for_an_event_react
- * @see io.spine.server.aggregate.AggregateShould#create_single_event_for_a_pair_of_events_with_empty_for_a_rejection_react
+ * @see io.spine.server.aggregate.AggregateTest.CreateSingleEventForPair
  */
 public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder> {
 
@@ -85,8 +82,7 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
      * Creates a new {@link AggTaskAssigned} event message with provided values. If the
      * {@linkplain UserId assignee} is a default empty instance returns {@code null}.
      */
-    @Nullable
-    private static AggTaskAssigned taskAssignedOrNull(AggTaskId id, UserId assignee) {
+    private static @Nullable AggTaskAssigned taskAssignedOrNull(AggTaskId id, UserId assignee) {
         final UserId emptyUserId = UserId.getDefaultInstance();
         if (assignee.equals(emptyUserId)) {
             return null;
@@ -156,8 +152,7 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
         return Pair.withNullable(newAssigneeNotified, previousAssigneeNotified);
     }
 
-    @Nullable
-    private static AggUserNotified userNotifiedOrNull(AggTaskId taskId, UserId userId) {
+    private static @Nullable AggUserNotified userNotifiedOrNull(AggTaskId taskId, UserId userId) {
         if (userId.equals(EMPTY_USER_ID)) {
             return null;
         }

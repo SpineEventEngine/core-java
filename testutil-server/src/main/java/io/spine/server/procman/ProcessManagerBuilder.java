@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,6 +21,7 @@
 package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Version;
 import io.spine.server.entity.EntityBuilder;
@@ -42,12 +43,13 @@ public class ProcessManagerBuilder<P extends ProcessManager<I, S, B>,
                                    B extends ValidatingBuilder<S, ?>>
         extends EntityBuilder<P, I, S> {
 
+    /** Creates new instance. */
     public ProcessManagerBuilder() {
         super();
         // Have the constructor for easier location of usages.
     }
 
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // fix IDEA bug
+    @CanIgnoreReturnValue
     @Override
     public ProcessManagerBuilder<P, I, S, B> setResultClass(Class<P> entityClass) {
         super.setResultClass(entityClass);
@@ -56,6 +58,7 @@ public class ProcessManagerBuilder<P extends ProcessManager<I, S, B>,
 
     @Override
     protected void setState(P result, S state, Version version) {
-        PmTransaction.startWith(result, state, version).commit();
+        PmTransaction.startWith(result, state, version)
+                     .commit();
     }
 }

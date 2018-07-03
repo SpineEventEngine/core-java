@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,8 +23,7 @@ package io.spine.server.outbus.enrich;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import io.spine.annotation.Internal;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -53,7 +52,7 @@ public final class SupportsFieldConversion implements Predicate<EnrichmentFuncti
     }
 
     @Override
-    public boolean apply(@Nullable EnrichmentFunction<?, ?, ?> input) {
+    public boolean apply(EnrichmentFunction<?, ?, ?> input) {
         checkNotNull(input);
         final boolean eventClassMatches =
                 messageFieldClass.equals(input.getSourceClass());

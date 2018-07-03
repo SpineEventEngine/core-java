@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,9 +26,8 @@ import io.spine.server.model.Model;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Objects;
 
@@ -50,19 +49,16 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * @see #thisClass()
      * @see #getModelClass()
      */
-    @Nullable
-    private volatile EntityClass<?> thisClass;
+    private volatile @MonotonicNonNull EntityClass<?> thisClass;
 
     /** The ID of the entity. */
     private final I id;
 
     /** Cached version of string ID. */
-    @Nullable
-    private volatile String stringId;
+    private volatile @MonotonicNonNull String stringId;
 
     /** The state of the entity. */
-    @Nullable
-    private volatile S state;
+    private volatile @MonotonicNonNull S state;
 
     /**
      * Creates new instance with the passed ID.
@@ -83,7 +79,6 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * {@inheritDoc}
      */
     @Override
-    @CheckReturnValue
     public S getState() {
         if (state == null) {
             state = getDefaultState();
@@ -131,7 +126,6 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * {@inheritDoc}
      */
     @Override
-    @CheckReturnValue
     public S getDefaultState() {
         final Class<? extends Entity> entityClass = getClass();
         @SuppressWarnings("unchecked")

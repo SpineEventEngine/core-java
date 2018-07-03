@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,8 +22,10 @@
  * This package provides classes for working with the
  * {@linkplain io.spine.server.commandbus.CommandBus bus} output.
  */
-
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.outbus;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

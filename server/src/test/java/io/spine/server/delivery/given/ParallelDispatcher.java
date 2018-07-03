@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -35,7 +35,7 @@ import java.util.concurrent.ExecutorService;
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.concurrent.Executors.newFixedThreadPool;
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * The helper class used to dispatch numerous messages of a certain kind to the entities,
@@ -109,12 +109,9 @@ public abstract class ParallelDispatcher<I extends Message, M extends Message> {
         for (int i = 0; i < messageCount; i++) {
             final M message = newMessage();
 
-            builder.add(new Callable<Object>() {
-                @Override
-                public Object call() {
-                    postToBus(boundedContext, message);
-                    return 0;
-                }
+            builder.add(() -> {
+                postToBus(boundedContext, message);
+                return 0;
             });
         }
 

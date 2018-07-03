@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,7 +21,6 @@ package io.spine.server.storage;
 
 import com.google.protobuf.Message;
 
-import javax.annotation.CheckReturnValue;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -54,7 +53,6 @@ interface BulkStorageOperationsMixin<I, R extends Message> {
      * @return the {@link Iterable} containing the records matching the given IDs
      * @throws IllegalStateException if the storage was closed before
      */
-    @CheckReturnValue
     Iterator<R> readMultiple(Iterable<I> ids);
 
     /**
@@ -66,6 +64,5 @@ interface BulkStorageOperationsMixin<I, R extends Message> {
      * @return the {@code Map} containing the ID - record entries.
      * @throws IllegalStateException if the storage was closed before
      */
-    @CheckReturnValue
     Iterator<R> readAll();
 }

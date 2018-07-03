@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,8 +24,7 @@ import io.spine.core.RejectionContext;
 import io.spine.core.Subscribe;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.test.rejection.ProjectRejections.InvalidProjectName;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A rejection subscriber which listens to {@link InvalidProjectName} and remembers
@@ -35,16 +34,14 @@ import javax.annotation.Nullable;
  */
 public class RejectionEnrichmentConsumer extends RejectionSubscriber {
 
-    @Nullable
-    private RejectionContext context;
+    private @Nullable RejectionContext context;
 
     @Subscribe
     public void on(InvalidProjectName rejection, RejectionContext context) {
         this.context = context;
     }
 
-    @Nullable
-    public RejectionContext getContext() {
+    public @Nullable RejectionContext getContext() {
         return context;
     }
 }

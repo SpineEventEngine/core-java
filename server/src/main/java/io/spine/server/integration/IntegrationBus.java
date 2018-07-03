@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,9 +22,8 @@ package io.spine.server.integration;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Any;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
-import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.bus.Bus;
@@ -42,17 +41,16 @@ import io.spine.server.transport.SubscriberHub;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.validate.Validate;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.Identifier.newUuid;
-import static io.spine.Identifier.pack;
-import static io.spine.server.bus.Buses.acknowledge;
+import static io.spine.base.Identifier.newUuid;
+import static io.spine.base.Identifier.pack;
 import static io.spine.server.integration.IntegrationChannels.fromId;
 import static io.spine.server.integration.IntegrationChannels.toId;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -212,16 +210,13 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     }
 
     @Override
-    protected Ack doPost(ExternalMessageEnvelope envelope) {
+    protected void dispatch(ExternalMessageEnvelope envelope) {
         final ExternalMessageEnvelope markedEnvelope = markExternal(envelope);
         final int dispatchersCalled = callDispatchers(markedEnvelope);
 
-        final Any packedId = pack(markedEnvelope.getId());
         checkState(dispatchersCalled != 0,
                    format("External message %s has no local dispatchers.",
                           markedEnvelope.getMessage()));
-        final Ack result = acknowledge(packedId);
-        return result;
     }
 
     private  ExternalMessageEnvelope markExternal(ExternalMessageEnvelope envelope) {
@@ -296,16 +291,16 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      *         the set of message types that are now requested by this instance of
      *         integration bus
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder
     private void notifyOfNeeds(Iterable<ChannelId> currentlyRequested) {
-        final RequestForExternalMessages.Builder resultBuilder =
+        RequestForExternalMessages.Builder resultBuilder =
                 RequestForExternalMessages.newBuilder();
         for (ChannelId channelId : currentlyRequested) {
-            final ExternalMessageType type = fromId(channelId);
+            ExternalMessageType type = fromId(channelId);
             resultBuilder.addRequestedMessageTypes(type);
         }
-        final RequestForExternalMessages result = resultBuilder.build();
-        final ExternalMessage externalMessage = ExternalMessages.of(result,
-                                                                    boundedContextName);
+        RequestForExternalMessages result = resultBuilder.build();
+        ExternalMessage externalMessage = ExternalMessages.of(result, boundedContextName);
         publisherHub.get(CONFIG_EXCHANGE_CHANNEL_ID)
                     .publish(pack(newUuid()), externalMessage);
     }
@@ -421,6 +416,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
             return Optional.fromNullable(eventBus);
         }
 
+        @CanIgnoreReturnValue
         public Builder setEventBus(EventBus eventBus) {
             this.eventBus = checkNotNull(eventBus);
             return self();
@@ -437,16 +433,19 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
             return Optional.fromNullable(value);
         }
 
+        @CanIgnoreReturnValue
         public Builder setRejectionBus(RejectionBus rejectionBus) {
             this.rejectionBus = checkNotNull(rejectionBus);
             return self();
         }
 
+        @CanIgnoreReturnValue
         public Builder setBoundedContextName(BoundedContextName boundedContextName) {
             this.boundedContextName = checkNotNull(boundedContextName);
             return self();
         }
 
+        @CanIgnoreReturnValue
         public Builder setTransportFactory(TransportFactory transportFactory) {
             this.transportFactory = checkNotNull(transportFactory);
             return self();

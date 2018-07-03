@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.grpc.Internal;
+import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -41,15 +41,18 @@ import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.dispatch.Dispatch;
 import io.spine.server.command.dispatch.DispatchResult;
+import io.spine.server.entity.EventPlayer;
+import io.spine.server.entity.EventPlayers;
 import io.spine.server.event.EventFactory;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.Model;
 import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
-import javax.annotation.CheckReturnValue;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
@@ -57,6 +60,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.validate.Validate.isNotDefault;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Abstract base for aggregates.
@@ -125,7 +129,8 @@ import static io.spine.validate.Validate.isNotDefault;
 public abstract class Aggregate<I,
                                 S extends Message,
                                 B extends ValidatingBuilder<S, ? extends Message.Builder>>
-                extends CommandHandlingEntity<I, S, B> {
+        extends CommandHandlingEntity<I, S, B>
+        implements EventPlayer {
 
     /**
      * Events generated in the process of handling commands that were not yet committed.
@@ -262,6 +267,12 @@ public abstract class Aggregate<I,
         method.invoke(this, eventMessage);
     }
 
+    @Override
+    public void play(Iterable<Event> events) {
+        EventPlayers.forTransactionOf(this)
+                    .play(events);
+    }
+
     /**
      * Applies passed events.
      *
@@ -392,7 +403,6 @@ public abstract class Aggregate<I,
      *
      * @return immutable view of all uncommitted events
      */
-    @CheckReturnValue
     List<Event> getUncommittedEvents() {
         return ImmutableList.copyOf(uncommittedEvents);
     }
@@ -432,7 +442,6 @@ public abstract class Aggregate<I,
      *
      * @return new snapshot
      */
-    @CheckReturnValue
     Snapshot toShapshot() {
         final Any state = AnyPacker.pack(getState());
         final Snapshot.Builder builder = Snapshot.newBuilder()
@@ -457,7 +466,7 @@ public abstract class Aggregate<I,
      * Creates an iterator of the aggregate event history with reverse traversal.
      *
      * <p>The records are returned sorted by timestamp in a descending order (from newer to older).
-     * 
+     *
      * <p>The iterator is empty if there's no history for the aggregate.
      *
      * @return new iterator instance

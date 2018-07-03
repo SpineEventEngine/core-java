@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,12 +24,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Supplier;
 import io.grpc.Internal;
 import io.grpc.stub.StreamObserver;
+import io.spine.logging.Logging;
 import io.spine.string.Stringifiers;
-import io.spine.util.Logging;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.spine.util.Exceptions.unsupported;
 import static java.lang.String.format;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,12 +24,12 @@ import com.google.protobuf.Message;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.TenantId;
-import io.spine.server.aggregate.AggregateShould;
+import io.spine.server.aggregate.AggregateTest;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggStartProject;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 
 /**
  * @author Mykhailo Drachuk
@@ -65,7 +65,7 @@ public class IdempotencyGuardTestEnv {
     }
 
     public static TestActorRequestFactory newRequestFactory(TenantId tenantId) {
-        return TestActorRequestFactory.newInstance(AggregateShould.class, tenantId);
+        return TestActorRequestFactory.newInstance(AggregateTest.class, tenantId);
     }
 
     public static Command command(Message commandMessage, TenantId tenantId) {

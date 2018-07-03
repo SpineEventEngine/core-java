@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,8 +22,8 @@ package io.spine.server.tenant;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import io.spine.Environment;
 import io.spine.annotation.Internal;
+import io.spine.base.Environment;
 import io.spine.core.TenantId;
 import io.spine.server.storage.StorageFactory;
 

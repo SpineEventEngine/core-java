@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -55,8 +55,8 @@ class CEntity extends AbstractEntity<CommandId, CommandRecord> {
         checkNotNull(command);
         checkNotNull(status);
 
-        final CommandId commandId = command.getId();
-        final CEntity entity = create(commandId);
+        CommandId commandId = command.getId();
+        CEntity entity = create(commandId);
         entity.setCommandAndStatus(command, status);
         return entity;
     }
@@ -65,51 +65,58 @@ class CEntity extends AbstractEntity<CommandId, CommandRecord> {
         checkNotNull(command);
         checkNotNull(error);
 
-        final CommandId id = Records.getOrGenerateCommandId(command);
+        CommandId id = Records.getOrGenerateCommandId(command);
 
-        final CEntity result = create(id);
+        CEntity result = create(id);
         result.setError(id, command, error);
         return result;
     }
 
     private void setCommandAndStatus(Command command, CommandStatus status) {
-        final CommandRecord record = Records.newRecordBuilder(command,
-                                                              status,
-                                                              null).build();
+        CommandRecord record = Records.newRecordBuilder(command, status, null)
+                                      .build();
         updateState(record);
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     private void setError(CommandId id, Command command, Error error) {
-        final CommandRecord.Builder builder = Records.newRecordBuilder(command, ERROR, id);
+        CommandRecord.Builder builder = Records.newRecordBuilder(command, ERROR, id);
         builder.getStatusBuilder()
                .setError(error);
-        final CommandRecord record = builder.build();
+        CommandRecord record = builder.build();
         updateState(record);
     }
 
+    private CommandRecord.Builder stateBuilder() {
+        return getState().toBuilder();
+    }
+
+    @SuppressWarnings("CheckReturnValue") // calling builder
     void setOkStatus() {
-        final CommandRecord.Builder builder = getState().toBuilder();
+        CommandRecord.Builder builder = stateBuilder();
         builder.getStatusBuilder()
                .setCode(OK);
-        final CommandRecord record = builder.build();
+        CommandRecord record = builder.build();
         updateState(record);
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     void setToError(Error error) {
-        final CommandRecord.Builder builder = getState().toBuilder();
+        CommandRecord.Builder builder = stateBuilder();
         builder.getStatusBuilder()
                .setCode(ERROR)
                .setError(error);
-        final CommandRecord record = builder.build();
+        CommandRecord record = builder.build();
         updateState(record);
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     void setToRejected(Rejection rejection) {
-        final CommandRecord.Builder builder = getState().toBuilder();
+        CommandRecord.Builder builder = stateBuilder();
         builder.getStatusBuilder()
                .setCode(REJECTED)
                .setRejection(rejection);
-        final CommandRecord record = builder.build();
+        CommandRecord record = builder.build();
         updateState(record);
     }
 }

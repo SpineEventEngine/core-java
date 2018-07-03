@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,12 +23,13 @@ package io.spine.server.tuple;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.UnmodifiableIterator;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Iterator;
 import java.util.List;
@@ -81,8 +82,8 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
      * @return the passed value
      * @throws IllegalArgumentException if the passed value is {@link Empty}
      */
-    @Nullable
-    static <M extends Message, T extends Tuple>
+    @CanIgnoreReturnValue
+    static @Nullable <M extends Message, T extends Tuple>
     M checkNotEmpty(Class<T> checkingClass, @Nullable M value) {
         if (value == null) {
             return null;
@@ -97,6 +98,7 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         return value;
     }
 
+    @CanIgnoreReturnValue
     static <M extends Message, T extends Tuple>
     M checkNotNullOrEmpty(Class<T> checkingClass, M value) {
         checkNotNull(value);
@@ -117,9 +119,8 @@ public abstract class Tuple implements Iterable<Message>, Serializable {
         }
     }
 
-    @Nonnull
     @Override
-    public final Iterator<Message> iterator() {
+    public final @NonNull Iterator<Message> iterator() {
         final Iterator<Message> result = new ExtractingIterator(values);
         return result;
     }

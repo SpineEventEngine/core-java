@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,8 +24,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import io.spine.Identifier;
 import io.spine.base.Error;
+import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.CommandStatus;
@@ -33,8 +33,8 @@ import io.spine.core.Rejection;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.ProcessingStatus;
 import io.spine.server.entity.DefaultRecordBasedRepository;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static com.google.common.collect.Iterators.transform;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -29,6 +29,8 @@ import io.spine.server.route.given.switchman.rejection.SwitchmanUnavailable;
 /**
  * A repository which fires a rejection in response to a command with a particular value of the
  * target aggregate ID.
+ *
+ * @author Alexander Yevsyukov
  */
 @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
 public final class SwitchmanBureau extends AggregateRepository<String, Switchman> {
@@ -36,6 +38,8 @@ public final class SwitchmanBureau extends AggregateRepository<String, Switchman
     /** The ID of the aggregate for which a {@link SetSwitch command} would be rejected. */
     public static final String MISSING_SWITCHMAN_NAME = "Petrovich";
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    // Can ignore the value since we're calling own builder-like method.
     public SwitchmanBureau() {
         super();
         getCommandRouting().route(SetSwitch.class, new CommandRoute<String, SetSwitch>() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,6 +20,7 @@
 package io.spine.server.delivery;
 
 import com.google.common.base.MoreObjects;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -27,6 +28,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
 import io.spine.protobuf.AnyPacker;
+import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessages;
@@ -35,9 +37,8 @@ import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
 import io.spine.string.Stringifiers;
 import io.spine.type.ClassName;
-import io.spine.util.GenericTypeIndex;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 import static com.google.common.base.Joiner.on;
@@ -307,8 +308,9 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
             checkNotNull(boundedContextName);
             checkNotNull(envelopeClass);
 
-            final ClassName className = key.getEntityClass()
-                                           .getClassName();
+            final Class<?> keyClass = key.getEntityClass()
+                                         .value();
+            final ClassName className = ClassName.of(keyClass);
             final ShardIndex shardIndex = key.getIndex();
 
             final StringValue asMsg = asChannelName(boundedContextName, envelopeClass, className,
@@ -371,6 +373,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
             return boundedContextName;
         }
 
+        @CanIgnoreReturnValue
         public B setBoundedContextName(BoundedContextName boundedContextName) {
             checkNotNull(boundedContextName);
             this.boundedContextName = boundedContextName;
@@ -381,6 +384,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
             return key;
         }
 
+        @CanIgnoreReturnValue
         public B setKey(ShardingKey key) {
             checkNotNull(key);
             this.key = key;
@@ -391,12 +395,14 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
             return tag;
         }
 
+        @CanIgnoreReturnValue
         public B setTag(DeliveryTag<E> tag) {
             checkNotNull(tag);
             this.tag = tag;
             return thisAsB();
         }
 
+        @CanIgnoreReturnValue
         public B setTargetIdClass(Class<I> targetIdClass) {
             checkNotNull(targetIdClass);
             this.targetIdClass = targetIdClass;
@@ -407,6 +413,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
             return targetIdClass;
         }
 
+        @CanIgnoreReturnValue
         public B setConsumer(ShardedStreamConsumer<I, E> consumer) {
             checkNotNull(consumer);
             this.consumer = consumer;

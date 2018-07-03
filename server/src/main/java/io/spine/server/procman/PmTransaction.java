@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -58,6 +58,9 @@ class PmTransaction<I,
         super(processManager, state, version);
     }
 
+    //TODO:2018-05-23:alexander.yevsyukov: Check that we really can ignore events returned by
+    // event reactor method of a ProcessManager. This looks like a bug.
+    @SuppressWarnings("CheckReturnValue")
     @Override
     protected void dispatch(ProcessManager processManager, EventEnvelope event) {
         processManager.dispatchEvent(event);
@@ -106,10 +109,9 @@ class PmTransaction<I,
      */
     static <I,
             S extends Message,
-            B extends ValidatingBuilder<S, ? extends Message.Builder>>
-    PmTransaction<I, S, B> startWith(ProcessManager<I, S, B> processManager,
-                                     S state,
-                                     Version version) {
+            B extends ValidatingBuilder<S, ? extends Message.Builder>,
+            P extends ProcessManager<I, S, B>>
+    PmTransaction<I, S, B> startWith(P processManager, S state, Version version) {
         final PmTransaction<I, S, B> tx = new PmTransaction<>(processManager, state, version);
         return tx;
     }

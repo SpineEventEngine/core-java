@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -19,7 +19,7 @@
  */
 package io.spine.server.projection.given;
 
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.core.Event;
 import io.spine.core.Subscribe;
 import io.spine.server.command.TestEventFactory;
@@ -41,7 +41,8 @@ import static io.spine.protobuf.AnyPacker.pack;
 public class ProjectionEventDeliveryTestEnv {
 
     /** Prevents instantiation of this utility class. */
-    private ProjectionEventDeliveryTestEnv() {}
+    private ProjectionEventDeliveryTestEnv() {
+    }
 
     public static Event projectCreated() {
         final ProjectId projectId = projectId();

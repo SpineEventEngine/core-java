@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,6 +21,7 @@
 package io.spine.server.storage.memory;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.protobuf.FieldMask;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -28,6 +29,7 @@ import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -79,13 +81,13 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Iterator<EntityRecord> readMultipleRecords(final Iterable<I> givenIds,
-                                                         FieldMask fieldMask) {
+    protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> givenIds,
+                                                                   FieldMask fieldMask) {
         final TenantRecords<I> storage = getStorage();
 
         // It is not possible to return an immutable collection,
         // since null may be present in it.
-        final Collection<EntityRecord> result = new LinkedList<>();
+        final Collection<EntityRecord> result = Lists.newLinkedList();
 
         for (I givenId : givenIds) {
             final EntityRecord matchingResult = storage.findAndApplyFieldMask(givenId, fieldMask);

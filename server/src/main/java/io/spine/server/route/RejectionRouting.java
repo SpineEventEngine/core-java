@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,6 +21,7 @@
 package io.spine.server.route;
 
 import com.google.common.base.Optional;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionContext;
@@ -57,6 +58,7 @@ public final class RejectionRouting<I>
      * @param defaultRoute
      *        the route to use if a custom one is not {@linkplain #route(Class, RejectionRoute) set}
      */
+    @CanIgnoreReturnValue
     public static <I> RejectionRouting<I> withDefault(RejectionRoute<I, Message> defaultRoute) {
         checkNotNull(defaultRoute);
         return new RejectionRouting<>(defaultRoute);
@@ -78,6 +80,7 @@ public final class RejectionRouting<I>
      * @param newDefault the new route to be used as default
      * @return {@code this} to allow chained calls when configuring the routing
      */
+    @CanIgnoreReturnValue
     public RejectionRouting<I> replaceDefault(RejectionRoute<I, Message> newDefault) {
         return (RejectionRouting<I>) super.replaceDefault(newDefault);
     }
@@ -102,6 +105,7 @@ public final class RejectionRouting<I>
      * @return {@code this} to allow chained calls when configuring the routing
      * @throws IllegalStateException if the route for this rejection class is already set
      */
+    @CanIgnoreReturnValue
     public <R extends Message> RejectionRouting<I> route(Class<R> rejectionClass,
                                                          RejectionRoute<I, R> via)
         throws IllegalStateException {

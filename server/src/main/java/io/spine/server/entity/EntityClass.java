@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,13 +21,14 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
-import io.spine.Identifier;
 import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
+import io.spine.protobuf.Messages;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Objects;
@@ -56,8 +57,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
 
     /** The constructor for entities of this class. */
     @SuppressWarnings("TransientFieldNotInitialized") // Lazily initialized via accessor method.
-    @Nullable
-    private transient Constructor<E> entityConstructor;
+    private transient @Nullable Constructor<E> entityConstructor;
 
     /** Creates new instance of the model class for the passed class of entities. */
     public EntityClass(Class<? extends E> cls) {
@@ -104,10 +104,21 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      * public API. It is used internally by other framework routines and not designed for efficient
      * execution by Spine users.
      */
-    @Internal
-    public static <S extends Message> Class<S> getStateClass(Class<? extends Entity> entityClass) {
+    private static <S extends Message> Class<S> getStateClass(Class<? extends Entity> entityClass) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
         final Class<S> result = (Class<S>) Entity.GenericParameter.STATE.getArgumentIn(entityClass);
+        return result;
+    }
+
+    /**
+     * Creates default state by entity class.
+     *
+     * @return default state
+     */
+    @Internal
+    public static Message createDefaultState(Class<? extends Entity> entityClass) {
+        Class<? extends Message> stateClass = getStateClass(entityClass);
+        Message result = Messages.newInstance(stateClass);
         return result;
     }
 

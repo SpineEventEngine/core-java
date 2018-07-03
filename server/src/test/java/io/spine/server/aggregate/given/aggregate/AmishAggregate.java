@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -73,7 +73,7 @@ public class AmishAggregate extends Aggregate<ProjectId, Project, ProjectVBuilde
     List<Message> handle(AggCancelProject cmd, CommandContext ctx) {
         final AggProjectPaused firstPaused = projectPaused(cmd.getProjectId());
         final AggProjectCancelled thenCancelled = projectCancelled(cmd.getProjectId());
-        return Lists.<Message>newArrayList(firstPaused, thenCancelled);
+        return Lists.newArrayList(firstPaused, thenCancelled);
     }
 
     @Apply

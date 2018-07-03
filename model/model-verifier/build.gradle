@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -39,13 +39,19 @@ sourceSets {
 
 dependencies {
     compile gradleApi()
-    compile group: 'io.spine.tools', name: 'spine-plugin-base', version: spineBaseVersion
+    compile "io.spine.tools:spine-plugin-base:$spineBaseVersion"
     compile project(':server')
     compile project(':model-assembler')
 
-    testCompile group: 'junit', name: 'junit', version: jUnitVersion
     testCompile gradleTestKit()
-    testCompile group: 'io.spine.tools', name: 'spine-plugin-base', version: spineBaseVersion, classifier: 'test'
+    testCompile group: 'io.spine.tools',
+                name: 'spine-plugin-base',
+                version: spineBaseVersion,
+                classifier: 'test'
+    testCompile "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
+
+    testRuntime "org.junit.jupiter:junit-jupiter-engine:$jUnitVersion"
+    testRuntime "org.junit.vintage:junit-vintage-engine:$jUnitVersion"
 }
 
 test {

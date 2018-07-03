@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,6 +21,7 @@
 package io.spine.server.event.given;
 
 import com.google.common.base.Function;
+import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -32,6 +33,9 @@ import io.spine.core.given.GivenUserId;
 import io.spine.people.PersonName;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventEnricher;
+import io.spine.server.event.EventEnricherTest;
+import io.spine.server.outbus.enrich.given.StringToPersonName;
+import io.spine.server.outbus.enrich.given.StringToZoneOffset;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
@@ -40,14 +44,13 @@ import io.spine.test.event.ProjectStarted;
 import io.spine.test.event.user.permission.PermissionGrantedEvent;
 import io.spine.test.event.user.permission.PermissionRevokedEvent;
 import io.spine.test.event.user.sharing.SharingRequestApproved;
-import io.spine.time.ZoneId;
 import io.spine.time.ZoneOffset;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.command.TestEventFactory.newInstance;
 
 /**
  * @author Alexander Yevsyukov
@@ -55,13 +58,19 @@ import static io.spine.protobuf.AnyPacker.pack;
 public class EventEnricherTestEnv {
 
     /** Prevents instantiation of this utility class. */
-    private EventEnricherTestEnv() {}
+    private EventEnricherTestEnv() {
+    }
 
-    static ProjectId newProjectId() {
-        final String uuid = newUuid();
+    private static ProjectId newProjectId() {
         return ProjectId.newBuilder()
-                        .setId(uuid)
+                        .setId(newUuid())
                         .build();
+    }
+
+    public static Event createEvent(Message msg) {
+        final TestEventFactory eventFactory = newInstance(EventEnricherTest.class);
+        final Event event = eventFactory.createEvent(msg);
+        return event;
     }
 
     public static class GivenEventMessage {
@@ -73,7 +82,8 @@ public class EventEnricherTestEnv {
         private static final ProjectStarred PROJECT_STARRED = projectStarred(PROJECT_ID);
 
         /** Prevents instantiation of this utility class. */
-        private GivenEventMessage() {}
+        private GivenEventMessage() {
+        }
 
         public static ProjectCreated projectCreated() {
             return PROJECT_CREATED;
@@ -141,10 +151,11 @@ public class EventEnricherTestEnv {
 
         private static final ProjectId PROJECT_ID = newProjectId();
 
-        private GivenEvent() {}
+        private GivenEvent() {
+        }
 
         private static TestEventFactory eventFactory() {
-            final TestEventFactory result =
+            TestEventFactory result =
                     TestEventFactory.newInstance(pack(PROJECT_ID), GivenEvent.class);
             return result;
         }
@@ -154,66 +165,67 @@ public class EventEnricherTestEnv {
         }
 
         public static Event projectStarted() {
-            final ProjectStarted msg = GivenEventMessage.projectStarted();
-            final Event event = eventFactory().createEvent(msg);
+            ProjectStarted msg = GivenEventMessage.projectStarted();
+            Event event = eventFactory().createEvent(msg);
             return event;
         }
 
         public static Event projectCreated(ProjectId projectId) {
-            final ProjectCreated msg = GivenEventMessage.projectCreated(projectId);
-            final Event event = eventFactory().createEvent(msg);
+            ProjectCreated msg = GivenEventMessage.projectCreated(projectId);
+            Event event = eventFactory().createEvent(msg);
             return event;
         }
 
         public static Event permissionGranted() {
-            final PermissionGrantedEvent message = GivenEventMessage.permissionGranted();
-            final Event permissionGranted = createGenericEvent(message);
+            PermissionGrantedEvent message = GivenEventMessage.permissionGranted();
+            Event permissionGranted = createGenericEvent(message);
             return permissionGranted;
         }
 
         public static Event permissionRevoked() {
-            final PermissionRevokedEvent message = GivenEventMessage.permissionRevoked();
-            final Event permissionRevoked = createGenericEvent(message);
+            PermissionRevokedEvent message = GivenEventMessage.permissionRevoked();
+            Event permissionRevoked = createGenericEvent(message);
             return permissionRevoked;
         }
 
         public static Event sharingRequestApproved() {
-            final SharingRequestApproved message = GivenEventMessage.sharingRequestApproved();
-            final Event sharingRequestApproved = createGenericEvent(message);
+            SharingRequestApproved message = GivenEventMessage.sharingRequestApproved();
+            Event sharingRequestApproved = createGenericEvent(message);
             return sharingRequestApproved;
         }
 
         private static Event createGenericEvent(Message eventMessage) {
-            final Any wrappedMessage = pack(eventMessage);
-            final Event permissionRevoked = eventFactory().createEvent(wrappedMessage);
+            Any wrappedMessage = pack(eventMessage);
+            Event permissionRevoked = eventFactory().createEvent(wrappedMessage);
             return permissionRevoked;
         }
     }
 
     public static class Enrichment {
 
-        private Enrichment() {}
+        private Enrichment() {
+        }
 
         /** Creates a new enricher with all required enrichment functions set. */
         public static EventEnricher newEventEnricher() {
-            final EventEnricher.Builder builder = EventEnricher.newBuilder();
-            builder.add(ProjectId.class, String.class, new GetProjectName())
-                   .add(ProjectId.class, UserId.class, new GetProjectOwnerId())
-                   .add(EventId.class, String.class, EVENT_ID_TO_STRING)
-                   .add(Timestamp.class, String.class, TIMESTAMP_TO_STRING)
-                   .add(CommandContext.class, String.class, CMD_CONTEXT_TO_STRING)
-                   .add(Any.class, String.class, ANY_TO_STRING)
-                   .add(Integer.class, String.class, VERSION_TO_STRING)
-                   .add(String.class, ZoneOffset.class, STRING_TO_ZONE_OFFSET)
-                   .add(String.class, PersonName.class, STRING_TO_PERSON_NAME)
-                   .add(String.class, Integer.class, STRING_TO_INT);
+            EventEnricher.Builder builder = EventEnricher
+                    .newBuilder()
+                    .add(ProjectId.class, String.class, new GetProjectName())
+                    .add(ProjectId.class, UserId.class, new GetProjectOwnerId())
+                    .add(EventId.class, String.class, EVENT_ID_TO_STRING)
+                    .add(Timestamp.class, String.class, TIMESTAMP_TO_STRING)
+                    .add(CommandContext.class, String.class, CMD_CONTEXT_TO_STRING)
+                    .add(Any.class, String.class, ANY_TO_STRING)
+                    .add(Integer.class, String.class, VERSION_TO_STRING)
+                    .add(String.class, ZoneOffset.class, STRING_TO_ZONE_OFFSET)
+                    .add(String.class, PersonName.class, STRING_TO_PERSON_NAME)
+                    .add(String.class, Integer.class, STRING_TO_INT);
             return builder.build();
         }
 
         public static class GetProjectName implements Function<ProjectId, String> {
-            @Nullable
             @Override
-            public String apply(@Nullable ProjectId id) {
+            public @Nullable String apply(@Nullable ProjectId id) {
                 checkNotNull(id);
                 final String name = "prj_" + id.getId();
                 return name;
@@ -221,9 +233,8 @@ public class EventEnricherTestEnv {
         }
 
         public static class GetProjectOwnerId implements Function<ProjectId, UserId> {
-            @Nullable
             @Override
-            public UserId apply(@Nullable ProjectId id) {
+            public @Nullable UserId apply(@Nullable ProjectId id) {
                 checkNotNull(id);
                 return GivenUserId.of("po_" + id.getId());
             }
@@ -231,78 +242,31 @@ public class EventEnricherTestEnv {
 
         private static final Function<EventId, String> EVENT_ID_TO_STRING =
                 new Function<EventId, String>() {
-                    @Nullable
                     @Override
-                    public String apply(@Nullable EventId input) {
+                    public @Nullable String apply(@Nullable EventId input) {
                         checkNotNull(input);
                         return input.getValue();
                     }
                 };
 
         private static final Function<Timestamp, String> TIMESTAMP_TO_STRING =
-                new Function<Timestamp, String>() {
-                    @Override
-                    public String apply(@Nullable Timestamp input) {
-                        checkNotNull(input);
-                        return input.toString();
-                    }
-                };
+                AbstractMessage::toString;
 
         private static final Function<CommandContext, String> CMD_CONTEXT_TO_STRING =
-                new Function<CommandContext, String>() {
-                    @Override
-                    public String apply(@Nullable CommandContext input) {
-                        return checkNotNull(input).toString();
-                    }
-                };
+                input -> checkNotNull(input).toString();
 
         private static final Function<Any, String> ANY_TO_STRING =
-                new Function<Any, String>() {
-                    @Override
-                    public String apply(@Nullable Any input) {
-                        return checkNotNull(input).toString();
-                    }
-                };
+                input -> checkNotNull(input).toString();
 
         private static final Function<Integer, String> VERSION_TO_STRING =
-                new Function<Integer, String>() {
-                    @Override
-                    public String apply(@Nullable Integer input) {
-                        return checkNotNull(input).toString();
-                    }
-                };
+                input -> checkNotNull(input).toString();
 
         private static final Function<String, ZoneOffset> STRING_TO_ZONE_OFFSET =
-                new Function<String, ZoneOffset>() {
-                    @Nullable
-                    @Override
-                    public ZoneOffset apply(@Nullable String input) {
-                        checkNotNull(input);
-                        return ZoneOffset.newBuilder()
-                                         .setId(ZoneId.newBuilder()
-                                                      .setValue(input))
-                                         .build();
-                    }
-                };
+                new StringToZoneOffset();
 
         private static final Function<String, PersonName> STRING_TO_PERSON_NAME =
-                new Function<String, PersonName>() {
-                    @Nullable
-                    @Override
-                    public PersonName apply(@Nullable String input) {
-                        checkNotNull(input);
-                        return PersonName.newBuilder()
-                                         .setFamilyName(input)
-                                         .build();
-                    }
-                };
+                new StringToPersonName();
 
-        private static final Function<String, Integer> STRING_TO_INT =
-                new Function<String, Integer>() {
-                    @Override
-                    public Integer apply(@Nullable String input) {
-                        return 0;
-                    }
-                };
+        private static final Function<String, Integer> STRING_TO_INT = Integer::valueOf;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -59,7 +59,6 @@ import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 
-import javax.annotation.CheckReturnValue;
 import java.util.List;
 import java.util.Set;
 
@@ -105,40 +104,31 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     /** The routing schema for events to which aggregates react. */
     private final EventRouting<I> eventRouting =
-            EventRouting.withDefault(EventProducers.<I>fromContext());
+            EventRouting.withDefault(EventProducers.fromContext());
 
     /** The routing schema for rejections to which aggregates react. */
     private final RejectionRouting<I> rejectionRouting =
-            RejectionRouting.withDefault(RejectionProducers.<I>fromContext());
+            RejectionRouting.withDefault(RejectionProducers.fromContext());
 
     private final Supplier<AggregateCommandDelivery<I, A>> commandDeliverySupplier =
-            memoize(new Supplier<AggregateCommandDelivery<I, A>>() {
-        @Override
-        public AggregateCommandDelivery<I, A> get() {
-            final AggregateCommandDelivery<I, A> result =
-                    new AggregateCommandDelivery<>(AggregateRepository.this);
-            return result;
-        }
-    });
+            memoize(() -> {
+                final AggregateCommandDelivery<I, A> result =
+                        new AggregateCommandDelivery<>(this);
+                return result;
+            });
 
     private final Supplier<AggregateEventDelivery<I, A>> eventDeliverySupplier =
-            memoize(new Supplier<AggregateEventDelivery<I, A>>() {
-        @Override
-        public AggregateEventDelivery<I, A> get() {
-            final AggregateEventDelivery<I, A> result =
-                    new AggregateEventDelivery<>(AggregateRepository.this);
-            return result;
-        }
-    });
+            memoize(() -> {
+                final AggregateEventDelivery<I, A> result =
+                        new AggregateEventDelivery<>(this);
+                return result;
+            });
 
     private final Supplier<AggregateRejectionDelivery<I, A>> rejectionDeliverySupplier =
-            memoize(new Supplier<AggregateRejectionDelivery<I, A>>() {
-                @Override
-                public AggregateRejectionDelivery<I, A> get() {
-                    final AggregateRejectionDelivery<I, A> result =
-                            new AggregateRejectionDelivery<>(AggregateRepository.this);
-                    return result;
-                }
+            memoize(() -> {
+                final AggregateRejectionDelivery<I, A> result =
+                        new AggregateRejectionDelivery<>(this);
+                return result;
             });
 
     /**
@@ -271,18 +261,20 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @param aggregate an instance to store
      */
+    @SuppressWarnings("CheckReturnValue") 
+        // ignore result of `commitEvents()` because we obtain them in the block before the call. 
     @Override
     protected void store(A aggregate) {
-        final I id = aggregate.getId();
-        final int snapshotTrigger = getSnapshotTrigger();
-        final AggregateStorage<I> storage = aggregateStorage();
+        I id = aggregate.getId();
+        int snapshotTrigger = getSnapshotTrigger();
+        AggregateStorage<I> storage = aggregateStorage();
         int eventCount = storage.readEventCountAfterLastSnapshot(id);
-        final Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents();
+        Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents();
         for (Event event : uncommittedEvents) {
             storage.writeEvent(id, event);
             ++eventCount;
             if (eventCount >= snapshotTrigger) {
-                final Snapshot snapshot = aggregate.toShapshot();
+                Snapshot snapshot = aggregate.toShapshot();
                 aggregate.clearRecentHistory();
                 storage.writeSnapshot(id, snapshot);
                 eventCount = 0;
@@ -327,7 +319,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @param envelope the envelope of the command to dispatch
      */
     @Override
-    public I dispatch(final CommandEnvelope envelope) {
+    public I dispatch(CommandEnvelope envelope) {
         checkNotNull(envelope);
         return AggregateCommandEndpoint.handle(this, envelope);
     }
@@ -438,7 +430,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return a positive integer value
      * @see #DEFAULT_SNAPSHOT_TRIGGER
      */
-    @CheckReturnValue
     protected int getSnapshotTrigger() {
         return this.snapshotTrigger;
     }
@@ -463,7 +454,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     protected AggregateStorage<I> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
-        final AggregateStorage<I> result = (AggregateStorage<I>) getStorage();
+        AggregateStorage<I> result = (AggregateStorage<I>) getStorage();
         return result;
     }
 
@@ -474,13 +465,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return loaded or created aggregate instance
      */
     A loadOrCreate(I id) {
-        final Optional<A> optional = load(id);
+        Optional<A> optional = load(id);
 
         if (optional.isPresent()) {
             return optional.get();
         }
 
-        final A result = create(id);
+        A result = create(id);
         return result;
     }
 
@@ -497,9 +488,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *         with the ID
      */
     private Optional<A> load(I id) {
-        final Optional<AggregateStateRecord> eventsFromStorage = fetchHistory(id);
+        Optional<AggregateStateRecord> eventsFromStorage = fetchHistory(id);
         if (eventsFromStorage.isPresent()) {
-            final A result = play(id, eventsFromStorage.get());
+            A result = play(id, eventsFromStorage.get());
             return Optional.of(result);
         }
         return Optional.absent();
@@ -517,8 +508,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *         {@code Optional.absent()} if there is no record with the ID
      */
     protected Optional<AggregateStateRecord> fetchHistory(I id) {
-        final AggregateReadRequest<I> request = new AggregateReadRequest<>(id, snapshotTrigger);
-        final Optional<AggregateStateRecord> eventsFromStorage = aggregateStorage().read(request);
+        AggregateReadRequest<I> request = new AggregateReadRequest<>(id, snapshotTrigger);
+        Optional<AggregateStateRecord> eventsFromStorage = aggregateStorage().read(request);
         return eventsFromStorage;
     }
 
@@ -531,8 +522,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @return an instance of {@link Aggregate}
      */
     protected A play(I id, AggregateStateRecord history) {
-        final A result = create(id);
-        final AggregateTransaction tx = AggregateTransaction.start(result);
+        A result = create(id);
+        AggregateTransaction tx = AggregateTransaction.start(result);
         result.play(history);
         tx.commit();
         return result;
@@ -545,7 +536,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @param aggregate the updated aggregate
      */
     void onModifiedAggregate(TenantId tenantId, A aggregate) {
-        final List<Event> events = aggregate.getUncommittedEvents();
+        List<Event> events = aggregate.getUncommittedEvents();
         store(aggregate);
         updateStand(tenantId, aggregate);
         postEvents(events);
@@ -569,7 +560,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public Optional<A> find(I id) throws IllegalStateException {
-        final Optional<A> result = load(id);
+        Optional<A> result = load(id);
         return result;
     }
 
@@ -638,8 +629,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
-        final Iterable<ShardedStreamConsumer<?, ?>> result =
-                ImmutableList.<ShardedStreamConsumer<?, ?>>of(
+        Iterable<ShardedStreamConsumer<?, ?>> result =
+                ImmutableList.of(
                         getCommandEndpointDelivery().getConsumer(),
                         getEventEndpointDelivery().getConsumer(),
                         getRejectionEndpointDelivery().getConsumer()
@@ -649,7 +640,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public BoundedContextName getBoundedContextName() {
-        final BoundedContextName name = getBoundedContext().getName();
+        BoundedContextName name = getBoundedContext().getName();
         return name;
     }
 

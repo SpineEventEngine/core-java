@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,8 +25,8 @@ import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
 import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -98,6 +98,7 @@ public final class Rejections {
         return builder.build();
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     private static RejectionContext createContext(ThrowableMessage message, Command command) {
         final String stacktrace = Throwables.getStackTraceAsString(message);
         final RejectionContext.Builder builder =

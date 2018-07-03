@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,8 +23,7 @@ package io.spine.server.tenant;
 import com.google.protobuf.Empty;
 import io.spine.annotation.SPI;
 import io.spine.core.TenantId;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A tenant-aware function that takes no parameters.
@@ -45,13 +44,12 @@ public abstract class TenantAwareFunction0<T> extends TenantAwareFunction<Empty,
 
     public abstract T apply();
 
-    @Nullable
     @Override
-    public T apply(@Nullable Empty input) {
+    public @Nullable T apply(@Nullable Empty input) {
         return apply();
     }
 
     public T execute() {
-        return super.execute(Empty.getDefaultInstance());
+        return execute(Empty.getDefaultInstance());
     }
 }

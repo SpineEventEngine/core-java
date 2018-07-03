@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -33,8 +33,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.IntegrationEventContext;
 import io.spine.validate.ValidationException;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.getCurrentTime;
@@ -153,11 +152,13 @@ public class EventFactory {
                            .build();
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     private EventContext createContext(@Nullable Version version) {
-        final Timestamp timestamp = getCurrentTime();
-        final EventContext.Builder builder = EventContext.newBuilder()
-                                                         .setTimestamp(timestamp)
-                                                         .setProducerId(producerId);
+        Timestamp timestamp = getCurrentTime();
+        EventContext.Builder builder =
+                EventContext.newBuilder()
+                            .setTimestamp(timestamp)
+                            .setProducerId(producerId);
         origin.setOriginFields(builder);
         if (version != null) {
             builder.setVersion(version);

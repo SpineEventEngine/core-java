@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,6 +26,7 @@ import com.google.protobuf.StringValue;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
+import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.dispatch.Dispatch;
 import io.spine.server.command.dispatch.DispatchResult;
@@ -34,7 +35,6 @@ import io.spine.server.event.EventBus;
 import io.spine.server.model.Model;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
-import io.spine.util.Logging;
 import org.slf4j.Logger;
 
 import java.util.List;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -65,10 +65,11 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
      * @param builder the entity builder to update
      * @param entity  the entity which data is passed to the {@link EntityRecord} we are building
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     protected void updateBuilder(EntityRecord.Builder builder, E entity) {
         if (entity instanceof AbstractVersionableEntity) {
-            final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
+            AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
             builder.setVersion(versionable.getVersion())
                    .setLifecycleFlags(versionable.getLifecycleFlags());
         }

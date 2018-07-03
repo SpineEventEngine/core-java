@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,7 +22,7 @@ package io.spine.server.command;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.change.MessageMismatch;
 import io.spine.change.StringMismatch;
@@ -30,7 +30,7 @@ import io.spine.change.ValueMismatch;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Rejections;
-import io.spine.server.entity.EventPlayingEntity;
+import io.spine.server.entity.TransactionalEntity;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;
@@ -60,7 +60,7 @@ public abstract
 class CommandHandlingEntity<I,
                             S extends Message,
                             B extends ValidatingBuilder<S, ? extends Message.Builder>>
-      extends EventPlayingEntity<I, S, B> {
+        extends TransactionalEntity<I, S, B> {
 
     /** Cached value of the ID in the form of {@code Any} instance. */
     private final Any idAsAny;

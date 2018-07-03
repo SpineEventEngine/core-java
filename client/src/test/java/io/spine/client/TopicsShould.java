@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,22 +21,28 @@
 package io.spine.client;
 
 import io.spine.test.Tests;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertFalse;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * @author Alexander Yeveyukov
  */
-public class TopicsShould {
+@DisplayName("Topics utility should")
+class TopicsShould {
 
     @Test
-    public void have_utility_ctor() {
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
         Tests.assertHasPrivateParameterlessCtor(Topics.class);
     }
 
     @Test
-    public void generate_id() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         assertFalse(Topics.generateId()
                           .getValue()
                           .isEmpty());

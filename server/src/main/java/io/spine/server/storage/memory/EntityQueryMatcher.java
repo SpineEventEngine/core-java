@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,7 +24,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter.CompositeOperator;
 import io.spine.server.entity.storage.CompositeQueryParameter;
@@ -33,8 +33,8 @@ import io.spine.server.entity.storage.EntityColumn.MemoizedValue;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 
@@ -141,16 +141,17 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
         if (actualValue == null) {
             return false;
         }
-        final Object value;
+        final Object filterValue;
         final Any wrappedValue = filter.getValue();
-        final Class<?> sourceClass = actualValue.getSourceColumn()
-                                                .getType();
+        final EntityColumn sourceColumn = actualValue.getSourceColumn();
+        final Class<?> sourceClass = sourceColumn.getType();
         if (sourceClass != Any.class) {
-            value = toObject(wrappedValue, sourceClass);
+            filterValue = toObject(wrappedValue, sourceClass);
         } else {
-            value = wrappedValue;
+            filterValue = wrappedValue;
         }
-        final boolean result = eval(actualValue.getValue(), filter.getOperator(), value);
+        final Object columnValue = sourceColumn.toPersistedValue(filterValue);
+        final boolean result = eval(actualValue.getValue(), filter.getOperator(), columnValue);
         return result;
     }
 

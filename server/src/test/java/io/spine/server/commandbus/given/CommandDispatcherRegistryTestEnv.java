@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -38,10 +38,10 @@ import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
+import io.spine.test.command.CmdStartProject;
 import io.spine.test.command.Project;
 import io.spine.test.command.ProjectId;
 import io.spine.test.command.ProjectVBuilder;
-import io.spine.test.command.CmdStartProject;
 import io.spine.test.command.Task;
 import io.spine.test.command.event.CmdProjectCreated;
 import io.spine.test.command.event.CmdProjectStarted;

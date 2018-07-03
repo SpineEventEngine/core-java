@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,8 +24,8 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
 import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -41,6 +41,7 @@ import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.stand.AggregateStateId;
 import io.spine.server.stand.StandStorage;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -114,6 +115,7 @@ public abstract class RecordStorage<I>
      *         or {@code Optional.absent()} if there is no record matching this request
      * @see    #read(RecordReadRequest)
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder method
     public Optional<EntityRecord> read(RecordReadRequest<I> request, FieldMask fieldMask) {
         final Optional<EntityRecord> rawResult = read(request);
 
@@ -342,8 +344,8 @@ public abstract class RecordStorage<I>
     protected abstract Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids);
 
     /** @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable) */
-    protected abstract Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids,
-                                                                  FieldMask fieldMask);
+    protected abstract Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids,
+                                                                            FieldMask fieldMask);
 
     /** @see BulkStorageOperationsMixin#readAll() */
     protected abstract Iterator<EntityRecord> readAllRecords();

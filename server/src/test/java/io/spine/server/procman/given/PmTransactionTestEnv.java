@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -31,8 +31,8 @@ import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.validate.ConstraintViolation;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
@@ -43,14 +43,15 @@ import static com.google.common.collect.Lists.newLinkedList;
 public class PmTransactionTestEnv {
 
     /** Prevents instantiation on this utility class. */
-    private PmTransactionTestEnv() {}
+    private PmTransactionTestEnv() {
+    }
 
     @SuppressWarnings({"MethodMayBeStatic", "unused"})  // Methods accessed via reflection.
     public static class TestProcessManager
             extends ProcessManager<ProjectId, Project, PatchedProjectBuilder> {
 
         private final List<Message> receivedEvents = newLinkedList();
-        private final List<ConstraintViolation> violations;
+        private final @Nullable List<ConstraintViolation> violations;
 
         public TestProcessManager(ProjectId id) {
             this(id, null);
@@ -58,7 +59,9 @@ public class PmTransactionTestEnv {
 
         public TestProcessManager(ProjectId id, @Nullable List<ConstraintViolation> violations) {
             super(id);
-            this.violations = violations;
+            this.violations = violations == null
+                              ? null
+                              : ImmutableList.copyOf(violations);
         }
 
         @Override
@@ -72,9 +75,9 @@ public class PmTransactionTestEnv {
         @React
         public Empty event(PmProjectCreated event) {
             receivedEvents.add(event);
-            final Project newState = Project.newBuilder(getState())
-                                            .setId(event.getProjectId())
-                                            .build();
+            Project newState = Project.newBuilder(getState())
+                                      .setId(event.getProjectId())
+                                      .build();
             getBuilder().mergeFrom(newState);
             return Empty.getDefaultInstance();
         }

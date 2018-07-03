@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,10 +24,14 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Timestamp;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
+import io.spine.server.command.CommandHandlerClass;
 import io.spine.server.event.EventBus;
 import io.spine.test.Tests;
 import org.junit.Before;
 import org.junit.Test;
+
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Alexander Yevsyukov
@@ -49,15 +53,17 @@ public class ModelTestsShould {
 
     @Test
     public void clear_the_model() {
-
         // This adds a command handler for `com.google.protobuf.Timestamp`.
-        model.asCommandHandlerClass(TestCommandHandler.class);
+        final CommandHandlerClass cls1 = model.asCommandHandlerClass(TestCommandHandler.class);
+        assertNotNull(cls1);
 
         ModelTests.clearModel();
 
         // This should pass as we cleared the model,
         // i.e. there is no registered command handler for `com.google.protobuf.Timestamp`.
-        model.asCommandHandlerClass(DuplicatedCommandHandler.class);
+        CommandHandlerClass cls2 = model.asCommandHandlerClass(DuplicatedCommandHandler.class);
+        assertNotNull(cls2);
+        assertNotEquals(cls1, cls2);
     }
 
     private static class TestCommandHandler extends CommandHandler {

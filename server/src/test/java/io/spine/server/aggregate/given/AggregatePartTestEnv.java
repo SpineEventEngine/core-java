@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -41,7 +41,8 @@ public class AggregatePartTestEnv {
 
     private static final String TASK_DESCRIPTION = "Description";
 
-    private AggregatePartTestEnv() {}
+    private AggregatePartTestEnv() {
+    }
 
     public static class AnAggregateRoot extends AggregateRoot<String> {
         public AnAggregateRoot(BoundedContext boundedContext, String id) {
@@ -80,7 +81,7 @@ public class AggregatePartTestEnv {
         @Assign
         AggTaskAdded handle(AggAddTask msg) {
             final AggTaskAdded result = AggTaskAdded.newBuilder()
-                                              .build();
+                                                    .build();
             //This command can be empty since we use apply method to setup aggregate part.
             return result;
         }

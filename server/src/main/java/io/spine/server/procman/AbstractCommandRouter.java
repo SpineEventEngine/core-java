@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -23,6 +23,7 @@ package io.spine.server.procman;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Queues;
 import com.google.common.util.concurrent.SettableFuture;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.ActorRequestFactory;
@@ -96,6 +97,7 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
     /**
      * Adds {@code commandMessage} to be routed.
      */
+    @CanIgnoreReturnValue
     public T add(Message commandMessage) {
         queue.add(commandMessage);
         return getThis();
@@ -104,6 +106,7 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
     /**
      * Adds all command messages from the passed iterable.
      */
+    @CanIgnoreReturnValue
     protected T addAll(Iterable<Message> iterable) {
         for (Message message : iterable) {
             add(message);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -34,7 +34,7 @@ import io.spine.validate.ValidatingBuilder;
  */
 @Internal
 public interface TransactionListener<I,
-                                     E extends EventPlayingEntity<I, S, B>,
+                                     E extends TransactionalEntity<I, S, B>,
                                      S extends Message,
                                      B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
@@ -74,7 +74,7 @@ public interface TransactionListener<I,
      * callbacks.
      */
     class SilentWitness<I,
-                        E extends EventPlayingEntity<I, S, B>,
+                        E extends TransactionalEntity<I, S, B>,
                         S extends Message,
                         B extends ValidatingBuilder<S, ? extends Message.Builder>>
             implements TransactionListener<I, E, S, B> {

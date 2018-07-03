@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,8 +25,7 @@ import io.spine.base.Time;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.EventsShould;
-import io.spine.core.Version;
+import io.spine.core.EventsTest;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.Tests;
 
@@ -41,7 +40,7 @@ public class GivenEvent {
 
     public static final TestEventFactory eventFactory =
             TestEventFactory.newInstance(toAny(GivenEvent.class.getSimpleName()),
-                                         EventsShould.class);
+                                         EventsTest.class);
 
     private GivenEvent() {
         // Prevent instantiation of this utility class.
@@ -49,7 +48,7 @@ public class GivenEvent {
 
     public static EventContext context() {
         final Event event = eventFactory.createEvent(Time.getCurrentTime(),
-                                                     Tests.<Version>nullRef());
+                                                     Tests.nullRef());
         return event.getContext();
     }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -89,8 +89,8 @@ public class AggregateRootTestEnv {
         @Assign
         AggProjectStarted handle(AggStartProject msg) {
             final AggProjectStarted result = AggProjectStarted.newBuilder()
-                                                        .setProjectId(msg.getProjectId())
-                                                        .build();
+                                                              .setProjectId(msg.getProjectId())
+                                                              .build();
             return result;
         }
 

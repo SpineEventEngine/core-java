@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,16 +22,15 @@ package io.spine.client;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
 import io.spine.core.ActorContext;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Arrays;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.client.Queries.queryBuilderFor;
 import static java.lang.String.format;
 
@@ -182,12 +181,10 @@ public final class QueryFactory {
                        @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass, "The class of Entity must be specified for a Query");
 
-        final Query.Builder builder = queryBuilderFor(entityClass,
-                                                      ids,
-                                                      columnFilters,
-                                                      fieldMask);
-        builder.setId(newQueryId())
-               .setContext(actorContext);
+        Query.Builder builder =
+                queryBuilderFor(entityClass, ids, columnFilters, fieldMask)
+                        .setId(newQueryId())
+                        .setContext(actorContext);
         return builder.build();
     }
 }

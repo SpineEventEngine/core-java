@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,7 +26,7 @@ import io.spine.annotation.Internal;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeUrl;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collections;
 import java.util.Set;
 
@@ -75,6 +75,7 @@ public final class Targets {
         return result;
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     static Target composeTarget(Class<? extends Message> entityClass,
                                 @Nullable Set<? extends Message> ids,
                                 @Nullable Set<CompositeColumnFilter> columnFilters) {

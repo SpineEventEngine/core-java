@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -37,7 +37,7 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static java.lang.String.format;
 
 /**
- * Test environment for {@link io.spine.server.aggregate.AggregateRepositoryShould}.
+ * Test environment for {@link io.spine.server.aggregate.AggregateRepositoryTest}.
  *
  * @author Alexander Yevsyukov
  */
@@ -95,7 +95,7 @@ public class AggregateRepositoryViewTestEnv {
         /**
          * Custom {@code IdCommandFunction} that parses an aggregate ID from {@code StringValue}.
          */
-        private static final CommandRoute<Long,Message> parsingRoute =
+        private static final CommandRoute<Long, Message> parsingRoute =
                 new CommandRoute<Long, Message>() {
 
                     private static final long serialVersionUID = 0L;

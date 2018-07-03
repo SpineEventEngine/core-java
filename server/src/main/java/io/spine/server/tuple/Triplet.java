@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,8 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
 import io.spine.server.tuple.Element.CValue;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Optional.fromNullable;
 import static io.spine.server.tuple.Element.value;

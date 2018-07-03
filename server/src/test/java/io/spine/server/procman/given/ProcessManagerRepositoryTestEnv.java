@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,10 +27,12 @@ import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.core.React;
+import io.spine.core.Subscribe;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
+import io.spine.server.event.EventSubscriber;
 import io.spine.server.procman.CommandRouted;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
@@ -49,16 +51,23 @@ import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.testdata.Sample;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
 import static io.spine.protobuf.AnyPacker.pack;
 import static java.util.Collections.emptyList;
 
+/**
+ * @author Alexander Yevsyukov
+ * @author Dmytro Grankin
+ * @author Alex Tymchenko
+ */
 public class ProcessManagerRepositoryTestEnv {
 
     /** Prevents instantiation of this utility class. */
-    private ProcessManagerRepositoryTestEnv() {}
+    private ProcessManagerRepositoryTestEnv() {
+    }
 
     public static class TestProcessManagerRepository
             extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
@@ -309,5 +318,23 @@ public class ProcessManagerRepositoryTestEnv {
      * process manager class}.
      */
     public static class SensoryDeprivedPmRepository
-            extends ProcessManagerRepository<ProjectId, SensoryDeprivedProcessManager, Project> {}
+            extends ProcessManagerRepository<ProjectId, SensoryDeprivedProcessManager, Project> {
+    }
+
+    /**
+     * Helper event subscriber which remembers an event message.
+     */
+    public static class RememberingSubscriber extends EventSubscriber {
+
+        private @Nullable PmTaskAdded remembered;
+
+        @Subscribe
+        void on(PmTaskAdded msg) {
+            remembered = msg;
+        }
+
+        public @Nullable PmTaskAdded getRemembered() {
+            return remembered;
+        }
+    }
 }

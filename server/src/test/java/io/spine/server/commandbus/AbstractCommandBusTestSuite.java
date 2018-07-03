@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -35,7 +35,6 @@ import io.spine.core.CommandValidationError;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.grpc.StreamObservers;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.commandstore.CommandStore;
@@ -47,9 +46,10 @@ import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.event.CmdProjectCreated;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.List;
@@ -58,16 +58,17 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.core.given.GivenTenantId.newUuid;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.BoundedContext.newName;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -79,7 +80,7 @@ import static org.mockito.Mockito.verify;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ProtectedField") // OK for brevity of derived tests.
-public abstract class AbstractCommandBusTestSuite {
+abstract class AbstractCommandBusTestSuite {
 
     private final boolean multitenant;
 
@@ -169,8 +170,8 @@ public abstract class AbstractCommandBusTestSuite {
         return result;
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         ModelTests.clearModel();
 
         final InMemoryStorageFactory storageFactory =
@@ -199,11 +200,11 @@ public abstract class AbstractCommandBusTestSuite {
                             ? TestActorRequestFactory.newInstance(getClass(), newUuid())
                             : TestActorRequestFactory.newInstance(getClass());
         createProjectHandler = new CreateProjectHandler();
-        observer = StreamObservers.memoizingObserver();
+        observer = memoizingObserver();
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    void tearDown() throws Exception {
         if (commandStore.isOpen()) { // then CommandBus is opened, too
             commandBus.close();
         }
@@ -211,7 +212,8 @@ public abstract class AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void post_commands_in_bulk() {
+    @DisplayName("post commands in bulk")
+    void postCommandsInBulk() {
         final Command first = newCommand();
         final Command second = newCommand();
         final List<Command> commands = newArrayList(first, second);
@@ -222,7 +224,7 @@ public abstract class AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
 
         final CommandBus spy = spy(commandBus);
-        spy.post(commands, StreamObservers.<Ack>memoizingObserver());
+        spy.post(commands, memoizingObserver());
 
         @SuppressWarnings("unchecked")
         final ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);
@@ -232,7 +234,7 @@ public abstract class AbstractCommandBusTestSuite {
         assertContainsAll(storingArgs, first, second);
 
         final ArgumentCaptor<CommandEnvelope> postingCaptor = forClass(CommandEnvelope.class);
-        verify(spy, times(2)).doPost(postingCaptor.capture());
+        verify(spy, times(2)).dispatch(postingCaptor.capture());
         final List<CommandEnvelope> postingArgs = postingCaptor.getAllValues();
         assertSize(commands.size(), postingArgs);
         assertEquals(commands.get(0), postingArgs.get(0).getCommand());

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,8 +24,8 @@ import io.spine.core.CommandContext;
 import io.spine.core.Subscribe;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.RjUpdateProjectName;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 
 /**
@@ -72,12 +72,9 @@ public class RejectionSubscriberMethodTestEnv {
 
     public static class ValidThreeParams extends TestRejectionSubscriber {
 
-        @Nullable
-        private Message lastRejectionMessage;
-        @Nullable
-        private Message lastCommandMessage;
-        @Nullable
-        private CommandContext lastCommandContext;
+        private @Nullable Message lastRejectionMessage;
+        private @Nullable Message lastCommandMessage;
+        private @Nullable CommandContext lastCommandContext;
 
         @Subscribe
         public void handle(InvalidProjectName rejection,
@@ -88,18 +85,15 @@ public class RejectionSubscriberMethodTestEnv {
             lastCommandContext = context;
         }
 
-        @Nullable
-        public Message getLastRejectionMessage() {
+        public @Nullable Message getLastRejectionMessage() {
             return lastRejectionMessage;
         }
 
-        @Nullable
-        public Message getLastCommandMessage() {
+        public @Nullable Message getLastCommandMessage() {
             return lastCommandMessage;
         }
 
-        @Nullable
-        public CommandContext getLastCommandContext() {
+        public @Nullable CommandContext getLastCommandContext() {
             return lastCommandContext;
         }
     }

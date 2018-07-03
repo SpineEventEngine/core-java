@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -46,12 +46,12 @@ public class QuintetTestEnv {
     public static class QuintetFactory {
 
         public static final InstrumentNumber NUM_1 = InstrumentNumber.newBuilder()
-                                                              .setValue(1)
-                                                              .build();
+                                                                     .setValue(1)
+                                                                     .build();
 
         public static final InstrumentNumber NUM_2 = InstrumentNumber.newBuilder()
-                                                              .setValue(2)
-                                                              .build();
+                                                                     .setValue(2)
+                                                                     .build();
 
         /** Prevents instantiation of this utility class. */
         private QuintetFactory() {
@@ -84,41 +84,41 @@ public class QuintetTestEnv {
         }
 
         public static Violin newViolin(InstrumentNumber number) {
-            final Violin result = Violin.newBuilder()
-                                        .setNumber(number)
-                                        .build();
+            Violin result = Violin.newBuilder()
+                                  .setNumber(number)
+                                  .build();
             Validate.checkValid(result);
             return result;
         }
 
         public static Viola newViola() {
-            final Viola result = Viola.newBuilder()
-                                      .setSingle(true)
-                                      .build();
+            Viola result = Viola.newBuilder()
+                                .setSingle(true)
+                                .build();
             Validate.checkValid(result);
             return result;
         }
 
         public static Viola newViola(InstrumentNumber number) {
-            final Viola result = Viola.newBuilder()
-                                      .setNumber(number)
-                                      .build();
+            Viola result = Viola.newBuilder()
+                                .setNumber(number)
+                                .build();
             Validate.checkValid(result);
             return result;
         }
 
         public static ViolinCello newViolinCello(InstrumentNumber number) {
-            final ViolinCello result = ViolinCello.newBuilder()
-                                                  .setNumber(number)
-                                                  .build();
+            ViolinCello result = ViolinCello.newBuilder()
+                                            .setNumber(number)
+                                            .build();
             Validate.checkValid(result);
             return result;
         }
 
         public static ViolinCello newViolinCello() {
-            final ViolinCello result = ViolinCello.newBuilder()
-                                                  .setSingle(true)
-                                                  .build();
+            ViolinCello result = ViolinCello.newBuilder()
+                                            .setSingle(true)
+                                            .build();
             Validate.checkValid(result);
             return result;
         }

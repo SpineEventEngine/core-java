@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,11 +21,11 @@ package io.spine.client;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
 import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
 import io.spine.type.TypeUrl;
 
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -78,6 +78,7 @@ public final class Queries {
         return typeUrl;
     }
 
+    @SuppressWarnings("CheckReturnValue") // calling builder
     static Query.Builder queryBuilderFor(Class<? extends Message> entityClass,
                                          @Nullable Set<? extends Message> ids,
                                          @Nullable Set<CompositeColumnFilter> columnFilters,

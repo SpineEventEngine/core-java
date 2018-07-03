@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,8 +22,7 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import io.spine.validate.AbstractValidatingBuilder;
 import io.spine.validate.ValidationException;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -36,12 +35,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public abstract class ThrowingValidatingBuilder<M extends Message, B extends Message.Builder>
         extends AbstractValidatingBuilder<M, B> {
 
-    @Nullable
-    private RuntimeException shouldThrow;
+    private @Nullable RuntimeException shouldThrow;
 
     @Override
     public M build() throws ValidationException {
-        if(shouldThrow != null) {
+        if (shouldThrow != null) {
             throw shouldThrow;
         } else {
             return super.build();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -40,13 +40,13 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.integration.IntegrationBus;
-import io.spine.server.transport.TransportFactory;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.rejection.RejectionSubscriber;
+import io.spine.server.transport.TransportFactory;
 import io.spine.test.integration.Project;
 import io.spine.test.integration.ProjectId;
 import io.spine.test.integration.ProjectVBuilder;
@@ -63,7 +63,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.command.TestEventFactory.newInstance;
@@ -78,7 +78,8 @@ public class IntegrationBusTestEnv {
         // Prevent instantiation of this utility class.
     }
 
-    public static BoundedContext contextWithExtEntitySubscribers(TransportFactory transportFactory) {
+    public static BoundedContext
+    contextWithExtEntitySubscribers(TransportFactory transportFactory) {
         final BoundedContext boundedContext = contextWithTransport(transportFactory);
         boundedContext.register(new ProjectDetailsRepository());
         boundedContext.register(new ProjectWizardRepository());
@@ -170,9 +171,7 @@ public class IntegrationBusTestEnv {
 
     private static Command toCommand(ItgStartProject cmdMessage) {
         return TestActorRequestFactory.newInstance(IntegrationBusTestEnv.class)
-                                      .createCommand(
-                                       cmdMessage
-                               );
+                                      .createCommand(cmdMessage);
     }
 
     private static ProjectId projectId() {

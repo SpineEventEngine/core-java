@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -35,7 +35,8 @@ import io.spine.validate.UInt32ValueVBuilder;
  */
 public final class Switchman extends Aggregate<String, UInt32Value, UInt32ValueVBuilder> {
 
-    @SuppressWarnings("unused") // invoked by reflection.
+    @SuppressWarnings("unused")
+        // Invoked by reflection.
     Switchman(String id) {
         super(id);
     }
@@ -49,6 +50,7 @@ public final class Switchman extends Aggregate<String, UInt32Value, UInt32ValueV
                                       .build();
     }
 
+    @SuppressWarnings("CheckReturnValue") // Calling builder.
     @Apply
     void event(SwitchPositionConfirmed event) {
         getBuilder().setValue(getState().getValue() + 1);

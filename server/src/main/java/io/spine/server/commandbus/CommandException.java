@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -126,10 +126,11 @@ public abstract class CommandException extends RuntimeException implements Messa
      */
     protected static String messageFormat(String format, Command command) {
         final CommandEnvelope envelope = CommandEnvelope.of(command);
-        final ClassName commandClass = envelope.getMessageClass()
-                                               .getClassName();
+        final Class<? extends Message> commandClass = envelope.getMessageClass()
+                                                              .value();
+        final ClassName commandClassName = ClassName.of(commandClass);
         final TypeName typeName = envelope.getTypeName();
-        final String result = format(format, commandClass, typeName);
+        final String result = format(format, commandClassName, typeName);
         return result;
     }
 }

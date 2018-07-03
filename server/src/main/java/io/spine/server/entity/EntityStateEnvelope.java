@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,14 +25,13 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
+import io.spine.base.Identifier;
 import io.spine.core.EventContext;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.string.Stringifiers;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static io.spine.util.Exceptions.unsupported;
 

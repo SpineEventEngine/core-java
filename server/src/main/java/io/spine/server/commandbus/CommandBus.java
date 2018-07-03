@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,11 +21,10 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import io.spine.Identifier;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
-import io.spine.base.Error;
+import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
-import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
@@ -38,8 +37,8 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.rejection.RejectionBus;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
 
@@ -48,9 +47,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
 import static io.spine.core.Rejections.causedByRejection;
 import static io.spine.core.Rejections.toRejection;
-import static io.spine.server.bus.Buses.acknowledge;
-import static io.spine.server.bus.Buses.reject;
-import static io.spine.util.Exceptions.toError;
 import static java.lang.String.format;
 
 /**
@@ -103,8 +99,7 @@ public class CommandBus extends Bus<Command,
      *
      * @see #getValidator() to getreive the non-null value of the validator
      */
-    @Nullable
-    private CommandValidator commandValidator;
+    private @Nullable CommandValidator commandValidator;
 
     /**
      * Creates new instance according to the passed {@link Builder}.
@@ -193,17 +188,14 @@ public class CommandBus extends Bus<Command,
     }
 
     @Override
-    protected Ack doPost(CommandEnvelope envelope) {
+    protected void dispatch(CommandEnvelope envelope) {
         final CommandDispatcher<?> dispatcher = getDispatcher(envelope);
-        Ack result;
         try {
             dispatcher.dispatch(envelope);
             commandStore.setCommandStatusOk(envelope);
-            result = acknowledge(envelope.getId());
         } catch (RuntimeException e) {
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(envelope, cause, log);
-
             if (causedByRejection(e)) {
                 final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
                 final Rejection rejection = toRejection(throwableMessage, envelope.getCommand());
@@ -211,13 +203,8 @@ public class CommandBus extends Bus<Command,
                                                          .getClass();
                 Log.log().trace("Posting rejection {} to RejectionBus.", rejectionClass.getName());
                 rejectionBus().post(rejection);
-                result = reject(envelope.getId(), rejection);
-            } else {
-                final Error error = toError(cause);
-                result = reject(envelope.getId(), error);
             }
         }
-        return result;
     }
 
     /**
@@ -252,15 +239,15 @@ public class CommandBus extends Bus<Command,
      * Passes a previously scheduled command to the corresponding dispatcher.
      */
     void postPreviouslyScheduled(Command command) {
-        final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
-        doPost(commandEnvelope);
+        CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
+        dispatch(commandEnvelope);
     }
 
     private static IllegalStateException noDispatcherFound(CommandEnvelope commandEnvelope) {
         final String idStr = Identifier.toString(commandEnvelope.getId());
         final String msg = format("No dispatcher found for the command (class: %s id: %s).",
                                   commandEnvelope.getMessageClass()
-                                                 .getClassName(),
+                                                 .toString(),
                                   idStr);
         throw new IllegalStateException(msg);
     }
@@ -273,9 +260,8 @@ public class CommandBus extends Bus<Command,
     }
 
     private CommandDispatcher<?> getDispatcher(CommandEnvelope commandEnvelope) {
-        final Optional<? extends CommandDispatcher<?>> dispatcher = getDispatcher(
-                commandEnvelope.getMessageClass()
-        );
+        Optional<? extends CommandDispatcher<?>> dispatcher =
+                getDispatcher(commandEnvelope.getMessageClass());
         if (!dispatcher.isPresent()) {
             throw noDispatcherFound(commandEnvelope);
         }
@@ -326,8 +312,7 @@ public class CommandBus extends Bus<Command,
          * <p>If set directly, the value would be matched to the multi-tenancy flag of
          * {@code BoundedContext}.
          */
-        @Nullable
-        private Boolean multitenant;
+        private @Nullable Boolean multitenant;
 
         private CommandStore commandStore;
 
@@ -353,18 +338,18 @@ public class CommandBus extends Bus<Command,
          * the current runtime environment.
          */
         private static boolean detectThreadsAllowed() {
-            final boolean appEngine = ServerEnvironment.getInstance()
-                                                       .isAppEngine();
+            boolean appEngine = ServerEnvironment.getInstance()
+                                                 .isAppEngine();
             return !appEngine;
         }
 
         @Internal
-        @Nullable
-        public Boolean isMultitenant() {
+        public @Nullable Boolean isMultitenant() {
             return multitenant;
         }
 
         @Internal
+        @CanIgnoreReturnValue
         public Builder setMultitenant(@Nullable Boolean multitenant) {
             this.multitenant = multitenant;
             return this;
@@ -386,18 +371,21 @@ public class CommandBus extends Bus<Command,
             return Optional.fromNullable(rejectionBus);
         }
 
+        @CanIgnoreReturnValue
         public Builder setCommandStore(CommandStore commandStore) {
             checkNotNull(commandStore);
             this.commandStore = commandStore;
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder setCommandScheduler(CommandScheduler commandScheduler) {
             checkNotNull(commandScheduler);
             this.commandScheduler = commandScheduler;
             return this;
         }
 
+        @CanIgnoreReturnValue
         public Builder setRejectionBus(RejectionBus rejectionBus) {
             checkNotNull(rejectionBus);
             this.rejectionBus = rejectionBus;
@@ -417,6 +405,7 @@ public class CommandBus extends Bus<Command,
          * <p>If not set explicitly, the default value of this flag is set upon the best guess,
          * based on current {@link io.spine.server.ServerEnvironment server environment}.
          */
+        @CanIgnoreReturnValue
         public Builder setThreadSpawnAllowed(boolean threadSpawnAllowed) {
             this.threadSpawnAllowed = threadSpawnAllowed;
             return this;
@@ -490,12 +479,12 @@ public class CommandBus extends Bus<Command,
             return this;
         }
 
+        @SuppressWarnings("CheckReturnValue")
+            /* Calling registry() enforces creating the registry to make spying for CommandBus
+               instances in tests work. */
         private CommandBus createCommandBus() {
-            final CommandBus commandBus = new CommandBus(this);
-
-            // Enforce creating the registry to make spying for CommandBus-es in tests work.
+            CommandBus commandBus = new CommandBus(this);
             commandBus.registry();
-
             return commandBus;
         }
     }
@@ -507,8 +496,8 @@ public class CommandBus extends Bus<Command,
 
         @Override
         public UnsupportedCommandException handle(CommandEnvelope message) {
-            final Command command = message.getCommand();
-            final UnsupportedCommandException exception = new UnsupportedCommandException(command);
+            Command command = message.getCommand();
+            UnsupportedCommandException exception = new UnsupportedCommandException(command);
             commandStore().storeWithError(command, exception);
             return exception;
         }

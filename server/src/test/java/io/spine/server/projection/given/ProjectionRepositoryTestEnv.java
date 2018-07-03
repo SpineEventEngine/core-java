@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -40,10 +40,16 @@ import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjProjectDeleted;
 import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
+/**
+ * @author Alexander Yevsyukov
+ * @author Alexander Aleksandrov
+ * @author Dmytro Grankin
+ * @author Alex Tymchenko
+ */
 public class ProjectionRepositoryTestEnv {
 
     private ProjectionRepositoryTestEnv() {
@@ -80,10 +86,8 @@ public class ProjectionRepositoryTestEnv {
     public static class TestProjectionRepository
             extends ProjectionRepository<ProjectId, TestProjection, Project> {
 
-        @Nullable
-        private MessageEnvelope lastErrorEnvelope;
-        @Nullable
-        private RuntimeException lastException;
+        private @Nullable MessageEnvelope lastErrorEnvelope;
+        private @Nullable RuntimeException lastException;
 
         @Subscribe
         public void apply(PrjProjectCreated event, EventContext eventContext) {
@@ -99,13 +103,11 @@ public class ProjectionRepositoryTestEnv {
             lastException = exception;
         }
 
-        @Nullable
-        public MessageEnvelope getLastErrorEnvelope() {
+        public @Nullable MessageEnvelope getLastErrorEnvelope() {
             return lastErrorEnvelope;
         }
 
-        @Nullable
-        public RuntimeException getLastException() {
+        public @Nullable RuntimeException getLastException() {
             return lastException;
         }
     }
@@ -144,7 +146,8 @@ public class ProjectionRepositoryTestEnv {
         public static Set<ProjectId> whoProcessed(Message eventMessage) {
             final ImmutableSet.Builder<ProjectId> builder = ImmutableSet.builder();
             for (ProjectId projectId : eventMessagesDelivered.keySet()) {
-                if(eventMessagesDelivered.get(projectId).contains(eventMessage)) {
+                if(eventMessagesDelivered.get(projectId)
+                                         .contains(eventMessage)) {
                     builder.add(projectId);
                 }
             }
@@ -275,5 +278,6 @@ public class ProjectionRepositoryTestEnv {
      * projection class}.
      */
     public static class SensoryDeprivedProjectionRepository
-            extends ProjectionRepository<ProjectId, SensoryDeprivedProjection, Project> {}
+            extends ProjectionRepository<ProjectId, SensoryDeprivedProjection, Project> {
+    }
 }

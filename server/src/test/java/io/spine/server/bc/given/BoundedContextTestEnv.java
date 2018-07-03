@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -55,7 +55,8 @@ import static com.google.common.collect.Lists.newArrayList;
 
 public class BoundedContextTestEnv {
 
-    private BoundedContextTestEnv() {}
+    private BoundedContextTestEnv() {
+    }
 
     public static class ProjectAggregate
             extends Aggregate<ProjectId, Project, ProjectVBuilder> {
@@ -82,9 +83,8 @@ public class BoundedContextTestEnv {
 
         @Apply
         void event(BcProjectCreated event) {
-            getBuilder()
-                    .setId(event.getProjectId())
-                    .setStatus(Project.Status.CREATED);
+            getBuilder().setId(event.getProjectId())
+                        .setStatus(Project.Status.CREATED);
         }
 
         @Apply
@@ -94,15 +94,13 @@ public class BoundedContextTestEnv {
 
         @Apply
         void event(BcProjectStarted event) {
-            getBuilder()
-                    .setId(event.getProjectId())
-                    .setStatus(Project.Status.STARTED)
-                    .build();
+            getBuilder().setId(event.getProjectId())
+                        .setStatus(Project.Status.STARTED);
         }
     }
 
     public static class ProjectAggregateRepository
-                  extends AggregateRepository<ProjectId, ProjectAggregate> {
+            extends AggregateRepository<ProjectId, ProjectAggregate> {
     }
 
     public static class TestEventSubscriber extends EventSubscriber {

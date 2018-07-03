@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,6 +20,7 @@
 
 package io.spine.server.projection;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Version;
 import io.spine.server.entity.EntityBuilder;
@@ -40,11 +41,13 @@ public class ProjectionBuilder<P extends Projection<I, S, B>,
                                B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends EntityBuilder<P, I, S> {
 
+    /** Creates new instance. */
     public ProjectionBuilder() {
         super();
         // Have the constructor for easier location of usages.
     }
 
+    @CanIgnoreReturnValue
     @Override
     public ProjectionBuilder<P, I, S, B> setResultClass(Class<P> entityClass) {
         super.setResultClass(entityClass);

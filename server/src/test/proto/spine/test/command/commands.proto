@@ -1,5 +1,5 @@
 //
-// Copyright 2018, TeamDev Ltd. All rights reserved.
+// Copyright 2018, TeamDev. All rights reserved.
 //
 // Redistribution and use in source and/or binary forms, with or without
 // modification, must retain the above copyright notice and the following
@@ -43,8 +43,33 @@ message CmdStartProject {
     ProjectId project_id = 1;
 }
 
+message CmdRemoveTask {
+    ProjectId project_id = 1;
+    Task task = 2;
+}
+
 // A command to create a project for duplicate command tests.
 //
 message DCmdCreateProject {
     ProjectId project_id = 1;
+}
+
+// A command to create a project to test the command posting order.
+//
+// This command is to be sent first.
+//
+message FirstCmdCreateProject {
+
+    ProjectId id = 1;
+
+    string name = 2;
+}
+
+// A command to start a project to test the command posting order.
+//
+// This command is to be sent second, as a part of the `FirstCmdCreateProject` handling.
+//
+message SecondCmdStartProject {
+
+    ProjectId id = 1;
 }

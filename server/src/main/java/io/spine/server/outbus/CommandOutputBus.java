@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -19,11 +19,8 @@
  */
 package io.spine.server.outbus;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.Identifier;
 import io.spine.annotation.Internal;
-import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Rejection;
@@ -32,7 +29,6 @@ import io.spine.server.bus.MulticastBus;
 import io.spine.type.MessageClass;
 
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.bus.Buses.acknowledge;
 import static java.lang.String.format;
 
 /**
@@ -75,15 +71,11 @@ public abstract class CommandOutputBus<M extends Message,
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
 
     @Override
-    protected Ack doPost(E envelope) {
+    protected void dispatch(E envelope) {
         final E enrichedEnvelope = enrich(envelope);
         final int dispatchersCalled = callDispatchers(enrichedEnvelope);
-
-        final Any packedId = Identifier.pack(envelope.getId());
         checkState(dispatchersCalled != 0,
                    format("Message %s has no dispatchers.", envelope.getMessage()));
-        final Ack result = acknowledge(packedId);
-        return result;
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.entity.storage.ColumnValueExtractor.create;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.String.format;
 
@@ -73,8 +74,8 @@ public class Columns {
     static Collection<EntityColumn> getAllColumns(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
 
-        final ColumnReader columnReader = ColumnReader.forClass(entityClass);
-        final Collection<EntityColumn> entityColumns = columnReader.readColumns();
+        ColumnReader columnReader = ColumnReader.forClass(entityClass);
+        Collection<EntityColumn> entityColumns = columnReader.readColumns();
         return entityColumns;
     }
 
@@ -90,17 +91,27 @@ public class Columns {
      */
     static EntityColumn findColumn(Class<? extends Entity> entityClass, String columnName) {
         checkNotNull(entityClass);
-        checkNotEmptyOrBlank(columnName, "entity column name");
+        checkColumnName(columnName);
 
-        final ColumnReader columnReader = ColumnReader.forClass(entityClass);
-        final Collection<EntityColumn> entityColumns = columnReader.readColumns();
+        ColumnReader columnReader = ColumnReader.forClass(entityClass);
+        Collection<EntityColumn> entityColumns = columnReader.readColumns();
         for (EntityColumn column : entityColumns) {
-            if (column.getName()
-                    .equals(columnName)) {
+            if (columnName.equals(column.getName())) {
                 return column;
             }
         }
 
+        throw couldNotFindColumn(entityClass, columnName);
+    }
+
+    static void checkColumnName(String columnName) {
+        checkNotEmptyOrBlank(columnName, "entity column name");
+    }
+
+    static IllegalArgumentException couldNotFindColumn(Class<? extends Entity> entityClass,
+                                                       String columnName) {
+        checkNotNull(entityClass);
+        checkNotNull(columnName);
         throw new IllegalArgumentException(
                 format("Could not find an EntityColumn description for %s.%s.",
                         entityClass.getCanonicalName(),
@@ -108,19 +119,23 @@ public class Columns {
     }
 
     /**
-     * Extracts the {@linkplain EntityColumn column} values from the given {@linkplain Entity}, using given
-     * {@linkplain EntityColumn entity columns}.
+     * Extracts the {@linkplain EntityColumn column} values from the given {@linkplain Entity}, 
+     * using given {@linkplain EntityColumn entity columns}.
      *
      * <p>By using predefined {@linkplain EntityColumn entity columns} the process of
      * {@linkplain ColumnReader#readColumns() obtaining columns} from the given {@link Entity} class
      * can be skipped.
      *
-     * <p>This method will return {@linkplain Collections#emptyMap() empty map} for {@link Entity} classes
-     * that are non-public or cannot be subjected to column extraction for some other reason.
+     * <p>This method will return {@linkplain Collections#emptyMap() empty map} for 
+     * {@link Entity} classes that are non-public or cannot be subjected to column extraction 
+     * for some other reason.
      *
-     * @param entity        an {@link Entity} to get the {@linkplain EntityColumn column} values from
-     * @param entityColumns {@linkplain EntityColumn entity columns} which values should be extracted
-     * @param <E>           the type of the {@link Entity}
+     * @param  entity        
+     *         an {@link Entity} to get the {@linkplain EntityColumn column} values from
+     * @param  entityColumns 
+     *         {@linkplain EntityColumn entity columns} which values should be extracted
+     * @param  <E>           
+     *         the type of the {@link Entity}
      * @return a {@code Map} of the column {@linkplain EntityColumn#getStoredName()
      *         names for storing} to their {@linkplain MemoizedValue memoized values}
      * @see MemoizedValue
@@ -130,7 +145,7 @@ public class Columns {
         checkNotNull(entity);
         checkNotNull(entityColumns);
 
-        final ColumnValueExtractor columnValueExtractor = ColumnValueExtractor.create(entity, entityColumns);
+        ColumnValueExtractor columnValueExtractor = create(entity, entityColumns);
         return columnValueExtractor.extractColumnValues();
     }
 }

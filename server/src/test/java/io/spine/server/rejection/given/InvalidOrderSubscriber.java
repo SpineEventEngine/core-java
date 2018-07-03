@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,8 +26,11 @@ import io.spine.core.Subscribe;
 import io.spine.test.rejection.ProjectRejections;
 import io.spine.test.rejection.command.RjRemoveOwner;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 public class InvalidOrderSubscriber extends VerifiableSubscriber {
 
     @SuppressWarnings("unused") // The method should never be invoked, so the params are unused.

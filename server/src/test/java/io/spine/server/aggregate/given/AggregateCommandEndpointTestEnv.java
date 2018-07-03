@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -42,8 +42,8 @@ import io.spine.test.aggregate.event.AggTaskAdded;
  */
 public class AggregateCommandEndpointTestEnv {
 
+    /** Prevent instantiation of this utility class. */
     private AggregateCommandEndpointTestEnv() {
-        // Prevent instantiation of this utility class.
     }
 
     public static class ProjectAggregate
@@ -68,9 +68,9 @@ public class AggregateCommandEndpointTestEnv {
         AggProjectCreated handle(AggCreateProject msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return AggProjectCreated.newBuilder()
-                                 .setProjectId(msg.getProjectId())
-                                 .setName(msg.getName())
-                                 .build();
+                                    .setProjectId(msg.getProjectId())
+                                    .setName(msg.getName())
+                                    .build();
         }
 
         @Apply
@@ -83,8 +83,8 @@ public class AggregateCommandEndpointTestEnv {
         AggTaskAdded handle(AggAddTask msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return AggTaskAdded.newBuilder()
-                            .setProjectId(msg.getProjectId())
-                            .build();
+                               .setProjectId(msg.getProjectId())
+                               .build();
         }
 
         @Apply
@@ -96,8 +96,8 @@ public class AggregateCommandEndpointTestEnv {
         AggProjectStarted handle(AggStartProject msg, CommandContext context) {
             commandsHandled.add(msg, context);
             return AggProjectStarted.newBuilder()
-                                 .setProjectId(msg.getProjectId())
-                                 .build();
+                                    .setProjectId(msg.getProjectId())
+                                    .build();
         }
 
         @Apply

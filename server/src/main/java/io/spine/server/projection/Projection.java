@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -20,13 +20,14 @@
 
 package io.spine.server.projection;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.server.entity.EventPlayingEntity;
+import io.spine.server.entity.EventPlayer;
+import io.spine.server.entity.EventPlayers;
+import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventSubscriberMethod;
 import io.spine.server.model.Model;
 import io.spine.validate.ValidatingBuilder;
@@ -47,7 +48,8 @@ import io.spine.validate.ValidatingBuilder;
 public abstract class Projection<I,
                                  M extends Message,
                                  B extends ValidatingBuilder<M, ? extends Message.Builder>>
-        extends EventPlayingEntity<I, M, B> {
+        extends TransactionalEntity<I, M, B>
+        implements EventPlayer {
 
     /**
      * Creates a new instance.
@@ -74,8 +76,12 @@ public abstract class Projection<I,
         apply(event.getMessage(), event.getEventContext());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overridden to expose into the {@code io.spine.server.projection} package.
+     */
     @Override
-    @VisibleForTesting      // Overridden to expose this method to tests.
     protected B getBuilder() {
         return super.getBuilder();
     }
@@ -104,5 +110,11 @@ public abstract class Projection<I,
     void apply(Message eventMessage, EventContext eventContext)  {
         final EventSubscriberMethod method = thisClass().getSubscriber(EventClass.of(eventMessage));
         method.invoke(this, eventMessage, eventContext);
+    }
+
+    @Override
+    public void play(Iterable<Event> events) {
+        final EventPlayer eventPlayer = EventPlayers.forTransactionOf(this);
+        eventPlayer.play(events);
     }
 }

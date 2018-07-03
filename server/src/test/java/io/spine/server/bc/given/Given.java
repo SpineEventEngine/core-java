@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -31,14 +31,15 @@ import io.spine.test.bc.event.BcProjectCreated;
 import io.spine.test.bc.event.BcProjectStarted;
 import io.spine.test.bc.event.BcTaskAdded;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.BoundedContext.newName;
 
 public class Given {
 
-    private Given() {}
+    private Given() {
+    }
 
     public static class AggregateId {
 
@@ -66,14 +67,14 @@ public class Given {
 
         public static BcTaskAdded taskAdded(ProjectId id) {
             return BcTaskAdded.newBuilder()
-                            .setProjectId(id)
-                            .build();
+                              .setProjectId(id)
+                              .build();
         }
 
         public static BcProjectStarted projectStarted(ProjectId id) {
             return BcProjectStarted.newBuilder()
-                                 .setProjectId(id)
-                                 .build();
+                                   .setProjectId(id)
+                                   .build();
         }
     }
 

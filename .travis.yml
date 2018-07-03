@@ -27,8 +27,6 @@ before_install:
 script:
   - ./gradlew check --stacktrace
 
-  - ./gradlew cleanGCS --info
-
   # The publishing script should be executed in `script` section in order to
   # fail the Travis build if execution of this script is failed.
   - chmod +x ./scripts/publish.sh

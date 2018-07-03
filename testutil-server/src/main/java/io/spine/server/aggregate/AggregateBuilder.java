@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Version;
 import io.spine.server.entity.EntityBuilder;
@@ -46,6 +47,7 @@ public class AggregateBuilder<A extends Aggregate<I, S, ?>,
         // Have the constructor for easier location of usages.
     }
 
+    @CanIgnoreReturnValue
     @Override
     public AggregateBuilder<A, I, S> setResultClass(Class<A> entityClass) {
         super.setResultClass(entityClass);

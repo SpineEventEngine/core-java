@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -38,7 +38,7 @@ import io.spine.test.aggregate.command.AggReassignTask;
 import io.spine.test.aggregate.task.AggTaskId;
 import io.spine.testdata.Sample;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.given.GivenVersion.withNumber;
 
 /**
@@ -108,7 +108,8 @@ public class AggregateTestEnv {
         return eventFactory().createEvent(eventMessage, withNumber(versionNumber));
     }
 
-    public static RejectionEnvelope cannotModifyDeletedEntity(Class<? extends Message> commandMessageCls) {
+    public static RejectionEnvelope
+    cannotModifyDeletedEntity(Class<? extends Message> commandMessageCls) {
         final CannotModifyDeletedEntity rejectionMsg = CannotModifyDeletedEntity.newBuilder()
                                                                                 .build();
         final Command command = io.spine.server.commandbus.Given.ACommand.withMessage(

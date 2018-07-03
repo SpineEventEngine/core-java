@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -33,7 +33,7 @@ import java.util.List;
  * @author Alexander Yevsyukov
  */
 class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
-    extends AggregateMessageEndpoint<I, A, CommandEnvelope, I> {
+        extends AggregateEndpoint<I, A, CommandEnvelope, I> {
 
     private AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope command) {
         super(repo, command);

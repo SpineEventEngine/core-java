@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,6 +21,7 @@
 package io.spine.server.route;
 
 import com.google.common.base.Optional;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
@@ -72,6 +73,7 @@ public final class CommandRouting<I> extends MessageRouting<CommandContext, Comm
      * @param newDefault the new route to be used as default
      * @return {@code this} to allow chained calls when configuring the routing
      */
+    @CanIgnoreReturnValue
     public CommandRouting<I> replaceDefault(CommandRoute<I, Message> newDefault) {
         checkNotNull(newDefault);
         return (CommandRouting<I>) super.replaceDefault(newDefault);
@@ -94,6 +96,7 @@ public final class CommandRouting<I> extends MessageRouting<CommandContext, Comm
      * @return {@code this} to allow chained calls when configuring the routing
      * @throws IllegalStateException if the route for this command class is already set
      */
+    @CanIgnoreReturnValue
     public <M extends Message> CommandRouting<I> route(Class<M> commandClass,
                                                        CommandRoute<I, M> via)
             throws IllegalStateException {

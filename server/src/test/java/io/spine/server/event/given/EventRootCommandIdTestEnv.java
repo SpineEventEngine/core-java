@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -34,7 +34,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.event.EventRootCommandIdShould;
+import io.spine.server.event.EventRootCommandIdTest;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
@@ -79,7 +79,7 @@ public class EventRootCommandIdTestEnv {
     public static final TenantId TENANT_ID = tenantId();
 
     private static final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(EventRootCommandIdShould.class, TENANT_ID);
+            TestActorRequestFactory.newInstance(EventRootCommandIdTest.class, TENANT_ID);
 
     private EventRootCommandIdTestEnv() {
         // Prevent instantiation.
@@ -177,13 +177,13 @@ public class EventRootCommandIdTestEnv {
     }
 
     public static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, ProjectAggregate> { }
+            extends AggregateRepository<ProjectId, ProjectAggregate> {
+    }
 
     /**
      * Routes the {@link ProjectCreated} event to the {@link TeamAggregate} the project belongs to.
      * This is done for the purposes of the
-     * {@linkplain EventRootCommandIdShould#match_the_id_of_an_external_event_handled_by_an_aggregate()}
-     * test.
+     * {@linkplain EventRootCommandIdTest.MatchExternalEventHandledBy#aggregate()} test.
      */
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public static class TeamAggregateRepository
@@ -206,8 +206,7 @@ public class EventRootCommandIdTestEnv {
     /**
      * Routes the {@link EvInvitationAccepted} event to the {@link TeamCreationProcessManager} which
      * created the invitation. This is done for the purposes of the
-     * {@linkplain EventRootCommandIdShould#match_the_id_of_an_external_event_handled_by_a_process_manager()}
-     * test.
+     * {@linkplain EventRootCommandIdTest.MatchExternalEventHandledBy#processManager()} test.
      */
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
     public static class TeamCreationRepository
@@ -230,7 +229,8 @@ public class EventRootCommandIdTestEnv {
     }
 
     public static class UserSignUpRepository
-            extends ProcessManagerRepository<UserId, UserSignUpProcessManager, EvUserSignUp> { }
+            extends ProcessManagerRepository<UserId, UserSignUpProcessManager, EvUserSignUp> {
+    }
 
     static class ProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
@@ -310,7 +310,8 @@ public class EventRootCommandIdTestEnv {
         }
     }
 
-    static class TeamCreationProcessManager extends ProcessManager<EvTeamId, EvTeamCreation, EvTeamCreationVBuilder> {
+    static class TeamCreationProcessManager
+            extends ProcessManager<EvTeamId, EvTeamCreation, EvTeamCreationVBuilder> {
 
         private TeamCreationProcessManager(EvTeamId id) {
             super(id);
@@ -374,7 +375,8 @@ public class EventRootCommandIdTestEnv {
         }
     }
 
-    static class UserSignUpProcessManager extends ProcessManager<UserId, EvUserSignUp, EvUserSignUpVBuilder> {
+    static class UserSignUpProcessManager
+            extends ProcessManager<UserId, EvUserSignUp, EvUserSignUpVBuilder> {
 
         private UserSignUpProcessManager(UserId id) {
             super(id);

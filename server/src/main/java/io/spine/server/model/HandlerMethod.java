@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -32,8 +32,8 @@ import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.server.event.EventFactory;
 import io.spine.type.MessageClass;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -225,14 +225,15 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
      * @return the result of message handling
      */
     public Object invoke(Object target, Message message, C context) {
+        checkNotNull(target);
         checkNotNull(message);
         checkNotNull(context);
         try {
-            final int paramCount = getParamCount();
-            final Object returnedValue = (paramCount == 1)
-                    ? method.invoke(target, message)
-                    : method.invoke(target, message, context);
-            return returnedValue;
+            int paramCount = getParamCount();
+            Object result = (paramCount == 1)
+                            ? method.invoke(target, message)
+                            : method.invoke(target, message, context);
+            return result;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
             throw whyFailed(target, message, context, e);
         }

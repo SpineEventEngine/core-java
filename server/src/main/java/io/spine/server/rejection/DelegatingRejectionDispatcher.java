@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -26,13 +26,13 @@ import io.spine.annotation.Internal;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
+import io.spine.logging.Logging;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
-import io.spine.util.Logging;
 import org.slf4j.Logger;
 
 import java.util.Set;
@@ -108,23 +108,23 @@ public final class DelegatingRejectionDispatcher<I> implements RejectionDispatch
         return new ExternalMessageDispatcher<I>() {
             @Override
             public Set<ExternalMessageClass> getMessageClasses() {
-                final Set<RejectionClass> rejectionClasses = delegate.getExternalRejectionClasses();
+                Set<RejectionClass> rejectionClasses = delegate.getExternalRejectionClasses();
                 return ExternalMessageClass.fromRejectionClasses(rejectionClasses);
             }
 
             @Override
             public Set<I> dispatch(ExternalMessageEnvelope envelope) {
-                final ExternalMessage externalMessage = envelope.getOuterObject();
-                final Rejection rejection = unpack(externalMessage.getOriginalMessage());
-                final Set<I> ids = delegate.dispatchRejection(RejectionEnvelope.of(rejection));
+                ExternalMessage externalMessage = envelope.getOuterObject();
+                Rejection rejection = unpack(externalMessage.getOriginalMessage());
+                Set<I> ids = delegate.dispatchRejection(RejectionEnvelope.of(rejection));
                 return ids;
             }
 
             @Override
             public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-                final MessageClass messageClass = envelope.getMessageClass();
-                final String messageId = Stringifiers.toString(envelope.getId());
-                final String errorMessage =
+                MessageClass messageClass = envelope.getMessageClass();
+                String messageId = Stringifiers.toString(envelope.getId());
+                String errorMessage =
                         format("Error dispatching external rejection (class: %s, id: %s)",
                                messageClass, messageId);
                 log().error(errorMessage, exception);

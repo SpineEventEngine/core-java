@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -32,7 +32,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.CommandService;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.aggregate.AggregateShould;
+import io.spine.server.aggregate.AggregateTest;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.transport.GrpcContainer;
@@ -45,7 +45,7 @@ import io.spine.test.command.event.DCmdProjectCreated;
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
 
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 /**
@@ -87,7 +87,7 @@ public class DuplicateCommandTestEnv {
     }
 
     private static TestActorRequestFactory newRequestFactory(TenantId tenantId) {
-        return TestActorRequestFactory.newInstance(AggregateShould.class, tenantId);
+        return TestActorRequestFactory.newInstance(AggregateTest.class, tenantId);
     }
 
     /**
@@ -96,16 +96,13 @@ public class DuplicateCommandTestEnv {
     public static void runServer(final TestServer server) throws Exception {
         final CountDownLatch serverStartLatch = new CountDownLatch(1);
 
-        final Thread serverThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    server.start();
-                    server.awaitTermination();
-                    serverStartLatch.countDown();
-                } catch (IOException e) {
-                    throw new IllegalStateException(e);
-                }
+        final Thread serverThread = new Thread(() -> {
+            try {
+                server.start();
+                server.awaitTermination();
+                serverStartLatch.countDown();
+            } catch (IOException e) {
+                throw new IllegalStateException(e);
             }
         });
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -25,11 +25,11 @@ import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
+import io.spine.logging.Logging;
 import io.spine.server.model.Model;
 import io.spine.server.tenant.CommandOperation;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
-import io.spine.util.Logging;
 import org.slf4j.Logger;
 
 import java.util.Set;
@@ -61,7 +61,7 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
      * the subscriber, or empty set if dispatching failed
      */
     @Override
-    public Set<String> dispatch(final RejectionEnvelope envelope) {
+    public Set<String> dispatch(RejectionEnvelope envelope) {
         final Command originCommand = envelope.getOuterObject()
                                               .getContext()
                                               .getCommand();

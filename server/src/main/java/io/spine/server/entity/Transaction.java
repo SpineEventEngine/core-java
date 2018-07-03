@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,6 +21,7 @@ package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.EventContext;
@@ -42,7 +43,7 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 
 /**
- * The abstract class for the {@linkplain EventPlayingEntity} transactions.
+ * The abstract class for the {@linkplain TransactionalEntity entity} transactions.
  *
  * <p>The transaction is a set of changes made to an entity state or entity attributes
  * (e.g. version, lifecycle flags etc).
@@ -52,8 +53,8 @@ import static java.lang.String.format;
  *
  * <p>The transaction is injected to the entity, which state should be modified. By doing so,
  * the {@linkplain Transaction#getBuilder() "buffering" builder} is exposed to concrete
- * {@code EventPlayingEntity} subclasses. In turn, they receive an ability to change the entity
- * state by modifying {@link EventPlayingEntity#getBuilder() entity state builder}.
+ * {@code TransactionalEntity} subclasses. In turn, they receive an ability to change the entity
+ * state by modifying {@link TransactionalEntity#getBuilder() entity state builder}.
  *
  * <p>Same applies to the entity lifecycle flags.
  *
@@ -68,7 +69,7 @@ import static java.lang.String.format;
  */
 @Internal
 public abstract class Transaction<I,
-                                  E extends EventPlayingEntity<I, S, B>,
+                                  E extends TransactionalEntity<I, S, B>,
                                   S extends Message,
                                   B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
@@ -134,7 +135,7 @@ public abstract class Transaction<I,
 
     /**
      * Creates a new instance of {@code Transaction} and
-     * {@linkplain EventPlayingEntity#injectTransaction(Transaction) injects} the newly created
+     * {@linkplain TransactionalEntity#injectTransaction(Transaction) injects} the newly created
      * transaction into the given {@code entity}.
      *
      * <p>The entity state and attributes are set as starting values for this transaction.
@@ -159,8 +160,8 @@ public abstract class Transaction<I,
 
     /**
      * Acts similar to
-     * {@linkplain Transaction#Transaction(EventPlayingEntity, TransactionListener)
-     * Transaction(EventPlayingEntity, TransactionListener)}, but passes an instance of
+     * {@linkplain Transaction#Transaction(TransactionalEntity, TransactionListener)
+     * Transaction(TransactionalEntity, TransactionListener)}, but passes an instance of
      * {@link SilentWitness} as a listener.
      *
      * @param entity the entity to create the transaction for.
@@ -170,7 +171,7 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Acts similar to {@linkplain Transaction#Transaction(EventPlayingEntity)
+     * Acts similar to {@linkplain Transaction#Transaction(TransactionalEntity)
      * an overloaded ctor}, but instead of using the original entity state and version,
      * this transaction will have the passed state and version as a starting point.
      *
@@ -189,7 +190,7 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Acts similar to {@linkplain Transaction#Transaction(EventPlayingEntity,
+     * Acts similar to {@linkplain Transaction#Transaction(TransactionalEntity,
      * Message, Version, TransactionListener) an overloaded ctor},
      * but passes an instance of {@link SilentWitness} as a listener.
      *
@@ -318,7 +319,8 @@ public abstract class Transaction<I,
      * @return this instance of the transaction
      * @see Transaction#apply(EventEnvelope)
      */
-    @SuppressWarnings("OverlyBroadCatchBlock")  // to `rollback(..)` in case of any exception.
+    @CanIgnoreReturnValue
+    @SuppressWarnings("OverlyBroadCatchBlock")  /* to `rollback(..)` in case of any exception. */
     Transaction<I, E, S, B> apply(EventEnvelope event) {
         final Phase<I, E, S, B> phase = new Phase<>(this, event);
 
@@ -361,7 +363,7 @@ public abstract class Transaction<I,
     }
 
     void initAll(S state, Version version) {
-        final B builder = getBuilder();
+        B builder = getBuilder();
         builder.clear();
         builder.mergeFrom(state);
         initVersion(version);
@@ -470,7 +472,7 @@ public abstract class Transaction<I,
      * @param <B> the type of a {@code ValidatingBuilder} for the entity state
      */
     protected static class Phase<I,
-                                 E extends EventPlayingEntity<I, S, B>,
+                                 E extends TransactionalEntity<I, S, B>,
                                  S extends Message,
                                  B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 

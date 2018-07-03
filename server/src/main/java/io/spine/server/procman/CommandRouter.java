@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -50,6 +50,7 @@ public class CommandRouter extends AbstractCommandRouter<CommandRouter> {
      *
      * @return the event with the source and produced commands
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder
     public CommandRouted routeAll() {
         final CommandRouted.Builder result = CommandRouted.newBuilder();
         result.setSource(getSource());

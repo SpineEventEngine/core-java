@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -21,6 +21,7 @@
 package io.spine.server.projection;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.EventContext;
@@ -61,18 +62,18 @@ class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
 
     @Override
     protected Set<I> getTargets() {
-        final EventEnvelope event = envelope();
-        final Set<I> ids = repository().eventRouting()
-                                       .apply(event.getMessage(), event.getEventContext());
+        EventEnvelope event = envelope();
+        Set<I> ids = repository().eventRouting()
+                                 .apply(event.getMessage(), event.getEventContext());
         return ids;
     }
 
     @Override
     protected void deliverNowTo(I entityId) {
-        final P projection = repository().findOrCreate(entityId);
-        final ProjectionTransaction<I, ?, ?> tx =
+        P projection = repository().findOrCreate(entityId);
+        ProjectionTransaction<I, ?, ?> tx =
                 ProjectionTransaction.start((Projection<I, ?, ?>) projection);
-        projection.handle(envelope());
+        doDispatch(projection, envelope());
         tx.commit();
         store(projection);
     }
@@ -82,6 +83,7 @@ class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         return repository().getEndpointDelivery();
     }
 
+    @CanIgnoreReturnValue
     @Override
     protected List<? extends Message> doDispatch(P projection, EventEnvelope event) {
         projection.handle(event);
@@ -96,11 +98,11 @@ class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
 
     @Override
     protected void onModified(P projection) {
-        final ProjectionRepository<I, P, ?> repository = repository();
+        ProjectionRepository<I, P, ?> repository = repository();
         repository.store(projection);
 
-        final EventContext eventContext = envelope().getEventContext();
-        final Timestamp eventTime = eventContext.getTimestamp();
+        EventContext eventContext = envelope().getEventContext();
+        Timestamp eventTime = eventContext.getTimestamp();
         repository.projectionStorage()
                   .writeLastHandledEventTime(eventTime);
 

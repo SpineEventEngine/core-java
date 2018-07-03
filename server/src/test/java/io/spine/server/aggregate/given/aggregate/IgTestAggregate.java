@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -37,7 +37,7 @@ import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
 
 /**
  * An aggregate class for {@linkplain
- * io.spine.server.aggregate.IdempotencyGuardShould IdempotencyGuard tests}.
+ * io.spine.server.aggregate.IdempotencyGuardTest IdempotencyGuard tests}.
  *
  * @author Mykhailo Drachuk
  */

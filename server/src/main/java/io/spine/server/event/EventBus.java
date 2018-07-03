@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -22,6 +22,7 @@ package io.spine.server.event;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
@@ -39,8 +40,8 @@ import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
 import io.spine.server.storage.StorageFactory;
 import io.spine.validate.MessageValidator;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -262,8 +263,7 @@ public class EventBus
          * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory
          * to create an instance of {@code EventBus}.
          */
-        @Nullable
-        private StorageFactory storageFactory;
+        private @Nullable StorageFactory storageFactory;
 
         /**
          * A {@code EventStore} for storing all the events passed through the {@code EventBus}.
@@ -274,8 +274,7 @@ public class EventBus
          * <p>Either a {@code StorageFactory} or an {@code EventStore} are mandatory
          * to create an instance of {@code EventBus}.
          */
-        @Nullable
-        private EventStore eventStore;
+        private @Nullable EventStore eventStore;
 
         /**
          * Optional {@code Executor} for returning event stream from the {@code EventStore}.
@@ -284,16 +283,14 @@ public class EventBus
          *
          * <p>If not set, a default value will be set by the builder.
          */
-        @Nullable
-        private Executor eventStoreStreamExecutor;
+        private @Nullable Executor eventStoreStreamExecutor;
 
         /**
          * Optional validator for events.
          *
          * <p>If not set, a default value will be set by the builder.
          */
-        @Nullable
-        private MessageValidator eventValidator;
+        private @Nullable MessageValidator eventValidator;
 
         /**
          * Optional enricher for events.
@@ -301,8 +298,7 @@ public class EventBus
          * <p>If not set, the enrichments will NOT be supported
          * in the {@code EventBus} instance built.
          */
-        @Nullable
-        private EventEnricher enricher;
+        private @Nullable EventEnricher enricher;
 
         /** Logging level for posted events.  */
         private LoggingObserver.Level logLevelForPost = Level.TRACE;
@@ -324,6 +320,7 @@ public class EventBus
          *
          * @see #setEventStore(EventStore)
          */
+        @CanIgnoreReturnValue
         public Builder setStorageFactory(StorageFactory storageFactory) {
             checkState(eventStore == null, MSG_EVENT_STORE_CONFIGURED);
             this.storageFactory = checkNotNull(storageFactory);
@@ -346,6 +343,7 @@ public class EventBus
          * @see #setEventStoreStreamExecutor(Executor)
          * @see #setStorageFactory(StorageFactory)
          */
+        @CanIgnoreReturnValue
         public Builder setEventStore(EventStore eventStore) {
             checkState(storageFactory == null, "storageFactory already set.");
             checkState(eventStoreStreamExecutor == null, "eventStoreStreamExecutor already set.");
@@ -369,7 +367,7 @@ public class EventBus
          *
          * @see #setEventStore(EventStore)
          */
-
+        @CanIgnoreReturnValue
         public Builder setEventStoreStreamExecutor(Executor eventStoreStreamExecutor) {
             checkState(eventStore == null, MSG_EVENT_STORE_CONFIGURED);
             this.eventStoreStreamExecutor = eventStoreStreamExecutor;
@@ -380,6 +378,7 @@ public class EventBus
             return Optional.fromNullable(eventStoreStreamExecutor);
         }
 
+        @CanIgnoreReturnValue
         public Builder setEventValidator(MessageValidator eventValidator) {
             this.eventValidator = checkNotNull(eventValidator);
             return this;

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -27,8 +27,7 @@ import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.getCurrentTime;
@@ -53,8 +52,7 @@ public class ActorRequestFactory {
      *
      * <p>This field is null in a single tenant application.
      */
-    @Nullable
-    private final TenantId tenantId;
+    private final @Nullable TenantId tenantId;
 
     protected ActorRequestFactory(Builder builder) {
         this.actor = builder.actor;
@@ -74,8 +72,7 @@ public class ActorRequestFactory {
         return zoneOffset;
     }
 
-    @Nullable
-    public TenantId getTenantId() {
+    public @Nullable TenantId getTenantId() {
         return tenantId;
     }
 
@@ -86,10 +83,11 @@ public class ActorRequestFactory {
      * @return new factory at new time zone
      */
     public ActorRequestFactory switchTimezone(ZoneOffset zoneOffset) {
-        final ActorRequestFactory result = newBuilder().setActor(getActor())
-                                                       .setZoneOffset(zoneOffset)
-                                                       .setTenantId(getTenantId())
-                                                       .build();
+        ActorRequestFactory result =
+                newBuilder().setActor(getActor())
+                            .setZoneOffset(zoneOffset)
+                            .setTenantId(getTenantId())
+                            .build();
         return result;
     }
 
@@ -137,11 +135,13 @@ public class ActorRequestFactory {
      * <p>Sets the timestamp value to the
      * {@linkplain io.spine.base.Time#getCurrentTime() current time}.
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder
     ActorContext actorContext() {
-        final ActorContext.Builder builder = ActorContext.newBuilder()
-                                                         .setActor(actor)
-                                                         .setTimestamp(getCurrentTime())
-                                                         .setZoneOffset(zoneOffset);
+        ActorContext.Builder builder = ActorContext
+                .newBuilder()
+                .setActor(actor)
+                .setTimestamp(getCurrentTime())
+                .setZoneOffset(zoneOffset);
         if (tenantId != null) {
             builder.setTenantId(tenantId);
         }
@@ -157,8 +157,7 @@ public class ActorRequestFactory {
 
         private ZoneOffset zoneOffset;
 
-        @Nullable
-        private TenantId tenantId;
+        private @Nullable TenantId tenantId;
 
         public UserId getActor() {
             return actor;
@@ -169,13 +168,13 @@ public class ActorRequestFactory {
          *
          * @param actor the ID of the user generating commands
          */
+        @CanIgnoreReturnValue
         public Builder setActor(UserId actor) {
             this.actor = checkNotNull(actor);
             return this;
         }
 
-        @Nullable
-        public ZoneOffset getZoneOffset() {
+        public @Nullable ZoneOffset getZoneOffset() {
             return zoneOffset;
         }
 
@@ -184,13 +183,13 @@ public class ActorRequestFactory {
          *
          * @param zoneOffset the offset of the timezone the user works in
          */
+        @CanIgnoreReturnValue
         public Builder setZoneOffset(ZoneOffset zoneOffset) {
             this.zoneOffset = checkNotNull(zoneOffset);
             return this;
         }
 
-        @Nullable
-        public TenantId getTenantId() {
+        public @Nullable TenantId getTenantId() {
             return tenantId;
         }
 
@@ -199,6 +198,7 @@ public class ActorRequestFactory {
          *
          * @param tenantId the ID of the tenant or null for single-tenant applications
          */
+        @CanIgnoreReturnValue
         public Builder setTenantId(@Nullable TenantId tenantId) {
             this.tenantId = tenantId;
             return this;
@@ -211,7 +211,6 @@ public class ActorRequestFactory {
          *
          * @return {@code null}
          */
-        @SuppressWarnings("ReturnOfNull")   // It's fine for an abstract Builder.
         @CanIgnoreReturnValue
         public ActorRequestFactory build() {
             checkNotNull(actor, "`actor` must be defined");

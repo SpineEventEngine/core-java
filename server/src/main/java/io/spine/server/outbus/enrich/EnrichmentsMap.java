@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -32,8 +32,8 @@ import io.spine.option.OptionsProto;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -45,7 +45,7 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
-import static io.spine.util.PropertyFiles.loadAllProperties;
+import static io.spine.io.PropertyFiles.loadAllProperties;
 
 /**
  * A map from an event enrichment Protobuf type name to the corresponding

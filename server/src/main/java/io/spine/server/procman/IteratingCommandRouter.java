@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -62,6 +62,7 @@ public class IteratingCommandRouter extends AbstractCommandRouter<IteratingComma
      * </ul>
      * @see CommandRouted#getMessageToFollowList()
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder
     protected CommandRouted routeFirst() {
         final CommandRouted.Builder result = CommandRouted.newBuilder();
         result.setSource(getSource());

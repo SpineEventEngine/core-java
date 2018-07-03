@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -24,13 +24,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.Identifier;
 import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 import io.spine.time.Timestamps2;
 
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -49,13 +48,10 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 public final class Events {
 
     /** Compares two events by their timestamps. */
-    private static final Comparator<Event> eventComparator = new Comparator<Event>() {
-        @Override
-        public int compare(Event o1, Event o2) {
-            final Timestamp timestamp1 = getTimestamp(o1);
-            final Timestamp timestamp2 = getTimestamp(o2);
-            return Timestamps2.compare(timestamp1, timestamp2);
-        }
+    private static final Comparator<Event> eventComparator = (o1, o2) -> {
+        final Timestamp timestamp1 = getTimestamp(o1);
+        final Timestamp timestamp2 = getTimestamp(o2);
+        return Timestamps2.compare(timestamp1, timestamp2);
     };
 
     /** The stringifier for event IDs. */
@@ -89,7 +85,7 @@ public final class Events {
      */
     public static void sort(List<Event> events) {
         checkNotNull(events);
-        Collections.sort(events, eventComparator());
+        events.sort(eventComparator());
     }
 
     /**
@@ -306,6 +302,7 @@ public final class Events {
      * @param event the event to clear enrichments
      * @return the event without enrichments
      */
+    @SuppressWarnings("CheckReturnValue") // calling builder
     @Internal
     public static Event clearEnrichments(Event event) {
         final EventContext context = event.getContext();

@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -72,9 +72,9 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
     @React
     SwitchWorkRecorded on(SwitchPositionConfirmed event) {
         return SwitchWorkRecorded.newBuilder()
-                .setSwitchId(event.getSwitchId())
-                .setSwitchmanName(event.getSwitchmanName())
-                .build();
+                                 .setSwitchId(event.getSwitchId())
+                                 .setSwitchmanName(event.getSwitchmanName())
+                                 .build();
     }
 
     @Apply
@@ -89,10 +89,13 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
     /**
      * The repository with default routing functions that route to the singleton aggregate.
      */
-    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
+    @SuppressWarnings({
+            "SerializableInnerClassWithNonSerializableOuterClass",
+            "AssignmentOrReturnOfFieldWithMutableType" // Returning immutable impl.
+    })
     public static final class Repository extends AggregateRepository<Long, Log> {
 
-        private static final Set<Long> SINGLETON_ID_SET = ImmutableSet.of(ID);
+        private static final ImmutableSet<Long> SINGLETON_ID_SET = ImmutableSet.of(ID);
 
         public Repository() {
             super();
