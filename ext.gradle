@@ -54,6 +54,7 @@ ext {
     gRpcVersion = '1.10.0'
     slf4JVersion = '1.7.25'
     jUnitVersion = '5.1.1'
+    jUnitPioneerVersion = '0.1-SNAPSHOT'
 
     checkerFrameworkVersion = '2.5.1'
     errorProneVersion = '2.3.1'

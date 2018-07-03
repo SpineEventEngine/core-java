@@ -50,15 +50,11 @@ dependencies {
                 classifier: 'test'
 
     testCompile "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
+    testCompile "org.junit-pioneer:junit-pioneer:$jUnitPioneerVersion"
     testRuntime "org.junit.jupiter:junit-jupiter-engine:$jUnitVersion"
-    testRuntime "org.junit.vintage:junit-vintage-engine:$jUnitVersion"
 }
 
 test {
-    useJUnitPlatform {
-        includeEngines 'junit-jupiter', 'junit-vintage'
-    }
-
     dependsOn publishToMavenLocal
     dependsOn project(':core').publishToMavenLocal
     dependsOn project(':client').publishToMavenLocal
