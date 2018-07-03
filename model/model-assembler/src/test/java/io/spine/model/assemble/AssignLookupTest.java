@@ -17,23 +17,34 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-dependencies {
-    // Depend on JUnit in the production part of the code, as this module exposes testing utilities
-    // that are based on JUnit.
-    compile "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
-    runtime "org.junit.jupiter:junit-jupiter-engine:$jUnitVersion"
 
-    // Depend on Mockito in the production code because this module exposes testing utilities
-    // based on this library.
-    compile "org.mockito:mockito-core:$mockitoVersion"
+package io.spine.model.assemble;
 
-    // Depend on the client module that contains `Timestamps` and other utility classes.
-    compile project(path: ':client')
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-    compile project(path: ':testutil-core')
+import java.util.Set;
 
-    // General purpose test utilities.
-    compile ("io.spine:spine-testlib:$spineBaseVersion") {
-        exclude group: 'com.google.guava'
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+/**
+ * @author Dmytro Dashenkov
+ */
+@DisplayName("AssignLookup should")
+class AssignLookupTest extends SpineAnnotationProcessorTest {
+
+    @Override
+    protected SpineAnnotationProcessor processor() {
+        return new AssignLookup();
+    }
+
+    @Test
+    @DisplayName("support `spineDirRoot` option")
+    void supportSpineDirRoot() {
+        Set<String> opts = processor().getSupportedOptions();
+        assertEquals(1, opts.size());
+        assertThat(opts, contains(AssignLookup.OUTPUT_OPTION_NAME));
     }
 }

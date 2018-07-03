@@ -34,7 +34,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public class EventSubscriberTestEnv {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private EventSubscriberTestEnv() {
     }
 

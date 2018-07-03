@@ -18,18 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.server.entity.given;
 
-import io.spine.test.Tests;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class TestRejectionClassesShould {
+@DisplayName("GivenLifecycleFlags should")
+class GivenLifecycleFlagsTest {
 
     @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(TestRejectionClasses.class);
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(GivenLifecycleFlags.class);
+    }
+
+    @Test
+    @DisplayName("create `archived` visibility")
+    void createArchivedVisibility() {
+        assertTrue(GivenLifecycleFlags.archived().getArchived());
+    }
+
+    @Test
+    @DisplayName("create `deleted` visibility")
+    void createDeletedVisibility() {
+        assertTrue(GivenLifecycleFlags.deleted().getDeleted());
     }
 }

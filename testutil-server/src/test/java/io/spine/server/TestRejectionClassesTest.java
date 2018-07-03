@@ -18,30 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.model.assemble;
+package io.spine.server;
 
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import java.util.Set;
-
-import static org.hamcrest.Matchers.contains;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
- * @author Dmytro Dashenkov
+ * @author Alexander Yevsyukov
  */
-public class AssignLookupShould extends SpineAnnotationProcessorShould {
-
-    @Override
-    protected SpineAnnotationProcessor processor() {
-        return new AssignLookup();
-    }
+@DisplayName("TestRejectionClasses utility should")
+class TestRejectionClassesTest {
 
     @Test
-    public void support_spineDirRoot_option() {
-        final Set<String> opts = processor().getSupportedOptions();
-        assertEquals(1, opts.size());
-        assertThat(opts, contains(AssignLookup.OUTPUT_OPTION_NAME));
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(TestRejectionClasses.class);
     }
 }

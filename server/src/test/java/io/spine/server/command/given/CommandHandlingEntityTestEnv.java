@@ -33,7 +33,7 @@ import static io.spine.test.TestValues.newUuidValue;
 
 public class CommandHandlingEntityTestEnv {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private CommandHandlingEntityTestEnv() {
     }
 

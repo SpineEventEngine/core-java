@@ -30,7 +30,7 @@ import java.util.Collection;
 
 import static com.google.common.collect.Collections2.transform;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Utilities for testing event classes.
@@ -39,7 +39,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestEventClasses {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private TestEventClasses() {}
 
 

@@ -20,7 +20,6 @@
 
 package io.spine.server.entity.given;
 
-import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
@@ -34,87 +33,52 @@ import io.spine.server.projection.Projection;
 import io.spine.validate.StringValueVBuilder;
 import io.spine.validate.TimestampVBuilder;
 import io.spine.validate.UInt32ValueVBuilder;
-import org.junit.Test;
 
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertEquals;
+/**
+ * @author Alexander Yevsyukov
+ * @author Illia Shepilov
+ * @author Dmytro Kuzmin
+ */
+class GivenTestEnv {
 
-public class GivenShould {
-
-    @Test
-    public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(Given.class);
+    /** Prevents instantiation of this utility class. */
+    private GivenTestEnv() {
     }
 
-    @Test
-    public void create_entity_builder() {
-        assertEquals(AnEntity.class, Given.entityOfClass(AnEntity.class)
-                                          .getResultClass());
-    }
-
-    private static class AnEntity extends AbstractVersionableEntity<String, Timestamp> {
+    static class AnEntity extends AbstractVersionableEntity<String, Timestamp> {
         protected AnEntity(String id) {
             super(id);
         }
     }
 
-    @Test
-    public void create_aggregate_builder() {
-        assertEquals(AnAggregate.class, Given.aggregateOfClass(AnAggregate.class)
-                                             .getResultClass());
-    }
-
-    private static class AnAggregate
+    static class AnAggregate
             extends Aggregate<Integer, StringValue, StringValueVBuilder> {
         protected AnAggregate(Integer id) {
             super(id);
         }
     }
 
-    @Test
-    public void create_aggregate_part_builder() {
-        assertEquals(AnAggregatePart.class, Given.aggregatePartOfClass(AnAggregatePart.class)
-                                                 .getResultClass());
-    }
 
-    private static class AnAggregatePart extends AggregatePart<Long,
-                                                               Timestamp,
+    static class AnAggregatePart extends AggregatePart<Long,
+            Timestamp,
             TimestampVBuilder,
-                                                               AnAggregateRoot> {
+            AnAggregateRoot> {
         protected AnAggregatePart(AnAggregateRoot root) {
             super(root);
         }
     }
 
-    @Test
-    public void create_projection_builder() {
-        assertEquals(AProjection.class, Given.projectionOfClass(AProjection.class)
-                                             .getResultClass());
-    }
-
-    private static class AProjection extends Projection<String,
-                                                        UInt32Value,
-                                                        UInt32ValueVBuilder> {
+    static class AProjection extends Projection<String,
+            UInt32Value,
+            UInt32ValueVBuilder> {
         protected AProjection(String id) {
             super(id);
         }
     }
 
-    @Test
-    public void create_builder_for_process_managers() {
-        assertEquals(AProcessManager.class, Given.processManagerOfClass(AProcessManager.class)
-                                                 .getResultClass());
-    }
-
-    @Test
-    public void pass_the_null_tolerance_check() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(Given.class);
-    }
-
-    private static class AProcessManager extends ProcessManager<Timestamp,
-                                                                StringValue,
-                                                                StringValueVBuilder> {
+    static class AProcessManager extends ProcessManager<Timestamp,
+            StringValue,
+            StringValueVBuilder> {
         protected AProcessManager(Timestamp id) {
             super(id);
         }

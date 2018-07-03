@@ -22,28 +22,29 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
+import io.spine.server.aggregate.given.AggregateBuilderTestEnv.TestAggregate;
 import io.spine.test.TimeTests;
-import io.spine.validate.TimestampVBuilder;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static io.spine.server.aggregate.given.AggregateBuilderTestEnv.givenAggregate;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class AggregateBuilderShould {
-
-    private static AggregateBuilder<TestAggregate, Integer, Timestamp> givenAggregate() {
-        final AggregateBuilder<TestAggregate, Integer, Timestamp> result = new AggregateBuilder<>();
-        result.setResultClass(TestAggregate.class);
-        return result;
-    }
+/**
+ * @author Alexander Yevsyukov
+ */
+@DisplayName("AggregateBuilder should")
+class AggregateBuilderTest {
 
     @Test
-    public void create_aggregate() {
-        final int id = 2048;
-        final int version = 2017;
-        final Timestamp whenModified = Time.getCurrentTime();
-        final Timestamp state = TimeTests.Past.minutesAgo(60);
+    @DisplayName("create aggregate")
+    void createAggregate() {
+        int id = 2048;
+        int version = 2017;
+        Timestamp whenModified = Time.getCurrentTime();
+        Timestamp state = TimeTests.Past.minutesAgo(60);
 
-        final Aggregate aggregate = givenAggregate()
+        Aggregate aggregate = givenAggregate()
                 .withId(id)
                 .withVersion(version)
                 .withState(state)
@@ -55,12 +56,5 @@ public class AggregateBuilderShould {
         assertEquals(state, aggregate.getState());
         assertEquals(version, aggregate.getVersion().getNumber());
         assertEquals(whenModified, aggregate.whenModified());
-    }
-
-    private static class TestAggregate
-            extends Aggregate<Integer, Timestamp, TimestampVBuilder> {
-        protected TestAggregate(Integer id) {
-            super(id);
-        }
     }
 }

@@ -18,46 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus.given;
+package io.spine.server.command.given;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.core.MessageEnvelope;
-import io.spine.server.bus.MulticastDispatcher;
-import io.spine.type.MessageClass;
+import com.google.protobuf.StringValue;
+import io.spine.client.ActorRequestFactory;
+import io.spine.server.command.CommandTest;
 
-import java.util.Set;
-
-import static io.spine.base.Identifier.newUuid;
-
-public class MulticastDispatcherIdentityTestEnv {
+/**
+ * @author Alexander Yevsyukov
+ * @author Dmytro Kuzmin
+ */
+public class CommandTestTestEnv {
 
     /** Prevents instantiation of this utility class. */
-    private MulticastDispatcherIdentityTestEnv() {
+    private CommandTestTestEnv() {
     }
 
-    public static class IdentityDispatcher
-            implements MulticastDispatcher<MessageClass, MessageEnvelope, String> {
+    /**
+     * The test class for verifying the behaviour of the abstract parent.
+     */
+    public static class TestCommandTest extends CommandTest<StringValue> {
 
-        public static final String ID = newUuid();
+        public TestCommandTest(ActorRequestFactory requestFactory) {
+            super(requestFactory);
+        }
 
-        @Override
-        public Set<MessageClass> getMessageClasses() {
-            return ImmutableSet.of();
+        public TestCommandTest() {
+            super();
         }
 
         @Override
-        public Set<String> dispatch(MessageEnvelope envelope) {
-            return Identity.of(this);
-        }
-
-        @Override
-        public void onError(MessageEnvelope envelope, RuntimeException exception) {
-            // Do nothing.
-        }
-
-        @Override
-        public String toString() {
-            return ID;
+        protected void setUp() {
+            // We don't have an object under test for this test harness class.
         }
     }
 }

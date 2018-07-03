@@ -38,6 +38,8 @@ import static org.junit.Assert.assertNotNull;
 /**
  * @author Dmytro Dashenkov
  */
+// TODO:2018-07-02:dmytro.kuzmin: Migrate to JUnit 5 when GradleProject class from
+// spine-plugin-testlib will no longer require JUnit 4 TemporaryFolder class.
 public class ModelVerifierPluginShould {
 
     private static final String PROJECT_NAME = "model-verifier-test";
@@ -81,7 +83,7 @@ public class ModelVerifierPluginShould {
     public void halt_build_on_malformed_command_handling_methods() {
         final BuildResult result =
                 newProjectWithJava("io/spine/model/verify/MalformedAggregate.java")
-                .executeAndFail(VERIFY_MODEL);
+                        .executeAndFail(VERIFY_MODEL);
         final BuildTask task = result.task(toPath(VERIFY_MODEL));
         assertNotNull(task);
         final TaskOutcome generationResult = task.getOutcome();

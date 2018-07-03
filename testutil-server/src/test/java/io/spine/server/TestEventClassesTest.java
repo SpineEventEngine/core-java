@@ -17,23 +17,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-dependencies {
-    // Depend on JUnit in the production part of the code, as this module exposes testing utilities
-    // that are based on JUnit.
-    compile "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
-    runtime "org.junit.jupiter:junit-jupiter-engine:$jUnitVersion"
 
-    // Depend on Mockito in the production code because this module exposes testing utilities
-    // based on this library.
-    compile "org.mockito:mockito-core:$mockitoVersion"
+package io.spine.server;
 
-    // Depend on the client module that contains `Timestamps` and other utility classes.
-    compile project(path: ':client')
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-    compile project(path: ':testutil-core')
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
-    // General purpose test utilities.
-    compile ("io.spine:spine-testlib:$spineBaseVersion") {
-        exclude group: 'com.google.guava'
+/**
+ * @author Alexander Yevsyukov
+ */
+@DisplayName("TestEventClasses utility should")
+class TestEventClassesTest {
+
+    @Test
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(TestEventClasses.class);
     }
 }

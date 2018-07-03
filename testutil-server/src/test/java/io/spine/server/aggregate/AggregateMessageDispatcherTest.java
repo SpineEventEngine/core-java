@@ -29,38 +29,41 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.given.AggregateMessageDispatcherTestEnv.MessageLog;
 import io.spine.server.command.TestEventFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
-import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchEvent;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class AggregateMessageDispatcherShould {
+@SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
+@DisplayName("AggregateMessageDispatcher should")
+class AggregateMessageDispatcherTest {
 
     private MessageLog aggregate;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         aggregate = new MessageLog(1L);
     }
 
     @Test
-    public void dispatch_command() {
-        final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
-        final int messageValue = 2017_07_28;
-        final UInt32Value message = UInt32Value.newBuilder()
-                                               .setValue(messageValue)
-                                               .build();
-        final CommandEnvelope commandEnvelope = CommandEnvelope.of(factory.createCommand(message));
+    @DisplayName("dispatch command")
+    void dispatchCommand() {
+        TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
+        int messageValue = 2017_07_28;
+        UInt32Value message = UInt32Value.newBuilder()
+                                         .setValue(messageValue)
+                                         .build();
+        CommandEnvelope commandEnvelope = CommandEnvelope.of(factory.createCommand(message));
 
-        final List<? extends Message> eventMessages = dispatchCommand(aggregate, commandEnvelope);
+        List<? extends Message> eventMessages =
+                AggregateMessageDispatcher.dispatchCommand(aggregate, commandEnvelope);
 
         assertTrue(aggregate.getState()
                             .getValue()
@@ -70,15 +73,17 @@ public class AggregateMessageDispatcherShould {
     }
 
     @Test
-    public void dispatch_event() {
-        final TestEventFactory factory = TestEventFactory.newInstance(getClass());
-        final float messageValue = 2017.0729f;
-        final FloatValue message = FloatValue.newBuilder()
-                                             .setValue(messageValue)
-                                             .build();
-        final EventEnvelope eventEnvelope = EventEnvelope.of(factory.createEvent(message));
+    @DisplayName("dispatch event")
+    void dispatchEvent() {
+        TestEventFactory factory = TestEventFactory.newInstance(getClass());
+        float messageValue = 2017.0729f;
+        FloatValue message = FloatValue.newBuilder()
+                                       .setValue(messageValue)
+                                       .build();
+        EventEnvelope eventEnvelope = EventEnvelope.of(factory.createEvent(message));
 
-        final List<? extends Message> eventMessages = dispatchEvent(aggregate, eventEnvelope);
+        List<? extends Message> eventMessages =
+                AggregateMessageDispatcher.dispatchEvent(aggregate, eventEnvelope);
 
         assertTrue(aggregate.getState()
                             .getValue()

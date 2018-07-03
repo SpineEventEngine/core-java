@@ -20,47 +20,34 @@
 
 package io.spine.core.given;
 
-import com.google.common.testing.NullPointerTester;
-import io.spine.core.UserId;
-import io.spine.test.Tests;
-import org.junit.Test;
+import io.spine.core.Version;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static io.spine.core.given.GivenUserId.of;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.TestValues.random;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class GivenUserIdShould {
+@DisplayName("GivenVersion should")
+class GivenVersionTest {
 
     @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(GivenUserId.class);
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(GivenVersion.class);
     }
 
     @Test
-    public void pass_null_tolerance_check() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(GivenUserId.class);
-    }
+    @DisplayName("generate version by number")
+    void generateByNumber() {
+        int number = random(100);
 
-    @Test
-    public void create_UserId_by_string() {
-        final String testIdString = "12345";
-        final UserId userId = of(testIdString);
+        Version version = GivenVersion.withNumber(number);
 
-        final UserId expected = UserId.newBuilder()
-                                      .setValue(testIdString)
-                                      .build();
-
-        assertEquals(expected, userId);
-    }
-
-    @Test
-    public void create_new_UUID_based_UserId() {
-        assertFalse(GivenUserId.newUuid()
-                               .getValue()
-                               .isEmpty());
+        assertEquals(number, version.getNumber());
     }
 }

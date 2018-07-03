@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public final class HandlerMethods {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private HandlerMethods() {}
 
     /**

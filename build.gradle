@@ -227,7 +227,6 @@ subprojects {
                     changing: true
         testCompile "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
         testRuntime "org.junit.jupiter:junit-jupiter-engine:$jUnitVersion"
-        testRuntime "org.junit.vintage:junit-vintage-engine:$jUnitVersion"
     }
 
     sourceSets {
@@ -247,12 +246,12 @@ subprojects {
         }
     }
 
-    /* Uncomment this block if you need to display console output during the Gradle build.*/
     test {
         useJUnitPlatform {
-            includeEngines 'junit-jupiter', 'junit-vintage'
+            includeEngines 'junit-jupiter'
         }
 
+        /* Uncomment this block if you need to display console output during the Gradle build.*/
         testLogging {
             // Make sure output from standard out or error is shown in Gradle output.
             showStandardStreams = false

@@ -240,7 +240,7 @@ public class ProcessManagerRepositoryTestEnv {
 
         public static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
-        /** Prevents instantiation on this utility class. */
+        /** Prevents instantiation of this utility class. */
         private GivenCommandMessage() {
         }
 
