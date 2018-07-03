@@ -39,7 +39,7 @@ import static org.junit.Assert.assertNotNull;
  * @author Dmytro Dashenkov
  */
 // TODO:2018-07-02:dmytro.kuzmin: Migrate to JUnit 5 when GradleProject class from
-// {@code spine-plugin-testlib} will no longer require JUnit 4 TemporaryFolder class.
+// spine-plugin-testlib will no longer require JUnit 4 TemporaryFolder class.
 public class ModelVerifierPluginShould {
 
     private static final String PROJECT_NAME = "model-verifier-test";
