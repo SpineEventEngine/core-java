@@ -41,11 +41,16 @@ import java.util.List;
 public final class DispatchResult {
 
     private final List<? extends Message> messages;
-    private final MessageEnvelope envelope;
+    private final MessageEnvelope origin;
 
-    <E extends MessageEnvelope> DispatchResult(List<? extends Message> messages, E envelope) {
+    /**
+     * @param messages messages which were emitted by the dispatch
+     * @param origin a message that was dispatched
+     * @param <E> {@link MessageEnvelope} dispatched message type
+     */
+    <E extends MessageEnvelope> DispatchResult(List<? extends Message> messages, E origin) {
         this.messages = ImmutableList.copyOf(messages);
-        this.envelope = envelope;
+        this.origin = origin;
     }
 
     /**
@@ -59,6 +64,6 @@ public final class DispatchResult {
      * @return dispatch result representation as a list of Spine events
      */
     public List<Event> asEvents(Any producerId, Version version) {
-        return HandlerMethod.toEvents(producerId, version, messages, envelope);
+        return HandlerMethod.toEvents(producerId, version, messages, origin);
     }
 }
