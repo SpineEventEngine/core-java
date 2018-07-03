@@ -28,7 +28,6 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventContext;
 import io.spine.core.React;
-import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
@@ -44,8 +43,8 @@ import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.test.procman.quiz.PmAnswer;
-import io.spine.test.procman.quiz.PmQuizId;
 import io.spine.test.procman.quiz.PmQuestionId;
+import io.spine.test.procman.quiz.PmQuizId;
 import io.spine.test.procman.quiz.command.PmAnswerQuestion;
 import io.spine.test.procman.quiz.command.PmStartQuiz;
 import io.spine.testdata.Sample;
@@ -59,7 +58,6 @@ import java.util.Set;
 
 import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.TestBoundedContexts.newBoundedContext;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
@@ -108,26 +106,6 @@ public class ProcessManagerTestEnv {
                        .setQuestionId(id)
                        .setCorrect(correct)
                        .build();
-    }
-
-    /**
-     * Creates a new multitenant bounded context with a registered
-     * {@linkplain QuizProcmanRepository exam repository}.
-     */
-    public static BoundedContext newQuizBoundedContext() {
-        final BoundedContext boundedContext = newBoundedContext();
-        boundedContext.register(new QuizProcmanRepository());
-        return boundedContext;
-    }
-
-    /**
-     * Creates a new multitenant bounded context with a registered
-     * {@linkplain DirectQuizProcmanRepository exam repository}.
-     */
-    public static BoundedContext newDirectQuizBoundedContext() {
-        final BoundedContext boundedContext = newBoundedContext();
-        boundedContext.register(new DirectQuizProcmanRepository());
-        return boundedContext;
     }
 
     /**

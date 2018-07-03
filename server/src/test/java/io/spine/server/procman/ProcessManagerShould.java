@@ -21,13 +21,12 @@
 package io.spine.server.procman;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.Identifier;
-import io.spine.base.Error;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -37,8 +36,6 @@ import io.spine.core.Events;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
-import io.spine.core.TenantId;
-import io.spine.grpc.MemoizingObserver;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
@@ -46,9 +43,12 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.entity.given.Given;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
+import io.spine.server.integration.BlackBoxBoundedContext;
 import io.spine.server.model.ModelTests;
+import io.spine.server.procman.given.DirectQuizProcmanRepository;
 import io.spine.server.procman.given.ProcessManagerTestEnv.AddTaskDispatcher;
 import io.spine.server.procman.given.ProcessManagerTestEnv.TestProcessManager;
+import io.spine.server.procman.given.QuizProcmanRepository;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
@@ -59,8 +59,8 @@ import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
-import io.spine.test.procman.quiz.PmQuizId;
 import io.spine.test.procman.quiz.PmQuestionId;
+import io.spine.test.procman.quiz.PmQuizId;
 import io.spine.test.procman.quiz.command.PmAnswerQuestion;
 import io.spine.test.procman.quiz.command.PmStartQuiz;
 import io.spine.test.procman.quiz.event.PmQuestionAnswered;
@@ -73,27 +73,21 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.Commands.getMessage;
-import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.commandbus.Given.ACommand;
+import static io.spine.server.integration.AckedCommandsVerifier.acked;
+import static io.spine.server.integration.EmittedEventsVerifier.emitted;
 import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.answerQuestion;
-import static io.spine.server.TestBoundedContexts.closeContext;
-import static io.spine.server.TestBoundedContexts.command;
-import static io.spine.server.procman.given.ProcessManagerTestEnv.newDirectQuizBoundedContext;
-import static io.spine.server.procman.given.ProcessManagerTestEnv.newQuizBoundedContext;
-import static io.spine.server.procman.given.ProcessManagerTestEnv.newQuizId;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.newAnswer;
-import static io.spine.server.TestBoundedContexts.newTenantId;
-import static io.spine.server.TestBoundedContexts.readAllEvents;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.newQuizId;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.startQuiz;
 import static io.spine.test.Verify.assertSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -334,33 +328,18 @@ public class ProcessManagerShould {
      */
     @Test
     public void not_create_event_if_reaction_is_either_of_three_with_Empty() {
-        final BoundedContext boundedContext = newQuizBoundedContext();
-        final TenantId tenantId = newTenantId();
         final PmQuizId quizId = newQuizId();
         final Iterable<PmQuestionId> questions = newArrayList();
-        final Command startCommand = command(startQuiz(quizId, questions), tenantId);
-        final MemoizingObserver<Ack> observer = memoizingObserver();
-        final CommandBus commandBus = boundedContext.getCommandBus();
-        commandBus.post(startCommand, observer);
+        final PmStartQuiz startQuiz = startQuiz(quizId, questions);
+        final PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
-        final Command command = command(answerQuestion(quizId, newAnswer()), tenantId);
-        commandBus.post(command, observer);
-
-        assertNull(observer.getError());
-
-        final List<Ack> responses = observer.responses();
-        assertSize(2, responses);
-
-        final Ack response = responses.get(0);
-        final io.spine.core.Status status = response.getStatus();
-        final Error emptyError = Error.getDefaultInstance();
-        assertEquals(emptyError, status.getError());
-        final Rejection emptyRejection = Rejection.getDefaultInstance();
-        assertEquals(emptyRejection, status.getRejection());
-
-        final List<Event> events = readAllEvents(boundedContext, tenantId);
-        assertSize(2, events);
-        closeContext(boundedContext);
+        BlackBoxBoundedContext
+                .with(new QuizProcmanRepository())
+                .receivesCommands(startQuiz, answerQuestion)
+                .verify(acked(2).withoutErrorsOrRejections())
+                .verify(emitted(2))
+                .verify(emitted(0, Empty.class))
+                .close();
     }
 
     /**
@@ -384,33 +363,18 @@ public class ProcessManagerShould {
      */
     @Test
     public void not_create_event_if_command_handle_results_is_either_of_three_with_Empty() {
-        final BoundedContext boundedContext = newDirectQuizBoundedContext();
-        final TenantId tenantId = newTenantId();
         final PmQuizId quizId = newQuizId();
         final Iterable<PmQuestionId> questions = newArrayList();
-        final Command startCommand = command(startQuiz(quizId, questions), tenantId);
-        final MemoizingObserver<Ack> observer = memoizingObserver();
-        final CommandBus commandBus = boundedContext.getCommandBus();
-        commandBus.post(startCommand, observer);
+        final PmStartQuiz startQuiz = startQuiz(quizId, questions);
+        final PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
-        final Command command = command(answerQuestion(quizId, newAnswer()), tenantId);
-        commandBus.post(command, observer);
-
-        assertNull(observer.getError());
-
-        final List<Ack> responses = observer.responses();
-        assertSize(2, responses);
-
-        final Ack response = responses.get(0);
-        final io.spine.core.Status status = response.getStatus();
-        final Error emptyError = Error.getDefaultInstance();
-        assertEquals(emptyError, status.getError());
-        final Rejection emptyRejection = Rejection.getDefaultInstance();
-        assertEquals(emptyRejection, status.getRejection());
-
-        final List<Event> events = readAllEvents(boundedContext, tenantId);
-        assertSize(1, events);
-        closeContext(boundedContext);
+        BlackBoxBoundedContext
+                .with(new DirectQuizProcmanRepository())
+                .receivesCommands(startQuiz, answerQuestion)
+                .verify(acked(2).withoutErrorsOrRejections())
+                .verify(emitted(1))
+                .verify(emitted(0, Empty.class))
+                .close();
     }
 
     private static PmCreateProject createProject() {

@@ -27,5 +27,5 @@ import io.spine.test.procman.quiz.PmQuizId;
 /**
  * @author Mykhailo Drachuk
  */
-class DirectQuizProcmanRepository extends ProcessManagerRepository<PmQuizId, DirectQuizProcman, PmQuiz> {
+public class DirectQuizProcmanRepository extends ProcessManagerRepository<PmQuizId, DirectQuizProcman, PmQuiz> {
 }

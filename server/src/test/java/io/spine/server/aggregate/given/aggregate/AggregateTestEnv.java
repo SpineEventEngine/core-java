@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
@@ -29,8 +28,8 @@ import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
+import io.spine.core.TenantId;
 import io.spine.core.UserId;
-import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.rejection.StandardRejections.CannotModifyDeletedEntity;
 import io.spine.test.aggregate.command.AggAssignTask;
@@ -38,12 +37,9 @@ import io.spine.test.aggregate.command.AggCreateTask;
 import io.spine.test.aggregate.command.AggReassignTask;
 import io.spine.test.aggregate.task.AggTaskId;
 import io.spine.testdata.Sample;
-import io.spine.type.TypeUrl;
 
 import static io.spine.Identifier.newUuid;
 import static io.spine.core.given.GivenVersion.withNumber;
-import static io.spine.server.TestBoundedContexts.command;
-import static io.spine.server.TestBoundedContexts.newBoundedContext;
 
 /**
  * @author Alexander Yevsyukov
@@ -68,14 +64,10 @@ public class AggregateTestEnv {
                      .build();
     }
 
-    /**
-     * Creates a new multitenant bounded context with a registered
-     * {@linkplain TaskAggregateRepository task repository}.
-     */
-    public static BoundedContext newTaskBoundedContext() {
-        final BoundedContext boundedContext = newBoundedContext();
-        boundedContext.register(new TaskAggregateRepository());
-        return boundedContext;
+    public static TenantId newTenantId() {
+        return TenantId.newBuilder()
+                       .setValue(newUuid())
+                       .build();
     }
 
     public static AggCreateTask createTask() {
@@ -98,13 +90,14 @@ public class AggregateTestEnv {
                               .build();
     }
 
-    /**
-     * Obtains the {@link TypeUrl} of the message from the provided event.
-     */
-    public static TypeUrl typeUrlOf(Event event) {
-        final Any message = event.getMessage();
-        final TypeUrl result = TypeUrl.parse(message.getTypeUrl());
-        return result;
+    public static Command command(Message commandMessage, TenantId tenantId) {
+        return requestFactory(tenantId).command()
+                                       .create(commandMessage);
+    }
+
+    public static Command command(Message commandMessage) {
+        return requestFactory().command()
+                               .create(commandMessage);
     }
 
     public static CommandEnvelope env(Message commandMessage) {
@@ -124,7 +117,11 @@ public class AggregateTestEnv {
         return RejectionEnvelope.of(rejection);
     }
 
-    private static TestActorRequestFactory requestFactory() {
+    private static TestActorRequestFactory requestFactory(TenantId tenantId) {
+        return TestActorRequestFactory.newInstance(AggregateTestEnv.class, tenantId);
+    }
+
+    public static TestActorRequestFactory requestFactory() {
         return TestActorRequestFactory.newInstance(AggregateTestEnv.class);
     }
 
