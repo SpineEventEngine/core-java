@@ -49,10 +49,8 @@ import io.spine.server.model.Model;
 import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Predicate;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
@@ -60,7 +58,6 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.validate.Validate.isNotDefault;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Abstract base for aggregates.
@@ -250,8 +247,7 @@ public abstract class Aggregate<I,
      */
     List<? extends Message> reactOn(RejectionEnvelope rejection) {
         CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
-        RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
-                                                                     commandClass);
+        RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(), commandClass);
         Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection).to(this, method);
         DispatchResult dispatchResult = dispatch.perform();
         return dispatchResult.asMessages();

@@ -163,7 +163,7 @@ public abstract class ProcessManager<I,
     List<Event> dispatchRejection(RejectionEnvelope rejection) {
         CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
         RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
-                                                                     commandClass);
+                                                               commandClass);
         Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection).to(this, method);
         DispatchResult dispatchResult = dispatch.perform();
         return toEvents(dispatchResult);
