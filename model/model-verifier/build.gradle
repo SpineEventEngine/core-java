@@ -55,6 +55,10 @@ dependencies {
 }
 
 test {
+    useJUnitPlatform {
+        includeEngines 'junit-jupiter', 'junit-vintage'
+    }
+
     dependsOn publishToMavenLocal
     dependsOn project(':core').publishToMavenLocal
     dependsOn project(':client').publishToMavenLocal
