@@ -50,7 +50,7 @@ class GivenTenantIdTest {
     }
 
     @Test
-    @DisplayName("create TenantId by string value")
+    @DisplayName("create TenantId from string value")
     void createByStringValue() {
         String expected = Identifier.newUuid();
 
@@ -59,7 +59,7 @@ class GivenTenantIdTest {
     }
 
     @Test
-    @DisplayName("create TenantId by test class name")
+    @DisplayName("create TenantId from test class name")
     void createByTestClassName() {
         assertEquals(getClass().getSimpleName(), GivenTenantId.nameOf(getClass())
                                                               .getValue());

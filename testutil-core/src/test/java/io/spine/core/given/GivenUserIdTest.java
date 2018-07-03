@@ -66,7 +66,7 @@ class GivenUserIdTest {
 
     @Test
     @DisplayName("create new UUID based UserId")
-    void createNewUUIDBased() {
+    void createNewUuidBased() {
         assertFalse(GivenUserId.newUuid()
                                .getValue()
                                .isEmpty());

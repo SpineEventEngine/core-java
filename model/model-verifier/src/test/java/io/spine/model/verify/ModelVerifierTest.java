@@ -75,7 +75,7 @@ class ModelVerifierTest {
 
     @Test
     @DisplayName("verify model from classpath")
-    void verifyModelFromClasspath() {
+    void verifyModel() {
         ModelVerifier verifier = new ModelVerifier(project);
 
         verify(project).getSubprojects();
@@ -117,7 +117,7 @@ class ModelVerifierTest {
 
     @Test
     @DisplayName("not accept non-CommandHandler types")
-    void notAcceptNonCommandHandlerTypes() {
+    void rejectNonHandlerTypes() {
         String invalidClassname = ModelVerifierTest.class.getName();
         CommandHandlers spineModel = CommandHandlers.newBuilder()
                                                     .addCommandHandlingTypes(invalidClassname)
