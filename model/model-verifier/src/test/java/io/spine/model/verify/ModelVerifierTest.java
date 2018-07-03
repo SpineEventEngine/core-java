@@ -30,7 +30,6 @@ import org.gradle.api.tasks.TaskCollection;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.gradle.internal.impldep.com.google.common.collect.Iterators;
-import org.gradle.testfixtures.ProjectBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,6 +38,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import static io.spine.model.verify.given.ModelVerifierTestEnv.actualProject;
 import static io.spine.tools.gradle.TaskName.COMPILE_JAVA;
 import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -145,11 +145,5 @@ class ModelVerifierTest {
         JavaCompile compileTask = mock(JavaCompile.class);
         Function<JavaCompile, URL> func = ModelVerifier.GetDestinationDir.FUNCTION;
         assertNull(func.apply(compileTask));
-    }
-
-    private static Project actualProject() {
-        Project result = ProjectBuilder.builder().build();
-        result.getPluginManager().apply("java");
-        return result;
     }
 }
