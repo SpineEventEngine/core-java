@@ -46,12 +46,13 @@ class AggregatePartCommandTestTest {
     private AggregatePartCommandTest<Timestamp, TimerCounter> aggregatePartCommandTest;
 
     private static ActorRequestFactory newRequestFactory(Class<?> clazz) {
+        final TenantId tenantId = TenantId.newBuilder()
+                                          .setValue(clazz.getSimpleName())
+                                          .build();
         return ActorRequestFactory.newBuilder()
                                   .setActor(newUuid())
                                   .setZoneOffset(ZoneOffsets.UTC)
-                                  .setTenantId(TenantId.newBuilder()
-                                                       .setValue(clazz.getSimpleName())
-                                                       .build())
+                                  .setTenantId(tenantId)
                                   .build();
     }
 
