@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A {@link MessageDispatchFactory message dispatch factory} that deals
- * with {@link EventEnvelope events}.
+ * with {@link EventEnvelope event envelopes}.
  *
  * @author Mykhailo Drachuk
  */

@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A {@link MessageDispatchFactory message dispatch factory} that deals
- * with {@link CommandEnvelope commands}.
+ * with {@link CommandEnvelope command envelopes}.
  *
  * @author Mykhailo Drachuk
  */
@@ -47,7 +47,6 @@ public final class CommandDispatchFactory extends MessageDispatchFactory<Command
         checkNotNull(method);
         return new CommandMethodDispatch(envelope(), method, context);
     }
-
 
     /**
      * A dispatch of a {@link CommandEnvelope commands envelope}

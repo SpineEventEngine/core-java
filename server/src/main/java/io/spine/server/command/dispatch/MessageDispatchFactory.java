@@ -24,12 +24,13 @@ import io.spine.core.MessageEnvelope;
 import io.spine.server.model.HandlerMethod;
 
 /**
- * {@link Dispatch Dispatches} instantiated using this factory send off a 
- * {@link MessageEnvelope message envelope} {@link #to to a specified target}.
+ * {@link Dispatch Dispatches} instantiated using this factory send off a
+ * {@link MessageEnvelope message envelope} {@link #to to a specified target method}.
  *
  * @author Mykhailo Drachuk
  */
 public abstract class MessageDispatchFactory<E extends MessageEnvelope, M extends HandlerMethod> {
+
     private final E envelope;
 
     MessageDispatchFactory(E envelope) {
