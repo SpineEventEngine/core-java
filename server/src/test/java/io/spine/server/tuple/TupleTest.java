@@ -29,45 +29,52 @@ import io.spine.base.Time;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
 import io.spine.test.TestValues;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings({"LocalVariableNamingConvention", "FieldNamingConvention"})
-// OK for tuple entry values
-public class TupleShould {
+@SuppressWarnings({"LocalVariableNamingConvention", "FieldNamingConvention",
+        "InstanceVariableNamingConvention"}) // OK for tuple entry values.
+@DisplayName("Tuple should")
+class TupleTest {
 
     private final StringValue a = TestValues.newUuidValue();
     private final EitherOfTwo<Timestamp, BoolValue> b = EitherOfTwo.withA(Time.getCurrentTime());
 
     private TTuple<StringValue, EitherOfTwo<Timestamp, BoolValue>> tuple;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         tuple = new TTuple<>(a, b);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void prohibit_Empty_values() {
-        new TTuple<>(TestValues.newUuidValue(), Empty.getDefaultInstance());
+    @Test
+    @DisplayName("prohibit Empty values")
+    void prohibitEmptyValues() {
+        assertThrows(IllegalArgumentException.class,
+                     () -> new TTuple<>(TestValues.newUuidValue(), Empty.getDefaultInstance()));
     }
 
     @Test
-    public void allow_Either_argument() {
+    @DisplayName("allow Either argument")
+    void allowEitherArgument() {
         assertEquals(a, tuple.getA());
         assertEquals(b, tuple.getB());
     }
 
     @Test
-    public void return_value_from_Either_on_iteration() {
-        final Iterator<Message> iterator = tuple.iterator();
+    @DisplayName("return value from Either on iteration")
+    void returnValueOnIteration() {
+        Iterator<Message> iterator = tuple.iterator();
 
         assertEquals(a, iterator.next());
         assertEquals(b.getA(), iterator.next());
@@ -90,12 +97,12 @@ public class TupleShould {
 
         @Override
         public A getA() {
-            return (A)get(0);
+            return (A) get(0);
         }
 
         @Override
         public B getB() {
-            return (B)get(1);
+            return (B) get(1);
         }
     }
 }

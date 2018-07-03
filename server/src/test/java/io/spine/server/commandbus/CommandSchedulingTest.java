@@ -208,7 +208,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
 
         spy.postPreviouslyScheduled(command);
 
-        verify(spy).doPost(eq(CommandEnvelope.of(command)));
+        verify(spy).dispatch(eq(CommandEnvelope.of(command)));
     }
 
     @Test

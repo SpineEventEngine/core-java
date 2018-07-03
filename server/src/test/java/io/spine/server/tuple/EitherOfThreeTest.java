@@ -28,22 +28,28 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import io.spine.base.Time;
 import io.spine.test.TestValues;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("FieldNamingConvention") // short vars are OK for tuple tests.
-public class EitherOfThreeShould {
+@SuppressWarnings({"FieldNamingConvention", "InstanceVariableNamingConvention",
+        /* Short vars are OK for tuple tests. */
+        "DuplicateStringLiteralInspection" /* Common test display names. */,
+        "ResultOfMethodCallIgnored" /* Methods are called to throw exception. */})
+@DisplayName("EitherOfThree should")
+class EitherOfThreeTest {
 
     private final StringValue a = TestValues.newUuidValue();
     private final UInt32Value b = UInt32Value.newBuilder()
@@ -55,18 +61,22 @@ public class EitherOfThreeShould {
     private EitherOfThree<StringValue, UInt32Value, Timestamp> eitherWithB;
     private EitherOfThree<StringValue, UInt32Value, Timestamp> eitherWithC;
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         eitherWithA = EitherOfThree.withA(a);
         eitherWithB = EitherOfThree.withB(b);
         eitherWithC = EitherOfThree.withC(c);
     }
 
     @Test
-    public void support_equality() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        new NullPointerTester().testAllPublicStaticMethods(EitherOfThree.class);
+    }
+
+    @Test
+    @DisplayName("support equality")
+    void supportEquality() {
         new EqualsTester().addEqualityGroup(eitherWithA, EitherOfThree.withA(a))
                           .addEqualityGroup(eitherWithB)
                           .addEqualityGroup(eitherWithC)
@@ -74,82 +84,96 @@ public class EitherOfThreeShould {
     }
 
     @Test
-    public void pass_null_tolerance_check() {
-        new NullPointerTester().testAllPublicStaticMethods(EitherOfThree.class);
-    }
-
-    @Test
-    public void return_values() {
+    @DisplayName("return values")
+    void returnValues() {
         assertEquals(a, eitherWithA.getA());
         assertEquals(b, eitherWithB.getB());
         assertEquals(c, eitherWithC.getC());
     }
 
     @Test
-    public void return_value_index() {
+    @DisplayName("return value index")
+    void returnValueIndex() {
         assertEquals(0, eitherWithA.getIndex());
         assertEquals(1, eitherWithB.getIndex());
         assertEquals(2, eitherWithC.getIndex());
     }
 
     @Test
-    public void return_only_one_value_in_iteration() {
-        final Iterator<Message> iteratorA = eitherWithA.iterator();
+    @DisplayName("return only one value in iteration")
+    void provideProperIterator() {
+        Iterator<Message> iteratorA = eitherWithA.iterator();
 
         assertEquals(a, iteratorA.next());
         assertFalse(iteratorA.hasNext());
 
-        final Iterator<Message> iteratorB = eitherWithB.iterator();
+        Iterator<Message> iteratorB = eitherWithB.iterator();
 
         assertEquals(b, iteratorB.next());
         assertFalse(iteratorB.hasNext());
 
-        final Iterator<Message> iteratorC = eitherWithC.iterator();
+        Iterator<Message> iteratorC = eitherWithC.iterator();
 
         assertEquals(c, iteratorC.next());
         assertFalse(iteratorC.hasNext());
     }
 
     @Test
-    public void prohibit_obtaining_the_other_value_A_B() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithA.getB();
-    }
-
-    @Test
-    public void prohibit_obtaining_the_other_value_A_C() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithA.getC();
-    }
-
-    @Test
-    public void prohibit_obtaining_the_other_value_B_A() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithB.getA();
-    }
-
-    @Test
-    public void prohibit_obtaining_the_other_value_B_C() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithB.getC();
-    }
-
-    @Test
-    public void prohibit_obtaining_the_other_value_C_A() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithC.getA();
-    }
-
-    @Test
-    public void prohibit_obtaining_the_other_value_C_B() {
-        thrown.expect(IllegalStateException.class);
-        eitherWithC.getB();
-    }
-
-    @Test
-    public void serialize() {
+    @DisplayName("be serializable")
+    void serialize() {
         reserializeAndAssert(eitherWithA);
         reserializeAndAssert(eitherWithB);
         reserializeAndAssert(eitherWithC);
+    }
+
+    @Nested
+    @DisplayName("when A is set, prohibit obtaining")
+    class ProhibitObtainingForA {
+
+        @Test
+        @DisplayName("B")
+        void b() {
+            assertThrows(IllegalStateException.class, () -> eitherWithA.getB());
+        }
+
+        @Test
+        @DisplayName("C")
+        void c() {
+            assertThrows(IllegalStateException.class, () -> eitherWithA.getC());
+        }
+    }
+
+    @Nested
+    @DisplayName("when B is set, prohibit obtaining")
+    class ProhibitObtainingForB {
+
+        @Test
+        @DisplayName("A")
+        void a() {
+            assertThrows(IllegalStateException.class, () -> eitherWithB.getA());
+        }
+
+        @Test
+        @DisplayName("C")
+        void c() {
+            assertThrows(IllegalStateException.class, () -> eitherWithB.getC());
+        }
+    }
+
+    @Nested
+    @DisplayName("when C is set, prohibit obtaining")
+    class ProhibitObtainingForC {
+
+        @Test
+        @DisplayName("A")
+        void a() {
+            assertThrows(IllegalStateException.class, () -> eitherWithC.getA());
+        }
+
+        @Test
+        @DisplayName("B")
+        void b() {
+            assertThrows(IllegalStateException.class, () -> eitherWithC.getB());
+        }
     }
 }

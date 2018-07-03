@@ -23,10 +23,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
-import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
-import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
@@ -47,11 +45,8 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.base.Errors.fromThrowable;
 import static io.spine.core.Rejections.causedByRejection;
 import static io.spine.core.Rejections.toRejection;
-import static io.spine.server.bus.Buses.acknowledge;
-import static io.spine.server.bus.Buses.reject;
 import static java.lang.String.format;
 
 /**
@@ -193,17 +188,14 @@ public class CommandBus extends Bus<Command,
     }
 
     @Override
-    protected Ack doPost(CommandEnvelope envelope) {
+    protected void dispatch(CommandEnvelope envelope) {
         final CommandDispatcher<?> dispatcher = getDispatcher(envelope);
-        Ack result;
         try {
             dispatcher.dispatch(envelope);
             commandStore.setCommandStatusOk(envelope);
-            result = acknowledge(envelope.getId());
         } catch (RuntimeException e) {
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(envelope, cause, log);
-
             if (causedByRejection(e)) {
                 final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
                 final Rejection rejection = toRejection(throwableMessage, envelope.getCommand());
@@ -211,13 +203,8 @@ public class CommandBus extends Bus<Command,
                                                          .getClass();
                 Log.log().trace("Posting rejection {} to RejectionBus.", rejectionClass.getName());
                 rejectionBus().post(rejection);
-                result = reject(envelope.getId(), rejection);
-            } else {
-                final Error error = fromThrowable(cause);
-                result = reject(envelope.getId(), error);
             }
         }
-        return result;
     }
 
     /**
@@ -251,11 +238,9 @@ public class CommandBus extends Bus<Command,
     /**
      * Passes a previously scheduled command to the corresponding dispatcher.
      */
-    @SuppressWarnings("CheckReturnValue")
-        // can ignore ack. since we checked the command when scheduled
     void postPreviouslyScheduled(Command command) {
         CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
-        doPost(commandEnvelope);
+        dispatch(commandEnvelope);
     }
 
     private static IllegalStateException noDispatcherFound(CommandEnvelope commandEnvelope) {

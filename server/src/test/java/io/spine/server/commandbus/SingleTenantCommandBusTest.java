@@ -29,22 +29,29 @@ import io.spine.core.CommandValidationError;
 import io.spine.core.Rejection;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.bus.EnvelopeValidator;
+import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.CommandPostingHandler;
 import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.FaultyHandler;
+import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.MemoizingRejectionSubscriber;
+import io.spine.test.command.FirstCmdCreateProject;
+import io.spine.test.command.SecondCmdStartProject;
 import io.spine.test.reflect.InvalidProjectName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.core.CommandValidationError.TENANT_INAPPLICABLE;
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.commandbus.Given.ACommand.addTask;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
+import static io.spine.server.commandbus.Given.ACommand.firstCreateProject;
+import static io.spine.server.commandbus.Given.ACommand.secondStartProject;
+import static io.spine.server.commandbus.Given.ACommand.removeTask;
 import static io.spine.server.tenant.TenantAwareOperation.isTenantSet;
-import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -113,6 +120,8 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     void propagateRejections() {
         final FaultyHandler faultyHandler = new FaultyHandler(eventBus);
         commandBus.register(faultyHandler);
+        MemoizingRejectionSubscriber rejectionSubscriber = new MemoizingRejectionSubscriber();
+        rejectionBus.register(rejectionSubscriber);
 
         final Command addTaskCommand = clearTenantId(addTask());
         final MemoizingObserver<Ack> observer = memoizingObserver();
@@ -120,11 +129,44 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
         final InvalidProjectName throwable = faultyHandler.getThrowable();
         final Rejection expectedRejection = toRejection(throwable, addTaskCommand);
+        rejectionSubscriber.verifyGot(expectedRejection);
+
         final Ack ack = observer.firstResponse();
-        final Rejection actualRejection = ack.getStatus()
-                                             .getRejection();
-        assertTrue(isNotDefault(actualRejection));
-        assertEquals(unpack(expectedRejection.getMessage()), unpack(actualRejection.getMessage()));
+        assertTrue(ack.getStatus()
+                      .hasOk());
+    }
+
+    @Test
+    @DisplayName("post commands in FIFO order")
+    void doPostCommandsInFIFO() {
+        Command secondCommand = clearTenantId(secondStartProject());
+        CommandPostingHandler handler = new CommandPostingHandler(eventBus, commandBus,
+                                                                  secondCommand);
+        commandBus.register(handler);
+
+        final Command firstCommand = clearTenantId(firstCreateProject());
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+        commandBus.post(firstCommand, observer);
+
+        List<Message> handledCommands = handler.handledCommands();
+        assertEquals(2, handledCommands.size());
+        assertTrue(FirstCmdCreateProject.class.isInstance(handledCommands.get(0)));
+        assertTrue(SecondCmdStartProject.class.isInstance(handledCommands.get(1)));
+    }
+
+    @Test
+    @DisplayName("do not propagate dispatching errors")
+    void doNotPropagateExceptions() {
+        final FaultyHandler faultyHandler = new FaultyHandler(eventBus);
+        commandBus.register(faultyHandler);
+
+        final Command remoteTaskCommand = clearTenantId(removeTask());
+        final MemoizingObserver<Ack> observer = memoizingObserver();
+        commandBus.post(remoteTaskCommand, observer);
+
+        final Ack ack = observer.firstResponse();
+        assertTrue(ack.getStatus()
+                      .hasOk());
     }
 
     @Test
