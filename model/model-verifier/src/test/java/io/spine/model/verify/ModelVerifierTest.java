@@ -23,7 +23,11 @@ package io.spine.model.verify;
 import com.google.common.base.Function;
 import com.google.common.io.Files;
 import io.spine.model.CommandHandlers;
-import io.spine.model.verify.given.ModelVerifierTestEnv;
+import io.spine.model.verify.ModelVerifier.GetDestinationDir;
+import io.spine.model.verify.given.ModelVerifierTestEnv.AnyCommandHandler;
+import io.spine.model.verify.given.ModelVerifierTestEnv.DuplicateAnyCommandHandler;
+import io.spine.model.verify.given.ModelVerifierTestEnv.Int32HandlerAggregate;
+import io.spine.model.verify.given.ModelVerifierTestEnv.Int64HandlerProcMan;
 import io.spine.server.model.DuplicateCommandHandlerError;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskCollection;
@@ -80,9 +84,9 @@ class ModelVerifierTest {
 
         verify(project).getSubprojects();
 
-        String commandHandlerTypeName = ModelVerifierTestEnv.AnyCommandHandler.class.getName();
-        String aggregateTypeName = ModelVerifierTestEnv.Int32HandlerAggregate.class.getName();
-        String procManTypeName = ModelVerifierTestEnv.Int64HandlerProcMan.class.getName();
+        String commandHandlerTypeName = AnyCommandHandler.class.getName();
+        String aggregateTypeName = Int32HandlerAggregate.class.getName();
+        String procManTypeName = Int64HandlerProcMan.class.getName();
         CommandHandlers spineModel = CommandHandlers.newBuilder()
                                                     .addCommandHandlingTypes(commandHandlerTypeName)
                                                     .addCommandHandlingTypes(aggregateTypeName)
@@ -95,8 +99,8 @@ class ModelVerifierTest {
     @DisplayName("fail on duplicate command handlers")
     void failOnDuplicateHandlers() {
         ModelVerifier verifier = new ModelVerifier(project);
-        String firstType = ModelVerifierTestEnv.AnyCommandHandler.class.getName();
-        String secondType = ModelVerifierTestEnv.DuplicateAnyCommandHandler.class.getName();
+        String firstType = AnyCommandHandler.class.getName();
+        String secondType = DuplicateAnyCommandHandler.class.getName();
 
         CommandHandlers spineModel = CommandHandlers.newBuilder()
                                                     .addCommandHandlingTypes(firstType)
@@ -134,7 +138,7 @@ class ModelVerifierTest {
                                                  .getByName(COMPILE_JAVA.getValue());
         File dest = Files.createTempDir();
         compileTask.setDestinationDir(dest);
-        Function<JavaCompile, URL> func = ModelVerifier.GetDestinationDir.FUNCTION;
+        Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
         URL destUrl = dest.toURI().toURL();
         assertEquals(destUrl, func.apply(compileTask));
     }
@@ -143,7 +147,7 @@ class ModelVerifierTest {
     @DisplayName("retrieve null if destination directory is null")
     void getNullDestDir() {
         JavaCompile compileTask = mock(JavaCompile.class);
-        Function<JavaCompile, URL> func = ModelVerifier.GetDestinationDir.FUNCTION;
+        Function<JavaCompile, URL> func = GetDestinationDir.FUNCTION;
         assertNull(func.apply(compileTask));
     }
 }
