@@ -46,8 +46,7 @@ buildscript {
 
     configurations.all({
         resolutionStrategy {
-            force "com.google.guava:guava:$guavaVersion"
-            force "com.google.guava:guava-testlib:$guavaVersion"
+            force deps.build.guava
         }
     })
 }
@@ -105,8 +104,8 @@ subprojects {
 
         all {
             resolutionStrategy {
-                force "com.google.guava:guava:$guavaVersion"
-                force "com.google.guava:guava-testlib:$guavaVersion"
+                force deps.build.guava
+                force deps.test.guavaTestlib
             }
         }
     }
@@ -176,7 +175,7 @@ subprojects {
         implementation deps.build.jsr305Annotations
 
         implementation deps.build.checkerAnnotations
-        implementation "com.google.errorprone:error_prone_annotations:$errorProneVersion"
+        implementation "com.google.errorprone:error_prone_annotations:$deps.versions.errorProne"
 
         implementation deps.build.slf4j
 

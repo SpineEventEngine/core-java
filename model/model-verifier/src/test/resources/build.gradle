@@ -29,25 +29,19 @@ buildscript {
     //
     // NOTE: this file is copied from the root project in the test setup.
     apply from: 'ext.gradle'
+    apply from: 'config/gradle/dependencies.gradle'
 
     repositories {
-        // Snapshots of Guava.
-        maven { url = sonatypeSnapshots }
-
+        jcenter()
         mavenLocal()
-        mavenCentral()
 
-        maven { url = spineRepository }
-        maven { url = spineSnapshotsRepository }
+        maven { url = repos.spine }
+        maven { url = repos.spineSnapshots }
     }
 
     dependencies {
-        classpath ("com.google.protobuf:protobuf-java:${protobufVersion}") {
-            exclude group: 'com.google.guava'
-        }
-        classpath ("com.google.protobuf:protobuf-gradle-plugin:${protobufGradlePluginVersion}") {
-            exclude group: 'com.google.guava'
-        }
+        classpath deps.build.protobuf
+        classpath deps.build.gradlePlugins.protobuf
         classpath "io.spine.tools:spine-model-verifier:${spineVersion}"
     }
 
@@ -65,14 +59,11 @@ apply from: 'ext.gradle'
 
 
 repositories {
-    // Snapshots of Guava.
-    maven { url = sonatypeSnapshots }
-
+    jcenter()
     mavenLocal()
-    mavenCentral()
 
-    maven { url = spineRepository }
-    maven { url = spineSnapshotsRepository }
+    maven { url = repos.spine }
+    maven { url = repos.spineSnapshots }
 }
 
 compileJava {
@@ -80,10 +71,7 @@ compileJava {
 }
 
 dependencies {
-
-    compile ("com.google.protobuf:protobuf-java:$protobufVersion") {
-        exclude group: 'com.google.guava'
-    }
+    compile deps.build.protobuf
 
     compileOnly "io.spine.tools:spine-model-assembler:$spineVersion"
 }
