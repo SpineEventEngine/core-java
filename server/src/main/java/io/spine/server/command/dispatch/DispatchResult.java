@@ -49,14 +49,14 @@ public final class DispatchResult {
     }
 
     /**
-     * @return dispatch result representation as a list of domain events.
+     * @return dispatch result representation as a list of domain events
      */
     public List<? extends Message> asMessages() {
         return ImmutableList.copyOf(this.messages);
     }
 
     /**
-     * @return dispatch result representation as a list of Spine events.
+     * @return dispatch result representation as a list of Spine events
      */
     public List<Event> asEvents(Any producerId, Version version) {
         return HandlerMethod.toEvents(producerId, version, messages, envelope);
