@@ -37,11 +37,7 @@ dependencies {
     testCompile project(path: ":testutil-server")
 }
 
-apply from: gRpcScript
-
 apply from: testArtifactsScript
-
-apply plugin: spineProtobufPluginId
 
 // Copies the documentation files to the Javadoc output folder.
 // Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673
