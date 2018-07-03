@@ -30,7 +30,7 @@ import io.spine.server.command.CommandTest;
  */
 public class CommandTestTestEnv {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private CommandTestTestEnv() {
     }
 

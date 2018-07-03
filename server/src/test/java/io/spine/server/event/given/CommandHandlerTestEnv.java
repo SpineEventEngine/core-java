@@ -54,7 +54,7 @@ import static com.google.common.collect.Lists.newLinkedList;
  */
 public class CommandHandlerTestEnv {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private CommandHandlerTestEnv() {
     }
 

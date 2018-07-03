@@ -39,7 +39,7 @@ import io.spine.validate.UInt32ValueVBuilder;
  */
 public class AggregatePartCommandTestTestEnv {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private AggregatePartCommandTestTestEnv() {
     }
 

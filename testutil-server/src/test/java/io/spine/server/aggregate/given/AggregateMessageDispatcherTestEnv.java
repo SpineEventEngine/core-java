@@ -36,7 +36,7 @@ import io.spine.validate.StringValueVBuilder;
  */
 public class AggregateMessageDispatcherTestEnv {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private AggregateMessageDispatcherTestEnv() {
     }
 

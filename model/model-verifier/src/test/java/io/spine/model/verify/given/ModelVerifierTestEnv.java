@@ -40,7 +40,7 @@ import java.util.Collections;
  */
 public class ModelVerifierTestEnv {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private ModelVerifierTestEnv() {
     }
 

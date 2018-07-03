@@ -31,7 +31,7 @@ import io.spine.validate.TimestampVBuilder;
  */
 public class AggregateBuilderTestEnv {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private AggregateBuilderTestEnv() {
     }
 

@@ -32,7 +32,7 @@ import io.spine.server.event.EventBus;
  */
 public class ModelTestsTestEnv {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private ModelTestsTestEnv() {
     }
 

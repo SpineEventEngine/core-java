@@ -41,7 +41,7 @@ import static io.spine.core.given.GivenUserId.newUuid;
  */
 public class AggregateCommandTestTestEnv {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private AggregateCommandTestTestEnv() {
     }
 

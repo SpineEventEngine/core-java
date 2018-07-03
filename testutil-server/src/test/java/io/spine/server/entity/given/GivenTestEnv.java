@@ -41,7 +41,7 @@ import io.spine.validate.UInt32ValueVBuilder;
  */
 class GivenTestEnv {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private GivenTestEnv() {
     }
 
