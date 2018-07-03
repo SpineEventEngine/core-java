@@ -18,20 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.server.command.given;
 
-import io.spine.test.Tests;
-import org.junit.Test;
-import org.junit.jupiter.api.DisplayName;
+import com.google.protobuf.StringValue;
+import io.spine.client.ActorRequestFactory;
+import io.spine.server.command.CommandTest;
 
 /**
  * @author Alexander Yevsyukov
+ * @author Dmytro Kuzmin
  */
-public class TestRejectionClassesShould {
+public class CommandTestTestEnv {
 
-    @Test
-    @DisplayName("have utility ctor")
-    void haveUtilityCtor() {
-        Tests.assertHasPrivateParameterlessCtor(TestRejectionClasses.class);
+    /** Prevents instantiation on this utility class. */
+    private CommandTestTestEnv() {
+    }
+
+    /**
+     * The test class for verifying the behaviour of the abstract parent.
+     */
+    public static class TestCommandTest extends CommandTest<StringValue> {
+
+        public TestCommandTest(ActorRequestFactory requestFactory) {
+            super(requestFactory);
+        }
+
+        public TestCommandTest() {
+            super();
+        }
+
+        @Override
+        protected void setUp() {
+            // We don't have an object under test for this test harness class.
+        }
     }
 }

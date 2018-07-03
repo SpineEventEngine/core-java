@@ -18,81 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate;
+package io.spine.server.aggregate.given;
 
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
-import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
+import io.spine.server.aggregate.AggregatePart;
+import io.spine.server.aggregate.AggregatePartCommandTest;
+import io.spine.server.aggregate.AggregateRoot;
+import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.command.CommandTest;
 import io.spine.server.entity.given.Given;
-import io.spine.server.model.ModelTests;
-import io.spine.time.ZoneOffsets;
 import io.spine.validate.UInt32ValueVBuilder;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.jupiter.api.DisplayName;
-
-import static io.spine.core.given.GivenUserId.newUuid;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
+ * @author Dmytro Kuzmin
  */
-public class AggregatePartCommandTestShould {
+public class AggregatePartCommandTestTestEnv {
 
-    private AggregatePartCommandTest<Timestamp, TimerCounter> aggregatePartCommandTest;
-
-    private static ActorRequestFactory newRequestFactory(Class<?> clazz) {
-        return ActorRequestFactory.newBuilder()
-                                  .setActor(newUuid())
-                                  .setZoneOffset(ZoneOffsets.UTC)
-                                  .setTenantId(TenantId.newBuilder()
-                                                       .setValue(clazz.getSimpleName())
-                                                       .build())
-                                  .build();
-    }
-
-    @Before
-    public void setUp() {
-        ModelTests.clearModel();
-        aggregatePartCommandTest = new TimerCountingTest();
-    }
-
-    @Test
-    @DisplayName("create an aggregate part in setUp")
-    void createAnAggregatePartInSetUp() {
-        assertFalse(aggregatePartCommandTest.aggregatePart()
-                                            .isPresent());
-
-        aggregatePartCommandTest.setUp();
-
-        assertTrue(aggregatePartCommandTest.aggregatePart()
-                                           .isPresent());
-    }
-
-    /**
-     * Ensures existence of the constructor in {@link AggregatePartCommandTest} class.
-     *
-     * <p>We do this by simply invoking the constructor in the derived class.
-     * We do not perform checks because they are done in the test suite that checks
-     * {@link CommandTest} class.
-     */
-    @SuppressWarnings("ResultOfObjectAllocationIgnored") // because we don't need the result.
-    @Test
-    @DisplayName("has constructor with ActorRequestFactory")
-    void hasConstructorWithActorRequestFactory() {
-        new TimerCountingTest(newRequestFactory(getClass()));
+    /** Prevents instantiation on this utility class. */
+    private AggregatePartCommandTestTestEnv() {
     }
 
     /**
      * A dummy aggregate part that counts the number of commands it receives as {@code Timestamp}s.
      */
-    private static final class TimerCounter
+    public static final class TimerCounter
             extends AggregatePart<String, UInt32Value, UInt32ValueVBuilder, TimerCounterRoot> {
         private TimerCounter(TimerCounterRoot root) {
             super(root);
@@ -112,17 +66,17 @@ public class AggregatePartCommandTestShould {
     /**
      * The test harness class that tests how {@code TimerCounterPart} handles its command.
      */
-    private static class TimerCountingTest
+    public static class TimerCountingTest
             extends AggregatePartCommandTest<Timestamp, TimerCounter> {
 
         private static final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                                            .build();
 
-        private TimerCountingTest(ActorRequestFactory requestFactory) {
+        public TimerCountingTest(ActorRequestFactory requestFactory) {
             super(requestFactory);
         }
 
-        private TimerCountingTest() {
+        public TimerCountingTest() {
             super();
         }
 

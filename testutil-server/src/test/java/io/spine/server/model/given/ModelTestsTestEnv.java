@@ -18,58 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.model.given;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Timestamp;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
-import io.spine.server.command.CommandHandlerClass;
 import io.spine.server.event.EventBus;
-import io.spine.test.Tests;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.jupiter.api.DisplayName;
-
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Alexander Yevsyukov
+ * @author Dmytro Kuzmin
  */
-public class ModelTestsShould {
+public class ModelTestsTestEnv {
 
-    private final Model model = Model.getInstance();
-
-    @Before
-    public void setUp() throws Exception {
-        // The model should not be polluted by the previously executed tests.
-        model.clear();
+    /** Prevents instantiation on this utility class. */
+    private ModelTestsTestEnv() {
     }
 
-    @Test
-    @DisplayName("have utility ctor")
-    void haveUtilityCtor() {
-        Tests.assertHasPrivateParameterlessCtor(ModelTests.class);
-    }
-
-    @Test
-    @DisplayName("clear the model")
-    void clearTheModel() {
-        // This adds a command handler for `com.google.protobuf.Timestamp`.
-        final CommandHandlerClass cls1 = model.asCommandHandlerClass(TestCommandHandler.class);
-        assertNotNull(cls1);
-
-        ModelTests.clearModel();
-
-        // This should pass as we cleared the model,
-        // i.e. there is no registered command handler for `com.google.protobuf.Timestamp`.
-        CommandHandlerClass cls2 = model.asCommandHandlerClass(DuplicatedCommandHandler.class);
-        assertNotNull(cls2);
-        assertNotEquals(cls1, cls2);
-    }
-
-    private static class TestCommandHandler extends CommandHandler {
+    public static class TestCommandHandler extends CommandHandler {
         private TestCommandHandler(EventBus eventBus) {
             super(eventBus);
         }
@@ -80,7 +47,7 @@ public class ModelTestsShould {
         }
     }
 
-    private static class DuplicatedCommandHandler extends CommandHandler {
+    public static class DuplicatedCommandHandler extends CommandHandler {
         private DuplicatedCommandHandler(EventBus eventBus) {
             super(eventBus);
         }

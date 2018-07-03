@@ -18,32 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given;
-
-import com.google.protobuf.Timestamp;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateBuilder;
-import io.spine.validate.TimestampVBuilder;
-
 /**
- * @author Dmytro Dashenkov
- * @author Dmytro Kuzmin
+ * Test environment classes for the {@code io.spine.server.command} package of the
+ * {@code testutil-server} module.
  */
-public class AggregateBuilderTestEnv {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.command.given;
 
-    /** Prevents instantiation on this utility class. */
-    private AggregateBuilderTestEnv() {
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    public static AggregateBuilder<TestAggregate, Integer, Timestamp> givenAggregate() {
-        final AggregateBuilder<TestAggregate, Integer, Timestamp> result = new AggregateBuilder<>();
-        result.setResultClass(TestAggregate.class);
-        return result;
-    }
-
-    public static class TestAggregate extends Aggregate<Integer, Timestamp, TimestampVBuilder> {
-        protected TestAggregate(Integer id) {
-            super(id);
-        }
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

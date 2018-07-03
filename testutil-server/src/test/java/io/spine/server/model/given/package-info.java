@@ -18,34 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.given;
-
-import io.spine.test.Tests;
-import org.junit.Test;
-import org.junit.jupiter.api.DisplayName;
-
-import static org.junit.Assert.assertTrue;
-
 /**
- * @author Alexander Yevsyukov
+ * Test environment classes for the {@code io.spine.server.model} package of the
+ * {@code testutil-server} module.
  */
-public class GivenLifecycleFlagsShould {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.model.given;
 
-    @Test
-    @DisplayName("create archived visibility")
-    void createArchivedVisibility() {
-        assertTrue(GivenLifecycleFlags.archived().getArchived());
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    @Test
-    @DisplayName("create deleted visibility")
-    void createDeletedVisibility() {
-        assertTrue(GivenLifecycleFlags.deleted().getDeleted());
-    }
-
-    @Test
-    @DisplayName("have utility ctor")
-    void haveUtilityCtor() {
-        Tests.assertHasPrivateParameterlessCtor(GivenLifecycleFlags.class);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

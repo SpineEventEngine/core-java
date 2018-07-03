@@ -30,6 +30,9 @@ import org.junit.jupiter.api.Test;
 import static io.spine.server.aggregate.given.AggregateBuilderTestEnv.givenAggregate;
 import static org.junit.Assert.assertEquals;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 @DisplayName("AggregateBuilder should")
 class AggregateBuilderTest {
 

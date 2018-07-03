@@ -31,6 +31,9 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.validate.StringValueVBuilder;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 public class AggregateMessageDispatcherTestEnv {
 
     /** Prevents instantiation on this utility class. */

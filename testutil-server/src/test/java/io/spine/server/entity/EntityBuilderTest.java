@@ -24,15 +24,22 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SuppressWarnings({"ConstantConditions" /* some of the methods test `null` arguments */,
-        "ResultOfMethodCallIgnored" /* we ignore when we test for `null`s */})
-public class EntityBuilderShould {
+/**
+ * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
+ */
+@SuppressWarnings({"ConstantConditions" /* Some of the methods test `null` arguments. */,
+        "ResultOfMethodCallIgnored" /* We ignore when we test for `null`s. */})
+@DisplayName("EntityBuilder should")
+class EntityBuilderTest {
 
     /**
      * Convenience method that mimics the way tests would call creation of an entity.
@@ -42,27 +49,35 @@ public class EntityBuilderShould {
         return builder.setResultClass(TestEntity.class);
     }
 
-    @Test(expected = NullPointerException.class)
-    @DisplayName("do not accept null ID")
-    void doNotAcceptNullID() {
-        givenEntity().withId(null);
+    @Test
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(EntityBuilder.class);
     }
 
-    @Test(expected = NullPointerException.class)
-    @DisplayName("do not accept null state")
-    void doNotAcceptNullState() {
-        givenEntity().withState(null);
-    }
-
-    @Test(expected = NullPointerException.class)
-    @DisplayName("do not accept null timestamp")
-    void doNotAcceptNullTimestamp() {
-        givenEntity().modifiedOn(null);
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test case.
+    @Test
+    @DisplayName("not accept null ID")
+    void notAcceptNullID() {
+        assertThrows(NullPointerException.class, () -> givenEntity().withId(null));
     }
 
     @Test
-    @DisplayName("obtain entity id class")
-    void obtainEntityIdClass() {
+    @DisplayName("not accept null state")
+    void notAcceptNullState() {
+        assertThrows(NullPointerException.class, () -> givenEntity().withState(null));
+    }
+
+    @Test
+    @DisplayName("not accept null timestamp")
+    void notAcceptNullTimestamp() {
+        assertThrows(NullPointerException.class, () -> givenEntity().modifiedOn(null));
+    }
+
+    @Test
+    @DisplayName("obtain entity ID class")
+    void getEntityIdClass() {
         assertEquals(Long.class, givenEntity().getIdClass());
     }
 
@@ -90,20 +105,13 @@ public class EntityBuilderShould {
 
     @Test
     @DisplayName("create entity with default values")
-    void createEntityWithDefaultValues() {
+    void createWithDefaultValues() {
         final VersionableEntity entity = givenEntity().build();
 
         assertEquals(TestEntity.class, entity.getClass());
         assertEquals(0L, entity.getId());
         assertEquals(toMessage(""), entity.getState());
         assertEquals(0, entity.getVersion().getNumber());
-    }
-
-    @Test
-    @DisplayName("pass the check")
-    void passTheCheck() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(EntityBuilder.class);
     }
 
     private static class TestEntity extends AbstractVersionableEntity<Long, StringValue> {

@@ -18,32 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given;
+package io.spine.server.entity.given;
 
-import com.google.protobuf.Timestamp;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateBuilder;
-import io.spine.validate.TimestampVBuilder;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertTrue;
 
 /**
- * @author Dmytro Dashenkov
- * @author Dmytro Kuzmin
+ * @author Alexander Yevsyukov
  */
-public class AggregateBuilderTestEnv {
+@DisplayName("GivenLifecycleFlags should")
+class GivenLifecycleFlagsTest {
 
-    /** Prevents instantiation on this utility class. */
-    private AggregateBuilderTestEnv() {
+    @Test
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(GivenLifecycleFlags.class);
     }
 
-    public static AggregateBuilder<TestAggregate, Integer, Timestamp> givenAggregate() {
-        final AggregateBuilder<TestAggregate, Integer, Timestamp> result = new AggregateBuilder<>();
-        result.setResultClass(TestAggregate.class);
-        return result;
+    @Test
+    @DisplayName("create `archived` visibility")
+    void createArchivedVisibility() {
+        assertTrue(GivenLifecycleFlags.archived().getArchived());
     }
 
-    public static class TestAggregate extends Aggregate<Integer, Timestamp, TimestampVBuilder> {
-        protected TestAggregate(Integer id) {
-            super(id);
-        }
+    @Test
+    @DisplayName("create `deleted` visibility")
+    void createDeletedVisibility() {
+        assertTrue(GivenLifecycleFlags.deleted().getDeleted());
     }
 }

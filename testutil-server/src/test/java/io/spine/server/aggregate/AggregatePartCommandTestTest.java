@@ -21,14 +21,18 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Timestamp;
-import io.spine.server.aggregate.given.AggregateCommandTestTestEnv;
-import io.spine.server.aggregate.given.AggregateCommandTestTestEnv.TimePrintingTest;
+import io.spine.client.ActorRequestFactory;
+import io.spine.core.TenantId;
+import io.spine.server.aggregate.given.AggregatePartCommandTestTestEnv.TimerCounter;
+import io.spine.server.aggregate.given.AggregatePartCommandTestTestEnv.TimerCountingTest;
 import io.spine.server.command.CommandTest;
+import io.spine.server.model.ModelTests;
+import io.spine.time.ZoneOffsets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.aggregate.given.AggregateCommandTestTestEnv.newRequestFactory;
+import static io.spine.core.given.GivenUserId.newUuid;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -36,28 +40,41 @@ import static org.junit.Assert.assertTrue;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
-@DisplayName("AggregateCommandTest should")
-class AggregateCommandTestTest {
+@DisplayName("AggregatePartCommandTest should")
+class AggregatePartCommandTestTest {
 
-    private AggregateCommandTest<Timestamp, AggregateCommandTestTestEnv.TimePrinter> aggregateCommandTest;
+    private AggregatePartCommandTest<Timestamp, TimerCounter> aggregatePartCommandTest;
+
+    private static ActorRequestFactory newRequestFactory(Class<?> clazz) {
+        return ActorRequestFactory.newBuilder()
+                                  .setActor(newUuid())
+                                  .setZoneOffset(ZoneOffsets.UTC)
+                                  .setTenantId(TenantId.newBuilder()
+                                                       .setValue(clazz.getSimpleName())
+                                                       .build())
+                                  .build();
+    }
 
     @BeforeEach
     void setUp() {
-        aggregateCommandTest = new TimePrintingTest();
+        ModelTests.clearModel();
+        aggregatePartCommandTest = new TimerCountingTest();
     }
 
     @Test
-    @DisplayName("create aggregate in `setUp`")
-    void createAggregateInSetUp() {
-        assertFalse(aggregateCommandTest.aggregate().isPresent());
+    @DisplayName("create aggregate part in `setUp`")
+    void createAggregatePartInSetUp() {
+        assertFalse(aggregatePartCommandTest.aggregatePart()
+                                            .isPresent());
 
-        aggregateCommandTest.setUp();
+        aggregatePartCommandTest.setUp();
 
-        assertTrue(aggregateCommandTest.aggregate().isPresent());
+        assertTrue(aggregatePartCommandTest.aggregatePart()
+                                           .isPresent());
     }
 
     /**
-     * Ensures existence of the constructor in {@link AggregateCommandTest} class.
+     * Ensures existence of the constructor in {@link AggregatePartCommandTest} class.
      *
      * <p>We do this by simply invoking the constructor in the derived class.
      * We do not perform checks because they are done in the test suite that checks
@@ -67,6 +84,6 @@ class AggregateCommandTestTest {
     @Test
     @DisplayName("have constructor with ActorRequestFactory")
     void haveCtorWithRequestFactory() {
-        new TimePrintingTest(newRequestFactory(getClass()));
+        new TimerCountingTest(newRequestFactory(getClass()));
     }
 }

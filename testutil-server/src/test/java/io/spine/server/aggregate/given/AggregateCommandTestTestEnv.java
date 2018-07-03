@@ -35,6 +35,10 @@ import io.spine.validate.StringValueVBuilder;
 
 import static io.spine.core.given.GivenUserId.newUuid;
 
+/**
+ * @author Alexander Yevsyukov
+ * @author Dmytro Kuzmin
+ */
 public class AggregateCommandTestTestEnv {
 
     /** Prevents instantiation on this utility class. */
