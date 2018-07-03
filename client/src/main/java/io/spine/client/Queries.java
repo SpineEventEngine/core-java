@@ -48,8 +48,10 @@ public final class Queries {
      */
     private static final String QUERY_ID_FORMAT = "q-%s";
 
+    /**
+     * Prevents the utility class instantiation.
+     */
     private Queries() {
-        // Prevent instantiation of this utility class.
     }
 
     public static QueryId generateId() {
@@ -74,8 +76,8 @@ public final class Queries {
         final Target target = query.getTarget();
         final String type = target.getType();
         final TypeUrl typeUrl = TypeUrl.parse(type);
-        checkState(KnownTypes.instance()
-                             .contains(typeUrl), "Unknown type URL: `%s`.", type);
+        checkState(KnownTypes.instance().contains(typeUrl),
+                   "Unknown type URL: `%s`.", type);
         return typeUrl;
     }
 
