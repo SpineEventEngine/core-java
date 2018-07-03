@@ -20,14 +20,10 @@
 
 dependencies {
     compile "io.spine:spine-base:$spineBaseVersion"
-    compile ("io.spine:spine-time:$spineTimeVersion") {
-        exclude group: 'com.google.guava'
-    }
+    compile "io.spine:spine-time:$spineTimeVersion"
 
-    testCompile project(path: ":testutil-core")
-    testCompile ("io.spine:spine-testutil-time:$spineTimeVersion") {
-        exclude group: 'com.google.guava'
-    }
+    testImplementation project(path: ":testutil-core")
+    testImplementation "io.spine:spine-testutil-time:$spineTimeVersion"
 }
 
 apply from: testArtifactsScript

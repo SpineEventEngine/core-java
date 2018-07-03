@@ -17,21 +17,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 dependencies {
     compile project(path: ':client')
 
     // Depend on JUnit in the production part of the code, as this module exposes testing utilities
     // that are based on JUnit.
-    compile "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
-    runtime "org.junit.jupiter:junit-jupiter-engine:$jUnitVersion"
-    runtime "org.junit.vintage:junit-vintage-engine:$jUnitVersion"
+    api deps.test.junit5Api
+    runtimeClasspath deps.test.junit5Runner
 
     // Depend on Mockito in the production code because this module exposes testing utilities
     // based on this library.
-    compile "org.mockito:mockito-core:$mockitoVersion"
+    api deps.test.mockito
 
     // General purpose test utilities.
-    compile ("io.spine:spine-testlib:$spineBaseVersion") {
-        exclude group: 'com.google.guava'
-    }
+    api "io.spine:spine-testlib:$spineBaseVersion"
 }

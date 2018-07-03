@@ -17,24 +17,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-dependencies {
-    compile ("io.grpc:grpc-netty:$gRpcVersion") {
-        exclude group: 'com.google.guava'
-    }
-    compile ("io.grpc:grpc-protobuf:$gRpcVersion") {
-        exclude group: 'com.google.guava'
-    }
-    compile ("io.grpc:grpc-stub:$gRpcVersion") {
-        exclude group: 'com.google.guava'
-    }
 
+dependencies {
     compile project(path: ':client')
 
-    testCompile ("io.spine:spine-testlib:$spineBaseVersion") {
-        exclude group: 'com.google.guava'
-    }
-    testCompile project(path: ":client", configuration: 'testArtifacts')
-    testCompile project(path: ":testutil-server")
+    api "io.grpc:grpc-stub:$gRpcVersion"
+    implementation "io.grpc:grpc-netty:$gRpcVersion"
+    implementation "io.grpc:grpc-protobuf:$gRpcVersion"
+
+    testImplementation "io.spine:spine-testlib:$spineBaseVersion"
+    testImplementation project(path: ":core", configuration: 'testArtifacts')
+    testImplementation project(path: ":client", configuration: 'testArtifacts')
+    testImplementation project(path: ":testutil-server")
 }
 
 apply from: testArtifactsScript

@@ -18,25 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 dependencies {
-    compile ("io.grpc:grpc-okhttp:$gRpcVersion") {
-        exclude group: 'com.google.guava'
-    }
-    compile ("io.grpc:grpc-protobuf:$gRpcVersion") {
-        exclude group: 'com.google.guava'
-    }
-    compile ("io.grpc:grpc-stub:$gRpcVersion") {
-        exclude group: 'com.google.guava'
-    }
-
     compile project(path: ':core')
 
-    testCompile ("io.spine:spine-testlib:$spineBaseVersion") {
-        exclude group: 'com.google.guava'
-    }
-    testCompile project(path: ":testutil-client")
-    testCompile project(path: ":core", configuration: 'testArtifacts')
+    api "io.grpc:grpc-stub:$gRpcVersion"
+
+    implementation "io.grpc:grpc-okhttp:$gRpcVersion"
+    implementation "io.grpc:grpc-protobuf:$gRpcVersion"
+
+    testImplementation project(path: ":testutil-client")
+    testImplementation project(path: ":core", configuration: 'testArtifacts')
+    testImplementation "io.spine:spine-testlib:$spineBaseVersion"
 }
 
 apply from: testArtifactsScript
 
-apply from: "../scripts/assemble-proto.gradle"
+apply from: "$rootDir/scripts/assemble-proto.gradle"

@@ -18,30 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 dependencies {
-    // Depend on JUnit in the production part of the code, as this module exposes testing utilities
-    // that are based on JUnit.
-    compile "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
-    runtime "org.junit.jupiter:junit-jupiter-engine:$jUnitVersion"
-    runtime "org.junit.vintage:junit-vintage-engine:$jUnitVersion"
-
-    // Depend on Mockito in the production code because this module exposes testing utilities
-    // based on this library.
-    compile "org.mockito:mockito-core:$mockitoVersion"
-    
-    // Depend on the base module that contains `Timestamps` and other utility classes.
-    compile "io.spine:spine-base:$spineBaseVersion"
-
-    // Depend on `io.spine.server.entity` and other packages for the GivenXxx classes.
     compile project(path: ':server')
 
-    // General purpose test utilities.
-    compile ("io.spine:spine-testlib:$spineBaseVersion") {
-        exclude group: 'com.google.guava'
-    }
-    compile project(path: ':testutil-client')
-
-    // Depend on testutil-time for `TimeTests` class.
-    testCompile ("io.spine:spine-testutil-time:$spineTimeVersion") {
-        exclude group: 'com.google.guava'
-    }
+    api project(path: ':testutil-client')
 }
