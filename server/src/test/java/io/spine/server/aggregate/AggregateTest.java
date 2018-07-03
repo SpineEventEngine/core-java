@@ -30,6 +30,7 @@ import io.spine.base.Time;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.core.TenantId;
@@ -83,6 +84,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.core.CommandEnvelope.of;
 import static io.spine.core.Events.getRootCommandId;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -805,27 +807,19 @@ public class AggregateTest {
         }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+        // We're not interested in what dispatch() returns
     @Test
-    @DisplayName("acknowledge DuplicateCommandException for command handled after last snapshot")
+    @DisplayName("throw DuplicateCommandException for a duplicated command")
     void acknowledgeExceptionForDuplicateCommand() {
         TenantId tenantId = newTenantId();
         Command createCommand = command(createProject, tenantId);
+        CommandEnvelope envelope = of(createCommand);
+        repository.dispatch(envelope);
 
-        CommandBus commandBus = boundedContext.getCommandBus();
-        StreamObserver<Ack> noOpObserver = noOpObserver();
-        MemoizingObserver<Ack> memoizingObserver = memoizingObserver();
-        commandBus.post(createCommand, noOpObserver);
-        commandBus.post(createCommand, memoizingObserver);
-
-        List<Ack> responses = memoizingObserver.responses();
-        Ack ack = responses.get(0);
-        assertTrue(ack.getStatus()
-                      .hasError());
-
-        String errorType = DuplicateCommandException.class.getCanonicalName();
-        assertEquals(errorType, ack.getStatus()
-                                   .getError()
-                                   .getType());
+        assertThrows(DuplicateCommandException.class, () -> {
+            repository.dispatch(envelope);
+        });
     }
 
     @Nested

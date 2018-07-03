@@ -33,8 +33,11 @@ import io.spine.core.given.GivenCommandContext;
 import io.spine.core.given.GivenUserId;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
+import io.spine.test.command.CmdRemoveTask;
 import io.spine.test.command.CmdStartProject;
+import io.spine.test.command.FirstCmdCreateProject;
 import io.spine.test.command.ProjectId;
+import io.spine.test.command.SecondCmdStartProject;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
@@ -45,7 +48,7 @@ public class Given {
         // Prevent construction from outside.
     }
 
-    static ProjectId newProjectId() {
+    private static ProjectId newProjectId() {
         final String uuid = newUuid();
         return ProjectId.newBuilder()
                         .setId(uuid)
@@ -84,9 +87,24 @@ public class Given {
             return addTask(USER_ID, PROJECT_ID, getCurrentTime());
         }
 
+        static Command secondStartProject() {
+            SecondCmdStartProject command = CommandMessage.secondStartProject(newProjectId());
+            return create(command, USER_ID, getCurrentTime());
+        }
+
+        static Command firstCreateProject() {
+            FirstCmdCreateProject command = CommandMessage.firstCreateProject(newProjectId());
+            return create(command, USER_ID, getCurrentTime());
+        }
+
         static Command addTask(UserId userId, ProjectId projectId, Timestamp when) {
             final CmdAddTask command = CommandMessage.addTask(projectId);
             return create(command, userId, when);
+        }
+
+        static Command removeTask() {
+            final CmdRemoveTask command = CommandMessage.removeTask(PROJECT_ID);
+            return create(command, USER_ID, getCurrentTime());
         }
 
         /** Creates a new {@link ACommand} with default properties (current time etc). */
@@ -146,6 +164,12 @@ public class Given {
                              .build();
         }
 
+        static CmdRemoveTask removeTask(ProjectId projectId) {
+            return CmdRemoveTask.newBuilder()
+                                .setProjectId(projectId)
+                                .build();
+        }
+
         public static CmdCreateProject createProjectMessage() {
             return createProjectMessage(newProjectId());
         }
@@ -166,6 +190,18 @@ public class Given {
             return CmdStartProject.newBuilder()
                                   .setProjectId(id)
                                   .build();
+        }
+
+        static FirstCmdCreateProject firstCreateProject(ProjectId projectId) {
+            return FirstCmdCreateProject.newBuilder()
+                                    .setId(projectId)
+                                    .build();
+        }
+
+        static SecondCmdStartProject secondStartProject(ProjectId projectId) {
+            return SecondCmdStartProject.newBuilder()
+                                        .setId(projectId)
+                                        .build();
         }
     }
 }
