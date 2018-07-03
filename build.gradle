@@ -227,7 +227,6 @@ subprojects {
                     changing: true
         testCompile "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
         testRuntime "org.junit.jupiter:junit-jupiter-engine:$jUnitVersion"
-        testRuntime "org.junit.vintage:junit-vintage-engine:$jUnitVersion"
     }
 
     sourceSets {

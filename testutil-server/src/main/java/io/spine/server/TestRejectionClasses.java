@@ -25,7 +25,7 @@ import io.spine.core.RejectionClass;
 
 import java.util.Collection;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Utilities for working with rejection classes.
