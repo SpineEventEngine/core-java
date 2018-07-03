@@ -66,7 +66,7 @@ class Filtering {
     }
 
     /**
-     * @return an instance of an {@linkplain NonEmpty non-empty predicate}
+     * @return an instance of a {@linkplain NonEmpty non-empty predicate}
      */
     private static Predicate<Message> nonEmpty() {
         return NonEmpty.INSTANCE;
