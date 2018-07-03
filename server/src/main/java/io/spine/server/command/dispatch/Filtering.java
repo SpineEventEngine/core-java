@@ -38,7 +38,8 @@ class Filtering {
     private final Iterable<? extends Message> messages;
 
     /**
-     * A private constructor preventing instantiation.
+     * A private constructor preventing instantiation outside of {@link #of(Iterable) factory 
+     * method}.
      *
      * @param messages event messages which were emitted by a command handling entity and
      *                 require filtering
