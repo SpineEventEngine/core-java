@@ -20,28 +20,21 @@
 
 package io.spine.server;
 
-import com.google.protobuf.Message;
-import io.spine.core.RejectionClass;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
- * Utilities for working with rejection classes.
- *
  * @author Alexander Yevsyukov
  */
-public class TestRejectionClasses {
+@DisplayName("TestEventClasses utility should")
+class TestEventClassesTest {
 
-    /** Prevents instantiation of this utility class. */
-    private TestRejectionClasses() {}
-
-    @SafeVarargs
-    public static void assertContains(Collection<RejectionClass> expected,
-                                      Class<? extends Message>... rejectionClass) {
-        for (Class<? extends Message> cls : rejectionClass) {
-            assertTrue(expected.contains(RejectionClass.of(cls)));
-        }
+    @Test
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(TestEventClasses.class);
     }
 }

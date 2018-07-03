@@ -25,7 +25,7 @@ import io.spine.core.CommandClass;
 
 import java.util.Collection;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Utilities for testing command classes.
@@ -34,7 +34,7 @@ import static org.junit.Assert.assertTrue;
  */
 public class TestCommandClasses {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private TestCommandClasses() {
     }
 

@@ -36,7 +36,7 @@ import java.util.Set;
  */
 public class RejectionProducers {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private RejectionProducers() {}
 
     /**

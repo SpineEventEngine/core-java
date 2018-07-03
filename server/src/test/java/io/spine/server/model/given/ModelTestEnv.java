@@ -42,7 +42,7 @@ import io.spine.validate.StringValueVBuilder;
  */
 public class ModelTestEnv {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private ModelTestEnv() {
     }
 

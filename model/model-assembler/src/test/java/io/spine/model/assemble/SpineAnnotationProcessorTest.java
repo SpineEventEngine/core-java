@@ -20,8 +20,9 @@
 
 package io.spine.model.assemble;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -29,9 +30,9 @@ import java.util.Set;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
 import static javax.tools.Diagnostic.Kind.WARNING;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -40,20 +41,22 @@ import static org.mockito.Mockito.when;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class SpineAnnotationProcessorShould {
+@DisplayName("SpineAnnotationProcessor should")
+abstract class SpineAnnotationProcessorTest {
 
     private SpineAnnotationProcessor processor;
 
     protected abstract SpineAnnotationProcessor processor();
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         processor = processor();
     }
 
     @Test
-    public void have_constant_annotation_type() {
-        final Class<?> target = processor.getAnnotationType();
+    @DisplayName("have constant annotation type")
+    void getAnnotationType() {
+        Class<?> target = processor.getAnnotationType();
         assertNotNull(target);
         assertTrue(target.isAnnotation());
 
@@ -66,36 +69,39 @@ public abstract class SpineAnnotationProcessorShould {
     }
 
     @Test
-    public void generate_supported_annotation_names_based_of_target_annotation() {
-        final Class<?> targetType = processor.getAnnotationType();
-        final Set<String> supportedAnnotations = processor.getSupportedAnnotationTypes();
+    @DisplayName("generate supported annotation names based on target annotation")
+    void getSupportedAnnotationTypes() {
+        Class<?> targetType = processor.getAnnotationType();
+        Set<String> supportedAnnotations = processor.getSupportedAnnotationTypes();
 
         assertNotNull(supportedAnnotations);
         assertEquals(targetType.getName(), supportedAnnotations.iterator().next());
     }
 
     @Test
-    public void print_error_message() {
-        final ProcessingEnvironment environment = mock(ProcessingEnvironment.class);
-        final Messager messager = mock(Messager.class);
+    @DisplayName("print error message")
+    void printErrorMessage() {
+        ProcessingEnvironment environment = mock(ProcessingEnvironment.class);
+        Messager messager = mock(Messager.class);
         when(environment.getMessager()).thenReturn(messager);
 
         processor.init(environment);
 
-        final String errorMessage = "custom error";
+        String errorMessage = "custom error";
         processor.error(errorMessage);
         verify(messager).printMessage(eq(ERROR), eq(errorMessage));
     }
 
     @Test
-    public void print_warning_message() {
-        final ProcessingEnvironment environment = mock(ProcessingEnvironment.class);
-        final Messager messager = mock(Messager.class);
+    @DisplayName("print warning message")
+    void printWarningMessage() {
+        ProcessingEnvironment environment = mock(ProcessingEnvironment.class);
+        Messager messager = mock(Messager.class);
         when(environment.getMessager()).thenReturn(messager);
 
         processor.init(environment);
 
-        final String message = "custom warning";
+        String message = "custom warning";
         processor.warn(message);
         verify(messager).printMessage(eq(WARNING), eq(message));
     }

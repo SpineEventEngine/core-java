@@ -27,7 +27,7 @@ package io.spine.server.model;
  */
 public class ModelTests {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private ModelTests() {}
 
     /** Clears the {@link Model}. */

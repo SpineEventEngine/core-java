@@ -18,30 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.model.assemble;
 
-import com.google.protobuf.Message;
-import io.spine.core.RejectionClass;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Utilities for working with rejection classes.
- *
- * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
-public class TestRejectionClasses {
+@DisplayName("AssignLookup should")
+class AssignLookupTest extends SpineAnnotationProcessorTest {
 
-    /** Prevents instantiation of this utility class. */
-    private TestRejectionClasses() {}
+    @Override
+    protected SpineAnnotationProcessor processor() {
+        return new AssignLookup();
+    }
 
-    @SafeVarargs
-    public static void assertContains(Collection<RejectionClass> expected,
-                                      Class<? extends Message>... rejectionClass) {
-        for (Class<? extends Message> cls : rejectionClass) {
-            assertTrue(expected.contains(RejectionClass.of(cls)));
-        }
+    @Test
+    @DisplayName("support `spineDirRoot` option")
+    void supportSpineDirRoot() {
+        Set<String> opts = processor().getSupportedOptions();
+        assertEquals(1, opts.size());
+        assertThat(opts, contains(AssignLookup.OUTPUT_OPTION_NAME));
     }
 }

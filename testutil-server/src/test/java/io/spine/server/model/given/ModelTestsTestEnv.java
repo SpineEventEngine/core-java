@@ -18,42 +18,46 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core.given;
+package io.spine.server.model.given;
 
-import com.google.common.testing.NullPointerTester;
-import io.spine.base.Identifier;
-import io.spine.test.Tests;
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Timestamp;
+import io.spine.server.command.Assign;
+import io.spine.server.command.CommandHandler;
+import io.spine.server.event.EventBus;
 
 /**
  * @author Alexander Yevsyukov
+ * @author Dmytro Kuzmin
  */
-public class GivenTenantIdShould {
+public class ModelTestsTestEnv {
 
-    @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(GivenTenantId.class);
+    /** Prevents instantiation of this utility class. */
+    private ModelTestsTestEnv() {
     }
 
-    @Test
-    public void pass_null_tolerance_check() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(GivenTenantId.class);
+    public static class TestCommandHandler extends CommandHandler {
+        private TestCommandHandler(EventBus eventBus) {
+            super(eventBus);
+        }
+
+        @Assign
+        Empty handle(Timestamp cmd) {
+            return Empty.getDefaultInstance();
+        }
     }
 
-    @Test
-    public void create_by_string_value() {
-        final String expected = Identifier.newUuid();
+    public static class DuplicatedCommandHandler extends CommandHandler {
+        private DuplicatedCommandHandler(EventBus eventBus) {
+            super(eventBus);
+        }
 
-        assertEquals(expected, GivenTenantId.of(expected)
-                                            .getValue());
-    }
-
-    @Test
-    public void create_by_test_class_name() {
-        assertEquals(getClass().getSimpleName(), GivenTenantId.nameOf(getClass())
-                                                              .getValue());
+        /**
+         * Handles the same command as {@link TestCommandHandler#handle(Timestamp)}.
+         */
+        @Assign
+        Empty handle(Timestamp cmd) {
+            return Empty.getDefaultInstance();
+        }
     }
 }

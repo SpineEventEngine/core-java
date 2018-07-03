@@ -34,7 +34,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public class EventSubscriberMethodTestEnv {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private EventSubscriberMethodTestEnv() {
     }
 

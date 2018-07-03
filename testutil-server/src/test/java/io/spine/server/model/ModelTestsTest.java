@@ -20,41 +20,43 @@
 
 package io.spine.server.model;
 
-import com.google.protobuf.Empty;
-import com.google.protobuf.Timestamp;
-import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
 import io.spine.server.command.CommandHandlerClass;
-import io.spine.server.event.EventBus;
-import io.spine.test.Tests;
-import org.junit.Before;
-import org.junit.Test;
+import io.spine.server.model.given.ModelTestsTestEnv.DuplicatedCommandHandler;
+import io.spine.server.model.given.ModelTestsTestEnv.TestCommandHandler;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class ModelTestsShould {
+@DisplayName("ModelTests utility should")
+class ModelTestsTest {
 
     private final Model model = Model.getInstance();
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() throws Exception {
         // The model should not be polluted by the previously executed tests.
         model.clear();
     }
 
     @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(ModelTests.class);
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(ModelTests.class);
     }
 
     @Test
-    public void clear_the_model() {
+    @DisplayName("clear model")
+    void clearModel() {
         // This adds a command handler for `com.google.protobuf.Timestamp`.
-        final CommandHandlerClass cls1 = model.asCommandHandlerClass(TestCommandHandler.class);
+        CommandHandlerClass cls1 = model.asCommandHandlerClass(TestCommandHandler.class);
         assertNotNull(cls1);
 
         ModelTests.clearModel();
@@ -64,30 +66,5 @@ public class ModelTestsShould {
         CommandHandlerClass cls2 = model.asCommandHandlerClass(DuplicatedCommandHandler.class);
         assertNotNull(cls2);
         assertNotEquals(cls1, cls2);
-    }
-
-    private static class TestCommandHandler extends CommandHandler {
-        private TestCommandHandler(EventBus eventBus) {
-            super(eventBus);
-        }
-
-        @Assign
-        Empty handle(Timestamp cmd) {
-            return Empty.getDefaultInstance();
-        }
-    }
-
-    private static class DuplicatedCommandHandler extends CommandHandler {
-        private DuplicatedCommandHandler(EventBus eventBus) {
-            super(eventBus);
-        }
-
-        /**
-         * Handles the same command as {@link TestCommandHandler#handle(Timestamp)}.
-         */
-        @Assign
-        Empty handle(Timestamp cmd) {
-            return Empty.getDefaultInstance();
-        }
     }
 }

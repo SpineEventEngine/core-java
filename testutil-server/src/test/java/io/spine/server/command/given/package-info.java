@@ -18,31 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core.given;
-
-import io.spine.core.Version;
-import io.spine.test.Tests;
-import org.junit.Test;
-
-import static io.spine.test.TestValues.random;
-import static org.junit.Assert.assertEquals;
-
 /**
- * @author Alexander Yevsyukov
+ * Test environment classes for the {@code io.spine.server.command} package of the
+ * {@code testutil-server} module.
  */
-public class GivenVersionShould {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.command.given;
 
-    @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(GivenVersion.class);
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    @Test
-    public void generate_version_by_number() {
-        final int number = random(100);
-
-        final Version version = GivenVersion.withNumber(number);
-
-        assertEquals(number, version.getNumber());
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

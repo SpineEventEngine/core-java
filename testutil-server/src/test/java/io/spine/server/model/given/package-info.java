@@ -18,33 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core.given;
-
-import com.google.protobuf.Any;
-import io.spine.core.Enrichment;
-import org.junit.Test;
-
-import java.util.Map;
-
-import static io.spine.core.given.GivenEnrichment.withOneAttribute;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Verify.assertSize;
-
 /**
- * @author Dmytro Grankin
+ * Test environment classes for the {@code io.spine.server.model} package of the
+ * {@code testutil-server} module.
  */
-public class GivenEnrichmentShould {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.model.given;
 
-    @Test
-    public void have_private_utility_ctor() {
-        assertHasPrivateParameterlessCtor(GivenEnrichment.class);
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    @Test
-    public void create_enrichment_with_one_attribute() {
-        final Enrichment enrichment = withOneAttribute();
-        final Map<String, Any> enrichmentAttributes = enrichment.getContainer()
-                                                                .getItems();
-        assertSize(1, enrichmentAttributes);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;
