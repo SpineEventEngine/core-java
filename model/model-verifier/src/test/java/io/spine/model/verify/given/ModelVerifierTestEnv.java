@@ -38,8 +38,8 @@ import java.util.Collections;
  */
 public class ModelVerifierTestEnv {
 
+    /** Prevents instantiation on this utility class. */
     private ModelVerifierTestEnv() {
-        // Prevent utility class instantiation.
     }
 
     public static class AnyCommandHandler extends CommandHandler {
