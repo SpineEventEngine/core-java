@@ -476,5 +476,4 @@ public abstract class Aggregate<I,
     protected int versionNumber() {
         return super.versionNumber();
     }
-
 }
