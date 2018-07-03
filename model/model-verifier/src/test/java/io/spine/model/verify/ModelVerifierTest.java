@@ -80,14 +80,16 @@ class ModelVerifierTest {
 
         verify(project).getSubprojects();
 
-        final String commandHandlerTypeName = ModelVerifierTestEnv.AnyCommandHandler.class.getName();
+        final String commandHandlerTypeName =
+                ModelVerifierTestEnv.AnyCommandHandler.class.getName();
         final String aggregateTypeName = ModelVerifierTestEnv.Int32HandlerAggregate.class.getName();
         final String procManTypeName = ModelVerifierTestEnv.Int64HandlerProcMan.class.getName();
-        final CommandHandlers spineModel = CommandHandlers.newBuilder()
-                                                .addCommandHandlingTypes(commandHandlerTypeName)
-                                                .addCommandHandlingTypes(aggregateTypeName)
-                                                .addCommandHandlingTypes(procManTypeName)
-                                                .build();
+        final CommandHandlers spineModel =
+                CommandHandlers.newBuilder()
+                               .addCommandHandlingTypes(commandHandlerTypeName)
+                               .addCommandHandlingTypes(aggregateTypeName)
+                               .addCommandHandlingTypes(procManTypeName)
+                               .build();
         verifier.verify(spineModel);
     }
 
@@ -99,9 +101,9 @@ class ModelVerifierTest {
         final String secondType = ModelVerifierTestEnv.DuplicateAnyCommandHandler.class.getName();
 
         final CommandHandlers spineModel = CommandHandlers.newBuilder()
-                                                .addCommandHandlingTypes(firstType)
-                                                .addCommandHandlingTypes(secondType)
-                                                .build();
+                                                          .addCommandHandlingTypes(firstType)
+                                                          .addCommandHandlingTypes(secondType)
+                                                          .build();
         assertThrows(DuplicateCommandHandlerError.class, () -> verifier.verify(spineModel));
     }
 
@@ -110,8 +112,8 @@ class ModelVerifierTest {
     void ignoreInvalidClassNames() {
         final String invalidClassname = "non.existing.class.Name";
         final CommandHandlers spineModel = CommandHandlers.newBuilder()
-                                                .addCommandHandlingTypes(invalidClassname)
-                                                .build();
+                                                          .addCommandHandlingTypes(invalidClassname)
+                                                          .build();
         new ModelVerifier(project).verify(spineModel);
     }
 
@@ -120,8 +122,8 @@ class ModelVerifierTest {
     void notAcceptNonCommandHandlerTypes() {
         final String invalidClassname = ModelVerifierTest.class.getName();
         final CommandHandlers spineModel = CommandHandlers.newBuilder()
-                                                .addCommandHandlingTypes(invalidClassname)
-                                                .build();
+                                                          .addCommandHandlingTypes(invalidClassname)
+                                                          .build();
         assertThrows(IllegalArgumentException.class,
                      () -> new ModelVerifier(project).verify(spineModel));
     }
