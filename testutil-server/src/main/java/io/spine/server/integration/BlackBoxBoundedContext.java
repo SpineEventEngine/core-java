@@ -41,7 +41,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
-import static io.spine.Identifier.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
