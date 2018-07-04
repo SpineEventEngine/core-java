@@ -219,14 +219,14 @@ public class BlackBoxBoundedContext {
         return this;
     }
     
-    public BlackBoxBoundedContext verifiesThat(AckedCommandsVerifier verifier) {
-        AckedCommands acks = ackedCommands();
+    public BlackBoxBoundedContext verifiesThat(CommandAcksVerifier verifier) {
+        CommandAcks acks = commandAcks();
         verifier.verify(acks);
         return this;
     }
 
-    private AckedCommands ackedCommands() {
-        return new AckedCommands(observer);
+    private CommandAcks commandAcks() {
+        return new CommandAcks(observer);
     }
 
     /*

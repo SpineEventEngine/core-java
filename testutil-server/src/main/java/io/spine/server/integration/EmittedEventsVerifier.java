@@ -26,8 +26,8 @@ import com.google.protobuf.Message;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.Lists.asList;
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -55,12 +55,14 @@ public abstract class EmittedEventsVerifier {
     }
 
     @SafeVarargs
-    public static EmittedEventsVerifier emitted(Class<? extends Message>... eventTypes) {
-        checkArgument(eventTypes.length > 0);
-        return emitted(asList(eventTypes));
+    public static EmittedEventsVerifier
+    emitted(Class<? extends Message> firstEventType, Class<? extends Message>... otherEventTypes) {
+        return emitted(asList(firstEventType, otherEventTypes));
     }
 
     private static EmittedEventsVerifier emitted(List<Class<? extends Message>> eventTypes) {
+        checkArgument(eventTypes.size() > 0,
+                      "At least one event must be provided to emitted events verifier in a list.");
         return new EmittedEventsVerifier() {
 
             @Override

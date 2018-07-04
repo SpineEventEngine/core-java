@@ -21,7 +21,6 @@
 package io.spine.server.integration;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
@@ -31,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.ImmutableList.copyOf;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
@@ -43,7 +43,7 @@ class EmittedEvents {
     private final Map<EventClass, Integer> countOfTypes;
 
     EmittedEvents(List<Event> events) {
-        this.events = ImmutableList.copyOf(events);
+        this.events = copyOf(events);
         this.countOfTypes = countEventTypes(events);
     }
 

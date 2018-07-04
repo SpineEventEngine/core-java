@@ -103,7 +103,7 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.event;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.newTenantId;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.reassignTask;
 import static io.spine.server.entity.given.Given.aggregateOfClass;
-import static io.spine.server.integration.AckedCommandsVerifier.acked;
+import static io.spine.server.integration.CommandAcksVerifier.acked;
 import static io.spine.server.integration.EmittedEventsVerifier.emitted;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;

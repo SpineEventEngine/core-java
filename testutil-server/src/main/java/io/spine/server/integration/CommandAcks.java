@@ -21,22 +21,29 @@
 package io.spine.server.integration;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
+import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.Ack;
+import io.spine.core.Event;
 import io.spine.core.Rejection;
+import io.spine.core.RejectionClass;
 import io.spine.core.Status;
 import io.spine.grpc.MemoizingObserver;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
-class AckedCommands {
+class CommandAcks {
 
     private static final Rejection EMPTY_REJECTION = Rejection.getDefaultInstance();
     private static final Error EMPTY_ERROR = Error.getDefaultInstance();
@@ -45,7 +52,7 @@ class AckedCommands {
     private final List<Error> errors = newArrayList();
     private final List<Rejection> rejections = newArrayList();
 
-    AckedCommands(MemoizingObserver<Ack> observer) {
+    CommandAcks(MemoizingObserver<Ack> observer) {
         List<Ack> responses = observer.responses();
         for (Ack response : responses) {
             acks.add(response);
@@ -64,20 +71,24 @@ class AckedCommands {
         }
     }
 
-    boolean withoutErrors() {
+    /*
+     * Errors
+     ******************************************************************************/
+
+    boolean containNoErrors() {
         return errors.isEmpty();
     }
-    
-    boolean withErrors() {
+
+    boolean containErrors() {
         return !errors.isEmpty();
     }
 
-    boolean withError(Error error) {
+    boolean containError(Error error) {
         checkNotNull(error);
         return errors.contains(error);
     }
 
-    boolean withError(ErrorQualifier qualifier) {
+    boolean containError(ErrorQualifier qualifier) {
         return errors.stream()
                      .anyMatch(qualifier);
     }
