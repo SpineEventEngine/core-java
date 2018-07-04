@@ -22,15 +22,15 @@ import com.google.common.io.Files
 import org.apache.tools.ant.filters.ReplaceTokens
 
 buildscript {
-    repositories {
-        // Snapshots of Guava.
-        maven { url = sonatypeSnapshots }
 
-        mavenCentral()
+    apply from: "$rootDir/config/gradle/dependencies.gradle"
+
+    repositories {
+        jcenter()
     }
 
     dependencies {
-        classpath "com.google.guava:guava:$guavaVersion"
+        classpath deps.build.guava
     }
 }
 

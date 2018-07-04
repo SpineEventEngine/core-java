@@ -96,8 +96,7 @@ public final class BoundedContext
     /** Memoized version of the {@code StorageFactory} supplier passed to the constructor. */
     private final Supplier<StorageFactory> storageFactory;
 
-    @Nullable
-    private final TenantIndex tenantIndex;
+    private final @Nullable TenantIndex tenantIndex;
 
     private BoundedContext(Builder builder) {
         super();

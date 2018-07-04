@@ -19,7 +19,6 @@
  */
 package io.spine.server.integration;
 
-import com.google.common.base.Supplier;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
@@ -35,6 +34,7 @@ import org.slf4j.Logger;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;

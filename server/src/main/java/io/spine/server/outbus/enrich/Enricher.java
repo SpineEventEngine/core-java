@@ -87,11 +87,11 @@ public abstract class Enricher<M extends EnrichableMessageEnvelope<?, ?, C>, C e
         final ImmutableMultimap<String, String> enrichmentsMap = EnrichmentsMap.getInstance();
         for (String enrichmentType : enrichmentsMap.keySet()) {
             final Class<Message> enrichmentClass = TypeName.of(enrichmentType)
-                                                           .getJavaClass();
+                                                           .getMessageClass();
             final ImmutableCollection<String> srcMessageTypes = enrichmentsMap.get(enrichmentType);
             for (String srcType : srcMessageTypes) {
                 final Class<Message> messageClass = TypeName.of(srcType)
-                                                            .getJavaClass();
+                                                            .getMessageClass();
                 final MessageEnrichment msgEnricher = create(this, messageClass, enrichmentClass);
                 functionsMap.put(messageClass, msgEnricher);
             }

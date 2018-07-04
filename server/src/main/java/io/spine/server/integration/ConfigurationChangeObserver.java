@@ -150,7 +150,7 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
 
     private static Class<Message> asClassOfMsg(String classStr) {
         final TypeUrl typeUrl = TypeUrl.parse(classStr);
-        return typeUrl.getJavaClass();
+        return typeUrl.getMessageClass();
     }
 
     /**

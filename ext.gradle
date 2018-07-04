@@ -25,44 +25,17 @@
  *  as we want to manage the versions in a single source.
  */
  
-def final SPINE_VERSION = '0.10.42-SNAPSHOT'
+def final SPINE_VERSION = '0.10.44-SNAPSHOT'
 
-//noinspection GroovyAssignabilityCheck
 ext {
-    // Repositories for specific purposes.
-    googleMavenCentralMirror = 'https://maven-central.storage.googleapis.com'
-    spineRepository = 'http://maven.teamdev.com/repository/spine'
-    spineSnapshotsRepository = 'http://maven.teamdev.com/repository/spine-snapshots'
-    sonatypeSnapshots = 'https://oss.sonatype.org/content/repositories/snapshots'
-    gradlePlugins = 'https://plugins.gradle.org/m2/'
 
     // The version of the modules in this project.
     spineVersion = SPINE_VERSION
 
     // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.10.40-SNAPSHOT'
+    spineBaseVersion = '0.10.44-SNAPSHOT'
 
     spineTimeVersion = '0.10.29-SNAPSHOT'
 
-    guavaVersion = '25.1-jre'
-
-    // NOTE: when updating Protobuf dependency, please check that
-    // `KnownTypes.addStandardProtobufTypes()` method is updated with new Message types that may be
-    // introduced in the new version of Protobuf.
-    protobufVersion = '3.5.1'
-
     gRpcVersion = '1.10.0'
-    slf4JVersion = '1.7.25'
-    jUnitVersion = '5.1.1'
-
-    checkerFrameworkVersion = '2.5.1'
-    errorProneVersion = '2.3.1'
-    errorPronePluginVersion = '0.0.14'
-
-    // Note that this Mockito version is not the latest one.
-    // When migrating to the further versions, side effects may happen, like mocks persisting
-    // throughout a test suite. We leave this version as is ('2.7.22') for now.
-    mockitoVersion = '2.7.22'
-
-    protobufGradlePluginVersion = '0.8.5'
 }

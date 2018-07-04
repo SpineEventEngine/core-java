@@ -29,5 +29,5 @@ repositories {
 }
 
 dependencies {
-    compile project(':server')
+    implementation project(':server')
 }

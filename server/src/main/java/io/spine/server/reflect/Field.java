@@ -140,11 +140,11 @@ public final class Field {
                 return ByteString.class;
             case ENUM:
                 typeUrl = TypeUrl.from(field.getEnumType());
-                final Class<? extends Message> enumClass = typeUrl.getJavaClass();
+                final Class<?> enumClass = typeUrl.getJavaClass();
                 return enumClass;
             case MESSAGE:
                 typeUrl = TypeUrl.from(field.getMessageType());
-                final Class<? extends Message> msgClass = typeUrl.getJavaClass();
+                final Class<? extends Message> msgClass = typeUrl.getMessageClass();
                 return msgClass;
             default:
                 throw newIllegalArgumentException("Unknown field type discovered: %s",

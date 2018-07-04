@@ -20,8 +20,8 @@
 
 package io.spine.model.verify;
 
+import io.spine.tools.gradle.GradleProject;
 import io.spine.tools.gradle.TaskName;
-import io.spine.tools.gradle.given.GradleProject;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.TaskOutcome;

@@ -48,6 +48,7 @@ gradlew.bat
 *.gif binary
 *.swf binary
 *.jar binary
+*.desc binary
 
 *.scpt binary
 *.scssc binary

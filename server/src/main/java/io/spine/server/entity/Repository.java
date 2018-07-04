@@ -22,7 +22,6 @@ package io.spine.server.entity;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.base.Supplier;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import io.spine.base.Identifier;
@@ -42,11 +41,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
 import java.util.Iterator;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.entity.Repository.GenericParameter.ENTITY;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static io.spine.util.Exceptions.unsupported;
 import static java.lang.String.format;
 
 /**
@@ -423,11 +422,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
             E entity = loaded.get();
             return entity;
-        }
-
-        @Override
-        public void remove() {
-            throw unsupported();
         }
     }
 }

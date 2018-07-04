@@ -185,14 +185,8 @@ public class Sample {
 
     private static Message messageValueFor(FieldDescriptor field) {
         final TypeUrl messageType = TypeUrl.from(field.getMessageType());
-        final Class<? extends Message> javaClass = classFor(messageType);
+        final Class<? extends Message> javaClass = messageType.getMessageClass();
         final Message fieldValue = messageOfType(javaClass);
         return fieldValue;
-    }
-
-    @SuppressWarnings("unchecked") // Reflective class definition retrieving
-    private static <M extends Message> Class<M> classFor(TypeUrl url) {
-        final Class<M> javaClass = url.getJavaClass();
-        return javaClass;
     }
 }

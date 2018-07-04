@@ -151,7 +151,8 @@ class EnrichmentsMap {
                                                PACKAGE_WILDCARD_INDICATOR.length();
             final String packageName = eventsPackage.substring(0, lastSignificantCharPos);
             final Set<String> boundFields = getBoundFields(enrichmentType);
-            final Collection<TypeUrl> eventTypes = KnownTypes.getAllFromPackage(packageName);
+            final Collection<TypeUrl> eventTypes = KnownTypes.instance()
+                                                             .getAllFromPackage(packageName);
             for (TypeUrl type : eventTypes) {
                 final String typeQualifier = type.getTypeName();
                 if (hasOneOfTargetFields(typeQualifier, boundFields)) {
@@ -162,7 +163,7 @@ class EnrichmentsMap {
 
         private static Set<String> getBoundFields(String enrichmentType) {
             final Descriptor enrichmentDescriptor = TypeName.of(enrichmentType)
-                                                            .getDescriptor();
+                                                            .getMessageDescriptor();
             final Set<String> result = new HashSet<>();
             for (FieldDescriptor field : enrichmentDescriptor.getFields()) {
                 final String extension = field.getOptions()
@@ -199,7 +200,7 @@ class EnrichmentsMap {
         private static boolean hasOneOfTargetFields(String eventType,
                                                     Collection<String> targetFields) {
             final Descriptor eventDescriptor = TypeName.of(eventType)
-                                                       .getDescriptor();
+                                                       .getMessageDescriptor();
             final List<FieldDescriptor> fields = eventDescriptor.getFields();
             final Collection<String> fieldNames = Collections2.transform(
                     fields,

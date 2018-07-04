@@ -47,15 +47,12 @@ import com.google.common.collect.Lists
 
 buildscript {
     repositories {
-        // Snapshots of Guava.
-        maven { url = sonatypeSnapshots }
-
-        mavenCentral()
+        jcenter()
         mavenLocal()
     }
 
     dependencies {
-        classpath "com.google.guava:guava:$guavaVersion"
+        classpath deps.build.guava
     }
 }
 
