@@ -51,6 +51,7 @@ class CommandAcks {
     private final List<Ack> acks = newArrayList();
     private final List<Error> errors = newArrayList();
     private final List<Rejection> rejections = newArrayList();
+    private final Map<RejectionClass, Integer> rejectionTypes;
 
     CommandAcks(MemoizingObserver<Ack> observer) {
         List<Ack> responses = observer.responses();
@@ -69,6 +70,27 @@ class CommandAcks {
                 rejections.add(rejection);
             }
         }
+        rejectionTypes = countRejectionTypes(rejections);
+    }
+
+    /**
+     * Counts the number of times the domain event types are included in the provided list.
+     *
+     * @param rejections a list of {@link Event}
+     * @return a mapping of Rejection classes to their count
+     */
+    private static Map<RejectionClass, Integer> countRejectionTypes(List<Rejection> rejections) {
+        Map<RejectionClass, Integer> countForType = new HashMap<>();
+        for (Rejection rejection : rejections) {
+            RejectionClass type = RejectionClass.of(rejection);
+            int currentCount = countForType.getOrDefault(type, 0);
+            countForType.put(type, currentCount + 1);
+        }
+        return ImmutableMap.copyOf(countForType);
+    }
+
+    public int count() {
+        return acks.size();
     }
 
     /*
@@ -93,11 +115,42 @@ class CommandAcks {
                      .anyMatch(qualifier);
     }
 
-    boolean withoutRejections() {
+    /*
+     * Rejections
+     ******************************************************************************/
+
+    boolean containNoRejections() {
         return rejections.isEmpty();
     }
 
-    public int count() {
-        return acks.size();
+    boolean containRejections() {
+        return rejections.isEmpty();
+    }
+
+    boolean containRejections(RejectionClass type) {
+        return rejectionTypes.containsKey(type);
+    }
+
+    boolean containRejection(Message domainRejection) {
+        return rejections.stream()
+                         .anyMatch(rejection -> {
+                             Message message = unpack(rejection.getMessage());
+                             return domainRejection.equals(message);
+                         });
+    }
+
+    boolean containRejections(Message rejection1, Message rejection2, Message... otherRejections) {
+        if (!containRejection(rejection1)) {
+            return false;
+        }
+        if (!containRejection(rejection2)) {
+            return false;
+        }
+        for (Message rejection : otherRejections) {
+            if (!containRejection(rejection)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
