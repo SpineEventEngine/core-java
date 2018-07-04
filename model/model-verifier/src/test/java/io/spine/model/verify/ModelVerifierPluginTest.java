@@ -71,20 +71,20 @@ class ModelVerifierPluginTest {
     @Disabled
     @DisplayName("halt build on duplicate command handling methods")
     void rejectDuplicateHandlingMethods() {
-        final BuildResult result = newProjectWithJava(
+        BuildResult result = newProjectWithJava(
                 "io/spine/model/verify/DuplicateAggregate.java",
                 "io/spine/model/verify/DuplicateCommandHandler.java")
                 .executeAndFail(VERIFY_MODEL);
-        final BuildTask task = result.task(toPath(VERIFY_MODEL));
+        BuildTask task = result.task(toPath(VERIFY_MODEL));
         assertNotNull(task);
-        final TaskOutcome generationResult = task.getOutcome();
+        TaskOutcome generationResult = task.getOutcome();
         assertEquals(FAILED, generationResult);
     }
 
     @Test
     @DisplayName("ignore duplicate entries")
     void ignoreDuplicateEntries() {
-        final GradleProject project = newProjectWithJava(COMPILING_TEST_ENTITY_PATH);
+        GradleProject project = newProjectWithJava(COMPILING_TEST_ENTITY_PATH);
         project.executeTask(VERIFY_MODEL);
         project.executeTask(VERIFY_MODEL);
     }
@@ -95,12 +95,11 @@ class ModelVerifierPluginTest {
     @Test
     @DisplayName("halt build on malformed command handling methods")
     void rejectMalformedHandlingMethods() {
-        final BuildResult result =
-                newProjectWithJava("io/spine/model/verify/MalformedAggregate.java")
-                        .executeAndFail(VERIFY_MODEL);
-        final BuildTask task = result.task(toPath(VERIFY_MODEL));
+        BuildResult result = newProjectWithJava("io/spine/model/verify/MalformedAggregate.java")
+                .executeAndFail(VERIFY_MODEL);
+        BuildTask task = result.task(toPath(VERIFY_MODEL));
         assertNotNull(task);
-        final TaskOutcome generationResult = task.getOutcome();
+        TaskOutcome generationResult = task.getOutcome();
         assertEquals(FAILED, generationResult);
     }
 
