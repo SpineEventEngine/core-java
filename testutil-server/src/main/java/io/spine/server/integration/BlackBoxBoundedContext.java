@@ -46,6 +46,9 @@ import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
+/**
+ * @author Mykhailo Drachuk
+ */
 @VisibleForTesting
 public class BlackBoxBoundedContext {
 

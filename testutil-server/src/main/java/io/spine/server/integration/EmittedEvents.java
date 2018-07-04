@@ -33,6 +33,9 @@ import java.util.Map;
 
 import static io.spine.protobuf.AnyPacker.unpack;
 
+/**
+ * @author Mykhailo Drachuk
+ */
 @VisibleForTesting
 class EmittedEvents {
 

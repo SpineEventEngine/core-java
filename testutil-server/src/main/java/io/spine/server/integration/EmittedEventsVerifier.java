@@ -31,6 +31,9 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * @author Mykhailo Drachuk
+ */
 @VisibleForTesting
 public abstract class EmittedEventsVerifier {
 
