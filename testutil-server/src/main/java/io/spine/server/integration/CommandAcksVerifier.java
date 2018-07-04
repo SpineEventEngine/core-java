@@ -153,6 +153,20 @@ public abstract class CommandAcksVerifier {
         };
     }
 
+    public static CommandAcksVerifier 
+    ackedWithRejections(Message rejection1, Message rejection2, Message... otherRejections) {
+        return new CommandAcksVerifier() {
+            @Override
+            void verify(CommandAcks acks) {
+                ackedWithRejection(rejection1).verify(acks);
+                ackedWithRejection(rejection2).verify(acks);
+                for (Message rejection : otherRejections) {
+                    ackedWithRejection(rejection).verify(acks);
+                }
+            }
+        };
+    }
+
     /*
      * Methods incorporating verifiers.
      ******************************************************************************/

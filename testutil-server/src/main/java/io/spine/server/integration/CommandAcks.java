@@ -138,19 +138,4 @@ class CommandAcks {
                              return domainRejection.equals(message);
                          });
     }
-
-    boolean containRejections(Message rejection1, Message rejection2, Message... otherRejections) {
-        if (!containRejection(rejection1)) {
-            return false;
-        }
-        if (!containRejection(rejection2)) {
-            return false;
-        }
-        for (Message rejection : otherRejections) {
-            if (!containRejection(rejection)) {
-                return false;
-            }
-        }
-        return true;
-    }
 }
