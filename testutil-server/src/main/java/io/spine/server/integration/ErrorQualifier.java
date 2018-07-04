@@ -20,6 +20,7 @@
 
 package io.spine.server.integration;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
 
@@ -32,6 +33,7 @@ import static java.lang.String.format;
 /**
  * @author Mykhailo Drachuk
  */
+@VisibleForTesting
 public abstract class ErrorQualifier implements Predicate<Error> {
 
     protected abstract String description();
