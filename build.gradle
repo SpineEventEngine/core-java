@@ -175,7 +175,7 @@ subprojects {
         implementation deps.build.jsr305Annotations
 
         implementation deps.build.checkerAnnotations
-        implementation "com.google.errorprone:error_prone_annotations:$deps.versions.errorProne"
+        implementation deps.build.errorProneAnnotations
 
         implementation deps.build.slf4j
 

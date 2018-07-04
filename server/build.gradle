@@ -21,9 +21,8 @@
 dependencies {
     compile project(path: ':client')
 
-    api "io.grpc:grpc-stub:$gRpcVersion"
-    implementation "io.grpc:grpc-netty:$gRpcVersion"
-    implementation "io.grpc:grpc-protobuf:$gRpcVersion"
+    implementation deps.grpc.grpcNetty
+    implementation deps.grpc.grpcProtobuf
 
     testImplementation "io.spine:spine-testlib:$spineBaseVersion"
     testImplementation project(path: ":core", configuration: 'testArtifacts')
