@@ -38,6 +38,7 @@ public class ErrorAttributeQualifier extends ErrorQualifier {
     private final String name;
 
     private ErrorAttributeQualifier(String name) {
+        super();
         this.name = name;
     }
 
