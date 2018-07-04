@@ -68,6 +68,7 @@ class ModelVerifierPluginTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("halt build on duplicate command handling methods")
     void rejectDuplicateHandlingMethods() {
         final BuildResult result = newProjectWithJava(
