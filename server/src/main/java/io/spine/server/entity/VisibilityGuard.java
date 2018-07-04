@@ -20,16 +20,13 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.option.EntityOptions;
 import io.spine.type.TypeName;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Map;
@@ -125,29 +122,23 @@ public final class VisibilityGuard {
         // Filter repositories of entities with this visibility.
         final Collection<RepositoryAccess> repos =
                 filterValues(repositories,
-                             new Predicate<RepositoryAccess>() {
-                                 @Override
-                                 public boolean apply(@Nullable RepositoryAccess input) {
-                                     checkNotNull(input);
-                                     return input.visibility == visibility;
-                                 }
+                             input -> {
+                                 checkNotNull(input);
+                                 return input.visibility == visibility;
                              }).values();
 
         // Get type names for entities of the filtered repositories.
         final Iterable<TypeName> entityTypes =
                 transform(repos,
-                          new Function<RepositoryAccess, TypeName>() {
-                              @Override
-                              public TypeName apply(@Nullable RepositoryAccess input) {
-                                  checkNotNull(input);
-                                  @SuppressWarnings("unchecked")
+                          input -> {
+                              checkNotNull(input);
+                              @SuppressWarnings("unchecked")
                                   // Safe as it's bounded by Repository class definition.
-                                  final Class<? extends Message> cls =
-                                          input.repository.entityClass()
-                                                          .getStateClass();
-                                  final TypeName result = TypeName.of(cls);
-                                  return result;
-                              }
+                              final Class<? extends Message> cls =
+                                      input.repository.entityClass()
+                                                      .getStateClass();
+                              final TypeName result = TypeName.of(cls);
+                              return result;
                           });
         return Sets.newHashSet(entityTypes);
     }
@@ -180,7 +171,7 @@ public final class VisibilityGuard {
 
         private Optional<Repository> get() {
             return (visibility == Visibility.NONE)
-                    ? Optional.<Repository>absent()
+                    ? Optional.absent()
                     : Optional.of(repository);
         }
     }

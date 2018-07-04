@@ -28,6 +28,7 @@ import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
+import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.commandbus.CommandBus;
@@ -59,7 +60,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static io.spine.validate.Validate.checkNameNotEmptyOrBlank;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -69,12 +69,9 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
  * @author Mikhail Melnik
  * @author Dmitry Ganzha
  */
-public final class BoundedContext
+public abstract class BoundedContext
         extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
         implements AutoCloseable {
-
-    /** The default name for a {@code BoundedContext}. */
-    static final BoundedContextName DEFAULT_NAME = newName("Main");
 
     /**
      * The name of the bounded context, which is used to distinguish the context in an application
@@ -98,9 +95,9 @@ public final class BoundedContext
 
     private final @Nullable TenantIndex tenantIndex;
 
-    private BoundedContext(Builder builder) {
+    BoundedContext(Builder builder) {
         super();
-        this.name = newName(builder.name);
+        this.name = builder.name;
         this.multitenant = builder.multitenant;
         this.storageFactory = Suppliers.memoize(builder.storageFactorySupplier);
         this.commandBus = builder.commandBus.build();
@@ -110,7 +107,7 @@ public final class BoundedContext
 
         /*
          * Additionally initialize the {@code IntegrationBus} with a ready-to-go instances
-         * of {@code EventBus} and {@code FailureBus}.
+         * of {@code EventBus} and {@code RejectionBus}.
          */
         this.integrationBus = builder.integrationBus.setEventBus(this.eventBus)
                                                     .setRejectionBus(this.commandBus.rejectionBus())
@@ -134,11 +131,6 @@ public final class BoundedContext
                                                             .setValue(name)
                                                             .build();
         return result;
-    }
-
-
-    private void init() {
-        stand.onCreated(this);
     }
 
     /**
@@ -204,7 +196,7 @@ public final class BoundedContext
     }
 
     private String nameForLogging() {
-        return getClass().getSimpleName() + ' ' + getName().getValue();
+        return BoundedContext.class.getSimpleName() + ' ' + getName().getValue();
     }
 
     /**
@@ -212,7 +204,7 @@ public final class BoundedContext
      *
      * <p>The ID allows to identify a bounded context if a multi-context application.
      * If the ID was not defined, during the building process, the context would get
-     * {@link #DEFAULT_NAME}.
+     * {@link BoundedContextNames#mainBoundedContext()} name.
      *
      * @return the ID of this {@code BoundedContext}
      */
@@ -339,7 +331,7 @@ public final class BoundedContext
     @SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
     public static class Builder {
 
-        private String name = DEFAULT_NAME.getValue();
+        private BoundedContextName name = BoundedContextNames.mainBoundedContext();
         private boolean multitenant;
         private TenantIndex tenantIndex;
         private Supplier<StorageFactory> storageFactorySupplier;
@@ -351,9 +343,10 @@ public final class BoundedContext
         private IntegrationBus.Builder integrationBus;
 
         /**
-         * Sets the name for a new bounded context.
+         * Sets the value of the name for a new bounded context.
          *
-         * <p>If the name is not defined in the builder, the context will get {@link #DEFAULT_NAME}.
+         * <p>If the name is not defined in the builder, the context will get
+         * {@link BoundedContextNames#mainBoundedContext()} name.
          *
          * <p>It is the responsibility of an application developer to provide meaningful and unique
          * names for bounded contexts. The framework does not check for duplication of names.
@@ -362,15 +355,31 @@ public final class BoundedContext
          *             Cannot be null, empty, or blank
          */
         public Builder setName(String name) {
-            this.name = checkNameNotEmptyOrBlank(name);
+            return setName(newName(name));
+        }
+
+        /**
+         * Sets the name for a new bounded context.
+         *
+         * <p>If the name is not defined in the builder, the context will get
+         * {@link BoundedContextNames#mainBoundedContext()} name.
+         *
+         * <p>It is the responsibility of an application developer to provide meaningful and unique
+         * names for bounded contexts. The framework does not check for duplication of names.
+         *
+         * @param name an identifier string for a new bounded context.
+         *             Cannot be null, empty, or blank
+         */
+        public Builder setName(BoundedContextName name) {
+            this.name = name;
             return this;
         }
 
         /**
-         * Returns the previously set name or {@link #DEFAULT_NAME}
+         * Returns the previously set name or {@link BoundedContextNames#mainBoundedContext()}
          * if the name was not explicitly set.
          */
-        public String getName() {
+        public BoundedContextName getName() {
             return name;
         }
 
@@ -454,9 +463,9 @@ public final class BoundedContext
         }
 
         public BoundedContext build() {
-            final StorageFactory storageFactory = getStorageFactory();
+            StorageFactory storageFactory = getStorageFactory();
 
-            final TransportFactory transportFactory = getTransportFactory();
+            TransportFactory transportFactory = getTransportFactory();
 
             initTenantIndex(storageFactory);
             initCommandBus(storageFactory);
@@ -464,16 +473,32 @@ public final class BoundedContext
             initStand(storageFactory);
             initIntegrationBus(transportFactory);
 
-            final BoundedContext result = new BoundedContext(this);
-            result.init();
+            SystemBoundedContext system = createSystemContext();
+            DefaultBoundedContext built = new DefaultBoundedContext(this, system);
+
+            built.init();
+
+            BoundedContext result = built;
+
             log().info(result.nameForLogging() + " created.");
             return result;
+        }
+
+        @SuppressWarnings("ResultOfMethodCallIgnored") // Builder method.
+        private SystemBoundedContext createSystemContext() {
+            BoundedContextName name = getName();
+            BoundedContextName systemName = BoundedContextNames.system(name);
+            this.setName(systemName);
+            SystemBoundedContext systemContext = new SystemBoundedContext(this);
+            this.setName(name);
+
+            return systemContext;
         }
 
         private StorageFactory getStorageFactory() {
             if (storageFactorySupplier == null) {
                 storageFactorySupplier =
-                        StorageFactorySwitch.newInstance(newName(name), multitenant);
+                        StorageFactorySwitch.newInstance(name, multitenant);
             }
 
             final StorageFactory storageFactory = storageFactorySupplier.get();
