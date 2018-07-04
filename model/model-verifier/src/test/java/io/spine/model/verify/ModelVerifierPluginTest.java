@@ -43,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 /**
  * @author Dmytro Dashenkov
  */
+@ExtendWith(TempDirectory.class)
 @DisplayName("ModelVerifierPlugin should")
 class ModelVerifierPluginTest {
 
@@ -53,7 +54,6 @@ class ModelVerifierPluginTest {
     private Path tempDir;
 
     @BeforeEach
-    @ExtendWith(TempDirectory.class)
     void setUp(@TempDir Path junitCreatedDir) {
         tempDir = junitCreatedDir;
     }
