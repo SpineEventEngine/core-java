@@ -420,11 +420,11 @@ class ProcessManagerTest {
             BlackBoxBoundedContext
                     .with(new QuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
-                    .verify(acked(2).withoutErrorsOrRejections())
-                    .verify(emitted(2))
-                    .verify(emitted(PmQuizStarted.class))
-                    .verify(emitted(PmQuestionAnswered.class))
-                    .verify(emitted(0, Empty.class))
+                    .verifiesThat(acked(2).withoutErrorsOrRejections())
+                    .verifiesThat(emitted(2))
+                    .verifiesThat(emitted(PmQuizStarted.class))
+                    .verifiesThat(emitted(PmQuestionAnswered.class))
+                    .verifiesThat(emitted(0, Empty.class))
                     .close();
         }
 
@@ -458,10 +458,10 @@ class ProcessManagerTest {
             BlackBoxBoundedContext
                     .with(new DirectQuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
-                    .verify(acked(2).withoutErrorsOrRejections())
-                    .verify(emitted(1))
-                    .verify(emitted(PmQuizStarted.class))
-                    .verify(emitted(0, Empty.class))
+                    .verifiesThat(acked(2).withoutErrorsOrRejections())
+                    .verifiesThat(emitted(1))
+                    .verifiesThat(emitted(PmQuizStarted.class))
+                    .verifiesThat(emitted(0, Empty.class))
                     .close();
         }
     }

@@ -835,8 +835,8 @@ public class AggregateTest {
             BlackBoxBoundedContext
                     .with(new TaskAggregateRepository())
                     .receivesCommand(createTask())
-                    .verify(acked(1).withoutErrorsOrRejections())
-                    .verify(emitted(1))
+                    .verifiesThat(acked(1).withoutErrorsOrRejections())
+                    .verifiesThat(emitted(1))
                     .close();
         }
 
@@ -855,10 +855,10 @@ public class AggregateTest {
             BlackBoxBoundedContext
                     .with(new TaskAggregateRepository())
                     .receivesCommand(assignTask())
-                    .verify(acked(1).withoutErrorsOrRejections())
-                    .verify(emitted(2))
-                    .verify(emitted(AggTaskAssigned.class))
-                    .verify(emitted(AggUserNotified.class))
+                    .verifiesThat(acked(1).withoutErrorsOrRejections())
+                    .verifiesThat(emitted(2))
+                    .verifiesThat(emitted(AggTaskAssigned.class))
+                    .verifiesThat(emitted(AggUserNotified.class))
                     .close();
         }
 
@@ -877,9 +877,9 @@ public class AggregateTest {
             BlackBoxBoundedContext
                     .with(new TaskAggregateRepository())
                     .receivesCommand(reassignTask())
-                    .verify(acked(1).withoutErrorsOrRejections())
-                    .verify(emitted(1))
-                    .verify(emitted(AggUserNotified.class))
+                    .verifiesThat(acked(1).withoutErrorsOrRejections())
+                    .verifiesThat(emitted(1))
+                    .verifiesThat(emitted(AggUserNotified.class))
                     .close();
         }
     }

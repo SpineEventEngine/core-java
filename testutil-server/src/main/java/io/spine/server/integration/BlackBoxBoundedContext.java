@@ -210,13 +210,13 @@ public class BlackBoxBoundedContext {
      * Methods verifying the bounded context behaviour.
      ******************************************************************************/
 
-    public BlackBoxBoundedContext verify(EmittedEventsVerifier verifier) {
+    public BlackBoxBoundedContext verifiesThat(EmittedEventsVerifier verifier) {
         EmittedEvents events = emittedEvents();
         verifier.verify(events);
         return this;
     }
     
-    public BlackBoxBoundedContext verify(AckedCommandsVerifier verifier) {
+    public BlackBoxBoundedContext verifiesThat(AckedCommandsVerifier verifier) {
         AckedCommands acks = ackedCommands();
         verifier.verify(acks);
         return this;

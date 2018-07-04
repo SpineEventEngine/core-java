@@ -46,6 +46,10 @@ public abstract class AckedCommandsVerifier {
         };
     }
 
+    private static String compare(int actualCount, int expectedCount) {
+        return (expectedCount < actualCount) ? "more" : "less";
+    }
+
     public static AckedCommandsVerifier ackedWithoutErrors() {
         return new AckedCommandsVerifier() {
             @Override
@@ -63,10 +67,6 @@ public abstract class AckedCommandsVerifier {
                            acks.withoutRejections());
             }
         };
-    }
-
-    private static String compare(int actualCount, int expectedCount) {
-        return (expectedCount < actualCount) ? "more" : "less";
     }
 
     public AckedCommandsVerifier withoutErrorsOrRejections() {
