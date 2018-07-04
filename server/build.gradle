@@ -17,38 +17,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-dependencies {
-    compile ("io.grpc:grpc-netty:$gRpcVersion") {
-        exclude group: 'com.google.guava'
-    }
-    compile ("io.grpc:grpc-protobuf:$gRpcVersion") {
-        exclude group: 'com.google.guava'
-    }
-    compile ("io.grpc:grpc-stub:$gRpcVersion") {
-        exclude group: 'com.google.guava'
-    }
 
+dependencies {
     compile project(path: ':client')
 
-    testCompile ("io.spine:spine-testlib:$spineBaseVersion") {
-        exclude group: 'com.google.guava'
-    }
-    testCompile project(path: ":client", configuration: 'testArtifacts')
-    testCompile project(path: ":testutil-server")
+    implementation deps.grpc.grpcNetty
+    implementation deps.grpc.grpcProtobuf
+
+    testImplementation "io.spine:spine-testlib:$spineBaseVersion"
+    testImplementation project(path: ":core", configuration: 'testArtifacts')
+    testImplementation project(path: ":client", configuration: 'testArtifacts')
+    testImplementation project(path: ":testutil-server")
 }
-
-apply from: gRpcScript
-
-apply from: generateDescriptorSetScript
 
 apply from: testArtifactsScript
-
-apply plugin: spineProtobufPluginId
-
-modelCompiler {
-    generateValidatingBuilders = true
-}
-
 
 // Copies the documentation files to the Javadoc output folder.
 // Inspired by https://discuss.gradle.org/t/do-doc-files-work-with-gradle-javadoc/4673

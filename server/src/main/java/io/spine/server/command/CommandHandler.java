@@ -20,7 +20,6 @@
 
 package io.spine.server.command;
 
-import com.google.common.base.Supplier;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -39,6 +38,7 @@ import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.TypeConverter.toMessage;

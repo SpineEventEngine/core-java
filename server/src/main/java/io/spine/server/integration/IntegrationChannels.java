@@ -100,7 +100,7 @@ class IntegrationChannels {
         final StringValue rawValue = AnyPacker.unpack(channelId.getIdentifier());
         final TypeUrl typeUrl = TypeUrl.parse(rawValue.getValue());
 
-        final boolean isRejection = Rejections.isRejection(typeUrl.getJavaClass());
+        final boolean isRejection = Rejections.isRejection(typeUrl.getMessageClass());
         final String wrapperTypeUrl = isRejection ? REJECTION_TYPE_URL.value()
                                                   : EVENT_TYPE_URL.value();
         final ExternalMessageType result = ExternalMessageType.newBuilder()

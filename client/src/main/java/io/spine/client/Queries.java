@@ -23,15 +23,15 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
+import io.spine.type.KnownTypes;
 import io.spine.type.TypeUrl;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.client.Targets.composeTarget;
-import static io.spine.type.KnownTypes.getAllUrls;
 import static java.lang.String.format;
 
 /**
@@ -48,8 +48,10 @@ public final class Queries {
      */
     private static final String QUERY_ID_FORMAT = "q-%s";
 
+    /**
+     * Prevents the utility class instantiation.
+     */
     private Queries() {
-        // Prevent instantiation of this utility class.
     }
 
     public static QueryId generateId() {
@@ -74,7 +76,8 @@ public final class Queries {
         final Target target = query.getTarget();
         final String type = target.getType();
         final TypeUrl typeUrl = TypeUrl.parse(type);
-        checkState(getAllUrls().contains(typeUrl), "Unknown type URL: `%s`.", type);
+        checkState(KnownTypes.instance().contains(typeUrl),
+                   "Unknown type URL: `%s`.", type);
         return typeUrl;
     }
 
