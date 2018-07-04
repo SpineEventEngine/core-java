@@ -21,11 +21,15 @@
 package io.spine.server.integration;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.base.Error;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * @author Mykhailo Drachuk
+ */
 @VisibleForTesting
 public abstract class AckedCommandsVerifier {
 
@@ -59,12 +63,69 @@ public abstract class AckedCommandsVerifier {
         };
     }
 
+    public static AckedCommandsVerifier ackedWithError() {
+        return new AckedCommandsVerifier() {
+            @Override
+            void verify(AckedCommands acks) {
+                assertTrue("Bounded Context unexpectedly did not err", acks.withErrors());
+            }
+        };
+    }
+
+    public static AckedCommandsVerifier ackedWithError(Error error) {
+        return new AckedCommandsVerifier() {
+            @Override
+            void verify(AckedCommands acks) {
+                assertTrue("Bounded Context did not contain an expected error"
+                                   + error.getMessage(),
+                           acks.withError(error));
+            }
+        };
+    }
+
+    public static AckedCommandsVerifier ackedWithError(ErrorQualifier qualifier) {
+        return new AckedCommandsVerifier() {
+            @Override
+            void verify(AckedCommands acks) {
+                assertTrue("Bounded Context did not contain an expected error. "
+                                   + qualifier.description(),
+                           acks.withError(qualifier));
+            }
+        };
+    }
+
     public static AckedCommandsVerifier ackedWithoutRejections() {
         return new AckedCommandsVerifier() {
             @Override
             void verify(AckedCommands acks) {
                 assertTrue("Bounded Context unexpectedly rejected a message",
                            acks.withoutRejections());
+            }
+        };
+    }
+
+    public AckedCommandsVerifier withError(Error error) {
+        AckedCommandsVerifier current = this;
+        AckedCommandsVerifier withError = ackedWithError(error);
+
+        return new AckedCommandsVerifier() {
+            @Override
+            void verify(AckedCommands target) {
+                current.verify(target);
+                withError.verify(target);
+            }
+        };
+    }
+
+    public AckedCommandsVerifier withError(ErrorQualifier qualifier) {
+        AckedCommandsVerifier current = this;
+        AckedCommandsVerifier withError = ackedWithError(qualifier);
+
+        return new AckedCommandsVerifier() {
+            @Override
+            void verify(AckedCommands target) {
+                current.verify(target);
+                withError.verify(target);
             }
         };
     }

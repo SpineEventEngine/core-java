@@ -29,14 +29,18 @@ import io.spine.grpc.MemoizingObserver;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 
+/**
+ * @author Mykhailo Drachuk
+ */
 @VisibleForTesting
 class AckedCommands {
 
     private static final Rejection EMPTY_REJECTION = Rejection.getDefaultInstance();
     private static final Error EMPTY_ERROR = Error.getDefaultInstance();
-    
+
     private final List<Ack> acks = newArrayList();
     private final List<Error> errors = newArrayList();
     private final List<Rejection> rejections = newArrayList();
@@ -47,7 +51,7 @@ class AckedCommands {
             acks.add(response);
 
             Status status = response.getStatus();
-         
+
             Error error = status.getError();
             if (!error.equals(EMPTY_ERROR)) {
                 errors.add(error);
@@ -62,6 +66,20 @@ class AckedCommands {
 
     boolean withoutErrors() {
         return errors.isEmpty();
+    }
+    
+    boolean withErrors() {
+        return !errors.isEmpty();
+    }
+
+    boolean withError(Error error) {
+        checkNotNull(error);
+        return errors.contains(error);
+    }
+
+    boolean withError(ErrorQualifier qualifier) {
+        return errors.stream()
+                     .anyMatch(qualifier);
     }
 
     boolean withoutRejections() {
