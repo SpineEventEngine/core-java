@@ -40,10 +40,11 @@ import io.spine.util.Exceptions;
 import java.util.Collection;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.asList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 /**
@@ -129,7 +130,10 @@ public class BlackBoxBoundedContext {
      */
     public static BlackBoxBoundedContext with(Repository... repositories) {
         BlackBoxBoundedContext blackBox = new BlackBoxBoundedContext();
-        return blackBox.andWith(repositories);
+        for (Repository repository : repositories) {
+            blackBox.boundedContext.register(repository);
+        }
+        return blackBox;
     }
 
     /**
@@ -138,7 +142,9 @@ public class BlackBoxBoundedContext {
      * @param repositories repositories to register in the bounded context
      * @return current {@link BlackBoxBoundedContext} instance
      */
-    public BlackBoxBoundedContext andWith(Repository... repositories) {
+    public BlackBoxBoundedContext andWith(Repository firstRepository, Repository... repositories) {
+        checkNotNull(firstRepository);
+        boundedContext.register(firstRepository);
         for (Repository repository : repositories) {
             boundedContext.register(repository);
         }
@@ -153,8 +159,9 @@ public class BlackBoxBoundedContext {
         return this.receivesCommands(singletonList(domainCommand));
     }
 
-    public BlackBoxBoundedContext receivesCommands(Message... domainCommands) {
-        return this.receivesCommands(asList(domainCommands));
+    public BlackBoxBoundedContext
+    receivesCommands(Message firstCommand, Message secondCommand, Message... otherCommands) {
+        return this.receivesCommands(asList(firstCommand, secondCommand, otherCommands));
     }
 
     private BlackBoxBoundedContext receivesCommands(Collection<Message> domainCommands) {
@@ -185,8 +192,9 @@ public class BlackBoxBoundedContext {
         return this.receivesEvents(singletonList(domainEvent));
     }
 
-    public BlackBoxBoundedContext receivesEvents(Message... domainEvents) {
-        return this.receivesEvents(asList(domainEvents));
+    public BlackBoxBoundedContext
+    receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
+        return this.receivesEvents(asList(firstEvent, secondEvent, otherEvents));
     }
 
     private BlackBoxBoundedContext receivesEvents(Collection<Message> domainEvents) {
@@ -208,7 +216,7 @@ public class BlackBoxBoundedContext {
     private Event event(Message eventMessage) {
         return eventFactory.createEvent(eventMessage);
     }
-    
+
     /*
      * Methods verifying the bounded context behaviour.
      ******************************************************************************/
@@ -218,7 +226,7 @@ public class BlackBoxBoundedContext {
         verifier.verify(events);
         return this;
     }
-    
+
     public BlackBoxBoundedContext verifiesThat(CommandAcksVerifier verifier) {
         CommandAcks acks = commandAcks();
         verifier.verify(acks);
@@ -268,7 +276,7 @@ public class BlackBoxBoundedContext {
     /*
      * Bounded context lifecycle.
      ******************************************************************************/
-    
+
     /**
      * Closes the bounded context so that it shutting down all of its repositories.
      *
