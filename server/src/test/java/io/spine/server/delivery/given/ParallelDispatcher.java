@@ -34,8 +34,8 @@ import java.util.concurrent.ExecutorService;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.concurrent.Executors.newFixedThreadPool;
-import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The helper class used to dispatch numerous messages of a certain kind to the entities,

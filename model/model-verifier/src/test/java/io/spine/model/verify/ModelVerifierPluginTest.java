@@ -25,75 +25,89 @@ import io.spine.tools.gradle.TaskName;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.TaskOutcome;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit$pioneer.jupiter.TempDirectory;
+import org.junit$pioneer.jupiter.TempDirectory.TempDir;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.nio.file.Path;
 
 import static io.spine.tools.gradle.TaskName.VERIFY_MODEL;
 import static org.gradle.testkit.runner.TaskOutcome.FAILED;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * @author Dmytro Dashenkov
  */
-// TODO:2018-07-02:dmytro.kuzmin: Migrate to JUnit 5 when GradleProject class from
-// spine-plugin-testlib will no longer require JUnit 4 TemporaryFolder class.
-public class ModelVerifierPluginShould {
+@ExtendWith(TempDirectory.class)
+@DisplayName("ModelVerifierPlugin should")
+class ModelVerifierPluginTest {
 
     private static final String PROJECT_NAME = "model-verifier-test";
     private static final String COMPILING_TEST_ENTITY_PATH =
             "io/spine/model/verify/ValidAggregate.java";
 
-    @Rule
-    public final TemporaryFolder testProjectDir = new TemporaryFolder();
+    private Path tempDir;
+
+    @BeforeEach
+    void setUp(@TempDir Path junitCreatedDir) {
+        tempDir = junitCreatedDir;
+    }
 
     @Test
-    public void pass_valid_model_classes() {
+    @DisplayName("pass valid model classes")
+    void passValidModelClasses() {
         newProjectWithJava(COMPILING_TEST_ENTITY_PATH,
                            "io/spine/model/verify/ValidProcMan.java",
                            "io/spine/model/verify/ValidCommandHandler.java")
                 .executeTask(VERIFY_MODEL);
     }
 
+    // See https://github.com/SpineEventEngine/core-java/issues/737 as to why it's disabled.
     @Test
-    public void halt_build_on_duplicate_command_handling_methods() {
-        final BuildResult result = newProjectWithJava(
+    @Disabled("the test is failing other tests in the suite")
+    @DisplayName("halt build on duplicate command handling methods")
+    void rejectDuplicateHandlingMethods() {
+        BuildResult result = newProjectWithJava(
                 "io/spine/model/verify/DuplicateAggregate.java",
                 "io/spine/model/verify/DuplicateCommandHandler.java")
                 .executeAndFail(VERIFY_MODEL);
-        final BuildTask task = result.task(toPath(VERIFY_MODEL));
+        BuildTask task = result.task(toPath(VERIFY_MODEL));
         assertNotNull(task);
-        final TaskOutcome generationResult = task.getOutcome();
+        TaskOutcome generationResult = task.getOutcome();
         assertEquals(FAILED, generationResult);
     }
 
     @Test
-    public void ignore_duplicate_entries() {
-        final GradleProject project = newProjectWithJava(COMPILING_TEST_ENTITY_PATH);
+    @DisplayName("ignore duplicate entries")
+    void ignoreDuplicateEntries() {
+        GradleProject project = newProjectWithJava(COMPILING_TEST_ENTITY_PATH);
         project.executeTask(VERIFY_MODEL);
         project.executeTask(VERIFY_MODEL);
     }
 
-    @Ignore // TODO:2017-08-25:dmytro.dashenkov: Re-enable when Model is capable of
-            // checking the handler methods.
-            // https://github.com/SpineEventEngine/base/issues/49
+    @Disabled // TODO:2017-08-25:dmytro.dashenkov: Re-enable when Model is capable of
+              // checking the handler methods.
+              // https://github.com/SpineEventEngine/base/issues/49
     @Test
-    public void halt_build_on_malformed_command_handling_methods() {
-        final BuildResult result =
-                newProjectWithJava("io/spine/model/verify/MalformedAggregate.java")
-                        .executeAndFail(VERIFY_MODEL);
-        final BuildTask task = result.task(toPath(VERIFY_MODEL));
+    @DisplayName("halt build on malformed command handling methods")
+    void rejectMalformedHandlingMethods() {
+        BuildResult result = newProjectWithJava("io/spine/model/verify/MalformedAggregate.java")
+                .executeAndFail(VERIFY_MODEL);
+        BuildTask task = result.task(toPath(VERIFY_MODEL));
         assertNotNull(task);
-        final TaskOutcome generationResult = task.getOutcome();
+        TaskOutcome generationResult = task.getOutcome();
         assertEquals(FAILED, generationResult);
     }
 
     private GradleProject newProjectWithJava(String... fileNames) {
         return GradleProject.newBuilder()
                             .setProjectName(PROJECT_NAME)
-                            .setProjectFolder(testProjectDir)
+                            .setProjectFolder(tempDir.toFile())
                             .addJavaFiles(fileNames)
                             .build();
     }
