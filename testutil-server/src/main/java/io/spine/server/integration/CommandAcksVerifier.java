@@ -48,6 +48,7 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Mykhailo Drachuk
  */
+@SuppressWarnings("ClassWithTooManyMethods")
 @VisibleForTesting
 public abstract class CommandAcksVerifier {
 
@@ -218,6 +219,7 @@ public abstract class CommandAcksVerifier {
     /**
      * Verifies that commands were handled responding with provided {@link Rejection rejections}.
      */
+    @SuppressWarnings("OverloadedVarargsMethod")
     public static CommandAcksVerifier
     ackedWithRejections(Message rejection1, Message rejection2, Message... otherRejections) {
         return new CommandAcksVerifier() {
@@ -258,7 +260,7 @@ public abstract class CommandAcksVerifier {
          * Creates a combination of two verifiers. More verifiers are appended using
          * {@link #and(CommandAcksVerifier) and()}.
          */
-        private CommandAcksVerifierCombination(List<CommandAcksVerifier> verifiers) {
+        private CommandAcksVerifierCombination(Collection<CommandAcksVerifier> verifiers) {
             this.verifiers = ImmutableList.copyOf(verifiers);
         }
 
@@ -270,7 +272,7 @@ public abstract class CommandAcksVerifier {
             return new CommandAcksVerifierCombination(verifiers);
         }
 
-        public static CommandAcksVerifierCombination of(List<CommandAcksVerifier> items,
+        public static CommandAcksVerifierCombination of(Iterable<CommandAcksVerifier> items,
                                                         CommandAcksVerifier newVerifier) {
             List<CommandAcksVerifier> verifiers = newArrayList(items);
             addVerifierToList(newVerifier, verifiers);
@@ -425,6 +427,7 @@ public abstract class CommandAcksVerifier {
      *
      * @return a new {@link CommandAcksVerifier} instance
      */
+    @SuppressWarnings("OverloadedVarargsMethod")
     public CommandAcksVerifier
     withRejections(Message rejection1, Message rejection2, Message... otherRejections) {
         CommandAcksVerifier multipleRejections =
