@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Lists.asList;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * A verifier working with the events emitted in the {@link BlackBoxBoundedContext Bounded Context}.
@@ -45,7 +45,7 @@ public abstract class EmittedEventsVerifier {
     abstract void verify(EmittedEvents events);
 
     /**
-     * Verifies that there was an expected amount of events of any type emitted 
+     * Verifies that there was an expected amount of events of any type emitted
      * in the Bounded Context.
      *
      * @return new {@link EmittedEventsVerifier emitted events verifier} instance
@@ -94,8 +94,9 @@ public abstract class EmittedEventsVerifier {
             public void verify(EmittedEvents events) {
                 for (Class<? extends Message> eventType : eventTypes) {
                     String eventName = eventType.getName();
-                    assertTrue(events.contain(eventType),
-                               format("Bounded Context did not emit %s event", eventName));
+                    if (!events.contain(eventType)) {
+                        fail(format("Bounded Context did not emit %s event", eventName));
+                    }
                 }
             }
         };
