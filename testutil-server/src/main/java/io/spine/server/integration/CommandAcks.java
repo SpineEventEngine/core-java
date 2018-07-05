@@ -170,7 +170,7 @@ class CommandAcks {
      * {@code false} otherwise
      */
     boolean containRejections() {
-        return rejections.isEmpty();
+        return !rejections.isEmpty();
     }
 
     /**
