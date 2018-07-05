@@ -18,22 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.system.server;
 
-import io.spine.system.server.ControlBus;
-import io.spine.system.server.NoOpControlBus;
+import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 
 /**
  * @author Dmytro Dashenkov
  */
-final class SystemBoundedContext extends BoundedContext {
+@Internal
+public enum NoOpControlBus implements ControlBus {
 
-    SystemBoundedContext(Builder builder) {
-        super(builder);
-    }
+    INSTANCE;
 
     @Override
-    public ControlBus getControlBus() {
-        return NoOpControlBus.INSTANCE;
+    public void post(Message systemCommand) {
+        // NOP.
     }
 }

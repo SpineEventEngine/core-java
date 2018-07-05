@@ -50,6 +50,7 @@ import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
+import io.spine.system.server.ControlBus;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
@@ -294,6 +295,8 @@ public abstract class BoundedContext
     public IntegrationBus getIntegrationBus() {
         return this.integrationBus;
     }
+
+    public abstract ControlBus getControlBus();
 
     /** Obtains instance of {@link Stand} of this {@code BoundedContext}. */
     public Stand getStand() {

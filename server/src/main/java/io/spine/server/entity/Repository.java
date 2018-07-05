@@ -24,7 +24,9 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import com.google.protobuf.Message;
 import io.spine.base.Identifier;
+import io.spine.client.EntityId;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.reflect.GenericTypeIndex;
@@ -34,6 +36,7 @@ import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.string.Stringifiers;
+import io.spine.system.server.CreateEntity;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -217,7 +220,20 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @param id the id of the entity
      * @return new entity instance
      */
-    public abstract E create(I id);
+    public E create(I id) {
+        E entity = doCreate(id);
+        EntityId entityId = EntityId.newBuilder()
+                                    .setId(Identifier.pack(id))
+                                    .build();
+        CreateEntity systemCommand = CreateEntity
+                .newBuilder()
+                .setId(entityId)
+                .build();
+        postSystem(systemCommand);
+        return entity;
+    }
+
+    protected abstract E doCreate(I id);
 
     /**
      * Stores the passed object.
@@ -359,6 +375,11 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         String messageId = Stringifiers.toString(envelope.getId());
         String errorMessage = format(msgFormat, messageClass, messageId);
         log().error(errorMessage, exception);
+    }
+
+    private void postSystem(Message systemCommand) {
+        getBoundedContext().getControlBus()
+                           .post(systemCommand);
     }
 
     /**

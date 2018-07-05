@@ -18,22 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.system.server;
 
-import io.spine.system.server.ControlBus;
-import io.spine.system.server.NoOpControlBus;
+import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 
 /**
  * @author Dmytro Dashenkov
  */
-final class SystemBoundedContext extends BoundedContext {
+@Internal
+public interface ControlBus { // TODO:2018-07-05:dmytro.dashenkov: Rename. This ain't Bus.
 
-    SystemBoundedContext(Builder builder) {
-        super(builder);
-    }
-
-    @Override
-    public ControlBus getControlBus() {
-        return NoOpControlBus.INSTANCE;
-    }
+    void post(Message systemCommand);
 }

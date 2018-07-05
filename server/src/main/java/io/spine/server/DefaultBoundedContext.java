@@ -20,19 +20,29 @@
 
 package io.spine.server;
 
+import io.spine.system.server.ControlBus;
+import io.spine.system.server.DefaultControlBus;
+
 /**
  * @author Dmytro Dashenkov
  */
 final class DefaultBoundedContext extends BoundedContext {
 
     private final SystemBoundedContext system;
+    private final ControlBus controlBus;
 
     DefaultBoundedContext(Builder builder, SystemBoundedContext systemBoundedContext) {
         super(builder);
         this.system = systemBoundedContext;
+        this.controlBus = new DefaultControlBus(system);
     }
 
     void init() {
         getStand().onCreated(this);
+    }
+
+    @Override
+    public ControlBus getControlBus() {
+        return controlBus;
     }
 }
