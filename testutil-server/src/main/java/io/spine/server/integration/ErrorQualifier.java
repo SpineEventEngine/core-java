@@ -31,13 +31,31 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
+ * An abstract predicate testing {@link Error Spine errors} to
+ * match some simple rules.
+ *
+ * <p>This qualifiers are consumed by command acks verifier
+ * {@link CommandAcksVerifier#ackedWithError(ErrorQualifier) ackedWithError method}.
+ *
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
 public abstract class ErrorQualifier implements Predicate<Error> {
 
+    /**
+     * A message describing the qualifier.
+     *
+     * <p>Used to report an assertion error.
+     */
     protected abstract String description();
 
+    /**
+     * Combines two qualifiers executing them sequentially.
+     *
+     * <p>Current qualifier is executed first and the descriptions get concatenated.
+     *
+     * @return new {@link ErrorQualifier error qualifier} instance
+     */
     public ErrorQualifier and(ErrorQualifier other) {
         checkNotNull(other);
         ErrorQualifier current = this;
@@ -54,6 +72,12 @@ public abstract class ErrorQualifier implements Predicate<Error> {
         };
     }
 
+    /**
+     * Verifies that the {@link Error#getType() errors type} matches the provided one.
+     *
+     * @param type a type that is to be matched in error
+     * @return new {@link ErrorQualifier error qualifier} instance
+     */
     public static ErrorQualifier withType(String type) {
         checkNotNull(type);
         return new ErrorQualifier() {
@@ -69,6 +93,12 @@ public abstract class ErrorQualifier implements Predicate<Error> {
         };
     }
 
+    /**
+     * Verifies that the {@link Error#getCode() errors code} matches the provided one.
+     *
+     * @param code a code that is to be matched in error
+     * @return new {@link ErrorQualifier error qualifier} instance
+     */
     public static ErrorQualifier withCode(int code) {
         return new ErrorQualifier() {
             @Override
@@ -83,6 +113,12 @@ public abstract class ErrorQualifier implements Predicate<Error> {
         };
     }
 
+    /**
+     * Verifies that the {@link Error#getMessage() errors message} matches the provided one.
+     *
+     * @param message a message that is to be matched in error
+     * @return new {@link ErrorQualifier error qualifier} instance
+     */
     public static ErrorQualifier withMessage(String message) {
         return new ErrorQualifier() {
             @Override
@@ -97,6 +133,13 @@ public abstract class ErrorQualifier implements Predicate<Error> {
         };
     }
 
+    /**
+     * Verifies that the error does not contain {@link Error#getAttributesMap() an attribute}
+     * with a provided name.
+     *
+     * @param name a name of an attribute that must be absent in error
+     * @return new {@link ErrorQualifier error qualifier} instance
+     */
     public static ErrorQualifier withoutAttribute(String name) {
         return new ErrorQualifier() {
             @Override

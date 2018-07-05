@@ -30,6 +30,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
+ * An specific {@link ErrorQualifier error qualifier} that checks the errors
+ * {@link Error#getAttributes() attributes}.
+ *
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
@@ -42,17 +45,25 @@ public class ErrorAttributeQualifier extends ErrorQualifier {
         this.name = name;
     }
 
+    /** {@inheritDoc} */
     @Override
     protected String description() {
         return format("Error contains an attribute \"%s\"", name);
     }
 
+    /** {@inheritDoc} */
     @Override
     public boolean test(Error error) {
         Map<String, Value> attributes = error.getAttributes();
         return attributes.containsKey(name);
     }
 
+    /**
+     * Verifies the value of the attribute under current name.
+     *
+     * @param value a value that is expected by an attribute name
+     * @return a new {@link ErrorQualifier error qualifier} instance
+     */
     public ErrorQualifier value(Value value) {
         checkNotNull(value);
         return new ErrorQualifier() {
@@ -70,6 +81,16 @@ public class ErrorAttributeQualifier extends ErrorQualifier {
         };
     }
 
+    /**
+     * A static factory method for creating an {@link ErrorAttributeQualifier
+     * error attribute qualifier}.
+     *
+     * <p>An error attribute verifier checks that the error contains an
+     * {@link Error#getAttributes() attribute} with a provided name.
+     *
+     * @param name name of an attribute which is check by a qualifier
+     * @return a new {@link ErrorAttributeQualifier error attribute qualifier} instance
+     */
     public static ErrorAttributeQualifier withAttribute(String name) {
         return new ErrorAttributeQualifier(name);
     }
