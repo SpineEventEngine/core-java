@@ -41,11 +41,13 @@ import "spine/client/entities.proto";
 message EntityHistory {
     option (entity).kind = AGGREGATE;
 
-    spine.client.EntityId id = 1 [(required) = true];
+    spine.client.EntityId id = 1;
 
-    repeated DispatchedMessage commands = 2;
+    EntityOption.Kind kind = 2;
 
-    repeated DispatchedMessage events = 3;
+    repeated DispatchedMessage commands = 3;
+
+    repeated DispatchedMessage events = 4;
 }
 
 message DispatchedMessage {

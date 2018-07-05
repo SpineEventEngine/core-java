@@ -39,9 +39,32 @@ import "spine/system/server/entity_history.proto";
 message CreateEntity {
 
     spine.client.EntityId id = 1 [(required) = true];
+
+    EntityOption.Kind kind = 2 [(required) = true];
 }
 
-message DispatchMessage {
+message DispatchEventToSubscriber {
+
+    spine.client.EntityId receiver = 1 [(required) = true];
+
+    spine.system.server.DispatchedMessage payload = 2 [(required) = true, (valid) = true];
+}
+
+message DispatchEventToReactor {
+
+    spine.client.EntityId receiver = 1 [(required) = true];
+
+    spine.system.server.DispatchedMessage payload = 2 [(required) = true, (valid) = true];
+}
+
+message DispatchEventToApplier {
+
+    spine.client.EntityId receiver = 1 [(required) = true];
+
+    spine.system.server.DispatchedMessage payload = 2 [(required) = true, (valid) = true];
+}
+
+message DispatchCommandToHandler {
 
     spine.client.EntityId receiver = 1 [(required) = true];
 

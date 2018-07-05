@@ -39,6 +39,8 @@ import "spine/system/server/entity_history.proto";
 message EntityCreated {
 
     spine.client.EntityId id = 1 [(required) = true];
+
+    EntityOption.Kind kind = 2 [(required) = true];
 }
 
 message EventDispatchedToSubscriber {

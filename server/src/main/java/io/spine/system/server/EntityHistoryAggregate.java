@@ -23,10 +23,13 @@ package io.spine.system.server;
 import io.spine.annotation.Internal;
 import io.spine.client.EntityId;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
+import io.spine.server.command.Assign;
 
 /**
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings("OverlyCoupledClass") // OK for an Aggregate class.
 @Internal
 public final class EntityHistoryAggregate
         extends Aggregate<EntityId, EntityHistory, EntityHistoryVBuilder> {
@@ -35,5 +38,134 @@ public final class EntityHistoryAggregate
         super(id);
     }
 
+    @Assign
+    EntityCreated handle(CreateEntity command) {
+        return EntityCreated.newBuilder()
+                            .setId(command.getId())
+                            .setKind(command.getKind())
+                            .build();
+    }
 
+    @Assign
+    EventDispatchedToSubscriber handle(DispatchEventToSubscriber command) {
+        return EventDispatchedToSubscriber.newBuilder()
+                                          .setReceiver(command.getReceiver())
+                                          .setPayload(command.getPayload())
+                                          .build();
+    }
+
+    @Assign
+    EventDispatchedToReactor handle(DispatchEventToReactor command) {
+        return EventDispatchedToReactor.newBuilder()
+                                       .setReceiver(command.getReceiver())
+                                       .setPayload(command.getPayload())
+                                       .build();
+    }
+
+    @Assign
+    EventDispatchedToApplier handle(DispatchEventToApplier command) {
+        return EventDispatchedToApplier.newBuilder()
+                                       .setReceiver(command.getReceiver())
+                                       .setPayload(command.getPayload())
+                                       .build();
+    }
+
+    @Assign
+    CommandDispatchedToHandler handle(DispatchCommandToHandler command) {
+        return CommandDispatchedToHandler.newBuilder()
+                                         .setReceiver(command.getReceiver())
+                                         .setPayload(command.getPayload())
+                                         .build();
+    }
+
+    @Assign
+    EntityStateChanged handle(ChangeEntityState command) {
+        return EntityStateChanged.newBuilder()
+                                 .setId(command.getId())
+                                 .setMessageId(command.getMessageId())
+                                 .setNewState(command.getNewState())
+                                 .build();
+    }
+
+    @Assign
+    EntityArchived handle(ArchiveEntity command) {
+        return EntityArchived.newBuilder()
+                             .setId(command.getId())
+                             .setMessageId(command.getMessageId())
+                             .build();
+    }
+
+    @Assign
+    EntityDeleted handle(DeleteEntity command) {
+        return EntityDeleted.newBuilder()
+                            .setId(command.getId())
+                            .setMessageId(command.getMessageId())
+                            .build();
+    }
+
+    @Assign
+    EntityExtractedFromArchive handle(ExtractEntityFromArchive command) {
+        return EntityExtractedFromArchive.newBuilder()
+                                         .setId(command.getId())
+                                         .setMessageId(command.getMessageId())
+                                         .build();
+    }
+
+    @Assign
+    EntityRestored handle(RestoreEntity command) {
+        return EntityRestored.newBuilder()
+                             .setId(command.getId())
+                             .setMessageId(command.getMessageId())
+                             .build();
+    }
+
+    @Apply
+    private void on(EntityCreated event) {
+        getBuilder().setId(event.getId());
+    }
+
+    @Apply
+    private void on(EventDispatchedToSubscriber event) {
+        getBuilder().addEvents(event.getPayload());
+    }
+
+    @Apply
+    private void on(EventDispatchedToReactor event) {
+        getBuilder().addEvents(event.getPayload());
+    }
+
+    @Apply
+    private void on(EventDispatchedToApplier event) {
+        getBuilder().addEvents(event.getPayload());
+    }
+
+    @Apply
+    private void on(CommandDispatchedToHandler event) {
+        getBuilder().addCommands(event.getPayload());
+    }
+
+    @Apply
+    private void on(EntityStateChanged event) {
+        // NOP.
+    }
+
+    @Apply
+    private void on(EntityArchived event) {
+        // NOP.
+    }
+
+    @Apply
+    private void on(EntityDeleted event) {
+        // NOP.
+    }
+
+    @Apply
+    private void on(EntityExtractedFromArchive event) {
+        // NOP.
+    }
+
+    @Apply
+    private void on(EntityRestored event) {
+        // NOP.
+    }
 }
