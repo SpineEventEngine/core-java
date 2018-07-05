@@ -28,10 +28,15 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Lists.asList;
 import static java.lang.String.format;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
+ * A verifier working with the events emitted in the {@link BlackBoxBoundedContext Bounded Context}.
+ *
+ * <p> Contains static factory methods for creating emitted events verifiers, checking that specific
+ * amounts of some event types were emitted by entities inside of the Bounded Context.
+ *
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
@@ -39,6 +44,12 @@ public abstract class EmittedEventsVerifier {
 
     abstract void verify(EmittedEvents events);
 
+    /**
+     * Verifies that there was an expected amount of events of any type emitted 
+     * in the Bounded Context.
+     *
+     * @return new {@link EmittedEventsVerifier emitted events verifier} instance
+     */
     public static EmittedEventsVerifier emitted(int expectedCount) {
         checkArgument(expectedCount >= 0, "0 or more emitted events must be expected.");
 
@@ -48,17 +59,31 @@ public abstract class EmittedEventsVerifier {
             public void verify(EmittedEvents events) {
                 int actualCount = events.count();
                 String moreOrLess = compare(actualCount, expectedCount);
-                assertEquals("Bounded Context emitted " + moreOrLess + " events than expected",
-                             expectedCount, actualCount);
+                assertEquals(expectedCount, actualCount,
+                             "Bounded Context emitted " + moreOrLess + " events than expected");
             }
         };
     }
 
+    /**
+     * Verifies that there were events of each of the provided event types emitted
+     * in the Bounded Context.
+     *
+     * @return new {@link EmittedEventsVerifier emitted events verifier} instance
+     */
     @SafeVarargs
     public static EmittedEventsVerifier
     emitted(Class<? extends Message> firstEventType, Class<? extends Message>... otherEventTypes) {
         return emitted(asList(firstEventType, otherEventTypes));
     }
+
+    /**
+     * Verifies that there were events of each of the provided event types emitted
+     * in the Bounded Context.
+     *
+     * @param eventTypes a list of class of a domain event message
+     * @return new {@link EmittedEventsVerifier emitted events verifier} instance
+     */
 
     private static EmittedEventsVerifier emitted(List<Class<? extends Message>> eventTypes) {
         checkArgument(eventTypes.size() > 0,
@@ -69,13 +94,22 @@ public abstract class EmittedEventsVerifier {
             public void verify(EmittedEvents events) {
                 for (Class<? extends Message> eventType : eventTypes) {
                     String eventName = eventType.getName();
-                    assertTrue(format("Bounded Context did not emit %s event", eventName),
-                               events.contain(eventType));
+                    assertTrue(events.contain(eventType),
+                               format("Bounded Context did not emit %s event", eventName));
                 }
             }
         };
     }
 
+    /**
+     * Verifies that there wes a specific number of events of the provided event type emitted
+     * in the Bounded Context.
+     *
+     * @param expectedCount an amount of events of a provided event type that should
+     *                      be emitted in the Bounded Context
+     * @param eventType     a class of a domain event message
+     * @return new {@link EmittedEventsVerifier emitted events verifier} instance
+     */
     public static EmittedEventsVerifier
     emitted(int expectedCount, Class<? extends Message> eventType) {
         checkArgument(expectedCount >= 0);
@@ -86,15 +120,25 @@ public abstract class EmittedEventsVerifier {
                 String eventName = eventType.getName();
                 int actualCount = events.count(eventType);
                 String moreOrLess = compare(actualCount, expectedCount);
-                assertEquals(
-                        format("Bounded Context emitted %s %s events than expected",
-                               moreOrLess, eventName),
-                        expectedCount, actualCount);
+                assertEquals(expectedCount, actualCount,
+                             format("Bounded Context emitted %s %s events than expected",
+                                    moreOrLess, eventName));
             }
         };
     }
 
-    private static String compare(int actualCount, int expectedCount) {
-        return (expectedCount < actualCount) ? "more" : "less";
+    /**
+     * Compares two integers returning a string stating if the first value is less, more or
+     * same number as the second.
+     */
+    @SuppressWarnings("DuplicateStringLiteralInspection")
+    private static String compare(int firstValue, int secondValue) {
+        if (firstValue > secondValue) {
+            return "more";
+        }
+        if (firstValue < secondValue) {
+            return "less";
+        }
+        return "same number";
     }
 }
