@@ -34,6 +34,9 @@ import static com.google.common.collect.ImmutableList.copyOf;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
+ * Contains the data on the events emitted in the {@link BlackBoxBoundedContext Bounded Context}.
+ * It can be queried for event presence, count and structure.
+ *
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
@@ -45,6 +48,23 @@ class EmittedEvents {
     EmittedEvents(List<Event> events) {
         this.events = copyOf(events);
         this.countOfTypes = countEventTypes(events);
+    }
+
+    /**
+     * Counts the number of times the domain event types are included in the provided list.
+     *
+     * @param events a list of {@link Event}
+     * @return a mapping of Event classes to its count
+     */
+    private static Map<EventClass, Integer> countEventTypes(List<Event> events) {
+        Map<EventClass, Integer> countForType = new HashMap<>();
+        for (Event event : events) {
+            Message message = unpack(event.getMessage());
+            EventClass type = EventClass.of(message);
+            int currentCount = countForType.getOrDefault(type, 0);
+            countForType.put(type, currentCount + 1);
+        }
+        return ImmutableMap.copyOf(countForType);
     }
 
     /**
@@ -78,26 +98,19 @@ class EmittedEvents {
     }
 
     /**
-     * Counts the number of times the domain event types are included in the provided list.
-     *
-     * @param events a list of {@link Event}
-     * @return a mapping of Event classes to its count
+     * @param eventType a class representing a domain event
+     * @return {@code true} if the event of provided type was emitted in the Bounded Context,
+     * {@code false} otherwise
      */
-    private static Map<EventClass, Integer> countEventTypes(List<Event> events) {
-        Map<EventClass, Integer> countForType = new HashMap<>();
-        for (Event event : events) {
-            Message message = unpack(event.getMessage());
-            EventClass type = EventClass.of(message);
-            int currentCount = countForType.getOrDefault(type, 0);
-            countForType.put(type, currentCount + 1);
-        }
-        return ImmutableMap.copyOf(countForType);
-    }
-
     boolean contain(Class<? extends Message> eventType) {
         return contain(EventClass.of(eventType));
     }
 
+    /**
+     * @param eventClass an {@link EventClass EventClass} instance for a domain event
+     * @return {@code true} if the event of provided type was emitted in the Bounded Context,
+     * {@code false} otherwise
+     */
     boolean contain(EventClass eventClass) {
         return countOfTypes.containsKey(eventClass);
     }

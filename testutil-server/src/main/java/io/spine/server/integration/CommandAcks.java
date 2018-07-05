@@ -41,8 +41,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
- * Contains the data on all acknowledgements in a Bounded Context. Can be queried on information
- * about acks, errors, and rejections.
+ * Contains the data on all acknowledgements in a {@link BlackBoxBoundedContext Bounded Context}. 
+ * Can be queried for information about acks, errors, and rejections.
  *
  * @author Mykhailo Drachuk
  */
