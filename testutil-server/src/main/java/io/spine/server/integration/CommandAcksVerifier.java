@@ -34,8 +34,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.Character.LINE_SEPARATOR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * An abstract verifier of command acknowledgements.
@@ -87,6 +86,7 @@ public abstract class CommandAcksVerifier {
      * Compares two integers returning a string stating if the first value is less, more or
      * same number as the second.
      */
+    @SuppressWarnings("DuplicateStringLiteralInspection")
     private static String compare(int firstValue, int secondValue) {
         if (firstValue > secondValue) {
             return "more";
@@ -110,7 +110,9 @@ public abstract class CommandAcksVerifier {
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                assertFalse(acks.containErrors(), "Bounded Context unexpectedly erred");
+                if (acks.containErrors()) {
+                    fail("Bounded Context unexpectedly erred");
+                }
             }
         };
     }
@@ -124,7 +126,9 @@ public abstract class CommandAcksVerifier {
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                assertTrue(acks.containErrors(), "Bounded Context unexpectedly did not err");
+                if (!acks.containErrors()) {
+                    fail("Bounded Context unexpectedly did not err");
+                }
             }
         };
     }
@@ -139,9 +143,10 @@ public abstract class CommandAcksVerifier {
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                assertTrue(acks.containErrors(error),
-                           "Bounded Context did not contain an expected error" +
-                                   error.getMessage());
+                if (!acks.containErrors(error)) {
+                    fail("Bounded Context did not contain an expected error" +
+                                 error.getMessage());
+                }
             }
         };
     }
@@ -158,9 +163,10 @@ public abstract class CommandAcksVerifier {
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                assertTrue(acks.containErrors(qualifier),
-                           "Bounded Context did not contain an expected error. "
-                                   + qualifier.description());
+                if (!acks.containErrors(qualifier)) {
+                    fail("Bounded Context did not contain an expected error. "
+                                 + qualifier.description());
+                }
             }
         };
     }
@@ -178,8 +184,9 @@ public abstract class CommandAcksVerifier {
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                assertFalse(acks.containRejections(),
-                           "Bounded Context unexpectedly rejected a message");
+                if (acks.containRejections()) {
+                    fail("Bounded Context unexpectedly rejected a message");
+                }
             }
         };
     }
@@ -193,7 +200,9 @@ public abstract class CommandAcksVerifier {
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                assertTrue(acks.containRejections(), "Bounded Context did not reject any messages");
+                if (!acks.containRejections()) {
+                    fail("Bounded Context did not reject any messages");
+                }
             }
         };
     }
@@ -222,9 +231,10 @@ public abstract class CommandAcksVerifier {
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                assertTrue(acks.containRejections(type),
-                           "Bounded Context did not reject a message of type:" +
-                                   domainRejection.getSimpleName());
+                if (!acks.containRejections(type)) {
+                    fail("Bounded Context did not reject a message of type:" +
+                                 domainRejection.getSimpleName());
+                }
             }
         };
     }
@@ -239,9 +249,10 @@ public abstract class CommandAcksVerifier {
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                assertTrue(acks.containRejection(domainRejection),
-                           "Bounded Context did not reject a message:"
-                                   + LINE_SEPARATOR + domainRejection);
+                if (!acks.containRejection(domainRejection)) {
+                    fail("Bounded Context did not reject a message:"
+                                 + LINE_SEPARATOR + domainRejection);
+                }
             }
         };
     }
