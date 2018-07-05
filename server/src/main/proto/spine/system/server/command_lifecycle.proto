@@ -28,36 +28,35 @@ option (type_url_prefix) = "type.spine.io";
 option (internal_all) = true;
 
 option java_package = "io.spine.system.server";
-option java_outer_classname = "EntityHistoryProto";
+option java_outer_classname = "CommandLicecycleProto";
 option java_multiple_files = true;
 
-import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 
 import "spine/core/command.proto";
-import "spine/core/event.proto";
+import "spine/core/response.proto";
 import "spine/client/entities.proto";
 
-message EntityHistory {
-    option (entity).kind = AGGREGATE;
+message CommandLifecycle {
 
-    spine.client.EntityId id = 1 [(required) = true];
+    spine.core.CommandId id = 1;
 
-    repeated DispatchedMessage commands = 2;
+    spine.core.Command command = 2;
 
-    repeated DispatchedMessage events = 3;
+    spine.client.EntityId receiver = 3;
+
+    Status status = 4 [(required) = true];
 }
 
-message DispatchedMessage {
+message Status {
 
-    oneof kind {
+    google.protobuf.Timestamp when_received = 1;
 
-        spine.core.Event event = 1;
+    google.protobuf.Timestamp when_acknowledged = 2;
 
-        spine.core.Command command = 2;
-    }
+    google.protobuf.Timestamp when_dispatched = 3;
 
-    google.protobuf.Timestamp when_dispatched = 3 [(required) = true, (when).in = PAST];
+    google.protobuf.Timestamp when_processed = 4 [(goes).with = "processing_status"];
+
+    spine.core.Status processing_status = 5 [(goes).with = "when_processed"];
 }
-
-

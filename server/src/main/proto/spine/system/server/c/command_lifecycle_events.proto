@@ -28,18 +28,48 @@ option (type_url_prefix) = "type.spine.io";
 option (internal_all) = true;
 
 option java_package = "io.spine.system.server";
-option java_outer_classname = "EntityHistoryProto";
+option java_outer_classname = "CommandLifecycleEventsProto";
 option java_multiple_files = true;
 
-import "google/protobuf/any.proto";
-import "google/protobuf/timestamp.proto";
-
+import "spine/base/error.proto";
+import "spine/core/command.proto";
+import "spine/core/rejection.proto";
 import "spine/client/entities.proto";
-import "spine/system/server/entity_history.proto";
 
-message DispatchMessage {
+message CommandReceived {
 
-    spine.client.EntityId receiver = 1;
+    spine.core.CommandId id = 1;
 
-    spine.system.server.DispatchedMessage = 2;
+    spine.core.Command payload = 2;
+}
+
+message CommandAcknowledged {
+
+    spine.core.CommandId id = 1;
+}
+
+message CommandDispatch {
+
+    spine.core.CommandId id = 1;
+
+    spine.client.EntityId receiver = 2;
+}
+
+message CommandMarkedAsHandled {
+
+    spine.core.CommandId id = 1;
+}
+
+message CommandMarkedAsErrored {
+
+    spine.core.CommandId id = 1;
+
+    spine.base.Error error = 2;
+}
+
+message CommandMarkedAsRejected {
+
+    spine.core.CommandId id = 1;
+
+    spine.core.Rejection rejection = 2;
 }

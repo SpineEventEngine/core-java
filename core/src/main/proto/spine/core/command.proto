@@ -157,6 +157,7 @@ enum CommandValidationError {
 
 // This enumeration defines possible statuses of command processing.
 enum CommandStatus {
+    option deprecated = true; // TODO:2018-07-05:dmytro.dashenkov: Delete this type.
 
     // Reserved value.
     UNDEFINED = 0;

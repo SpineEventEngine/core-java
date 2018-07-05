@@ -28,36 +28,59 @@ option (type_url_prefix) = "type.spine.io";
 option (internal_all) = true;
 
 option java_package = "io.spine.system.server";
-option java_outer_classname = "EntityHistoryProto";
+option java_outer_classname = "HistoryCommandsProto";
 option java_multiple_files = true;
 
 import "google/protobuf/any.proto";
-import "google/protobuf/timestamp.proto";
 
-import "spine/core/command.proto";
-import "spine/core/event.proto";
 import "spine/client/entities.proto";
+import "spine/system/server/entity_history.proto";
 
-message EntityHistory {
-    option (entity).kind = AGGREGATE;
+message CreateEntity {
+
+    spine.client.EntityId id = 1 [(required) = true];
+}
+
+message DispatchMessage {
+
+    spine.client.EntityId receiver = 1 [(required) = true];
+
+    spine.system.server.DispatchedMessage payload = 2 [(required) = true, (valid) = true];
+}
+
+message ChangeEntityState {
 
     spine.client.EntityId id = 1 [(required) = true];
 
-    repeated DispatchedMessage commands = 2;
+    google.protobuf.Any new_state = 2 [(required) = true];
 
-    repeated DispatchedMessage events = 3;
+    google.protobuf.Any message_id = 3 [(required) = true];
 }
 
-message DispatchedMessage {
+message ArchiveEntity {
 
-    oneof kind {
+    spine.client.EntityId id = 1 [(required) = true];
 
-        spine.core.Event event = 1;
-
-        spine.core.Command command = 2;
-    }
-
-    google.protobuf.Timestamp when_dispatched = 3 [(required) = true, (when).in = PAST];
+    google.protobuf.Any message_id = 2 [(required) = true];
 }
 
+message DeleteEntity {
 
+    spine.client.EntityId id = 1 [(required) = true];
+
+    google.protobuf.Any message_id = 2 [(required) = true];
+}
+
+message ExtractEntityFromArchive {
+
+    spine.client.EntityId id = 1 [(required) = true];
+
+    google.protobuf.Any message_id = 2 [(required) = true];
+}
+
+message RestoreEntity {
+
+    spine.client.EntityId id = 1 [(required) = true];
+
+    google.protobuf.Any message_id = 2 [(required) = true];
+}
