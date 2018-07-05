@@ -33,8 +33,9 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.Character.LINE_SEPARATOR;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * An abstract verifier of command acknowledgements.
@@ -60,6 +61,12 @@ public abstract class CommandAcksVerifier {
      */
     abstract void verify(CommandAcks acks);
 
+    /**
+     * Verifies that Bounded Context responded with a specified number of acknowledgements.
+     *
+     * @param expectedCount an expected amount of acknowledgements observed in Bounded Context
+     * @return a new {@link CommandAcksVerifier} instance
+     */
     public static CommandAcksVerifier acked(int expectedCount) {
         checkArgument(expectedCount >= 0, "0 or more acknowledgements must be expected.");
 
@@ -69,8 +76,9 @@ public abstract class CommandAcksVerifier {
                 int actualCount = acks.count();
                 String moreOrLess = compare(actualCount, expectedCount);
                 assertEquals(
-                        "Bounded Context acknowledged " + moreOrLess + " commands than expected",
-                        expectedCount, actualCount);
+                        expectedCount, actualCount,
+                        "Bounded Context acknowledged " + moreOrLess + " commands than expected"
+                );
             }
         };
     }
@@ -93,22 +101,30 @@ public abstract class CommandAcksVerifier {
      * Factory methods for verifying acks with errors.
      ******************************************************************************/
 
-    /** Verifies that the command handling did not respond with {@link Error error}. */
+    /**
+     * Verifies that the command handling did not respond with {@link Error error}.
+     *
+     * @return a new {@link CommandAcksVerifier} instance
+     */
     public static CommandAcksVerifier ackedWithoutErrors() {
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                assertTrue("Bounded Context unexpectedly erred", acks.containNoErrors());
+                assertFalse(acks.containErrors(), "Bounded Context unexpectedly erred");
             }
         };
     }
 
-    /** Verifies that a command was handled responding with some {@link Error error}. */
+    /**
+     * Verifies that a command was handled responding with some {@link Error error}.
+     *
+     * @return a new {@link CommandAcksVerifier} instance
+     */
     public static CommandAcksVerifier ackedWithError() {
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                assertTrue("Bounded Context unexpectedly did not err", acks.containErrors());
+                assertTrue(acks.containErrors(), "Bounded Context unexpectedly did not err");
             }
         };
     }
@@ -117,14 +133,15 @@ public abstract class CommandAcksVerifier {
      * Verifies that a command was handled responding with a provided {@link Error error}.
      *
      * @param error an error that matches the one in acknowledgement
+     * @return a new {@link CommandAcksVerifier} instance
      */
     public static CommandAcksVerifier ackedWithError(Error error) {
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                assertTrue("Bounded Context did not contain an expected error"
-                                   + error.getMessage(),
-                           acks.containError(error));
+                assertTrue(acks.containErrors(error),
+                           "Bounded Context did not contain an expected error" +
+                                   error.getMessage());
             }
         };
     }
@@ -135,14 +152,15 @@ public abstract class CommandAcksVerifier {
      *
      * @param qualifier an error qualifier specifying which kind of error should be a part
      *                  of acknowledgement
+     * @return a new {@link CommandAcksVerifier} instance
      */
     public static CommandAcksVerifier ackedWithError(ErrorQualifier qualifier) {
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                assertTrue("Bounded Context did not contain an expected error. "
-                                   + qualifier.description(),
-                           acks.containError(qualifier));
+                assertTrue(acks.containErrors(qualifier),
+                           "Bounded Context did not contain an expected error. "
+                                   + qualifier.description());
             }
         };
     }
@@ -151,24 +169,31 @@ public abstract class CommandAcksVerifier {
      * Factory methods for verifying acks with rejections.
      ******************************************************************************/
 
-    /** Verifies that a command handling did not respond with any {@link Rejection rejections}. */
+    /**
+     * Verifies that a command handling did not respond with any {@link Rejection rejections}.
+     *
+     * @return a new {@link CommandAcksVerifier} instance
+     */
     public static CommandAcksVerifier ackedWithoutRejections() {
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                assertTrue("Bounded Context unexpectedly rejected a message",
-                           acks.containNoRejections());
+                assertFalse(acks.containRejections(),
+                           "Bounded Context unexpectedly rejected a message");
             }
         };
     }
 
-    /** Verifies that a command was handled responding with some {@link Rejection rejection}. */
+    /**
+     * Verifies that a command was handled responding with some {@link Rejection rejection}.
+     *
+     * @return a new {@link CommandAcksVerifier} instance
+     */
     public static CommandAcksVerifier ackedWithRejections() {
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                assertTrue("Bounded Context did not reject any messages",
-                           acks.containRejections());
+                assertTrue(acks.containRejections(), "Bounded Context did not reject any messages");
             }
         };
     }
@@ -177,7 +202,8 @@ public abstract class CommandAcksVerifier {
      * Verifies that a command was handled responding with a {@link Rejection rejection}
      * of the provided type.
      *
-     * @param type rejection type in a form of {@code message class}
+     * @param type rejection type in a form of message class
+     * @return a new {@link CommandAcksVerifier} instance
      */
     public static CommandAcksVerifier ackedWithRejection(Class<? extends Message> type) {
         RejectionClass rejectionClass = RejectionClass.of(type);
@@ -189,35 +215,115 @@ public abstract class CommandAcksVerifier {
      * of the provided type.
      *
      * @param type rejection type in a form of {@link RejectionClass RejectionClass}
+     * @return a new {@link CommandAcksVerifier} instance
      */
     public static CommandAcksVerifier ackedWithRejection(RejectionClass type) {
         Class<? extends Message> domainRejection = type.value();
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                assertTrue("Bounded Context did not reject a message of type:"
-                                   + domainRejection.getName(),
-                           acks.containRejections(type));
+                assertTrue(acks.containRejections(type),
+                           "Bounded Context did not reject a message of type:" +
+                                   domainRejection.getSimpleName());
             }
         };
     }
 
     /**
      * Verifies that a command was handled responding with a provided {@link Rejection rejection}.
+     *
+     * @param domainRejection a domain message representing the rejection
+     * @return a new {@link CommandAcksVerifier} instance
      */
     public static CommandAcksVerifier ackedWithRejection(Message domainRejection) {
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                assertTrue("Bounded Context did not reject a message:"
-                                   + LINE_SEPARATOR + domainRejection,
-                           acks.containRejection(domainRejection));
+                assertTrue(acks.containRejection(domainRejection),
+                           "Bounded Context did not reject a message:"
+                                   + LINE_SEPARATOR + domainRejection);
             }
         };
     }
 
     /**
-     * Verifies that commands were handled responding with provided {@link Rejection rejections}.
+     * Verifies that a command was handled responding with a provided domain rejection
+     * specified amount of times.
+     *
+     * @param expectedCount an amount of rejection that are expected in Bounded Context
+     * @return a new {@link CommandAcksVerifier} instance
+     */
+    public static CommandAcksVerifier ackedWithRejections(int expectedCount) {
+        checkArgument(expectedCount >= 0, "0 or more rejections must be expected.");
+        return new CommandAcksVerifier() {
+            @Override
+            void verify(CommandAcks acks) {
+                assertEquals(expectedCount, acks.countRejections(),
+                             "Bounded Context did not contain a rejection expected amount of times.");
+            }
+        };
+    }
+
+    /**
+     * Verifies that a command was handled responding with a {@link Rejection rejection}
+     * of a provided type specified amount of times.
+     *
+     * @param expectedCount an amount of rejection that are expected in Bounded Context
+     * @param type          rejection type in a form of message class
+     * @return a new {@link CommandAcksVerifier} instance
+     */
+    public static CommandAcksVerifier ackedWithRejections(int expectedCount,
+                                                          Class<? extends Message> type) {
+        RejectionClass rejectionClass = RejectionClass.of(type);
+        return ackedWithRejections(expectedCount, rejectionClass);
+    }
+
+    /**
+     * Verifies that a command was handled responding with a {@link Rejection rejection}
+     * of a provided type specified amount of times.
+     *
+     * @param expectedCount an amount of rejection that are expected in Bounded Context
+     * @param type          rejection type in a form of {@link RejectionClass RejectionClass}
+     * @return a new {@link CommandAcksVerifier} instance
+     */
+    public static CommandAcksVerifier ackedWithRejections(int expectedCount, RejectionClass type) {
+        checkArgument(expectedCount >= 0, "0 or more rejections of type must be expected.");
+        return new CommandAcksVerifier() {
+            @Override
+            void verify(CommandAcks acks) {
+                Class<? extends Message> rejectionClass = type.value();
+                assertEquals(expectedCount, acks.countRejections(),
+                             "Bounded Context did not contain " + rejectionClass.getSimpleName() +
+                                     "rejection expected amount of times.");
+            }
+        };
+    }
+
+    /**
+     * Verifies that a command was handled responding with a provided domain rejection
+     * specified amount of times.
+     *
+     * @param expectedCount   an amount of rejection that are expected in Bounded Context
+     * @param domainRejection a domain message representing the rejection
+     * @return a new {@link CommandAcksVerifier} instance
+     */
+    public static CommandAcksVerifier ackedWithRejections(int expectedCount,
+                                                          Message domainRejection) {
+        checkArgument(expectedCount >= 0, "0 or more specified rejections must be expected.");
+        return new CommandAcksVerifier() {
+            @Override
+            void verify(CommandAcks acks) {
+                assertEquals(expectedCount, acks.countRejections(domainRejection),
+                             "Bounded Context did not contain a rejection expected amount of times:"
+                                     + LINE_SEPARATOR + domainRejection);
+            }
+        };
+    }
+
+    /**
+     * Verifies that commands were handled responding with provided domain rejections.
+     *
+     * @return a new {@link CommandAcksVerifier} instance
      */
     @SuppressWarnings("OverloadedVarargsMethod")
     public static CommandAcksVerifier

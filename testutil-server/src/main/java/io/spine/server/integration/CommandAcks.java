@@ -34,12 +34,16 @@ import io.spine.grpc.MemoizingObserver;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
+ * Contains the data on all acknowledgements in a Bounded Context. Can be queried on information
+ * about acks, errors, and rejections.
+ *
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
@@ -89,6 +93,9 @@ class CommandAcks {
         return ImmutableMap.copyOf(countForType);
     }
 
+    /**
+     * @return the total number of acknowledgements observed in a Bounded Context.
+     */
     public int count() {
         return acks.size();
     }
@@ -97,45 +104,135 @@ class CommandAcks {
      * Errors
      ******************************************************************************/
 
-    boolean containNoErrors() {
-        return errors.isEmpty();
-    }
-
+    /**
+     * @return {@code true} if errors did occur in the Bounded Context during command handling,
+     * {@code false} otherwise.
+     */
     boolean containErrors() {
         return !errors.isEmpty();
     }
 
-    boolean containError(Error error) {
+    /**
+     * @return a total number of errors which were observed in Bounded Context acknowledgements.
+     */
+    int countErrors() {
+        return errors.size();
+    }
+
+    /**
+     * @param error an error that matches the one in acknowledgement
+     * @return {@code true} if the provided error did occur in the Bounded Context during
+     * command handling, {@code false} otherwise.
+     */
+    boolean containErrors(Error error) {
         checkNotNull(error);
         return errors.contains(error);
     }
 
-    boolean containError(ErrorQualifier qualifier) {
+    /**
+     * @return {@code true} if an error which matches the provided qualifier did occur in
+     * the Bounded Context during command handling, {@code false} otherwise.
+     */
+    boolean containErrors(ErrorQualifier qualifier) {
+        checkNotNull(qualifier);
         return errors.stream()
                      .anyMatch(qualifier);
+    }
+
+    /**
+     * @return a total number of times the provided error was observed in the
+     * Bounded Context responses
+     */
+    long countErrors(Error error) {
+        checkNotNull(error);
+        return errors.stream()
+                     .filter(error::equals)
+                     .count();
+    }
+
+    /**
+     * @return a total number of times errors matching the provided qualifier were observed in the
+     * Bounded Context responses
+     */
+    long countErrors(ErrorQualifier qualifier) {
+        checkNotNull(qualifier);
+        return errors.stream()
+                     .filter(qualifier)
+                     .count();
     }
 
     /*
      * Rejections
      ******************************************************************************/
 
-    boolean containNoRejections() {
-        return rejections.isEmpty();
-    }
-
+    /**
+     * @return {@code true} if there were any rejections in the Bounded Context,
+     * {@code false} otherwise
+     */
     boolean containRejections() {
         return rejections.isEmpty();
     }
 
+    /**
+     * @return a total amount of rejections observed in Bounded Context
+     */
+    int countRejections() {
+        return rejections.size();
+    }
+
+    /**
+     * @param type rejection type in a form of {@link RejectionClass RejectionClass}
+     * @return {@code true} if the rejection of a provided type was observed in the Bounded Context,
+     * {@code false} otherwise
+     */
     boolean containRejections(RejectionClass type) {
         return rejectionTypes.containsKey(type);
     }
 
+    /**
+     * @param type rejection type in a form of {@link RejectionClass RejectionClass}
+     * @return an amount of rejections of the provided type observed in Bounded Context
+     */
+    int countRejections(RejectionClass type) {
+        return rejectionTypes.get(type);
+    }
+
+    /**
+     * @param domainRejection a domain message representing the rejection
+     * @return {@code true} if the rejection was observed in the Bounded Context,
+     * {@code false} otherwise
+     */
     boolean containRejection(Message domainRejection) {
         return rejections.stream()
-                         .anyMatch(rejection -> {
-                             Message message = unpack(rejection.getMessage());
-                             return domainRejection.equals(message);
-                         });
+                         .anyMatch(new RejectionEquals(domainRejection));
+    }
+
+    /**
+     * @param domainRejection a domain message representing the rejection
+     * @return an amount of provided rejections observed in Bounded Context
+     */
+    long countRejections(Message domainRejection) {
+        return rejections.stream()
+                         .filter(new RejectionEquals(domainRejection))
+                         .count();
+    }
+
+    /**
+     * A predicate filtering the {@link Rejection rejections} which contain the provided
+     * {@link Message domain message}.
+     */
+    private static class RejectionEquals implements Predicate<Rejection> {
+
+        private final Message domainRejection;
+
+        private RejectionEquals(Message domainRejection) {
+            this.domainRejection = domainRejection;
+        }
+
+        @Override
+        public boolean test(Rejection rejection) {
+            Message message = unpack(rejection.getMessage());
+            return domainRejection.equals(message);
+        }
     }
 }
