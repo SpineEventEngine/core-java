@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.CommandClass;
@@ -235,7 +236,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    public A create(I id) {
+    protected A doCreate(I id) {
         return aggregateClass().createEntity(id);
     }
 
@@ -620,6 +621,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getCommandEndpointDelivery() {
         return commandDeliverySupplier.get();
+    }
+
+    @Override
+    protected void postSystem(Message systemCommand) {
+        super.postSystem(systemCommand);
     }
 
     @Override

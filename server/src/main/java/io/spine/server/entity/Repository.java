@@ -25,6 +25,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
 import io.spine.core.MessageEnvelope;
@@ -220,7 +221,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @param id the id of the entity
      * @return new entity instance
      */
-    public E create(I id) {
+    public final E create(I id) {
         E entity = doCreate(id);
         EntityId entityId = EntityId.newBuilder()
                                     .setId(Identifier.pack(id))
@@ -377,7 +378,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         log().error(errorMessage, exception);
     }
 
-    private void postSystem(Message systemCommand) {
+    @Internal
+    protected void postSystem(Message systemCommand) {
         getBoundedContext().getSystemGateway()
                            .post(systemCommand);
     }

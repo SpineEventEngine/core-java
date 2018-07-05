@@ -22,6 +22,7 @@ package io.spine.system.server;
 
 import io.spine.annotation.Internal;
 import io.spine.client.EntityId;
+import io.spine.core.EventContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
@@ -125,23 +126,43 @@ public final class EntityHistoryAggregate
     }
 
     @Apply
-    private void on(EventDispatchedToSubscriber event) {
-        getBuilder().addEvents(event.getPayload());
+    private void on(EventDispatchedToSubscriber event, EventContext context) {
+        DispatchedEvent dispatchedEvent = DispatchedEvent
+                .newBuilder()
+                .setEvent(event.getPayload())
+                .setWhenDispatched(context.getTimestamp())
+                .build();
+        getBuilder().addEvents(dispatchedEvent);
     }
 
     @Apply
-    private void on(EventDispatchedToReactor event) {
-        getBuilder().addEvents(event.getPayload());
+    private void on(EventDispatchedToReactor event, EventContext context) {
+        DispatchedEvent dispatchedEvent = DispatchedEvent
+                .newBuilder()
+                .setEvent(event.getPayload())
+                .setWhenDispatched(context.getTimestamp())
+                .build();
+        getBuilder().addEvents(dispatchedEvent);
     }
 
     @Apply
-    private void on(EventDispatchedToApplier event) {
-        getBuilder().addEvents(event.getPayload());
+    private void on(EventDispatchedToApplier event, EventContext context) {
+        DispatchedEvent dispatchedEvent = DispatchedEvent
+                .newBuilder()
+                .setEvent(event.getPayload())
+                .setWhenDispatched(context.getTimestamp())
+                .build();
+        getBuilder().addEvents(dispatchedEvent);
     }
 
     @Apply
-    private void on(CommandDispatchedToHandler event) {
-        getBuilder().addCommands(event.getPayload());
+    private void on(CommandDispatchedToHandler event, EventContext context) {
+        DispatchedCommand dispatchedCommand = DispatchedCommand
+                .newBuilder()
+                .setCommand(event.getPayload())
+                .setWhenDispatched(context.getTimestamp())
+                .build();
+        getBuilder().addCommands(dispatchedCommand);
     }
 
     @Apply

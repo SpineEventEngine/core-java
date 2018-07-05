@@ -45,21 +45,21 @@ message EntityHistory {
 
     EntityOption.Kind kind = 2;
 
-    repeated DispatchedMessage commands = 3;
+    repeated DispatchedCommand commands = 3;
 
-    repeated DispatchedMessage events = 4;
+    repeated DispatchedEvent events = 4;
 }
 
-message DispatchedMessage {
+message DispatchedEvent {
 
-    oneof kind {
+    spine.core.Event event = 1;
 
-        spine.core.Event event = 1;
-
-        spine.core.Command command = 2;
-    }
-
-    google.protobuf.Timestamp when_dispatched = 3 [(required) = true, (when).in = PAST];
+    google.protobuf.Timestamp when_dispatched = 2 [(required) = true, (when).in = PAST];
 }
 
+message DispatchedCommand {
 
+    spine.core.Command command = 1;
+
+    google.protobuf.Timestamp when_dispatched = 2 [(required) = true, (when).in = PAST];
+}

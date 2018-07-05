@@ -33,8 +33,9 @@ option java_multiple_files = true;
 
 import "google/protobuf/any.proto";
 
+import "spine/core/event.proto";
+import "spine/core/command.proto";
 import "spine/client/entities.proto";
-import "spine/system/server/entity_history.proto";
 
 message CreateEntity {
 
@@ -47,28 +48,28 @@ message DispatchEventToSubscriber {
 
     spine.client.EntityId receiver = 1 [(required) = true];
 
-    spine.system.server.DispatchedMessage payload = 2 [(required) = true, (valid) = true];
+    spine.core.Event payload = 2 [(required) = true, (valid) = true];
 }
 
 message DispatchEventToReactor {
 
     spine.client.EntityId receiver = 1 [(required) = true];
 
-    spine.system.server.DispatchedMessage payload = 2 [(required) = true, (valid) = true];
+    spine.core.Event payload = 2 [(required) = true, (valid) = true];
 }
 
 message DispatchEventToApplier {
 
     spine.client.EntityId receiver = 1 [(required) = true];
 
-    spine.system.server.DispatchedMessage payload = 2 [(required) = true, (valid) = true];
+    spine.core.Event payload = 2 [(required) = true, (valid) = true];
 }
 
 message DispatchCommandToHandler {
 
     spine.client.EntityId receiver = 1 [(required) = true];
 
-    spine.system.server.DispatchedMessage payload = 2 [(required) = true, (valid) = true];
+    spine.core.Command payload = 2 [(required) = true, (valid) = true];
 }
 
 message ChangeEntityState {
