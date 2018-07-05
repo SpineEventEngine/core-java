@@ -113,5 +113,4 @@ public abstract class ErrorQualifier implements Predicate<Error> {
     }
 
     //TODO:2018-07-04:mdrachuk: check validation errors? (constraint violation?)
-
 }
