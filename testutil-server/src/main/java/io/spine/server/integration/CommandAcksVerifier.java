@@ -21,24 +21,42 @@
 package io.spine.server.integration;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
+import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 
+import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.Character.LINE_SEPARATOR;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
+ * An abstract verifier of command acknowledgements.
+ *
+ * <p> Contains static factory methods for creating acknowledgement verifiers, checking that
+ * commands were acknowledged, responded with rejections, and errors.
+ *
+ * <p>Allows combining verifiers using {@link #and(CommandAcksVerifier) and()} or factory method
+ * shortcuts: {@code ackedWithoutErrors().and(ackedWithRejection(rej))} can be simplified
+ * to {@code ackedWithoutErrors().withRejection(rej)}.
+ *
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
 public abstract class CommandAcksVerifier {
 
+    /**
+     * Executes the command acknowledgement verifier throwing an assertion error if the
+     * data does not match the rule..
+     *
+     * @param acks acknowledgements of handling commands by the Bounded Context
+     */
     abstract void verify(CommandAcks acks);
 
     public static CommandAcksVerifier acked(int expectedCount) {
@@ -56,14 +74,25 @@ public abstract class CommandAcksVerifier {
         };
     }
 
-    private static String compare(int actualCount, int expectedCount) {
-        return (expectedCount < actualCount) ? "more" : "less";
+    /**
+     * Compares two integers returning a string stating if the first value is less, more or
+     * same number as the second.
+     */
+    private static String compare(int firstValue, int secondValue) {
+        if (firstValue > secondValue) {
+            return "more";
+        }
+        if (firstValue < secondValue) {
+            return "less";
+        }
+        return "same number";
     }
 
     /*
      * Factory methods for verifying acks with errors.
      ******************************************************************************/
 
+    /** Verifies that the command handling did not respond with {@link Error error}. */
     public static CommandAcksVerifier ackedWithoutErrors() {
         return new CommandAcksVerifier() {
             @Override
@@ -73,6 +102,7 @@ public abstract class CommandAcksVerifier {
         };
     }
 
+    /** Verifies that a command was handled responding with some {@link Error error}. */
     public static CommandAcksVerifier ackedWithError() {
         return new CommandAcksVerifier() {
             @Override
@@ -82,6 +112,11 @@ public abstract class CommandAcksVerifier {
         };
     }
 
+    /**
+     * Verifies that a command was handled responding with a provided {@link Error error}.
+     *
+     * @param error an error that matches the one in acknowledgement
+     */
     public static CommandAcksVerifier ackedWithError(Error error) {
         return new CommandAcksVerifier() {
             @Override
@@ -93,6 +128,13 @@ public abstract class CommandAcksVerifier {
         };
     }
 
+    /**
+     * Verifies that a command was handled responding with an error matching a provided
+     * {@link ErrorQualifier error qualifier}.
+     *
+     * @param qualifier an error qualifier specifying which kind of error should be a part
+     *                  of acknowledgement
+     */
     public static CommandAcksVerifier ackedWithError(ErrorQualifier qualifier) {
         return new CommandAcksVerifier() {
             @Override
@@ -108,6 +150,7 @@ public abstract class CommandAcksVerifier {
      * Factory methods for verifying acks with rejections.
      ******************************************************************************/
 
+    /** Verifies that a command handling did not respond with any {@link Rejection rejections}. */
     public static CommandAcksVerifier ackedWithoutRejections() {
         return new CommandAcksVerifier() {
             @Override
@@ -118,6 +161,7 @@ public abstract class CommandAcksVerifier {
         };
     }
 
+    /** Verifies that a command was handled responding with some {@link Rejection rejection}. */
     public static CommandAcksVerifier ackedWithRejections() {
         return new CommandAcksVerifier() {
             @Override
@@ -128,12 +172,24 @@ public abstract class CommandAcksVerifier {
         };
     }
 
-    public static CommandAcksVerifier ackedWithRejections(Class<? extends Message> type) {
+    /**
+     * Verifies that a command was handled responding with a {@link Rejection rejection}
+     * of the provided type.
+     *
+     * @param type rejection type in a form of {@code message class}
+     */
+    public static CommandAcksVerifier ackedWithRejection(Class<? extends Message> type) {
         RejectionClass rejectionClass = RejectionClass.of(type);
-        return ackedWithRejections(rejectionClass);
+        return ackedWithRejection(rejectionClass);
     }
 
-    public static CommandAcksVerifier ackedWithRejections(RejectionClass type) {
+    /**
+     * Verifies that a command was handled responding with a {@link Rejection rejection}
+     * of the provided type.
+     *
+     * @param type rejection type in a form of {@link RejectionClass RejectionClass}
+     */
+    public static CommandAcksVerifier ackedWithRejection(RejectionClass type) {
         Class<? extends Message> domainRejection = type.value();
         return new CommandAcksVerifier() {
             @Override
@@ -145,6 +201,9 @@ public abstract class CommandAcksVerifier {
         };
     }
 
+    /**
+     * Verifies that a command was handled responding with a provided {@link Rejection rejection}.
+     */
     public static CommandAcksVerifier ackedWithRejection(Message domainRejection) {
         return new CommandAcksVerifier() {
             @Override
@@ -156,6 +215,9 @@ public abstract class CommandAcksVerifier {
         };
     }
 
+    /**
+     * Verifies that commands were handled responding with provided {@link Rejection rejections}.
+     */
     public static CommandAcksVerifier
     ackedWithRejections(Message rejection1, Message rejection2, Message... otherRejections) {
         return new CommandAcksVerifier() {
@@ -171,26 +233,65 @@ public abstract class CommandAcksVerifier {
     }
 
     /*
-     * Methods incorporating verifiers.
+     * Command acknowledgements verifier combination.
      ******************************************************************************/
 
+    /**
+     * Combines current verifier with a provided verifier, making them execute sequentially.
+     *
+     * @param otherVerifier a verifier executed after the current verifier
+     * @return a verifier that executes both current and provided assertions
+     */
     public CommandAcksVerifier and(CommandAcksVerifier otherVerifier) {
-        return new CommandsAcksListVerifier(this, otherVerifier);
+        return CommandAcksVerifierCombination.of(this, otherVerifier);
     }
 
-    private static class CommandsAcksListVerifier extends CommandAcksVerifier {
+    /**
+     * A special kind of a {@link CommandAcksVerifier Command Acknowledgements Verifier} that
+     * executes a list of assertions one by one.
+     */
+    private static class CommandAcksVerifierCombination extends CommandAcksVerifier {
 
-        private final List<CommandAcksVerifier> verifiers = newLinkedList();
+        private final List<CommandAcksVerifier> verifiers;
 
-        private CommandsAcksListVerifier(CommandAcksVerifier first, CommandAcksVerifier second) {
-            verifiers.add(first);
-            if (second instanceof CommandsAcksListVerifier) {
-                verifiers.addAll(((CommandsAcksListVerifier) second).verifiers);
+        /**
+         * Creates a combination of two verifiers. More verifiers are appended using
+         * {@link #and(CommandAcksVerifier) and()}.
+         */
+        private CommandAcksVerifierCombination(List<CommandAcksVerifier> verifiers) {
+            this.verifiers = ImmutableList.copyOf(verifiers);
+        }
+
+        public static CommandAcksVerifierCombination of(CommandAcksVerifier first,
+                                                        CommandAcksVerifier second) {
+            List<CommandAcksVerifier> verifiers = newArrayList();
+            addVerifierToList(first, verifiers);
+            addVerifierToList(second, verifiers);
+            return new CommandAcksVerifierCombination(verifiers);
+        }
+
+        public static CommandAcksVerifierCombination of(List<CommandAcksVerifier> items,
+                                                        CommandAcksVerifier newVerifier) {
+            List<CommandAcksVerifier> verifiers = newArrayList(items);
+            addVerifierToList(newVerifier, verifiers);
+            return new CommandAcksVerifierCombination(verifiers);
+        }
+
+        private static void addVerifierToList(CommandAcksVerifier verifier,
+                                              Collection<CommandAcksVerifier> items) {
+            if (verifier instanceof CommandAcksVerifierCombination) {
+                items.addAll(((CommandAcksVerifierCombination) verifier).verifiers);
             } else {
-                verifiers.add(second);
+                items.add(verifier);
             }
         }
 
+        /**
+         * Executes all of the verifiers that were combined using
+         * {@link #and(CommandAcksVerifier) and()}.
+         *
+         * @param acks acknowledgements of handling commands by the Bounded Context
+         */
         @Override
         void verify(CommandAcks acks) {
             for (CommandAcksVerifier verifier : verifiers) {
@@ -198,72 +299,132 @@ public abstract class CommandAcksVerifier {
             }
         }
 
+        /**
+         * Creates a new verifier appending the provided verifier to the current combination.
+         *
+         * @param verifier a verifier to be added to a combination
+         * @return a new verifier instance
+         */
         @Override
-        public CommandsAcksListVerifier and(CommandAcksVerifier verifier) {
-            if (verifier instanceof CommandsAcksListVerifier) {
-                appendListVerifierItems((CommandsAcksListVerifier) verifier);
-            } else {
-                verifiers.add(verifier);
-            }
-            return this;
-        }
-
-        private void appendListVerifierItems(CommandsAcksListVerifier verifier) {
-            verifiers.addAll(verifier.verifiers);
+        public CommandAcksVerifierCombination and(CommandAcksVerifier verifier) {
+            return of(verifiers, verifier);
         }
     }
 
+    /*
+     * Verifier combination shortcuts.
+     ******************************************************************************/
+
+    /**
+     * Creates a new verifier adding a check to not contain any {@link Error errors}.
+     *
+     * @return a new {@link CommandAcksVerifier} instance
+     */
     public CommandAcksVerifier withoutErrors() {
         CommandAcksVerifier noErrors = ackedWithoutErrors();
         return this.and(noErrors);
     }
 
+    /**
+     * Creates a new verifier adding a check to contain at least one {@link Error error}.
+     *
+     * @return a new {@link CommandAcksVerifier} instance
+     */
     public CommandAcksVerifier withError() {
         CommandAcksVerifier withError = ackedWithError();
         return this.and(withError);
     }
 
+    /**
+     * Creates a new verifier adding a check to contain the specified {@link Error error}.
+     *
+     * @return a new {@link CommandAcksVerifier} instance
+     */
     public CommandAcksVerifier withError(Error error) {
         CommandAcksVerifier withError = ackedWithError(error);
         return this.and(withError);
     }
 
+    /**
+     * Creates a new verifier adding a check to contain an {@link Error error} that
+     * matches the qualifier.
+     *
+     * @return a new {@link CommandAcksVerifier} instance
+     */
     public CommandAcksVerifier withError(ErrorQualifier qualifier) {
         CommandAcksVerifier withError = ackedWithError(qualifier);
         return this.and(withError);
     }
 
+    /**
+     * Creates a new verifier adding a check to not contain any {@link Error errors} or
+     * {@link Rejection rejections}.
+     *
+     * @return a new {@link CommandAcksVerifier} instance
+     */
     public CommandAcksVerifier withoutErrorsOrRejections() {
         CommandAcksVerifier noRejections = ackedWithoutRejections();
         CommandAcksVerifier noErrors = ackedWithoutErrors();
-        return this.and(noRejections.and(noErrors));
+        return this.and(noErrors.and(noRejections));
     }
 
+    /**
+     * Creates a new verifier adding a check to not contain any {@link Rejection rejections}.
+     *
+     * @return a new {@link CommandAcksVerifier} instance
+     */
     public CommandAcksVerifier withoutRejections() {
         CommandAcksVerifier noRejections = ackedWithoutRejections();
         return this.and(noRejections);
     }
 
+    /**
+     * Creates a new verifier adding a check to contain some {@link Rejection rejection}.
+     *
+     * @return a new {@link CommandAcksVerifier} instance
+     */
     public CommandAcksVerifier withRejections() {
         CommandAcksVerifier someRejection = ackedWithRejections();
         return this.and(someRejection);
     }
 
+    /**
+     * Creates a new verifier adding a check to contain a {@link Rejection rejection} of a
+     * type specified by {@code class}.
+     *
+     * @return a new {@link CommandAcksVerifier} instance
+     */
     public CommandAcksVerifier withRejections(Class<? extends Message> type) {
-        CommandAcksVerifier rejectedType = ackedWithRejections(type);
+        CommandAcksVerifier rejectedType = ackedWithRejection(type);
         return this.and(rejectedType);
     }
 
+    /**
+     * Creates a new verifier adding a check to contain a {@link Rejection rejection} of a
+     * type specified by a {@link RejectionClass rejection class}.
+     *
+     * @return a new {@link CommandAcksVerifier} instance
+     */
     public CommandAcksVerifier withRejections(RejectionClass type) {
-        CommandAcksVerifier rejectedType = ackedWithRejections(type);
+        CommandAcksVerifier rejectedType = ackedWithRejection(type);
         return this.and(rejectedType);
     }
 
+    /**
+     * Creates a new verifier adding a check to contain a provided domain rejection.
+     *
+     * @return a new {@link CommandAcksVerifier} instance
+     */
     public CommandAcksVerifier withRejection(Message domainRejection) {
         CommandAcksVerifier oneRejection = ackedWithRejection(domainRejection);
         return this.and(oneRejection);
     }
 
+    /**
+     * Creates a new verifier adding a check to contain all of the provided domain rejections.
+     *
+     * @return a new {@link CommandAcksVerifier} instance
+     */
     public CommandAcksVerifier
     withRejections(Message rejection1, Message rejection2, Message... otherRejections) {
         CommandAcksVerifier multipleRejections =
