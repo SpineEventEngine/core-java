@@ -37,7 +37,7 @@ import static org.junit.Assert.assertTrue;
 @VisibleForTesting
 public abstract class EmittedEventsVerifier {
 
-    public abstract void verify(EmittedEvents events);
+    abstract void verify(EmittedEvents events);
 
     public static EmittedEventsVerifier emitted(int expectedCount) {
         checkArgument(expectedCount >= 0, "0 or more emitted events must be expected.");

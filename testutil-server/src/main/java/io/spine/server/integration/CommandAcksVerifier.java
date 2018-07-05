@@ -25,7 +25,10 @@ import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.RejectionClass;
 
+import java.util.List;
+
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.Character.LINE_SEPARATOR;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -153,7 +156,7 @@ public abstract class CommandAcksVerifier {
         };
     }
 
-    public static CommandAcksVerifier 
+    public static CommandAcksVerifier
     ackedWithRejections(Message rejection1, Message rejection2, Message... otherRejections) {
         return new CommandAcksVerifier() {
             @Override
@@ -171,44 +174,92 @@ public abstract class CommandAcksVerifier {
      * Methods incorporating verifiers.
      ******************************************************************************/
 
-    public CommandAcksVerifier withError(Error error) {
-        CommandAcksVerifier current = this;
-        CommandAcksVerifier withError = ackedWithError(error);
+    public CommandAcksVerifier and(CommandAcksVerifier otherVerifier) {
+        return new CommandsAcksListVerifier(this, otherVerifier);
+    }
 
-        return new CommandAcksVerifier() {
-            @Override
-            void verify(CommandAcks target) {
-                current.verify(target);
-                withError.verify(target);
+    private static class CommandsAcksListVerifier extends CommandAcksVerifier {
+
+        private final List<CommandAcksVerifier> verifiers = newLinkedList();
+
+        private CommandsAcksListVerifier(CommandAcksVerifier first, CommandAcksVerifier second) {
+            verifiers.add(first);
+            if (second instanceof CommandsAcksListVerifier) {
+                verifiers.addAll(((CommandsAcksListVerifier) second).verifiers);
+            } else {
+                verifiers.add(second);
             }
-        };
+        }
+
+        @Override
+        void verify(CommandAcks acks) {
+            for (CommandAcksVerifier verifier : verifiers) {
+                verifier.verify(acks);
+            }
+        }
+
+        @Override
+        public CommandAcksVerifier and(CommandAcksVerifier verifier) {
+            verifiers.add(verifier);
+            return this;
+        }
+    }
+
+    public CommandAcksVerifier withoutErrors() {
+        CommandAcksVerifier noErrors = ackedWithoutErrors();
+        return this.and(noErrors);
+    }
+
+    public CommandAcksVerifier withError() {
+        CommandAcksVerifier withError = ackedWithError();
+        return this.and(withError);
+    }
+
+    public CommandAcksVerifier withError(Error error) {
+        CommandAcksVerifier withError = ackedWithError(error);
+        return this.and(withError);
     }
 
     public CommandAcksVerifier withError(ErrorQualifier qualifier) {
-        CommandAcksVerifier current = this;
         CommandAcksVerifier withError = ackedWithError(qualifier);
-
-        return new CommandAcksVerifier() {
-            @Override
-            void verify(CommandAcks target) {
-                current.verify(target);
-                withError.verify(target);
-            }
-        };
+        return this.and(withError);
     }
 
     public CommandAcksVerifier withoutErrorsOrRejections() {
-        CommandAcksVerifier current = this;
         CommandAcksVerifier noRejections = ackedWithoutRejections();
         CommandAcksVerifier noErrors = ackedWithoutErrors();
+        return this.and(noRejections.and(noErrors));
+    }
 
-        return new CommandAcksVerifier() {
-            @Override
-            void verify(CommandAcks target) {
-                current.verify(target);
-                noRejections.verify(target);
-                noErrors.verify(target);
-            }
-        };
+    public CommandAcksVerifier withoutRejections() {
+        CommandAcksVerifier noRejections = ackedWithoutRejections();
+        return this.and(noRejections);
+    }
+
+    public CommandAcksVerifier withRejections() {
+        CommandAcksVerifier someRejection = ackedWithRejections();
+        return this.and(someRejection);
+    }
+
+    public CommandAcksVerifier withRejections(Class<? extends Message> type) {
+        CommandAcksVerifier rejectedType = ackedWithRejections(type);
+        return this.and(rejectedType);
+    }
+
+    public CommandAcksVerifier withRejections(RejectionClass type) {
+        CommandAcksVerifier rejectedType = ackedWithRejections(type);
+        return this.and(rejectedType);
+    }
+
+    public CommandAcksVerifier withRejection(Message domainRejection) {
+        CommandAcksVerifier oneRejection = ackedWithRejection(domainRejection);
+        return this.and(oneRejection);
+    }
+
+    public CommandAcksVerifier
+    withRejections(Message rejection1, Message rejection2, Message... otherRejections) {
+        CommandAcksVerifier multipleRejections =
+                ackedWithRejections(rejection1, rejection2, otherRejections);
+        return this.and(multipleRejections);
     }
 }
