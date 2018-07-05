@@ -20,61 +20,74 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import io.spine.client.ActorRequestFactory;
-import io.spine.server.command.CommandTest;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * An abstract base for test suites testing aggregate part commands.
+ * An abstract base class for testing a single command handling in
+ * an {@link AggregatePart}.
  *
- * @param <C> the type of the command message that we test in the suite
- * @param <P> the type of the aggregate part that handles the command
- * @author Alexander Yevsyukov
+ * @param <C> type of the command to test
+ * @param <I> ID message of the aggregate
+ * @param <S> the aggregate part state type
+ * @param <P> the {@link AggregatePart} type
+ * @param <R> the {@link AggregateRoot} type
+ * @author Dmytro Dashenkov
  */
 public abstract class AggregatePartCommandTest<C extends Message,
-                                               P extends AggregatePart> extends CommandTest<C> {
-    /** The object under the test. */
-    @Nullable
-    private P aggregatePart;
+                                               I,
+                                               S extends Message,
+                                               P extends AggregatePart<I, S, ?, R>,
+                                               R extends AggregateRoot<I>>
+        extends AggregateCommandTest<C, I, S, P> {
 
     /**
-     * {@inheritDoc}
-     */
-    protected AggregatePartCommandTest(ActorRequestFactory requestFactory) {
-        super(requestFactory);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected AggregatePartCommandTest() {
-        super();
-    }
-
-    /**
-     * Creates new test object.
-     */
-    protected abstract P createAggregatePart();
-
-    /**
-     * Obtains the aggregate part being tested or {@code Optional.absent()} if
-     * the test object has not been created yet.
-     */
-    protected Optional<P> aggregatePart() {
-        return Optional.fromNullable(aggregatePart);
-    }
-
-    /**
-     * Initializes a test suite with a newly created {@code AggregatePart}.
+     * Instantiates a new aggregate root with the given ID.
      *
-     * <p>This method must be called in derived test suites in methods
-     * annotated with {@code @Before} (JUnit 4) or {@code @BeforeEach} (JUnit 5).
+     * <p>A typical implementation:
+     * <pre>
+     *     {@code
+     *     \@Override
+     *     protected MyAggregateRoot newRoot(MyId id) {
+     *         return new MyAggregateRoot(id);
+     *     }
+     *     }
+     * </pre>
+     *
+     * @param id the aggregate ID
+     * @return new instance of root
      */
-    @Override
-    protected void setUp() {
-        this.aggregatePart = createAggregatePart();
+    protected abstract R newRoot(I id);
+
+    /**
+     * Instantiates a new aggregate part with the given root.
+     *
+     * <p>A typical implementation:
+     * <pre>
+     *     {@code
+     *     \@Override
+     *     protected MyAggregatePart newRoot(MyAggregateRoot root) {
+     *         return new MyAggregatePart(root);
+     *     }
+     *     }
+     * </pre>
+     *
+     * @param root the aggregate root
+     * @return new instance of part
+     */
+    protected abstract P newPart(R root);
+
+    /**
+     * Creates a new aggregate part with the given ID.
+     *
+     * <p>The resulting part has default state and
+     * {@link io.spine.core.Versions#zero() Versions.zero()} version.
+     *
+     * @param id the aggregate ID
+     * @return new part instance
+     */
+    protected final P newPart(I id) {
+        final R root = newRoot(id);
+        final P part = newPart(root);
+        return part;
     }
 }

@@ -17,34 +17,52 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.aggregate;
+
+package io.spine.server.procman;
 
 import com.google.protobuf.Message;
+import io.spine.core.Event;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.CommandExpected;
 import io.spine.server.CommandHandlerTest;
 
 import java.util.List;
 
 import static io.spine.core.CommandEnvelope.of;
-import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
+import static io.spine.server.procman.CommandBusInjection.inject;
+import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
+import static java.util.stream.Collectors.toList;
 
 /**
- * An abstract base class for testing a single command handling in an {@link Aggregate}.
+ * An abstract base class for testing a single command handling in a {@link ProcessManager}.
  *
  * @param <C> type of the command to test
  * @param <I> ID message of the aggregate
  * @param <S> the aggregate state type
- * @param <A> the {@link Aggregate} type
+ * @param <P> the {@link ProcessManager} type
  * @author Vladyslav Lubenskyi
  */
-@SuppressWarnings("TestOnlyProblems")
-public abstract class AggregateCommandTest<C extends Message,
-                                           I,
-                                           S extends Message,
-                                           A extends Aggregate<I, S, ?>>
-        extends CommandHandlerTest<C, I, S, A> {
+public abstract class ProcManCommandTest<C extends Message,
+                                         I,
+                                         S extends Message,
+                                         P extends ProcessManager<I, S, ?>>
+        extends CommandHandlerTest<C, I, S, P> {
 
     @Override
-    protected List<? extends Message> dispatchTo(A entity) {
-        return dispatchCommand(entity, of(createCommand(message())));
+    protected List<? extends Message> dispatchTo(P entity) {
+        final List<Event> events = dispatch(entity, of(createCommand(message())));
+        return events.stream()
+                     .map(ProcManCommandTest::eventToMessage)
+                     .collect(toList());
+    }
+
+    private static Message eventToMessage(Event event) {
+        return AnyPacker.unpack(event.getMessage());
+    }
+
+    @Override
+    protected CommandExpected<S> expectThat(P entity) {
+        inject(entity, boundedContext().getCommandBus());
+        return super.expectThat(entity);
     }
 }

@@ -17,34 +17,38 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
-import io.spine.server.CommandHandlerTest;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
+import io.spine.server.ReactionTest;
 
 import java.util.List;
 
-import static io.spine.core.CommandEnvelope.of;
-import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
+import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchEvent;
 
 /**
- * An abstract base class for testing a single command handling in an {@link Aggregate}.
+ * An abstract base class for testing a single event reactor in an {@link Aggregate}.
  *
- * @param <C> type of the command to test
+ * @param <E> type of the event to test
  * @param <I> ID message of the aggregate
  * @param <S> the aggregate state type
  * @param <A> the {@link Aggregate} type
- * @author Vladyslav Lubenskyi
+ * @author Dmytro Dashenkov
  */
 @SuppressWarnings("TestOnlyProblems")
-public abstract class AggregateCommandTest<C extends Message,
-                                           I,
-                                           S extends Message,
-                                           A extends Aggregate<I, S, ?>>
-        extends CommandHandlerTest<C, I, S, A> {
+public abstract class AggregateEventReactionTest<E extends Message,
+                                                 I,
+                                                 S extends Message,
+                                                 A extends Aggregate<I, S, ?>>
+        extends ReactionTest<E, I, S, A> {
 
     @Override
-    protected List<? extends Message> dispatchTo(A entity) {
-        return dispatchCommand(entity, of(createCommand(message())));
+    protected List<? extends Message> dispatchTo(A aggregate) {
+        final Event event = createEvent(message());
+        final EventEnvelope envelope = EventEnvelope.of(event);
+        return dispatchEvent(aggregate, envelope);
     }
 }
