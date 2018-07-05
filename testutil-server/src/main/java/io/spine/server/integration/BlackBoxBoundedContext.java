@@ -40,6 +40,7 @@ import io.spine.util.Exceptions;
 import java.util.Collection;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
@@ -53,6 +54,7 @@ import static java.util.Collections.singletonList;
 @VisibleForTesting
 public class BlackBoxBoundedContext {
 
+    private static final String NOT_A_DOMAIN_EVENT_ERROR = "The Black Box bounded context expects a domain event, not Spine Event instance";
     private final BoundedContext boundedContext;
     private final TestActorRequestFactory requestFactory;
     private final TestEventFactory eventFactory;
@@ -155,15 +157,36 @@ public class BlackBoxBoundedContext {
      * Methods sending commands to the bounded context.
      ******************************************************************************/
 
+    /**
+     * Sends off a provided command to the Bounded Context.
+     *
+     * @param domainCommand a domain command to be dispatched to the Bounded Context
+     * @return current {@link BlackBoxBoundedContext black box} instance
+     */
     public BlackBoxBoundedContext receivesCommand(Message domainCommand) {
         return this.receivesCommands(singletonList(domainCommand));
     }
 
+    /**
+     * Sends off provided commands to the Bounded Context.
+     *
+     * @param firstCommand  a domain command to be dispatched to the Bounded Context first
+     * @param secondCommand a domain command to be dispatched to the Bounded Context second
+     * @param otherCommands optional domain commands to be dispatched to the Bounded Context
+     *                      in supplied order
+     * @return current {@link BlackBoxBoundedContext black box} instance
+     */
     public BlackBoxBoundedContext
     receivesCommands(Message firstCommand, Message secondCommand, Message... otherCommands) {
         return this.receivesCommands(asList(firstCommand, secondCommand, otherCommands));
     }
 
+    /**
+     * Sends off a provided command to the Bounded Context.
+     *
+     * @param domainCommands a list of domain commands to be dispatched to the Bounded Context
+     * @return current {@link BlackBoxBoundedContext black box} instance
+     */
     private BlackBoxBoundedContext receivesCommands(Collection<Message> domainCommands) {
         List<Command> commands = newArrayListWithCapacity(domainCommands.size());
         for (Message domainCommand : domainCommands) {
@@ -188,15 +211,39 @@ public class BlackBoxBoundedContext {
      * Methods sending events to the bounded context.
      ******************************************************************************/
 
+    /**
+     * Sends off a provided event to the Bounded Context.
+     *
+     * @param domainEvent a domain event to be dispatched to the Bounded Context
+     * @return current {@link BlackBoxBoundedContext black box} instance
+     */
     public BlackBoxBoundedContext receivesEvent(Message domainEvent) {
+        checkArgument(!(domainEvent instanceof Event), NOT_A_DOMAIN_EVENT_ERROR);
         return this.receivesEvents(singletonList(domainEvent));
     }
 
+    /**
+     * Sends off provided events to the Bounded Context.
+     *
+     * @param firstEvent  a domain event to be dispatched to the Bounded Context first
+     * @param secondEvent a domain event to be dispatched to the Bounded Context second
+     * @param otherEvents optional domain events to be dispatched to the Bounded Context
+     *                    in supplied order
+     * @return current {@link BlackBoxBoundedContext black box} instance
+     */
     public BlackBoxBoundedContext
     receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
+        checkArgument(!(firstEvent instanceof Event), NOT_A_DOMAIN_EVENT_ERROR);
+        checkArgument(!(secondEvent instanceof Event), NOT_A_DOMAIN_EVENT_ERROR);
         return this.receivesEvents(asList(firstEvent, secondEvent, otherEvents));
     }
 
+    /**
+     * Sends off provided events to the Bounded Context.
+     *
+     * @param domainEvents a list of domain event to be dispatched to the Bounded Context
+     * @return current {@link BlackBoxBoundedContext black box} instance
+     */
     private BlackBoxBoundedContext receivesEvents(Collection<Message> domainEvents) {
         List<Event> events = newArrayListWithCapacity(domainEvents.size());
         for (Message domainEvent : domainEvents) {
@@ -221,12 +268,29 @@ public class BlackBoxBoundedContext {
      * Methods verifying the bounded context behaviour.
      ******************************************************************************/
 
+    /**
+     * Executes the provided verifier, which throws an assertion error in case of unexpected results.
+     *
+     * @param verifier a verifier that checks the events emitted in this Bounded Context
+     * @return current {@link BlackBoxBoundedContext black box} instance
+     */
     public BlackBoxBoundedContext verifiesThat(EmittedEventsVerifier verifier) {
         EmittedEvents events = emittedEvents();
         verifier.verify(events);
         return this;
     }
 
+    private EmittedEvents emittedEvents() {
+        List<Event> events = readAllEvents();
+        return new EmittedEvents(events);
+    }
+
+    /**
+     * Executes the provided verifier, which throws an assertion error in case of unexpected results.
+     *
+     * @param verifier a verifier that checks the command acknowledgements in this Bounded Context
+     * @return current {@link BlackBoxBoundedContext black box} instance
+     */
     public BlackBoxBoundedContext verifiesThat(CommandAcksVerifier verifier) {
         CommandAcks acks = commandAcks();
         verifier.verify(acks);
@@ -240,11 +304,6 @@ public class BlackBoxBoundedContext {
     /*
      * Methods reading the events which were emitted in the bounded context.
      ******************************************************************************/
-
-    private EmittedEvents emittedEvents() {
-        List<Event> events = readAllEvents();
-        return new EmittedEvents(events);
-    }
 
     /**
      * Reads all events from the bounded context for the provided tenant.
