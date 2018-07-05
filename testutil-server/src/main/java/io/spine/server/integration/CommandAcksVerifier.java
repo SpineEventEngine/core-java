@@ -367,6 +367,7 @@ public abstract class CommandAcksVerifier {
          * {@link #and(CommandAcksVerifier) and()}.
          */
         private CommandAcksVerifierCombination(Collection<CommandAcksVerifier> verifiers) {
+            super();
             this.verifiers = ImmutableList.copyOf(verifiers);
         }
 
