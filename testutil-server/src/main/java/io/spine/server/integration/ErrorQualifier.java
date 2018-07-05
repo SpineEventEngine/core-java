@@ -62,7 +62,7 @@ public abstract class ErrorQualifier implements Predicate<Error> {
         return new ErrorQualifier() {
             @Override
             protected String description() {
-                return String.format("%s. %s", current.description(), other.description());
+                return current.description() + ". " + other.description();
             }
 
             @Override
