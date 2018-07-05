@@ -45,10 +45,10 @@ message CommandLifecycle {
 
     spine.client.EntityId receiver = 3;
 
-    Status status = 4 [(required) = true];
+    CommandStatus status = 4 [(required) = true];
 }
 
-message Status {
+message CommandStatus {
 
     google.protobuf.Timestamp when_received = 1;
 

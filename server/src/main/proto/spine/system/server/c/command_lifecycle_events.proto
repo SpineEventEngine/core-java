@@ -48,26 +48,26 @@ message CommandAcknowledged {
     spine.core.CommandId id = 1;
 }
 
-message CommandDispatch {
+message CommandDispatched {
 
     spine.core.CommandId id = 1;
 
     spine.client.EntityId receiver = 2;
 }
 
-message CommandMarkedAsHandled {
+message CommandHandled {
 
     spine.core.CommandId id = 1;
 }
 
-message CommandMarkedAsErrored {
+message CommandErrored {
 
     spine.core.CommandId id = 1;
 
     spine.base.Error error = 2;
 }
 
-message CommandMarkedAsRejected {
+message CommandRejected {
 
     spine.core.CommandId id = 1;
 
