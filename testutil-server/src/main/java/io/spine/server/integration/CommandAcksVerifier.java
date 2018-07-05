@@ -199,9 +199,17 @@ public abstract class CommandAcksVerifier {
         }
 
         @Override
-        public CommandAcksVerifier and(CommandAcksVerifier verifier) {
-            verifiers.add(verifier);
+        public CommandsAcksListVerifier and(CommandAcksVerifier verifier) {
+            if (verifier instanceof CommandsAcksListVerifier) {
+                appendListVerifierItems((CommandsAcksListVerifier) verifier);
+            } else {
+                verifiers.add(verifier);
+            }
             return this;
+        }
+
+        private void appendListVerifierItems(CommandsAcksListVerifier verifier) {
+            verifiers.addAll(verifier.verifiers);
         }
     }
 
