@@ -27,7 +27,7 @@ import io.spine.annotation.Internal;
  * @author Dmytro Dashenkov
  */
 @Internal
-public interface ControlBus { // TODO:2018-07-05:dmytro.dashenkov: Rename. This ain't Bus.
+public interface SystemGateway {
 
     void post(Message systemCommand);
 }

@@ -39,7 +39,7 @@ import static io.spine.grpc.StreamObservers.noOpObserver;
  * @author Dmytro Dashenkov
  */
 @Internal
-public final class DefaultControlBus implements ControlBus {
+public final class DefaultSystemGateway implements SystemGateway {
 
     private static final UserId SYSTEM = UserId
             .newBuilder()
@@ -48,7 +48,7 @@ public final class DefaultControlBus implements ControlBus {
 
     private final BoundedContext system;
 
-    public DefaultControlBus(BoundedContext system) {
+    public DefaultSystemGateway(BoundedContext system) {
         this.system = system;
     }
 

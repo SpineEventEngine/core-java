@@ -27,7 +27,7 @@ import io.spine.annotation.Internal;
  * @author Dmytro Dashenkov
  */
 @Internal
-public enum NoOpControlBus implements ControlBus {
+public enum NoOpSystemGateway implements SystemGateway {
 
     INSTANCE;
 

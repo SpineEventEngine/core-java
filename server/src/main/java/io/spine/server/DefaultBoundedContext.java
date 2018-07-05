@@ -20,8 +20,8 @@
 
 package io.spine.server;
 
-import io.spine.system.server.ControlBus;
-import io.spine.system.server.DefaultControlBus;
+import io.spine.system.server.DefaultSystemGateway;
+import io.spine.system.server.SystemGateway;
 
 /**
  * @author Dmytro Dashenkov
@@ -29,12 +29,12 @@ import io.spine.system.server.DefaultControlBus;
 final class DefaultBoundedContext extends BoundedContext {
 
     private final SystemBoundedContext system;
-    private final ControlBus controlBus;
+    private final SystemGateway systemGateway;
 
     DefaultBoundedContext(Builder builder, SystemBoundedContext systemBoundedContext) {
         super(builder);
         this.system = systemBoundedContext;
-        this.controlBus = new DefaultControlBus(system);
+        this.systemGateway = new DefaultSystemGateway(system);
     }
 
     void init() {
@@ -42,7 +42,7 @@ final class DefaultBoundedContext extends BoundedContext {
     }
 
     @Override
-    public ControlBus getControlBus() {
-        return controlBus;
+    public SystemGateway getSystemGateway() {
+        return systemGateway;
     }
 }

@@ -20,8 +20,8 @@
 
 package io.spine.server;
 
-import io.spine.system.server.ControlBus;
-import io.spine.system.server.NoOpControlBus;
+import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.SystemGateway;
 
 /**
  * @author Dmytro Dashenkov
@@ -33,7 +33,7 @@ final class SystemBoundedContext extends BoundedContext {
     }
 
     @Override
-    public ControlBus getControlBus() {
-        return NoOpControlBus.INSTANCE;
+    public SystemGateway getSystemGateway() {
+        return NoOpSystemGateway.INSTANCE;
     }
 }

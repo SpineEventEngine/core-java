@@ -378,7 +378,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     private void postSystem(Message systemCommand) {
-        getBoundedContext().getControlBus()
+        getBoundedContext().getSystemGateway()
                            .post(systemCommand);
     }
 
