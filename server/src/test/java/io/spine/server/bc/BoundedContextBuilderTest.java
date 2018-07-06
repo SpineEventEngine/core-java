@@ -117,7 +117,8 @@ class BoundedContextBuilderTest {
             final String nameString = getClass().getName();
             assertEquals(nameString, BoundedContext.newBuilder()
                                                    .setName(nameString)
-                                                   .getName());
+                                                   .getName()
+                                                   .getValue());
         }
 
         @Test
