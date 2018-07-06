@@ -37,6 +37,7 @@ final class DefaultBoundedContext extends BoundedContext {
         this.systemGateway = new DefaultSystemGateway(system);
     }
 
+    @Override
     void init() {
         getStand().onCreated(this);
     }

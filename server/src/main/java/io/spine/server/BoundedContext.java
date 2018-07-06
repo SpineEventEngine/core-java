@@ -116,6 +116,8 @@ public abstract class BoundedContext
                                                     .build();
     }
 
+    abstract void init();
+
     /**
      * Creates a new value object for a bounded context name.
      *
@@ -494,6 +496,7 @@ public abstract class BoundedContext
             this.setName(systemName);
             SystemBoundedContext systemContext = new SystemBoundedContext(this);
             this.setName(name);
+            systemContext.init();
 
             return systemContext;
         }
