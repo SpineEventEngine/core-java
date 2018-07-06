@@ -36,7 +36,6 @@ import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchComma
  * @param <A> the {@link Aggregate} type
  * @author Vladyslav Lubenskyi
  */
-@SuppressWarnings("TestOnlyProblems")
 public abstract class AggregateCommandTest<C extends Message,
                                            I,
                                            S extends Message,

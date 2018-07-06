@@ -38,7 +38,6 @@ import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchEvent
  * @param <A> the {@link Aggregate} type
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings("TestOnlyProblems")
 public abstract class AggregateEventReactionTest<E extends Message,
                                                  I,
                                                  S extends Message,

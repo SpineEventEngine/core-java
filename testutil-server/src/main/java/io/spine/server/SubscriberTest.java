@@ -20,6 +20,7 @@
 
 package io.spine.server;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.server.command.TestEventFactory;
@@ -42,15 +43,16 @@ public abstract class SubscriberTest<M extends Message,
     private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
     @Override
+    @CanIgnoreReturnValue
     protected Expected<S> expectThat(E entity) {
         final S initialState = entity.getState();
-        List<? extends Message> unused = dispatchTo(entity);
+        dispatchTo(entity);
         return new Expected<>(initialState, entity.getState());
     }
 
     protected final Event createEvent() {
-        final Message eventMessage = message();
-        final Event result = eventFactory.createEvent(eventMessage);
+        Message eventMessage = message();
+        Event result = eventFactory.createEvent(eventMessage);
         return result;
     }
 
