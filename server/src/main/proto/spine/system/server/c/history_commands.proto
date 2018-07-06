@@ -35,46 +35,46 @@ import "google/protobuf/any.proto";
 
 import "spine/core/event.proto";
 import "spine/core/command.proto";
-import "spine/client/entities.proto";
+import "spine/system/server/entity_history.proto";
 
 message CreateEntity {
 
-    spine.client.EntityId id = 1 [(required) = true];
+    EntityHistoryId id = 1 [(required) = true];
 
     EntityOption.Kind kind = 2 [(required) = true];
 }
 
 message DispatchEventToSubscriber {
 
-    spine.client.EntityId receiver = 1 [(required) = true];
+    EntityHistoryId receiver = 1 [(required) = true];
 
     spine.core.Event payload = 2 [(required) = true, (valid) = true];
 }
 
 message DispatchEventToReactor {
 
-    spine.client.EntityId receiver = 1 [(required) = true];
+    EntityHistoryId receiver = 1 [(required) = true];
 
     spine.core.Event payload = 2 [(required) = true, (valid) = true];
 }
 
 message DispatchEventToApplier {
 
-    spine.client.EntityId receiver = 1 [(required) = true];
+    EntityHistoryId receiver = 1 [(required) = true];
 
     spine.core.Event payload = 2 [(required) = true, (valid) = true];
 }
 
 message DispatchCommandToHandler {
 
-    spine.client.EntityId receiver = 1 [(required) = true];
+    EntityHistoryId receiver = 1 [(required) = true];
 
     spine.core.Command payload = 2 [(required) = true, (valid) = true];
 }
 
 message ChangeEntityState {
 
-    spine.client.EntityId id = 1 [(required) = true];
+    EntityHistoryId id = 1 [(required) = true];
 
     google.protobuf.Any new_state = 2 [(required) = true];
 
@@ -83,28 +83,28 @@ message ChangeEntityState {
 
 message ArchiveEntity {
 
-    spine.client.EntityId id = 1 [(required) = true];
+    EntityHistoryId id = 1 [(required) = true];
 
     google.protobuf.Any message_id = 2 [(required) = true];
 }
 
 message DeleteEntity {
 
-    spine.client.EntityId id = 1 [(required) = true];
+    EntityHistoryId id = 1 [(required) = true];
 
     google.protobuf.Any message_id = 2 [(required) = true];
 }
 
 message ExtractEntityFromArchive {
 
-    spine.client.EntityId id = 1 [(required) = true];
+    EntityHistoryId id = 1 [(required) = true];
 
     google.protobuf.Any message_id = 2 [(required) = true];
 }
 
 message RestoreEntity {
 
-    spine.client.EntityId id = 1 [(required) = true];
+    EntityHistoryId id = 1 [(required) = true];
 
     google.protobuf.Any message_id = 2 [(required) = true];
 }

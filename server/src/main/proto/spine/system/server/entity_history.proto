@@ -38,10 +38,17 @@ import "spine/core/command.proto";
 import "spine/core/event.proto";
 import "spine/client/entities.proto";
 
+message EntityHistoryId {
+
+    spine.client.EntityId entity_id = 1;
+
+    string type_url = 2;
+}
+
 message EntityHistory {
     option (entity).kind = AGGREGATE;
 
-    spine.client.EntityId id = 1;
+    EntityHistoryId id = 1;
 
     EntityOption.Kind kind = 2;
 

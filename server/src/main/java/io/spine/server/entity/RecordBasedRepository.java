@@ -110,7 +110,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     @Override
-    protected E doCreate(I id) {
+    public E create(I id) {
         E result = entityFactory().create(id);
         return result;
     }
