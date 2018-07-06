@@ -24,6 +24,7 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
+import io.spine.client.EntityId;
 import io.spine.core.BoundedContextName;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
@@ -59,6 +60,8 @@ import io.spine.server.route.RejectionRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.system.server.DispatchEventToApplier;
+import io.spine.system.server.EntityHistoryId;
 
 import java.util.List;
 import java.util.Set;
@@ -66,6 +69,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
+import static io.spine.base.Identifier.pack;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -415,6 +419,24 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     protected final RejectionRouting<I> getRejectionRouting() {
         return rejectionRouting;
+    }
+
+    void onEventApplied(I id, Event event) {
+        EntityId entityId = EntityId
+                .newBuilder()
+                .setId(pack(id))
+                .build();
+        EntityHistoryId historyId = EntityHistoryId
+                .newBuilder()
+                .setTypeUrl(getEntityStateType().value())
+                .setEntityId(entityId)
+                .build();
+        DispatchEventToApplier systemCommand = DispatchEventToApplier
+                .newBuilder()
+                .setReceiver(historyId)
+                .setPayload(event)
+                .build();
+        postSystem(systemCommand);
     }
 
     /**

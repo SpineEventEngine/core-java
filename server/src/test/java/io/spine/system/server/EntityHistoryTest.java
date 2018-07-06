@@ -117,9 +117,16 @@ class EntityHistoryTest {
             context.getCommandBus()
                    .post(command, noOpObserver());
             List<? extends Message> systemEvents = eventSubscriber.events();
-            assertEquals(2, systemEvents.size());
-            checkEntityCreated(systemEvents.get(0), AGGREGATE, TypeUrl.of(Person.class));
-            checkEntityCreated(systemEvents.get(1), PROJECTION, TypeUrl.of(PersonView.class));
+            assertEquals(5, systemEvents.size());
+
+            TypeUrl aggregateType = TypeUrl.of(Person.class);
+            TypeUrl projectionType = TypeUrl.of(PersonView.class);
+
+            checkEntityCreated(systemEvents.get(0), AGGREGATE, aggregateType);
+            checkCommandDispatchedToHandler(systemEvents.get(1), aggregateType);
+            checkEventDispatchedToApplier(systemEvents.get(2), aggregateType);
+            checkEntityCreated(systemEvents.get(3), PROJECTION, projectionType);
+            checkEventDispatchedToSubscriber(systemEvents.get(4), projectionType);
         }
 
         private void checkEntityCreated(Message event,
@@ -135,7 +142,52 @@ class EntityHistoryTest {
                                                                .getTypeUrl());
             assertEquals(entityKind, entityCreatedEvent.getKind());
         }
-    }
 
+        private void checkEventDispatchedToSubscriber(Message event,
+                                                      TypeUrl entityType) {
+            assertThat(event, instanceOf(EventDispatchedToSubscriber.class));
+            EventDispatchedToSubscriber eventDispatchedEvent = (EventDispatchedToSubscriber) event;
+            StringValue actualIdValue = unpack(eventDispatchedEvent.getReceiver()
+                                                                 .getEntityId()
+                                                                 .getId());
+            PersonCreated payload = unpack(eventDispatchedEvent.getPayload()
+                                                             .getEvent()
+                                                             .getMessage());
+            assertEquals(id, actualIdValue.getValue());
+            assertEquals(entityType.value(), eventDispatchedEvent.getReceiver()
+                                                               .getTypeUrl());
+            assertEquals(id, payload.getId());
+        }
+
+        private void checkEventDispatchedToApplier(Message event, TypeUrl entityType) {
+            assertThat(event, instanceOf(EventDispatchedToApplier.class));
+            EventDispatchedToApplier eventDispatchedEvent = (EventDispatchedToApplier) event;
+            StringValue actualIdValue = unpack(eventDispatchedEvent.getReceiver()
+                                                                   .getEntityId()
+                                                                   .getId());
+            PersonCreated payload = unpack(eventDispatchedEvent.getPayload()
+                                                               .getEvent()
+                                                               .getMessage());
+            assertEquals(id, actualIdValue.getValue());
+            assertEquals(entityType.value(), eventDispatchedEvent.getReceiver()
+                                                                 .getTypeUrl());
+            assertEquals(id, payload.getId());
+        }
+
+        private void checkCommandDispatchedToHandler(Message event, TypeUrl entityType) {
+            assertThat(event, instanceOf(CommandDispatchedToHandler.class));
+            CommandDispatchedToHandler commandDispatchedEvent = (CommandDispatchedToHandler) event;
+            StringValue actualIdValue = unpack(commandDispatchedEvent.getReceiver()
+                                                                     .getEntityId()
+                                                                     .getId());
+            CreatePerson payload = unpack(commandDispatchedEvent.getPayload()
+                                                                .getCommand()
+                                                                .getMessage());
+            assertEquals(id, actualIdValue.getValue());
+            assertEquals(entityType.value(), commandDispatchedEvent.getReceiver()
+                                                                   .getTypeUrl());
+            assertEquals(id, payload.getId());
+        }
+    }
 }
 

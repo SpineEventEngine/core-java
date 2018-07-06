@@ -21,10 +21,11 @@
 package io.spine.system.server;
 
 import io.spine.annotation.Internal;
-import io.spine.core.EventContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+
+import static io.spine.base.Time.getCurrentTime;
 
 /**
  * @author Dmytro Dashenkov
@@ -48,33 +49,53 @@ public final class EntityHistoryAggregate
 
     @Assign
     EventDispatchedToSubscriber handle(DispatchEventToSubscriber command) {
+        DispatchedEvent dispatchedEvent = DispatchedEvent
+                .newBuilder()
+                .setEvent(command.getPayload())
+                .setWhenDispatched(getCurrentTime())
+                .build();
         return EventDispatchedToSubscriber.newBuilder()
                                           .setReceiver(command.getReceiver())
-                                          .setPayload(command.getPayload())
+                                          .setPayload(dispatchedEvent)
                                           .build();
     }
 
     @Assign
     EventDispatchedToReactor handle(DispatchEventToReactor command) {
+        DispatchedEvent dispatchedEvent = DispatchedEvent
+                .newBuilder()
+                .setEvent(command.getPayload())
+                .setWhenDispatched(getCurrentTime())
+                .build();
         return EventDispatchedToReactor.newBuilder()
                                        .setReceiver(command.getReceiver())
-                                       .setPayload(command.getPayload())
+                                       .setPayload(dispatchedEvent)
                                        .build();
     }
 
     @Assign
     EventDispatchedToApplier handle(DispatchEventToApplier command) {
+        DispatchedEvent dispatchedEvent = DispatchedEvent
+                .newBuilder()
+                .setEvent(command.getPayload())
+                .setWhenDispatched(getCurrentTime())
+                .build();
         return EventDispatchedToApplier.newBuilder()
                                        .setReceiver(command.getReceiver())
-                                       .setPayload(command.getPayload())
+                                       .setPayload(dispatchedEvent)
                                        .build();
     }
 
     @Assign
     CommandDispatchedToHandler handle(DispatchCommandToHandler command) {
+        DispatchedCommand dispatchedCommand = DispatchedCommand
+                .newBuilder()
+                .setCommand(command.getPayload())
+                .setWhenDispatched(getCurrentTime())
+                .build();
         return CommandDispatchedToHandler.newBuilder()
                                          .setReceiver(command.getReceiver())
-                                         .setPayload(command.getPayload())
+                                         .setPayload(dispatchedCommand)
                                          .build();
     }
 
@@ -125,43 +146,23 @@ public final class EntityHistoryAggregate
     }
 
     @Apply
-    private void on(EventDispatchedToSubscriber event, EventContext context) {
-        DispatchedEvent dispatchedEvent = DispatchedEvent
-                .newBuilder()
-                .setEvent(event.getPayload())
-                .setWhenDispatched(context.getTimestamp())
-                .build();
-        getBuilder().addEvents(dispatchedEvent);
+    private void on(EventDispatchedToSubscriber event) {
+        getBuilder().addEvents(event.getPayload());
     }
 
     @Apply
-    private void on(EventDispatchedToReactor event, EventContext context) {
-        DispatchedEvent dispatchedEvent = DispatchedEvent
-                .newBuilder()
-                .setEvent(event.getPayload())
-                .setWhenDispatched(context.getTimestamp())
-                .build();
-        getBuilder().addEvents(dispatchedEvent);
+    private void on(EventDispatchedToReactor event) {
+        getBuilder().addEvents(event.getPayload());
     }
 
     @Apply
-    private void on(EventDispatchedToApplier event, EventContext context) {
-        DispatchedEvent dispatchedEvent = DispatchedEvent
-                .newBuilder()
-                .setEvent(event.getPayload())
-                .setWhenDispatched(context.getTimestamp())
-                .build();
-        getBuilder().addEvents(dispatchedEvent);
+    private void on(EventDispatchedToApplier event) {
+        getBuilder().addEvents(event.getPayload());
     }
 
     @Apply
-    private void on(CommandDispatchedToHandler event, EventContext context) {
-        DispatchedCommand dispatchedCommand = DispatchedCommand
-                .newBuilder()
-                .setCommand(event.getPayload())
-                .setWhenDispatched(context.getTimestamp())
-                .build();
-        getBuilder().addCommands(dispatchedCommand);
+    private void on(CommandDispatchedToHandler event) {
+        getBuilder().addCommands(event.getPayload());
     }
 
     @Apply

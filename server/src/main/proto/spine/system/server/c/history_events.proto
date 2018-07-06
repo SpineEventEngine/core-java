@@ -48,28 +48,28 @@ message EventDispatchedToSubscriber {
 
     EntityHistoryId receiver = 1 [(required) = true];
 
-    spine.core.Event payload = 2 [(required) = true, (valid) = true];
+    DispatchedEvent payload = 2 [(required) = true, (valid) = true];
 }
 
 message EventDispatchedToReactor {
 
     EntityHistoryId receiver = 1 [(required) = true];
 
-    spine.core.Event payload = 2 [(required) = true, (valid) = true];
+    DispatchedEvent payload = 2 [(required) = true, (valid) = true];
 }
 
 message EventDispatchedToApplier {
 
     EntityHistoryId receiver = 1 [(required) = true];
 
-    spine.core.Event payload = 2 [(required) = true, (valid) = true];
+    DispatchedEvent payload = 2 [(required) = true, (valid) = true];
 }
 
 message CommandDispatchedToHandler {
 
     EntityHistoryId receiver = 1 [(required) = true];
 
-    spine.core.Command payload = 2 [(required) = true, (valid) = true];
+    DispatchedCommand payload = 2 [(required) = true, (valid) = true];
 }
 
 message EntityStateChanged {

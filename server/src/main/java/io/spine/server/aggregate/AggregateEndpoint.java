@@ -26,6 +26,7 @@ import io.spine.core.Event;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.LifecycleFlags;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -54,8 +55,12 @@ abstract class AggregateEndpoint<I,
 
         final List<? extends Message> eventMessages = doDispatch(aggregate, envelope());
         final AggregateTransaction tx = startTransaction(aggregate);
-        aggregate.apply(eventMessages, envelope());
+        Collection<Event> events = aggregate.apply(eventMessages, envelope());
         tx.commit();
+
+        events.forEach(
+                event -> repository().onEventApplied(aggregateId, event)
+        );
 
         // Update lifecycle flags only if the message was handled successfully and flags changed.
         final LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();

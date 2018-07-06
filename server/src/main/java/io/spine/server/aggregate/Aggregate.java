@@ -21,6 +21,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -306,7 +307,8 @@ public abstract class Aggregate<I,
      * @param origin        the envelope of a message which caused the events
      * @see #ensureEventMessage(Message)
      */
-    void apply(Iterable<? extends Message> eventMessages, MessageEnvelope origin) {
+    @CanIgnoreReturnValue
+    Collection<Event> apply(Iterable<? extends Message> eventMessages, MessageEnvelope origin) {
         final List<? extends Message> messages = newArrayList(eventMessages);
         final EventFactory eventFactory =
                 EventFactory.on(origin, getProducerId());
@@ -337,6 +339,8 @@ public abstract class Aggregate<I,
         }
         play(events);
         uncommittedEvents.addAll(events);
+
+        return events;
     }
 
     /**
