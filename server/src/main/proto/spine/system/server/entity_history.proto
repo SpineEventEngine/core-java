@@ -61,12 +61,12 @@ message DispatchedEvent {
 
     spine.core.Event event = 1;
 
-    google.protobuf.Timestamp when_dispatched = 2 [(required) = true, (when).in = PAST];
+    google.protobuf.Timestamp when_dispatched = 2 [(required) = true];
 }
 
 message DispatchedCommand {
 
     spine.core.Command command = 1;
 
-    google.protobuf.Timestamp when_dispatched = 2 [(required) = true, (when).in = PAST];
+    google.protobuf.Timestamp when_dispatched = 2 [(required) = true];
 }
