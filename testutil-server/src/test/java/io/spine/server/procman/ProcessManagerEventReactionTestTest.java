@@ -59,6 +59,7 @@ class ProcessManagerEventReactionTestTest {
 
     @Test
     @DisplayName("dispatch tested command and store results")
+    @SuppressWarnings("CheckReturnValue")
     void shouldDispatchCommand() {
         pmEventTest.setUp();
         pmEventTest.init();

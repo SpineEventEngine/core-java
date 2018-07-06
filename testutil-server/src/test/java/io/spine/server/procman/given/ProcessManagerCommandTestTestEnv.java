@@ -68,6 +68,7 @@ public class ProcessManagerCommandTestTestEnv {
         }
 
         @Assign
+        @SuppressWarnings("CheckReturnValue")
         UInt64Value handle(UInt64Value command, CommandContext context) {
             newRouterFor(command, context).add(NESTED_COMMAND)
                                           .routeAll();

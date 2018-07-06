@@ -72,6 +72,7 @@ public class ProcessManagerEventReactionTestTestEnv {
         }
 
         @React
+        @SuppressWarnings("CheckReturnValue")
         UInt32Value on(UInt64Value event, EventContext context) {
             StringValue command = NESTED_COMMAND;
             newRouterFor(event, context.getCommandContext()).add(command)

@@ -99,7 +99,6 @@ public class ProjectionTestTestEnv {
             return TEST_EVENT;
         }
 
-        @CanIgnoreReturnValue
         @Override
         public Expected<StringValue> expectThat(TestProjection entity) {
             return super.expectThat(entity);

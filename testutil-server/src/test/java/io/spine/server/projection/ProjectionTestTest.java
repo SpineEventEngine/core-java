@@ -55,6 +55,7 @@ class ProjectionTestTest {
 
     @Test
     @DisplayName("dispatch tested event and store results")
+    @SuppressWarnings("CheckReturnValue")
     void shouldDispatchCommand() {
         projectionTest.setUp();
         projectionTest.init();
