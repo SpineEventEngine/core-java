@@ -168,7 +168,7 @@ public abstract class MessageHandlerTest<M extends Message,
     }
 
     @BeforeEach
-    void configureBoundedContext() {
+    protected final void configureBoundedContext() {
         boundedContext = TestBoundedContext.create(new TrackingBusFilter());
         entityRepository = createEntityRepository();
         assertNotNull(entityRepository);

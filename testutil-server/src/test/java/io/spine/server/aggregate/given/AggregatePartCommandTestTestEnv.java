@@ -21,7 +21,7 @@
 package io.spine.server.aggregate.given;
 
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import io.spine.base.Identifier;
 import io.spine.server.BoundedContext;
@@ -78,12 +78,12 @@ public class AggregatePartCommandTestTestEnv {
         }
 
         @Assign
-        public Timestamp handle(Timestamp timestamp) {
-            return timestamp;
+        public StringValue handle(StringValue command) {
+            return command;
         }
 
         @Apply
-        void on(Timestamp timestamp) {
+        void on(StringValue event) {
             getBuilder().setValue(getState().getValue() + 1);
         }
     }
@@ -103,12 +103,12 @@ public class AggregatePartCommandTestTestEnv {
     /**
      * The test harness class that tests how {@code TimePrinter} handles its command.
      */
-    public static class TimeCounterTest extends AggregatePartCommandTest<Timestamp,
+    public static class TimeCounterTest extends AggregatePartCommandTest<StringValue,
             String, UInt32Value, TimerCounter, TimerCounterRoot> {
 
-        public static final Timestamp TEST_COMMAND = Timestamp.newBuilder()
-                                                              .setNanos(1024)
-                                                              .build();
+        public static final StringValue TEST_COMMAND = StringValue.newBuilder()
+                                                                  .setValue("test command")
+                                                                  .build();
 
         @Override
         protected String newId() {
@@ -116,7 +116,7 @@ public class AggregatePartCommandTestTestEnv {
         }
 
         @Override
-        protected Timestamp createMessage() {
+        protected StringValue createMessage() {
             return TEST_COMMAND;
         }
 
