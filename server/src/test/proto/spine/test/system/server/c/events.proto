@@ -45,4 +45,12 @@ message PersonNameCreated {
     string first_name = 2;
 }
 
+message PersonHidden {
 
+    string id = 1;
+}
+
+message PersonUnHidden {
+
+    string id = 1;
+}

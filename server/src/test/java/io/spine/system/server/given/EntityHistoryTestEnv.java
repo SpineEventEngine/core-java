@@ -20,7 +20,7 @@
 
 package io.spine.system.server.given;
 
-import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
@@ -46,20 +46,29 @@ import io.spine.system.server.EntityStateChanged;
 import io.spine.system.server.EventDispatchedToApplier;
 import io.spine.system.server.EventDispatchedToReactor;
 import io.spine.system.server.EventDispatchedToSubscriber;
+import io.spine.system.server.HidePerson;
 import io.spine.system.server.Person;
 import io.spine.system.server.PersonCreated;
 import io.spine.system.server.PersonCreation;
 import io.spine.system.server.PersonCreationVBuilder;
 import io.spine.system.server.PersonFirstName;
 import io.spine.system.server.PersonFirstNameVBuilder;
+import io.spine.system.server.PersonHidden;
 import io.spine.system.server.PersonNameCreated;
 import io.spine.system.server.PersonVBuilder;
 import io.spine.system.server.PersonView;
 import io.spine.system.server.PersonViewVBuilder;
+import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Iterator;
 import java.util.List;
 
+import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newLinkedList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Dmytro Dashenkov
@@ -76,8 +85,27 @@ public final class EntityHistoryTestEnv {
         
         private final List<Message> events = newLinkedList();
 
-        public List<? extends Message> events() {
-            return ImmutableList.copyOf(events);
+        private @Nullable Iterator<? extends Message> eventIterator;
+
+        public int eventsCount() {
+            return events.size();
+        }
+
+        public void clearEvents() {
+            events.clear();
+        }
+
+        @CanIgnoreReturnValue
+        public <E extends Message> E nextEvent(Class<E> eventType) {
+            if (eventIterator == null) {
+                eventIterator = copyOf(events).iterator();
+            }
+            assertTrue(eventIterator.hasNext());
+            Message next = eventIterator.next();
+            assertThat(next, instanceOf(eventType));
+            @SuppressWarnings("unchecked")
+            E result = (E) next;
+            return result;
         }
 
         @Subscribe
@@ -133,6 +161,8 @@ public final class EntityHistoryTestEnv {
 
     public static class TestAggregate extends Aggregate<String, Person, PersonVBuilder> {
 
+        public static final TypeUrl TYPE = TypeUrl.of(Person.class);
+
         protected TestAggregate(String id) {
             super(id);
         }
@@ -145,14 +175,28 @@ public final class EntityHistoryTestEnv {
                                 .build();
         }
 
+        @Assign
+        PersonHidden handle(HidePerson command) {
+            return PersonHidden.newBuilder()
+                               .setId(command.getId())
+                               .build();
+        }
+
         @Apply
         private void on(PersonCreated event) {
             getBuilder().setId(event.getId())
                         .setName(event.getName());
         }
+
+        @Apply
+        private void on(PersonHidden event) {
+            setArchived(true);
+        }
     }
 
     public static class TestProjection extends Projection<String, PersonView, PersonViewVBuilder> {
+
+        public static final TypeUrl TYPE = TypeUrl.of(PersonView.class);
 
         protected TestProjection(String id) {
             super(id);
@@ -163,11 +207,18 @@ public final class EntityHistoryTestEnv {
             getBuilder().setId(event.getId())
                         .setName(event.getName());
         }
+
+        @Subscribe
+        public void on(PersonHidden event) {
+            setDeleted(true);
+        }
     }
 
     public static class TestProcman extends ProcessManager<String,
                                                            PersonCreation,
                                                            PersonCreationVBuilder> {
+
+        public static final TypeUrl TYPE = TypeUrl.of(PersonCreation.class);
 
         protected TestProcman(String id) {
             super(id);
@@ -185,6 +236,9 @@ public final class EntityHistoryTestEnv {
                                                                 PersonFirstName,
                                                                 PersonFirstNameVBuilder,
                                                                 TestAggregateRoot> {
+
+        public static final TypeUrl TYPE = TypeUrl.of(PersonFirstName.class);
+        
         protected TestAggregatePart(TestAggregateRoot root) {
             super(root);
         }
