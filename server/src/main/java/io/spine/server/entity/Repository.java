@@ -27,8 +27,10 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
+import io.spine.client.EntityId;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
+import io.spine.option.EntityOption;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
 import io.spine.server.model.Model;
@@ -36,6 +38,8 @@ import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.string.Stringifiers;
+import io.spine.system.server.CreateEntity;
+import io.spine.system.server.EntityHistoryId;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -46,6 +50,7 @@ import java.util.Iterator;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.base.Identifier.pack;
 import static io.spine.server.entity.Repository.GenericParameter.ENTITY;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
@@ -220,6 +225,24 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @return new entity instance
      */
     public abstract E create(I id);
+
+    @Internal
+    protected final void onCreateEntity(I id, EntityOption.Kind entityKind) {
+        EntityId entityId = EntityId
+                .newBuilder()
+                .setId(pack(id))
+                .build();
+        TypeUrl type = getEntityStateType();
+        EntityHistoryId historyId = EntityHistoryId
+                .newBuilder()
+                .setEntityId(entityId)
+                .setTypeUrl(type.value())
+                .build();
+        postSystem(CreateEntity.newBuilder()
+                               .setId(historyId)
+                               .setKind(entityKind)
+                               .build());
+    }
 
     /**
      * Stores the passed object.

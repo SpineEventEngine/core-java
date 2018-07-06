@@ -63,6 +63,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
+import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -88,36 +89,27 @@ public abstract class ProcessManagerRepository<I,
 
     /** The rejection routing schema used by this repository. */
     private final RejectionRouting<I> rejectionRouting =
-            RejectionRouting.withDefault(RejectionProducers.<I>fromContext());
+            RejectionRouting.withDefault(RejectionProducers.fromContext());
 
     private final Supplier<PmCommandDelivery<I, P>> commandDeliverySupplier =
-            memoize(new Supplier<PmCommandDelivery<I, P>>() {
-                @Override
-                public PmCommandDelivery<I, P> get() {
-                    final PmCommandDelivery<I, P> result =
-                            new PmCommandDelivery<>(ProcessManagerRepository.this);
-                    return result;
-                }
+            memoize(() -> {
+                final PmCommandDelivery<I, P> result =
+                        new PmCommandDelivery<>(this);
+                return result;
             });
 
     private final Supplier<PmEventDelivery<I, P>> eventDeliverySupplier =
-            memoize(new Supplier<PmEventDelivery<I, P>>() {
-                @Override
-                public PmEventDelivery<I, P> get() {
-                    final PmEventDelivery<I, P> result =
-                            new PmEventDelivery<>(ProcessManagerRepository.this);
-                    return result;
-                }
+            memoize(() -> {
+                final PmEventDelivery<I, P> result =
+                        new PmEventDelivery<>(this);
+                return result;
             });
 
     private final Supplier<PmRejectionDelivery<I, P>> rejectionDeliverySupplier =
-            memoize(new Supplier<PmRejectionDelivery<I, P>>() {
-                @Override
-                public PmRejectionDelivery<I, P> get() {
-                    final PmRejectionDelivery<I, P> result =
-                            new PmRejectionDelivery<>(ProcessManagerRepository.this);
-                    return result;
-                }
+            memoize(() -> {
+                final PmRejectionDelivery<I, P> result =
+                        new PmRejectionDelivery<>(this);
+                return result;
             });
 
 
@@ -383,6 +375,13 @@ public abstract class ProcessManagerRepository<I,
         final CommandBus commandBus = getBoundedContext().getCommandBus();
         result.setCommandBus(commandBus);
         return result;
+    }
+
+    @Override
+    public P create(I id) {
+        P procman = super.create(id);
+        onCreateEntity(id, PROCESS_MANAGER);
+        return procman;
     }
 
     /** Open access to the event routing to the package. */

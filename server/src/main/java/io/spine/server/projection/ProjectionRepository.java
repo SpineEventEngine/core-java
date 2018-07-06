@@ -58,6 +58,7 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
+import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -112,6 +113,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     protected final ProjectionClass<P> getModelClass(Class<P> cls) {
         return (ProjectionClass<P>) Model.getInstance()
                                          .asProjectionClass(cls);
+    }
+
+    @Override
+    public P create(I id) {
+        P projection = super.create(id);
+        onCreateEntity(id, PROJECTION);
+        return projection;
     }
 
     @Override

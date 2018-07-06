@@ -24,8 +24,6 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
-import io.spine.base.Identifier;
-import io.spine.client.EntityId;
 import io.spine.core.BoundedContextName;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
@@ -61,9 +59,6 @@ import io.spine.server.route.RejectionRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.system.server.CreateEntity;
-import io.spine.system.server.EntityHistoryId;
-import io.spine.type.TypeUrl;
 
 import java.util.List;
 import java.util.Set;
@@ -244,25 +239,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public A create(I id) {
         A aggregate = aggregateClass().createEntity(id);
-        onAggregateCreated(id);
+        onCreateEntity(id, AGGREGATE);
         return aggregate;
-    }
-
-    final void onAggregateCreated(I id) {
-        EntityId entityId = EntityId
-                .newBuilder()
-                .setId(Identifier.pack(id))
-                .build();
-        TypeUrl type = entityClass().getStateType();
-        EntityHistoryId historyId = EntityHistoryId
-                .newBuilder()
-                .setEntityId(entityId)
-                .setTypeUrl(type.value())
-                .build();
-        postSystem(CreateEntity.newBuilder()
-                               .setId(historyId)
-                               .setKind(AGGREGATE)
-                               .build());
     }
 
     /** Obtains class information of aggregates managed by this repository. */

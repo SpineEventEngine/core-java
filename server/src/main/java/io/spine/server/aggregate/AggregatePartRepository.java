@@ -22,6 +22,8 @@ package io.spine.server.aggregate;
 
 import io.spine.server.model.Model;
 
+import static io.spine.option.EntityOption.Kind.AGGREGATE;
+
 /**
  * Common abstract base for repositories that manage {@code AggregatePart}s.
  *
@@ -47,7 +49,7 @@ public abstract class AggregatePartRepository<I,
     public A create(I id) {
         final AggregateRoot<I> root = createAggregateRoot(id);
         final A result = createAggregatePart(root);
-        onAggregateCreated(id);
+        onCreateEntity(id, AGGREGATE);
         return result;
     }
 
