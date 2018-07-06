@@ -56,6 +56,7 @@ class AggregateEventReactionTestTest {
 
     @Test
     @DisplayName("dispatch tested event and store results")
+    @SuppressWarnings("CheckReturnValue")
     void shouldDispatchCommand() {
         aggregateEventTest.setUp();
         aggregateEventTest.init();

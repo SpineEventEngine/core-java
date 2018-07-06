@@ -20,7 +20,6 @@
 
 package io.spine.server;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.server.command.TestEventFactory;
