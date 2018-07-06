@@ -21,7 +21,6 @@
 package io.spine.system.server;
 
 import io.spine.annotation.Internal;
-import io.spine.client.EntityId;
 import io.spine.core.EventContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
@@ -33,9 +32,9 @@ import io.spine.server.command.Assign;
 @SuppressWarnings("OverlyCoupledClass") // OK for an Aggregate class.
 @Internal
 public final class EntityHistoryAggregate
-        extends Aggregate<EntityId, EntityHistory, EntityHistoryVBuilder> {
+        extends Aggregate<EntityHistoryId, EntityHistory, EntityHistoryVBuilder> {
 
-    private EntityHistoryAggregate(EntityId id) {
+    private EntityHistoryAggregate(EntityHistoryId id) {
         super(id);
     }
 

@@ -61,9 +61,15 @@ public final class DefaultSystemGateway implements SystemGateway {
     }
 
     private ActorRequestFactory buildRequestFactory() {
-        boolean multitenant = system.isMultitenant();
+        ActorRequestFactory result = system.isMultitenant()
+                                     ? buildMultitenantFactory()
+                                     : buildSingleTenantFaltory();
+        return result;
+    }
+
+    private static ActorRequestFactory buildMultitenantFactory() {
         TenantFunction<ActorRequestFactory> contextFactory =
-                new TenantFunction<ActorRequestFactory>(multitenant) {
+                new TenantFunction<ActorRequestFactory>(true) {
                     @Override
                     @CanIgnoreReturnValue
                     public ActorRequestFactory apply(@Nullable TenantId input) {
@@ -76,5 +82,11 @@ public final class DefaultSystemGateway implements SystemGateway {
         ActorRequestFactory result = contextFactory.execute();
         checkNotNull(result);
         return result;
+    }
+
+    private static ActorRequestFactory buildSingleTenantFaltory() {
+        return ActorRequestFactory.newBuilder()
+                                  .setActor(SYSTEM)
+                                  .build();
     }
 }

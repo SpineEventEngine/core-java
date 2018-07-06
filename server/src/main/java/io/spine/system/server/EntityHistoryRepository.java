@@ -20,12 +20,11 @@
 
 package io.spine.system.server;
 
-import io.spine.client.EntityId;
 import io.spine.server.aggregate.AggregateRepository;
 
 /**
  * @author Dmytro Dashenkov
  */
 public final class EntityHistoryRepository
-        extends AggregateRepository<EntityId, EntityHistoryAggregate> {
+        extends AggregateRepository<EntityHistoryId, EntityHistoryAggregate> {
 }

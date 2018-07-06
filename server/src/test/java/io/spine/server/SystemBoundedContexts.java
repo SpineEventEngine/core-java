@@ -20,36 +20,22 @@
 
 package io.spine.server;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.system.server.DefaultSystemGateway;
-import io.spine.system.server.SystemGateway;
+import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * @author Dmytro Dashenkov
  */
-final class DefaultBoundedContext extends BoundedContext {
+public final class SystemBoundedContexts {
 
-    private final SystemBoundedContext system;
-    private final SystemGateway systemGateway;
-
-    DefaultBoundedContext(Builder builder, SystemBoundedContext systemBoundedContext) {
-        super(builder);
-        this.system = systemBoundedContext;
-        this.systemGateway = new DefaultSystemGateway(system);
+    /**
+     * Prevents the utility class instantiation.
+     */
+    private SystemBoundedContexts() {
     }
 
-    @Override
-    void init() {
-        getStand().onCreated(this);
-    }
-
-    @VisibleForTesting
-    BoundedContext system() {
-        return system;
-    }
-
-    @Override
-    public SystemGateway getSystemGateway() {
-        return systemGateway;
+    public static BoundedContext systemOf(BoundedContext context) {
+        checkArgument(context instanceof DefaultBoundedContext);
+        DefaultBoundedContext defaultContext = (DefaultBoundedContext) context;
+        return defaultContext.system();
     }
 }
