@@ -41,7 +41,7 @@ public abstract class SubscriberTest<M extends Message,
     private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
     @Override
-    @CanIgnoreReturnValue
+    @SuppressWarnings("CheckReturnValue")
     protected Expected<S> expectThat(E entity) {
         final S initialState = entity.getState();
         dispatchTo(entity);
