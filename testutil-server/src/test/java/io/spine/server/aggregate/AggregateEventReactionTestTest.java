@@ -18,22 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman;
+package io.spine.server.aggregate;
 
 import com.google.protobuf.StringValue;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.UInt32Value;
+import com.google.protobuf.util.Timestamps;
 import io.spine.server.MessageProducingExpected;
-import io.spine.server.procman.given.ProcessManagerEventReactionTestTestEnv.EventReactingProcessManager;
-import io.spine.server.procman.given.ProcessManagerEventReactionTestTestEnv.EventReactingProcessManagerTest;
+import io.spine.server.aggregate.given.AggregateEventReactionTestTestEnv.EventReactingAggregate;
+import io.spine.server.aggregate.given.AggregateEventReactionTestTestEnv.EventReactingAggregateTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.procman.given.ProcessManagerEventReactionTestTestEnv.EventReactingProcessManager.NESTED_COMMAND;
-import static io.spine.server.procman.given.ProcessManagerEventReactionTestTestEnv.EventReactingProcessManager.RESULT_EVENT;
-import static io.spine.server.procman.given.ProcessManagerEventReactionTestTestEnv.EventReactingProcessManagerTest.TEST_EVENT;
-import static io.spine.server.procman.given.ProcessManagerEventReactionTestTestEnv.processManager;
+import static io.spine.server.aggregate.given.AggregateEventReactionTestTestEnv.EventReactingAggregateTest.TEST_EVENT;
+import static io.spine.server.aggregate.given.AggregateEventReactionTestTestEnv.aggregate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -41,35 +38,35 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 @SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("ProcessManagerEventReactionTest should")
-class ProcessManagerEventReactionTestTest {
+class AggregateEventReactionTestTest {
 
-    private EventReactingProcessManagerTest pmEventTest;
+    private EventReactingAggregateTest aggregateEventTest;
 
     @BeforeEach
     void setUp() {
-        pmEventTest = new EventReactingProcessManagerTest();
+        aggregateEventTest = new EventReactingAggregateTest();
     }
 
     @Test
     @DisplayName("store tested event")
     void shouldStoreCommand() {
-        pmEventTest.setUp();
-        assertEquals(pmEventTest.storedMessage(), TEST_EVENT);
+        aggregateEventTest.setUp();
+        assertEquals(aggregateEventTest.storedMessage(), TEST_EVENT);
     }
 
     @Test
-    @DisplayName("dispatch tested command and store results")
+    @DisplayName("dispatch tested event and store results")
     void shouldDispatchCommand() {
-        pmEventTest.setUp();
-        pmEventTest.init();
-        EventReactingProcessManager testPm = processManager();
-        MessageProducingExpected<StringValue> expected = pmEventTest.expectThat(testPm);
+        aggregateEventTest.setUp();
+        aggregateEventTest.init();
+        EventReactingAggregate aggregate = aggregate();
+        MessageProducingExpected<StringValue> expected = aggregateEventTest.expectThat(aggregate);
 
-        expected.producesCommand(StringValue.class, command -> {
-            assertEquals(command, NESTED_COMMAND);
+        expected.producesEvent(StringValue.class, event -> {
+            assertEquals(event.getValue(), Timestamps.toString(TEST_EVENT));
         });
-        expected.producesEvent(UInt32Value.class, event -> {
-            assertEquals(event, RESULT_EVENT);
+        expected.hasState(state -> {
+            assertEquals(state.getValue(), Timestamps.toString(TEST_EVENT));
         });
     }
 }

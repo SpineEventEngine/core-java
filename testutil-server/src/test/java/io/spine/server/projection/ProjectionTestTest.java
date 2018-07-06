@@ -18,49 +18,51 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate;
+package io.spine.server.projection;
 
-import com.google.protobuf.util.Timestamps;
-import io.spine.server.aggregate.given.AggregateCommandTestTestEnv.TimePrinter;
-import io.spine.server.aggregate.given.AggregateCommandTestTestEnv.TimePrintingTest;
+import com.google.protobuf.StringValue;
+import io.spine.server.SubscriberTest;
+import io.spine.server.projection.given.ProjectionTestTestEnv.TestProjection;
+import io.spine.server.projection.given.ProjectionTestTestEnv.TestProjectionTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.aggregate.given.AggregateCommandTestTestEnv.TimePrintingTest.TEST_COMMAND;
-import static io.spine.server.aggregate.given.AggregateCommandTestTestEnv.aggregate;
+import static io.spine.server.projection.given.ProjectionTestTestEnv.TestProjectionTest.TEST_EVENT;
+import static io.spine.server.projection.given.ProjectionTestTestEnv.projection;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Vladyslav Lubenskyi
  */
 @SuppressWarnings("DuplicateStringLiteralInspection")
-@DisplayName("AggregateCommandTest should")
-class AggregateCommandTestTest {
+@DisplayName("ProjectionTest should")
+class ProjectionTestTest {
 
-    private TimePrintingTest aggregateCommandTest;
+    private TestProjectionTest projectionTest;
 
     @BeforeEach
     void setUp() {
-        aggregateCommandTest = new TimePrintingTest();
+        projectionTest = new TestProjectionTest();
     }
 
     @Test
-    @DisplayName("store tested command")
+    @DisplayName("store tested event")
     void shouldStoreCommand() {
-        aggregateCommandTest.setUp();
-        assertEquals(aggregateCommandTest.storedMessage(), TEST_COMMAND);
+        projectionTest.setUp();
+        assertEquals(projectionTest.storedMessage(), TEST_EVENT);
     }
 
     @Test
-    @DisplayName("dispatch tested command")
+    @DisplayName("dispatch tested event and store results")
     void shouldDispatchCommand() {
-        aggregateCommandTest.setUp();
-        TimePrinter testAggregate = aggregate();
-        aggregateCommandTest.expectThat(testAggregate);
-        String newState = testAggregate.getState()
-                                       .getValue();
-        assertEquals(newState, Timestamps.toString(TEST_COMMAND));
-    }
+        projectionTest.setUp();
+        projectionTest.init();
+        TestProjection aggregate = projection();
+        SubscriberTest.Expected<StringValue> expected = projectionTest.expectThat(aggregate);
 
+        expected.hasState(state -> {
+            assertEquals(state.getValue(), TEST_EVENT.getValue());
+        });
+    }
 }

@@ -28,6 +28,7 @@ import io.spine.server.SubscriberTest;
 
 import java.util.List;
 
+import static io.spine.server.projection.ProjectionEventDispatcher.dispatch;
 import static java.util.Collections.emptyList;
 
 /**
@@ -54,7 +55,7 @@ public abstract class ProjectionTest<M extends Message,
                                                .setContext(context)
                                                .build();
 
-        ProjectionEventDispatcher.dispatch(entity, enrichedEvent);
+        dispatch(entity, enrichedEvent);
         return emptyList();
     }
 

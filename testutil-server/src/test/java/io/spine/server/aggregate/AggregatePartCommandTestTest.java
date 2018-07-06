@@ -30,6 +30,9 @@ import static io.spine.server.aggregate.given.AggregatePartCommandTestTestEnv.Ti
 import static io.spine.server.aggregate.given.AggregatePartCommandTestTestEnv.aggregatePart;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * @author Vladyslav Lubenskyi
+ */
 @SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("AggregatePartCommandTest should")
 class AggregatePartCommandTestTest {

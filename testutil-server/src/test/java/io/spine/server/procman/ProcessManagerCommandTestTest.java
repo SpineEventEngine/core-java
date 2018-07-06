@@ -35,6 +35,9 @@ import static io.spine.server.procman.given.ProcessManagerCommandTestTestEnv.Tim
 import static io.spine.server.procman.given.ProcessManagerCommandTestTestEnv.processManager;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * @author Vladyslav Lubenskyi
+ */
 @SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("ProcessManagerCommandTest should")
 class ProcessManagerCommandTestTest {
