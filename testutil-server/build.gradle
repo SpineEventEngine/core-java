@@ -45,3 +45,13 @@ dependencies {
         exclude group: 'com.google.guava'
     }
 }
+
+apply from: generateDescriptorSetScript
+
+apply from: testArtifactsScript
+
+apply plugin: spineProtobufPluginId
+
+modelCompiler {
+    generateValidatingBuilders = true
+}
