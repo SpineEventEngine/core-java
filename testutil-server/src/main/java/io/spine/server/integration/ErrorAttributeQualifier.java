@@ -40,14 +40,14 @@ public class ErrorAttributeQualifier extends ErrorQualifier {
 
     private final String name;
 
-    private ErrorAttributeQualifier(String name) {
+    ErrorAttributeQualifier(String name) {
         super();
         this.name = name;
     }
 
     /** {@inheritDoc} */
     @Override
-    protected String description() {
+    public String description() {
         return format("Error contains an attribute \"%s\"", name);
     }
 
@@ -68,7 +68,7 @@ public class ErrorAttributeQualifier extends ErrorQualifier {
         checkNotNull(value);
         return new ErrorQualifier() {
             @Override
-            protected String description() {
+            public String description() {
                 return format("Error contains an attribute \"%s\" with following value: %s",
                               name, value);
             }
@@ -79,19 +79,5 @@ public class ErrorAttributeQualifier extends ErrorQualifier {
                 return value.equals(attributes.get(name));
             }
         };
-    }
-
-    /**
-     * A static factory method for creating an {@link ErrorAttributeQualifier
-     * error attribute qualifier}.
-     *
-     * <p>An error attribute verifier checks that the error contains an
-     * {@link Error#getAttributes() attribute} with a provided name.
-     *
-     * @param name name of an attribute which is check by a qualifier
-     * @return a new {@link ErrorAttributeQualifier error attribute qualifier} instance
-     */
-    public static ErrorAttributeQualifier withAttribute(String name) {
-        return new ErrorAttributeQualifier(name);
     }
 }

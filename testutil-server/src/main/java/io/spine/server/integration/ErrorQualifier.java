@@ -25,7 +25,6 @@ import com.google.protobuf.Value;
 import io.spine.base.Error;
 
 import java.util.Map;
-import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
@@ -40,37 +39,16 @@ import static java.lang.String.format;
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
-public abstract class ErrorQualifier implements Predicate<Error> {
+public abstract class ErrorQualifier {
 
     /**
      * A message describing the qualifier.
      *
      * <p>Used to report an assertion error.
      */
-    protected abstract String description();
+    public abstract String description();
 
-    /**
-     * Combines two qualifiers executing them sequentially.
-     *
-     * <p>Current qualifier is executed first and the descriptions get concatenated.
-     *
-     * @return new {@link ErrorQualifier error qualifier} instance
-     */
-    public ErrorQualifier and(ErrorQualifier other) {
-        checkNotNull(other);
-        ErrorQualifier current = this;
-        return new ErrorQualifier() {
-            @Override
-            protected String description() {
-                return current.description() + ". " + other.description();
-            }
-
-            @Override
-            public boolean test(Error error) {
-                return current.test(error) && other.test(error);
-            }
-        };
-    }
+    public abstract boolean test(Error error);
 
     /**
      * Verifies that the {@link Error#getType() errors type} matches the provided one.
@@ -82,7 +60,7 @@ public abstract class ErrorQualifier implements Predicate<Error> {
         checkNotNull(type);
         return new ErrorQualifier() {
             @Override
-            protected String description() {
+            public String description() {
                 return format("Error type is %s", type);
             }
 
@@ -102,7 +80,7 @@ public abstract class ErrorQualifier implements Predicate<Error> {
     public static ErrorQualifier withCode(int code) {
         return new ErrorQualifier() {
             @Override
-            protected String description() {
+            public String description() {
                 return format("Error code is \"%s\"", code);
             }
 
@@ -122,7 +100,7 @@ public abstract class ErrorQualifier implements Predicate<Error> {
     public static ErrorQualifier withMessage(String message) {
         return new ErrorQualifier() {
             @Override
-            protected String description() {
+            public String description() {
                 return format("Error contains following message: %s", message);
             }
 
@@ -131,6 +109,20 @@ public abstract class ErrorQualifier implements Predicate<Error> {
                 return message.equals(error.getMessage());
             }
         };
+    }
+
+    /**
+     * A static factory method for creating an {@link ErrorAttributeQualifier
+     * error attribute qualifier}.
+     *
+     * <p>An error attribute verifier checks that the error contains an
+     * {@link Error#getAttributes() attribute} with a provided name.
+     *
+     * @param name name of an attribute which is check by a qualifier
+     * @return a new {@link ErrorAttributeQualifier error attribute qualifier} instance
+     */
+    public static ErrorAttributeQualifier withAttribute(String name) {
+        return new ErrorAttributeQualifier(name);
     }
 
     /**
@@ -143,7 +135,7 @@ public abstract class ErrorQualifier implements Predicate<Error> {
     public static ErrorQualifier withoutAttribute(String name) {
         return new ErrorQualifier() {
             @Override
-            protected String description() {
+            public String description() {
                 return format("Error does not contain an attribute \"%s\"", name);
             }
 
@@ -154,6 +146,4 @@ public abstract class ErrorQualifier implements Predicate<Error> {
             }
         };
     }
-
-    //TODO:2018-07-04:mdrachuk: check validation errors? (constraint violation?)
 }

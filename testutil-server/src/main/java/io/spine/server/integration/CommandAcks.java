@@ -125,7 +125,7 @@ class CommandAcks {
     boolean containErrors(ErrorQualifier qualifier) {
         checkNotNull(qualifier);
         return errors.stream()
-                     .anyMatch(qualifier);
+                     .anyMatch(qualifier::test);
     }
 
     /**
@@ -135,7 +135,7 @@ class CommandAcks {
     long countErrors(ErrorQualifier qualifier) {
         checkNotNull(qualifier);
         return errors.stream()
-                     .filter(qualifier)
+                     .filter(qualifier::test)
                      .count();
     }
 
