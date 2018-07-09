@@ -46,12 +46,15 @@ import io.spine.string.Stringifiers;
 import io.spine.system.server.ArchiveEntity;
 import io.spine.system.server.ChangeEntityState;
 import io.spine.system.server.CreateEntity;
+import io.spine.system.server.DeleteEntity;
 import io.spine.system.server.DispatchCommandToHandler;
 import io.spine.system.server.DispatchEventToApplier;
 import io.spine.system.server.DispatchEventToReactor;
 import io.spine.system.server.DispatchEventToSubscriber;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.ExtractEntityFromArchive;
+import io.spine.system.server.RestoreEntity;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -386,7 +389,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         log().error(errorMessage, exception);
     }
 
-    @Internal
     private void postSystem(Message systemCommand) {
         getBoundedContext().getSystemGateway()
                            .post(systemCommand);
@@ -570,7 +572,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                                      .getLifecycleFlags()
                                      .getDeleted();
             if (newValue && !oldValue) {
-                ArchiveEntity command = ArchiveEntity
+                DeleteEntity command = DeleteEntity
                         .newBuilder()
                         .setId(id)
                         .addAllMessageId(messageIds)
@@ -588,7 +590,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                                      .getLifecycleFlags()
                                      .getArchived();
             if (!newValue && oldValue) {
-                ArchiveEntity command = ArchiveEntity
+                ExtractEntityFromArchive command = ExtractEntityFromArchive
                         .newBuilder()
                         .setId(id)
                         .addAllMessageId(messageIds)
@@ -606,7 +608,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                                      .getLifecycleFlags()
                                      .getDeleted();
             if (!newValue && oldValue) {
-                ArchiveEntity command = ArchiveEntity
+                RestoreEntity command = RestoreEntity
                         .newBuilder()
                         .setId(id)
                         .addAllMessageId(messageIds)

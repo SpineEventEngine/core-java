@@ -94,6 +94,14 @@ public abstract class Transaction<I,
     private final B builder;
 
     /**
+     * The {@link LifecycleFlags} which the entity has had before the transaction start.
+     *
+     * <p>This value is used in order to check if lifecycle flags had been changed in current
+     * transaction.
+     */
+    private final LifecycleFlags initialLifecycleFlags;
+
+    /**
      * The version of the entity, modified within this transaction.
      *
      * <p>All the version changes made within the transaction are stored in this variable,
@@ -154,6 +162,7 @@ public abstract class Transaction<I,
         this.builder = entity.builderFromState();
         this.version = entity.getVersion();
         this.lifecycleFlags = entity.getLifecycleFlags();
+        this.initialLifecycleFlags = entity.getLifecycleFlags();
         this.active = true;
 
         this.transactionListener = new SilentWitness<>();
@@ -237,13 +246,13 @@ public abstract class Transaction<I,
 
     private void commitChangedState(B builder, Version pendingVersion) {
         try {
-            EntityRecord previousRecord = record();
+            EntityRecord previousRecord = record(initialLifecycleFlags);
             S newState = builder.build();
             markStateChanged();
             beforeCommit(newState, pendingVersion);
             entity.updateState(newState, pendingVersion);
             commitAttributeChanges();
-            EntityRecord newRecord = record();
+            EntityRecord newRecord = record(lifecycleFlags);
             afterCommit(previousRecord, newRecord);
         } catch (ValidationException exception) {  /* Could only happen if the state
                                                       has been injected not using
@@ -262,7 +271,7 @@ public abstract class Transaction<I,
     }
 
     private void commitUnchangedState(Version pendingVersion) {
-        EntityRecord previousRecord = record();
+        EntityRecord previousRecord = record(initialLifecycleFlags);
         S unmodifiedState = getEntity().getState();
         beforeCommit(unmodifiedState, pendingVersion);
         if(!pendingVersion.equals(entity.getVersion())) {
@@ -270,7 +279,7 @@ public abstract class Transaction<I,
         }
         commitAttributeChanges();
         releaseTx();
-        EntityRecord newRecord = record();
+        EntityRecord newRecord = record(lifecycleFlags);
         afterCommit(previousRecord, newRecord);
     }
 
@@ -304,12 +313,11 @@ public abstract class Transaction<I,
         entity.releaseTransaction();
     }
 
-    private EntityRecord record() {
+    private EntityRecord record(LifecycleFlags lifecycleFlags) {
         E entity = getEntity();
         Any entityId = Identifier.pack(entity.getId());
         Version version = entity.getVersion();
         Any state = pack(entity.getState());
-        LifecycleFlags lifecycleFlags = entity.getLifecycleFlags();
         return EntityRecord.newBuilder()
                            .setEntityId(entityId)
                            .setVersion(version)
@@ -452,11 +460,15 @@ public abstract class Transaction<I,
     }
 
     public void setArchived(boolean archived) {
-        lifecycleFlags = lifecycleFlags.toBuilder().setArchived(archived).build();
+        lifecycleFlags = lifecycleFlags.toBuilder()
+                                       .setArchived(archived)
+                                       .build();
     }
 
     public void setDeleted(boolean deleted) {
-        lifecycleFlags = lifecycleFlags.toBuilder().setDeleted(deleted).build();
+        lifecycleFlags = lifecycleFlags.toBuilder()
+                                       .setDeleted(deleted)
+                                       .build();
     }
 
     /**

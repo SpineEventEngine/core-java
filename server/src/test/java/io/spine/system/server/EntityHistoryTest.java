@@ -27,6 +27,7 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.option.EntityOption;
+import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.InProcessSharding;
@@ -114,23 +115,28 @@ class EntityHistoryTest {
                                                .setId(id)
                                                .build();
             postCommand(command);
-            eventWatcher.assertCount(6);
+            eventWatcher.assertEventCount(7);
 
             checkEntityCreated(AGGREGATE, TestAggregate.TYPE);
             checkCommandDispatchedToAggregateHandler();
             checkEventDispatchedToApplier();
             checkEntityStateChanged(Person.newBuilder()
                                           .setId(id)
+                                          .setName(PersonName.getDefaultInstance())
                                           .build());
             checkEntityCreated(PROJECTION, TestProjection.TYPE);
             checkEventDispatchedToSubscriber();
+            checkEntityStateChanged(PersonView.newBuilder()
+                                              .setId(id)
+                                              .setName(PersonName.getDefaultInstance())
+                                              .build());
         }
 
         @Test
         @DisplayName("entity is archived or deleted")
         void archivedAndDeleted() {
             hidePerson();
-            eventWatcher.assertCount(7);
+            eventWatcher.assertEventCount(7);
 
             eventWatcher.nextEvent(EntityCreated.class);
             eventWatcher.nextEvent(CommandDispatchedToHandler.class);
@@ -156,13 +162,13 @@ class EntityHistoryTest {
                     .build();
             postCommand(command);
 
-            eventWatcher.nextEvent(EntityCreated.class);
+            eventWatcher.assertEventCount(5);
+
             eventWatcher.nextEvent(CommandDispatchedToHandler.class);
             eventWatcher.nextEvent(EventDispatchedToApplier.class);
 
             checkEntityExtracted();
 
-            eventWatcher.nextEvent(EntityCreated.class);
             eventWatcher.nextEvent(EventDispatchedToSubscriber.class);
 
             checkEntityRestored();

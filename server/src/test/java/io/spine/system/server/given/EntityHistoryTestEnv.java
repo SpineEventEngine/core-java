@@ -92,7 +92,7 @@ public final class EntityHistoryTestEnv {
 
         private @Nullable Iterator<? extends Message> eventIterator;
 
-        public void assertCount(int expectedCount) {
+        public void assertEventCount(int expectedCount) {
             assertEquals(expectedCount, events.size(), errorMessage());
         }
 

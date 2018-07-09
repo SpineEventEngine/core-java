@@ -298,6 +298,7 @@ public abstract class BoundedContext
         return this.integrationBus;
     }
 
+    @Internal
     public abstract SystemGateway getSystemGateway();
 
     /** Obtains instance of {@link Stand} of this {@code BoundedContext}. */
