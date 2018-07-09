@@ -46,8 +46,8 @@ public abstract class AggregateEventReactionTest<E extends Message,
 
     @Override
     protected List<? extends Message> dispatchTo(A aggregate) {
-        final Event event = createEvent(message());
-        final EventEnvelope envelope = EventEnvelope.of(event);
+        Event event = createEvent(message());
+        EventEnvelope envelope = EventEnvelope.of(event);
         return dispatchEvent(aggregate, envelope);
     }
 }

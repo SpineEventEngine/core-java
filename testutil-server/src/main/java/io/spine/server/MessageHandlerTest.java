@@ -173,8 +173,8 @@ public abstract class MessageHandlerTest<M extends Message,
         entityRepository = createEntityRepository();
         assertNotNull(entityRepository);
 
-        final Set<CommandClass> commandClasses = getAllCommandClasses();
-        final CommandBus commandBus = boundedContext().getCommandBus();
+        Set<CommandClass> commandClasses = getAllCommandClasses();
+        CommandBus commandBus = boundedContext().getCommandBus();
         commandBus.register(new VoidCommandDispatcher<>(commandClasses));
     }
 

@@ -43,23 +43,23 @@ import static java.util.stream.Collectors.toList;
  * @author Vladyslav Lubenskyi
  */
 public abstract class ProcessManagerEventReactionTest<E extends Message,
-                                               I,
-                                               S extends Message,
-                                               P extends ProcessManager<I, S, ?>>
+                                                      I,
+                                                      S extends Message,
+                                                      P extends ProcessManager<I, S, ?>>
         extends ReactionTest<E, I, S, P> {
 
     @Override
     protected List<? extends Message> dispatchTo(P entity) {
-        final Event sourceEvent = createEvent(message());
-        final EventContext context = sourceEvent.getContext()
+        Event sourceEvent = createEvent(message());
+        EventContext context = sourceEvent.getContext()
                                                 .toBuilder()
                                                 .setEnrichment(enrichment())
                                                 .build();
-        final Event enrichedEvent = sourceEvent.toBuilder()
+        Event enrichedEvent = sourceEvent.toBuilder()
                                                .setContext(context)
                                                .build();
-        final EventEnvelope envelope = EventEnvelope.of(enrichedEvent);
-        final List<Event> events = ProcessManagerDispatcher.dispatch(entity, envelope);
+        EventEnvelope envelope = EventEnvelope.of(enrichedEvent);
+        List<Event> events = ProcessManagerDispatcher.dispatch(entity, envelope);
         return events.stream()
                      .map(ProcessManagerEventReactionTest::eventToMessage)
                      .collect(toList());

@@ -28,7 +28,7 @@ import java.lang.reflect.Method;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
- * Injects the given {@link CommandBus command bus} into the process manager.
+ * Injects the given {@link CommandBus command bus} into the process manager for unit tests.
  *
  * @author Vladyslav Lubenskyi
  */
@@ -44,10 +44,11 @@ class CommandBusInjection {
      * Injects {@link CommandBus} instance into the process manager via reflection.
      *
      * @param processManager tested process manager.
+     * @see {@link ProcessManager#setCommandBus(CommandBus)}
      */
     static void inject(ProcessManager processManager, CommandBus commandBus) {
         try {
-            final Method method = ProcessManager.class.getDeclaredMethod("setCommandBus",
+            Method method = ProcessManager.class.getDeclaredMethod("setCommandBus",
                                                                          CommandBus.class);
             method.setAccessible(true);
             method.invoke(processManager, commandBus);

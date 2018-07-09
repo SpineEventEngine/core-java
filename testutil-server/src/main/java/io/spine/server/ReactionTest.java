@@ -70,8 +70,8 @@ public abstract class ReactionTest<M extends Message,
     }
 
     protected final Event createEvent(M message) {
-        final Event event = eventFactory.createEvent(message);
-        final EventContext context = event.getContext()
+        Event event = eventFactory.createEvent(message);
+        EventContext context = event.getContext()
                                           .toBuilder()
                                           .setExternal(externalMessage())
                                           .build();
@@ -81,14 +81,14 @@ public abstract class ReactionTest<M extends Message,
     }
 
     protected final Rejection createRejection(M message) {
-        final Empty cmd = Empty.getDefaultInstance();
-        final Command command = requestFactory.command()
-                                              .create(cmd);
-        final Rejection rejection = Rejections.createRejection(message, command);
-        final RejectionContext context = rejection.getContext()
-                                                  .toBuilder()
-                                                  .setExternal(externalMessage())
-                                                  .build();
+        Empty cmd = Empty.getDefaultInstance();
+        Command command = requestFactory.command()
+                                        .create(cmd);
+        Rejection rejection = Rejections.createRejection(message, command);
+        RejectionContext context = rejection.getContext()
+                                            .toBuilder()
+                                            .setExternal(externalMessage())
+                                            .build();
         return rejection.toBuilder()
                         .setContext(context)
                         .build();

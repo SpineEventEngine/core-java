@@ -49,7 +49,7 @@ public class AggregateEventReactionTestTestEnv {
     }
 
     public static EventReactingAggregate aggregate() {
-        final EventReactingAggregate result =
+        EventReactingAggregate result =
                 Given.aggregateOfClass(EventReactingAggregate.class)
                      .withId(ID)
                      .withVersion(64)

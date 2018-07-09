@@ -42,7 +42,7 @@ public abstract class SubscriberTest<M extends Message,
     @Override
     @SuppressWarnings("CheckReturnValue")
     protected Expected<S> expectThat(E entity) {
-        final S initialState = entity.getState();
+        S initialState = entity.getState();
         dispatchTo(entity);
         return new Expected<>(initialState, entity.getState());
     }

@@ -78,23 +78,23 @@ public abstract class CommandHandlerTest<C extends Message,
      * @return {@link Command} ready to be dispatched
      */
     protected final Command createCommand(C commandMessage) {
-        final Command command = requestFactory.command()
-                                              .create(commandMessage);
+        Command command = requestFactory.command()
+                                        .create(commandMessage);
         return command;
     }
 
     @Override
     protected CommandExpected<S> expectThat(E entity) {
-        final S initialState = entity.getState();
+        S initialState = entity.getState();
         Message rejection = null;
 
         List<? extends Message> events = emptyList();
         try {
             events = dispatchTo(entity);
         } catch (HandlerMethodFailedException e) {
-            final Throwable cause = getRootCause(e);
+            Throwable cause = getRootCause(e);
             if (causedByRejection(cause)) {
-                final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
+                ThrowableMessage throwableMessage = (ThrowableMessage) cause;
                 rejection = toRejection(throwableMessage, createCommand(message()));
             } else {
                 throw e;

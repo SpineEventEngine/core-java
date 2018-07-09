@@ -86,8 +86,8 @@ public abstract class AggregatePartCommandTest<C extends Message,
      * @return new part instance
      */
     protected final P newPart(I id) {
-        final R root = newRoot(id);
-        final P part = newPart(root);
+        R root = newRoot(id);
+        P part = newPart(root);
         return part;
     }
 }

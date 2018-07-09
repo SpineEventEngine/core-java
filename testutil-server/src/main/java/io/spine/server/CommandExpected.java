@@ -90,7 +90,7 @@ public class CommandExpected<S extends Message> extends MessageProducingExpected
     }
 
     private void assertNotRejected(String eventType) {
-        final boolean rejected = rejection != null;
+        boolean rejected = rejection != null;
         if (rejected) {
             fail(format("Message was rejected. Expected messages(s): [%s]. Rejection: %s%s%s.",
                         eventType, rejection.getClass().getSimpleName(),

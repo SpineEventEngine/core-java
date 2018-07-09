@@ -49,10 +49,10 @@ public class AggregateCommandTestTestEnv {
     }
 
     public static TimePrinter aggregate() {
-        final TimePrinter result = Given.aggregateOfClass(TimePrinter.class)
-                                        .withId(ID)
-                                        .withVersion(64)
-                                        .build();
+        TimePrinter result = Given.aggregateOfClass(TimePrinter.class)
+                                  .withId(ID)
+                                  .withVersion(64)
+                                  .build();
         return result;
     }
 

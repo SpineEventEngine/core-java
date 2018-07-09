@@ -29,7 +29,7 @@ import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 
 /**
- * A bounded context used for unit testing of an {@link io.spine.server.entity.Entity Entity}.
+ * A bounded context used for unit testing.
  *
  * @author Vladyslav Lubenskyi
  */
@@ -53,15 +53,15 @@ public class TestBoundedContext {
      */
     @SuppressWarnings("Guava") // Spine Java 7 API.
     public static BoundedContext create() {
-        final StorageFactorySwitch storageFactorySwitch =
+        StorageFactorySwitch storageFactorySwitch =
                 StorageFactorySwitch.newInstance(NAME, MULTITENANT);
-        final Supplier<StorageFactory> factorySupplier = new StorageFactorySupplier();
-        final StorageFactorySwitch supplier = storageFactorySwitch.init(factorySupplier,
-                                                                        factorySupplier);
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setName(NAME.getValue())
-                                                            .setStorageFactorySupplier(supplier)
-                                                            .build();
+        Supplier<StorageFactory> factorySupplier = new StorageFactorySupplier();
+        StorageFactorySwitch supplier = storageFactorySwitch.init(factorySupplier,
+                                                                  factorySupplier);
+        BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                      .setName(NAME.getValue())
+                                                      .setStorageFactorySupplier(supplier)
+                                                      .build();
         return boundedContext;
     }
 
@@ -73,18 +73,18 @@ public class TestBoundedContext {
      */
     @SuppressWarnings("Guava") // Spine Java 7 API.
     public static BoundedContext create(BusFilter<CommandEnvelope> commandFilter) {
-        final StorageFactorySwitch storageFactorySwitch =
+        StorageFactorySwitch storageFactorySwitch =
                 StorageFactorySwitch.newInstance(NAME, MULTITENANT);
-        final Supplier<StorageFactory> factorySupplier = new StorageFactorySupplier();
-        final StorageFactorySwitch supplier = storageFactorySwitch.init(factorySupplier,
-                                                                        factorySupplier);
-        final CommandBus.Builder commandBus = CommandBus.newBuilder()
-                                                        .appendFilter(commandFilter);
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setName(NAME.getValue())
-                                                            .setStorageFactorySupplier(supplier)
-                                                            .setCommandBus(commandBus)
-                                                            .build();
+        Supplier<StorageFactory> factorySupplier = new StorageFactorySupplier();
+        StorageFactorySwitch supplier = storageFactorySwitch.init(factorySupplier,
+                                                                  factorySupplier);
+        CommandBus.Builder commandBus = CommandBus.newBuilder()
+                                                  .appendFilter(commandFilter);
+        BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                      .setName(NAME.getValue())
+                                                      .setStorageFactorySupplier(supplier)
+                                                      .setCommandBus(commandBus)
+                                                      .build();
         return boundedContext;
     }
 

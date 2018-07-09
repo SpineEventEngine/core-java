@@ -43,14 +43,14 @@ import static java.util.stream.Collectors.toList;
  * @author Vladyslav Lubenskyi
  */
 public abstract class ProcessManagerCommandTest<C extends Message,
-                                         I,
-                                         S extends Message,
-                                         P extends ProcessManager<I, S, ?>>
+                                                I,
+                                                S extends Message,
+                                                P extends ProcessManager<I, S, ?>>
         extends CommandHandlerTest<C, I, S, P> {
 
     @Override
     protected List<? extends Message> dispatchTo(P entity) {
-        final List<Event> events = dispatch(entity, of(createCommand(message())));
+        List<Event> events = dispatch(entity, of(createCommand(message())));
         return events.stream()
                      .map(ProcessManagerCommandTest::eventToMessage)
                      .collect(toList());

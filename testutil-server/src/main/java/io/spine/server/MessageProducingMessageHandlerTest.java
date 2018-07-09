@@ -46,8 +46,8 @@ public abstract class MessageProducingMessageHandlerTest<M extends Message,
 
     @Override
     protected MessageProducingExpected<S> expectThat(E entity) {
-        final S initialState = entity.getState();
-        final List<? extends Message> events = dispatchTo(entity);
+        S initialState = entity.getState();
+        List<? extends Message> events = dispatchTo(entity);
         return new MessageProducingExpected<>(events, initialState, entity.getState(),
                                               interceptedCommands());
     }

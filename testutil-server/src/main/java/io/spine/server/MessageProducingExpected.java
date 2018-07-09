@@ -100,9 +100,9 @@ public class MessageProducingExpected<S extends Message>
                                      .collect(toList()),
                 eventClasses.length
         ));
-        final List<? extends Class<?>> actualClasses = events.stream()
-                                                             .map(Message::getClass)
-                                                             .collect(toList());
+        List<? extends Class<?>> actualClasses = events.stream()
+                                                       .map(Message::getClass)
+                                                       .collect(toList());
         assertThat(actualClasses, containsInAnyOrder(eventClasses));
         return self();
     }
@@ -144,9 +144,9 @@ public class MessageProducingExpected<S extends Message>
                                          .collect(toList()),
                 commandClasses.length
         ));
-        final List<? extends Class<?>> actualClasses = commands.stream()
-                                                               .map(Message::getClass)
-                                                               .collect(toList());
+        List<? extends Class<?>> actualClasses = commands.stream()
+                                                         .map(Message::getClass)
+                                                         .collect(toList());
         assertThat(actualClasses, containsInAnyOrder(commandClasses));
         return self();
     }

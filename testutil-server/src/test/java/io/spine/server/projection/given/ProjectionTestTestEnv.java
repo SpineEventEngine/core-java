@@ -20,7 +20,6 @@
 
 package io.spine.server.projection.given;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.Subscribe;
@@ -46,7 +45,7 @@ public class ProjectionTestTestEnv {
     }
 
     public static TestProjection projection() {
-        final TestProjection result =
+        TestProjection result =
                 Given.projectionOfClass(TestProjection.class)
                      .withId(ID)
                      .withVersion(64)
@@ -71,7 +70,7 @@ public class ProjectionTestTestEnv {
         }
     }
 
-    public static class TestProjectionRepository
+    private static class TestProjectionRepository
             extends ProjectionRepository<Long, TestProjection, StringValue> {
 
     }
