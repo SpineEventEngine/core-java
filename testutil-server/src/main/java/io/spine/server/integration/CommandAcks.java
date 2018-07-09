@@ -119,16 +119,6 @@ class CommandAcks {
     }
 
     /**
-     * @param error an error that matches the one in acknowledgement
-     * @return {@code true} if the provided error did occur in the Bounded Context during
-     * command handling, {@code false} otherwise.
-     */
-    boolean containErrors(Error error) {
-        checkNotNull(error);
-        return errors.contains(error);
-    }
-
-    /**
      * @return {@code true} if an error which matches the provided qualifier did occur in
      * the Bounded Context during command handling, {@code false} otherwise.
      */
@@ -136,17 +126,6 @@ class CommandAcks {
         checkNotNull(qualifier);
         return errors.stream()
                      .anyMatch(qualifier);
-    }
-
-    /**
-     * @return a total number of times the provided error was observed in the
-     * Bounded Context responses
-     */
-    long countErrors(Error error) {
-        checkNotNull(error);
-        return errors.stream()
-                     .filter(error::equals)
-                     .count();
     }
 
     /**

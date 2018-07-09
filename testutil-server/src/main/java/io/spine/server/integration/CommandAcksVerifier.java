@@ -133,24 +133,6 @@ public abstract class CommandAcksVerifier {
     }
 
     /**
-     * Verifies that a command was handled responding with a provided {@link Error error}.
-     *
-     * @param error an error that matches the one in acknowledgement
-     * @return a new {@link CommandAcksVerifier} instance
-     */
-    public static CommandAcksVerifier ackedWithError(Error error) {
-        return new CommandAcksVerifier() {
-            @Override
-            void verify(CommandAcks acks) {
-                if (!acks.containErrors(error)) {
-                    fail("Bounded Context did not contain an expected error" +
-                                 error.getMessage());
-                }
-            }
-        };
-    }
-
-    /**
      * Verifies that a command was handled responding with an error matching a provided
      * {@link ErrorQualifier error qualifier}.
      *
@@ -434,16 +416,6 @@ public abstract class CommandAcksVerifier {
      */
     public CommandAcksVerifier withError() {
         CommandAcksVerifier withError = ackedWithError();
-        return this.and(withError);
-    }
-
-    /**
-     * Creates a new verifier adding a check to contain the specified {@link Error error}.
-     *
-     * @return a new {@link CommandAcksVerifier} instance
-     */
-    public CommandAcksVerifier withError(Error error) {
-        CommandAcksVerifier withError = ackedWithError(error);
         return this.and(withError);
     }
 
