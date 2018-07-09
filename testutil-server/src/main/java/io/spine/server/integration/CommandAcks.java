@@ -56,7 +56,7 @@ class CommandAcks {
     private final List<Rejection> rejections = newArrayList();
     private final Map<RejectionClass, Integer> rejectionTypes;
 
-    CommandAcks(List<Ack> responses) {
+    CommandAcks(Iterable<Ack> responses) {
         for (Ack response : responses) {
             acks.add(response);
 
