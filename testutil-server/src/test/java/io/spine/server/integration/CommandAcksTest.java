@@ -30,8 +30,15 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.server.integration.ErrorQualifier.withType;
+import static io.spine.server.integration.given.CommandAcksTestEnv.*;
+import static io.spine.server.integration.given.CommandAcksTestEnv.DUPLICATE_ERROR_TYPE;
+import static io.spine.server.integration.given.CommandAcksTestEnv.MISSING_ERROR_TYPE;
+import static io.spine.server.integration.given.CommandAcksTestEnv.UNIQUE_ERROR_TYPE;
 import static io.spine.server.integration.given.CommandAcksTestEnv.acks;
 import static io.spine.server.integration.given.CommandAcksTestEnv.concat;
+import static io.spine.server.integration.given.CommandAcksTestEnv.newError;
+import static io.spine.server.integration.given.CommandAcksTestEnv.newErrorAck;
 import static io.spine.server.integration.given.CommandAcksTestEnv.newRejectionAck;
 import static io.spine.server.integration.given.CommandAcksTestEnv.newTask;
 import static io.spine.server.integration.given.CommandAcksTestEnv.projectAlreadyStarted;
@@ -64,6 +71,10 @@ class CommandAcksTest {
         CommandAcks threeAcks = new CommandAcks(acks(3, CommandAcksTestEnv::newOkAck));
         assertEquals(3, threeAcks.count());
     }
+
+    /*
+     * Rejections
+     ******************************************************************************/
 
     @Test
     @DisplayName("return true if contain any rejections")
@@ -146,37 +157,30 @@ class CommandAcksTest {
     @Test
     @DisplayName("return true if contain a rejection specified by predicate")
     void containRejectionUsingPredicate() {
-        String presentTitle = "present-title";
-        String missingTitle = "missing-title";
         ImmutableList<Ack> items = ImmutableList.of(
-                newRejectionAck(taskCreatedInCompletedProject(newTask(presentTitle)))
+                newRejectionAck(taskCreatedInCompletedProject(newTask(PRESENT_TASK_TITLE)))
         );
         CommandAcks acks = new CommandAcks(items);
-        Class<Rejections.IntTaskCreatedInCompletedProject> taskInCompletedProjectClass =
+        Class<Rejections.IntTaskCreatedInCompletedProject> taskInCompletedProject =
                 Rejections.IntTaskCreatedInCompletedProject.class;
 
         RejectionPredicate<Rejections.IntTaskCreatedInCompletedProject> withPresentTitle =
-                rejection -> presentTitle.equals(rejection.getTask()
-                                                          .getTitle());
-        assertTrue(acks.containRejection(taskInCompletedProjectClass, withPresentTitle));
+                rejection -> PRESENT_TASK_TITLE.equals(rejection.getTask().getTitle());
+        assertTrue(acks.containRejection(taskInCompletedProject, withPresentTitle));
 
         RejectionPredicate<Rejections.IntTaskCreatedInCompletedProject> withMissingTitle =
-                rejection -> missingTitle.equals(rejection.getTask()
-                                                          .getTitle());
-        assertFalse(acks.containRejection(taskInCompletedProjectClass, withMissingTitle));
+                rejection -> MISSING_TASK_TITLE.equals(rejection.getTask().getTitle());
+        assertFalse(acks.containRejection(taskInCompletedProject, withMissingTitle));
     }
 
     @Test
     @DisplayName("return proper count if contain a rejection specified by predicate")
     void countRejectionUsingPredicate() {
-        String uniqueTitle = "single-title";
-        String duplicatedTitle = "duplicate-title";
-        String missingTitle = "missing-title";
         ImmutableList<Ack> items = ImmutableList.of(
                 newRejectionAck(taskLimitReached()),
-                newRejectionAck(taskCreatedInCompletedProject(newTask(uniqueTitle))),
-                newRejectionAck(taskCreatedInCompletedProject(newTask(duplicatedTitle))),
-                newRejectionAck(taskCreatedInCompletedProject(newTask(duplicatedTitle)))
+                newRejectionAck(taskCreatedInCompletedProject(newTask(UNIQUE_TASK_TITLEE))),
+                newRejectionAck(taskCreatedInCompletedProject(newTask(DUPLICATE_TASK_TITLE))),
+                newRejectionAck(taskCreatedInCompletedProject(newTask(DUPLICATE_TASK_TITLE)))
         );
         CommandAcks acks = new CommandAcks(items);
 
@@ -184,15 +188,76 @@ class CommandAcksTest {
                 Rejections.IntTaskCreatedInCompletedProject.class;
 
         RejectionPredicate<Rejections.IntTaskCreatedInCompletedProject> withMissingTitle =
-                rejection -> missingTitle.equals(rejection.getTask().getTitle());
+                rejection -> MISSING_TASK_TITLE.equals(rejection.getTask().getTitle());
         assertEquals(0, acks.countRejections(taskInCompletedProject, withMissingTitle));
 
         RejectionPredicate<Rejections.IntTaskCreatedInCompletedProject> withUniqueTitle =
-                rejection -> uniqueTitle.equals(rejection.getTask().getTitle());
+                rejection -> UNIQUE_TASK_TITLEE.equals(rejection.getTask().getTitle());
         assertEquals(1, acks.countRejections(taskInCompletedProject, withUniqueTitle));
 
         RejectionPredicate<Rejections.IntTaskCreatedInCompletedProject> withDuplicatedTitle =
-                rejection -> duplicatedTitle.equals(rejection.getTask().getTitle());
+                rejection -> DUPLICATE_TASK_TITLE.equals(rejection.getTask().getTitle());
         assertEquals(2, acks.countRejections(taskInCompletedProject, withDuplicatedTitle));
+    }
+
+    /*
+     * Errors
+     ******************************************************************************/
+
+    @Test
+    @DisplayName("return true if contain any errors")
+    void containErrors() {
+        List<Ack> items = ImmutableList.of(newErrorAck());
+
+        CommandAcks acks = new CommandAcks(items);
+        assertTrue(acks.containErrors());
+
+        CommandAcks emptyAcks = new CommandAcks(emptyList());
+        assertFalse(emptyAcks.containErrors());
+    }
+
+    @Test
+    @DisplayName("return proper total error count")
+    void countErrors() {
+        CommandAcks noAcks = new CommandAcks(newArrayList());
+        assertEquals(0, noAcks.countErrors());
+
+        CommandAcks ack = new CommandAcks(acks(1, CommandAcksTestEnv::newErrorAck));
+        assertEquals(1, ack.countErrors());
+
+        CommandAcks fiveAcksTwoRejections = new CommandAcks(concat(
+                acks(3, CommandAcksTestEnv::newOkAck),
+                acks(2, CommandAcksTestEnv::newErrorAck)));
+        assertEquals(2, fiveAcksTwoRejections.countErrors());
+
+        CommandAcks sixAcksThreeRejections = new CommandAcks(concat(
+                acks(3, CommandAcksTestEnv::newErrorAck),
+                acks(3, CommandAcksTestEnv::newOkAck)));
+        assertEquals(3, sixAcksThreeRejections.countErrors());
+    }
+
+    @Test
+    @DisplayName("return true if contain errors matched by qualifier")
+    void containErrorsUsingQualifier() {
+        List<Ack> items = ImmutableList.of(newErrorAck(newError(PRESENT_ERROR_TYPE)));
+        CommandAcks acks = new CommandAcks(items);
+
+        assertTrue(acks.containErrors(withType(PRESENT_ERROR_TYPE)));
+        assertFalse(acks.containErrors(withType(MISSING_ERROR_TYPE)));
+    }
+
+    @Test
+    @DisplayName("return proper total error count matched by qualifier")
+    void countErrorsUsingQualifier() {
+        CommandAcks acks = new CommandAcks(asList(
+                newErrorAck(newError(UNIQUE_ERROR_TYPE)),
+                newErrorAck(newError(DUPLICATE_ERROR_TYPE)),
+                newErrorAck(newError(DUPLICATE_ERROR_TYPE))
+        ));
+        
+        assertEquals(0, acks.countErrors(withType(MISSING_ERROR_TYPE)));
+        assertEquals(1, acks.countErrors(withType(UNIQUE_ERROR_TYPE)));
+        assertEquals(2, acks.countErrors(withType(DUPLICATE_ERROR_TYPE)));
+
     }
 }

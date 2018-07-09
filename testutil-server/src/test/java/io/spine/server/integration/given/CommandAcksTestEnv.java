@@ -25,6 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.Rejection;
 import io.spine.core.Status;
@@ -48,6 +49,14 @@ import static java.util.stream.Collectors.toList;
 public class CommandAcksTestEnv {
 
     private static final String SPINE_TYPE_PREFIX = "type.spine.io";
+    public static final String MISSING_ERROR_TYPE = "missing-error";
+    public static final String UNIQUE_ERROR_TYPE = "unique-error";
+    public static final String DUPLICATE_ERROR_TYPE = "duplicate-error";
+    public static final String PRESENT_ERROR_TYPE = "present-error";
+    public static final String UNIQUE_TASK_TITLEE = "single-title";
+    public static final String DUPLICATE_TASK_TITLE = "duplicate-title";
+    public static final String MISSING_TASK_TITLE = "missing-title";
+    public static final String PRESENT_TASK_TITLE = "present-title";
 
     /** Prevents instantiation of this utility class. */
     private CommandAcksTestEnv() {
@@ -65,6 +74,28 @@ public class CommandAcksTestEnv {
         return Ack.newBuilder()
                   .setMessageId(newMessageId())
                   .setStatus(newRejectedStatus(rejection))
+                  .build();
+    }
+
+    public static Ack newErrorAck() {
+        return newErrorAck(newError());
+    }
+
+    private static Error newError() {
+        return newError(newUuid());
+    }
+
+    public static Error newError(String type) {
+        return Error.newBuilder()
+                    .setType(type)
+                    .setCode(0)
+                    .build();
+    }
+
+    public static Ack newErrorAck(Error error) {
+        return Ack.newBuilder()
+                  .setMessageId(newMessageId())
+                  .setStatus(newErrorStatus(error))
                   .build();
     }
 
@@ -89,6 +120,12 @@ public class CommandAcksTestEnv {
                          .build();
         return Status.newBuilder()
                      .setRejection(rejection)
+                     .build();
+    }
+
+    private static Status newErrorStatus(Error error) {
+        return Status.newBuilder()
+                     .setError(error)
                      .build();
     }
 
