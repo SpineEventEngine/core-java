@@ -31,6 +31,7 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
+import io.spine.server.expected.AbstractExpected;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;

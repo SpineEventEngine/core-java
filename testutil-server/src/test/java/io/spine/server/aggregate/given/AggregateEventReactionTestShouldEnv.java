@@ -25,7 +25,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.React;
-import io.spine.server.MessageProducingExpected;
+import io.spine.server.expected.MessageProducingExpected;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventReactionTest;
 import io.spine.server.aggregate.AggregateRepository;

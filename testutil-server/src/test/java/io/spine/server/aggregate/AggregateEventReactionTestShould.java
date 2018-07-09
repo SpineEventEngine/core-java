@@ -22,7 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.Timestamps;
-import io.spine.server.MessageProducingExpected;
+import io.spine.server.expected.MessageProducingExpected;
 import io.spine.server.aggregate.given.AggregateEventReactionTestShouldEnv.EventReactingAggregate;
 import io.spine.server.aggregate.given.AggregateEventReactionTestShouldEnv.EventReactingAggregateTest;
 import org.junit.jupiter.api.BeforeEach;

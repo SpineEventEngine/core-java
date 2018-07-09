@@ -22,6 +22,7 @@ package io.spine.server;
 
 import com.google.protobuf.Message;
 import io.spine.server.command.CommandHandlingEntity;
+import io.spine.server.expected.MessageProducingExpected;
 
 import java.util.List;
 

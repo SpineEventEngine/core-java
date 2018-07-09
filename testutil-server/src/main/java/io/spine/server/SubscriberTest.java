@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.Entity;
+import io.spine.server.expected.AbstractExpected;
 
 /**
  * The base class for testing the single event handling by a subscriber.
@@ -60,7 +61,7 @@ public abstract class SubscriberTest<M extends Message,
         }
 
         @Override
-        Expected<S> self() {
+        protected Expected<S> self() {
             return this;
         }
     }

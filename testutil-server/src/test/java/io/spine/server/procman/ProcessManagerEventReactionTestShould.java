@@ -22,7 +22,7 @@ package io.spine.server.procman;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
-import io.spine.server.MessageProducingExpected;
+import io.spine.server.expected.MessageProducingExpected;
 import io.spine.server.procman.given.ProcessManagerEventReactionTestShouldEnv.EventReactingProcessManager;
 import io.spine.server.procman.given.ProcessManagerEventReactionTestShouldEnv.EventReactingProcessManagerTest;
 import org.junit.jupiter.api.BeforeEach;

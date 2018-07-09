@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.server.expected;
 
 import com.google.protobuf.Message;
 
@@ -44,11 +44,11 @@ public class CommandExpected<S extends Message> extends MessageProducingExpected
     @Nullable
     private final Message rejection;
 
-    CommandExpected(List<? extends Message> events,
-                    @Nullable Message rejection,
-                    S initialState,
-                    S state,
-                    List<Message> interceptedCommands) {
+    public CommandExpected(List<? extends Message> events,
+                           @Nullable Message rejection,
+                           S initialState,
+                           S state,
+                           List<Message> interceptedCommands) {
         super(events, initialState, state, interceptedCommands);
         this.rejection = rejection;
     }
@@ -93,7 +93,8 @@ public class CommandExpected<S extends Message> extends MessageProducingExpected
         boolean rejected = rejection != null;
         if (rejected) {
             fail(format("Message was rejected. Expected messages(s): [%s]. Rejection: %s%s%s.",
-                        eventType, rejection.getClass().getSimpleName(),
+                        eventType, rejection.getClass()
+                                            .getSimpleName(),
                         System.lineSeparator(), rejection));
         }
     }

@@ -26,7 +26,7 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.MessageProducingExpected;
+import io.spine.server.expected.MessageProducingExpected;
 import io.spine.server.ReactionTest;
 
 import java.util.List;

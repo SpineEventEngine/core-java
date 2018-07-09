@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.server.expected;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Empty;
@@ -47,10 +47,10 @@ public class MessageProducingExpected<S extends Message>
     private final ImmutableList<? extends Message> events;
     private final ImmutableList<Message> commands;
 
-    MessageProducingExpected(List<? extends Message> events,
-                             S initialState,
-                             S state,
-                             List<Message> interceptedCommands) {
+    public MessageProducingExpected(List<? extends Message> events,
+                                    S initialState,
+                                    S state,
+                                    List<Message> interceptedCommands) {
         super(initialState, state);
         this.events = copyOf(events);
         this.commands = copyOf(interceptedCommands);
@@ -169,7 +169,7 @@ public class MessageProducingExpected<S extends Message>
     }
 
     @Override
-    MessageProducingExpected<S> self() {
+    protected MessageProducingExpected<S> self() {
         return this;
     }
 

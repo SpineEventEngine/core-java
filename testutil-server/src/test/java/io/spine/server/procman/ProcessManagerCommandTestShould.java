@@ -23,7 +23,7 @@ package io.spine.server.procman;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
 import io.spine.core.UserId;
-import io.spine.server.CommandExpected;
+import io.spine.server.expected.CommandExpected;
 import io.spine.server.procman.given.ProcessManagerCommandTestTestEnv.CommandHandlingProcessManager;
 import io.spine.server.procman.given.ProcessManagerCommandTestTestEnv.TimestampProcessManagerTest;
 import org.junit.jupiter.api.BeforeEach;

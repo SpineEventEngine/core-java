@@ -23,7 +23,7 @@ package io.spine.server.procman;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.CommandExpected;
+import io.spine.server.expected.CommandExpected;
 import io.spine.server.CommandHandlerTest;
 
 import java.util.List;

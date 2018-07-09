@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.server.expected;
 
 import com.google.protobuf.Message;
 
@@ -35,12 +35,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @author Vladyslav Lubenskyi
  * @see MessageProducingExpected
  */
-abstract class AbstractExpected<S extends Message, E extends AbstractExpected<S, E>> {
+public abstract class AbstractExpected<S extends Message, E extends AbstractExpected<S, E>> {
 
     private final S initialState;
     private final S state;
 
-    AbstractExpected(S initialState, S state) {
+    protected AbstractExpected(S initialState, S state) {
         this.initialState = initialState;
         this.state = state;
     }
@@ -68,5 +68,5 @@ abstract class AbstractExpected<S extends Message, E extends AbstractExpected<S,
     /**
      * @return {@code this} with the required compile-time type
      */
-    abstract E self();
+    protected abstract E self();
 }
