@@ -75,18 +75,18 @@ public class CommandExpected<S extends Message> extends MessageProducingExpected
     }
 
     @Override
-    public <M extends Message> MessageProducingExpected<S> producesCommand(Class<M> commandClass,
-                                                                           Consumer<M> validator) {
+    public <M extends Message> MessageProducingExpected<S> routesCommand(Class<M> commandClass,
+                                                                         Consumer<M> validator) {
         assertNotRejected(commandClass.getName());
-        return super.producesCommand(commandClass, validator);
+        return super.routesCommand(commandClass, validator);
     }
 
     @Override
-    public MessageProducingExpected<S> producesCommands(Class<?>... commandClasses) {
+    public MessageProducingExpected<S> routesCommands(Class<?>... commandClasses) {
         assertNotRejected(Stream.of(commandClasses)
                                 .map(Class::getSimpleName)
                                 .collect(joining(",")));
-        return super.producesCommands(commandClasses);
+        return super.routesCommands(commandClasses);
     }
 
     private void assertNotRejected(String eventType) {

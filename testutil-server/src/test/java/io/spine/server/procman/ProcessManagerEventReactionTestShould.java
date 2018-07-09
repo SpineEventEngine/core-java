@@ -64,7 +64,7 @@ class ProcessManagerEventReactionTestShould {
         pmEventTest.init();
         EventReactingProcessManager testPm = processManager();
         MessageProducingExpected<StringValue> expected = pmEventTest.expectThat(testPm);
-        expected.producesCommand(StringValue.class, command -> {
+        expected.routesCommand(StringValue.class, command -> {
             assertEquals(command, NESTED_COMMAND);
         });
         expected.producesEvent(UInt32Value.class, event -> {

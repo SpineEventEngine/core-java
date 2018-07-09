@@ -120,7 +120,7 @@ public class MessageProducingExpected<S extends Message>
      */
     @SuppressWarnings({"unchecked", "UnusedReturnValue"})
     public <M extends Message> MessageProducingExpected<S>
-    producesCommand(Class<M> commandClass, Consumer<M> validator) {
+    routesCommand(Class<M> commandClass, Consumer<M> validator) {
         assertNotNull(validator);
         assertEquals(1, commands.size());
         assertSingleCommand(commands.get(0), commandClass, validator);
@@ -135,7 +135,7 @@ public class MessageProducingExpected<S extends Message>
      * @param commandClasses types of the expected commands
      */
     @SuppressWarnings("UnusedReturnValue")
-    public MessageProducingExpected<S> producesCommands(Class<?>... commandClasses) {
+    public MessageProducingExpected<S> routesCommands(Class<?>... commandClasses) {
         assertEquals(commandClasses.length, commands.size(), () -> format(
                 "Unexpected number of commands: %s (%s). Expected %s",
                 commands.size(), commands.stream()

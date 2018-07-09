@@ -65,7 +65,7 @@ class ProcessManagerCommandTestShould {
         CommandHandlingProcessManager testPm = processManager();
         CommandExpected<StringValue> expected = pmCommandTest.expectThat(testPm);
 
-        expected.producesCommand(UserId.class, command -> {
+        expected.routesCommand(UserId.class, command -> {
             assertEquals(NESTED_COMMAND, command);
         });
         expected.producesEvent(UInt64Value.class, event -> {
