@@ -38,12 +38,12 @@ import org.junit.jupiter.api.BeforeEach;
 /**
  * @author Vladyslav Lubenskyi
  */
-public class ProcessManagerEventReactionTestTestEnv {
+public class ProcessManagerEventReactionTestShouldEnv {
 
     /**
      * Prevents direct instantiation.
      */
-    private ProcessManagerEventReactionTestTestEnv() {
+    private ProcessManagerEventReactionTestShouldEnv() {
     }
 
     public static EventReactingProcessManager processManager() {
@@ -51,7 +51,7 @@ public class ProcessManagerEventReactionTestTestEnv {
                                        .setValue("state")
                                        .build();
         return Given.processManagerOfClass(EventReactingProcessManager.class)
-                    .withId(ProcessManagerEventReactionTestTestEnv.class.getName())
+                    .withId(ProcessManagerEventReactionTestShouldEnv.class.getName())
                     .withState(state)
                     .build();
     }
@@ -104,7 +104,7 @@ public class ProcessManagerEventReactionTestTestEnv {
 
         @Override
         protected String newId() {
-            return ProcessManagerEventReactionTestTestEnv.class.getName();
+            return ProcessManagerEventReactionTestShouldEnv.class.getName();
         }
 
         @Override

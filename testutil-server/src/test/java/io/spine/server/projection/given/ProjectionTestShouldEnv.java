@@ -34,14 +34,14 @@ import org.junit.jupiter.api.BeforeEach;
 /**
  * @author Vladyslav Lubenskyi
  */
-public class ProjectionTestTestEnv {
+public class ProjectionTestShouldEnv {
 
     private static final long ID = 1L;
 
     /**
      * Prevents direct instantiation.
      */
-    private ProjectionTestTestEnv() {
+    private ProjectionTestShouldEnv() {
     }
 
     public static TestProjection projection() {

@@ -40,14 +40,14 @@ import org.junit.jupiter.api.BeforeEach;
 /**
  * @author Vladyslav Lubenskyi
  */
-public class AggregatePartCommandTestTestEnv {
+public class AggregatePartCommandTestShouldEnv {
 
     private static final long ID = 1L;
 
     /**
      * Prevents instantiation of this utility class.
      */
-    private AggregatePartCommandTestTestEnv() {
+    private AggregatePartCommandTestShouldEnv() {
     }
 
     public static TimerCounter aggregatePart() {
@@ -57,7 +57,7 @@ public class AggregatePartCommandTestTestEnv {
                                             .build();
         TimerCounter result = Given.aggregatePartOfClass(TimerCounter.class)
                                    .withRoot(root)
-                                   .withId(AggregatePartCommandTestTestEnv.class.getName())
+                                   .withId(AggregatePartCommandTestShouldEnv.class.getName())
                                    .withVersion(5)
                                    .withState(int32Value)
                                    .build();
@@ -118,7 +118,7 @@ public class AggregatePartCommandTestTestEnv {
 
         @Override
         protected String newId() {
-            return AggregatePartCommandTestTestEnv.class.getName();
+            return AggregatePartCommandTestShouldEnv.class.getName();
         }
 
         @Override

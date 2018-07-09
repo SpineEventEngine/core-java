@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 @SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("ProcessManagerCommandTest should")
-class ProcessManagerCommandTestTest {
+class ProcessManagerCommandTestShould {
 
     private TimestampProcessManagerTest pmCommandTest;
 

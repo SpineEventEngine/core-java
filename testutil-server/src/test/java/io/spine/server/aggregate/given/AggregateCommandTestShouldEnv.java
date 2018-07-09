@@ -38,14 +38,14 @@ import org.junit.jupiter.api.BeforeEach;
 /**
  * @author Vladyslav Lubenskyi
  */
-public class AggregateCommandTestTestEnv {
+public class AggregateCommandTestShouldEnv {
 
     private static final long ID = 1L;
 
     /**
      * Prevents instantiation of this utility class.
      */
-    private AggregateCommandTestTestEnv() {
+    private AggregateCommandTestShouldEnv() {
     }
 
     public static TimePrinter aggregate() {

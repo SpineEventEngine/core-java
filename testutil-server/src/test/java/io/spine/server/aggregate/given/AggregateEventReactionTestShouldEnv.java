@@ -38,14 +38,14 @@ import org.junit.jupiter.api.BeforeEach;
 /**
  * @author Vladyslav Lubenskyi
  */
-public class AggregateEventReactionTestTestEnv {
+public class AggregateEventReactionTestShouldEnv {
 
     private static final long ID = 1L;
 
     /**
      * Prevents direct instantiation.
      */
-    private AggregateEventReactionTestTestEnv() {
+    private AggregateEventReactionTestShouldEnv() {
     }
 
     public static EventReactingAggregate aggregate() {

@@ -20,47 +20,47 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.server.aggregate.given.AggregatePartCommandTestTestEnv.TimeCounterTest;
-import io.spine.server.aggregate.given.AggregatePartCommandTestTestEnv.TimerCounter;
+import com.google.protobuf.util.Timestamps;
+import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.TimePrinter;
+import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.TimePrintingTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.aggregate.given.AggregatePartCommandTestTestEnv.TimeCounterTest.TEST_COMMAND;
-import static io.spine.server.aggregate.given.AggregatePartCommandTestTestEnv.aggregatePart;
+import static io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.TimePrintingTest.TEST_COMMAND;
+import static io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.aggregate;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Vladyslav Lubenskyi
  */
 @SuppressWarnings("DuplicateStringLiteralInspection")
-@DisplayName("AggregatePartCommandTest should")
-class AggregatePartCommandTestTest {
+@DisplayName("AggregateCommandTest should")
+class AggregateCommandTestShould {
 
-    private TimeCounterTest aggregatePartCommandTest;
+    private TimePrintingTest aggregateCommandTest;
 
     @BeforeEach
     void setUp() {
-        aggregatePartCommandTest = new TimeCounterTest();
+        aggregateCommandTest = new TimePrintingTest();
     }
 
     @Test
     @DisplayName("store tested command")
     void shouldStoreCommand() {
-        aggregatePartCommandTest.setUp();
-        assertEquals(aggregatePartCommandTest.storedMessage(), TEST_COMMAND);
+        aggregateCommandTest.setUp();
+        assertEquals(aggregateCommandTest.storedMessage(), TEST_COMMAND);
     }
 
     @Test
     @DisplayName("dispatch tested command")
     void shouldDispatchCommand() {
-        aggregatePartCommandTest.setUp();
-        TimerCounter testPart = aggregatePart();
-        int oldState = testPart.getState()
-                               .getValue();
-        aggregatePartCommandTest.expectThat(testPart);
-        assertEquals(oldState + 1, testPart.getState()
-                                                     .getValue());
+        aggregateCommandTest.setUp();
+        TimePrinter testAggregate = aggregate();
+        aggregateCommandTest.expectThat(testAggregate);
+        String newState = testAggregate.getState()
+                                       .getValue();
+        assertEquals(newState, Timestamps.toString(TEST_COMMAND));
     }
 
 }
