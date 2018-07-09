@@ -77,7 +77,9 @@ class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
                 ProjectionTransaction.start((Projection<I, ?, ?>) projection);
         TransactionListener listener = MonitorTransactionListener.instance(repository());
         tx.setListener(listener);
-        doDispatch(projection, envelope());
+        EventEnvelope envelope = envelope();
+        doDispatch(projection, envelope);
+        repository().onEventDispatched(entityId, envelope.getOuterObject());
         tx.commit();
         store(projection);
     }
@@ -90,7 +92,7 @@ class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     @CanIgnoreReturnValue
     @Override
     protected List<? extends Message> doDispatch(P projection, EventEnvelope event) {
-        projection.handle(event);
+        projection.play(event.getOuterObject());
         return ImmutableList.of();
     }
 

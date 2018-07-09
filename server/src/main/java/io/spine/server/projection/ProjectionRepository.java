@@ -27,7 +27,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
-import io.spine.client.EntityId;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
@@ -52,8 +51,6 @@ import io.spine.server.route.EventRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.system.server.DispatchEventToSubscriber;
-import io.spine.system.server.EntityHistoryId;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -62,7 +59,6 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
-import static io.spine.base.Identifier.pack;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -259,29 +255,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     public Set<I> dispatch(EventEnvelope envelope) {
         Set<I> ids = ProjectionEndpoint.handle(this, envelope);
-        Event event = envelope.getOuterObject();
-        ids.forEach(
-                projectionId -> onEventDispatched(projectionId, event)
-        );
         return ids;
     }
 
-    private void onEventDispatched(I id, Event event) {
-        EntityId entityId = EntityId
-                .newBuilder()
-                .setId(pack(id))
-                .build();
-        EntityHistoryId historyId = EntityHistoryId
-                .newBuilder()
-                .setEntityId(entityId)
-                .setTypeUrl(getEntityStateType().value())
-                .build();
-        DispatchEventToSubscriber systemCommand = DispatchEventToSubscriber
-                .newBuilder()
-                .setReceiver(historyId)
-                .setPayload(event)
-                .build();
-        postSystem(systemCommand);
+    void onEventDispatched(I id, Event event) {
+        lifecycleOf(id).onDispatchEventToSubscriber(event);
     }
 
     @Internal
