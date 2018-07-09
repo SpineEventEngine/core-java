@@ -78,33 +78,33 @@ message EntityStateChanged {
 
     google.protobuf.Any new_state = 2 [(required) = true];
 
-    repeated DispatchedMessageId message_id = 3 [(required) = true];
+    repeated DispatchedMessageId message_id = 3;
 }
 
 message EntityArchived {
 
     EntityHistoryId id = 1 [(required) = true];
 
-    repeated DispatchedMessageId message_id = 2 [(required) = true];
+    repeated DispatchedMessageId message_id = 2;
 }
 
 message EntityDeleted {
 
     EntityHistoryId id = 1 [(required) = true];
 
-    repeated DispatchedMessageId message_id = 2 [(required) = true];
+    repeated DispatchedMessageId message_id = 2;
 }
 
 message EntityExtractedFromArchive {
 
     EntityHistoryId id = 1 [(required) = true];
 
-    repeated DispatchedMessageId message_id = 2 [(required) = true];
+    repeated DispatchedMessageId message_id = 2;
 }
 
 message EntityRestored {
 
     EntityHistoryId id = 1 [(required) = true];
 
-    repeated DispatchedMessageId message_id = 2 [(required) = true];
+    repeated DispatchedMessageId message_id = 2;
 }
