@@ -20,6 +20,7 @@
 
 package io.spine.server.expected.given;
 
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
@@ -28,12 +29,19 @@ import io.spine.server.expected.MessageProducingExpected;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 /**
  * @author Vladyslav Lubenskyi
  */
 public class MessageProducingExpectedTestEnv {
+
+    /**
+     * Prevents direct instantiation.
+     */
+    private MessageProducingExpectedTestEnv() {
+    }
 
     public static List<Message> events() {
         StringValue firstEvent = StringValue.newBuilder()
@@ -73,12 +81,30 @@ public class MessageProducingExpectedTestEnv {
         return expected;
     }
 
-    public static MessageProducingExpected<UInt64Value> expectedWithCommand(Message event) {
+    public static MessageProducingExpected<UInt64Value> expectedWithCommand(Message command) {
         MessageProducingExpected<UInt64Value> expected =
                 new MessageProducingExpected<>(events(),
                                                oldState(),
                                                newState(),
-                                               singletonList(event));
+                                               singletonList(command));
+        return expected;
+    }
+
+    public static MessageProducingExpected<UInt64Value> blankExpected() {
+        MessageProducingExpected<UInt64Value> expected =
+                new MessageProducingExpected<>(emptyList(),
+                                               oldState(),
+                                               oldState(),
+                                               emptyList());
+        return expected;
+    }
+
+    public static MessageProducingExpected<UInt64Value> emptyExpected() {
+        MessageProducingExpected<UInt64Value> expected =
+                new MessageProducingExpected<>(singletonList(Empty.getDefaultInstance()),
+                                               oldState(),
+                                               oldState(),
+                                               emptyList());
         return expected;
     }
 

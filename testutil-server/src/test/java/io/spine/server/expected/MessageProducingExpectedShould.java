@@ -25,6 +25,8 @@ import com.google.protobuf.UInt64Value;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.blankExpected;
+import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.emptyExpected;
 import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.expected;
 import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.expectedWithCommand;
 import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.expectedWithEvent;
@@ -82,5 +84,19 @@ class MessageProducingExpectedShould {
         expected.routesCommand(StringValue.class, command -> {
             assertEquals(expectedCommand, command);
         });
+    }
+
+    @Test
+    @DisplayName("ignore message if no events were generated")
+    void ignoreNoEvents() {
+        MessageProducingExpected<UInt64Value> expected = blankExpected();
+        expected.ignoresMessage();
+    }
+
+    @Test
+    @DisplayName("ignore message if the single Empty was generated")
+    void ignoreEmptyEvent() {
+        MessageProducingExpected<UInt64Value> expected = emptyExpected();
+        expected.ignoresMessage();
     }
 }
