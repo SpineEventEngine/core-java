@@ -21,28 +21,24 @@
 package io.spine.server.integration;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Streams;
-import com.google.protobuf.Any;
-import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.core.Ack;
-import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
-import io.spine.core.Status;
+import io.spine.server.integration.given.CommandAcksTestEnv;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.function.Supplier;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Any.pack;
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.server.integration.given.CommandAcksTestEnv.acks;
+import static io.spine.server.integration.given.CommandAcksTestEnv.newRejectionAck;
+import static io.spine.server.integration.given.CommandAcksTestEnv.newTask;
+import static io.spine.server.integration.given.CommandAcksTestEnv.projectAlreadyStarted;
+import static io.spine.server.integration.given.CommandAcksTestEnv.taskCreatedInCompletedProject;
+import static io.spine.server.integration.given.CommandAcksTestEnv.taskLimitReached;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,110 +49,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("Command Acknowledgements should")
 class CommandAcksTest {
 
-    private static final String SPINE_TYPE_PREFIX = "type.spine.io";
-
     @Test
     @DisplayName("return proper total acknowledgements count")
     void count() {
         CommandAcks noAcks = new CommandAcks(newArrayList());
         assertEquals(0, noAcks.count());
 
-        CommandAcks ack = new CommandAcks(acks(1, CommandAcksTest::newOkAck));
+        CommandAcks ack = new CommandAcks(acks(1, CommandAcksTestEnv::newOkAck));
         assertEquals(1, ack.count());
 
-        CommandAcks twoAcks = new CommandAcks(acks(2, CommandAcksTest::newOkAck));
+        CommandAcks twoAcks = new CommandAcks(acks(2, CommandAcksTestEnv::newOkAck));
         assertEquals(2, twoAcks.count());
 
-        CommandAcks threeAcks = new CommandAcks(acks(3, CommandAcksTest::newOkAck));
+        CommandAcks threeAcks = new CommandAcks(acks(3, CommandAcksTestEnv::newOkAck));
         assertEquals(3, threeAcks.count());
-    }
-
-    private static Ack newOkAck() {
-        return Ack.newBuilder()
-                  .setMessageId(newMessageId())
-                  .setStatus(newOkStatus())
-                  .build();
-    }
-
-    private static Ack newRejectionAck(Message rejection) {
-        return Ack.newBuilder()
-                  .setMessageId(newMessageId())
-                  .setStatus(newRejectedStatus(rejection))
-                  .build();
-    }
-
-    private static Ack newRejectionAck() {
-        return newRejectionAck(taskLimitReached());
-    }
-
-    private static Any newMessageId() {
-        return pack(StringValue.of(newUuid()), SPINE_TYPE_PREFIX);
-    }
-
-    private static Status newOkStatus() {
-        return Status.newBuilder()
-                     .setOk(Empty.getDefaultInstance())
-                     .build();
-    }
-
-    private static Status newRejectedStatus(Message domainRejection) {
-        Rejection rejection =
-                Rejection.newBuilder()
-                         .setMessage(pack(domainRejection, SPINE_TYPE_PREFIX))
-                         .build();
-        return Status.newBuilder()
-                     .setRejection(rejection)
-                     .build();
-    }
-
-    private static List<Ack> acks(int count, Supplier<Ack> messageSupplier) {
-        List<Ack> events = newArrayList();
-        for (int i = 0; i < count; i++) {
-            events.add(messageSupplier.get());
-        }
-        return events;
-    }
-
-    private static ProjectId newProjectId() {
-        return ProjectId.newBuilder()
-                        .setId(newUuid())
-                        .build();
-    }
-
-    private static Rejections.IntProjectAlreadyStarted projectAlreadyStarted() {
-        return Rejections.IntProjectAlreadyStarted.newBuilder()
-                                                  .setProjectId(newProjectId())
-                                                  .build();
-    }
-
-    private static Rejections.IntTaskLimitReached taskLimitReached() {
-        return Rejections.IntTaskLimitReached.newBuilder()
-                                             .setProjectId(newProjectId())
-                                             .build();
-
-    }
-
-    private static Task newTask(String title) {
-        return Task.newBuilder()
-                   .setTaskId(newTaskId())
-                   .setTitle(title)
-                   .build();
-    }
-
-    private static TaskId newTaskId() {
-        return TaskId.newBuilder()
-                     .setId(newUuid())
-                     .build();
-    }
-
-    private static Rejections.IntTaskCreatedInCompletedProject
-    taskCreatedInCompletedProject(Task task) {
-        return Rejections.IntTaskCreatedInCompletedProject
-                .newBuilder()
-                .setProjectId(newProjectId())
-                .setTask(task)
-                .build();
-
     }
 
     @Test
@@ -177,23 +83,18 @@ class CommandAcksTest {
         CommandAcks noAcks = new CommandAcks(newArrayList());
         assertEquals(0, noAcks.countRejections());
 
-        CommandAcks ack = new CommandAcks(acks(1, CommandAcksTest::newRejectionAck));
+        CommandAcks ack = new CommandAcks(acks(1, CommandAcksTestEnv::newRejectionAck));
         assertEquals(1, ack.countRejections());
 
-        CommandAcks fiveAcksTwoRejections = new CommandAcks(concat(
-                acks(3, CommandAcksTest::newOkAck),
-                acks(2, CommandAcksTest::newRejectionAck)));
+        CommandAcks fiveAcksTwoRejections = new CommandAcks(CommandAcksTestEnv.concat(
+                acks(3, CommandAcksTestEnv::newOkAck),
+                acks(2, CommandAcksTestEnv::newRejectionAck)));
         assertEquals(2, fiveAcksTwoRejections.countRejections());
         
-        CommandAcks sixAcksThreeRejections = new CommandAcks(concat(
-                acks(3, CommandAcksTest::newRejectionAck), 
-                acks(3, CommandAcksTest::newOkAck)));
+        CommandAcks sixAcksThreeRejections = new CommandAcks(CommandAcksTestEnv.concat(
+                acks(3, CommandAcksTestEnv::newRejectionAck),
+                acks(3, CommandAcksTestEnv::newOkAck)));
         assertEquals(3, sixAcksThreeRejections.countRejections());
-    }
-
-    private static List<Ack> concat(Collection<Ack> itemsA, Collection<Ack> itemsB) {
-        return Streams.concat(itemsA.stream(), itemsB.stream())
-                      .collect(toList());
     }
 
     @Test
