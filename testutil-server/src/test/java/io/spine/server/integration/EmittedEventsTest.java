@@ -20,20 +20,19 @@
 
 package io.spine.server.integration;
 
-import com.google.protobuf.Message;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
-import io.spine.core.TenantId;
-import io.spine.server.command.TestEventFactory;
+import io.spine.server.integration.given.EmittedEventsTestEnv;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.server.integration.given.EmittedEventsTestEnv.event;
+import static io.spine.server.integration.given.EmittedEventsTestEnv.events;
+import static io.spine.server.integration.given.EmittedEventsTestEnv.projectCreated;
+import static io.spine.server.integration.given.EmittedEventsTestEnv.taskAdded;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -51,63 +50,17 @@ class EmittedEventsTest {
         EmittedEvents noEmittedEvents = new EmittedEvents(newArrayList());
         assertEquals(0, noEmittedEvents.count());
 
-        EmittedEvents emittedEvent = new EmittedEvents(
-                events(1, EmittedEventsTest::projectCreated));
+        EmittedEvents emittedEvent =
+                new EmittedEvents(events(1, EmittedEventsTestEnv::projectCreated));
         assertEquals(1, emittedEvent.count());
 
-        EmittedEvents twoEmittedEvents = new EmittedEvents(
-                events(2, EmittedEventsTest::projectCreated));
+        EmittedEvents twoEmittedEvents =
+                new EmittedEvents(events(2, EmittedEventsTestEnv::projectCreated));
         assertEquals(2, twoEmittedEvents.count());
 
-        EmittedEvents threeEmittedEvents = new EmittedEvents(
-                events(3, EmittedEventsTest::projectCreated));
+        EmittedEvents threeEmittedEvents =
+                new EmittedEvents(events(3, EmittedEventsTestEnv::projectCreated));
         assertEquals(3, threeEmittedEvents.count());
-    }
-
-    private static List<Event> events(int count, Supplier<Message> messageSupplier) {
-        List<Event> events = newArrayList();
-        for (int i = 0; i < count; i++) {
-            events.add(event(messageSupplier.get()));
-        }
-        return events;
-    }
-
-    private static Event event(Message domainEvent) {
-        TestEventFactory factory = eventFactory(requestFactory(newTenantId()));
-        return factory.createEvent(domainEvent);
-    }
-
-    private static TenantId newTenantId() {
-        return TenantId.newBuilder()
-                       .setValue(newUuid())
-                       .build();
-    }
-
-    private static TestEventFactory eventFactory(TestActorRequestFactory requestFactory) {
-        return TestEventFactory.newInstance(requestFactory);
-    }
-
-    private static TestActorRequestFactory requestFactory(TenantId tenantId) {
-        return TestActorRequestFactory.newInstance(BlackBoxBoundedContext.class, tenantId);
-    }
-
-    private static ProjectId newProjectId() {
-        return ProjectId.newBuilder()
-                        .setId(newUuid())
-                        .build();
-    }
-
-    private static IntProjectCreated projectCreated() {
-        return IntProjectCreated.newBuilder()
-                                .setProjectId(newProjectId())
-                                .build();
-    }
-
-    private static IntTaskAdded taskAdded() {
-        return IntTaskAdded.newBuilder()
-                           .setProjectId(newProjectId())
-                           .build();
-
     }
 
     @Test

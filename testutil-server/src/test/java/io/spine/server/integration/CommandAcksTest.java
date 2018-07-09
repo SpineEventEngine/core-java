@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.protobuf.Any.pack;
 import static io.spine.server.integration.given.CommandAcksTestEnv.acks;
 import static io.spine.server.integration.given.CommandAcksTestEnv.newRejectionAck;
 import static io.spine.server.integration.given.CommandAcksTestEnv.newTask;
@@ -90,7 +89,7 @@ class CommandAcksTest {
                 acks(3, CommandAcksTestEnv::newOkAck),
                 acks(2, CommandAcksTestEnv::newRejectionAck)));
         assertEquals(2, fiveAcksTwoRejections.countRejections());
-        
+
         CommandAcks sixAcksThreeRejections = new CommandAcks(CommandAcksTestEnv.concat(
                 acks(3, CommandAcksTestEnv::newRejectionAck),
                 acks(3, CommandAcksTestEnv::newOkAck)));
@@ -156,11 +155,13 @@ class CommandAcksTest {
                 Rejections.IntTaskCreatedInCompletedProject.class;
 
         RejectionPredicate<Rejections.IntTaskCreatedInCompletedProject> withPresentTitle =
-                rejection -> presentTitle.equals(rejection.getTask().getTitle());
+                rejection -> presentTitle.equals(rejection.getTask()
+                                                          .getTitle());
         assertTrue(acks.containRejection(taskInCompletedProjectClass, withPresentTitle));
 
         RejectionPredicate<Rejections.IntTaskCreatedInCompletedProject> withMissingTitle =
-                rejection -> missingTitle.equals(rejection.getTask().getTitle());
+                rejection -> missingTitle.equals(rejection.getTask()
+                                                          .getTitle());
         assertFalse(acks.containRejection(taskInCompletedProjectClass, withMissingTitle));
     }
 
