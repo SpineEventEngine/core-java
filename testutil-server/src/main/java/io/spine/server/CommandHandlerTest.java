@@ -57,7 +57,7 @@ public abstract class CommandHandlerTest<C extends Message,
                                          I,
                                          S extends Message,
                                          E extends CommandHandlingEntity<I, S, ?>>
-        extends MessageProducingMessageHandlerTest<C, I, S, E> {
+        extends ProducingMessageHandlerTest<C, I, S, E> {
 
     private final ActorRequestFactory requestFactory;
 

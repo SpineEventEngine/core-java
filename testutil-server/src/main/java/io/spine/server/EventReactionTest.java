@@ -51,16 +51,16 @@ import io.spine.server.command.TestEventFactory;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("TestOnlyProblems")
-public abstract class ReactionTest<M extends Message,
+public abstract class EventReactionTest<M extends Message,
                                    I,
                                    S extends Message,
                                    E extends CommandHandlingEntity<I, S, ?>>
-        extends MessageProducingMessageHandlerTest<M, I, S, E> {
+        extends ProducingMessageHandlerTest<M, I, S, E> {
 
     private final TestEventFactory eventFactory;
     private final ActorRequestFactory requestFactory;
 
-    protected ReactionTest() {
+    protected EventReactionTest() {
         super();
         this.eventFactory = TestEventFactory.newInstance(getClass());
         this.requestFactory = TestActorRequestFactory.newInstance(getClass());

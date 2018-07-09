@@ -39,7 +39,7 @@ import java.util.List;
  * @param <E> the entity type
  * @author Dmytro Dashenkov
  */
-public abstract class MessageProducingMessageHandlerTest<M extends Message,
+public abstract class ProducingMessageHandlerTest<M extends Message,
                                                          I,
                                                          S extends Message,
                                                          E extends CommandHandlingEntity<I, S, ?>>

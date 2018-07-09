@@ -64,7 +64,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  *
  * @author Dmytro Dashenkov
  * @see CommandHandlerTest
- * @see ReactionTest
+ * @see EventReactionTest
  */
 public abstract class MessageHandlerTest<M extends Message,
                                          I,

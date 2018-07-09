@@ -23,7 +23,7 @@ package io.spine.server.aggregate;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.server.ReactionTest;
+import io.spine.server.EventReactionTest;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ public abstract class AggregateEventReactionTest<E extends Message,
                                                  I,
                                                  S extends Message,
                                                  A extends Aggregate<I, S, ?>>
-        extends ReactionTest<E, I, S, A> {
+        extends EventReactionTest<E, I, S, A> {
 
     @Override
     protected List<? extends Message> dispatchTo(A aggregate) {

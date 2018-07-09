@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.server.SubscriberTest;
+import io.spine.server.EventSubscriptionTest;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ public abstract class ProjectionTest<M extends Message,
                                      I,
                                      S extends Message,
                                      P extends Projection<I, S, ?>>
-        extends SubscriberTest<M ,I, S, P> {
+        extends EventSubscriptionTest<M, I, S, P> {
 
     @Override
     protected List<? extends Message> dispatchTo(P entity) {

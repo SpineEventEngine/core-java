@@ -32,11 +32,11 @@ import io.spine.server.expected.AbstractExpected;
  * @author Vladyslav Lubenskyi
  */
 @SuppressWarnings("TestOnlyProblems")
-public abstract class SubscriberTest<M extends Message,
-                                     I,
-                                     S extends Message,
-                                     E extends Entity<I, S>>
-        extends MessageHandlerTest<M, I, S, E, SubscriberTest.Expected<S>> {
+public abstract class EventSubscriptionTest<M extends Message,
+                                            I,
+                                            S extends Message,
+                                            E extends Entity<I, S>>
+        extends MessageHandlerTest<M, I, S, E, EventSubscriptionTest.Expected<S>> {
 
     private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 

@@ -27,7 +27,7 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.expected.MessageProducingExpected;
-import io.spine.server.ReactionTest;
+import io.spine.server.EventReactionTest;
 
 import java.util.List;
 
@@ -47,7 +47,7 @@ public abstract class ProcessManagerEventReactionTest<E extends Message,
                                                       I,
                                                       S extends Message,
                                                       P extends ProcessManager<I, S, ?>>
-        extends ReactionTest<E, I, S, P> {
+        extends EventReactionTest<E, I, S, P> {
 
     @Override
     protected List<? extends Message> dispatchTo(P entity) {
