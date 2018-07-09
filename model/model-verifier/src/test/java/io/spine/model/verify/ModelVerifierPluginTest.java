@@ -25,13 +25,13 @@ import io.spine.tools.gradle.TaskName;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.BuildTask;
 import org.gradle.testkit.runner.TaskOutcome;
-import org.junit$pioneer.jupiter.TempDirectory;
-import org.junit$pioneer.jupiter.TempDirectory.TempDir;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junitpioneer.jupiter.TempDirectory;
+import org.junitpioneer.jupiter.TempDirectory.TempDir;
 
 import java.nio.file.Path;
 
