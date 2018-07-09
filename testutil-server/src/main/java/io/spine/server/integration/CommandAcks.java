@@ -29,7 +29,6 @@ import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.Status;
-import io.spine.grpc.MemoizingObserver;
 
 import java.util.HashMap;
 import java.util.List;
@@ -57,8 +56,7 @@ class CommandAcks {
     private final List<Rejection> rejections = newArrayList();
     private final Map<RejectionClass, Integer> rejectionTypes;
 
-    CommandAcks(MemoizingObserver<Ack> observer) {
-        List<Ack> responses = observer.responses();
+    CommandAcks(List<Ack> responses) {
         for (Ack response : responses) {
             acks.add(response);
 

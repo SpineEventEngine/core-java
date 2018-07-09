@@ -298,7 +298,7 @@ public class BlackBoxBoundedContext {
     }
 
     private CommandAcks commandAcks() {
-        return new CommandAcks(observer);
+        return new CommandAcks(observer.responses());
     }
 
     /*
