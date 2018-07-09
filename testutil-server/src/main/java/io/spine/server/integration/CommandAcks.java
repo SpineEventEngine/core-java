@@ -29,6 +29,7 @@ import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.Status;
+import io.spine.type.TypeUrl;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,7 +41,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
- * Contains the data on all acknowledgements in a {@link BlackBoxBoundedContext Bounded Context}. 
+ * Contains the data on all acknowledgements in a {@link BlackBoxBoundedContext Bounded Context}.
  * Can be queried for information about acks, errors, and rejections.
  *
  * @author Mykhailo Drachuk
@@ -196,41 +197,46 @@ class CommandAcks {
     }
 
     /**
-     * @param domainRejection a domain message representing the rejection
-     * @return {@code true} if the rejection was observed in the Bounded Context,
-     * {@code false} otherwise
+     * @param predicate a domain message representing the rejection
+     * @param type      a class of a domain rejection
+     * @param <T>       a domain rejection type
+     * @return {@code true} if the rejection matching the predicate was observed
+     * in the Bounded Context, {@code false} otherwise
      */
-    boolean containRejection(Message domainRejection) {
+    <T extends Message> boolean containRejection(Class<T> type, Predicate<T> predicate) {
         return rejections.stream()
-                         .anyMatch(new RejectionEquals(domainRejection));
+                         .anyMatch(new RejectionFilter<>(type, predicate));
     }
 
     /**
-     * @param domainRejection a domain message representing the rejection
-     * @return an amount of provided rejections observed in Bounded Context
+     * @param predicate a domain message representing the rejection
+     * @param type      a class of a domain rejection
+     * @param <T>       a domain rejection type
+     * @return an amount of rejections matching the predicate observed in Bounded Context
      */
-    long countRejections(Message domainRejection) {
+    <T extends Message> long countRejections(Class<T> type, Predicate<T> predicate) {
         return rejections.stream()
-                         .filter(new RejectionEquals(domainRejection))
+                         .filter(new RejectionFilter<>(type, predicate))
                          .count();
     }
 
     /**
-     * A predicate filtering the {@link Rejection rejections} which contain the provided
-     * {@link Message domain message}.
+     * A predicate filtering the {@link Rejection rejections} which match the provided predicate.
      */
-    private static class RejectionEquals implements Predicate<Rejection> {
+    private static class RejectionFilter<T extends Message> implements Predicate<Rejection> {
 
-        private final Message domainRejection;
+        private final TypeUrl typeUrl;
+        private final Predicate<T> predicate;
 
-        private RejectionEquals(Message domainRejection) {
-            this.domainRejection = domainRejection;
+        private RejectionFilter(Class<T> rejectionType, Predicate<T> predicate) {
+            this.typeUrl = TypeUrl.of(rejectionType);
+            this.predicate = predicate;
         }
 
         @Override
         public boolean test(Rejection rejection) {
-            Message message = unpack(rejection.getMessage());
-            return domainRejection.equals(message);
+            T message = unpack(rejection.getMessage());
+            return typeUrl.equals(TypeUrl.of(message)) && predicate.test(message);
         }
     }
 }

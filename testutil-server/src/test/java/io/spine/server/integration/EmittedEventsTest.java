@@ -20,7 +20,6 @@
 
 package io.spine.server.integration;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Event;
@@ -43,12 +42,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Mykhailo Drachuk
  */
-@VisibleForTesting
 @DisplayName("Emitted Events should")
 class EmittedEventsTest {
 
     @Test
-    @DisplayName("return proper total count")
+    @DisplayName("return proper total events count")
     void count() {
         EmittedEvents noEmittedEvents = new EmittedEvents(newArrayList());
         assertEquals(0, noEmittedEvents.count());
@@ -91,19 +89,6 @@ class EmittedEventsTest {
 
     private static TestActorRequestFactory requestFactory(TenantId tenantId) {
         return TestActorRequestFactory.newInstance(BlackBoxBoundedContext.class, tenantId);
-    }
-
-    private static IntCreateProject createProject() {
-        return IntCreateProject.newBuilder()
-                               .setProjectId(newProjectId())
-                               .build();
-    }
-
-    private static IntAddTask addTask() {
-        return IntAddTask.newBuilder()
-                         .setProjectId(newProjectId())
-                         .build();
-
     }
 
     private static ProjectId newProjectId() {

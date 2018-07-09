@@ -32,7 +32,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.collect.Lists.newArrayList;
-import static java.lang.Character.LINE_SEPARATOR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -242,16 +241,18 @@ public abstract class CommandAcksVerifier {
     /**
      * Verifies that a command was handled responding with a provided {@link Rejection rejection}.
      *
-     * @param domainRejection a domain message representing the rejection
+     * @param predicate a predicate filtering the domain rejections
+     * @param <T>       a domain rejection type
      * @return a new {@link CommandAcksVerifier} instance
      */
-    public static CommandAcksVerifier ackedWithRejection(Message domainRejection) {
+    public static <T extends Message> CommandAcksVerifier
+    ackedWithRejection(Class<T> clazz, RejectionPredicate<T> predicate) {
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                if (!acks.containRejection(domainRejection)) {
+                if (!acks.containRejection(clazz, predicate)) {
                     fail("Bounded Context did not reject a message:"
-                                 + LINE_SEPARATOR + domainRejection);
+                                 + predicate.message());
                 }
             }
         };
@@ -314,39 +315,20 @@ public abstract class CommandAcksVerifier {
      * Verifies that a command was handled responding with a provided domain rejection
      * specified amount of times.
      *
-     * @param expectedCount   an amount of rejection that are expected in Bounded Context
-     * @param domainRejection a domain message representing the rejection
+     * @param expectedCount an amount of rejection that are expected in Bounded Context
+     * @param predicate     a predicate filtering domain rejections
+     * @param <T>           a domain rejection type
      * @return a new {@link CommandAcksVerifier} instance
      */
-    public static CommandAcksVerifier ackedWithRejections(int expectedCount,
-                                                          Message domainRejection) {
+    public static <T extends Message> CommandAcksVerifier
+    ackedWithRejections(int expectedCount, Class<T> clazz, RejectionPredicate<T> predicate) {
         checkArgument(expectedCount >= 0, "0 or more specified rejections must be expected.");
         return new CommandAcksVerifier() {
             @Override
             void verify(CommandAcks acks) {
-                assertEquals(expectedCount, acks.countRejections(domainRejection),
+                assertEquals(expectedCount, acks.countRejections(clazz, predicate),
                              "Bounded Context did not contain a rejection expected amount of times:"
-                                     + LINE_SEPARATOR + domainRejection);
-            }
-        };
-    }
-
-    /**
-     * Verifies that commands were handled responding with provided domain rejections.
-     *
-     * @return a new {@link CommandAcksVerifier} instance
-     */
-    @SuppressWarnings("OverloadedVarargsMethod")
-    public static CommandAcksVerifier
-    ackedWithRejections(Message rejection1, Message rejection2, Message... otherRejections) {
-        return new CommandAcksVerifier() {
-            @Override
-            void verify(CommandAcks acks) {
-                ackedWithRejection(rejection1).verify(acks);
-                ackedWithRejection(rejection2).verify(acks);
-                for (Message rejection : otherRejections) {
-                    ackedWithRejection(rejection).verify(acks);
-                }
+                                     + predicate.message());
             }
         };
     }
@@ -533,23 +515,13 @@ public abstract class CommandAcksVerifier {
     /**
      * Creates a new verifier adding a check to contain a provided domain rejection.
      *
+     * @param predicate a predicate filtering domain rejections
+     * @param <T>       a domain rejection type
      * @return a new {@link CommandAcksVerifier} instance
      */
-    public CommandAcksVerifier withRejection(Message domainRejection) {
-        CommandAcksVerifier oneRejection = ackedWithRejection(domainRejection);
+    public <T extends Message> CommandAcksVerifier
+    withRejection(Class<T> clazz, RejectionPredicate<T> predicate) {
+        CommandAcksVerifier oneRejection = ackedWithRejection(clazz, predicate);
         return this.and(oneRejection);
-    }
-
-    /**
-     * Creates a new verifier adding a check to contain all of the provided domain rejections.
-     *
-     * @return a new {@link CommandAcksVerifier} instance
-     */
-    @SuppressWarnings("OverloadedVarargsMethod")
-    public CommandAcksVerifier
-    withRejections(Message rejection1, Message rejection2, Message... otherRejections) {
-        CommandAcksVerifier multipleRejections =
-                ackedWithRejections(rejection1, rejection2, otherRejections);
-        return this.and(multipleRejections);
     }
 }
