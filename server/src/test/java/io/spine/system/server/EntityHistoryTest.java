@@ -52,6 +52,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.SystemBoundedContexts.systemOf;
 import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * @author Dmytro Dashenkov
@@ -113,11 +114,14 @@ class EntityHistoryTest {
                                                .setId(id)
                                                .build();
             postCommand(command);
-            assertEquals(5, eventWatcher.eventsCount());
+            eventWatcher.assertCount(6);
 
             checkEntityCreated(AGGREGATE, TestAggregate.TYPE);
             checkCommandDispatchedToAggregateHandler();
             checkEventDispatchedToApplier();
+            checkEntityStateChanged(Person.newBuilder()
+                                          .setId(id)
+                                          .build());
             checkEntityCreated(PROJECTION, TestProjection.TYPE);
             checkEventDispatchedToSubscriber();
         }
@@ -126,7 +130,7 @@ class EntityHistoryTest {
         @DisplayName("entity is archived or deleted")
         void archivedAndDeleted() {
             hidePerson();
-            assertEquals(7, eventWatcher.eventsCount());
+            eventWatcher.assertCount(7);
 
             eventWatcher.nextEvent(EntityCreated.class);
             eventWatcher.nextEvent(CommandDispatchedToHandler.class);
@@ -142,7 +146,7 @@ class EntityHistoryTest {
 
         @Test
         @DisplayName("entity is extracted from archive or restored after deletion")
-        void unArchiveAndUnDeleted() {
+        void unArchivedAndUnDeleted() {
             hidePerson();
             eventWatcher.clearEvents();
 
@@ -152,11 +156,13 @@ class EntityHistoryTest {
                     .build();
             postCommand(command);
 
+            eventWatcher.nextEvent(EntityCreated.class);
             eventWatcher.nextEvent(CommandDispatchedToHandler.class);
             eventWatcher.nextEvent(EventDispatchedToApplier.class);
 
             checkEntityExtracted();
 
+            eventWatcher.nextEvent(EntityCreated.class);
             eventWatcher.nextEvent(EventDispatchedToSubscriber.class);
 
             checkEntityRestored();
@@ -192,6 +198,16 @@ class EntityHistoryTest {
             assertEquals(id, actualIdValue.getValue());
             assertEquals(TestProjection.TYPE.value(), receiver.getTypeUrl());
             assertEquals(id, payload.getId());
+        }
+
+        private void checkEntityStateChanged(Message state) {
+            EntityStateChanged event = eventWatcher.nextEvent(EntityStateChanged.class);
+            String actualId = Identifier.unpack(event.getId()
+                                                     .getEntityId()
+                                                     .getId());
+            assertEquals(id, actualId);
+            assertEquals(state, unpack(event.getNewState()));
+            assertFalse(event.getMessageIdList().isEmpty());
         }
 
         private void checkEventDispatchedToApplier() {

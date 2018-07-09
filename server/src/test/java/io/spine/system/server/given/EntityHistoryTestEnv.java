@@ -55,9 +55,11 @@ import io.spine.system.server.PersonFirstName;
 import io.spine.system.server.PersonFirstNameVBuilder;
 import io.spine.system.server.PersonHidden;
 import io.spine.system.server.PersonNameCreated;
+import io.spine.system.server.PersonUnHidden;
 import io.spine.system.server.PersonVBuilder;
 import io.spine.system.server.PersonView;
 import io.spine.system.server.PersonViewVBuilder;
+import io.spine.system.server.UnHidePerson;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -66,8 +68,11 @@ import java.util.List;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newLinkedList;
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -82,13 +87,13 @@ public final class EntityHistoryTestEnv {
     }
     
     public static class HistoryEventSubscriber extends EventSubscriber {
-        
+
         private final List<Message> events = newLinkedList();
 
         private @Nullable Iterator<? extends Message> eventIterator;
 
-        public int eventsCount() {
-            return events.size();
+        public void assertCount(int expectedCount) {
+            assertEquals(expectedCount, events.size(), errorMessage());
         }
 
         public void clearEvents() {
@@ -100,7 +105,7 @@ public final class EntityHistoryTestEnv {
             if (eventIterator == null) {
                 eventIterator = copyOf(events).iterator();
             }
-            assertTrue(eventIterator.hasNext());
+            assertTrue(eventIterator.hasNext(), errorMessage());
             Message next = eventIterator.next();
             assertThat(next, instanceOf(eventType));
             @SuppressWarnings("unchecked")
@@ -157,6 +162,13 @@ public final class EntityHistoryTestEnv {
         public void on(EntityRestored event) {
             events.add(event);
         }
+
+        private String errorMessage() {
+            return format("Actual events are: %s", events.stream()
+                                                         .map(Object::getClass)
+                                                         .map(Class::getSimpleName)
+                                                         .collect(joining(" -> ")));
+        }
     }
 
     public static class TestAggregate extends Aggregate<String, Person, PersonVBuilder> {
@@ -182,6 +194,13 @@ public final class EntityHistoryTestEnv {
                                .build();
         }
 
+        @Assign
+        PersonUnHidden handle(UnHidePerson command) {
+            return PersonUnHidden.newBuilder()
+                                 .setId(command.getId())
+                                 .build();
+        }
+
         @Apply
         private void on(PersonCreated event) {
             getBuilder().setId(event.getId())
@@ -191,6 +210,11 @@ public final class EntityHistoryTestEnv {
         @Apply
         private void on(PersonHidden event) {
             setArchived(true);
+        }
+
+        @Apply
+        private void on(PersonUnHidden event) {
+            setArchived(false);
         }
     }
 
@@ -211,6 +235,11 @@ public final class EntityHistoryTestEnv {
         @Subscribe
         public void on(PersonHidden event) {
             setDeleted(true);
+        }
+
+        @Subscribe
+        public void on(PersonUnHidden event) {
+            setDeleted(false);
         }
     }
 

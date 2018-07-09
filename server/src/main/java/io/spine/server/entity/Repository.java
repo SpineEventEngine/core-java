@@ -387,7 +387,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     @Internal
-    protected void postSystem(Message systemCommand) {
+    private void postSystem(Message systemCommand) {
         getBoundedContext().getSystemGateway()
                            .post(systemCommand);
     }

@@ -72,7 +72,7 @@ public final class MonitorTransactionListener<I,
 
     @Override
     public void onBeforeCommit(E entity, S state, Version version, LifecycleFlags lifecycleFlags) {
-
+        // NoOp.
     }
 
     @Override

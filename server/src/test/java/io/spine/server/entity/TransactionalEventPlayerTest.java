@@ -51,8 +51,8 @@ class TransactionalEventPlayerTest {
     @DisplayName("require active transaction to play events")
     void requireActiveTx() {
         assertThrows(IllegalStateException.class,
-                     () -> new TxPlayingEntity().play(newArrayList(
-                             eventFactory.createEvent(StringValue.getDefaultInstance()))));
+                     () -> new TxPlayingEntity().play(
+                             eventFactory.createEvent(StringValue.getDefaultInstance())));
     }
 
     @Test
