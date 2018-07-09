@@ -22,10 +22,13 @@ package io.spine.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.Identifier;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.server.entity.TransactionListener.SilentWitness;
 import io.spine.validate.AbstractValidatingBuilder;
@@ -37,6 +40,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.core.Versions.checkIsIncrement;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.EntityVersioning.FROM_EVENT;
 import static io.spine.server.entity.InvalidEntityStateException.onConstraintViolations;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
@@ -72,8 +76,6 @@ public abstract class Transaction<I,
                                   E extends TransactionalEntity<I, S, B>,
                                   S extends Message,
                                   B extends ValidatingBuilder<S, ? extends Message.Builder>> {
-
-    private final TransactionListener<I, E, S, B> listener;
 
     /**
      * The entity, which state and attributes are modified in this transaction.
@@ -133,6 +135,8 @@ public abstract class Transaction<I,
      */
     private final List<Phase<I, E, S, B>> phases = newLinkedList();
 
+    private TransactionListener<I, E, S, B> transactionListener;
+
     /**
      * Creates a new instance of {@code Transaction} and
      * {@linkplain TransactionalEntity#injectTransaction(Transaction) injects} the newly created
@@ -141,33 +145,20 @@ public abstract class Transaction<I,
      * <p>The entity state and attributes are set as starting values for this transaction.
      *
      * @param entity   the entity to create the transaction for
-     * @param listener the transaction listener
      * @see TransactionListener
      */
-    protected Transaction(E entity, TransactionListener<I, E, S, B> listener) {
+    protected Transaction(E entity) {
         checkNotNull(entity);
-        checkNotNull(listener);
 
         this.entity = entity;
         this.builder = entity.builderFromState();
         this.version = entity.getVersion();
         this.lifecycleFlags = entity.getLifecycleFlags();
         this.active = true;
-        this.listener = listener;
+
+        this.transactionListener = new SilentWitness<>();
 
         injectTo(entity);
-    }
-
-    /**
-     * Acts similar to
-     * {@linkplain Transaction#Transaction(TransactionalEntity, TransactionListener)
-     * Transaction(TransactionalEntity, TransactionListener)}, but passes an instance of
-     * {@link SilentWitness} as a listener.
-     *
-     * @param entity the entity to create the transaction for.
-     */
-    protected Transaction(E entity) {
-        this(entity, new SilentWitness<I, E, S, B>());
     }
 
     /**
@@ -181,25 +172,10 @@ public abstract class Transaction<I,
      * @param entity   the target entity to modify within this transaction
      * @param state    the entity state to set
      * @param version  the entity version to set
-     * @param listener the transaction listener
-     */
-    protected Transaction(E entity, S state, Version version,
-                          TransactionListener<I, E, S, B> listener) {
-        this(entity, listener);
-        initAll(state, version);
-    }
-
-    /**
-     * Acts similar to {@linkplain Transaction#Transaction(TransactionalEntity,
-     * Message, Version, TransactionListener) an overloaded ctor},
-     * but passes an instance of {@link SilentWitness} as a listener.
-     *
-     * @param entity  the target entity to modify within this transaction
-     * @param state   the entity state to set
-     * @param version the entity version to set
      */
     protected Transaction(E entity, S state, Version version) {
-        this(entity, state, version, new SilentWitness<I, E, S, B>());
+        this(entity);
+        initAll(state, version);
     }
 
     /**
@@ -249,48 +225,68 @@ public abstract class Transaction<I,
      * @throws IllegalStateException       in case of a generic error
      */
     protected void commit() throws InvalidEntityStateException, IllegalStateException {
-
-        final TransactionListener<I, E, S, B> listener = getListener();
         final B builder = getBuilder();
         final Version pendingVersion = getVersion();
 
-        // The state is only updated, if at least some changes were made to the builder.
         if (builder.isDirty()) {
-            try {
-                final S newState = builder.build();
-                markStateChanged();
-
-                listener.onBeforeCommit(getEntity(), newState,
-                                        pendingVersion, getLifecycleFlags());
-
-                entity.updateState(newState, pendingVersion);
-                commitAttributeChanges();
-            } catch (ValidationException exception) {  /* Could only happen if the state
-                                                                   has been injected not using
-                                                                   the builder setters. */
-                final InvalidEntityStateException invalidStateException = of(exception);
-                rollback(invalidStateException);
-
-                throw invalidStateException;
-            } catch (RuntimeException genericException) {
-                rollback(genericException);
-                throw illegalStateWithCauseOf(genericException);
-            } finally {
-                releaseTx();
-            }
+            commitChangedState(builder, pendingVersion);
         } else {
-            // The state isn't modified, but other attributes may have been modified.
-            final S unmodifiedState = getEntity().getState();
-            listener.onBeforeCommit(getEntity(), unmodifiedState,
-                                    pendingVersion, getLifecycleFlags());
+            commitUnchangedState(pendingVersion);
+        }
+    }
 
-            // Set the version if it has changed.
-            if(!pendingVersion.equals(entity.getVersion())) {
-                entity.updateState(unmodifiedState, pendingVersion);
-            }
+    private void commitChangedState(B builder, Version pendingVersion) {
+        try {
+            EntityRecord previousRecord = record();
+            S newState = builder.build();
+            markStateChanged();
+            beforeCommit(newState, pendingVersion);
+            entity.updateState(newState, pendingVersion);
             commitAttributeChanges();
+            EntityRecord newRecord = record();
+            afterCommit(previousRecord, newRecord);
+        } catch (ValidationException exception) {  /* Could only happen if the state
+                                                      has been injected not using
+                                                      the builder setters. */
+            final InvalidEntityStateException invalidStateException = of(exception);
+            rollback(invalidStateException);
+
+            throw invalidStateException;
+        } catch (@SuppressWarnings("OverlyBroadCatchBlock") // Catch all unexpected exceptions.
+                 RuntimeException genericException) {
+            rollback(genericException);
+            throw illegalStateWithCauseOf(genericException);
+        } finally {
             releaseTx();
         }
+    }
+
+    private void commitUnchangedState(Version pendingVersion) {
+        EntityRecord previousRecord = record();
+        S unmodifiedState = getEntity().getState();
+        beforeCommit(unmodifiedState, pendingVersion);
+        if(!pendingVersion.equals(entity.getVersion())) {
+            entity.updateState(unmodifiedState, pendingVersion);
+        }
+        commitAttributeChanges();
+        releaseTx();
+        EntityRecord newRecord = record();
+        afterCommit(previousRecord, newRecord);
+    }
+
+    private void beforeCommit(S newState, Version newVersion) {
+        E entity = getEntity();
+        LifecycleFlags newFlags = getLifecycleFlags();
+        transactionListener.onBeforeCommit(entity, newState, newVersion, newFlags);
+    }
+
+    private void afterCommit(EntityRecord oldEntity, EntityRecord newEntity) {
+        EntityRecordChange change = EntityRecordChange
+                .newBuilder()
+                .setPreviousValue(oldEntity)
+                .setNewValue(newEntity)
+                .build();
+        transactionListener.onAfterCommit(change);
     }
 
     /**
@@ -303,9 +299,23 @@ public abstract class Transaction<I,
         final S currentState = currentBuilderState();
         final TransactionListener<I, E, S, B> listener = getListener();
         listener.onTransactionFailed(cause, getEntity(), currentState,
-                                          getVersion(), getLifecycleFlags());
+                                     getVersion(), getLifecycleFlags());
         this.active = false;
         entity.releaseTransaction();
+    }
+
+    private EntityRecord record() {
+        E entity = getEntity();
+        Any entityId = Identifier.pack(entity.getId());
+        Version version = entity.getVersion();
+        Any state = pack(entity.getState());
+        LifecycleFlags lifecycleFlags = entity.getLifecycleFlags();
+        return EntityRecord.newBuilder()
+                           .setEntityId(entityId)
+                           .setVersion(version)
+                           .setState(state)
+                           .setLifecycleFlags(lifecycleFlags)
+                           .build();
     }
 
     /**
@@ -431,11 +441,14 @@ public abstract class Transaction<I,
      * Obtains an instance of the {@code TransactionListener} for this transaction.
      *
      * <p>By default, the returned listener {@linkplain SilentWitness does nothing}.
-     *
-     * <p>Descendant classes may override this method to specify a custom listener implementation.
      */
     private TransactionListener<I, E, S, B> getListener() {
-        return listener;
+        return transactionListener;
+    }
+
+    public void setListener(TransactionListener<I, E, S, B> listener) {
+        checkNotNull(listener);
+        this.transactionListener = listener;
     }
 
     public void setArchived(boolean archived) {
@@ -508,6 +521,10 @@ public abstract class Transaction<I,
 
         Transaction<I, E, S, B> getUnderlyingTransaction() {
             return underlyingTransaction;
+        }
+
+        EventId eventId() {
+            return event.getId();
         }
 
         private void markSuccessful() {

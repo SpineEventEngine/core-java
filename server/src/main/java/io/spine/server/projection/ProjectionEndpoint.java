@@ -28,7 +28,9 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.entity.EntityMessageEndpoint;
+import io.spine.server.entity.MonitorTransactionListener;
 import io.spine.server.entity.Repository;
+import io.spine.server.entity.TransactionListener;
 
 import java.util.List;
 import java.util.Set;
@@ -73,6 +75,8 @@ class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         P projection = repository().findOrCreate(entityId);
         ProjectionTransaction<I, ?, ?> tx =
                 ProjectionTransaction.start((Projection<I, ?, ?>) projection);
+        TransactionListener listener = MonitorTransactionListener.instance(repository());
+        tx.setListener(listener);
         doDispatch(projection, envelope());
         tx.commit();
         store(projection);

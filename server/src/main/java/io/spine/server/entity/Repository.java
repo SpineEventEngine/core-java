@@ -29,7 +29,9 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
+import io.spine.core.Command;
 import io.spine.core.CommandId;
+import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
@@ -44,6 +46,10 @@ import io.spine.string.Stringifiers;
 import io.spine.system.server.ArchiveEntity;
 import io.spine.system.server.ChangeEntityState;
 import io.spine.system.server.CreateEntity;
+import io.spine.system.server.DispatchCommandToHandler;
+import io.spine.system.server.DispatchEventToApplier;
+import io.spine.system.server.DispatchEventToReactor;
+import io.spine.system.server.DispatchEventToSubscriber;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.type.MessageClass;
@@ -387,7 +393,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     @Internal
-    protected final Lifecycle lifecycleOf(I id) {
+    protected Lifecycle lifecycleOf(I id) {
         checkNotNull(id);
         return new Lifecycle(id);
     }
@@ -465,15 +471,17 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             this.id = historyId(id);
         }
 
-        public final void onCreateEntity(EntityOption.Kind entityKind) {
-            postSystem(CreateEntity.newBuilder()
-                                   .setId(id)
-                                   .setKind(entityKind)
-                                   .build());
+        public void onCreateEntity(EntityOption.Kind entityKind) {
+            CreateEntity command = CreateEntity
+                    .newBuilder()
+                    .setId(id)
+                    .setKind(entityKind)
+                    .build();
+            postSystem(command);
         }
 
-        public final void onStateChanged(EntityRecordChange change,
-                                         Set<? extends Message> messageIds) {
+        public void onStateChanged(EntityRecordChange change,
+                                   Set<? extends Message> messageIds) {
             Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
 
             postOnChanged(change, dispatchedMessageIds);
@@ -483,12 +491,46 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             postOnRestored(change, dispatchedMessageIds);
         }
 
+        public void onDispatchCommand(Command command) {
+            DispatchCommandToHandler systemCommand = DispatchCommandToHandler
+                    .newBuilder()
+                    .setReceiver(id)
+                    .setPayload(command)
+                    .build();
+            postSystem(systemCommand);
+        }
+
+        public void onDispatchEventToApplier(Event event) {
+            DispatchEventToApplier systemCommand = DispatchEventToApplier
+                    .newBuilder()
+                    .setReceiver(id)
+                    .setPayload(event)
+                    .build();
+            postSystem(systemCommand);
+        }
+
+        public void onDispatchEventToSubscriber(Event event) {
+            DispatchEventToSubscriber systemCommand = DispatchEventToSubscriber
+                    .newBuilder()
+                    .setReceiver(id)
+                    .setPayload(event)
+                    .build();
+            postSystem(systemCommand);
+        }
+
+        public void onDispatchEventToReactor(Event event) {
+            DispatchEventToReactor systemCommand = DispatchEventToReactor
+                    .newBuilder()
+                    .setReceiver(id)
+                    .setPayload(event)
+                    .build();
+            postSystem(systemCommand);
+        }
+
         private void postOnChanged(EntityRecordChange change,
                                    Collection<DispatchedMessageId> messageIds) {
-            Any oldState = change.getPreviousValue()
-                                 .getState();
-            Any newState = change.getNewValue()
-                                 .getState();
+            Any oldState = change.getPreviousValue().getState();
+            Any newState = change.getNewValue().getState();
 
             if (!oldState.equals(newState)) {
                 ChangeEntityState command = ChangeEntityState

@@ -21,16 +21,9 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
-import io.spine.client.EntityId;
-import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
-import io.spine.system.server.DispatchCommandToHandler;
-import io.spine.system.server.EntityHistoryId;
-import io.spine.type.TypeUrl;
 
 import java.util.List;
-
-import static io.spine.base.Identifier.pack;
 
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
@@ -62,25 +55,8 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     protected List<? extends Message> doDispatch(A aggregate, CommandEnvelope envelope) {
-        onDispatchCommand(aggregate.getId(), envelope.getCommand());
+        repository().onDispatchCommand(aggregate.getId(), envelope.getCommand());
         return aggregate.dispatchCommand(envelope);
-    }
-
-    private void onDispatchCommand(I receiver, Command command) {
-        EntityId id = EntityId
-                .newBuilder()
-                .setId(pack(receiver))
-                .build();
-        TypeUrl type = repository().getEntityStateType();
-        EntityHistoryId historyId = EntityHistoryId
-                .newBuilder()
-                .setEntityId(id)
-                .setTypeUrl(type.value())
-                .build();
-        repository().postSystem(DispatchCommandToHandler.newBuilder()
-                                                        .setPayload(command)
-                                                        .setReceiver(historyId)
-                                                        .build());
     }
 
     @Override

@@ -46,6 +46,8 @@ import io.spine.server.delivery.ShardedStreamConsumer;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.EventDispatchingRepository;
+import io.spine.server.entity.MonitorTransactionListener;
+import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
@@ -344,8 +346,12 @@ public abstract class ProcessManagerRepository<I,
         logError("Rejection dispatching caused error (class: %s, id: %s", envelope, exception);
     }
 
+    @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.
     PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
-        return PmTransaction.start((ProcessManager<?, ?, ?>) manager);
+        PmTransaction<I, S, ?> tx = PmTransaction.start((ProcessManager<I, S, ?>) manager);
+        TransactionListener listener = MonitorTransactionListener.instance(this);
+        tx.setListener(listener);
+        return tx;
     }
 
     /**
