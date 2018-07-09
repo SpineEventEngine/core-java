@@ -46,7 +46,7 @@ public final class InvalidEntityStateException extends RuntimeException {
     private static final long serialVersionUID = 0L;
 
     private static final String MSG_VALIDATION_ERROR =
-            "Entity state does match the validation constraints.";
+            "Entity state does match the validation constraints";
 
     /**
      * The entity state or the message packed into {@link Any}.
