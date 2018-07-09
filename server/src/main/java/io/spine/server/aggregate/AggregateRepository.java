@@ -239,7 +239,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public A create(I id) {
         A aggregate = aggregateClass().createEntity(id);
-        lifecycleOf(id).onCreateEntity(AGGREGATE);
         return aggregate;
     }
 
@@ -500,8 +499,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         if (eventsFromStorage.isPresent()) {
             A result = play(id, eventsFromStorage.get());
             return Optional.of(result);
+        } else {
+            lifecycleOf(id).onCreateEntity(AGGREGATE);
+            return Optional.absent();
         }
-        return Optional.absent();
     }
 
     /**
