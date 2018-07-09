@@ -70,6 +70,9 @@ public class AggregatePartCommandTestTestEnv {
         return new TimerCounterRoot(boundedContext, Identifier.newUuid());
     }
 
+    /**
+     * A dummy aggregate that counts how many times the {@link StringValue} event occurred.
+     */
     public static final class TimerCounter
             extends AggregatePart<String, UInt32Value, UInt32ValueVBuilder, TimerCounterRoot> {
 
@@ -88,23 +91,26 @@ public class AggregatePartCommandTestTestEnv {
         }
     }
 
-    public static final class TimeCounterRepository
+    private static final class TimeCounterRepository
             extends AggregatePartRepository<String, TimerCounter, TimerCounterRoot> {
-
     }
 
     private static class TimerCounterRoot extends AggregateRoot<String> {
 
-        TimerCounterRoot(BoundedContext boundedContext, String id) {
+        private TimerCounterRoot(BoundedContext boundedContext, String id) {
             super(boundedContext, id);
         }
     }
 
     /**
-     * The test harness class that tests how {@code TimePrinter} handles its command.
+     * The test class for the {@code TimerCounter} only command handler.
      */
-    public static class TimeCounterTest extends AggregatePartCommandTest<StringValue,
-            String, UInt32Value, TimerCounter, TimerCounterRoot> {
+    public static class TimeCounterTest
+            extends AggregatePartCommandTest<StringValue,
+                                             String,
+                                             UInt32Value,
+                                             TimerCounter,
+                                             TimerCounterRoot> {
 
         public static final StringValue TEST_COMMAND = StringValue.newBuilder()
                                                                   .setValue("test command")

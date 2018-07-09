@@ -49,17 +49,16 @@ public class AggregateEventReactionTestTestEnv {
     }
 
     public static EventReactingAggregate aggregate() {
-        EventReactingAggregate result =
-                Given.aggregateOfClass(EventReactingAggregate.class)
-                     .withId(ID)
-                     .withVersion(64)
-                     .build();
+        EventReactingAggregate result = Given.aggregateOfClass(EventReactingAggregate.class)
+                                             .withId(ID)
+                                             .withVersion(64)
+                                             .build();
         return result;
     }
 
     /**
-     * A dummy aggregate that accepts a {@code Timestamp} as a command message
-     * and prints it into its state.
+     * A dummy aggregate that reacts on the {@code Timestamp} event and emits {@code StringValue}
+     * event as a result.
      */
     public static final class EventReactingAggregate
             extends Aggregate<Long, StringValue, StringValueVBuilder> {
@@ -81,13 +80,18 @@ public class AggregateEventReactionTestTestEnv {
         }
     }
 
-    public static class EventReactingAggregateRepository
+    private static class EventReactingAggregateRepository
             extends AggregateRepository<Long, EventReactingAggregate> {
-
     }
 
+    /**
+     * The test class for the {@code EventReactingAggregate} only command reactor.
+     */
     public static class EventReactingAggregateTest
-            extends AggregateEventReactionTest<Timestamp, Long, StringValue, EventReactingAggregate> {
+            extends AggregateEventReactionTest<Timestamp,
+                                               Long,
+                                               StringValue,
+                                               EventReactingAggregate> {
 
         public static final Timestamp TEST_EVENT = Timestamp.newBuilder()
                                                             .setNanos(125)

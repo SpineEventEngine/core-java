@@ -60,7 +60,7 @@ class AggregatePartCommandTestTest {
                                .getValue();
         aggregatePartCommandTest.expectThat(testPart);
         assertEquals(oldState + 1, testPart.getState()
-                                           .getValue());
+                                                     .getValue());
     }
 
 }

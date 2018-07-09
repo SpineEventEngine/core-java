@@ -57,7 +57,12 @@ public class ProcessManagerCommandTestTestEnv {
                     .build();
     }
 
-    public static class CommandHandlingProcessManager extends ProcessManager<String, StringValue, StringValueVBuilder> {
+    /**
+     * A dummy process manager that handles a {@code UInt64Value} command and routes a nested
+     * command.
+     */
+    public static class CommandHandlingProcessManager
+            extends ProcessManager<String, StringValue, StringValueVBuilder> {
 
         public static final UserId NESTED_COMMAND = UserId.newBuilder()
                                                           .setValue("test nested command")
@@ -75,11 +80,6 @@ public class ProcessManagerCommandTestTestEnv {
             return command;
         }
 
-        @React
-        void on(UInt64Value event) {
-            getBuilder().setValue(Long.toString(event.getValue()));
-        }
-
         @Assign
         Empty handle(UserId command) {
             getBuilder().setValue(command.getValue());
@@ -87,13 +87,18 @@ public class ProcessManagerCommandTestTestEnv {
         }
     }
 
-    public static class CommandHandlingProcessManagerRepository
+    private static class CommandHandlingProcessManagerRepository
             extends ProcessManagerRepository<String, CommandHandlingProcessManager, StringValue> {
-
     }
 
+    /**
+     * The test case for one of the command handlers in {@code CommandHandlingProcessManager}.
+     */
     public static class TimestampProcessManagerTest
-            extends ProcessManagerCommandTest<UInt64Value, String, StringValue, CommandHandlingProcessManager> {
+            extends ProcessManagerCommandTest<UInt64Value,
+                                              String,
+                                              StringValue,
+                                              CommandHandlingProcessManager> {
 
         public static final UInt64Value TEST_COMMAND = UInt64Value.newBuilder()
                                                                   .setValue(541L)

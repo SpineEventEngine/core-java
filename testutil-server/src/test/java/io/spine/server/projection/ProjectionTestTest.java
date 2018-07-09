@@ -61,7 +61,6 @@ class ProjectionTestTest {
         projectionTest.init();
         TestProjection aggregate = projection();
         SubscriberTest.Expected<StringValue> expected = projectionTest.expectThat(aggregate);
-
         expected.hasState(state -> {
             assertEquals(state.getValue(), TEST_EVENT.getValue());
         });

@@ -78,14 +78,14 @@ public class AggregateCommandTestTestEnv {
         }
     }
 
-    public static final class TimePrinterRepository extends AggregateRepository<Long, TimePrinter> {
-
+    private static final class TimePrinterRepository extends AggregateRepository<Long, TimePrinter> {
     }
 
     /**
-     * The test harness class that tests how {@code TimePrinter} handles its command.
+     * The test class for the {@code TimePrinter} only command handler.
      */
-    public static class TimePrintingTest extends AggregateCommandTest<Timestamp, Long, StringValue, TimePrinter> {
+    public static class TimePrintingTest
+            extends AggregateCommandTest<Timestamp, Long, StringValue, TimePrinter> {
 
         public static final Timestamp TEST_COMMAND = Timestamp.newBuilder()
                                                               .setNanos(1024)

@@ -58,14 +58,13 @@ class ProcessManagerEventReactionTestTest {
     }
 
     @Test
-    @DisplayName("dispatch tested command and store results")
+    @DisplayName("dispatch tested event and store results")
     @SuppressWarnings("CheckReturnValue")
     void shouldDispatchCommand() {
         pmEventTest.setUp();
         pmEventTest.init();
         EventReactingProcessManager testPm = processManager();
         MessageProducingExpected<StringValue> expected = pmEventTest.expectThat(testPm);
-
         expected.producesCommand(StringValue.class, command -> {
             assertEquals(command, NESTED_COMMAND);
         });

@@ -56,13 +56,15 @@ public class ProcessManagerEventReactionTestTestEnv {
                     .build();
     }
 
+    /**
+     * The dummy process manager that reacts on {@code UInt32Value} event, routes a nested command.
+     */
     public static class EventReactingProcessManager
             extends ProcessManager<String, StringValue, StringValueVBuilder> {
 
-        public
-        static final UInt32Value RESULT_EVENT = UInt32Value.newBuilder()
-                                                           .setValue(123)
-                                                           .build();
+        public static final UInt32Value RESULT_EVENT = UInt32Value.newBuilder()
+                                                                  .setValue(123)
+                                                                  .build();
         public static final StringValue NESTED_COMMAND = StringValue.newBuilder()
                                                                      .setValue("command")
                                                                      .build();
@@ -74,20 +76,21 @@ public class ProcessManagerEventReactionTestTestEnv {
         @React
         @SuppressWarnings("CheckReturnValue")
         UInt32Value on(UInt64Value event, EventContext context) {
-            StringValue command = NESTED_COMMAND;
-            newRouterFor(event, context.getCommandContext()).add(command)
+            newRouterFor(event, context.getCommandContext()).add(NESTED_COMMAND)
                                                             .routeAll();
             return RESULT_EVENT;
         }
     }
 
-    public static class EventReactingProcessManagerRepository
+    private static class EventReactingProcessManagerRepository
             extends ProcessManagerRepository<String, EventReactingProcessManager, StringValue> {
-
     }
 
     public static class EventReactingProcessManagerTest
-            extends ProcessManagerEventReactionTest<UInt64Value, String, StringValue, EventReactingProcessManager> {
+            extends ProcessManagerEventReactionTest<UInt64Value,
+                                                    String,
+                                                    StringValue,
+                                                    EventReactingProcessManager> {
 
         public static final UInt64Value TEST_EVENT = UInt64Value.newBuilder()
                                                                 .setValue(125)

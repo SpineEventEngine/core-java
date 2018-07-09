@@ -54,8 +54,7 @@ public class ProjectionTestTestEnv {
     }
 
     /**
-     * A dummy aggregate that accepts a {@code Timestamp} as a command message
-     * and prints it into its state.
+     * A dummy projection that is subscribed to a {@code StringValue} event.
      */
     public static final class TestProjection
             extends Projection<Long, StringValue, StringValueVBuilder> {
@@ -72,9 +71,11 @@ public class ProjectionTestTestEnv {
 
     private static class TestProjectionRepository
             extends ProjectionRepository<Long, TestProjection, StringValue> {
-
     }
 
+    /**
+     * The test case for the single event subscription in {@code TestProjection}.
+     */
     public static class TestProjectionTest
             extends ProjectionTest<StringValue, Long, StringValue, TestProjection> {
 
