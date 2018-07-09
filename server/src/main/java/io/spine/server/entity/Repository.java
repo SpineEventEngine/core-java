@@ -24,10 +24,13 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.client.EntityId;
+import io.spine.core.CommandId;
+import io.spine.core.EventId;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
@@ -38,7 +41,10 @@ import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.string.Stringifiers;
+import io.spine.system.server.ArchiveEntity;
+import io.spine.system.server.ChangeEntityState;
 import io.spine.system.server.CreateEntity;
+import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
@@ -46,14 +52,19 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.function.Supplier;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.base.Identifier.pack;
 import static io.spine.server.entity.Repository.GenericParameter.ENTITY;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Abstract base class for repositories.
@@ -64,7 +75,7 @@ import static java.lang.String.format;
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
 public abstract class Repository<I, E extends Entity<I, ?>>
-                implements RepositoryView<I, E>, AutoCloseable {
+        implements RepositoryView<I, E>, AutoCloseable {
 
     private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
@@ -106,7 +117,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     protected final EntityClass<E> entityClass() {
         if (entityClass == null) {
             @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
-            Class<E> cast = (Class<E>) ENTITY.getArgumentIn(getClass());
+                    Class<E> cast = (Class<E>) ENTITY.getArgumentIn(getClass());
             entityClass = getModelClass(cast);
         }
         return entityClass;
@@ -167,7 +178,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * @return parent {@code BoundedContext}
      * @throws IllegalStateException if the repository is not registered {@linkplain
-     * BoundedContext#register(Repository) registered} yet
+     *                               BoundedContext#register(Repository) registered} yet
      */
     protected final BoundedContext getBoundedContext() {
         checkState(boundedContext != null,
@@ -210,6 +221,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * <p>The cast is safe because the method is called after the
      * {@linkplain #managesVersionableEntities() type check}.
+     *
      * @see #onRegistered()
      */
     @SuppressWarnings("unchecked") // See Javadoc above.
@@ -225,24 +237,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @return new entity instance
      */
     public abstract E create(I id);
-
-    @Internal
-    protected final void onCreateEntity(I id, EntityOption.Kind entityKind) {
-        EntityId entityId = EntityId
-                .newBuilder()
-                .setId(pack(id))
-                .build();
-        TypeUrl type = getEntityStateType();
-        EntityHistoryId historyId = EntityHistoryId
-                .newBuilder()
-                .setEntityId(entityId)
-                .setTypeUrl(type.value())
-                .build();
-        postSystem(CreateEntity.newBuilder()
-                               .setId(historyId)
-                               .setKind(entityKind)
-                               .build());
-    }
 
     /**
      * Stores the passed object.
@@ -369,8 +363,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * <p>The formatted message has the following parameters:
      * <ol>
-     *     <li>The name of the message class.
-     *     <li>The message ID.
+     * <li>The name of the message class.
+     * <li>The message ID.
      * </ol>
      *
      * @param msgFormat the format of the message
@@ -390,6 +384,12 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     protected void postSystem(Message systemCommand) {
         getBoundedContext().getSystemGateway()
                            .post(systemCommand);
+    }
+
+    @Internal
+    protected final Lifecycle lifecycleOf(I id) {
+        checkNotNull(id);
+        return new Lifecycle(id);
     }
 
     /**
@@ -454,5 +454,168 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             E entity = loaded.get();
             return entity;
         }
+    }
+
+    @Internal
+    protected final class Lifecycle {
+
+        private final EntityHistoryId id;
+
+        private Lifecycle(I id) {
+            this.id = historyId(id);
+        }
+
+        public final void onCreateEntity(EntityOption.Kind entityKind) {
+            postSystem(CreateEntity.newBuilder()
+                                   .setId(id)
+                                   .setKind(entityKind)
+                                   .build());
+        }
+
+        public final void onStateChanged(EntityRecordChange change,
+                                         Set<? extends Message> messageIds) {
+            Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
+
+            postOnChanged(change, dispatchedMessageIds);
+            postOnArchived(change, dispatchedMessageIds);
+            postOnDeleted(change, dispatchedMessageIds);
+            postOnExtracted(change, dispatchedMessageIds);
+            postOnRestored(change, dispatchedMessageIds);
+        }
+
+        private void postOnChanged(EntityRecordChange change,
+                                   Collection<DispatchedMessageId> messageIds) {
+            Any oldState = change.getPreviousValue()
+                                 .getState();
+            Any newState = change.getNewValue()
+                                 .getState();
+
+            if (!oldState.equals(newState)) {
+                ChangeEntityState command = ChangeEntityState
+                        .newBuilder()
+                        .setId(id)
+                        .setNewState(newState)
+                        .addAllMessageId(messageIds)
+                        .build();
+                postSystem(command);
+            }
+        }
+
+        private void postOnArchived(EntityRecordChange change,
+                                    Collection<DispatchedMessageId> messageIds) {
+            boolean oldValue = change.getPreviousValue()
+                                     .getLifecycleFlags()
+                                     .getArchived();
+            boolean newValue = change.getNewValue()
+                                     .getLifecycleFlags()
+                                     .getArchived();
+            if (newValue && !oldValue) {
+                ArchiveEntity command = ArchiveEntity
+                        .newBuilder()
+                        .setId(id)
+                        .addAllMessageId(messageIds)
+                        .build();
+                postSystem(command);
+            }
+        }
+
+        private void postOnDeleted(EntityRecordChange change,
+                                   Collection<DispatchedMessageId> messageIds) {
+            boolean oldValue = change.getPreviousValue()
+                                     .getLifecycleFlags()
+                                     .getDeleted();
+            boolean newValue = change.getNewValue()
+                                     .getLifecycleFlags()
+                                     .getDeleted();
+            if (newValue && !oldValue) {
+                ArchiveEntity command = ArchiveEntity
+                        .newBuilder()
+                        .setId(id)
+                        .addAllMessageId(messageIds)
+                        .build();
+                postSystem(command);
+            }
+        }
+
+        private void postOnExtracted(EntityRecordChange change,
+                                     Collection<DispatchedMessageId> messageIds) {
+            boolean oldValue = change.getPreviousValue()
+                                     .getLifecycleFlags()
+                                     .getArchived();
+            boolean newValue = change.getNewValue()
+                                     .getLifecycleFlags()
+                                     .getArchived();
+            if (!newValue && oldValue) {
+                ArchiveEntity command = ArchiveEntity
+                        .newBuilder()
+                        .setId(id)
+                        .addAllMessageId(messageIds)
+                        .build();
+                postSystem(command);
+            }
+        }
+
+        private void postOnRestored(EntityRecordChange change,
+                                    Collection<DispatchedMessageId> messageIds) {
+            boolean oldValue = change.getPreviousValue()
+                                     .getLifecycleFlags()
+                                     .getDeleted();
+            boolean newValue = change.getNewValue()
+                                     .getLifecycleFlags()
+                                     .getDeleted();
+            if (!newValue && oldValue) {
+                ArchiveEntity command = ArchiveEntity
+                        .newBuilder()
+                        .setId(id)
+                        .addAllMessageId(messageIds)
+                        .build();
+                postSystem(command);
+            }
+        }
+
+        private Collection<DispatchedMessageId>
+        toDispatched(Collection<? extends Message> messageIds) {
+            Collection<DispatchedMessageId> dispatchedMessageIds =
+                    messageIds.stream()
+                              .map(this::dispatchedMessageId)
+                              .collect(toList());
+            return dispatchedMessageIds;
+        }
+
+        private EntityHistoryId historyId(I id) {
+            EntityId entityId = EntityId
+                    .newBuilder()
+                    .setId(pack(id))
+                    .build();
+            TypeUrl type = getEntityStateType();
+            EntityHistoryId historyId = EntityHistoryId
+                    .newBuilder()
+                    .setEntityId(entityId)
+                    .setTypeUrl(type.value())
+                    .build();
+            return historyId;
+        }
+
+        @SuppressWarnings("ChainOfInstanceofChecks")
+        private DispatchedMessageId dispatchedMessageId(Message messageId) {
+            checkNotNull(messageId);
+            if (messageId instanceof EventId) {
+                EventId eventId = (EventId) messageId;
+                return DispatchedMessageId.newBuilder()
+                                          .setEventId(eventId)
+                                          .build();
+            } else if (messageId instanceof CommandId) {
+                CommandId commandId = (CommandId) messageId;
+                return DispatchedMessageId.newBuilder()
+                                          .setCommandId(commandId)
+                                          .build();
+            } else {
+                throw newIllegalArgumentException(
+                        "Unexpected message ID of type %s. Expected EventId or CommandId.",
+                        messageId.getClass()
+                );
+            }
+        }
+
     }
 }

@@ -49,7 +49,7 @@ public abstract class AggregatePartRepository<I,
     public A create(I id) {
         final AggregateRoot<I> root = createAggregateRoot(id);
         final A result = createAggregatePart(root);
-        onCreateEntity(id, AGGREGATE);
+        lifecycleOf(id).onCreateEntity(AGGREGATE);
         return result;
     }
 

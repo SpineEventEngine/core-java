@@ -78,33 +78,33 @@ message ChangeEntityState {
 
     google.protobuf.Any new_state = 2 [(required) = true];
 
-    google.protobuf.Any message_id = 3 [(required) = true];
+    repeated DispatchedMessageId message_id = 3 [(required) = true];
 }
 
 message ArchiveEntity {
 
     EntityHistoryId id = 1 [(required) = true];
 
-    google.protobuf.Any message_id = 2 [(required) = true];
+    repeated DispatchedMessageId message_id = 2 [(required) = true];
 }
 
 message DeleteEntity {
 
     EntityHistoryId id = 1 [(required) = true];
 
-    google.protobuf.Any message_id = 2 [(required) = true];
+    repeated DispatchedMessageId message_id = 2 [(required) = true];
 }
 
 message ExtractEntityFromArchive {
 
     EntityHistoryId id = 1 [(required) = true];
 
-    google.protobuf.Any message_id = 2 [(required) = true];
+    repeated DispatchedMessageId message_id = 2 [(required) = true];
 }
 
 message RestoreEntity {
 
     EntityHistoryId id = 1 [(required) = true];
 
-    google.protobuf.Any message_id = 2 [(required) = true];
+    repeated DispatchedMessageId message_id = 2 [(required) = true];
 }

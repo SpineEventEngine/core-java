@@ -123,7 +123,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     public P create(I id) {
         P projection = super.create(id);
-        onCreateEntity(id, PROJECTION);
+        lifecycleOf(id).onCreateEntity(PROJECTION);
         return projection;
     }
 

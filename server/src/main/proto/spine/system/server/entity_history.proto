@@ -70,3 +70,10 @@ message DispatchedCommand {
 
     google.protobuf.Timestamp when_dispatched = 2 [(required) = true];
 }
+
+message DispatchedMessageId {
+
+    spine.core.CommandId command_id = 1;
+
+    spine.core.EventId event_id = 2;
+}

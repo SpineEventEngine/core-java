@@ -243,7 +243,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public A create(I id) {
         A aggregate = aggregateClass().createEntity(id);
-        onCreateEntity(id, AGGREGATE);
+        lifecycleOf(id).onCreateEntity(AGGREGATE);
         return aggregate;
     }
 
@@ -649,6 +649,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
+    // TODO:2018-07-09:dmytro.dashenkov: Make private.x
     protected void postSystem(Message systemCommand) {
         super.postSystem(systemCommand);
     }

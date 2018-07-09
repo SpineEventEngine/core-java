@@ -103,7 +103,7 @@ public final class EntityHistoryAggregate
     EntityStateChanged handle(ChangeEntityState command) {
         return EntityStateChanged.newBuilder()
                                  .setId(command.getId())
-                                 .setMessageId(command.getMessageId())
+                                 .addAllMessageId(command.getMessageIdList())
                                  .setNewState(command.getNewState())
                                  .build();
     }
@@ -112,7 +112,7 @@ public final class EntityHistoryAggregate
     EntityArchived handle(ArchiveEntity command) {
         return EntityArchived.newBuilder()
                              .setId(command.getId())
-                             .setMessageId(command.getMessageId())
+                             .addAllMessageId(command.getMessageIdList())
                              .build();
     }
 
@@ -120,7 +120,7 @@ public final class EntityHistoryAggregate
     EntityDeleted handle(DeleteEntity command) {
         return EntityDeleted.newBuilder()
                             .setId(command.getId())
-                            .setMessageId(command.getMessageId())
+                            .addAllMessageId(command.getMessageIdList())
                             .build();
     }
 
@@ -128,7 +128,7 @@ public final class EntityHistoryAggregate
     EntityExtractedFromArchive handle(ExtractEntityFromArchive command) {
         return EntityExtractedFromArchive.newBuilder()
                                          .setId(command.getId())
-                                         .setMessageId(command.getMessageId())
+                                         .addAllMessageId(command.getMessageIdList())
                                          .build();
     }
 
@@ -136,7 +136,7 @@ public final class EntityHistoryAggregate
     EntityRestored handle(RestoreEntity command) {
         return EntityRestored.newBuilder()
                              .setId(command.getId())
-                             .setMessageId(command.getMessageId())
+                             .addAllMessageId(command.getMessageIdList())
                              .build();
     }
 

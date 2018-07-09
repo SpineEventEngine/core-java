@@ -73,6 +73,15 @@ message LifecycleFlags {
     bool deleted = 2;
 }
 
+message EntityRecordChange {
+
+    // The value of fields that are changing.
+    EntityRecord previous_value = 1;
+
+    // The new value of fields.
+    EntityRecord new_value = 2;
+}
+
 // Enumeration of possible entity state validation errors.
 //
 // Contains the reasons of an errors, that are exclusively technical
