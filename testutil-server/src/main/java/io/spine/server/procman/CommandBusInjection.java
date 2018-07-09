@@ -49,7 +49,7 @@ class CommandBusInjection {
     static void inject(ProcessManager processManager, CommandBus commandBus) {
         try {
             Method method = ProcessManager.class.getDeclaredMethod("setCommandBus",
-                                                                         CommandBus.class);
+                                                                   CommandBus.class);
             method.setAccessible(true);
             method.invoke(processManager, commandBus);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {

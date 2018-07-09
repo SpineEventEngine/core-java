@@ -30,7 +30,7 @@ import java.util.List;
 import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchEvent;
 
 /**
- * An abstract base class for testing a single event reactor in an {@link Aggregate}.
+ * The implementation base for testing a single event reactor in an {@link Aggregate}.
  *
  * @param <E> type of the event to test
  * @param <I> ID message of the aggregate

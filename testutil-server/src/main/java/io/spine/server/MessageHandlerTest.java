@@ -52,7 +52,7 @@ import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * An implementation base for a message handler test.
+ * The implementation base for a message handler test.
  *
  * <p>A derived class initializes the test environment by providing the entity to test and
  * the message to dispatch to that entity.
@@ -78,7 +78,9 @@ public abstract class MessageHandlerTest<M extends Message,
     private @Nullable M message;
     private @Nullable Repository<I, E> entityRepository;
 
-    // List of the commands sent to the command bus by the current test method.
+    /**
+     * List of the commands sent to the bus during the test.
+     */
     private final List<Message> interceptedCommands = newArrayList();
 
     /**
@@ -169,7 +171,7 @@ public abstract class MessageHandlerTest<M extends Message,
 
     @BeforeEach
     protected final void configureBoundedContext() {
-        boundedContext = TestBoundedContext.create(new TrackingBusFilter());
+        boundedContext = TestBoundedContext.create(new MemoizingBusFilter());
         entityRepository = createEntityRepository();
         assertNotNull(entityRepository);
 
@@ -208,7 +210,6 @@ public abstract class MessageHandlerTest<M extends Message,
         message = null;
         entityRepository = null;
         interceptedCommands.clear();
-
         if (boundedContext != null) {
             try {
                 boundedContext.close();
@@ -261,9 +262,9 @@ public abstract class MessageHandlerTest<M extends Message,
     }
 
     /**
-     * A bus filter that remembers the commands posted to the command bus.
+     * The bus filter that remembers all commands posted to the command bus.
      */
-    private class TrackingBusFilter implements BusFilter<CommandEnvelope> {
+    private class MemoizingBusFilter implements BusFilter<CommandEnvelope> {
 
         @Override
         public Optional<Ack> accept(CommandEnvelope envelope) {
@@ -274,7 +275,7 @@ public abstract class MessageHandlerTest<M extends Message,
 
         @Override
         public void close() {
-            // We don't need the implementation here.
+            // NoOp.
         }
     }
 

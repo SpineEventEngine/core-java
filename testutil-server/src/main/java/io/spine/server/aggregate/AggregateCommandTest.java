@@ -28,7 +28,7 @@ import static io.spine.core.CommandEnvelope.of;
 import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 
 /**
- * An abstract base class for testing a single command handling in an {@link Aggregate}.
+ * The implementation base for testing a single command handling in an {@link Aggregate}.
  *
  * @param <C> type of the command to test
  * @param <I> ID message of the aggregate

@@ -35,7 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Assertions for command handler invocation results.
+ * Assertions for a command handler invocation results.
  *
  * @author Dmytro Dashenkov
  */
@@ -104,8 +104,7 @@ public class CommandExpected<S extends Message> extends MessageProducingExpected
      * @param rejectionClass type of the rejection expected to be produced
      */
     @SuppressWarnings("UnusedReturnValue")
-    public MessageProducingExpected<S> throwsRejection(
-            Class<? extends Message> rejectionClass) {
+    public MessageProducingExpected<S> throwsRejection(Class<? extends Message> rejectionClass) {
         assertNotNull(rejection, format("No rejection encountered. Expected %s",
                                         rejectionClass.getSimpleName()));
         assertTrue(rejectionClass.isInstance(rejection),

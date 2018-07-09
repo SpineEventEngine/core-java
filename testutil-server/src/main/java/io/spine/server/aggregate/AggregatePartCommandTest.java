@@ -23,8 +23,7 @@ package io.spine.server.aggregate;
 import com.google.protobuf.Message;
 
 /**
- * An abstract base class for testing a single command handling in
- * an {@link AggregatePart}.
+ * The implementation base for testing a single command handling in an {@link AggregatePart}.
  *
  * @param <C> type of the command to test
  * @param <I> ID message of the aggregate

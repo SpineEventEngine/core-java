@@ -28,13 +28,14 @@ import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.MessageProducingExpected;
 import io.spine.server.ReactionTest;
+
 import java.util.List;
 
 import static io.spine.server.procman.CommandBusInjection.inject;
 import static java.util.stream.Collectors.toList;
 
 /**
- * An abstract base class for testing a single event reactor in a {@link ProcessManager}.
+ * The implementation base for testing a single event reactor in a {@link ProcessManager}.
  *
  * @param <E> type of the event to test
  * @param <I> ID message of the aggregate
@@ -52,12 +53,12 @@ public abstract class ProcessManagerEventReactionTest<E extends Message,
     protected List<? extends Message> dispatchTo(P entity) {
         Event sourceEvent = createEvent(message());
         EventContext context = sourceEvent.getContext()
-                                                .toBuilder()
-                                                .setEnrichment(enrichment())
-                                                .build();
+                                          .toBuilder()
+                                          .setEnrichment(enrichment())
+                                          .build();
         Event enrichedEvent = sourceEvent.toBuilder()
-                                               .setContext(context)
-                                               .build();
+                                         .setContext(context)
+                                         .build();
         EventEnvelope envelope = EventEnvelope.of(enrichedEvent);
         List<Event> events = ProcessManagerDispatcher.dispatch(entity, envelope);
         return events.stream()

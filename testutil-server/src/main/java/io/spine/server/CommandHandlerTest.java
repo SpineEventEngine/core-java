@@ -35,9 +35,8 @@ import static io.spine.core.Rejections.causedByRejection;
 import static io.spine.core.Rejections.toRejection;
 import static java.util.Collections.emptyList;
 
-//@formatter:off Don't format javadoc because formatter doesn't indent <li> elements correctly.
 /**
- * An abstract base class for testing a single command handler.
+ * The implementation base for testing a single command handler.
  *
  * <p>It is expected that a test suite derived from this class ensures that:
  * <ol>
@@ -53,8 +52,6 @@ import static java.util.Collections.emptyList;
  *
  * @author Vladyslav Lubenskyi
  */
-//@formatter:on
-@SuppressWarnings("TestOnlyProblems")
 public abstract class CommandHandlerTest<C extends Message,
                                          I,
                                          S extends Message,

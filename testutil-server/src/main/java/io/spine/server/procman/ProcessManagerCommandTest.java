@@ -34,7 +34,7 @@ import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
 import static java.util.stream.Collectors.toList;
 
 /**
- * An abstract base class for testing a single command handling in a {@link ProcessManager}.
+ * The implementation base for testing a single command handling in a {@link ProcessManager}.
  *
  * @param <C> type of the command to test
  * @param <I> ID message of the aggregate

@@ -33,10 +33,8 @@ import io.spine.core.Rejections;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.TestEventFactory;
 
-//@formatter:off Don't format javadoc because formatter doesn't indent <li> elements correctly.
-
 /**
- * An abstract base class for testing a single message reactor.
+ * The implementation base for testing a single message reactor.
  *
  * <p>It is expected that a test suite derived from this class ensures that:
  * <ol>
@@ -52,7 +50,6 @@ import io.spine.server.command.TestEventFactory;
  *
  * @author Dmytro Dashenkov
  */
-//@formatter:on
 @SuppressWarnings("TestOnlyProblems")
 public abstract class ReactionTest<M extends Message,
                                    I,

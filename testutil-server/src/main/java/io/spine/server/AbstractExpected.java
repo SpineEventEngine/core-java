@@ -27,7 +27,7 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * An implementation base for the assertions of message handling result.
+ * The implementation base for the assertions of message handling results.
  *
  * @param <S> the state type of the tested entity
  * @param <E> the type of the tested entity

@@ -26,7 +26,7 @@ import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.Entity;
 
 /**
- * A base class for testing the single event handling by a subscriber.
+ * The base class for testing the single event handling by a subscriber.
  *
  * @author Vladyslav Lubenskyi
  */

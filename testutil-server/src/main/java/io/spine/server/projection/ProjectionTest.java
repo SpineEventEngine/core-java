@@ -32,7 +32,7 @@ import static io.spine.server.projection.ProjectionEventDispatcher.dispatch;
 import static java.util.Collections.emptyList;
 
 /**
- * An implementation base for testing projection event subscriptions.
+ * The implementation base for testing projection event subscriptions.
  *
  * @author Dmytro Dashenkov
  * @author Vladyslav Lubenskyi
