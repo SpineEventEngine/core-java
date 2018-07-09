@@ -193,7 +193,7 @@ class CommandAcks {
      * @return an amount of rejections of the provided type observed in Bounded Context
      */
     int countRejections(RejectionClass type) {
-        return rejectionTypes.get(type);
+        return rejectionTypes.getOrDefault(type, 0);
     }
 
     /**
