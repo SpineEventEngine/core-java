@@ -31,6 +31,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.server.integration.given.CommandAcksTestEnv.acks;
+import static io.spine.server.integration.given.CommandAcksTestEnv.concat;
 import static io.spine.server.integration.given.CommandAcksTestEnv.newRejectionAck;
 import static io.spine.server.integration.given.CommandAcksTestEnv.newTask;
 import static io.spine.server.integration.given.CommandAcksTestEnv.projectAlreadyStarted;
@@ -85,12 +86,12 @@ class CommandAcksTest {
         CommandAcks ack = new CommandAcks(acks(1, CommandAcksTestEnv::newRejectionAck));
         assertEquals(1, ack.countRejections());
 
-        CommandAcks fiveAcksTwoRejections = new CommandAcks(CommandAcksTestEnv.concat(
+        CommandAcks fiveAcksTwoRejections = new CommandAcks(concat(
                 acks(3, CommandAcksTestEnv::newOkAck),
                 acks(2, CommandAcksTestEnv::newRejectionAck)));
         assertEquals(2, fiveAcksTwoRejections.countRejections());
 
-        CommandAcks sixAcksThreeRejections = new CommandAcks(CommandAcksTestEnv.concat(
+        CommandAcks sixAcksThreeRejections = new CommandAcks(concat(
                 acks(3, CommandAcksTestEnv::newRejectionAck),
                 acks(3, CommandAcksTestEnv::newOkAck)));
         assertEquals(3, sixAcksThreeRejections.countRejections());
