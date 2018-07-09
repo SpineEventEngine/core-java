@@ -44,7 +44,7 @@ message Project {
         UNDEFINED = 0;
         CREATED = 1;
         STARTED = 2;
-        DONE = 3;
+        COMPLETED = 3;
         CANCELLED = 4;
     }
 
@@ -52,7 +52,7 @@ message Project {
 }
 
 message TaskId {
-    int32 id = 1;
+    string id = 1;
 }
 
 message Task {
