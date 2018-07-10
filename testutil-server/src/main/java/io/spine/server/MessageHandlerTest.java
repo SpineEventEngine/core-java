@@ -62,12 +62,18 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * test case dispatches the message to the entity via {@link #expectThat(Entity)} and validates
  * the message handling result.
  *
+ * @param <I> ID message of the message and the handling entity
+ * @param <M> the type of the message to test
+ * @param <S> state message of the handling entity
+ * @param <E> the type of the handling entity being tested
+ * @param <X> the type of {@link AbstractExpected Expected} object
+ *
  * @author Dmytro Dashenkov
  * @see CommandHandlerTest
  * @see EventReactionTest
  */
-public abstract class MessageHandlerTest<M extends Message,
-                                         I,
+public abstract class MessageHandlerTest<I,
+                                         M extends Message,
                                          S extends Message,
                                          E extends Entity<I, S>,
                                          X extends AbstractExpected<S, X>> {

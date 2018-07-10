@@ -29,14 +29,18 @@ import io.spine.server.expected.AbstractExpected;
 /**
  * The base class for testing the single event handling by a subscriber.
  *
+ * @param <I> ID message of the event and the handling entity
+ * @param <M> the type of the event message to test
+ * @param <S> state message of the handling entity
+ * @param <E> the type of the event subscriber being tested
+ *
  * @author Vladyslav Lubenskyi
  */
-@SuppressWarnings("TestOnlyProblems")
-public abstract class EventSubscriptionTest<M extends Message,
-                                            I,
+public abstract class EventSubscriptionTest<I,
+                                            M extends Message,
                                             S extends Message,
                                             E extends Entity<I, S>>
-        extends MessageHandlerTest<M, I, S, E, EventSubscriptionTest.Expected<S>> {
+        extends MessageHandlerTest<I, M, S, E, EventSubscriptionTest.Expected<S>> {
 
     private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 

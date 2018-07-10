@@ -46,18 +46,18 @@ import static java.util.Collections.emptyList;
  *     <li>the state of an entity is correctly changed after the events are emitted.
  * </ol>
  *
- * @param <C> the type of the command message to test
  * @param <I> ID message of the command and the handling entity
+ * @param <C> the type of the command message to test
  * @param <S> state message of the handling entity
  * @param <E> the type of the {@link CommandHandlingEntity} being tested
  *
  * @author Vladyslav Lubenskyi
  */
-public abstract class CommandHandlerTest<C extends Message,
-                                         I,
+public abstract class CommandHandlerTest<I,
+                                         C extends Message,
                                          S extends Message,
                                          E extends CommandHandlingEntity<I, S, ?>>
-        extends ProducingMessageHandlerTest<C, I, S, E> {
+        extends ProducingMessageHandlerTest<I, C, S, E> {
 
     private final ActorRequestFactory requestFactory;
 

@@ -37,17 +37,17 @@ import static java.util.stream.Collectors.toList;
 /**
  * The implementation base for testing a single event reactor in a {@link ProcessManager}.
  *
+ * @param <I> ID message of the process manager
  * @param <E> type of the event to test
- * @param <I> ID message of the aggregate
- * @param <S> the aggregate state type
+ * @param <S> the process manager state type
  * @param <P> the {@link ProcessManager} type
  * @author Vladyslav Lubenskyi
  */
-public abstract class ProcessManagerEventReactionTest<E extends Message,
-                                                      I,
+public abstract class ProcessManagerEventReactionTest<I,
+                                                      E extends Message,
                                                       S extends Message,
                                                       P extends ProcessManager<I, S, ?>>
-        extends EventReactionTest<E, I, S, P> {
+        extends EventReactionTest<I, E, S, P> {
 
     @Override
     protected List<? extends Message> dispatchTo(P entity) {

@@ -32,17 +32,17 @@ import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchEvent
 /**
  * The implementation base for testing a single event reactor in an {@link Aggregate}.
  *
- * @param <E> type of the event to test
  * @param <I> ID message of the aggregate
+ * @param <E> type of the event to test
  * @param <S> the aggregate state type
  * @param <A> the {@link Aggregate} type
  * @author Dmytro Dashenkov
  */
-public abstract class AggregateEventReactionTest<E extends Message,
-                                                 I,
+public abstract class AggregateEventReactionTest<I,
+                                                 E extends Message,
                                                  S extends Message,
                                                  A extends Aggregate<I, S, ?>>
-        extends EventReactionTest<E, I, S, A> {
+        extends EventReactionTest<I, E, S, A> {
 
     @Override
     protected List<? extends Message> dispatchTo(A aggregate) {

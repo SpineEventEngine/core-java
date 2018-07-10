@@ -39,11 +39,11 @@ import java.util.List;
  * @param <E> the entity type
  * @author Dmytro Dashenkov
  */
-public abstract class ProducingMessageHandlerTest<M extends Message,
-                                                         I,
-                                                         S extends Message,
-                                                         E extends CommandHandlingEntity<I, S, ?>>
-        extends MessageHandlerTest<M, I, S, E, MessageProducingExpected<S>> {
+public abstract class ProducingMessageHandlerTest<I,
+                                                  M extends Message,
+                                                  S extends Message,
+                                                  E extends CommandHandlingEntity<I, S, ?>>
+        extends MessageHandlerTest<I, M, S, E, MessageProducingExpected<S>> {
 
     @Override
     protected MessageProducingExpected<S> expectThat(E entity) {

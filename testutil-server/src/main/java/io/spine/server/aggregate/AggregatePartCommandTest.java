@@ -25,19 +25,19 @@ import com.google.protobuf.Message;
 /**
  * The implementation base for testing a single command handling in an {@link AggregatePart}.
  *
- * @param <C> type of the command to test
  * @param <I> ID message of the aggregate
+ * @param <C> type of the command to test
  * @param <S> the aggregate part state type
  * @param <P> the {@link AggregatePart} type
  * @param <R> the {@link AggregateRoot} type
  * @author Dmytro Dashenkov
  */
-public abstract class AggregatePartCommandTest<C extends Message,
-                                               I,
+public abstract class AggregatePartCommandTest<I,
+                                               C extends Message,
                                                S extends Message,
                                                P extends AggregatePart<I, S, ?, R>,
                                                R extends AggregateRoot<I>>
-        extends AggregateCommandTest<C, I, S, P> {
+        extends AggregateCommandTest<I, C, S, P> {
 
     /**
      * Instantiates a new aggregate root with the given ID.

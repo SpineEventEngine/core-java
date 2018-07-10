@@ -30,17 +30,17 @@ import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchComma
 /**
  * The implementation base for testing a single command handling in an {@link Aggregate}.
  *
- * @param <C> type of the command to test
  * @param <I> ID message of the aggregate
+ * @param <C> type of the command to test
  * @param <S> the aggregate state type
  * @param <A> the {@link Aggregate} type
  * @author Vladyslav Lubenskyi
  */
-public abstract class AggregateCommandTest<C extends Message,
-                                           I,
+public abstract class AggregateCommandTest<I,
+                                           C extends Message,
                                            S extends Message,
                                            A extends Aggregate<I, S, ?>>
-        extends CommandHandlerTest<C, I, S, A> {
+        extends CommandHandlerTest<I, C, S, A> {
 
     @Override
     protected List<? extends Message> dispatchTo(A entity) {

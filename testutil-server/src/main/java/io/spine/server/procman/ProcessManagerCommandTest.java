@@ -36,17 +36,17 @@ import static java.util.stream.Collectors.toList;
 /**
  * The implementation base for testing a single command handling in a {@link ProcessManager}.
  *
+ * @param <I> ID message of the process manager
  * @param <C> type of the command to test
- * @param <I> ID message of the aggregate
- * @param <S> the aggregate state type
+ * @param <S> the process manager state type
  * @param <P> the {@link ProcessManager} type
  * @author Vladyslav Lubenskyi
  */
-public abstract class ProcessManagerCommandTest<C extends Message,
-                                                I,
+public abstract class ProcessManagerCommandTest<I,
+                                                C extends Message,
                                                 S extends Message,
                                                 P extends ProcessManager<I, S, ?>>
-        extends CommandHandlerTest<C, I, S, P> {
+        extends CommandHandlerTest<I, C, S, P> {
 
     @Override
     protected List<? extends Message> dispatchTo(P entity) {
