@@ -119,10 +119,15 @@ class ErrorQualifierTest {
     @DisplayName("filter by attributes absence")
     void filterWithoutAttribute() {
         ErrorQualifier missingAttribute = withoutAttribute(Attribute.WEIGHT.title());
-        List<Error> errors = filterErrors(missingAttribute);
+        List<Error> errorsWithoutWeight = filterErrors(missingAttribute);
 
-        assertEquals(6, errors.size());
+        assertEquals(6, errorsWithoutWeight.size());
         assertNotNull(missingAttribute.description());
+
+        ErrorQualifier attributePresentInSome = withoutAttribute(Attribute.HEIGHT.title());
+        List<Error> errorsWithoutHeight = filterErrors(attributePresentInSome);
+        
+        assertEquals(4, errorsWithoutHeight.size());
     }
 
     @Test
