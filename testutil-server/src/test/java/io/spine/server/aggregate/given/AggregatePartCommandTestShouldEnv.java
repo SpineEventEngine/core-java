@@ -106,8 +106,8 @@ public class AggregatePartCommandTestShouldEnv {
      * The test class for the {@code TimerCounter} only command handler.
      */
     public static class TimeCounterTest
-            extends AggregatePartCommandTest<StringValue,
-                                             String,
+            extends AggregatePartCommandTest<String,
+                                             StringValue,
                                              UInt32Value,
                                              TimerCounter,
                                              TimerCounterRoot> {
@@ -156,5 +156,4 @@ public class AggregatePartCommandTestShouldEnv {
             return aggregatePart();
         }
     }
-
 }

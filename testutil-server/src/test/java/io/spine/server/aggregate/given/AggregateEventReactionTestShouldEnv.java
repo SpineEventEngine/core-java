@@ -88,8 +88,8 @@ public class AggregateEventReactionTestShouldEnv {
      * The test class for the {@code EventReactingAggregate} only command reactor.
      */
     public static class EventReactingAggregateTest
-            extends AggregateEventReactionTest<Timestamp,
-                                               Long,
+            extends AggregateEventReactionTest<Long,
+                                               Timestamp,
                                                StringValue,
                                                EventReactingAggregate> {
 

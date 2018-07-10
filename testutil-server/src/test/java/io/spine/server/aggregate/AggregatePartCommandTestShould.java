@@ -59,8 +59,8 @@ class AggregatePartCommandTestShould {
         int oldState = testPart.getState()
                                .getValue();
         aggregatePartCommandTest.expectThat(testPart);
-        assertEquals(oldState + 1, testPart.getState()
-                                                     .getValue());
+        int newState = testPart.getState()
+                               .getValue();
+        assertEquals(oldState + 1, newState);
     }
-
 }

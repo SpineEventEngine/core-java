@@ -77,7 +77,7 @@ public class ProjectionTestShouldEnv {
      * The test case for the single event subscription in {@code TestProjection}.
      */
     public static class TestProjectionTest
-            extends ProjectionTest<StringValue, Long, StringValue, TestProjection> {
+            extends ProjectionTest<Long, StringValue, StringValue, TestProjection> {
 
         public static final StringValue TEST_EVENT = StringValue.newBuilder()
                                                                 .setValue("test projection event")

@@ -103,7 +103,7 @@ public class AggregateCommandTestShouldEnv {
      * The test class for the {@code TimePrinter} only command handler.
      */
     public static class TimePrintingTest
-            extends AggregateCommandTest<Timestamp, Long, StringValue, TimePrinter> {
+            extends AggregateCommandTest<Long, Timestamp, StringValue, TimePrinter> {
 
         public static final Timestamp TEST_COMMAND = Timestamp.newBuilder()
                                                               .setNanos(1024)
@@ -144,7 +144,7 @@ public class AggregateCommandTestShouldEnv {
      * The test class for the {@code TimePrinter} only command handler.
      */
     public static class TimePrintingRejectionTest
-            extends AggregateCommandTest<LocalDate, Long, StringValue, TimePrinter> {
+            extends AggregateCommandTest<Long, LocalDate, StringValue, TimePrinter> {
 
         public static final LocalDate TEST_COMMAND = LocalDate.newBuilder()
                                                               .setDay(5)

@@ -50,7 +50,6 @@ import io.spine.server.command.TestEventFactory;
  *
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings("TestOnlyProblems")
 public abstract class EventReactionTest<I,
                                         M extends Message,
                                         S extends Message,

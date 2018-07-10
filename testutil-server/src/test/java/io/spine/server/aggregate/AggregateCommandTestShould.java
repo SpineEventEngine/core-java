@@ -78,5 +78,4 @@ class AggregateCommandTestShould {
                 testAggregate);
         expected.throwsRejection(Rejection.class);
     }
-
 }

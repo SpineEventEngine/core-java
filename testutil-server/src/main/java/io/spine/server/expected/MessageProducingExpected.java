@@ -40,6 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Assertions for any messages produced by handling the tested message.
  *
  * @param <S> the type of the tested entity state
+ * @author Vladyslav Lubenskyi
  */
 public class MessageProducingExpected<S extends Message>
         extends AbstractExpected<S, MessageProducingExpected<S>> {
