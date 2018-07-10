@@ -33,6 +33,12 @@ import java.util.Set;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toSet;
 
+/**
+ * A Report repository routing the {@link IntTaskAdded Task Added} events to all reports containing
+ * corresponding project.
+ *
+ * @author Mykhailo Drachuk
+ */
 public class IntReportRepository extends AggregateRepository<ReportId, IntReportAggregate> {
 
     private final List<IntReportAggregate> aggregates = newArrayList();

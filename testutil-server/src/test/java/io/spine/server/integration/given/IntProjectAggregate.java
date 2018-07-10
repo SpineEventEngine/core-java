@@ -40,6 +40,9 @@ import static io.spine.server.integration.Project.Status.COMPLETED;
 import static io.spine.server.integration.Project.Status.CREATED;
 import static io.spine.server.integration.Project.Status.STARTED;
 
+/**
+ * @author Mykhailo Drachuk
+ */
 public class IntProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
     protected IntProjectAggregate(ProjectId id) {

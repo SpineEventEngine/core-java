@@ -23,5 +23,8 @@ package io.spine.server.integration.given;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.integration.ProjectId;
 
+/**
+ * @author Mykhailo Drachuk
+ */
 public class IntProjectRepository extends AggregateRepository<ProjectId, IntProjectAggregate> {
 }

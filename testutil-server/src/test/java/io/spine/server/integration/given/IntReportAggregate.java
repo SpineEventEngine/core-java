@@ -32,6 +32,9 @@ import io.spine.server.integration.Report;
 import io.spine.server.integration.ReportId;
 import io.spine.server.integration.ReportVBuilder;
 
+/**
+ * @author Mykhailo Drachuk
+ */
 public class IntReportAggregate extends Aggregate<ReportId, Report, ReportVBuilder> {
 
     protected IntReportAggregate(ReportId id) {

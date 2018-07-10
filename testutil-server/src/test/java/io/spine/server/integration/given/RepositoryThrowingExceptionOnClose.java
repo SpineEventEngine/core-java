@@ -23,7 +23,10 @@ package io.spine.server.integration.given;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.integration.ProjectId;
 
-public abstract class IntProjectRepositoryFailingClose
+/**
+ * @author Mykhailo Drachuk
+ */
+public abstract class RepositoryThrowingExceptionOnClose
         extends AggregateRepository<ProjectId, IntProjectAggregate> {
 
     @Override
