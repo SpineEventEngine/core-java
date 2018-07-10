@@ -20,6 +20,7 @@
 
 package io.spine.server.expected.given;
 
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
@@ -33,6 +34,8 @@ import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.eve
 import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.newState;
 import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.oldState;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 /**
  * @author Vladyslav Lubenskyi
@@ -71,6 +74,48 @@ public class CommandExpectedTestEnv {
                                       oldState(),
                                       newState(),
                                       interceptedCommands());
+        return expected;
+    }
+
+    public static CommandExpected<UInt64Value> commandExpectedWithEvent(Message event) {
+        CommandExpected<UInt64Value> expected =
+                new CommandExpected<>(singletonList(event),
+                                      null,
+                                      oldState(),
+                                      newState(),
+                                      interceptedCommands());
+        return expected;
+    }
+
+    public static CommandExpected<UInt64Value> commandExpected(
+
+    ) {
+        CommandExpected<UInt64Value> expected =
+                new CommandExpected<>(events(),
+                                      null,
+                                      oldState(),
+                                      newState(),
+                                      interceptedCommands());
+        return expected;
+    }
+
+    public static CommandExpected<UInt64Value> blankExpected() {
+        CommandExpected<UInt64Value> expected =
+                new CommandExpected<>(emptyList(),
+                                      null,
+                                      oldState(),
+                                      oldState(),
+                                      emptyList());
+        return expected;
+    }
+
+    public static CommandExpected<UInt64Value> emptyExpected() {
+        CommandExpected<UInt64Value> expected =
+                new CommandExpected<>(singletonList(Empty.getDefaultInstance()),
+                                      null,
+                                      oldState(),
+                                      oldState(),
+                                      emptyList());
         return expected;
     }
 }

@@ -20,9 +20,13 @@
 
 package io.spine.server.aggregate;
 
+import com.google.protobuf.StringValue;
 import com.google.protobuf.util.Timestamps;
+import io.spine.core.Rejection;
 import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.TimePrinter;
+import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.TimePrintingRejectionTest;
 import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.TimePrintingTest;
+import io.spine.server.expected.CommandExpected;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,10 +43,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class AggregateCommandTestShould {
 
     private TimePrintingTest aggregateCommandTest;
+    private TimePrintingRejectionTest aggregateRejectionCommandTest;
 
     @BeforeEach
     void setUp() {
         aggregateCommandTest = new TimePrintingTest();
+        aggregateRejectionCommandTest = new TimePrintingRejectionTest();
     }
 
     @Test
@@ -61,6 +67,16 @@ class AggregateCommandTestShould {
         String newState = testAggregate.getState()
                                        .getValue();
         assertEquals(newState, Timestamps.toString(TEST_COMMAND));
+    }
+
+    @Test
+    @DisplayName("not fail when rejected")
+    void shouldHandleRejection() {
+        aggregateRejectionCommandTest.setUp();
+        TimePrinter testAggregate = aggregate();
+        CommandExpected<StringValue> expected = aggregateRejectionCommandTest.expectThat(
+                testAggregate);
+        expected.throwsRejection(Rejection.class);
     }
 
 }

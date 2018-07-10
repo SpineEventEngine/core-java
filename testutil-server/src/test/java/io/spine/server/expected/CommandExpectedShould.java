@@ -20,17 +20,26 @@
 
 package io.spine.server.expected;
 
+import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
 import io.spine.core.Rejection;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
+import static io.spine.server.expected.given.CommandExpectedTestEnv.commandExpected;
+import static io.spine.server.expected.given.CommandExpectedTestEnv.commandExpectedWithEvent;
 import static io.spine.server.expected.given.CommandExpectedTestEnv.commandExpectedWithRejection;
 import static io.spine.server.expected.given.CommandExpectedTestEnv.rejection;
+import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.blankExpected;
+import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.emptyExpected;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Vladyslav Lubenskyi
  */
+@SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("CommandExpected should")
 class CommandExpectedShould {
 
@@ -40,5 +49,54 @@ class CommandExpectedShould {
         CommandExpected<UInt64Value> expected =
                 commandExpectedWithRejection(rejection());
         expected.throwsRejection(Rejection.class);
+    }
+
+    @Test
+    @DisplayName("ignore message if no events were generated")
+    void ignoreNoEvents() {
+        MessageProducingExpected<UInt64Value> expected = blankExpected();
+        expected.ignoresMessage();
+    }
+
+    @Test
+    @DisplayName("ignore message if the single Empty was generated")
+    void ignoreEmptyEvent() {
+        MessageProducingExpected<UInt64Value> expected = emptyExpected();
+        expected.ignoresMessage();
+    }
+
+    @Test
+    @DisplayName("not ignore message if it was rejected")
+    void notIgnoreRejectedCommand() {
+        CommandExpected<UInt64Value> expected =
+                commandExpectedWithRejection(rejection());
+        assertThrows(AssertionFailedError.class, expected::ignoresMessage);
+    }
+
+    @Test
+    @DisplayName("not track events if rejected")
+    void notTrackEventsIfRejected() {
+        CommandExpected<UInt64Value> expected =
+                commandExpectedWithRejection(rejection());
+        assertThrows(AssertionFailedError.class, () -> expected.producesEvents(StringValue.class));
+    }
+
+    @Test
+    @DisplayName("track produced events")
+    void trackEvents() {
+        CommandExpected<UInt64Value> expected = commandExpected();
+        expected.producesEvents(StringValue.class, StringValue.class);
+    }
+
+    @Test
+    @DisplayName("validate the single produced events")
+    void trackSingleEvent() {
+        StringValue expectedEvent = StringValue.newBuilder()
+                                               .setValue("single produced event")
+                                               .build();
+        CommandExpected<UInt64Value> expected = commandExpectedWithEvent(expectedEvent);
+        expected.producesEvent(StringValue.class, event -> {
+            assertEquals(expectedEvent, event);
+        });
     }
 }

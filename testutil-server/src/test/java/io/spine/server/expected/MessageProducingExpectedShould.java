@@ -24,6 +24,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.blankExpected;
 import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.emptyExpected;
@@ -32,6 +33,7 @@ import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.exp
 import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.expectedWithEvent;
 import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.newState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Vladyslav Lubenskyi
@@ -53,6 +55,7 @@ class MessageProducingExpectedShould {
     void trackEvents() {
         MessageProducingExpected<UInt64Value> expected = expected();
         expected.producesEvents(StringValue.class, StringValue.class);
+        assertThrows(AssertionFailedError.class, () -> expected.producesEvents(StringValue.class));
     }
 
     @Test
@@ -72,6 +75,7 @@ class MessageProducingExpectedShould {
     void trackCommands() {
         MessageProducingExpected<UInt64Value> expected = expected();
         expected.routesCommands(StringValue.class, StringValue.class);
+        assertThrows(AssertionFailedError.class, () -> expected.routesCommands(StringValue.class));
     }
 
     @Test

@@ -20,11 +20,12 @@
 
 package io.spine.server.aggregate.given;
 
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import io.spine.server.expected.CommandExpected;
+import io.spine.base.ThrowableMessage;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateCommandTest;
 import io.spine.server.aggregate.AggregateRepository;
@@ -32,6 +33,9 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.given.Given;
+import io.spine.server.expected.CommandExpected;
+import io.spine.time.LocalDate;
+import io.spine.time.MonthOfYear;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -72,9 +76,23 @@ public class AggregateCommandTestShouldEnv {
             return timestamp;
         }
 
+        @Assign
+        public Timestamp handle(LocalDate command) throws TestRejection {
+            throw new TestRejection(command);
+        }
+
         @Apply
         void on(Timestamp timestamp) {
             getBuilder().setValue(Timestamps.toString(timestamp));
+        }
+    }
+
+    public static final class TestRejection extends ThrowableMessage {
+
+        private static final long serialVersionUID = 0;
+
+        TestRejection(GeneratedMessageV3 message) {
+            super(message);
         }
     }
 
@@ -98,6 +116,49 @@ public class AggregateCommandTestShouldEnv {
 
         @Override
         protected Timestamp createMessage() {
+            return TEST_COMMAND;
+        }
+
+        @BeforeEach
+        @Override
+        public void setUp() {
+            super.setUp();
+        }
+
+        @Override
+        protected Repository<Long, TimePrinter> createEntityRepository() {
+            return new TimePrinterRepository();
+        }
+
+        @Override
+        public CommandExpected<StringValue> expectThat(TimePrinter entity) {
+            return super.expectThat(entity);
+        }
+
+        public Message storedMessage() {
+            return message();
+        }
+    }
+
+    /**
+     * The test class for the {@code TimePrinter} only command handler.
+     */
+    public static class TimePrintingRejectionTest
+            extends AggregateCommandTest<LocalDate, Long, StringValue, TimePrinter> {
+
+        public static final LocalDate TEST_COMMAND = LocalDate.newBuilder()
+                                                              .setDay(5)
+                                                              .setMonth(MonthOfYear.AUGUST)
+                                                              .setYear(2015)
+                                                              .build();
+
+        @Override
+        protected Long newId() {
+            return ID;
+        }
+
+        @Override
+        protected LocalDate createMessage() {
             return TEST_COMMAND;
         }
 

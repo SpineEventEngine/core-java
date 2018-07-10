@@ -52,9 +52,9 @@ import io.spine.server.command.TestEventFactory;
  */
 @SuppressWarnings("TestOnlyProblems")
 public abstract class EventReactionTest<M extends Message,
-                                   I,
-                                   S extends Message,
-                                   E extends CommandHandlingEntity<I, S, ?>>
+                                        I,
+                                        S extends Message,
+                                        E extends CommandHandlingEntity<I, S, ?>>
         extends ProducingMessageHandlerTest<M, I, S, E> {
 
     private final TestEventFactory eventFactory;
