@@ -57,6 +57,7 @@ class BlackBoxBoundedContextTest {
 
     @SuppressWarnings("ReturnValueIgnored")
     @Test
+    @DisplayName("receive and handle a single commands")
     void receivesACommand() {
         project.receivesCommand(createProject())
                .verifiesThat(acked(1).withoutErrorsOrRejections())
@@ -65,6 +66,7 @@ class BlackBoxBoundedContextTest {
 
     @SuppressWarnings("ReturnValueIgnored")
     @Test
+    @DisplayName("receive and handle multiple commands")
     void receivesCommands() {
         ProjectId projectId = newProjectId();
         project.receivesCommand(createProject(projectId))
@@ -77,6 +79,7 @@ class BlackBoxBoundedContextTest {
 
     @SuppressWarnings("ReturnValueIgnored")
     @Test
+    @DisplayName("receive and react on single event")
     void receivesEvent() {
         ProjectId projectId = newProjectId();
         project.andWith(new IntReportRepository())
@@ -90,6 +93,7 @@ class BlackBoxBoundedContextTest {
 
     @SuppressWarnings("ReturnValueIgnored")
     @Test
+    @DisplayName("receive and react on multiple events")
     void receivesEvents() {
         ProjectId projectId = newProjectId();
         project.andWith(new IntReportRepository())
@@ -102,7 +106,8 @@ class BlackBoxBoundedContextTest {
     }
 
     @Test
-    void throwIllegalStateOnCloseException() {
+    @DisplayName("throw Illegal State Exception on Bounded Context close error")
+    void throwIllegalStateExceptionOnClose() {
         assertThrows(IllegalStateException.class, () ->
                 BlackBoxBoundedContext
                         .with(new IntProjectRepositoryFailingClose() {
