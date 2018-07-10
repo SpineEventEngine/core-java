@@ -20,11 +20,12 @@
 
 package io.spine.server.procman;
 
-import com.google.protobuf.StringValue;
-import com.google.protobuf.UInt32Value;
 import io.spine.server.expected.EventHandlerExpected;
 import io.spine.server.procman.given.ProcessManagerEventReactionTestShouldEnv.EventReactingProcessManager;
 import io.spine.server.procman.given.ProcessManagerEventReactionTestShouldEnv.EventReactingProcessManagerTest;
+import io.spine.testutil.server.aggregate.TestUtilAssignTask;
+import io.spine.testutil.server.aggregate.TestUtilTaskAssigned;
+import io.spine.testutil.server.aggregate.TestUtilTaskCreationPm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -63,11 +64,11 @@ class ProcessManagerEventReactionTestShould {
         pmEventTest.setUp();
         pmEventTest.init();
         EventReactingProcessManager testPm = processManager();
-        EventHandlerExpected<StringValue> expected = pmEventTest.expectThat(testPm);
-        expected.routesCommand(StringValue.class, command -> {
+        EventHandlerExpected<TestUtilTaskCreationPm> expected = pmEventTest.expectThat(testPm);
+        expected.routesCommand(TestUtilAssignTask.class, command -> {
             assertEquals(command, NESTED_COMMAND);
         });
-        expected.producesEvent(UInt32Value.class, event -> {
+        expected.producesEvent(TestUtilTaskAssigned.class, event -> {
             assertEquals(event, RESULT_EVENT);
         });
     }

@@ -21,9 +21,6 @@
 package io.spine.server.procman.given;
 
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
-import com.google.protobuf.UInt32Value;
-import com.google.protobuf.UInt64Value;
 import io.spine.core.Enrichment;
 import io.spine.core.EventContext;
 import io.spine.core.React;
@@ -32,13 +29,22 @@ import io.spine.server.entity.given.Given;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerEventReactionTest;
 import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.validate.StringValueVBuilder;
+import io.spine.testutil.server.aggregate.TestUtilAssignTask;
+import io.spine.testutil.server.aggregate.TestUtilProjectId;
+import io.spine.testutil.server.aggregate.TestUtilTaskAssigned;
+import io.spine.testutil.server.aggregate.TestUtilTaskCreated;
+import io.spine.testutil.server.aggregate.TestUtilTaskCreationPm;
+import io.spine.testutil.server.aggregate.TestUtilTaskCreationPmVBuilder;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
  * @author Vladyslav Lubenskyi
  */
 public class ProcessManagerEventReactionTestShouldEnv {
+
+    private static final TestUtilProjectId ID = TestUtilProjectId.newBuilder()
+                                                                 .setValue("test pm id")
+                                                                 .build();
 
     /**
      * Prevents direct instantiation.
@@ -47,12 +53,8 @@ public class ProcessManagerEventReactionTestShouldEnv {
     }
 
     public static EventReactingProcessManager processManager() {
-        StringValue state = StringValue.newBuilder()
-                                       .setValue("state")
-                                       .build();
         return Given.processManagerOfClass(EventReactingProcessManager.class)
-                    .withId(ProcessManagerEventReactionTestShouldEnv.class.getName())
-                    .withState(state)
+                    .withId(ID)
                     .build();
     }
 
@@ -60,22 +62,26 @@ public class ProcessManagerEventReactionTestShouldEnv {
      * The dummy process manager that reacts on {@code UInt32Value} event, routes a nested command.
      */
     public static class EventReactingProcessManager
-            extends ProcessManager<String, StringValue, StringValueVBuilder> {
+            extends ProcessManager<TestUtilProjectId,
+                                   TestUtilTaskCreationPm,
+                                   TestUtilTaskCreationPmVBuilder> {
 
-        public static final UInt32Value RESULT_EVENT = UInt32Value.newBuilder()
-                                                                  .setValue(123)
-                                                                  .build();
-        public static final StringValue NESTED_COMMAND = StringValue.newBuilder()
-                                                                     .setValue("command")
-                                                                     .build();
+        public static final TestUtilTaskAssigned RESULT_EVENT =
+                TestUtilTaskAssigned.newBuilder()
+                                    .setId(ID)
+                                    .build();
+        public static final TestUtilAssignTask NESTED_COMMAND =
+                TestUtilAssignTask.newBuilder()
+                                  .setId(ID)
+                                  .build();
 
-        protected EventReactingProcessManager(String id) {
+        protected EventReactingProcessManager(TestUtilProjectId id) {
             super(id);
         }
 
         @React
         @SuppressWarnings("CheckReturnValue")
-        UInt32Value on(UInt64Value event, EventContext context) {
+        TestUtilTaskAssigned on(TestUtilTaskCreated event, EventContext context) {
             newRouterFor(event, context.getCommandContext()).add(NESTED_COMMAND)
                                                             .routeAll();
             return RESULT_EVENT;
@@ -83,7 +89,9 @@ public class ProcessManagerEventReactionTestShouldEnv {
     }
 
     private static class EventReactingProcessManagerRepository
-            extends ProcessManagerRepository<String, EventReactingProcessManager, StringValue> {
+            extends ProcessManagerRepository<TestUtilProjectId,
+                                             EventReactingProcessManager,
+                                             TestUtilTaskCreationPm> {
     }
 
     /**
@@ -91,14 +99,15 @@ public class ProcessManagerEventReactionTestShouldEnv {
      * {@code EventReactingProcessManager}.
      */
     public static class EventReactingProcessManagerTest
-            extends ProcessManagerEventReactionTest<String,
-                                                    UInt64Value,
-                                                    StringValue,
+            extends ProcessManagerEventReactionTest<TestUtilProjectId,
+                                                    TestUtilTaskCreated,
+                                                    TestUtilTaskCreationPm,
                                                     EventReactingProcessManager> {
 
-        public static final UInt64Value TEST_EVENT = UInt64Value.newBuilder()
-                                                                .setValue(125)
-                                                                .build();
+        public static final TestUtilTaskCreated TEST_EVENT =
+                TestUtilTaskCreated.newBuilder()
+                                   .setId(ID)
+                                   .build();
 
         @BeforeEach
         @Override
@@ -107,17 +116,18 @@ public class ProcessManagerEventReactionTestShouldEnv {
         }
 
         @Override
-        protected String newId() {
-            return ProcessManagerEventReactionTestShouldEnv.class.getName();
+        protected TestUtilProjectId newId() {
+            return ID;
         }
 
         @Override
-        protected UInt64Value createMessage() {
+        protected TestUtilTaskCreated createMessage() {
             return TEST_EVENT;
         }
 
         @Override
-        protected Repository<String, EventReactingProcessManager> createEntityRepository() {
+        protected Repository<TestUtilProjectId, EventReactingProcessManager>
+        createEntityRepository() {
             return new EventReactingProcessManagerRepository();
         }
 

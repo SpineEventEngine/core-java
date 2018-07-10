@@ -74,8 +74,8 @@ public class AggregateCommandTestShouldEnv {
      */
     public static final class CommandHandlingAggregate
             extends Aggregate<TestUtilProjectId,
-            TestUtilProjectAggregate,
-            TestUtilProjectAggregateVBuilder> {
+                              TestUtilProjectAggregate,
+                              TestUtilProjectAggregateVBuilder> {
 
         CommandHandlingAggregate(TestUtilProjectId id) {
             super(id);
@@ -107,9 +107,9 @@ public class AggregateCommandTestShouldEnv {
      */
     public static class TimePrintingTest
             extends AggregateCommandTest<TestUtilProjectId,
-            TestUtilCreateProject,
-            TestUtilProjectAggregate,
-            CommandHandlingAggregate> {
+                                         TestUtilCreateProject,
+                                         TestUtilProjectAggregate,
+                                         CommandHandlingAggregate> {
 
         public static final TestUtilCreateProject TEST_COMMAND =
                 TestUtilCreateProject.newBuilder()
@@ -154,9 +154,9 @@ public class AggregateCommandTestShouldEnv {
      */
     public static class RejectionCommandHandlerTest
             extends AggregateCommandTest<TestUtilProjectId,
-            TestUtilAssignProject,
-            TestUtilProjectAggregate,
-            CommandHandlingAggregate> {
+                                         TestUtilAssignProject,
+                                         TestUtilProjectAggregate,
+                                         CommandHandlingAggregate> {
 
         public static final TestUtilAssignProject TEST_COMMAND =
                 TestUtilAssignProject.newBuilder()

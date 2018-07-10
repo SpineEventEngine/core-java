@@ -20,26 +20,32 @@
 
 package io.spine.server.procman.given;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
-import com.google.protobuf.UInt64Value;
+import com.google.protobuf.util.Timestamps;
 import io.spine.core.CommandContext;
-import io.spine.core.React;
-import io.spine.core.UserId;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.given.Given;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerCommandTest;
 import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.validate.StringValueVBuilder;
+import io.spine.testutil.server.aggregate.TestUtilAssignTask;
+import io.spine.testutil.server.aggregate.TestUtilCreateTask;
+import io.spine.testutil.server.aggregate.TestUtilProjectId;
+import io.spine.testutil.server.aggregate.TestUtilTaskAssigned;
+import io.spine.testutil.server.aggregate.TestUtilTaskCreated;
+import io.spine.testutil.server.aggregate.TestUtilTaskCreationPm;
+import io.spine.testutil.server.aggregate.TestUtilTaskCreationPmVBuilder;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
  * @author Vladyslav Lubenskyi
  */
 public class ProcessManagerCommandTestTestEnv {
+
+    private static final TestUtilProjectId ID = TestUtilProjectId.newBuilder()
+                                                                 .setValue("test pm id")
+                                                                 .build();
 
     /**
      * Prevents direct instantiation.
@@ -48,12 +54,8 @@ public class ProcessManagerCommandTestTestEnv {
     }
 
     public static CommandHandlingProcessManager processManager() {
-        StringValue state = StringValue.newBuilder()
-                                       .setValue("state")
-                                       .build();
         return Given.processManagerOfClass(CommandHandlingProcessManager.class)
-                    .withId(ProcessManagerCommandTestTestEnv.class.getName())
-                    .withState(state)
+                    .withId(ID)
                     .build();
     }
 
@@ -62,33 +64,42 @@ public class ProcessManagerCommandTestTestEnv {
      * command.
      */
     public static class CommandHandlingProcessManager
-            extends ProcessManager<String, StringValue, StringValueVBuilder> {
+            extends ProcessManager<TestUtilProjectId,
+                                   TestUtilTaskCreationPm,
+                                   TestUtilTaskCreationPmVBuilder> {
 
-        public static final UserId NESTED_COMMAND = UserId.newBuilder()
-                                                          .setValue("test nested command")
-                                                          .build();
+        public static final TestUtilAssignTask NESTED_COMMAND =
+                TestUtilAssignTask.newBuilder()
+                                  .setId(ID)
+                                  .build();
 
-        protected CommandHandlingProcessManager(String id) {
+        protected CommandHandlingProcessManager(TestUtilProjectId id) {
             super(id);
         }
 
         @Assign
         @SuppressWarnings("CheckReturnValue")
-        UInt64Value handle(UInt64Value command, CommandContext context) {
+        TestUtilTaskCreated handle(TestUtilCreateTask command, CommandContext context) {
             newRouterFor(command, context).add(NESTED_COMMAND)
                                           .routeAll();
-            return command;
+            return TestUtilTaskCreated.newBuilder()
+                                      .setId(command.getId())
+                                      .build();
         }
 
         @Assign
-        Empty handle(UserId command) {
-            getBuilder().setValue(command.getValue());
-            return Empty.getDefaultInstance();
+        TestUtilTaskAssigned handle(TestUtilAssignTask command) {
+            getBuilder().setTimestamp(Timestamps.fromNanos(123456));
+            return TestUtilTaskAssigned.newBuilder()
+                                       .setId(command.getId())
+                                       .build();
         }
     }
 
     private static class CommandHandlingProcessManagerRepository
-            extends ProcessManagerRepository<String, CommandHandlingProcessManager, StringValue> {
+            extends ProcessManagerRepository<TestUtilProjectId,
+                                             CommandHandlingProcessManager,
+                                             TestUtilTaskCreationPm> {
     }
 
     /**
@@ -96,14 +107,15 @@ public class ProcessManagerCommandTestTestEnv {
      * {@code CommandHandlingProcessManager}.
      */
     public static class TimestampProcessManagerTest
-            extends ProcessManagerCommandTest<String,
-                                              UInt64Value,
-                                              StringValue,
+            extends ProcessManagerCommandTest<TestUtilProjectId,
+                                              TestUtilCreateTask,
+                                              TestUtilTaskCreationPm,
                                               CommandHandlingProcessManager> {
 
-        public static final UInt64Value TEST_COMMAND = UInt64Value.newBuilder()
-                                                                  .setValue(541L)
-                                                                  .build();
+        public static final TestUtilCreateTask TEST_COMMAND =
+                TestUtilCreateTask.newBuilder()
+                                  .setId(ID)
+                                  .build();
 
         @BeforeEach
         @Override
@@ -112,17 +124,18 @@ public class ProcessManagerCommandTestTestEnv {
         }
 
         @Override
-        protected String newId() {
-            return ProcessManagerCommandTestTestEnv.class.getName();
+        protected TestUtilProjectId newId() {
+            return ID;
         }
 
         @Override
-        protected UInt64Value createMessage() {
+        protected TestUtilCreateTask createMessage() {
             return TEST_COMMAND;
         }
 
         @Override
-        protected Repository<String, CommandHandlingProcessManager> createEntityRepository() {
+        protected Repository<TestUtilProjectId, CommandHandlingProcessManager>
+        createEntityRepository() {
             return new CommandHandlingProcessManagerRepository();
         }
 

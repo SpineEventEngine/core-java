@@ -49,3 +49,10 @@ message TestUtilCommentsAggregatePart {
 
     google.protobuf.Timestamp timestamp = 2;
 }
+
+message TestUtilTaskCreationPm {
+
+    TestUtilProjectId id = 1;
+
+    google.protobuf.Timestamp timestamp = 2;
+}

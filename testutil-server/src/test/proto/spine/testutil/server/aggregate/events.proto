@@ -42,3 +42,11 @@ message TestUtilProjectAssigned {
 message TestUtilCommentAdded {
     TestUtilProjectId id = 1;
 }
+
+message TestUtilTaskCreated {
+    TestUtilProjectId id = 1;
+}
+
+message TestUtilTaskAssigned {
+    TestUtilProjectId id = 1;
+}

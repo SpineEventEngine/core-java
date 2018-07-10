@@ -20,12 +20,11 @@
 
 package io.spine.server.procman;
 
-import com.google.protobuf.StringValue;
-import com.google.protobuf.UInt64Value;
-import io.spine.core.UserId;
 import io.spine.server.expected.CommandHandlerExpected;
 import io.spine.server.procman.given.ProcessManagerCommandTestTestEnv.CommandHandlingProcessManager;
 import io.spine.server.procman.given.ProcessManagerCommandTestTestEnv.TimestampProcessManagerTest;
+import io.spine.testutil.server.aggregate.TestUtilAssignTask;
+import io.spine.testutil.server.aggregate.TestUtilTaskCreationPm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -63,13 +62,11 @@ class ProcessManagerCommandTestShould {
         pmCommandTest.setUp();
         pmCommandTest.init();
         CommandHandlingProcessManager testPm = processManager();
-        CommandHandlerExpected<StringValue> expected = pmCommandTest.expectThat(testPm);
+        CommandHandlerExpected<TestUtilTaskCreationPm> expected =
+                pmCommandTest.expectThat(testPm);
 
-        expected.routesCommand(UserId.class, command -> {
+        expected.routesCommand(TestUtilAssignTask.class, command -> {
             assertEquals(NESTED_COMMAND, command);
-        });
-        expected.producesEvent(UInt64Value.class, event -> {
-            assertEquals(TEST_COMMAND, event);
         });
     }
 }
