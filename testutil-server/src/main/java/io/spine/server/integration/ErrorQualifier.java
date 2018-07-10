@@ -34,7 +34,7 @@ import static java.lang.String.format;
  * match some simple rules.
  *
  * <p>This qualifiers are consumed by command acks verifier
- * {@link CommandAcksVerifier#ackedWithError(ErrorQualifier) ackedWithError method}.
+ * {@link CommandAcksVerifier#ackedWithErrors(ErrorQualifier) ackedWithError method}.
  *
  * @author Mykhailo Drachuk
  */
