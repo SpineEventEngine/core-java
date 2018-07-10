@@ -26,6 +26,7 @@ import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregatePart;
+import io.spine.server.aggregate.AggregatePartRepository;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateRoot;
 import io.spine.server.aggregate.Apply;
@@ -98,6 +99,7 @@ public final class EntityHistoryTestEnv {
 
         public void clearEvents() {
             events.clear();
+            eventIterator = null;
         }
 
         @CanIgnoreReturnValue
@@ -268,7 +270,7 @@ public final class EntityHistoryTestEnv {
 
         public static final TypeUrl TYPE = TypeUrl.of(PersonFirstName.class);
         
-        protected TestAggregatePart(TestAggregateRoot root) {
+        private TestAggregatePart(TestAggregateRoot root) {
             super(root);
         }
 
@@ -295,7 +297,7 @@ public final class EntityHistoryTestEnv {
                                                                               PersonView> {
     }
 
-    public static class TestAggregatePartRepository extends AggregateRepository<String,
-                                                                                TestAggregatePart> {
+    public static class TestAggregatePartRepository
+            extends AggregatePartRepository<String, TestAggregatePart, TestAggregateRoot> {
     }
 }

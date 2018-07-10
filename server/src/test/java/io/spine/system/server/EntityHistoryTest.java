@@ -35,6 +35,7 @@ import io.spine.server.delivery.Sharding;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.system.server.given.EntityHistoryTestEnv.HistoryEventSubscriber;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregate;
+import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregatePart;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregatePartRepository;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregateRepository;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestProjection;
@@ -111,10 +112,7 @@ class EntityHistoryTest {
         @Test
         @DisplayName("entity is created")
         void entityCreated() {
-            CreatePerson command = CreatePerson.newBuilder()
-                                               .setId(id)
-                                               .build();
-            postCommand(command);
+            createPerson();
             eventWatcher.assertEventCount(7);
 
             checkEntityCreated(AGGREGATE, TestAggregate.TYPE);
@@ -174,11 +172,56 @@ class EntityHistoryTest {
             checkEntityRestored();
         }
 
-        private void hidePerson() {
+        @Test
+        @DisplayName("command dispatched to handler in aggregate")
+        void commandToAggregate() {
+            createPerson();
+            eventWatcher.clearEvents();
+
+            Message domainCommand = hidePerson();
+            assertCommandDispatched(domainCommand);
+
+            eventWatcher.nextEvent(EventDispatchedToApplier.class);
+        }
+
+        @Test
+        @DisplayName("command dispatched to handler in aggregate part")
+        void commandToPart() {
+            CreatePersonName domainCommand = CreatePersonName
+                    .newBuilder()
+                    .setId(id)
+                    .setFirstName("Ringo")
+                    .build();
+            postCommand(domainCommand);
+
+            checkEntityCreated(AGGREGATE, TestAggregatePart.TYPE);
+            assertCommandDispatched(domainCommand);
+            eventWatcher.nextEvent(EventDispatchedToApplier.class);
+        }
+
+        private void createPerson() {
+            CreatePerson command = CreatePerson.newBuilder()
+                                               .setId(id)
+                                               .build();
+            postCommand(command);
+        }
+
+        private HidePerson hidePerson() {
             HidePerson command = HidePerson.newBuilder()
                                            .setId(id)
                                            .build();
             postCommand(command);
+            return command;
+        }
+
+        private void assertCommandDispatched(Message command) {
+            CommandDispatchedToHandler commandDispatched =
+                    eventWatcher.nextEvent(CommandDispatchedToHandler.class);
+            assertId(commandDispatched.getReceiver());
+            Message commandMessage = unpack(commandDispatched.getPayload()
+                                                             .getCommand()
+                                                             .getMessage());
+            assertEquals(command, commandMessage);
         }
 
         private void checkEntityCreated(EntityOption.Kind entityKind,
@@ -284,6 +327,11 @@ class EntityHistoryTest {
             String actualId = Identifier.unpack(restoredEvent.getId()
                                                              .getEntityId()
                                                              .getId());
+            assertEquals(id, actualId);
+        }
+
+        private void assertId(EntityHistoryId actual) {
+            String actualId = Identifier.unpack(actual.getEntityId().getId());
             assertEquals(id, actualId);
         }
     }
