@@ -31,6 +31,7 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStreamQuery;
@@ -50,9 +51,9 @@ import static java.util.Collections.singletonList;
 
 /**
  * Black Box Bounded Context is aimed at facilitating writing literate integration tests.
- * 
- * <p>Using its API commands and events are sent to a Bounded Context. Their effect is afterwards 
- * verified in using various verifiers (e.g. {@link CommandAcksVerifier acknowledgement verfier}, 
+ *
+ * <p>Using its API commands and events are sent to a Bounded Context. Their effect is afterwards
+ * verified in using various verifiers (e.g. {@link CommandAcksVerifier acknowledgement verfier},
  * {@link EmittedEventsVerifier emitted events verifier}).
  *
  * @author Mykhailo Drachuk
@@ -135,11 +136,14 @@ public class BlackBoxBoundedContext {
      * repositories.
      *
      * @param repositories repositories to register in the bounded context
+     * @param <I>          the type of IDs used in the repository
+     * @param <E>          the type of entities or aggregates
      * @return a newly created {@link BlackBoxBoundedContext Bounded Context black box}
      */
-    public static BlackBoxBoundedContext with(Repository... repositories) {
+    public static <I, E extends Entity<I, ?>> BlackBoxBoundedContext
+    with(Repository<I, E>... repositories) {
         BlackBoxBoundedContext blackBox = new BlackBoxBoundedContext();
-        for (Repository repository : repositories) {
+        for (Repository<I, E> repository : repositories) {
             blackBox.boundedContext.register(repository);
         }
         return blackBox;
@@ -149,12 +153,16 @@ public class BlackBoxBoundedContext {
      * Registers the provided repositories with the Bounded Context.
      *
      * @param repositories repositories to register in the bounded context
+     * @param <I>          the type of IDs used in the repository
+     * @param <E>          the type of entities or aggregates
      * @return current {@link BlackBoxBoundedContext} instance
      */
-    public BlackBoxBoundedContext andWith(Repository firstRepository, Repository... repositories) {
+    @SafeVarargs
+    public final <I, E extends Entity<I, ?>> BlackBoxBoundedContext
+    andWith(Repository<I, E> firstRepository, Repository<I, E>... repositories) {
         checkNotNull(firstRepository);
         boundedContext.register(firstRepository);
-        for (Repository repository : repositories) {
+        for (Repository<I, E> repository : repositories) {
             boundedContext.register(repository);
         }
         return this;
@@ -256,7 +264,6 @@ public class BlackBoxBoundedContext {
         for (Message domainEvent : domainEvents) {
             events.add(event(domainEvent));
         }
-        MemoizingObserver<Ack> observer = memoizingObserver();
         eventBus.post(events, observer);
         return this;
     }

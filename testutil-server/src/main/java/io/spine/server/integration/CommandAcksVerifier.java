@@ -110,7 +110,7 @@ public abstract class CommandAcksVerifier {
             @Override
             void verify(CommandAcks acks) {
                 if (acks.containErrors()) {
-                    fail("Bounded Context unexpectedly erred");
+                    fail("Bounded Context unexpectedly thrown an error");
                 }
             }
         };
