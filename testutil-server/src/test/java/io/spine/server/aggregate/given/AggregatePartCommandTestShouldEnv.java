@@ -103,7 +103,7 @@ public class AggregatePartCommandTestShouldEnv {
     }
 
     /**
-     * The test class for the {@code TimerCounter} only command handler.
+     * The test class for the {@code StringValue} command handler in {@code TimePrinter}.
      */
     public static class TimeCounterTest
             extends AggregatePartCommandTest<String,

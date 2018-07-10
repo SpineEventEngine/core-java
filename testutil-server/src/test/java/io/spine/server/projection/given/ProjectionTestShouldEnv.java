@@ -74,7 +74,7 @@ public class ProjectionTestShouldEnv {
     }
 
     /**
-     * The test case for the single event subscription in {@code TestProjection}.
+     * The test class for the {@code StringValue} event handler in {@code TestProjection}.
      */
     public static class TestProjectionTest
             extends ProjectionTest<Long, StringValue, StringValue, TestProjection> {

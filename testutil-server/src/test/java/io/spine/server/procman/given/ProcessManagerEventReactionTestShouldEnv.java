@@ -86,6 +86,10 @@ public class ProcessManagerEventReactionTestShouldEnv {
             extends ProcessManagerRepository<String, EventReactingProcessManager, StringValue> {
     }
 
+    /**
+     * The test class for the {@code UInt64Value} event handler in
+     * {@code EventReactingProcessManager}.
+     */
     public static class EventReactingProcessManagerTest
             extends ProcessManagerEventReactionTest<String,
                                                     UInt64Value,

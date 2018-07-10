@@ -92,7 +92,8 @@ public class ProcessManagerCommandTestTestEnv {
     }
 
     /**
-     * The test case for one of the command handlers in {@code CommandHandlingProcessManager}.
+     * The test class for the {@code UInt64Value} command handler in
+     * {@code CommandHandlingProcessManager}.
      */
     public static class TimestampProcessManagerTest
             extends ProcessManagerCommandTest<String,

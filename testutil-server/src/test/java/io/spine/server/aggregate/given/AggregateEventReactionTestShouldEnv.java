@@ -85,7 +85,7 @@ public class AggregateEventReactionTestShouldEnv {
     }
 
     /**
-     * The test class for the {@code EventReactingAggregate} only command reactor.
+     * The test class for the {@code Timestamp} event handler in {@code EventReactingAggregate}.
      */
     public static class EventReactingAggregateTest
             extends AggregateEventReactionTest<Long,

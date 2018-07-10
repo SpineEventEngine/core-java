@@ -52,22 +52,26 @@ public class AggregateCommandTestShouldEnv {
     private AggregateCommandTestShouldEnv() {
     }
 
-    public static TimePrinter aggregate() {
-        TimePrinter result = Given.aggregateOfClass(TimePrinter.class)
-                                  .withId(ID)
-                                  .withVersion(64)
-                                  .build();
+    public static CommandHandlingAggregate aggregate() {
+        CommandHandlingAggregate result = Given.aggregateOfClass(CommandHandlingAggregate.class)
+                                               .withId(ID)
+                                               .withVersion(64)
+                                               .build();
         return result;
     }
 
     /**
-     * A dummy aggregate that accepts a {@code Timestamp} as a command message
-     * and prints it into its state.
+     * A dummy aggregate that handles two command messages:
+     *
+     * <ul>
+     *     <li>accepts {@code Timestamp}.
+     *     <li>rejects {@code LocalDate}.
+     * </ul>
      */
-    public static final class TimePrinter
+    public static final class CommandHandlingAggregate
             extends Aggregate<Long, StringValue, StringValueVBuilder> {
 
-        TimePrinter(Long id) {
+        CommandHandlingAggregate(Long id) {
             super(id);
         }
 
@@ -96,14 +100,14 @@ public class AggregateCommandTestShouldEnv {
         }
     }
 
-    private static final class TimePrinterRepository extends AggregateRepository<Long, TimePrinter> {
+    private static final class TimePrinterRepository extends AggregateRepository<Long, CommandHandlingAggregate> {
     }
 
     /**
-     * The test class for the {@code TimePrinter} only command handler.
+     * The test class for the {@code Timestamp} command handler in {@code TimePrinter} aggregate.
      */
     public static class TimePrintingTest
-            extends AggregateCommandTest<Long, Timestamp, StringValue, TimePrinter> {
+            extends AggregateCommandTest<Long, Timestamp, StringValue, CommandHandlingAggregate> {
 
         public static final Timestamp TEST_COMMAND = Timestamp.newBuilder()
                                                               .setNanos(1024)
@@ -126,12 +130,12 @@ public class AggregateCommandTestShouldEnv {
         }
 
         @Override
-        protected Repository<Long, TimePrinter> createEntityRepository() {
+        protected Repository<Long, CommandHandlingAggregate> createEntityRepository() {
             return new TimePrinterRepository();
         }
 
         @Override
-        public CommandExpected<StringValue> expectThat(TimePrinter entity) {
+        public CommandExpected<StringValue> expectThat(CommandHandlingAggregate entity) {
             return super.expectThat(entity);
         }
 
@@ -141,10 +145,10 @@ public class AggregateCommandTestShouldEnv {
     }
 
     /**
-     * The test class for the {@code TimePrinter} only command handler.
+     * The test class for the {@code LocalDate} command handler in {@code CommandHandlingAggregate}.
      */
     public static class TimePrintingRejectionTest
-            extends AggregateCommandTest<Long, LocalDate, StringValue, TimePrinter> {
+            extends AggregateCommandTest<Long, LocalDate, StringValue, CommandHandlingAggregate> {
 
         public static final LocalDate TEST_COMMAND = LocalDate.newBuilder()
                                                               .setDay(5)
@@ -169,12 +173,12 @@ public class AggregateCommandTestShouldEnv {
         }
 
         @Override
-        protected Repository<Long, TimePrinter> createEntityRepository() {
+        protected Repository<Long, CommandHandlingAggregate> createEntityRepository() {
             return new TimePrinterRepository();
         }
 
         @Override
-        public CommandExpected<StringValue> expectThat(TimePrinter entity) {
+        public CommandExpected<StringValue> expectThat(CommandHandlingAggregate entity) {
             return super.expectThat(entity);
         }
 

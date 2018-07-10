@@ -23,7 +23,7 @@ package io.spine.server.aggregate;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.Rejection;
-import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.TimePrinter;
+import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.CommandHandlingAggregate;
 import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.TimePrintingRejectionTest;
 import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.TimePrintingTest;
 import io.spine.server.expected.CommandExpected;
@@ -62,7 +62,7 @@ class AggregateCommandTestShould {
     @DisplayName("dispatch tested command")
     void shouldDispatchCommand() {
         aggregateCommandTest.setUp();
-        TimePrinter testAggregate = aggregate();
+        CommandHandlingAggregate testAggregate = aggregate();
         aggregateCommandTest.expectThat(testAggregate);
         String newState = testAggregate.getState()
                                        .getValue();
@@ -73,7 +73,7 @@ class AggregateCommandTestShould {
     @DisplayName("not fail when rejected")
     void shouldHandleRejection() {
         aggregateRejectionCommandTest.setUp();
-        TimePrinter testAggregate = aggregate();
+        CommandHandlingAggregate testAggregate = aggregate();
         CommandExpected<StringValue> expected = aggregateRejectionCommandTest.expectThat(
                 testAggregate);
         expected.throwsRejection(Rejection.class);
