@@ -57,7 +57,7 @@ public abstract class AcknowledgementsVerifier {
      *
      * @param acks acknowledgements of handling commands by the Bounded Context
      */
-    abstract void verify(Acknowledgements acks);
+    public abstract void verify(Acknowledgements acks);
 
     /**
      * Verifies that Bounded Context responded with a specified number of acknowledgements.
@@ -70,7 +70,7 @@ public abstract class AcknowledgementsVerifier {
 
         return new AcknowledgementsVerifier() {
             @Override
-            void verify(Acknowledgements acks) {
+            public void verify(Acknowledgements acks) {
                 int actualCount = acks.count();
                 String moreOrLess = compare(actualCount, expectedCount);
                 assertEquals(
@@ -108,7 +108,7 @@ public abstract class AcknowledgementsVerifier {
     public static AcknowledgementsVerifier ackedWithoutErrors() {
         return new AcknowledgementsVerifier() {
             @Override
-            void verify(Acknowledgements acks) {
+            public void verify(Acknowledgements acks) {
                 if (acks.containErrors()) {
                     fail("Bounded Context unexpectedly thrown an error");
                 }
@@ -124,7 +124,7 @@ public abstract class AcknowledgementsVerifier {
     public static AcknowledgementsVerifier ackedWithErrors() {
         return new AcknowledgementsVerifier() {
             @Override
-            void verify(Acknowledgements acks) {
+            public void verify(Acknowledgements acks) {
                 if (!acks.containErrors()) {
                     fail("Bounded Context unexpectedly did not throw an error");
                 }
@@ -143,7 +143,7 @@ public abstract class AcknowledgementsVerifier {
                       "0 or more errors must be expected.");
         return new AcknowledgementsVerifier() {
             @Override
-            void verify(Acknowledgements acks) {
+            public void verify(Acknowledgements acks) {
                 assertEquals(expectedCount, acks.countErrors(), 
                              "Bounded context did not contain an expected amount of errors");
             }
@@ -161,7 +161,7 @@ public abstract class AcknowledgementsVerifier {
     public static AcknowledgementsVerifier ackedWithErrors(ErrorQualifier qualifier) {
         return new AcknowledgementsVerifier() {
             @Override
-            void verify(Acknowledgements acks) {
+            public void verify(Acknowledgements acks) {
                 if (!acks.containErrors(qualifier)) {
                     fail("Bounded Context did not contain an expected error. "
                                  + qualifier.description());
@@ -183,7 +183,7 @@ public abstract class AcknowledgementsVerifier {
         checkArgument(expectedCount >= 0, "0 or more errors matching qualifier must be expected.");
         return new AcknowledgementsVerifier() {
             @Override
-            void verify(Acknowledgements acks) {
+            public void verify(Acknowledgements acks) {
                 assertEquals(expectedCount, acks.countErrors(qualifier),
                              "Bounded Context did not contain an expected count of errors. "
                                      + qualifier.description());
@@ -203,7 +203,7 @@ public abstract class AcknowledgementsVerifier {
     public static AcknowledgementsVerifier ackedWithoutRejections() {
         return new AcknowledgementsVerifier() {
             @Override
-            void verify(Acknowledgements acks) {
+            public void verify(Acknowledgements acks) {
                 if (acks.containRejections()) {
                     fail("Bounded Context unexpectedly rejected a message");
                 }
@@ -219,7 +219,7 @@ public abstract class AcknowledgementsVerifier {
     public static AcknowledgementsVerifier ackedWithRejections() {
         return new AcknowledgementsVerifier() {
             @Override
-            void verify(Acknowledgements acks) {
+            public void verify(Acknowledgements acks) {
                 if (!acks.containRejections()) {
                     fail("Bounded Context did not reject any messages");
                 }
@@ -250,7 +250,7 @@ public abstract class AcknowledgementsVerifier {
         Class<? extends Message> domainRejection = type.value();
         return new AcknowledgementsVerifier() {
             @Override
-            void verify(Acknowledgements acks) {
+            public void verify(Acknowledgements acks) {
                 if (!acks.containRejections(type)) {
                     fail("Bounded Context did not reject a message of type:" +
                                  domainRejection.getSimpleName());
@@ -270,7 +270,7 @@ public abstract class AcknowledgementsVerifier {
     ackedWithRejections(Class<T> clazz, RejectionPredicate<T> predicate) {
         return new AcknowledgementsVerifier() {
             @Override
-            void verify(Acknowledgements acks) {
+            public void verify(Acknowledgements acks) {
                 if (!acks.containRejection(clazz, predicate)) {
                     fail("Bounded Context did not reject a message:"
                                  + predicate.message());
@@ -290,7 +290,7 @@ public abstract class AcknowledgementsVerifier {
         checkArgument(expectedCount >= 0, "0 or more rejections must be expected.");
         return new AcknowledgementsVerifier() {
             @Override
-            void verify(Acknowledgements acks) {
+            public void verify(Acknowledgements acks) {
                 assertEquals(expectedCount, acks.countRejections(),
                              "Bounded Context did not contain a rejection expected amount of times.");
             }
@@ -326,7 +326,7 @@ public abstract class AcknowledgementsVerifier {
                       "0 or more rejections of rejecetions of class must be expected.");
         return new AcknowledgementsVerifier() {
             @Override
-            void verify(Acknowledgements acks) {
+            public void verify(Acknowledgements acks) {
                 Class<? extends Message> rejectionClass = type.value();
                 assertEquals(expectedCount, acks.countRejections(type),
                              "Bounded Context did not contain " + rejectionClass.getSimpleName() +
@@ -349,7 +349,7 @@ public abstract class AcknowledgementsVerifier {
         checkArgument(expectedCount >= 0, "0 or more specified rejections must be expected.");
         return new AcknowledgementsVerifier() {
             @Override
-            void verify(Acknowledgements acks) {
+            public void verify(Acknowledgements acks) {
                 assertEquals(expectedCount, acks.countRejections(clazz, predicate),
                              "Bounded Context did not contain a rejection expected amount of times:"
                                      + predicate.message());
@@ -419,7 +419,7 @@ public abstract class AcknowledgementsVerifier {
          * @param acks acknowledgements of handling commands by the Bounded Context
          */
         @Override
-        void verify(Acknowledgements acks) {
+        public void verify(Acknowledgements acks) {
             for (AcknowledgementsVerifier verifier : verifiers) {
                 verifier.verify(acks);
             }

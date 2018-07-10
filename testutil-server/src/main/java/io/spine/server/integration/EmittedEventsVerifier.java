@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @VisibleForTesting
 public abstract class EmittedEventsVerifier {
 
-    abstract void verify(EmittedEvents events);
+    public abstract void verify(EmittedEvents events);
 
     /**
      * Verifies that there was an expected amount of events of any type emitted

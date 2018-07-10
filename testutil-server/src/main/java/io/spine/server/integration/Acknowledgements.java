@@ -47,7 +47,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
-class Acknowledgements {
+public class Acknowledgements {
 
     private static final Rejection EMPTY_REJECTION = Rejection.getDefaultInstance();
     private static final Error EMPTY_ERROR = Error.getDefaultInstance();
@@ -107,14 +107,14 @@ class Acknowledgements {
      * @return {@code true} if errors did occur in the Bounded Context during command handling,
      * {@code false} otherwise.
      */
-    boolean containErrors() {
+    public boolean containErrors() {
         return !errors.isEmpty();
     }
 
     /**
      * @return a total number of errors which were observed in Bounded Context acknowledgements.
      */
-    int countErrors() {
+    public int countErrors() {
         return errors.size();
     }
 
@@ -122,7 +122,7 @@ class Acknowledgements {
      * @return {@code true} if an error which matches the provided qualifier did occur in
      * the Bounded Context during command handling, {@code false} otherwise.
      */
-    boolean containErrors(ErrorQualifier qualifier) {
+    public boolean containErrors(ErrorQualifier qualifier) {
         checkNotNull(qualifier);
         return errors.stream()
                      .anyMatch(qualifier::test);
@@ -133,7 +133,7 @@ class Acknowledgements {
      * @return a total number of times errors matching the provided qualifier were 
      * observed in the Bounded Context responses
      */
-    long countErrors(ErrorQualifier qualifier) {
+    public long countErrors(ErrorQualifier qualifier) {
         checkNotNull(qualifier);
         return errors.stream()
                      .filter(qualifier::test)
@@ -148,14 +148,14 @@ class Acknowledgements {
      * @return {@code true} if there were any rejections in the Bounded Context,
      * {@code false} otherwise
      */
-    boolean containRejections() {
+    public boolean containRejections() {
         return !rejections.isEmpty();
     }
 
     /**
      * @return a total amount of rejections observed in Bounded Context
      */
-    int countRejections() {
+    public int countRejections() {
         return rejections.size();
     }
 
@@ -164,7 +164,7 @@ class Acknowledgements {
      * @return {@code true} if the rejection of a provided type was observed in the Bounded Context,
      * {@code false} otherwise
      */
-    boolean containRejections(RejectionClass type) {
+    public boolean containRejections(RejectionClass type) {
         return rejectionTypes.containsKey(type);
     }
 
@@ -172,7 +172,7 @@ class Acknowledgements {
      * @param type rejection type in a form of {@link RejectionClass RejectionClass}
      * @return an amount of rejections of the provided type observed in Bounded Context
      */
-    int countRejections(RejectionClass type) {
+    public int countRejections(RejectionClass type) {
         return rejectionTypes.getOrDefault(type, 0);
     }
 
@@ -183,7 +183,7 @@ class Acknowledgements {
      * @return {@code true} if the rejection matching the predicate was observed
      * in the Bounded Context, {@code false} otherwise
      */
-    <T extends Message> boolean containRejection(Class<T> type, Predicate<T> predicate) {
+    public <T extends Message> boolean containRejection(Class<T> type, Predicate<T> predicate) {
         return rejections.stream()
                          .anyMatch(new RejectionFilter<>(type, predicate));
     }
@@ -194,7 +194,7 @@ class Acknowledgements {
      * @param <T>       a domain rejection type
      * @return an amount of rejections matching the predicate observed in Bounded Context
      */
-    <T extends Message> long countRejections(Class<T> type, Predicate<T> predicate) {
+    public <T extends Message> long countRejections(Class<T> type, Predicate<T> predicate) {
         return rejections.stream()
                          .filter(new RejectionFilter<>(type, predicate))
                          .count();

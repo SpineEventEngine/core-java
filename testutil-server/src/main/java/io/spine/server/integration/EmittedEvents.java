@@ -40,7 +40,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
-class EmittedEvents {
+public class EmittedEvents {
 
     private final List<Event> events;
     private final Map<EventClass, Integer> countOfTypes;
@@ -70,7 +70,7 @@ class EmittedEvents {
     /**
      * @return total number of executed events
      */
-    int count() {
+    public int count() {
         return events.size();
     }
 
@@ -80,7 +80,7 @@ class EmittedEvents {
      * @param eventType a class of the fired domain event
      * @return number of times the provided event was executed
      */
-    int count(Class<? extends Message> eventType) {
+    public int count(Class<? extends Message> eventType) {
         return count(EventClass.of(eventType));
     }
 
@@ -90,7 +90,7 @@ class EmittedEvents {
      * @param eventClass an event class wrapping the event
      * @return number of times the provided event was executed
      */
-    int count(EventClass eventClass) {
+    public int count(EventClass eventClass) {
         if (!contain(eventClass)) {
             return 0;
         }
@@ -102,7 +102,7 @@ class EmittedEvents {
      * @return {@code true} if the event of provided type was emitted in the Bounded Context,
      * {@code false} otherwise
      */
-    boolean contain(Class<? extends Message> eventType) {
+    public boolean contain(Class<? extends Message> eventType) {
         return contain(EventClass.of(eventType));
     }
 
@@ -111,7 +111,7 @@ class EmittedEvents {
      * @return {@code true} if the event of provided type was emitted in the Bounded Context,
      * {@code false} otherwise
      */
-    boolean contain(EventClass eventClass) {
+    public boolean contain(EventClass eventClass) {
         return countOfTypes.containsKey(eventClass);
     }
 }
