@@ -34,8 +34,12 @@ class RejectionPredicateTest {
     @Test
     @DisplayName("contain default error message")
     void containDefaultErrorMessage() {
-        RejectionPredicate predicate = target -> true;
+        RejectionPredicate predicate = acceptAll();
         String message = predicate.message();
         assertNotNull(message);
+    }
+
+    private static RejectionPredicate acceptAll() {
+        return target -> true;
     }
 }
