@@ -63,9 +63,10 @@ class EmittedEventsVerifierTest {
         verify(emitted(IntProjectCreated.class, IntTaskAdded.class));
 
         assertThrows(AssertionError.class, () -> verify(emitted(IntProjectStarted.class)));
-        assertThrows(AssertionError.class, () -> {
-            verify(emitted(IntTaskAdded.class, IntProjectCreated.class, IntProjectStarted.class));
-        });
+        assertThrows(AssertionError.class, () -> 
+                verify(emitted(IntTaskAdded.class, 
+                               IntProjectCreated.class, 
+                               IntProjectStarted.class)));
     }
 
     @Test
