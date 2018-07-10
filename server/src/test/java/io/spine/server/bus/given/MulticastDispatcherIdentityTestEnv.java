@@ -31,7 +31,7 @@ import static io.spine.base.Identifier.newUuid;
 
 public class MulticastDispatcherIdentityTestEnv {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private MulticastDispatcherIdentityTestEnv() {
     }
 

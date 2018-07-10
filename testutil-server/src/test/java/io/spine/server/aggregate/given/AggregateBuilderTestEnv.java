@@ -18,33 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core.given;
+package io.spine.server.aggregate.given;
 
-import com.google.protobuf.Any;
-import io.spine.core.Enrichment;
-import org.junit.Test;
-
-import java.util.Map;
-
-import static io.spine.core.given.GivenEnrichment.withOneAttribute;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Verify.assertSize;
+import com.google.protobuf.Timestamp;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateBuilder;
+import io.spine.validate.TimestampVBuilder;
 
 /**
- * @author Dmytro Grankin
+ * @author Dmytro Dashenkov
+ * @author Dmytro Kuzmin
  */
-public class GivenEnrichmentShould {
+public class AggregateBuilderTestEnv {
 
-    @Test
-    public void have_private_utility_ctor() {
-        assertHasPrivateParameterlessCtor(GivenEnrichment.class);
+    /** Prevents instantiation of this utility class. */
+    private AggregateBuilderTestEnv() {
     }
 
-    @Test
-    public void create_enrichment_with_one_attribute() {
-        final Enrichment enrichment = withOneAttribute();
-        final Map<String, Any> enrichmentAttributes = enrichment.getContainer()
-                                                                .getItems();
-        assertSize(1, enrichmentAttributes);
+    public static AggregateBuilder<TestAggregate, Integer, Timestamp> givenAggregate() {
+        AggregateBuilder<TestAggregate, Integer, Timestamp> result = new AggregateBuilder<>();
+        result.setResultClass(TestAggregate.class);
+        return result;
+    }
+
+    public static class TestAggregate extends Aggregate<Integer, Timestamp, TimestampVBuilder> {
+        protected TestAggregate(Integer id) {
+            super(id);
+        }
     }
 }

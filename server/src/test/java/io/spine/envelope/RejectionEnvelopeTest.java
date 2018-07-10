@@ -47,8 +47,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @SuppressWarnings("DuplicateStringLiteralInspection") // Similar test cases to CommandEnvelopeTest.
 @DisplayName("RejectionEnvelope should")
 class RejectionEnvelopeTest extends MessageEnvelopeTest<Rejection,
-        RejectionEnvelope,
-        RejectionClass> {
+                                                        RejectionEnvelope,
+                                                        RejectionClass> {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(RejectionEnvelopeTest.class);

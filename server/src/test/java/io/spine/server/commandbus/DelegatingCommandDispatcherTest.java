@@ -26,7 +26,7 @@ import io.spine.server.commandbus.given.DelegatingCommandDispatcherTestEnv.Empty
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisplayName("DelegatingCommandDispatcher should")
 class DelegatingCommandDispatcherTest {

@@ -30,6 +30,8 @@ import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManager;
 import io.spine.validate.AnyVBuilder;
+import org.gradle.api.Project;
+import org.gradle.testfixtures.ProjectBuilder;
 
 import java.util.Collections;
 
@@ -38,8 +40,14 @@ import java.util.Collections;
  */
 public class ModelVerifierTestEnv {
 
+    /** Prevents instantiation of this utility class. */
     private ModelVerifierTestEnv() {
-        // Prevent utility class instantiation.
+    }
+
+    public static Project actualProject() {
+        Project result = ProjectBuilder.builder().build();
+        result.getPluginManager().apply("java");
+        return result;
     }
 
     public static class AnyCommandHandler extends CommandHandler {

@@ -115,12 +115,10 @@ public class EventBus
     private final StreamObserver<Ack> streamObserver;
 
     /** The validator for events posted to the bus. */
-    @Nullable
-    private EventValidator eventValidator;
+    private @Nullable EventValidator eventValidator;
 
     /** The enricher for posted events or {@code null} if the enrichment is not supported. */
-    @Nullable
-    private final EventEnricher enricher;
+    private final @Nullable EventEnricher enricher;
 
     /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {

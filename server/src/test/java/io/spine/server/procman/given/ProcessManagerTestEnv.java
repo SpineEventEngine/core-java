@@ -65,7 +65,7 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
  */
 public class ProcessManagerTestEnv {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private ProcessManagerTestEnv() {
         // Do nothing.
     }

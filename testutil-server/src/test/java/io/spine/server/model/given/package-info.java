@@ -18,18 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Apply this script to use `grpc` plugin in `generateProto` tasks.
-// This is needed for gRPC services generation.
-// Also adds generated gRPC code to the source sets.
+/**
+ * Test environment classes for the {@code io.spine.server.model} package of the
+ * {@code testutil-server} module.
+ */
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.model.given;
 
-protobuf {
-    generateProtoTasks {
-        all().each { final task ->
-            task.plugins {
-                grpc {}
-            }
-        }
-    }
-}
+import com.google.errorprone.annotations.CheckReturnValue;
 
-sourceSets.main.java.srcDirs += [generatedGrpcDir]
+import javax.annotation.ParametersAreNonnullByDefault;

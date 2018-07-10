@@ -18,18 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.core.given;
 
-import io.spine.test.Tests;
-import org.junit.Test;
+import com.google.protobuf.Any;
+import io.spine.core.Enrichment;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.util.Map;
+
+import static io.spine.core.given.GivenEnrichment.withOneAttribute;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Verify.assertSize;
 
 /**
- * @author Alexander Yevsyukov
+ * @author Dmytro Grankin
  */
-public class TestCommandClassesShould {
+@DisplayName("GivenEnrichment should")
+class GivenEnrichmentTest {
 
     @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(TestCommandClasses.class);
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(GivenEnrichment.class);
+    }
+
+    @Test
+    @DisplayName("create enrichment with one attribute")
+    void createWithOneAttribute() {
+        Enrichment enrichment = withOneAttribute();
+        Map<String, Any> enrichmentAttributes = enrichment.getContainer()
+                                                          .getItems();
+        assertSize(1, enrichmentAttributes);
     }
 }

@@ -18,16 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// Apply this script if it is needed to generate Protobuf descriptor set (special files with `.desc` extension).
-// These files may be needed by Gradle plugins to obtain descriptors of `.proto` files of this project.
-protobuf {
-    generateProtoTasks {
-        all().each { final task ->
-            task.plugins {
-                task.generateDescriptorSet = true
-                task.descriptorSetOptions.path = "$projectDir/build/descriptors/${task.sourceSet.name}.desc"
-                task.descriptorSetOptions.includeImports = true
-            }
+package io.spine.server.command.given;
+
+import com.google.protobuf.StringValue;
+import io.spine.client.ActorRequestFactory;
+import io.spine.server.command.CommandTest;
+
+/**
+ * @author Alexander Yevsyukov
+ * @author Dmytro Kuzmin
+ */
+public class CommandTestTestEnv {
+
+    /** Prevents instantiation of this utility class. */
+    private CommandTestTestEnv() {
+    }
+
+    /**
+     * The test class for verifying the behaviour of the abstract parent.
+     */
+    public static class TestCommandTest extends CommandTest<StringValue> {
+
+        public TestCommandTest(ActorRequestFactory requestFactory) {
+            super(requestFactory);
+        }
+
+        public TestCommandTest() {
+            super();
+        }
+
+        @Override
+        protected void setUp() {
+            // We don't have an object under test for this test harness class.
         }
     }
 }

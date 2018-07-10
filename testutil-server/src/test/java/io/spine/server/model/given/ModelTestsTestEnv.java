@@ -18,30 +18,46 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.given;
+package io.spine.server.model.given;
 
-import io.spine.test.Tests;
-import org.junit.Test;
-
-import static org.junit.Assert.assertTrue;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Timestamp;
+import io.spine.server.command.Assign;
+import io.spine.server.command.CommandHandler;
+import io.spine.server.event.EventBus;
 
 /**
  * @author Alexander Yevsyukov
+ * @author Dmytro Kuzmin
  */
-public class GivenLifecycleFlagsShould {
+public class ModelTestsTestEnv {
 
-    @Test
-    public void create_archived_visibility() {
-        assertTrue(GivenLifecycleFlags.archived().getArchived());
+    /** Prevents instantiation of this utility class. */
+    private ModelTestsTestEnv() {
     }
 
-    @Test
-    public void create_deleted_visibility() {
-        assertTrue(GivenLifecycleFlags.deleted().getDeleted());
+    public static class TestCommandHandler extends CommandHandler {
+        private TestCommandHandler(EventBus eventBus) {
+            super(eventBus);
+        }
+
+        @Assign
+        Empty handle(Timestamp cmd) {
+            return Empty.getDefaultInstance();
+        }
     }
 
-    @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(GivenLifecycleFlags.class);
+    public static class DuplicatedCommandHandler extends CommandHandler {
+        private DuplicatedCommandHandler(EventBus eventBus) {
+            super(eventBus);
+        }
+
+        /**
+         * Handles the same command as {@link TestCommandHandler#handle(Timestamp)}.
+         */
+        @Assign
+        Empty handle(Timestamp cmd) {
+            return Empty.getDefaultInstance();
+        }
     }
 }

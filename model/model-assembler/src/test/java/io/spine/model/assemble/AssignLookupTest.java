@@ -18,31 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core.given;
+package io.spine.model.assemble;
 
-import io.spine.core.Version;
-import io.spine.test.Tests;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-import static io.spine.test.TestValues.random;
-import static org.junit.Assert.assertEquals;
+import java.util.Set;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
-public class GivenVersionShould {
+@DisplayName("AssignLookup should")
+class AssignLookupTest extends SpineAnnotationProcessorTest {
 
-    @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(GivenVersion.class);
+    @Override
+    protected SpineAnnotationProcessor processor() {
+        return new AssignLookup();
     }
 
     @Test
-    public void generate_version_by_number() {
-        final int number = random(100);
-
-        final Version version = GivenVersion.withNumber(number);
-
-        assertEquals(number, version.getNumber());
+    @DisplayName("support `spineDirRoot` option")
+    void supportSpineDirRoot() {
+        Set<String> opts = processor().getSupportedOptions();
+        assertEquals(1, opts.size());
+        assertThat(opts, contains(AssignLookup.OUTPUT_OPTION_NAME));
     }
 }

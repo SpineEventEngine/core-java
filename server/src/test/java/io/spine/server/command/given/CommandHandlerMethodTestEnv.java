@@ -45,7 +45,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 
 public class CommandHandlerMethodTestEnv {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private CommandHandlerMethodTestEnv() {
     }
 

@@ -27,30 +27,36 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.command.TestEventFactory;
-import io.spine.test.Tests;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.core.Rejections.createRejection;
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.TestValues.newUuidValue;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.mockito.Mockito.mock;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class ProcessManagerDispatcherShould {
+@DisplayName("ProcessManagerDispatcher utility should")
+class ProcessManagerDispatcherTest {
 
     @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(ProcessManagerDispatcher.class);
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(ProcessManagerDispatcher.class);
     }
 
     @Test
-    public void pass_null_tolerance_check() {
+    @DisplayName(NOT_ACCEPT_NULLS)
+    void passNullToleranceCheck() {
         TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(getClass());
         TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
-        final Command command = requestFactory.generateCommand();
+        Command command = requestFactory.generateCommand();
         new NullPointerTester()
                 .setDefault(CommandEnvelope.class,
                             CommandEnvelope.of(command))

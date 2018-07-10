@@ -28,27 +28,26 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.Commands;
 import io.spine.core.TenantId;
-import io.spine.test.Tests;
+import io.spine.server.command.given.CommandTestTestEnv.TestCommandTest;
 import io.spine.test.TimeTests;
 import io.spine.time.ZoneOffsets;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 import static io.spine.core.given.GivenUserId.newUuid;
 import static io.spine.test.TestValues.newUuidValue;
+import static io.spine.test.Tests.nullRef;
 import static io.spine.validate.Validate.checkNotDefault;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class CommandTestShould {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+@DisplayName("CommandTest should")
+class CommandTestTest {
 
     private CommandTest<StringValue> commandTest;
 
@@ -87,26 +86,29 @@ public class CommandTestShould {
                                   .build();
     }
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         commandTest = new TestCommandTest();
     }
 
     @Test
-    public void initialize_with_default_ActorRequestFactory_and_produce_commands() {
+    @DisplayName("initialize with default ActorRequestFactory and produce commands")
+    void initWithDefaultRequestFactory() {
         createAndAssertCommand(commandTest);
     }
 
     @SuppressWarnings({"ConstantConditions" /* Passing `null` is the purpose of this test. */,
-            "ResultOfObjectAllocationIgnored" /* because the constructor should fail. */})
-    @Test(expected = NullPointerException.class)
-    public void do_not_allow_null_ActorRequestFactory() {
-        new TestCommandTest(null);
+            "ResultOfObjectAllocationIgnored" /* Because the constructor should fail. */})
+    @Test
+    @DisplayName("not allow null ActorRequestFactory")
+    void rejectNullRequestFactory() {
+        assertThrows(NullPointerException.class, () -> new TestCommandTest(null));
     }
 
     @Test
-    public void accept_custom_ActorRequestFactory() {
-        Class<? extends CommandTestShould> clazz = getClass();
+    @DisplayName("accept custom ActorRequestFactory")
+    void acceptCustomRequestFactory() {
+        Class<? extends CommandTestTest> clazz = getClass();
         CommandTest<StringValue> commandTestWithFactory =
                 new TestCommandTest(newRequestFactory(clazz));
 
@@ -114,7 +116,8 @@ public class CommandTestShould {
     }
 
     @Test
-    public void have_empty_state_before_command_creation() {
+    @DisplayName("have empty state before command creation")
+    void haveEmptyStateInitially() {
         assertFalse(commandTest.commandMessage()
                                .isPresent());
         assertFalse(commandTest.commandContext()
@@ -126,7 +129,8 @@ public class CommandTestShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // This test verifies that Optionals
     // are initialized.
     @Test
-    public void stores_command_after_creation() {
+    @DisplayName("store command after creation")
+    void storeCommandAfterCreation() {
         StringValue commandMessage = newUuidValue();
         Command command = commandTest.createCommand(commandMessage);
 
@@ -139,7 +143,8 @@ public class CommandTestShould {
     }
 
     @Test
-    public void create_command_with_custom_Timestamp() {
+    @DisplayName("create command with custom Timestamp")
+    void createWithCustomTimestamp() {
         StringValue commandMessage = newUuidValue();
         Timestamp timestamp = TimeTests.Past.minutesAgo(5);
         Command command = commandTest.createCommand(commandMessage, timestamp);
@@ -150,13 +155,15 @@ public class CommandTestShould {
     }
 
     @Test
-    public void do_not_accept_null_command_message_for_different_command() {
-        thrown.expect(NullPointerException.class);
-        commandTest.createDifferentCommand(Tests.nullRef());
+    @DisplayName("not accept null command message for different command")
+    void rejectNullCommandMessage() {
+        assertThrows(NullPointerException.class,
+                     () -> commandTest.createDifferentCommand(nullRef()));
     }
 
     @Test
-    public void create_different_command() {
+    @DisplayName("create different command")
+    void createDifferentCommand() {
         Message anotherCommandMsg = Time.getCurrentTime();
         Command anotherCommand = commandTest.createDifferentCommand(anotherCommandMsg);
 
@@ -164,7 +171,8 @@ public class CommandTestShould {
     }
 
     @Test
-    public void create_different_command_with_timestamp() {
+    @DisplayName("create different command with timestamp")
+    void createDifferentWithTimestamp() {
         Message anotherCommandMsg = Time.getCurrentTime();
         Timestamp timestamp = TimeTests.Past.minutesAgo(30);
         Command anotherCommand =
@@ -174,24 +182,5 @@ public class CommandTestShould {
         assertEquals(timestamp, anotherCommand.getContext()
                                               .getActorContext()
                                               .getTimestamp());
-    }
-
-    /**
-     * The test class for verifying the behaviour of the abstract parent.
-     */
-    private static class TestCommandTest extends CommandTest<StringValue> {
-
-        private TestCommandTest(ActorRequestFactory requestFactory) {
-            super(requestFactory);
-        }
-
-        private TestCommandTest() {
-            super();
-        }
-
-        @Override
-        protected void setUp() {
-            // We don't have an object under test for this test harness class.
-        }
     }
 }

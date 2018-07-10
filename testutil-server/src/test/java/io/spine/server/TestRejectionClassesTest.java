@@ -20,16 +20,21 @@
 
 package io.spine.server;
 
-import io.spine.test.Tests;
-import org.junit.Test;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class TestRejectionClassesShould {
+@DisplayName("TestRejectionClasses utility should")
+class TestRejectionClassesTest {
 
     @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(TestRejectionClasses.class);
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(TestRejectionClasses.class);
     }
 }

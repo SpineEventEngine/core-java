@@ -18,42 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core.given;
-
-import com.google.common.testing.NullPointerTester;
-import io.spine.base.Identifier;
-import io.spine.test.Tests;
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-
 /**
- * @author Alexander Yevsyukov
+ * Test environment classes for the {@code io.spine.server.command} package of the
+ * {@code testutil-server} module.
  */
-public class GivenTenantIdShould {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.command.given;
 
-    @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(GivenTenantId.class);
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    @Test
-    public void pass_null_tolerance_check() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(GivenTenantId.class);
-    }
-
-    @Test
-    public void create_by_string_value() {
-        final String expected = Identifier.newUuid();
-
-        assertEquals(expected, GivenTenantId.of(expected)
-                                            .getValue());
-    }
-
-    @Test
-    public void create_by_test_class_name() {
-        assertEquals(getClass().getSimpleName(), GivenTenantId.nameOf(getClass())
-                                                              .getValue());
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

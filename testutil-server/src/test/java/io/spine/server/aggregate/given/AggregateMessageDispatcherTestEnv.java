@@ -31,9 +31,12 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.validate.StringValueVBuilder;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 public class AggregateMessageDispatcherTestEnv {
 
-    /** Prevents instantiation on this utility class. */
+    /** Prevents instantiation of this utility class. */
     private AggregateMessageDispatcherTestEnv() {
     }
 
@@ -45,27 +48,26 @@ public class AggregateMessageDispatcherTestEnv {
 
         @Assign
         StringValue handle(UInt32Value value) {
-            final String digitalPart = String.valueOf(value.getValue());
+            String digitalPart = String.valueOf(value.getValue());
             return logItem(digitalPart);
         }
 
         @React
         StringValue handle(FloatValue value) {
-            final String digitalPart = String.valueOf(value.getValue());
+            String digitalPart = String.valueOf(value.getValue());
             return logItem(digitalPart);
         }
 
         @Apply
         void newLine(StringValue line) {
-            final String current = getState().getValue();
+            String current = getState().getValue();
             getBuilder().setValue(current + System.lineSeparator() + line.getValue());
         }
 
         private static StringValue logItem(String digitalPart) {
-            final String str =
-                    Timestamps.toString(Time.getCurrentTime())
-                            + " - "
-                            + digitalPart;
+            String str = Timestamps.toString(Time.getCurrentTime())
+                    + " - "
+                    + digitalPart;
             return StringValue.newBuilder()
                               .setValue(str)
                               .build();

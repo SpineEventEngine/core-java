@@ -22,36 +22,35 @@ buildscript {
     apply from: "$rootDir/ext.gradle"
 }
 
+ext {
+    jUnitPioneerVersion = '0.1-SNAPSHOT'
+}
+
 group 'io.spine.tools'
 
 repositories {
     mavenCentral()
+    maven { url = repos.sonatypeSnapshots }
 }
 
 sourceSets {
     main {
-        resources.srcDirs += "$sourcesRootDir/main/resources"
+        resources.srcDirs "$sourcesRootDir/main/resources"
     }
     test {
-        resources.srcDirs += "$sourcesRootDir/test/resources"
+        resources.srcDirs "$sourcesRootDir/test/resources"
     }
 }
 
 dependencies {
-    compile gradleApi()
-    compile "io.spine.tools:spine-plugin-base:$spineBaseVersion"
-    compile project(':server')
-    compile project(':model-assembler')
+    implementation gradleApi()
+    implementation "io.spine.tools:spine-plugin-base:$spineBaseVersion"
+    implementation project(':server')
+    implementation project(':model-assembler')
 
-    testCompile gradleTestKit()
-    testCompile group: 'io.spine.tools',
-                name: 'spine-plugin-base',
-                version: spineBaseVersion,
-                classifier: 'test'
-    testCompile "org.junit.jupiter:junit-jupiter-api:$jUnitVersion"
-
-    testRuntime "org.junit.jupiter:junit-jupiter-engine:$jUnitVersion"
-    testRuntime "org.junit.vintage:junit-vintage-engine:$jUnitVersion"
+    testImplementation gradleTestKit()
+    testImplementation "io.spine.tools:spine-plugin-testlib:$spineBaseVersion"
+    testImplementation "org.junit-pioneer:junit-pioneer:$jUnitPioneerVersion"
 }
 
 test {

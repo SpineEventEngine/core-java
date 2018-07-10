@@ -21,7 +21,6 @@
 package io.spine.server.rejection;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Supplier;
 import io.spine.annotation.Internal;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
@@ -36,6 +35,7 @@ import io.spine.type.MessageClass;
 import org.slf4j.Logger;
 
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;

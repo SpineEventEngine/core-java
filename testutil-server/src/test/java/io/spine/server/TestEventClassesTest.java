@@ -17,18 +17,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-dependencies {
-    compile project(path: ':server')
 
-    api project(path: ':testutil-client')
-}
+package io.spine.server;
 
-apply from: generateDescriptorSetScript
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-apply from: testArtifactsScript
+import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
-apply plugin: spineProtobufPluginId
+/**
+ * @author Alexander Yevsyukov
+ */
+@DisplayName("TestEventClasses utility should")
+class TestEventClassesTest {
 
-modelCompiler {
-    generateValidatingBuilders = true
+    @Test
+    @DisplayName(HAVE_PARAMETERLESS_CTOR)
+    void haveUtilityConstructor() {
+        assertHasPrivateParameterlessCtor(TestEventClasses.class);
+    }
 }
