@@ -81,7 +81,7 @@ public class CommandAcksTestEnv {
         return newErrorAck(newError());
     }
 
-    private static Error newError() {
+    public static Error newError() {
         return newError(newUuid());
     }
 

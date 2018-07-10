@@ -111,12 +111,11 @@ class CommandAcksTest {
     @Test
     @DisplayName("return proper total count for rejection class")
     void countRejectionClass() {
-        List<Ack> items = asList(
+        CommandAcks acks = new CommandAcks(asList(
                 newRejectionAck(projectAlreadyStarted()),
                 newRejectionAck(taskLimitReached()),
                 newRejectionAck(taskLimitReached())
-        );
-        CommandAcks acks = new CommandAcks(items);
+        ));
 
         RejectionClass taskInCompletedProject =
                 RejectionClass.of(Rejections.IntTaskCreatedInCompletedProject.class);
@@ -258,6 +257,5 @@ class CommandAcksTest {
         assertEquals(0, acks.countErrors(withType(MISSING_ERROR_TYPE)));
         assertEquals(1, acks.countErrors(withType(UNIQUE_ERROR_TYPE)));
         assertEquals(2, acks.countErrors(withType(DUPLICATE_ERROR_TYPE)));
-
     }
 }
