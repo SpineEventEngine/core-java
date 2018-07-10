@@ -25,8 +25,8 @@ import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.server.expected.MessageProducingExpected;
 import io.spine.server.EventReactionTest;
+import io.spine.server.expected.EventHandlerExpected;
 
 import java.util.List;
 
@@ -71,7 +71,7 @@ public abstract class ProcessManagerEventReactionTest<I,
     }
 
     @Override
-    protected MessageProducingExpected<S> expectThat(P entity) {
+    protected EventHandlerExpected<S> expectThat(P entity) {
         inject(entity, boundedContext().getCommandBus());
         return super.expectThat(entity);
     }

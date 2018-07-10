@@ -26,25 +26,26 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
-import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.blankExpected;
-import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.emptyExpected;
-import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.expected;
-import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.expectedWithCommand;
-import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.expectedWithEvent;
-import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.newState;
+import static io.spine.server.expected.given.EventHandlerExpectedTestEnv.blankExpected;
+import static io.spine.server.expected.given.EventHandlerExpectedTestEnv.emptyExpected;
+import static io.spine.server.expected.given.EventHandlerExpectedTestEnv.expected;
+import static io.spine.server.expected.given.EventHandlerExpectedTestEnv.expectedWithCommand;
+import static io.spine.server.expected.given.EventHandlerExpectedTestEnv.expectedWithEvent;
+import static io.spine.server.expected.given.EventHandlerExpectedTestEnv.newState;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Vladyslav Lubenskyi
  */
-@DisplayName("MessageProducingExpected should")
-class MessageProducingExpectedShould {
+@SuppressWarnings("DuplicateStringLiteralInspection")
+@DisplayName("EventHandlerExpected should")
+class EventHandlerExpectedShould {
 
     @Test
     @DisplayName("validate state")
     void validateState() {
-        MessageProducingExpected<UInt64Value> expected = expected();
+        EventHandlerExpected<UInt64Value> expected = expected();
         expected.hasState(state -> {
             assertEquals(newState(), state);
         });
@@ -53,7 +54,7 @@ class MessageProducingExpectedShould {
     @Test
     @DisplayName("track produced events")
     void trackEvents() {
-        MessageProducingExpected<UInt64Value> expected = expected();
+        EventHandlerExpected<UInt64Value> expected = expected();
         expected.producesEvents(StringValue.class, StringValue.class);
         assertThrows(AssertionFailedError.class, () -> expected.producesEvents(StringValue.class));
     }
@@ -64,7 +65,7 @@ class MessageProducingExpectedShould {
         StringValue expectedEvent = StringValue.newBuilder()
                                                .setValue("single produced event")
                                                .build();
-        MessageProducingExpected<UInt64Value> expected = expectedWithEvent(expectedEvent);
+        EventHandlerExpected<UInt64Value> expected = expectedWithEvent(expectedEvent);
         expected.producesEvent(StringValue.class, event -> {
             assertEquals(expectedEvent, event);
         });
@@ -73,7 +74,7 @@ class MessageProducingExpectedShould {
     @Test
     @DisplayName("track routed commands")
     void trackCommands() {
-        MessageProducingExpected<UInt64Value> expected = expected();
+        EventHandlerExpected<UInt64Value> expected = expected();
         expected.routesCommands(StringValue.class, StringValue.class);
         assertThrows(AssertionFailedError.class, () -> expected.routesCommands(StringValue.class));
     }
@@ -84,7 +85,7 @@ class MessageProducingExpectedShould {
         StringValue expectedCommand = StringValue.newBuilder()
                                                  .setValue("single routed command")
                                                  .build();
-        MessageProducingExpected<UInt64Value> expected = expectedWithCommand(expectedCommand);
+        EventHandlerExpected<UInt64Value> expected = expectedWithCommand(expectedCommand);
         expected.routesCommand(StringValue.class, command -> {
             assertEquals(expectedCommand, command);
         });
@@ -93,14 +94,14 @@ class MessageProducingExpectedShould {
     @Test
     @DisplayName("ignore message if no events were generated")
     void ignoreNoEvents() {
-        MessageProducingExpected<UInt64Value> expected = blankExpected();
+        EventHandlerExpected<UInt64Value> expected = blankExpected();
         expected.ignoresMessage();
     }
 
     @Test
     @DisplayName("ignore message if the single Empty was generated")
     void ignoreEmptyEvent() {
-        MessageProducingExpected<UInt64Value> expected = emptyExpected();
+        EventHandlerExpected<UInt64Value> expected = emptyExpected();
         expected.ignoresMessage();
     }
 }

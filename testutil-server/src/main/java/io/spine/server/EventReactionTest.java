@@ -22,6 +22,7 @@ package io.spine.server;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
@@ -32,6 +33,9 @@ import io.spine.core.RejectionContext;
 import io.spine.core.Rejections;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.TestEventFactory;
+import io.spine.server.expected.EventHandlerExpected;
+
+import java.util.List;
 
 /**
  * The implementation base for testing a single message reactor.
@@ -54,7 +58,7 @@ public abstract class EventReactionTest<I,
                                         M extends Message,
                                         S extends Message,
                                         E extends CommandHandlingEntity<I, S, ?>>
-        extends ProducingMessageHandlerTest<I, M, S, E> {
+        extends MessageHandlerTest<I, M, S, E, EventHandlerExpected<S>> {
 
     private final TestEventFactory eventFactory;
     private final ActorRequestFactory requestFactory;
@@ -63,6 +67,14 @@ public abstract class EventReactionTest<I,
         super();
         this.eventFactory = TestEventFactory.newInstance(getClass());
         this.requestFactory = TestActorRequestFactory.newInstance(getClass());
+    }
+
+    @Override
+    protected EventHandlerExpected<S> expectThat(E entity) {
+        S initialState = entity.getState();
+        List<? extends Message> events = dispatchTo(entity);
+        return new EventHandlerExpected<>(events, initialState, entity.getState(),
+                                          interceptedCommands());
     }
 
     /**

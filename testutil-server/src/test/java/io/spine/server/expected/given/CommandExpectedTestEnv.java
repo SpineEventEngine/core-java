@@ -26,13 +26,13 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionId;
-import io.spine.server.expected.CommandExpected;
+import io.spine.server.expected.CommandHandlerExpected;
 
 import java.util.List;
 
-import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.events;
-import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.newState;
-import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.oldState;
+import static io.spine.server.expected.given.EventHandlerExpectedTestEnv.events;
+import static io.spine.server.expected.given.EventHandlerExpectedTestEnv.newState;
+import static io.spine.server.expected.given.EventHandlerExpectedTestEnv.oldState;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -67,55 +67,55 @@ public class CommandExpectedTestEnv {
         return asList(firstCommand, secondCommand);
     }
 
-    public static CommandExpected<UInt64Value> commandExpectedWithRejection(Message rejection) {
-        CommandExpected<UInt64Value> expected =
-                new CommandExpected<>(events(),
-                                      rejection,
-                                      oldState(),
-                                      newState(),
-                                      interceptedCommands());
+    public static CommandHandlerExpected<UInt64Value> commandExpectedWithRejection(Message rejection) {
+        CommandHandlerExpected<UInt64Value> expected =
+                new CommandHandlerExpected<>(events(),
+                                             rejection,
+                                             oldState(),
+                                             newState(),
+                                             interceptedCommands());
         return expected;
     }
 
-    public static CommandExpected<UInt64Value> commandExpectedWithEvent(Message event) {
-        CommandExpected<UInt64Value> expected =
-                new CommandExpected<>(singletonList(event),
-                                      null,
-                                      oldState(),
-                                      newState(),
-                                      interceptedCommands());
+    public static CommandHandlerExpected<UInt64Value> commandExpectedWithEvent(Message event) {
+        CommandHandlerExpected<UInt64Value> expected =
+                new CommandHandlerExpected<>(singletonList(event),
+                                             null,
+                                             oldState(),
+                                             newState(),
+                                             interceptedCommands());
         return expected;
     }
 
-    public static CommandExpected<UInt64Value> commandExpected(
+    public static CommandHandlerExpected<UInt64Value> commandExpected(
 
     ) {
-        CommandExpected<UInt64Value> expected =
-                new CommandExpected<>(events(),
-                                      null,
-                                      oldState(),
-                                      newState(),
-                                      interceptedCommands());
+        CommandHandlerExpected<UInt64Value> expected =
+                new CommandHandlerExpected<>(events(),
+                                             null,
+                                             oldState(),
+                                             newState(),
+                                             interceptedCommands());
         return expected;
     }
 
-    public static CommandExpected<UInt64Value> blankExpected() {
-        CommandExpected<UInt64Value> expected =
-                new CommandExpected<>(emptyList(),
-                                      null,
-                                      oldState(),
-                                      oldState(),
-                                      emptyList());
+    public static CommandHandlerExpected<UInt64Value> blankExpected() {
+        CommandHandlerExpected<UInt64Value> expected =
+                new CommandHandlerExpected<>(emptyList(),
+                                             null,
+                                             oldState(),
+                                             oldState(),
+                                             emptyList());
         return expected;
     }
 
-    public static CommandExpected<UInt64Value> emptyExpected() {
-        CommandExpected<UInt64Value> expected =
-                new CommandExpected<>(singletonList(Empty.getDefaultInstance()),
-                                      null,
-                                      oldState(),
-                                      oldState(),
-                                      emptyList());
+    public static CommandHandlerExpected<UInt64Value> emptyExpected() {
+        CommandHandlerExpected<UInt64Value> expected =
+                new CommandHandlerExpected<>(singletonList(Empty.getDefaultInstance()),
+                                             null,
+                                             oldState(),
+                                             oldState(),
+                                             emptyList());
         return expected;
     }
 }

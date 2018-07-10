@@ -20,20 +20,22 @@
 
 package io.spine.server.aggregate;
 
-import com.google.protobuf.StringValue;
-import com.google.protobuf.util.Timestamps;
+import com.google.protobuf.Timestamp;
 import io.spine.core.Rejection;
 import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.CommandHandlingAggregate;
-import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.TimePrintingRejectionTest;
+import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.RejectionCommandHandlerTest;
 import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.TimePrintingTest;
-import io.spine.server.expected.CommandExpected;
+import io.spine.server.expected.CommandHandlerExpected;
+import io.spine.testutil.server.aggregate.TestUtilProjectAggregate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.TimePrintingTest.TEST_COMMAND;
 import static io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.aggregate;
+import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Vladyslav Lubenskyi
@@ -43,12 +45,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class AggregateCommandTestShould {
 
     private TimePrintingTest aggregateCommandTest;
-    private TimePrintingRejectionTest aggregateRejectionCommandTest;
+    private RejectionCommandHandlerTest aggregateRejectionCommandTest;
 
     @BeforeEach
     void setUp() {
         aggregateCommandTest = new TimePrintingTest();
-        aggregateRejectionCommandTest = new TimePrintingRejectionTest();
+        aggregateRejectionCommandTest = new RejectionCommandHandlerTest();
     }
 
     @Test
@@ -64,9 +66,9 @@ class AggregateCommandTestShould {
         aggregateCommandTest.setUp();
         CommandHandlingAggregate testAggregate = aggregate();
         aggregateCommandTest.expectThat(testAggregate);
-        String newState = testAggregate.getState()
-                                       .getValue();
-        assertEquals(newState, Timestamps.toString(TEST_COMMAND));
+        Timestamp newState = testAggregate.getState()
+                                          .getTimestamp();
+        assertTrue(isNotDefault(newState));
     }
 
     @Test
@@ -74,8 +76,8 @@ class AggregateCommandTestShould {
     void shouldHandleRejection() {
         aggregateRejectionCommandTest.setUp();
         CommandHandlingAggregate testAggregate = aggregate();
-        CommandExpected<StringValue> expected = aggregateRejectionCommandTest.expectThat(
-                testAggregate);
+        CommandHandlerExpected<TestUtilProjectAggregate> expected =
+                aggregateRejectionCommandTest.expectThat(testAggregate);
         expected.throwsRejection(Rejection.class);
     }
 }

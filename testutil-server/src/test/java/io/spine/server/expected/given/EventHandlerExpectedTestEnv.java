@@ -24,7 +24,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
-import io.spine.server.expected.MessageProducingExpected;
+import io.spine.server.expected.EventHandlerExpected;
 
 import java.util.List;
 
@@ -35,12 +35,12 @@ import static java.util.Collections.singletonList;
 /**
  * @author Vladyslav Lubenskyi
  */
-public class MessageProducingExpectedTestEnv {
+public class EventHandlerExpectedTestEnv {
 
     /**
      * Prevents direct instantiation.
      */
-    private MessageProducingExpectedTestEnv() {
+    private EventHandlerExpectedTestEnv() {
     }
 
     public static List<Message> events() {
@@ -63,45 +63,45 @@ public class MessageProducingExpectedTestEnv {
         return asList(firstCommand, secondCommand);
     }
 
-    public static MessageProducingExpected<UInt64Value> expected() {
-        MessageProducingExpected<UInt64Value> expected =
-                new MessageProducingExpected<>(events(),
+    public static EventHandlerExpected<UInt64Value> expected() {
+        EventHandlerExpected<UInt64Value> expected =
+                new EventHandlerExpected<>(events(),
                                                oldState(),
                                                newState(),
                                                interceptedCommands());
         return expected;
     }
 
-    public static MessageProducingExpected<UInt64Value> expectedWithEvent(Message event) {
-        MessageProducingExpected<UInt64Value> expected =
-                new MessageProducingExpected<>(singletonList(event),
+    public static EventHandlerExpected<UInt64Value> expectedWithEvent(Message event) {
+        EventHandlerExpected<UInt64Value> expected =
+                new EventHandlerExpected<>(singletonList(event),
                                                oldState(),
                                                newState(),
                                                interceptedCommands());
         return expected;
     }
 
-    public static MessageProducingExpected<UInt64Value> expectedWithCommand(Message command) {
-        MessageProducingExpected<UInt64Value> expected =
-                new MessageProducingExpected<>(events(),
+    public static EventHandlerExpected<UInt64Value> expectedWithCommand(Message command) {
+        EventHandlerExpected<UInt64Value> expected =
+                new EventHandlerExpected<>(events(),
                                                oldState(),
                                                newState(),
                                                singletonList(command));
         return expected;
     }
 
-    public static MessageProducingExpected<UInt64Value> blankExpected() {
-        MessageProducingExpected<UInt64Value> expected =
-                new MessageProducingExpected<>(emptyList(),
+    public static EventHandlerExpected<UInt64Value> blankExpected() {
+        EventHandlerExpected<UInt64Value> expected =
+                new EventHandlerExpected<>(emptyList(),
                                                oldState(),
                                                oldState(),
                                                emptyList());
         return expected;
     }
 
-    public static MessageProducingExpected<UInt64Value> emptyExpected() {
-        MessageProducingExpected<UInt64Value> expected =
-                new MessageProducingExpected<>(singletonList(Empty.getDefaultInstance()),
+    public static EventHandlerExpected<UInt64Value> emptyExpected() {
+        EventHandlerExpected<UInt64Value> expected =
+                new EventHandlerExpected<>(singletonList(Empty.getDefaultInstance()),
                                                oldState(),
                                                oldState(),
                                                emptyList());

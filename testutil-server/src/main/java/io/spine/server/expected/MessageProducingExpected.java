@@ -42,8 +42,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @param <S> the type of the tested entity state
  * @author Vladyslav Lubenskyi
  */
-public class MessageProducingExpected<S extends Message>
-        extends AbstractExpected<S, MessageProducingExpected<S>> {
+public abstract class MessageProducingExpected<S extends Message,
+                                               X extends MessageProducingExpected<S, X>>
+        extends AbstractExpected<S, X> {
 
     private final ImmutableList<? extends Message> events;
     private final ImmutableList<Message> commands;
@@ -58,7 +59,7 @@ public class MessageProducingExpected<S extends Message>
     }
 
     @Override
-    public MessageProducingExpected<S> ignoresMessage() {
+    public X ignoresMessage() {
         assertTrue(commands.isEmpty(), format("Message produced commands: %s", commands));
 
         if (!events.isEmpty()) {
@@ -78,12 +79,11 @@ public class MessageProducingExpected<S extends Message>
      * @param <M>        class of the event's Protobuf message
      */
     @SuppressWarnings({"unchecked", "UnusedReturnValue"})
-    public <M extends Message> MessageProducingExpected<S>
-    producesEvent(Class<M> eventClass, Consumer<M> validator) {
+    public <M extends Message> X producesEvent(Class<M> eventClass, Consumer<M> validator) {
         assertNotNull(validator);
         assertEquals(1, events.size());
         assertSingleEvent(events.get(0), eventClass, validator);
-        return this;
+        return self();
     }
 
     /**
@@ -92,7 +92,7 @@ public class MessageProducingExpected<S extends Message>
      * @param eventClasses types of the expected events
      */
     @SuppressWarnings("UnusedReturnValue")
-    public MessageProducingExpected<S> producesEvents(Class<?>... eventClasses) {
+    public X producesEvents(Class<?>... eventClasses) {
         assertEquals(eventClasses.length, events.size(), () -> format(
                 "Unexpected number of events: %s (%s). Expected %s",
                 events.size(), events.stream()
@@ -120,8 +120,7 @@ public class MessageProducingExpected<S extends Message>
      * @param <M>          class of the command's Protobuf message
      */
     @SuppressWarnings({"unchecked", "UnusedReturnValue"})
-    public <M extends Message> MessageProducingExpected<S>
-    routesCommand(Class<M> commandClass, Consumer<M> validator) {
+    public <M extends Message> X routesCommand(Class<M> commandClass, Consumer<M> validator) {
         assertNotNull(validator);
         assertEquals(1, commands.size());
         assertSingleCommand(commands.get(0), commandClass, validator);
@@ -136,7 +135,7 @@ public class MessageProducingExpected<S extends Message>
      * @param commandClasses types of the expected commands
      */
     @SuppressWarnings("UnusedReturnValue")
-    public MessageProducingExpected<S> routesCommands(Class<?>... commandClasses) {
+    public X routesCommands(Class<?>... commandClasses) {
         assertEquals(commandClasses.length, commands.size(), () -> format(
                 "Unexpected number of commands: %s (%s). Expected %s",
                 commands.size(), commands.stream()
@@ -167,11 +166,6 @@ public class MessageProducingExpected<S extends Message>
                                                                 Consumer<M> validator) {
         assertTrue(expectedCommandClass.isInstance(generatedCommand));
         validator.accept((M) generatedCommand);
-    }
-
-    @Override
-    protected MessageProducingExpected<S> self() {
-        return this;
     }
 
     /**

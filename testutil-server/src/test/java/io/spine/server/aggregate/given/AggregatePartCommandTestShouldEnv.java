@@ -25,7 +25,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import io.spine.base.Identifier;
 import io.spine.server.BoundedContext;
-import io.spine.server.expected.CommandExpected;
+import io.spine.server.expected.CommandHandlerExpected;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.AggregatePartCommandTest;
 import io.spine.server.aggregate.AggregatePartRepository;
@@ -138,7 +138,7 @@ public class AggregatePartCommandTestShouldEnv {
         }
 
         @Override
-        public CommandExpected<UInt32Value> expectThat(TimerCounter entity) {
+        public CommandHandlerExpected<UInt32Value> expectThat(TimerCounter entity) {
             return super.expectThat(entity);
         }
 

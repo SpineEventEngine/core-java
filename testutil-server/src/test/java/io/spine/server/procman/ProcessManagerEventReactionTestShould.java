@@ -22,7 +22,7 @@ package io.spine.server.procman;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
-import io.spine.server.expected.MessageProducingExpected;
+import io.spine.server.expected.EventHandlerExpected;
 import io.spine.server.procman.given.ProcessManagerEventReactionTestShouldEnv.EventReactingProcessManager;
 import io.spine.server.procman.given.ProcessManagerEventReactionTestShouldEnv.EventReactingProcessManagerTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -63,7 +63,7 @@ class ProcessManagerEventReactionTestShould {
         pmEventTest.setUp();
         pmEventTest.init();
         EventReactingProcessManager testPm = processManager();
-        MessageProducingExpected<StringValue> expected = pmEventTest.expectThat(testPm);
+        EventHandlerExpected<StringValue> expected = pmEventTest.expectThat(testPm);
         expected.routesCommand(StringValue.class, command -> {
             assertEquals(command, NESTED_COMMAND);
         });

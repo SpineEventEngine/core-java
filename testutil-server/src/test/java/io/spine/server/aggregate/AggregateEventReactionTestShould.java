@@ -22,16 +22,22 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.Timestamps;
+import io.spine.server.expected.EventHandlerExpected;
 import io.spine.server.expected.MessageProducingExpected;
 import io.spine.server.aggregate.given.AggregateEventReactionTestShouldEnv.EventReactingAggregate;
 import io.spine.server.aggregate.given.AggregateEventReactionTestShouldEnv.EventReactingAggregateTest;
+import io.spine.testutil.server.aggregate.TestUtilProjectAggregate;
+import io.spine.testutil.server.aggregate.TestUtilProjectAssigned;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.aggregate.given.AggregateEventReactionTestShouldEnv.EventReactingAggregateTest.TEST_EVENT;
 import static io.spine.server.aggregate.given.AggregateEventReactionTestShouldEnv.aggregate;
+import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Vladyslav Lubenskyi
@@ -61,13 +67,14 @@ class AggregateEventReactionTestShould {
         aggregateEventTest.setUp();
         aggregateEventTest.init();
         EventReactingAggregate aggregate = aggregate();
-        MessageProducingExpected<StringValue> expected = aggregateEventTest.expectThat(aggregate);
+        EventHandlerExpected<TestUtilProjectAggregate> expected = aggregateEventTest.expectThat(aggregate);
 
-        expected.producesEvent(StringValue.class, event -> {
-            assertEquals(event.getValue(), Timestamps.toString(TEST_EVENT));
+        expected.producesEvent(TestUtilProjectAssigned.class, event -> {
+            assertNotNull(event);
+            assertTrue(isNotDefault(aggregate.getState().getTimestamp()));
         });
         expected.hasState(state -> {
-            assertEquals(state.getValue(), Timestamps.toString(TEST_EVENT));
+            assertTrue(isNotDefault(state.getTimestamp()));
         });
     }
 }

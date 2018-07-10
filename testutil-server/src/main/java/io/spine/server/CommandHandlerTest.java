@@ -26,7 +26,7 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.server.command.CommandHandlingEntity;
-import io.spine.server.expected.CommandExpected;
+import io.spine.server.expected.CommandHandlerExpected;
 import io.spine.server.model.HandlerMethodFailedException;
 
 import java.util.List;
@@ -57,7 +57,7 @@ public abstract class CommandHandlerTest<I,
                                          C extends Message,
                                          S extends Message,
                                          E extends CommandHandlingEntity<I, S, ?>>
-        extends ProducingMessageHandlerTest<I, C, S, E> {
+        extends MessageHandlerTest<I, C, S, E, CommandHandlerExpected<S>> {
 
     private final ActorRequestFactory requestFactory;
 
@@ -82,7 +82,7 @@ public abstract class CommandHandlerTest<I,
     }
 
     @Override
-    protected CommandExpected<S> expectThat(E entity) {
+    protected CommandHandlerExpected<S> expectThat(E entity) {
         S initialState = entity.getState();
         Message rejection = null;
 
@@ -98,7 +98,7 @@ public abstract class CommandHandlerTest<I,
                 throw e;
             }
         }
-        return new CommandExpected<>(events, rejection, initialState,
-                                     entity.getState(), interceptedCommands());
+        return new CommandHandlerExpected<>(events, rejection, initialState,
+                                            entity.getState(), interceptedCommands());
     }
 }

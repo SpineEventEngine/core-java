@@ -39,35 +39,41 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  * @author Dmytro Dashenkov
  */
-public class CommandExpected<S extends Message> extends MessageProducingExpected<S> {
+public class CommandHandlerExpected<S extends Message>
+        extends MessageProducingExpected<S, CommandHandlerExpected<S>> {
 
     @Nullable
     private final Message rejection;
 
-    public CommandExpected(List<? extends Message> events,
-                           @Nullable Message rejection,
-                           S initialState,
-                           S state,
-                           List<Message> interceptedCommands) {
+    public CommandHandlerExpected(List<? extends Message> events,
+                                  @Nullable Message rejection,
+                                  S initialState,
+                                  S state,
+                                  List<Message> interceptedCommands) {
         super(events, initialState, state, interceptedCommands);
         this.rejection = rejection;
     }
 
     @Override
-    public MessageProducingExpected<S> ignoresMessage() {
+    public CommandHandlerExpected<S> ignoresMessage() {
         assertNull(rejection, "Message caused a rejection.");
         return super.ignoresMessage();
     }
 
     @Override
-    public <M extends Message> MessageProducingExpected<S> producesEvent(Class<M> eventClass,
-                                                                         Consumer<M> validator) {
+    protected CommandHandlerExpected<S> self() {
+        return this;
+    }
+
+    @Override
+    public <M extends Message> CommandHandlerExpected<S> producesEvent(Class<M> eventClass,
+                                                                       Consumer<M> validator) {
         assertNotRejected(eventClass.getName());
         return super.producesEvent(eventClass, validator);
     }
 
     @Override
-    public MessageProducingExpected<S> producesEvents(Class<?>... eventClasses) {
+    public CommandHandlerExpected<S> producesEvents(Class<?>... eventClasses) {
         assertNotRejected(Stream.of(eventClasses)
                                 .map(Class::getSimpleName)
                                 .collect(joining(",")));
@@ -75,14 +81,14 @@ public class CommandExpected<S extends Message> extends MessageProducingExpected
     }
 
     @Override
-    public <M extends Message> MessageProducingExpected<S> routesCommand(Class<M> commandClass,
-                                                                         Consumer<M> validator) {
+    public <M extends Message> CommandHandlerExpected<S> routesCommand(Class<M> commandClass,
+                                                                       Consumer<M> validator) {
         assertNotRejected(commandClass.getName());
         return super.routesCommand(commandClass, validator);
     }
 
     @Override
-    public MessageProducingExpected<S> routesCommands(Class<?>... commandClasses) {
+    public CommandHandlerExpected<S> routesCommands(Class<?>... commandClasses) {
         assertNotRejected(Stream.of(commandClasses)
                                 .map(Class::getSimpleName)
                                 .collect(joining(",")));
@@ -105,7 +111,7 @@ public class CommandExpected<S extends Message> extends MessageProducingExpected
      * @param rejectionClass type of the rejection expected to be produced
      */
     @SuppressWarnings("UnusedReturnValue")
-    public MessageProducingExpected<S> throwsRejection(Class<? extends Message> rejectionClass) {
+    public CommandHandlerExpected<S> throwsRejection(Class<? extends Message> rejectionClass) {
         assertNotNull(rejection, format("No rejection encountered. Expected %s",
                                         rejectionClass.getSimpleName()));
         assertTrue(rejectionClass.isInstance(rejection),

@@ -20,12 +20,8 @@
 
 package io.spine.server.aggregate.given;
 
-import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
-import io.spine.base.ThrowableMessage;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateCommandTest;
 import io.spine.server.aggregate.AggregateRepository;
@@ -33,18 +29,26 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.given.Given;
-import io.spine.server.expected.CommandExpected;
-import io.spine.time.LocalDate;
-import io.spine.time.MonthOfYear;
-import io.spine.validate.StringValueVBuilder;
+import io.spine.server.expected.CommandHandlerExpected;
+import io.spine.testutil.server.aggregate.TestUtilAssignProject;
+import io.spine.testutil.server.aggregate.TestUtilCreateProject;
+import io.spine.testutil.server.aggregate.TestUtilFailedToCreateProject;
+import io.spine.testutil.server.aggregate.TestUtilProjectAggregate;
+import io.spine.testutil.server.aggregate.TestUtilProjectAggregateVBuilder;
+import io.spine.testutil.server.aggregate.TestUtilProjectCreated;
+import io.spine.testutil.server.aggregate.TestUtilProjectId;
 import org.junit.jupiter.api.BeforeEach;
+
+import static com.google.protobuf.util.Timestamps.fromMillis;
 
 /**
  * @author Vladyslav Lubenskyi
  */
 public class AggregateCommandTestShouldEnv {
 
-    private static final long ID = 1L;
+    private static final TestUtilProjectId ID = TestUtilProjectId.newBuilder()
+                                                                 .setValue("project id util")
+                                                                 .build();
 
     /**
      * Prevents instantiation of this utility class.
@@ -69,57 +73,56 @@ public class AggregateCommandTestShouldEnv {
      * </ul>
      */
     public static final class CommandHandlingAggregate
-            extends Aggregate<Long, StringValue, StringValueVBuilder> {
+            extends Aggregate<TestUtilProjectId,
+            TestUtilProjectAggregate,
+            TestUtilProjectAggregateVBuilder> {
 
-        CommandHandlingAggregate(Long id) {
+        CommandHandlingAggregate(TestUtilProjectId id) {
             super(id);
         }
 
         @Assign
-        public Timestamp handle(Timestamp timestamp) {
-            return timestamp;
+        public TestUtilProjectCreated handle(TestUtilCreateProject command) {
+            return TestUtilProjectCreated.getDefaultInstance();
         }
 
         @Assign
-        public Timestamp handle(LocalDate command) throws TestRejection {
-            throw new TestRejection(command);
+        public Timestamp handle(TestUtilAssignProject command)
+                throws TestUtilFailedToCreateProject {
+            throw new TestUtilFailedToCreateProject(getId());
         }
 
         @Apply
-        void on(Timestamp timestamp) {
-            getBuilder().setValue(Timestamps.toString(timestamp));
+        void on(TestUtilProjectCreated event) {
+            getBuilder().setTimestamp(fromMillis(1234567));
         }
     }
 
-    public static final class TestRejection extends ThrowableMessage {
-
-        private static final long serialVersionUID = 0;
-
-        TestRejection(GeneratedMessageV3 message) {
-            super(message);
-        }
-    }
-
-    private static final class TimePrinterRepository extends AggregateRepository<Long, CommandHandlingAggregate> {
+    private static final class CommandHandlingAggregateRepository
+            extends AggregateRepository<TestUtilProjectId, CommandHandlingAggregate> {
     }
 
     /**
      * The test class for the {@code Timestamp} command handler in {@code TimePrinter} aggregate.
      */
     public static class TimePrintingTest
-            extends AggregateCommandTest<Long, Timestamp, StringValue, CommandHandlingAggregate> {
+            extends AggregateCommandTest<TestUtilProjectId,
+            TestUtilCreateProject,
+            TestUtilProjectAggregate,
+            CommandHandlingAggregate> {
 
-        public static final Timestamp TEST_COMMAND = Timestamp.newBuilder()
-                                                              .setNanos(1024)
-                                                              .build();
+        public static final TestUtilCreateProject TEST_COMMAND =
+                TestUtilCreateProject.newBuilder()
+                                     .setId(ID)
+                                     .build();
 
         @Override
-        protected Long newId() {
+        protected TestUtilProjectId newId() {
             return ID;
         }
 
         @Override
-        protected Timestamp createMessage() {
+        protected TestUtilCreateProject createMessage() {
             return TEST_COMMAND;
         }
 
@@ -130,12 +133,14 @@ public class AggregateCommandTestShouldEnv {
         }
 
         @Override
-        protected Repository<Long, CommandHandlingAggregate> createEntityRepository() {
-            return new TimePrinterRepository();
+        protected Repository<TestUtilProjectId, CommandHandlingAggregate>
+        createEntityRepository() {
+            return new CommandHandlingAggregateRepository();
         }
 
         @Override
-        public CommandExpected<StringValue> expectThat(CommandHandlingAggregate entity) {
+        public CommandHandlerExpected<TestUtilProjectAggregate>
+        expectThat(CommandHandlingAggregate entity) {
             return super.expectThat(entity);
         }
 
@@ -147,22 +152,24 @@ public class AggregateCommandTestShouldEnv {
     /**
      * The test class for the {@code LocalDate} command handler in {@code CommandHandlingAggregate}.
      */
-    public static class TimePrintingRejectionTest
-            extends AggregateCommandTest<Long, LocalDate, StringValue, CommandHandlingAggregate> {
+    public static class RejectionCommandHandlerTest
+            extends AggregateCommandTest<TestUtilProjectId,
+            TestUtilAssignProject,
+            TestUtilProjectAggregate,
+            CommandHandlingAggregate> {
 
-        public static final LocalDate TEST_COMMAND = LocalDate.newBuilder()
-                                                              .setDay(5)
-                                                              .setMonth(MonthOfYear.AUGUST)
-                                                              .setYear(2015)
-                                                              .build();
+        public static final TestUtilAssignProject TEST_COMMAND =
+                TestUtilAssignProject.newBuilder()
+                                     .setId(ID)
+                                     .build();
 
         @Override
-        protected Long newId() {
+        protected TestUtilProjectId newId() {
             return ID;
         }
 
         @Override
-        protected LocalDate createMessage() {
+        protected TestUtilAssignProject createMessage() {
             return TEST_COMMAND;
         }
 
@@ -173,12 +180,14 @@ public class AggregateCommandTestShouldEnv {
         }
 
         @Override
-        protected Repository<Long, CommandHandlingAggregate> createEntityRepository() {
-            return new TimePrinterRepository();
+        protected Repository<TestUtilProjectId, CommandHandlingAggregate>
+        createEntityRepository() {
+            return new CommandHandlingAggregateRepository();
         }
 
         @Override
-        public CommandExpected<StringValue> expectThat(CommandHandlingAggregate entity) {
+        public CommandHandlerExpected<TestUtilProjectAggregate>
+        expectThat(CommandHandlingAggregate entity) {
             return super.expectThat(entity);
         }
 

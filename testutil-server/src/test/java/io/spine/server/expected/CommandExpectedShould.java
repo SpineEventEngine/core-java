@@ -27,12 +27,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
+import static io.spine.server.expected.given.CommandExpectedTestEnv.blankExpected;
 import static io.spine.server.expected.given.CommandExpectedTestEnv.commandExpected;
 import static io.spine.server.expected.given.CommandExpectedTestEnv.commandExpectedWithEvent;
 import static io.spine.server.expected.given.CommandExpectedTestEnv.commandExpectedWithRejection;
+import static io.spine.server.expected.given.CommandExpectedTestEnv.emptyExpected;
 import static io.spine.server.expected.given.CommandExpectedTestEnv.rejection;
-import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.blankExpected;
-import static io.spine.server.expected.given.MessageProducingExpectedTestEnv.emptyExpected;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -46,7 +46,7 @@ class CommandExpectedShould {
     @Test
     @DisplayName("validate the rejection")
     void trackRejection() {
-        CommandExpected<UInt64Value> expected =
+        CommandHandlerExpected<UInt64Value> expected =
                 commandExpectedWithRejection(rejection());
         expected.throwsRejection(Rejection.class);
     }
@@ -54,21 +54,21 @@ class CommandExpectedShould {
     @Test
     @DisplayName("ignore message if no events were generated")
     void ignoreNoEvents() {
-        MessageProducingExpected<UInt64Value> expected = blankExpected();
+        CommandHandlerExpected<UInt64Value> expected = blankExpected();
         expected.ignoresMessage();
     }
 
     @Test
     @DisplayName("ignore message if the single Empty was generated")
     void ignoreEmptyEvent() {
-        MessageProducingExpected<UInt64Value> expected = emptyExpected();
+        CommandHandlerExpected<UInt64Value> expected = emptyExpected();
         expected.ignoresMessage();
     }
 
     @Test
     @DisplayName("not ignore message if it was rejected")
     void notIgnoreRejectedCommand() {
-        CommandExpected<UInt64Value> expected =
+        CommandHandlerExpected<UInt64Value> expected =
                 commandExpectedWithRejection(rejection());
         assertThrows(AssertionFailedError.class, expected::ignoresMessage);
     }
@@ -76,7 +76,7 @@ class CommandExpectedShould {
     @Test
     @DisplayName("not track events if rejected")
     void notTrackEventsIfRejected() {
-        CommandExpected<UInt64Value> expected =
+        CommandHandlerExpected<UInt64Value> expected =
                 commandExpectedWithRejection(rejection());
         assertThrows(AssertionFailedError.class, () -> expected.producesEvents(StringValue.class));
     }
@@ -84,7 +84,7 @@ class CommandExpectedShould {
     @Test
     @DisplayName("track produced events")
     void trackEvents() {
-        CommandExpected<UInt64Value> expected = commandExpected();
+        CommandHandlerExpected<UInt64Value> expected = commandExpected();
         expected.producesEvents(StringValue.class, StringValue.class);
     }
 
@@ -94,7 +94,7 @@ class CommandExpectedShould {
         StringValue expectedEvent = StringValue.newBuilder()
                                                .setValue("single produced event")
                                                .build();
-        CommandExpected<UInt64Value> expected = commandExpectedWithEvent(expectedEvent);
+        CommandHandlerExpected<UInt64Value> expected = commandExpectedWithEvent(expectedEvent);
         expected.producesEvent(StringValue.class, event -> {
             assertEquals(expectedEvent, event);
         });

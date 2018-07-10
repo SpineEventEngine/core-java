@@ -23,8 +23,8 @@ package io.spine.server.procman;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.expected.CommandExpected;
 import io.spine.server.CommandHandlerTest;
+import io.spine.server.expected.CommandHandlerExpected;
 
 import java.util.List;
 
@@ -61,7 +61,7 @@ public abstract class ProcessManagerCommandTest<I,
     }
 
     @Override
-    protected CommandExpected<S> expectThat(P entity) {
+    protected CommandHandlerExpected<S> expectThat(P entity) {
         inject(entity, boundedContext().getCommandBus());
         return super.expectThat(entity);
     }
