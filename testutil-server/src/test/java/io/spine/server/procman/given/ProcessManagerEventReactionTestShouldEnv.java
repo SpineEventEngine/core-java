@@ -59,7 +59,8 @@ public class ProcessManagerEventReactionTestShouldEnv {
     }
 
     /**
-     * The dummy process manager that reacts on {@code UInt32Value} event, routes a nested command.
+     * The dummy process manager that reacts on {@code TestUtilTaskCreated} event and
+     * routes a nested command.
      */
     public static class EventReactingProcessManager
             extends ProcessManager<TestUtilProjectId,
@@ -95,7 +96,7 @@ public class ProcessManagerEventReactionTestShouldEnv {
     }
 
     /**
-     * The test class for the {@code UInt64Value} event handler in
+     * The test class for the {@code TestUtilTaskCreated} event handler in
      * {@code EventReactingProcessManager}.
      */
     public static class EventReactingProcessManagerTest

@@ -24,14 +24,14 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.Rejection;
 import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.CommandHandlingAggregate;
 import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.RejectionCommandHandlerTest;
-import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.TimePrintingTest;
+import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.CommandHandlingTest;
 import io.spine.server.expected.CommandHandlerExpected;
 import io.spine.testutil.server.aggregate.TestUtilProjectAggregate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.TimePrintingTest.TEST_COMMAND;
+import static io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.CommandHandlingTest.TEST_COMMAND;
 import static io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.aggregate;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -44,12 +44,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("AggregateCommandTest should")
 class AggregateCommandTestShould {
 
-    private TimePrintingTest aggregateCommandTest;
+    private CommandHandlingTest aggregateCommandTest;
     private RejectionCommandHandlerTest aggregateRejectionCommandTest;
 
     @BeforeEach
     void setUp() {
-        aggregateCommandTest = new TimePrintingTest();
+        aggregateCommandTest = new CommandHandlingTest();
         aggregateRejectionCommandTest = new RejectionCommandHandlerTest();
     }
 

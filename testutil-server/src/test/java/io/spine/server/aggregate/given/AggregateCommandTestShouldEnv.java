@@ -68,8 +68,8 @@ public class AggregateCommandTestShouldEnv {
      * A dummy aggregate that handles two command messages:
      *
      * <ul>
-     *     <li>accepts {@code Timestamp}.
-     *     <li>rejects {@code LocalDate}.
+     *     <li>accepts {@code TestUtilCreateProject}.
+     *     <li>rejects {@code TestUtilAssignProject}.
      * </ul>
      */
     public static final class CommandHandlingAggregate
@@ -103,9 +103,10 @@ public class AggregateCommandTestShouldEnv {
     }
 
     /**
-     * The test class for the {@code Timestamp} command handler in {@code TimePrinter} aggregate.
+     * The test class for the {@code TestUtilCreateProject} command handler in
+     * {@code CommandHandlingAggregate}.
      */
-    public static class TimePrintingTest
+    public static class CommandHandlingTest
             extends AggregateCommandTest<TestUtilProjectId,
                                          TestUtilCreateProject,
                                          TestUtilProjectAggregate,
@@ -150,7 +151,8 @@ public class AggregateCommandTestShouldEnv {
     }
 
     /**
-     * The test class for the {@code LocalDate} command handler in {@code CommandHandlingAggregate}.
+     * The test class for the {@code TestUtilAssignProject} command handler in
+     * {@code CommandHandlingAggregate}.
      */
     public static class RejectionCommandHandlerTest
             extends AggregateCommandTest<TestUtilProjectId,

@@ -60,7 +60,7 @@ public class ProcessManagerCommandTestTestEnv {
     }
 
     /**
-     * A dummy process manager that handles a {@code UInt64Value} command and routes a nested
+     * A dummy process manager that handles a {@code TestUtilCreateTask} command and routes a nested
      * command.
      */
     public static class CommandHandlingProcessManager
@@ -103,7 +103,7 @@ public class ProcessManagerCommandTestTestEnv {
     }
 
     /**
-     * The test class for the {@code UInt64Value} command handler in
+     * The test class for the {@code TestUtilCreateTask} command handler in
      * {@code CommandHandlingProcessManager}.
      */
     public static class TimestampProcessManagerTest

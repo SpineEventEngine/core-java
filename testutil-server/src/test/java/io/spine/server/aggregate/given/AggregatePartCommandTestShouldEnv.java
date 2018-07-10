@@ -74,7 +74,8 @@ public class AggregatePartCommandTestShouldEnv {
     }
 
     /**
-     * A dummy aggregate that counts how many times the {@link StringValue} event occurred.
+     * A dummy aggregate part that handles {@code TestUtilAddComment} command and applies
+     * the corresponding {@code TestUtilCommentAdded}.
      */
     public static final class CommentsAggregatePart
             extends AggregatePart<TestUtilProjectId,
@@ -113,7 +114,8 @@ public class AggregatePartCommandTestShouldEnv {
     }
 
     /**
-     * The test class for the {@code StringValue} command handler in {@code TimePrinter}.
+     * The test class for the {@code TestUtilAddComment} command handler in
+     * {@code CommentsAggregatePart}.
      */
     public static class TimeCounterTest
             extends AggregatePartCommandTest<TestUtilProjectId,
