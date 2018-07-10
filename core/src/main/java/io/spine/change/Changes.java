@@ -22,13 +22,6 @@ package io.spine.change;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
-import io.spine.annotation.Experimental;
-import io.spine.time.Interval;
-import io.spine.time.LocalDate;
-import io.spine.time.LocalTime;
-import io.spine.time.OffsetDate;
-import io.spine.time.OffsetDateTime;
-import io.spine.time.OffsetTime;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.change.Preconditions2.checkNewValueNotEmpty;
@@ -44,8 +37,8 @@ import static io.spine.change.Preconditions2.checkNotEqual;
     /* ... because we want one utility class for all the Changes classes. */
 public final class Changes {
 
+    /** Prevent instantiation of this utility class. */
     private Changes() {
-        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -293,115 +286,6 @@ public final class Changes {
                                                   .setPreviousValue(previousValue)
                                                   .setNewValue(newValue)
                                                   .build();
-        return result;
-    }
-
-    /**
-     * Creates {@link IntervalChange} object for the passed previous and new field values of
-     * time interval.
-     *
-     * <p>Passed values cannot be equal.
-     */
-    @Experimental
-    public static IntervalChange of(Interval previousValue, Interval newValue) {
-        checkNotNull(previousValue);
-        checkNotNull(newValue);
-        checkNotEqual(previousValue, newValue);
-
-        final IntervalChange result = IntervalChange.newBuilder()
-                                                    .setPreviousValue(previousValue)
-                                                    .setNewValue(newValue)
-                                                    .build();
-        return result;
-    }
-
-    /**
-     * Creates {@link LocalDateChange} object for the passed previous and new field values of
-     * local date.
-     *
-     * <p>Passed values cannot be equal.
-     */
-    public static LocalDateChange of(LocalDate previousValue, LocalDate newValue) {
-        checkNotNull(previousValue);
-        checkNotNull(newValue);
-        checkNotEqual(previousValue, newValue);
-
-        final LocalDateChange result = LocalDateChange.newBuilder()
-                                                      .setPreviousValue(previousValue)
-                                                      .setNewValue(newValue)
-                                                      .build();
-        return result;
-    }
-
-    /**
-     * Creates {@link LocalTimeChange} object for the passed previous and new field values of
-     * local time.
-     *
-     * <p>Passed values cannot be equal.
-     */
-    public static LocalTimeChange of(LocalTime previousValue, LocalTime newValue) {
-        checkNotNull(previousValue);
-        checkNotNull(newValue);
-        checkNotEqual(previousValue, newValue);
-
-        final LocalTimeChange result = LocalTimeChange.newBuilder()
-                                                      .setPreviousValue(previousValue)
-                                                      .setNewValue(newValue)
-                                                      .build();
-        return result;
-    }
-
-    /**
-     * Creates {@link OffsetTimeChange} object for the passed previous and new field values of
-     * offset time.
-     *
-     * <p>Passed values cannot be equal.
-     */
-    public static OffsetTimeChange of(OffsetTime previousValue, OffsetTime newValue) {
-        checkNotNull(previousValue);
-        checkNotNull(newValue);
-        checkNotEqual(previousValue, newValue);
-
-        final OffsetTimeChange result = OffsetTimeChange.newBuilder()
-                                                        .setPreviousValue(previousValue)
-                                                        .setNewValue(newValue)
-                                                        .build();
-        return result;
-    }
-
-    /**
-     * Creates {@link OffsetDateChange} object for the passed previous and new field values of
-     * offset time.
-     *
-     * <p>Passed values cannot be equal.
-     */
-    public static OffsetDateChange of(OffsetDate previousValue, OffsetDate newValue) {
-        checkNotNull(previousValue);
-        checkNotNull(newValue);
-        checkNotEqual(previousValue, newValue);
-
-        final OffsetDateChange result = OffsetDateChange.newBuilder()
-                                                        .setPreviousValue(previousValue)
-                                                        .setNewValue(newValue)
-                                                        .build();
-        return result;
-    }
-
-    /**
-     * Creates {@link OffsetDateTimeChange} object for the passed previous and new field values of
-     * offset time.
-     *
-     * <p>Passed values cannot be equal.
-     */
-    public static OffsetDateTimeChange of(OffsetDateTime previousValue, OffsetDateTime newValue) {
-        checkNotNull(previousValue);
-        checkNotNull(newValue);
-        checkNotEqual(previousValue, newValue);
-
-        final OffsetDateTimeChange result = OffsetDateTimeChange.newBuilder()
-                                                                .setPreviousValue(previousValue)
-                                                                .setNewValue(newValue)
-                                                                .build();
         return result;
     }
 }
