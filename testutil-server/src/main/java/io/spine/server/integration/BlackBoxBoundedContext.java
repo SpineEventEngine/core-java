@@ -49,6 +49,12 @@ import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static java.util.Collections.singletonList;
 
 /**
+ * Black Box Bounded Context is aimed at facilitating writing literate integration tests.
+ * 
+ * <p>Using its API commands and events are sent to a Bounded Context. Their effect is afterwards 
+ * verified in using various verifiers (e.g. {@link CommandAcksVerifier acknowledgement verfier}, 
+ * {@link EmittedEventsVerifier emitted events verifier}).
+ *
  * @author Mykhailo Drachuk
  */
 @SuppressWarnings("ClassWithTooManyMethods")
