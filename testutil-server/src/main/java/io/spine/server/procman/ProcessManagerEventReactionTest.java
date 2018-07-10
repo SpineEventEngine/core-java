@@ -25,12 +25,12 @@ import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.expected.MessageProducingExpected;
 import io.spine.server.EventReactionTest;
 
 import java.util.List;
 
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.procman.CommandBusInjection.inject;
 import static java.util.stream.Collectors.toList;
 
@@ -67,7 +67,7 @@ public abstract class ProcessManagerEventReactionTest<I,
     }
 
     private static Message eventToMessage(Event event) {
-        return AnyPacker.unpack(event.getMessage());
+        return unpack(event.getMessage());
     }
 
     @Override
@@ -76,5 +76,8 @@ public abstract class ProcessManagerEventReactionTest<I,
         return super.expectThat(entity);
     }
 
+    /**
+     * Creates an {@link Enrichment} to enrich the tested event.
+     */
     protected abstract Enrichment enrichment();
 }

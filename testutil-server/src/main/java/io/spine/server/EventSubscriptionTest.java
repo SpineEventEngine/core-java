@@ -52,6 +52,9 @@ public abstract class EventSubscriptionTest<I,
         return new Expected<>(initialState, entity.getState());
     }
 
+    /**
+     * Creates {@link Event} from the tested message.
+     */
     protected final Event createEvent() {
         Message eventMessage = message();
         Event result = eventFactory.createEvent(eventMessage);

@@ -65,6 +65,12 @@ public abstract class EventReactionTest<I,
         this.requestFactory = TestActorRequestFactory.newInstance(getClass());
     }
 
+    /**
+     * Creates {@link Event} from the given message and supplies it with {@link EventContext}.
+     *
+     * @param message an event message
+     * @return a new {@link Event}
+     */
     protected final Event createEvent(M message) {
         Event event = eventFactory.createEvent(message);
         EventContext context = event.getContext()
@@ -76,6 +82,13 @@ public abstract class EventReactionTest<I,
                     .build();
     }
 
+    /**
+     * Creates {@link Rejection} from the given message and supplies it with
+     * {@link RejectionContext}.
+     *
+     * @param message a rejection message
+     * @return a new {@link Rejection}
+     */
     protected final Rejection createRejection(M message) {
         Empty cmd = Empty.getDefaultInstance();
         Command command = requestFactory.command()
@@ -90,6 +103,12 @@ public abstract class EventReactionTest<I,
                         .build();
     }
 
+    /**
+     * Indicates if the tested event is external to the {@link BoundedContext}
+     * in which the rejection is being processed.
+     *
+     * @return {@code true} if the event is external, {@code false} otherwise
+     */
     protected boolean externalMessage() {
         return false;
     }
