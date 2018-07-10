@@ -38,14 +38,18 @@ import "spine/core/command.proto";
 import "spine/core/event.proto";
 import "spine/client/entities.proto";
 
+// An identifier of an entity history.
+//
 message EntityHistoryId {
 
+    // The ID of the entity.
     spine.client.EntityId entity_id = 1;
 
+    // The type URL of the entity state.
     string type_url = 2;
 }
 
-// The history of interactions with an entity.
+// A history of interactions with an entity.
 //
 // Each Aggregate, Projection, and ProcessManager instance has a corresponding entity history.
 //
@@ -57,30 +61,56 @@ message EntityHistory {
 
     EntityHistoryId id = 1;
 
+    // The kind of the entity.
     EntityOption.Kind kind = 2;
 
+    // All the commands ever dispatched to the entity.
     repeated DispatchedCommand commands = 3;
 
+    // All the events ever dispatched to the entity.
+    //
+    // In case of Aggregates, this includes both the applied events of the aggregate itself and
+    // the events dispatched to the reactor methods.
+    //
     repeated DispatchedEvent events = 4;
 }
 
+// A record of an event dispatched to a certain entity.
+//
 message DispatchedEvent {
 
+    // The ID of the event.
     spine.core.EventId event = 1;
 
+    // The time when the event was dispatched.
+    //
+    // This timestamp may differ from the one in the context of the event.
+    //
     google.protobuf.Timestamp when_dispatched = 2 [(required) = true];
 }
 
+// A record of a command dispatched to a certain entity.
+//
 message DispatchedCommand {
 
+    // The ID of the command.
     spine.core.CommandId command = 1;
 
+    // The time when the command was dispatched.
+    //
+    // This timestamp may differ from the one in the context of the event.
+    //
     google.protobuf.Timestamp when_dispatched = 2 [(required) = true];
 }
 
+// An identifier of a message dispatched to an entity.
+//
+// May represent either an event or a command.
+//
 message DispatchedMessageId {
 
     oneof kind {
+
         spine.core.CommandId command_id = 1;
 
         spine.core.EventId event_id = 2;
