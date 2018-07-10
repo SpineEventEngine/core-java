@@ -21,7 +21,7 @@
 package io.spine.server.integration;
 
 import io.spine.server.integration.given.IntProjectRepository;
-import io.spine.server.integration.given.IntProjectRepositoryFailingClose;
+import io.spine.server.integration.given.RepositoryThrowingExceptionOnClose;
 import io.spine.server.integration.given.IntReportRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -110,7 +110,7 @@ class BlackBoxBoundedContextTest {
     void throwIllegalStateExceptionOnClose() {
         assertThrows(IllegalStateException.class, () ->
                 BlackBoxBoundedContext
-                        .with(new IntProjectRepositoryFailingClose() {
+                        .with(new RepositoryThrowingExceptionOnClose() {
                             @Override
                             protected void throwException() {
                                 throw new RuntimeException("Expected error");
