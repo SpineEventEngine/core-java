@@ -47,7 +47,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
-class CommandAcks {
+class Acknowledgements {
 
     private static final Rejection EMPTY_REJECTION = Rejection.getDefaultInstance();
     private static final Error EMPTY_ERROR = Error.getDefaultInstance();
@@ -57,7 +57,7 @@ class CommandAcks {
     private final List<Rejection> rejections = newArrayList();
     private final Map<RejectionClass, Integer> rejectionTypes;
 
-    CommandAcks(Iterable<Ack> responses) {
+    Acknowledgements(Iterable<Ack> responses) {
         for (Ack response : responses) {
             acks.add(response);
 

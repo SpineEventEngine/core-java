@@ -29,7 +29,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.server.integration.CommandAcksVerifier.acked;
+import static io.spine.server.integration.AcknowledgementsVerifier.acked;
 import static io.spine.server.integration.EmittedEventsVerifier.emitted;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

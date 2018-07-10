@@ -33,8 +33,8 @@ import static java.lang.String.format;
  * An abstract predicate testing {@link Error Spine errors} to
  * match some simple rules.
  *
- * <p>This qualifiers are consumed by command acks verifier
- * {@link CommandAcksVerifier#ackedWithErrors(ErrorQualifier) ackedWithError method}.
+ * <p>This qualifiers are consumed by acks verifier
+ * {@link AcknowledgementsVerifier#ackedWithErrors(ErrorQualifier) ackedWithError method}.
  *
  * @author Mykhailo Drachuk
  */

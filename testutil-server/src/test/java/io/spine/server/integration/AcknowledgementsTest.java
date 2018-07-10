@@ -53,22 +53,22 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Mykhailo Drachuk
  */
-@DisplayName("Command Acknowledgements should")
-class CommandAcksTest {
+@DisplayName("Acknowledgements should")
+class AcknowledgementsTest {
 
     @Test
     @DisplayName("return proper total acknowledgements count")
     void count() {
-        CommandAcks noAcks = new CommandAcks(newArrayList());
+        Acknowledgements noAcks = new Acknowledgements(newArrayList());
         assertEquals(0, noAcks.count());
 
-        CommandAcks ack = new CommandAcks(acks(1, CommandAcksTestEnv::newOkAck));
+        Acknowledgements ack = new Acknowledgements(acks(1, CommandAcksTestEnv::newOkAck));
         assertEquals(1, ack.count());
 
-        CommandAcks twoAcks = new CommandAcks(acks(2, CommandAcksTestEnv::newOkAck));
+        Acknowledgements twoAcks = new Acknowledgements(acks(2, CommandAcksTestEnv::newOkAck));
         assertEquals(2, twoAcks.count());
 
-        CommandAcks threeAcks = new CommandAcks(acks(3, CommandAcksTestEnv::newOkAck));
+        Acknowledgements threeAcks = new Acknowledgements(acks(3, CommandAcksTestEnv::newOkAck));
         assertEquals(3, threeAcks.count());
     }
 
@@ -81,28 +81,28 @@ class CommandAcksTest {
     void containRejections() {
         List<Ack> items = ImmutableList.of(newRejectionAck(projectAlreadyStarted()));
 
-        CommandAcks acks = new CommandAcks(items);
+        Acknowledgements acks = new Acknowledgements(items);
         assertTrue(acks.containRejections());
 
-        CommandAcks emptyAcks = new CommandAcks(emptyList());
+        Acknowledgements emptyAcks = new Acknowledgements(emptyList());
         assertFalse(emptyAcks.containRejections());
     }
 
     @Test
     @DisplayName("return proper total rejection count")
     void countRejection() {
-        CommandAcks noAcks = new CommandAcks(newArrayList());
+        Acknowledgements noAcks = new Acknowledgements(newArrayList());
         assertEquals(0, noAcks.countRejections());
 
-        CommandAcks ack = new CommandAcks(acks(1, CommandAcksTestEnv::newRejectionAck));
+        Acknowledgements ack = new Acknowledgements(acks(1, CommandAcksTestEnv::newRejectionAck));
         assertEquals(1, ack.countRejections());
 
-        CommandAcks fiveAcksTwoRejections = new CommandAcks(concat(
+        Acknowledgements fiveAcksTwoRejections = new Acknowledgements(concat(
                 acks(3, CommandAcksTestEnv::newOkAck),
                 acks(2, CommandAcksTestEnv::newRejectionAck)));
         assertEquals(2, fiveAcksTwoRejections.countRejections());
 
-        CommandAcks sixAcksThreeRejections = new CommandAcks(concat(
+        Acknowledgements sixAcksThreeRejections = new Acknowledgements(concat(
                 acks(3, CommandAcksTestEnv::newRejectionAck),
                 acks(3, CommandAcksTestEnv::newOkAck)));
         assertEquals(3, sixAcksThreeRejections.countRejections());
@@ -111,7 +111,7 @@ class CommandAcksTest {
     @Test
     @DisplayName("return proper total count for rejection class")
     void countRejectionClass() {
-        CommandAcks acks = new CommandAcks(asList(
+        Acknowledgements acks = new Acknowledgements(asList(
                 newRejectionAck(projectAlreadyStarted()),
                 newRejectionAck(taskLimitReached()),
                 newRejectionAck(taskLimitReached())
@@ -138,7 +138,7 @@ class CommandAcksTest {
                 newRejectionAck(taskLimitReached()),
                 newRejectionAck(taskLimitReached())
         );
-        CommandAcks acks = new CommandAcks(items);
+        Acknowledgements acks = new Acknowledgements(items);
 
         RejectionClass completedProject =
                 RejectionClass.of(Rejections.IntTaskCreatedInCompletedProject.class);
@@ -159,7 +159,7 @@ class CommandAcksTest {
         ImmutableList<Ack> items = ImmutableList.of(
                 newRejectionAck(taskCreatedInCompletedProject(newTask(PRESENT_TASK_TITLE)))
         );
-        CommandAcks acks = new CommandAcks(items);
+        Acknowledgements acks = new Acknowledgements(items);
         Class<Rejections.IntTaskCreatedInCompletedProject> taskInCompletedProject =
                 Rejections.IntTaskCreatedInCompletedProject.class;
 
@@ -181,7 +181,7 @@ class CommandAcksTest {
                 newRejectionAck(taskCreatedInCompletedProject(newTask(DUPLICATE_TASK_TITLE))),
                 newRejectionAck(taskCreatedInCompletedProject(newTask(DUPLICATE_TASK_TITLE)))
         );
-        CommandAcks acks = new CommandAcks(items);
+        Acknowledgements acks = new Acknowledgements(items);
 
         Class<Rejections.IntTaskCreatedInCompletedProject> taskInCompletedProject =
                 Rejections.IntTaskCreatedInCompletedProject.class;
@@ -208,28 +208,28 @@ class CommandAcksTest {
     void containErrors() {
         List<Ack> items = ImmutableList.of(newErrorAck());
 
-        CommandAcks acks = new CommandAcks(items);
+        Acknowledgements acks = new Acknowledgements(items);
         assertTrue(acks.containErrors());
 
-        CommandAcks emptyAcks = new CommandAcks(emptyList());
+        Acknowledgements emptyAcks = new Acknowledgements(emptyList());
         assertFalse(emptyAcks.containErrors());
     }
 
     @Test
     @DisplayName("return proper total error count")
     void countErrors() {
-        CommandAcks noAcks = new CommandAcks(newArrayList());
+        Acknowledgements noAcks = new Acknowledgements(newArrayList());
         assertEquals(0, noAcks.countErrors());
 
-        CommandAcks ack = new CommandAcks(acks(1, CommandAcksTestEnv::newErrorAck));
+        Acknowledgements ack = new Acknowledgements(acks(1, CommandAcksTestEnv::newErrorAck));
         assertEquals(1, ack.countErrors());
 
-        CommandAcks fiveAcksTwoRejections = new CommandAcks(concat(
+        Acknowledgements fiveAcksTwoRejections = new Acknowledgements(concat(
                 acks(3, CommandAcksTestEnv::newOkAck),
                 acks(2, CommandAcksTestEnv::newErrorAck)));
         assertEquals(2, fiveAcksTwoRejections.countErrors());
 
-        CommandAcks sixAcksThreeRejections = new CommandAcks(concat(
+        Acknowledgements sixAcksThreeRejections = new Acknowledgements(concat(
                 acks(3, CommandAcksTestEnv::newErrorAck),
                 acks(3, CommandAcksTestEnv::newOkAck)));
         assertEquals(3, sixAcksThreeRejections.countErrors());
@@ -239,7 +239,7 @@ class CommandAcksTest {
     @DisplayName("return true if contain errors matched by qualifier")
     void containErrorsUsingQualifier() {
         List<Ack> items = ImmutableList.of(newErrorAck(newError(PRESENT_ERROR_TYPE)));
-        CommandAcks acks = new CommandAcks(items);
+        Acknowledgements acks = new Acknowledgements(items);
 
         assertTrue(acks.containErrors(withType(PRESENT_ERROR_TYPE)));
         assertFalse(acks.containErrors(withType(MISSING_ERROR_TYPE)));
@@ -248,7 +248,7 @@ class CommandAcksTest {
     @Test
     @DisplayName("return proper total error count matched by qualifier")
     void countErrorsUsingQualifier() {
-        CommandAcks acks = new CommandAcks(asList(
+        Acknowledgements acks = new Acknowledgements(asList(
                 newErrorAck(newError(UNIQUE_ERROR_TYPE)),
                 newErrorAck(newError(DUPLICATE_ERROR_TYPE)),
                 newErrorAck(newError(DUPLICATE_ERROR_TYPE))

@@ -80,7 +80,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.commandbus.Given.ACommand;
-import static io.spine.server.integration.CommandAcksVerifier.acked;
+import static io.spine.server.integration.AcknowledgementsVerifier.acked;
 import static io.spine.server.integration.EmittedEventsVerifier.emitted;
 import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.answerQuestion;

@@ -26,9 +26,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.integration.CommandAcksVerifier.acked;
-import static io.spine.server.integration.CommandAcksVerifier.ackedWithErrors;
-import static io.spine.server.integration.CommandAcksVerifier.ackedWithRejections;
+import static io.spine.server.integration.AcknowledgementsVerifier.acked;
+import static io.spine.server.integration.AcknowledgementsVerifier.ackedWithErrors;
+import static io.spine.server.integration.AcknowledgementsVerifier.ackedWithRejections;
 import static io.spine.server.integration.ErrorQualifier.withType;
 import static io.spine.server.integration.given.CommandAcksTestEnv.DUPLICATE_ERROR_TYPE;
 import static io.spine.server.integration.given.CommandAcksTestEnv.DUPLICATE_TASK_TITLE;
@@ -50,14 +50,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 /**
  * @author Mykhailo Drachuk
  */
-@DisplayName("Command Acknowledgements Verifier should")
-class CommandAcksVerifierTest {
+@DisplayName("Acknowledgements Verifier should")
+class AcknowledgementsVerifierTest {
 
-    private CommandAcks acks;
+    private Acknowledgements acks;
 
     @BeforeEach
     void setUp() {
-        acks = new CommandAcks(asList(newOkAck(), newOkAck(), newOkAck()));
+        acks = new Acknowledgements(asList(newOkAck(), newOkAck(), newOkAck()));
     }
 
     @Test
@@ -80,7 +80,7 @@ class CommandAcksVerifierTest {
     @Test
     @DisplayName("verify with rejection and with error rules")
     void containingRejectionsAndErrors() {
-        CommandAcks diverseAcks = new CommandAcks(asList(
+        Acknowledgements diverseAcks = new Acknowledgements(asList(
                 newOkAck(),
                 newRejectionAck(taskLimitReached()),
                 newErrorAck()
@@ -95,7 +95,7 @@ class CommandAcksVerifierTest {
     @Test
     @DisplayName("verify errors total amount")
     void countErrors() {
-        CommandAcks errorAcks = new CommandAcks(ImmutableList.of(
+        Acknowledgements errorAcks = new Acknowledgements(ImmutableList.of(
                 newErrorAck(),
                 newErrorAck(),
                 newErrorAck()
@@ -109,7 +109,7 @@ class CommandAcksVerifierTest {
     @Test
     @DisplayName("verify error by a qualifier")
     void containErrorByQualifier() {
-        CommandAcks errorAcks = new CommandAcks(ImmutableList.of(
+        Acknowledgements errorAcks = new Acknowledgements(ImmutableList.of(
                 newErrorAck(newError(PRESENT_ERROR_TYPE))
         ));
 
@@ -121,7 +121,7 @@ class CommandAcksVerifierTest {
     @Test
     @DisplayName("verify error by a qualifier")
     void countErrorByQualifier() {
-        CommandAcks errorAcks = new CommandAcks(ImmutableList.of(
+        Acknowledgements errorAcks = new Acknowledgements(ImmutableList.of(
                 newErrorAck(newError(DUPLICATE_ERROR_TYPE)),
                 newErrorAck(newError(DUPLICATE_ERROR_TYPE))
         ));
@@ -134,7 +134,7 @@ class CommandAcksVerifierTest {
     @Test
     @DisplayName("verify rejection by type")
     void containRejectionByType() {
-        CommandAcks rejectionAcks = new CommandAcks(ImmutableList.of(
+        Acknowledgements rejectionAcks = new Acknowledgements(ImmutableList.of(
                 newRejectionAck(projectAlreadyStarted()),
                 newRejectionAck(taskLimitReached()),
                 newRejectionAck(taskLimitReached())
@@ -156,7 +156,7 @@ class CommandAcksVerifierTest {
     @Test
     @DisplayName("verify rejection by predicate")
     void containRejectionByPredicate() {
-        CommandAcks rejectionAcks = new CommandAcks(ImmutableList.of(
+        Acknowledgements rejectionAcks = new Acknowledgements(ImmutableList.of(
                 newRejectionAck(projectAlreadyStarted()),
                 newRejectionAck(taskCreatedInCompletedProject(newTask(PRESENT_TASK_TITLE)))
         ));
@@ -182,7 +182,7 @@ class CommandAcksVerifierTest {
     @Test
     @DisplayName("verify rejection count")
     void containRejectionCount() {
-        CommandAcks rejectionAcks = new CommandAcks(ImmutableList.of(
+        Acknowledgements rejectionAcks = new Acknowledgements(ImmutableList.of(
                 newRejectionAck(projectAlreadyStarted()),
                 newRejectionAck(taskLimitReached()),
                 newRejectionAck(taskLimitReached()),
@@ -215,11 +215,11 @@ class CommandAcksVerifierTest {
                        rejectionAcks));
     }
 
-    private void verify(CommandAcksVerifier verifier) {
+    private void verify(AcknowledgementsVerifier verifier) {
         verify(verifier, acks);
     }
 
-    private static void verify(CommandAcksVerifier verifier, CommandAcks acks) {
+    private static void verify(AcknowledgementsVerifier verifier, Acknowledgements acks) {
         verifier.verify(acks);
     }
 }

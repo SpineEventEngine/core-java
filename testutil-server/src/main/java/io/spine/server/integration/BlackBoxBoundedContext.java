@@ -53,7 +53,7 @@ import static java.util.Collections.singletonList;
  * Black Box Bounded Context is aimed at facilitating writing literate integration tests.
  *
  * <p>Using its API commands and events are sent to a Bounded Context. Their effect is afterwards
- * verified in using various verifiers (e.g. {@link CommandAcksVerifier acknowledgement verfier},
+ * verified in using various verifiers (e.g. {@link AcknowledgementsVerifier acknowledgement verfier},
  * {@link EmittedEventsVerifier emitted events verifier}).
  *
  * @author Mykhailo Drachuk
@@ -302,17 +302,17 @@ public class BlackBoxBoundedContext {
     /**
      * Executes the provided verifier, which throws an assertion error in case of unexpected results.
      *
-     * @param verifier a verifier that checks the command acknowledgements in this Bounded Context
+     * @param verifier a verifier that checks the acknowledgements in this Bounded Context
      * @return current {@link BlackBoxBoundedContext black box} instance
      */
-    public BlackBoxBoundedContext verifiesThat(CommandAcksVerifier verifier) {
-        CommandAcks acks = commandAcks();
+    public BlackBoxBoundedContext verifiesThat(AcknowledgementsVerifier verifier) {
+        Acknowledgements acks = commandAcks();
         verifier.verify(acks);
         return this;
     }
 
-    private CommandAcks commandAcks() {
-        return new CommandAcks(observer.responses());
+    private Acknowledgements commandAcks() {
+        return new Acknowledgements(observer.responses());
     }
 
     /*

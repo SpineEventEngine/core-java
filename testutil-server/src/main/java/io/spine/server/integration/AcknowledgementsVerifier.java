@@ -36,12 +36,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * An abstract verifier of command acknowledgements.
+ * An abstract verifier of acknowledgements.
  *
  * <p> Contains static factory methods for creating acknowledgement verifiers, checking that
  * commands were acknowledged, responded with rejections, and errors.
  *
- * <p>Allows combining verifiers using {@link #and(CommandAcksVerifier) and()} or factory method
+ * <p>Allows combining verifiers using {@link #and(AcknowledgementsVerifier) and()} or factory method
  * shortcuts: {@code ackedWithoutErrors().and(ackedWithRejection(rej))} can be simplified
  * to {@code ackedWithoutErrors().withRejection(rej)}.
  *
@@ -49,28 +49,28 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 @VisibleForTesting
-public abstract class CommandAcksVerifier {
+public abstract class AcknowledgementsVerifier {
 
     /**
-     * Executes the command acknowledgement verifier throwing an assertion error if the
+     * Executes the acknowledgement verifier throwing an assertion error if the
      * data does not match the rule..
      *
      * @param acks acknowledgements of handling commands by the Bounded Context
      */
-    abstract void verify(CommandAcks acks);
+    abstract void verify(Acknowledgements acks);
 
     /**
      * Verifies that Bounded Context responded with a specified number of acknowledgements.
      *
      * @param expectedCount an expected amount of acknowledgements observed in Bounded Context
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static CommandAcksVerifier acked(int expectedCount) {
+    public static AcknowledgementsVerifier acked(int expectedCount) {
         checkArgument(expectedCount >= 0, "0 or more acknowledgements must be expected.");
 
-        return new CommandAcksVerifier() {
+        return new AcknowledgementsVerifier() {
             @Override
-            void verify(CommandAcks acks) {
+            void verify(Acknowledgements acks) {
                 int actualCount = acks.count();
                 String moreOrLess = compare(actualCount, expectedCount);
                 assertEquals(
@@ -103,12 +103,12 @@ public abstract class CommandAcksVerifier {
     /**
      * Verifies that the command handling did not respond with {@link Error error}.
      *
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static CommandAcksVerifier ackedWithoutErrors() {
-        return new CommandAcksVerifier() {
+    public static AcknowledgementsVerifier ackedWithoutErrors() {
+        return new AcknowledgementsVerifier() {
             @Override
-            void verify(CommandAcks acks) {
+            void verify(Acknowledgements acks) {
                 if (acks.containErrors()) {
                     fail("Bounded Context unexpectedly thrown an error");
                 }
@@ -119,12 +119,12 @@ public abstract class CommandAcksVerifier {
     /**
      * Verifies that a command was handled responding with some {@link Error error}.
      *
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static CommandAcksVerifier ackedWithErrors() {
-        return new CommandAcksVerifier() {
+    public static AcknowledgementsVerifier ackedWithErrors() {
+        return new AcknowledgementsVerifier() {
             @Override
-            void verify(CommandAcks acks) {
+            void verify(Acknowledgements acks) {
                 if (!acks.containErrors()) {
                     fail("Bounded Context unexpectedly did not throw an error");
                 }
@@ -136,14 +136,14 @@ public abstract class CommandAcksVerifier {
      * Verifies that a command was handled responding with specified number of {@link Error errors}.
      *
      * @param expectedCount an amount of errors that are expected to match the qualifier
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static CommandAcksVerifier ackedWithErrors(int expectedCount) {
+    public static AcknowledgementsVerifier ackedWithErrors(int expectedCount) {
         checkArgument(expectedCount >= 0,
                       "0 or more errors must be expected.");
-        return new CommandAcksVerifier() {
+        return new AcknowledgementsVerifier() {
             @Override
-            void verify(CommandAcks acks) {
+            void verify(Acknowledgements acks) {
                 assertEquals(expectedCount, acks.countErrors(), 
                              "Bounded context did not contain an expected amount of errors");
             }
@@ -156,12 +156,12 @@ public abstract class CommandAcksVerifier {
      *
      * @param qualifier an error qualifier specifying which kind of error should be a part
      *                  of acknowledgement
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static CommandAcksVerifier ackedWithErrors(ErrorQualifier qualifier) {
-        return new CommandAcksVerifier() {
+    public static AcknowledgementsVerifier ackedWithErrors(ErrorQualifier qualifier) {
+        return new AcknowledgementsVerifier() {
             @Override
-            void verify(CommandAcks acks) {
+            void verify(Acknowledgements acks) {
                 if (!acks.containErrors(qualifier)) {
                     fail("Bounded Context did not contain an expected error. "
                                  + qualifier.description());
@@ -177,13 +177,13 @@ public abstract class CommandAcksVerifier {
      * @param expectedCount an amount of errors that are expected to match the qualifier
      * @param qualifier     an error qualifier specifying which kind of error should be a part
      *                      of acknowledgement
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static CommandAcksVerifier ackedWithErrors(int expectedCount, ErrorQualifier qualifier) {
+    public static AcknowledgementsVerifier ackedWithErrors(int expectedCount, ErrorQualifier qualifier) {
         checkArgument(expectedCount >= 0, "0 or more errors matching qualifier must be expected.");
-        return new CommandAcksVerifier() {
+        return new AcknowledgementsVerifier() {
             @Override
-            void verify(CommandAcks acks) {
+            void verify(Acknowledgements acks) {
                 assertEquals(expectedCount, acks.countErrors(qualifier),
                              "Bounded Context did not contain an expected count of errors. "
                                      + qualifier.description());
@@ -198,12 +198,12 @@ public abstract class CommandAcksVerifier {
     /**
      * Verifies that a command handling did not respond with any {@link Rejection rejections}.
      *
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static CommandAcksVerifier ackedWithoutRejections() {
-        return new CommandAcksVerifier() {
+    public static AcknowledgementsVerifier ackedWithoutRejections() {
+        return new AcknowledgementsVerifier() {
             @Override
-            void verify(CommandAcks acks) {
+            void verify(Acknowledgements acks) {
                 if (acks.containRejections()) {
                     fail("Bounded Context unexpectedly rejected a message");
                 }
@@ -214,12 +214,12 @@ public abstract class CommandAcksVerifier {
     /**
      * Verifies that a command was handled responding with some {@link Rejection rejection}.
      *
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static CommandAcksVerifier ackedWithRejections() {
-        return new CommandAcksVerifier() {
+    public static AcknowledgementsVerifier ackedWithRejections() {
+        return new AcknowledgementsVerifier() {
             @Override
-            void verify(CommandAcks acks) {
+            void verify(Acknowledgements acks) {
                 if (!acks.containRejections()) {
                     fail("Bounded Context did not reject any messages");
                 }
@@ -232,9 +232,9 @@ public abstract class CommandAcksVerifier {
      * of the provided type.
      *
      * @param type rejection type in a form of message class
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static CommandAcksVerifier ackedWithRejections(Class<? extends Message> type) {
+    public static AcknowledgementsVerifier ackedWithRejections(Class<? extends Message> type) {
         RejectionClass rejectionClass = RejectionClass.of(type);
         return ackedWithRejections(rejectionClass);
     }
@@ -244,13 +244,13 @@ public abstract class CommandAcksVerifier {
      * of the provided type.
      *
      * @param type rejection type in a form of {@link RejectionClass RejectionClass}
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static CommandAcksVerifier ackedWithRejections(RejectionClass type) {
+    public static AcknowledgementsVerifier ackedWithRejections(RejectionClass type) {
         Class<? extends Message> domainRejection = type.value();
-        return new CommandAcksVerifier() {
+        return new AcknowledgementsVerifier() {
             @Override
-            void verify(CommandAcks acks) {
+            void verify(Acknowledgements acks) {
                 if (!acks.containRejections(type)) {
                     fail("Bounded Context did not reject a message of type:" +
                                  domainRejection.getSimpleName());
@@ -264,13 +264,13 @@ public abstract class CommandAcksVerifier {
      *
      * @param predicate a predicate filtering the domain rejections
      * @param <T>       a domain rejection type
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static <T extends Message> CommandAcksVerifier
+    public static <T extends Message> AcknowledgementsVerifier
     ackedWithRejections(Class<T> clazz, RejectionPredicate<T> predicate) {
-        return new CommandAcksVerifier() {
+        return new AcknowledgementsVerifier() {
             @Override
-            void verify(CommandAcks acks) {
+            void verify(Acknowledgements acks) {
                 if (!acks.containRejection(clazz, predicate)) {
                     fail("Bounded Context did not reject a message:"
                                  + predicate.message());
@@ -284,13 +284,13 @@ public abstract class CommandAcksVerifier {
      * specified amount of times.
      *
      * @param expectedCount an amount of rejection that are expected in Bounded Context
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static CommandAcksVerifier ackedWithRejections(int expectedCount) {
+    public static AcknowledgementsVerifier ackedWithRejections(int expectedCount) {
         checkArgument(expectedCount >= 0, "0 or more rejections must be expected.");
-        return new CommandAcksVerifier() {
+        return new AcknowledgementsVerifier() {
             @Override
-            void verify(CommandAcks acks) {
+            void verify(Acknowledgements acks) {
                 assertEquals(expectedCount, acks.countRejections(),
                              "Bounded Context did not contain a rejection expected amount of times.");
             }
@@ -303,10 +303,10 @@ public abstract class CommandAcksVerifier {
      *
      * @param expectedCount an amount of rejection that are expected in Bounded Context
      * @param type          rejection type in a form of message class
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static CommandAcksVerifier ackedWithRejections(int expectedCount,
-                                                          Class<? extends Message> type) {
+    public static AcknowledgementsVerifier ackedWithRejections(int expectedCount,
+                                                               Class<? extends Message> type) {
         checkArgument(expectedCount >= 0,
                       "0 or more rejections of rejections of message class type must be expected.");
         RejectionClass rejectionClass = RejectionClass.of(type);
@@ -319,14 +319,14 @@ public abstract class CommandAcksVerifier {
      *
      * @param expectedCount an amount of rejection that are expected in Bounded Context
      * @param type          rejection type in a form of {@link RejectionClass RejectionClass}
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static CommandAcksVerifier ackedWithRejections(int expectedCount, RejectionClass type) {
+    public static AcknowledgementsVerifier ackedWithRejections(int expectedCount, RejectionClass type) {
         checkArgument(expectedCount >= 0,
                       "0 or more rejections of rejecetions of class must be expected.");
-        return new CommandAcksVerifier() {
+        return new AcknowledgementsVerifier() {
             @Override
-            void verify(CommandAcks acks) {
+            void verify(Acknowledgements acks) {
                 Class<? extends Message> rejectionClass = type.value();
                 assertEquals(expectedCount, acks.countRejections(type),
                              "Bounded Context did not contain " + rejectionClass.getSimpleName() +
@@ -342,14 +342,14 @@ public abstract class CommandAcksVerifier {
      * @param expectedCount an amount of rejection that are expected in Bounded Context
      * @param predicate     a predicate filtering domain rejections
      * @param <T>           a domain rejection type
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static <T extends Message> CommandAcksVerifier
+    public static <T extends Message> AcknowledgementsVerifier
     ackedWithRejections(int expectedCount, Class<T> clazz, RejectionPredicate<T> predicate) {
         checkArgument(expectedCount >= 0, "0 or more specified rejections must be expected.");
-        return new CommandAcksVerifier() {
+        return new AcknowledgementsVerifier() {
             @Override
-            void verify(CommandAcks acks) {
+            void verify(Acknowledgements acks) {
                 assertEquals(expectedCount, acks.countRejections(clazz, predicate),
                              "Bounded Context did not contain a rejection expected amount of times:"
                                      + predicate.message());
@@ -358,7 +358,7 @@ public abstract class CommandAcksVerifier {
     }
 
     /*
-     * Command acknowledgements verifier combination.
+     * Acknowledgements verifier combination.
      ******************************************************************************/
 
     /**
@@ -367,46 +367,46 @@ public abstract class CommandAcksVerifier {
      * @param otherVerifier a verifier executed after the current verifier
      * @return a verifier that executes both current and provided assertions
      */
-    public CommandAcksVerifier and(CommandAcksVerifier otherVerifier) {
-        return CommandAcksVerifierCombination.of(this, otherVerifier);
+    public AcknowledgementsVerifier and(AcknowledgementsVerifier otherVerifier) {
+        return AcksVerifierCombination.of(this, otherVerifier);
     }
 
     /**
-     * A special kind of a {@link CommandAcksVerifier Command Acknowledgements Verifier} that
+     * A special kind of a {@link AcknowledgementsVerifier Acknowledgements Verifier} that
      * executes a list of assertions one by one.
      */
-    private static class CommandAcksVerifierCombination extends CommandAcksVerifier {
+    private static class AcksVerifierCombination extends AcknowledgementsVerifier {
 
-        private final List<CommandAcksVerifier> verifiers;
+        private final List<AcknowledgementsVerifier> verifiers;
 
         /**
          * Creates a combination of two verifiers. More verifiers are appended using
-         * {@link #and(CommandAcksVerifier) and()}.
+         * {@link #and(AcknowledgementsVerifier) and()}.
          */
-        private CommandAcksVerifierCombination(Collection<CommandAcksVerifier> verifiers) {
+        private AcksVerifierCombination(Collection<AcknowledgementsVerifier> verifiers) {
             super();
             this.verifiers = ImmutableList.copyOf(verifiers);
         }
 
-        public static CommandAcksVerifierCombination of(CommandAcksVerifier first,
-                                                        CommandAcksVerifier second) {
-            List<CommandAcksVerifier> verifiers = newArrayList();
+        public static AcksVerifierCombination of(AcknowledgementsVerifier first,
+                                                 AcknowledgementsVerifier second) {
+            List<AcknowledgementsVerifier> verifiers = newArrayList();
             addVerifierToList(first, verifiers);
             addVerifierToList(second, verifiers);
-            return new CommandAcksVerifierCombination(verifiers);
+            return new AcksVerifierCombination(verifiers);
         }
 
-        public static CommandAcksVerifierCombination of(Iterable<CommandAcksVerifier> items,
-                                                        CommandAcksVerifier newVerifier) {
-            List<CommandAcksVerifier> verifiers = newArrayList(items);
+        public static AcksVerifierCombination of(Iterable<AcknowledgementsVerifier> items,
+                                                 AcknowledgementsVerifier newVerifier) {
+            List<AcknowledgementsVerifier> verifiers = newArrayList(items);
             addVerifierToList(newVerifier, verifiers);
-            return new CommandAcksVerifierCombination(verifiers);
+            return new AcksVerifierCombination(verifiers);
         }
 
-        private static void addVerifierToList(CommandAcksVerifier verifier,
-                                              Collection<CommandAcksVerifier> items) {
-            if (verifier instanceof CommandAcksVerifierCombination) {
-                items.addAll(((CommandAcksVerifierCombination) verifier).verifiers);
+        private static void addVerifierToList(AcknowledgementsVerifier verifier,
+                                              Collection<AcknowledgementsVerifier> items) {
+            if (verifier instanceof AcksVerifierCombination) {
+                items.addAll(((AcksVerifierCombination) verifier).verifiers);
             } else {
                 items.add(verifier);
             }
@@ -414,13 +414,13 @@ public abstract class CommandAcksVerifier {
 
         /**
          * Executes all of the verifiers that were combined using
-         * {@link #and(CommandAcksVerifier) and()}.
+         * {@link #and(AcknowledgementsVerifier) and()}.
          *
          * @param acks acknowledgements of handling commands by the Bounded Context
          */
         @Override
-        void verify(CommandAcks acks) {
-            for (CommandAcksVerifier verifier : verifiers) {
+        void verify(Acknowledgements acks) {
+            for (AcknowledgementsVerifier verifier : verifiers) {
                 verifier.verify(acks);
             }
         }
@@ -432,7 +432,7 @@ public abstract class CommandAcksVerifier {
          * @return a new verifier instance
          */
         @Override
-        public CommandAcksVerifierCombination and(CommandAcksVerifier verifier) {
+        public AcksVerifierCombination and(AcknowledgementsVerifier verifier) {
             return of(verifiers, verifier);
         }
     }
@@ -444,20 +444,20 @@ public abstract class CommandAcksVerifier {
     /**
      * Creates a new verifier adding a check to not contain any {@link Error errors}.
      *
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public CommandAcksVerifier withoutErrors() {
-        CommandAcksVerifier noErrors = ackedWithoutErrors();
+    public AcknowledgementsVerifier withoutErrors() {
+        AcknowledgementsVerifier noErrors = ackedWithoutErrors();
         return this.and(noErrors);
     }
 
     /**
      * Creates a new verifier adding a check to contain at least one {@link Error error}.
      *
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public CommandAcksVerifier withErrors() {
-        CommandAcksVerifier withError = ackedWithErrors();
+    public AcknowledgementsVerifier withErrors() {
+        AcknowledgementsVerifier withError = ackedWithErrors();
         return this.and(withError);
     }
 
@@ -465,10 +465,10 @@ public abstract class CommandAcksVerifier {
      * Creates a new verifier adding a check to contain specified amount of {@link Error errors}.
      *
      * @param expectedCount an amount of errors that are expected to be observed in Bounded Context
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public CommandAcksVerifier withErrors(int expectedCount) {
-        CommandAcksVerifier withError = ackedWithErrors(expectedCount);
+    public AcknowledgementsVerifier withErrors(int expectedCount) {
+        AcknowledgementsVerifier withError = ackedWithErrors(expectedCount);
         return this.and(withError);
     }
 
@@ -478,10 +478,10 @@ public abstract class CommandAcksVerifier {
      *
      * @param qualifier an error qualifier specifying which kind of error should be a part
      *                  of acknowledgement
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public CommandAcksVerifier withErrors(ErrorQualifier qualifier) {
-        CommandAcksVerifier withError = ackedWithErrors(qualifier);
+    public AcknowledgementsVerifier withErrors(ErrorQualifier qualifier) {
+        AcknowledgementsVerifier withError = ackedWithErrors(qualifier);
         return this.and(withError);
     }
 
@@ -492,10 +492,10 @@ public abstract class CommandAcksVerifier {
      * @param expectedCount an amount of errors that are expected to match the qualifier
      * @param qualifier     an error qualifier specifying which kind of error should be a part
      *                      of acknowledgement
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public CommandAcksVerifier withErrors(int expectedCount, ErrorQualifier qualifier) {
-        CommandAcksVerifier withError = ackedWithErrors(expectedCount, qualifier);
+    public AcknowledgementsVerifier withErrors(int expectedCount, ErrorQualifier qualifier) {
+        AcknowledgementsVerifier withError = ackedWithErrors(expectedCount, qualifier);
         return this.and(withError);
     }
 
@@ -503,31 +503,31 @@ public abstract class CommandAcksVerifier {
      * Creates a new verifier adding a check to not contain any {@link Error errors} or
      * {@link Rejection rejections}.
      *
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public CommandAcksVerifier withoutErrorsOrRejections() {
-        CommandAcksVerifier noRejections = ackedWithoutRejections();
-        CommandAcksVerifier noErrors = ackedWithoutErrors();
+    public AcknowledgementsVerifier withoutErrorsOrRejections() {
+        AcknowledgementsVerifier noRejections = ackedWithoutRejections();
+        AcknowledgementsVerifier noErrors = ackedWithoutErrors();
         return this.and(noErrors.and(noRejections));
     }
 
     /**
      * Creates a new verifier adding a check to not contain any {@link Rejection rejections}.
      *
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public CommandAcksVerifier withoutRejections() {
-        CommandAcksVerifier noRejections = ackedWithoutRejections();
+    public AcknowledgementsVerifier withoutRejections() {
+        AcknowledgementsVerifier noRejections = ackedWithoutRejections();
         return this.and(noRejections);
     }
 
     /**
      * Creates a new verifier adding a check to contain some {@link Rejection rejection}.
      *
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public CommandAcksVerifier withRejections() {
-        CommandAcksVerifier someRejection = ackedWithRejections();
+    public AcknowledgementsVerifier withRejections() {
+        AcknowledgementsVerifier someRejection = ackedWithRejections();
         return this.and(someRejection);
     }
 
@@ -536,10 +536,10 @@ public abstract class CommandAcksVerifier {
      * type specified by {@code class}.
      *
      * @param type a type of a domain rejection specified by message class
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public CommandAcksVerifier withRejections(Class<? extends Message> type) {
-        CommandAcksVerifier rejectedType = ackedWithRejections(type);
+    public AcknowledgementsVerifier withRejections(Class<? extends Message> type) {
+        AcknowledgementsVerifier rejectedType = ackedWithRejections(type);
         return this.and(rejectedType);
     }
 
@@ -548,10 +548,10 @@ public abstract class CommandAcksVerifier {
      * type specified by a {@link RejectionClass rejection class}.
      *
      * @param type a type of a domain rejection specified by a {@link RejectionClass}
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public CommandAcksVerifier withRejections(RejectionClass type) {
-        CommandAcksVerifier rejectedType = ackedWithRejections(type);
+    public AcknowledgementsVerifier withRejections(RejectionClass type) {
+        AcknowledgementsVerifier rejectedType = ackedWithRejections(type);
         return this.and(rejectedType);
     }
 
@@ -561,10 +561,10 @@ public abstract class CommandAcksVerifier {
      *
      * @param expectedCount an amount of rejection that are expected in Bounded Context
      * @param type          rejection type in a form of message class
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public CommandAcksVerifier withRejections(int expectedCount, Class<? extends Message> type) {
-        CommandAcksVerifier rejectedType = ackedWithRejections(expectedCount, type);
+    public AcknowledgementsVerifier withRejections(int expectedCount, Class<? extends Message> type) {
+        AcknowledgementsVerifier rejectedType = ackedWithRejections(expectedCount, type);
         return this.and(rejectedType);
     }
 
@@ -574,10 +574,10 @@ public abstract class CommandAcksVerifier {
      *
      * @param expectedCount an amount of rejection that are expected in Bounded Context
      * @param type          rejection type in a form of {@link RejectionClass RejectionClass}
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public CommandAcksVerifier withRejections(int expectedCount, RejectionClass type) {
-        CommandAcksVerifier rejectedType = ackedWithRejections(expectedCount, type);
+    public AcknowledgementsVerifier withRejections(int expectedCount, RejectionClass type) {
+        AcknowledgementsVerifier rejectedType = ackedWithRejections(expectedCount, type);
         return this.and(rejectedType);
     }
 
@@ -587,11 +587,11 @@ public abstract class CommandAcksVerifier {
      * @param type      a type of a domain rejection specified by a {@link RejectionClass}
      * @param predicate a predicate filtering domain rejections
      * @param <T>       a domain rejection type
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public <T extends Message> CommandAcksVerifier
+    public <T extends Message> AcknowledgementsVerifier
     withRejections(Class<T> type, RejectionPredicate<T> predicate) {
-        CommandAcksVerifier oneRejection = ackedWithRejections(type, predicate);
+        AcknowledgementsVerifier oneRejection = ackedWithRejections(type, predicate);
         return this.and(oneRejection);
     }
 
@@ -602,11 +602,11 @@ public abstract class CommandAcksVerifier {
      * @param type          a type of a domain rejection specified by a {@link RejectionClass}
      * @param predicate     a predicate filtering domain rejections
      * @param <T>           a domain rejection type
-     * @return a new {@link CommandAcksVerifier} instance
+     * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public <T extends Message> CommandAcksVerifier
+    public <T extends Message> AcknowledgementsVerifier
     withRejections(int expectedCount, Class<T> type, RejectionPredicate<T> predicate) {
-        CommandAcksVerifier oneRejection = ackedWithRejections(expectedCount, type, predicate);
+        AcknowledgementsVerifier oneRejection = ackedWithRejections(expectedCount, type, predicate);
         return this.and(oneRejection);
     }
 }
