@@ -62,6 +62,7 @@ class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     protected List<? extends Message> doDispatch(A aggregate, EventEnvelope envelope) {
+        repository().onDispatchEvent(aggregate.getId(), envelope.getOuterObject());
         return aggregate.reactOn(envelope);
     }
 

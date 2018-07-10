@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
+import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -362,6 +363,15 @@ public abstract class ProcessManagerRepository<I,
         for (Event event : events) {
             eventBus.post(event);
         }
+    }
+
+
+    void onCommandDispatched(I id, Command command) {
+        lifecycleOf(id).onDispatchCommand(command);
+    }
+
+    void onEventDispatched(I id, Event event) {
+        lifecycleOf(id).onDispatchEventToReactor(event);
     }
 
     /**

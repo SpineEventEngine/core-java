@@ -45,12 +45,29 @@ message CreatePersonName {
     string first_name = 2;
 }
 
+message RenamePerson {
+
+    string id = 1;
+
+    string new_first_name = 2;
+}
+
 message HidePerson {
 
     string id = 1;
 }
 
 message UnHidePerson {
+
+    string id = 1;
+}
+
+message CompletePersonCreation {
+
+    string id = 1;
+}
+
+message StartPersonCreation {
 
     string id = 1;
 }

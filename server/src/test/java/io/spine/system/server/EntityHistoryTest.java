@@ -40,6 +40,7 @@ import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregatePart;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregatePartRepository;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregateRepository;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestProcman;
+import io.spine.system.server.given.EntityHistoryTestEnv.TestProcmanRepository;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestProjection;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestProjectionRepository;
 import io.spine.type.TypeUrl;
@@ -89,6 +90,7 @@ class EntityHistoryTest {
         context.register(new TestAggregateRepository());
         context.register(new TestProjectionRepository());
         context.register(new TestAggregatePartRepository());
+        context.register(new TestProcmanRepository());
     }
 
     @AfterEach
@@ -198,6 +200,36 @@ class EntityHistoryTest {
         }
 
         @Test
+        @DisplayName("command is dispatched to handler in procman")
+        void commandToPm() {
+            Message startCommand = StartPersonCreation
+                    .newBuilder()
+                    .setId(id)
+                    .build();
+            postCommand(startCommand);
+
+            checkEntityCreated(PROCESS_MANAGER, TestProcman.TYPE);
+            eventWatcher.nextEvent(CommandDispatchedToHandler.class);
+            EntityStateChanged stateChanged = eventWatcher.nextEvent(EntityStateChanged.class);
+            assertId(stateChanged.getId());
+            PersonCreation startedState = unpack(stateChanged.getNewState());
+            assertFalse(startedState.getCreated());
+            eventWatcher.clearEvents();
+
+            Message domainCommand = CompletePersonCreation
+                    .newBuilder()
+                    .setId(id)
+                    .build();
+            postCommand(domainCommand);
+
+            eventWatcher.nextEvent(CommandDispatchedToHandler.class);
+            EntityStateChanged stateChangedAgain = eventWatcher.nextEvent(EntityStateChanged.class);
+            assertId(stateChangedAgain.getId());
+            PersonCreation completedState = unpack(stateChangedAgain.getNewState());
+            assertTrue(completedState.getCreated());
+        }
+
+        @Test
         @DisplayName("event is dispatched to a reactor method in a ProcessManager")
         void eventToReactorInProcman() {
             createPersonName();
@@ -223,6 +255,35 @@ class EntityHistoryTest {
             PersonCreation processState = unpack(stateChanged.getNewState());
             assertEquals(id, processState.getId());
             assertTrue(processState.getCreated());
+        }
+
+        @Test
+        @DisplayName("event is dispatched to a reactor method in an Aggregate")
+        void eventToReactorInAggregate() {
+            createPerson();
+            createPersonName();
+            eventWatcher.clearEvents();
+
+            RenamePerson domainCommand = RenamePerson
+                    .newBuilder()
+                    .setId(id)
+                    .setNewFirstName("Paul")
+                    .build();
+            postCommand(domainCommand);
+
+            eventWatcher.nextEvent(CommandDispatchedToHandler.class);
+            eventWatcher.nextEvent(EventDispatchedToApplier.class);
+            eventWatcher.nextEvent(EntityStateChanged.class);
+
+            EventDispatchedToReactor dispatched =
+                    eventWatcher.nextEvent(EventDispatchedToReactor.class);
+            assertId(dispatched.getReceiver());
+            TypeUrl expectedType = TypeUrl.of(PersonRenamed.class);
+            TypeUrl actualType = TypeUrl.parse(dispatched.getPayload()
+                                                         .getEvent()
+                                                         .getMessage()
+                                                         .getTypeUrl());
+            assertEquals(expectedType, actualType);
         }
 
         private void createPerson() {

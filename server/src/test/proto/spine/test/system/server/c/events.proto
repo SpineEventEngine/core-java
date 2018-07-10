@@ -45,6 +45,13 @@ message PersonNameCreated {
     string first_name = 2;
 }
 
+message PersonRenamed {
+
+    string id = 1;
+
+    string new_first_name = 2;
+}
+
 message PersonHidden {
 
     string id = 1;

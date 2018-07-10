@@ -25,6 +25,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.React;
 import io.spine.core.Subscribe;
+import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregatePart;
@@ -35,9 +36,11 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.system.server.CommandDispatchedToHandler;
+import io.spine.system.server.CompletePersonCreation;
 import io.spine.system.server.CreatePerson;
 import io.spine.system.server.CreatePersonName;
 import io.spine.system.server.EntityArchived;
@@ -58,10 +61,13 @@ import io.spine.system.server.PersonFirstName;
 import io.spine.system.server.PersonFirstNameVBuilder;
 import io.spine.system.server.PersonHidden;
 import io.spine.system.server.PersonNameCreated;
+import io.spine.system.server.PersonRenamed;
 import io.spine.system.server.PersonUnHidden;
 import io.spine.system.server.PersonVBuilder;
 import io.spine.system.server.PersonView;
 import io.spine.system.server.PersonViewVBuilder;
+import io.spine.system.server.RenamePerson;
+import io.spine.system.server.StartPersonCreation;
 import io.spine.system.server.UnHidePerson;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -205,6 +211,14 @@ public final class EntityHistoryTestEnv {
                                  .build();
         }
 
+        @Assign
+        PersonRenamed handle(RenamePerson command) {
+            return PersonRenamed.newBuilder()
+                                .setId(command.getId())
+                                .setNewFirstName(command.getNewFirstName())
+                                .build();
+        }
+
         @Apply
         private void on(PersonCreated event) {
             getBuilder().setId(event.getId())
@@ -219,6 +233,15 @@ public final class EntityHistoryTestEnv {
         @Apply
         private void on(PersonUnHidden event) {
             setArchived(false);
+        }
+
+        @Apply
+        private void on(PersonRenamed event) {
+            PersonName newName = getBuilder().getName()
+                                             .toBuilder()
+                                             .setGivenName(event.getNewFirstName())
+                                             .build();
+            getBuilder().setName(newName);
         }
     }
 
@@ -257,6 +280,19 @@ public final class EntityHistoryTestEnv {
             super(id);
         }
 
+        @Assign
+        Empty handle(StartPersonCreation command) {
+            getBuilder().setId(command.getId());
+            return Empty.getDefaultInstance();
+        }
+
+        @Assign
+        Empty handle(CompletePersonCreation command) {
+            getBuilder().setId(command.getId())
+                        .setCreated(true);
+            return Empty.getDefaultInstance();
+        }
+
         @React
         Empty reactOn(PersonNameCreated event) {
             getBuilder().setId(event.getId())
@@ -281,6 +317,11 @@ public final class EntityHistoryTestEnv {
         
         private TestAggregatePart(TestAggregateRoot root) {
             super(root);
+        }
+
+        @React
+        Empty reactOn(PersonRenamed event) {
+            return Empty.getDefaultInstance();
         }
 
         @Assign
@@ -308,5 +349,9 @@ public final class EntityHistoryTestEnv {
 
     public static class TestAggregatePartRepository
             extends AggregatePartRepository<String, TestAggregatePart, TestAggregateRoot> {
+    }
+
+    public static class TestProcmanRepository
+            extends ProcessManagerRepository<String, TestProcman, PersonCreation>  {
     }
 }

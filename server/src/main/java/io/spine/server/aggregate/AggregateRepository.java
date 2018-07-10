@@ -635,6 +635,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         lifecycleOf(id).onDispatchCommand(command);
     }
 
+    void onDispatchEvent(I id, Event event) {
+        lifecycleOf(id).onDispatchEventToReactor(event);
+    }
+
     @Override
     public ShardingStrategy getShardingStrategy() {
         return UniformAcrossTargets.singleShard();
