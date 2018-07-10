@@ -112,7 +112,8 @@ public abstract class EmittedEventsVerifier {
      */
     public static EmittedEventsVerifier
     emitted(int expectedCount, Class<? extends Message> eventType) {
-        checkArgument(expectedCount >= 0);
+        checkArgument(expectedCount >= 0, 
+                      "Zero or more events must be expected to be emitted for type");
         return new EmittedEventsVerifier() {
 
             @Override
