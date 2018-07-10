@@ -65,7 +65,8 @@ class ErrorQualifierTest {
     }
 
     @Test
-    void filterWithType() {
+    @DisplayName("filter by type")
+    void filterByType() {
         ErrorQualifier type1Qualifier = withType(Type.FIRST.value());
         List<Error> type1Errors = filterErrors(type1Qualifier);
         assertEquals(1, type1Errors.size());
@@ -81,7 +82,8 @@ class ErrorQualifierTest {
     }
 
     @Test
-    void filterWithCode() {
+    @DisplayName("filter by code")
+    void filterByCode() {
         ErrorQualifier code0Qualifier = withCode(Code.ZERO.value());
         List<Error> code0Errors = filterErrors(code0Qualifier);
         assertEquals(2, code0Errors.size());
@@ -97,7 +99,8 @@ class ErrorQualifierTest {
     }
 
     @Test
-    void filterWithMessage() {
+    @DisplayName("filter by message")
+    void filterByMessage() {
         ErrorQualifier firstMessage = withMessage(Pangram.FIRST.text());
         List<Error> firstMessageErrors = filterErrors(firstMessage);
         assertEquals(1, firstMessageErrors.size());
@@ -113,6 +116,7 @@ class ErrorQualifierTest {
     }
 
     @Test
+    @DisplayName("filter by attributes absence")
     void filterWithoutAttribute() {
         ErrorQualifier missingAttribute = withoutAttribute(Attribute.WEIGHT.title());
         List<Error> errors = filterErrors(missingAttribute);
@@ -122,6 +126,7 @@ class ErrorQualifierTest {
     }
 
     @Test
+    @DisplayName("filter by attributes presence")
     void filterWithAttribute() {
         ErrorQualifier withHeight = withAttribute(Attribute.HEIGHT.title());
         List<Error> errors = filterErrors(withHeight);
@@ -131,7 +136,8 @@ class ErrorQualifierTest {
     }
 
     @Test
-    void filterWithAttributeValue() {
+    @DisplayName("filter by attributes value")
+    void filterByAttributeValue() {
         String height = Attribute.HEIGHT.title();
         Value value = Height.BRYANT.value();
         ErrorQualifier withHeightValue = withAttribute(height).value(value);
