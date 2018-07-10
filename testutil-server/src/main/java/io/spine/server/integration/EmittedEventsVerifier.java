@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * A verifier working with the events emitted in the {@link BlackBoxBoundedContext Bounded Context}.
  *
- * <p> Contains static factory methods for creating emitted events verifiers, checking that specific
+ * <p>Contains static factory methods for creating emitted events verifiers, checking that specific
  * amounts of some event types were emitted by entities inside of the Bounded Context.
  *
  * @author Mykhailo Drachuk

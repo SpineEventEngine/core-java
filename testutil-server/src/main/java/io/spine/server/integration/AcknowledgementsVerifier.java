@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * An abstract verifier of acknowledgements.
  *
- * <p> Contains static factory methods for creating acknowledgement verifiers, checking that
+ * <p>Contains static factory methods for creating acknowledgement verifiers, checking that
  * commands were acknowledged, responded with rejections, and errors.
  *
  * <p>Allows combining verifiers using {@link #and(AcknowledgementsVerifier) and()} or factory method
