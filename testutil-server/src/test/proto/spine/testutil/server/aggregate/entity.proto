@@ -43,7 +43,7 @@ message TestUtilProjectAggregate {
     google.protobuf.Timestamp timestamp = 2;
 }
 
-message TestUtilProjectCommentsAggregatePart {
+message TestUtilCommentsAggregatePart {
 
     TestUtilProjectId id = 1;
 

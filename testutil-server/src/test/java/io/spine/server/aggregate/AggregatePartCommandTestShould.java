@@ -20,15 +20,17 @@
 
 package io.spine.server.aggregate;
 
+import io.spine.server.aggregate.given.AggregatePartCommandTestShouldEnv.CommentsAggregatePart;
 import io.spine.server.aggregate.given.AggregatePartCommandTestShouldEnv.TimeCounterTest;
-import io.spine.server.aggregate.given.AggregatePartCommandTestShouldEnv.TimerCounter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.aggregate.given.AggregatePartCommandTestShouldEnv.TimeCounterTest.TEST_COMMAND;
 import static io.spine.server.aggregate.given.AggregatePartCommandTestShouldEnv.aggregatePart;
+import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Vladyslav Lubenskyi
@@ -55,12 +57,10 @@ class AggregatePartCommandTestShould {
     @DisplayName("dispatch tested command")
     void shouldDispatchCommand() {
         aggregatePartCommandTest.setUp();
-        TimerCounter testPart = aggregatePart();
-        int oldState = testPart.getState()
-                               .getValue();
-        aggregatePartCommandTest.expectThat(testPart);
-        int newState = testPart.getState()
-                               .getValue();
-        assertEquals(oldState + 1, newState);
+        CommentsAggregatePart testPart = aggregatePart();
+        aggregatePartCommandTest.expectThat(testPart)
+                                .hasState(state -> {
+                                    assertTrue(isNotDefault(state.getTimestamp()));
+                                });
     }
 }

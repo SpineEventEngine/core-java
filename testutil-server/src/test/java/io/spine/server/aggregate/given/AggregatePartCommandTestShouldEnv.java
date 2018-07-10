@@ -23,9 +23,8 @@ package io.spine.server.aggregate.given;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
-import io.spine.base.Identifier;
+import com.google.protobuf.util.Timestamps;
 import io.spine.server.BoundedContext;
-import io.spine.server.expected.CommandHandlerExpected;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.AggregatePartCommandTest;
 import io.spine.server.aggregate.AggregatePartRepository;
@@ -34,7 +33,12 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.given.Given;
-import io.spine.validate.UInt32ValueVBuilder;
+import io.spine.server.expected.CommandHandlerExpected;
+import io.spine.testutil.server.aggregate.TestUtilAddComment;
+import io.spine.testutil.server.aggregate.TestUtilCommentAdded;
+import io.spine.testutil.server.aggregate.TestUtilCommentsAggregatePart;
+import io.spine.testutil.server.aggregate.TestUtilProjectCommentsAggregatePartVBuilder;
+import io.spine.testutil.server.aggregate.TestUtilProjectId;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
@@ -42,7 +46,9 @@ import org.junit.jupiter.api.BeforeEach;
  */
 public class AggregatePartCommandTestShouldEnv {
 
-    private static final long ID = 1L;
+    private static final TestUtilProjectId ID = TestUtilProjectId.newBuilder()
+                                                                 .setValue("test id")
+                                                                 .build();
 
     /**
      * Prevents instantiation of this utility class.
@@ -50,54 +56,58 @@ public class AggregatePartCommandTestShouldEnv {
     private AggregatePartCommandTestShouldEnv() {
     }
 
-    public static TimerCounter aggregatePart() {
-        TimerCounterRoot root = aggregateRoot();
-        UInt32Value int32Value = UInt32Value.newBuilder()
-                                            .setValue(42)
-                                            .build();
-        TimerCounter result = Given.aggregatePartOfClass(TimerCounter.class)
+    public static CommentsAggregatePart aggregatePart() {
+        CommentsRoot root = aggregateRoot();
+        CommentsAggregatePart result =
+                Given.aggregatePartOfClass(CommentsAggregatePart.class)
                                    .withRoot(root)
-                                   .withId(AggregatePartCommandTestShouldEnv.class.getName())
+                                   .withId(ID)
                                    .withVersion(5)
-                                   .withState(int32Value)
                                    .build();
         return result;
     }
 
-    private static TimerCounterRoot aggregateRoot() {
+    private static CommentsRoot aggregateRoot() {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .build();
-        return new TimerCounterRoot(boundedContext, Identifier.newUuid());
+        return new CommentsRoot(boundedContext, ID);
     }
 
     /**
      * A dummy aggregate that counts how many times the {@link StringValue} event occurred.
      */
-    public static final class TimerCounter
-            extends AggregatePart<String, UInt32Value, UInt32ValueVBuilder, TimerCounterRoot> {
+    public static final class CommentsAggregatePart
+            extends AggregatePart<TestUtilProjectId,
+                                  TestUtilCommentsAggregatePart,
+                                  TestUtilProjectCommentsAggregatePartVBuilder,
+                                  CommentsRoot> {
 
-        private TimerCounter(TimerCounterRoot root) {
+        private CommentsAggregatePart(CommentsRoot root) {
             super(root);
         }
 
         @Assign
-        public StringValue handle(StringValue command) {
-            return command;
+        public TestUtilCommentAdded handle(TestUtilAddComment command) {
+            return TestUtilCommentAdded.newBuilder()
+                                       .setId(command.getId())
+                                       .build();
         }
 
         @Apply
-        void on(StringValue event) {
-            getBuilder().setValue(getState().getValue() + 1);
+        void on(TestUtilCommentAdded event) {
+            getBuilder().setTimestamp(Timestamps.fromMillis(123));
         }
     }
 
-    private static final class TimeCounterRepository
-            extends AggregatePartRepository<String, TimerCounter, TimerCounterRoot> {
+    private static final class CommentsAggregatePartRepository
+            extends AggregatePartRepository<TestUtilProjectId,
+                                            CommentsAggregatePart,
+                                            CommentsRoot> {
     }
 
-    private static class TimerCounterRoot extends AggregateRoot<String> {
+    private static class CommentsRoot extends AggregateRoot<TestUtilProjectId> {
 
-        private TimerCounterRoot(BoundedContext boundedContext, String id) {
+        private CommentsRoot(BoundedContext boundedContext, TestUtilProjectId id) {
             super(boundedContext, id);
         }
     }
@@ -106,29 +116,30 @@ public class AggregatePartCommandTestShouldEnv {
      * The test class for the {@code StringValue} command handler in {@code TimePrinter}.
      */
     public static class TimeCounterTest
-            extends AggregatePartCommandTest<String,
-                                             StringValue,
-                                             UInt32Value,
-                                             TimerCounter,
-                                             TimerCounterRoot> {
+            extends AggregatePartCommandTest<TestUtilProjectId,
+                                             TestUtilAddComment,
+                                             TestUtilCommentsAggregatePart,
+                                             CommentsAggregatePart,
+                                             CommentsRoot> {
 
-        public static final StringValue TEST_COMMAND = StringValue.newBuilder()
-                                                                  .setValue("test command")
-                                                                  .build();
+        public static final TestUtilAddComment TEST_COMMAND =
+                TestUtilAddComment.newBuilder()
+                                  .setId(ID)
+                                  .build();
 
         @Override
-        protected String newId() {
-            return AggregatePartCommandTestShouldEnv.class.getName();
+        protected TestUtilProjectId newId() {
+            return ID;
         }
 
         @Override
-        protected StringValue createMessage() {
+        protected TestUtilAddComment createMessage() {
             return TEST_COMMAND;
         }
 
         @Override
-        protected Repository<String, TimerCounter> createEntityRepository() {
-            return new TimeCounterRepository();
+        protected Repository<TestUtilProjectId, CommentsAggregatePart> createEntityRepository() {
+            return new CommentsAggregatePartRepository();
         }
 
         @BeforeEach
@@ -138,7 +149,8 @@ public class AggregatePartCommandTestShouldEnv {
         }
 
         @Override
-        public CommandHandlerExpected<UInt32Value> expectThat(TimerCounter entity) {
+        public CommandHandlerExpected<TestUtilCommentsAggregatePart>
+        expectThat(CommentsAggregatePart entity) {
             return super.expectThat(entity);
         }
 
@@ -147,12 +159,12 @@ public class AggregatePartCommandTestShouldEnv {
         }
 
         @Override
-        protected TimerCounterRoot newRoot(String id) {
+        protected CommentsRoot newRoot(TestUtilProjectId id) {
             return aggregateRoot();
         }
 
         @Override
-        protected TimerCounter newPart(TimerCounterRoot root) {
+        protected CommentsAggregatePart newPart(CommentsRoot root) {
             return aggregatePart();
         }
     }

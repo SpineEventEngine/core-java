@@ -38,3 +38,7 @@ message TestUtilCreateProject {
 message TestUtilAssignProject {
     TestUtilProjectId id = 1;
 }
+
+message TestUtilAddComment {
+    TestUtilProjectId id = 1;
+}
