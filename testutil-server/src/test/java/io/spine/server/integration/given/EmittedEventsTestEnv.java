@@ -27,6 +27,7 @@ import io.spine.core.TenantId;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.integration.BlackBoxBoundedContext;
 import io.spine.server.integration.IntProjectCreated;
+import io.spine.server.integration.IntProjectStarted;
 import io.spine.server.integration.IntTaskAdded;
 import io.spine.server.integration.ProjectId;
 

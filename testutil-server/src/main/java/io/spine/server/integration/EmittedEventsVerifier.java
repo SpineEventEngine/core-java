@@ -84,7 +84,6 @@ public abstract class EmittedEventsVerifier {
      * @param eventTypes a list of class of a domain event message
      * @return new {@link EmittedEventsVerifier emitted events verifier} instance
      */
-
     private static EmittedEventsVerifier emitted(List<Class<? extends Message>> eventTypes) {
         checkArgument(eventTypes.size() > 0,
                       "At least one event must be provided to emitted events verifier in a list.");
@@ -103,7 +102,7 @@ public abstract class EmittedEventsVerifier {
     }
 
     /**
-     * Verifies that there wes a specific number of events of the provided event type emitted
+     * Verifies that there was a specific number of events of the provided event type emitted
      * in the Bounded Context.
      *
      * @param expectedCount an amount of events of a provided event type that should
