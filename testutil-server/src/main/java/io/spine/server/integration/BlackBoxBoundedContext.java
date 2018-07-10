@@ -51,6 +51,7 @@ import static java.util.Collections.singletonList;
 /**
  * @author Mykhailo Drachuk
  */
+@SuppressWarnings("ClassWithTooManyMethods")
 @VisibleForTesting
 public class BlackBoxBoundedContext {
 
