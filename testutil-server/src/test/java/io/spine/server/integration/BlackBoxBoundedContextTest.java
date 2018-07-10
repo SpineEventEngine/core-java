@@ -28,9 +28,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.integration.AcknowledgementsVerifier.acked;
 import static io.spine.server.integration.EmittedEventsVerifier.emitted;
+import static io.spine.server.integration.given.BlackBoxBoundedContextTestEnv.addTask;
+import static io.spine.server.integration.given.BlackBoxBoundedContextTestEnv.createProject;
+import static io.spine.server.integration.given.BlackBoxBoundedContextTestEnv.createReport;
+import static io.spine.server.integration.given.BlackBoxBoundedContextTestEnv.newProjectId;
+import static io.spine.server.integration.given.BlackBoxBoundedContextTestEnv.taskAdded;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -99,64 +103,15 @@ class BlackBoxBoundedContextTest {
 
     @Test
     void throwIllegalStateOnCloseException() {
-        assertThrows(IllegalStateException.class, () -> {
-            BlackBoxBoundedContext
-                    .with(new IntProjectRepositoryFailingClose() {
-                        @Override
-                        protected void throwException() {
-                            throw new RuntimeException("Expected error");
-                        }
-                    })
-                    .close();
-        });
+        assertThrows(IllegalStateException.class, () ->
+                BlackBoxBoundedContext
+                        .with(new IntProjectRepositoryFailingClose() {
+                            @Override
+                            protected void throwException() {
+                                throw new RuntimeException("Expected error");
+                            }
+                        })
+                        .close());
     }
 
-    private static IntAddTask addTask(ProjectId projectId) {
-        return IntAddTask.newBuilder()
-                         .setProjectId(projectId)
-                         .setTask(newTask())
-                         .build();
-    }
-
-    private static IntTaskAdded taskAdded(ProjectId projectId) {
-        return IntTaskAdded.newBuilder()
-                           .setProjectId(projectId)
-                           .setTask(newTask())
-                           .build();
-    }
-
-    private static Task newTask() {
-        return Task.newBuilder()
-                   .setTitle(newUuid())
-                   .build();
-    }
-
-    private static IntCreateReport createReport(ProjectId projectId) {
-        return IntCreateReport.newBuilder()
-                              .setReportId(newReportId())
-                              .addProjectId(projectId)
-                              .build();
-    }
-
-    private static ReportId newReportId() {
-        return ReportId.newBuilder()
-                       .setId(newUuid())
-                       .build();
-    }
-
-    private static IntCreateProject createProject() {
-        return createProject(newProjectId());
-    }
-
-    private static IntCreateProject createProject(ProjectId projectId) {
-        return IntCreateProject.newBuilder()
-                               .setProjectId(projectId)
-                               .build();
-    }
-
-    private static ProjectId newProjectId() {
-        return ProjectId.newBuilder()
-                        .setId(newUuid())
-                        .build();
-    }
 }

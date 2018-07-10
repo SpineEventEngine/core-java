@@ -20,9 +20,72 @@
 
 package io.spine.server.integration.given;
 
+import io.spine.server.integration.IntAddTask;
+import io.spine.server.integration.IntCreateProject;
+import io.spine.server.integration.IntCreateReport;
+import io.spine.server.integration.IntTaskAdded;
+import io.spine.server.integration.ProjectId;
+import io.spine.server.integration.ReportId;
+import io.spine.server.integration.Task;
+
+import static io.spine.base.Identifier.newUuid;
+
 /**
  * @author Mykhailo Drachuk
  */
 public class BlackBoxBoundedContextTestEnv {
 
+    /** Prevents instantiation of this utility class. */
+    private BlackBoxBoundedContextTestEnv() {
+        // Does nothing.
+    }
+
+    public static IntAddTask addTask(ProjectId projectId) {
+        return IntAddTask.newBuilder()
+                         .setProjectId(projectId)
+                         .setTask(newTask())
+                         .build();
+    }
+
+    public static IntTaskAdded taskAdded(ProjectId projectId) {
+        return IntTaskAdded.newBuilder()
+                           .setProjectId(projectId)
+                           .setTask(newTask())
+                           .build();
+    }
+
+    private static Task newTask() {
+        return Task.newBuilder()
+                   .setTitle(newUuid())
+                   .build();
+    }
+
+    public static IntCreateReport createReport(ProjectId projectId) {
+        return IntCreateReport.newBuilder()
+                              .setReportId(newReportId())
+                              .addProjectId(projectId)
+                              .build();
+    }
+
+    private static ReportId newReportId() {
+        return ReportId.newBuilder()
+                       .setId(newUuid())
+                       .build();
+    }
+
+    public static IntCreateProject createProject() {
+        return createProject(newProjectId());
+    }
+
+    public static IntCreateProject createProject(ProjectId projectId) {
+        return IntCreateProject.newBuilder()
+                               .setProjectId(projectId)
+                               .build();
+    }
+
+    public static ProjectId newProjectId() {
+        return ProjectId.newBuilder()
+                        .setId(newUuid())
+                        .build();
+    }
 }
