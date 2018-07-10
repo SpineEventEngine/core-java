@@ -241,7 +241,7 @@ public class CommandStore implements AutoCloseable {
         final Func<CommandStatus, Iterator<Command>> func =
                 new Func<CommandStatus, Iterator<Command>>(this) {
             @Override
-            public Iterator<Command> apply(@Nullable final CommandStatus input) {
+            public Iterator<Command> apply(@Nullable CommandStatus input) {
                 checkNotNull(input);
                 final Iterator<CommandRecord> recordIterator = repository.iterator(status);
                 final Iterator<Command> commands = Records.toCommandIterator(recordIterator);
@@ -337,6 +337,7 @@ public class CommandStore implements AutoCloseable {
      * An abstract Command Store function which ensures that the store is open.
      */
     private abstract static class Func<F, T> extends TenantAwareFunction<F, T> {
+
         private final CommandStore store;
 
         private Func(CommandStore store) {

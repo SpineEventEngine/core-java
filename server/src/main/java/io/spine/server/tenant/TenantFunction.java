@@ -45,13 +45,16 @@ public abstract class TenantFunction<T> extends TenantAware implements Function<
         super(TenantAware.getCurrentTenant(multitenant));
     }
 
+    public TenantFunction() {
+
+    }
+
     /**
      * Applies the function and returns the result.
      *
      * @return the result of the function
      */
-    @Nullable
-    public T execute() {
+    public @Nullable T execute() {
         final TenantId currentTenant = tenantId();
         final T result = apply(currentTenant);
         return result;

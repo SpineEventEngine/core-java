@@ -497,7 +497,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             DispatchCommandToHandler systemCommand = DispatchCommandToHandler
                     .newBuilder()
                     .setReceiver(id)
-                    .setPayload(command)
+                    .setCommandId(command.getId())
                     .build();
             postSystem(systemCommand);
         }
@@ -506,7 +506,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             DispatchEventToApplier systemCommand = DispatchEventToApplier
                     .newBuilder()
                     .setReceiver(id)
-                    .setPayload(event)
+                    .setEventId(event.getId())
                     .build();
             postSystem(systemCommand);
         }
@@ -515,7 +515,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             DispatchEventToSubscriber systemCommand = DispatchEventToSubscriber
                     .newBuilder()
                     .setReceiver(id)
-                    .setPayload(event)
+                    .setEventId(event.getId())
                     .build();
             postSystem(systemCommand);
         }
@@ -524,7 +524,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             DispatchEventToReactor systemCommand = DispatchEventToReactor
                     .newBuilder()
                     .setReceiver(id)
-                    .setPayload(event)
+                    .setEventId(event.getId())
                     .build();
             postSystem(systemCommand);
         }

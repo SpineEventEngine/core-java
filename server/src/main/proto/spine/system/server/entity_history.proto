@@ -45,6 +45,13 @@ message EntityHistoryId {
     string type_url = 2;
 }
 
+// The history of interactions with an entity.
+//
+// Each Aggregate, Projection, and ProcessManager instance has a corresponding entity history.
+//
+// Stores the lists of all commands and events ever dispatched to the entity, represented by their
+// IDs.
+//
 message EntityHistory {
     option (entity).kind = AGGREGATE;
 
@@ -59,21 +66,23 @@ message EntityHistory {
 
 message DispatchedEvent {
 
-    spine.core.Event event = 1;
+    spine.core.EventId event = 1;
 
     google.protobuf.Timestamp when_dispatched = 2 [(required) = true];
 }
 
 message DispatchedCommand {
 
-    spine.core.Command command = 1;
+    spine.core.CommandId command = 1;
 
     google.protobuf.Timestamp when_dispatched = 2 [(required) = true];
 }
 
 message DispatchedMessageId {
 
-    spine.core.CommandId command_id = 1;
+    oneof kind {
+        spine.core.CommandId command_id = 1;
 
-    spine.core.EventId event_id = 2;
+        spine.core.EventId event_id = 2;
+    }
 }

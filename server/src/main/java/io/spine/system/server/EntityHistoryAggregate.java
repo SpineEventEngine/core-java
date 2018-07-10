@@ -51,7 +51,7 @@ public final class EntityHistoryAggregate
     EventDispatchedToSubscriber handle(DispatchEventToSubscriber command) {
         DispatchedEvent dispatchedEvent = DispatchedEvent
                 .newBuilder()
-                .setEvent(command.getPayload())
+                .setEvent(command.getEventId())
                 .setWhenDispatched(getCurrentTime())
                 .build();
         return EventDispatchedToSubscriber.newBuilder()
@@ -64,7 +64,7 @@ public final class EntityHistoryAggregate
     EventDispatchedToReactor handle(DispatchEventToReactor command) {
         DispatchedEvent dispatchedEvent = DispatchedEvent
                 .newBuilder()
-                .setEvent(command.getPayload())
+                .setEvent(command.getEventId())
                 .setWhenDispatched(getCurrentTime())
                 .build();
         return EventDispatchedToReactor.newBuilder()
@@ -77,7 +77,7 @@ public final class EntityHistoryAggregate
     EventDispatchedToApplier handle(DispatchEventToApplier command) {
         DispatchedEvent dispatchedEvent = DispatchedEvent
                 .newBuilder()
-                .setEvent(command.getPayload())
+                .setEvent(command.getEventId())
                 .setWhenDispatched(getCurrentTime())
                 .build();
         return EventDispatchedToApplier.newBuilder()
@@ -90,7 +90,7 @@ public final class EntityHistoryAggregate
     CommandDispatchedToHandler handle(DispatchCommandToHandler command) {
         DispatchedCommand dispatchedCommand = DispatchedCommand
                 .newBuilder()
-                .setCommand(command.getPayload())
+                .setCommand(command.getCommandId())
                 .setWhenDispatched(getCurrentTime())
                 .build();
         return CommandDispatchedToHandler.newBuilder()
