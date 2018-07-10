@@ -129,8 +129,9 @@ class Acknowledgements {
     }
 
     /**
-     * @return a total number of times errors matching the provided qualifier were observed in the
-     * Bounded Context responses
+     * @param qualifier an error qualifier specifying which kind of an error to count
+     * @return a total number of times errors matching the provided qualifier were 
+     * observed in the Bounded Context responses
      */
     long countErrors(ErrorQualifier qualifier) {
         checkNotNull(qualifier);
