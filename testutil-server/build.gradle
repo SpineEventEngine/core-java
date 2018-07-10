@@ -23,12 +23,4 @@ dependencies {
     api project(path: ':testutil-client')
 }
 
-apply from: generateDescriptorSetScript
-
 apply from: testArtifactsScript
-
-apply plugin: spineProtobufPluginId
-
-modelCompiler {
-    generateValidatingBuilders = true
-}
