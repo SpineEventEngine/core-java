@@ -121,6 +121,7 @@ public abstract class ErrorQualifier {
      * @param name name of an attribute which is check by a qualifier
      * @return a new {@link ErrorAttributeQualifier error attribute qualifier} instance
      */
+    @SuppressWarnings("ClassReferencesSubclass")
     public static ErrorAttributeQualifier withAttribute(String name) {
         return new ErrorAttributeQualifier(name);
     }
