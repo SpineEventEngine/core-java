@@ -21,7 +21,9 @@
 package io.spine.system.server.given;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import io.spine.core.React;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
@@ -253,6 +255,13 @@ public final class EntityHistoryTestEnv {
 
         protected TestProcman(String id) {
             super(id);
+        }
+
+        @React
+        Empty reactOn(PersonNameCreated event) {
+            getBuilder().setId(event.getId())
+                        .setCreated(true);
+            return Empty.getDefaultInstance();
         }
     }
 

@@ -20,6 +20,7 @@
 
 package io.spine.system.server;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
@@ -38,6 +39,7 @@ import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregate;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregatePart;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregatePartRepository;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregateRepository;
+import io.spine.system.server.given.EntityHistoryTestEnv.TestProcman;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestProjection;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestProjectionRepository;
 import io.spine.type.TypeUrl;
@@ -49,12 +51,14 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
+import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.SystemBoundedContexts.systemOf;
 import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Dmytro Dashenkov
@@ -173,7 +177,7 @@ class EntityHistoryTest {
         }
 
         @Test
-        @DisplayName("command dispatched to handler in aggregate")
+        @DisplayName("command is dispatched to handler in aggregate")
         void commandToAggregate() {
             createPerson();
             eventWatcher.clearEvents();
@@ -185,18 +189,40 @@ class EntityHistoryTest {
         }
 
         @Test
-        @DisplayName("command dispatched to handler in aggregate part")
+        @DisplayName("command is dispatched to handler in aggregate part")
         void commandToPart() {
-            CreatePersonName domainCommand = CreatePersonName
-                    .newBuilder()
-                    .setId(id)
-                    .setFirstName("Ringo")
-                    .build();
-            postCommand(domainCommand);
-
+            Message domainCommand = createPersonName();
             checkEntityCreated(AGGREGATE, TestAggregatePart.TYPE);
             assertCommandDispatched(domainCommand);
             eventWatcher.nextEvent(EventDispatchedToApplier.class);
+        }
+
+        @Test
+        @DisplayName("event is dispatched to a reactor method in a ProcessManager")
+        void eventToReactorInProcman() {
+            createPersonName();
+
+            eventWatcher.nextEvent(EntityCreated.class);
+            eventWatcher.nextEvent(CommandDispatchedToHandler.class);
+            eventWatcher.nextEvent(EventDispatchedToApplier.class);
+            eventWatcher.nextEvent(EntityStateChanged.class);
+
+            checkEntityCreated(PROCESS_MANAGER, TestProcman.TYPE);
+            EventDispatchedToReactor dispatchedToReactor =
+                    eventWatcher.nextEvent(EventDispatchedToReactor.class);
+            assertId(dispatchedToReactor.getReceiver());
+
+            TypeUrl expectedType = TypeUrl.of(PersonNameCreated.class);
+            TypeUrl actualType = TypeUrl.parse(dispatchedToReactor.getPayload()
+                                                                  .getEvent()
+                                                                  .getMessage()
+                                                                  .getTypeUrl());
+            assertEquals(expectedType, actualType);
+
+            EntityStateChanged stateChanged = eventWatcher.nextEvent(EntityStateChanged.class);
+            PersonCreation processState = unpack(stateChanged.getNewState());
+            assertEquals(id, processState.getId());
+            assertTrue(processState.getCreated());
         }
 
         private void createPerson() {
@@ -206,12 +232,24 @@ class EntityHistoryTest {
             postCommand(command);
         }
 
+        @CanIgnoreReturnValue
         private HidePerson hidePerson() {
             HidePerson command = HidePerson.newBuilder()
                                            .setId(id)
                                            .build();
             postCommand(command);
             return command;
+        }
+
+        @CanIgnoreReturnValue
+        private CreatePersonName createPersonName() {
+            CreatePersonName domainCommand = CreatePersonName
+                    .newBuilder()
+                    .setId(id)
+                    .setFirstName("Ringo")
+                    .build();
+            postCommand(domainCommand);
+            return domainCommand;
         }
 
         private void assertCommandDispatched(Message command) {
