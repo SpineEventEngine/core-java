@@ -94,27 +94,6 @@ public abstract class EventReactionTest<I,
     }
 
     /**
-     * Creates {@link Rejection} from the given message and supplies it with
-     * {@link RejectionContext}.
-     *
-     * @param message a rejection message
-     * @return a new {@link Rejection}
-     */
-    protected final Rejection createRejection(M message) {
-        Empty cmd = Empty.getDefaultInstance();
-        Command command = requestFactory.command()
-                                        .create(cmd);
-        Rejection rejection = Rejections.createRejection(message, command);
-        RejectionContext context = rejection.getContext()
-                                            .toBuilder()
-                                            .setExternal(externalMessage())
-                                            .build();
-        return rejection.toBuilder()
-                        .setContext(context)
-                        .build();
-    }
-
-    /**
      * Indicates if the tested event is external to the {@link BoundedContext}
      * in which the rejection is being processed.
      *
