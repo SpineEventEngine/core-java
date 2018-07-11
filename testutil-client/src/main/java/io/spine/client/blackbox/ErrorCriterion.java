@@ -21,7 +21,6 @@
 package io.spine.client.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
 
