@@ -81,3 +81,4 @@ class AggregateCommandTestShould {
         expected.throwsRejection(Rejection.class);
     }
 }
+

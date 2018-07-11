@@ -21,17 +21,17 @@
 package io.spine.server.procman;
 
 import io.spine.server.expected.CommandHandlerExpected;
-import io.spine.server.procman.given.ProcessManagerCommandTestTestEnv.CommandHandlingProcessManager;
-import io.spine.server.procman.given.ProcessManagerCommandTestTestEnv.TimestampProcessManagerTest;
+import io.spine.server.procman.given.ProcessManagerCommandTestShouldEnv.CommandHandlingProcessManager;
+import io.spine.server.procman.given.ProcessManagerCommandTestShouldEnv.TaskCreationProcessManagerTest;
 import io.spine.test.testutil.TUAssignTask;
 import io.spine.test.testutil.TUTaskCreationPm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.procman.given.ProcessManagerCommandTestTestEnv.CommandHandlingProcessManager.NESTED_COMMAND;
-import static io.spine.server.procman.given.ProcessManagerCommandTestTestEnv.TimestampProcessManagerTest.TEST_COMMAND;
-import static io.spine.server.procman.given.ProcessManagerCommandTestTestEnv.processManager;
+import static io.spine.server.procman.given.ProcessManagerCommandTestShouldEnv.CommandHandlingProcessManager.NESTED_COMMAND;
+import static io.spine.server.procman.given.ProcessManagerCommandTestShouldEnv.TaskCreationProcessManagerTest.TEST_COMMAND;
+import static io.spine.server.procman.given.ProcessManagerCommandTestShouldEnv.processManager;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -41,11 +41,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DisplayName("ProcessManagerCommandTest should")
 class ProcessManagerCommandTestShould {
 
-    private TimestampProcessManagerTest pmCommandTest;
+    private TaskCreationProcessManagerTest pmCommandTest;
 
     @BeforeEach
     void setUp() {
-        pmCommandTest = new TimestampProcessManagerTest();
+        pmCommandTest = new TaskCreationProcessManagerTest();
     }
 
     @Test

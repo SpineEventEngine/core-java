@@ -59,7 +59,7 @@ public class ProcessManagerEventReactionTestShouldEnv {
     }
 
     /**
-     * The dummy process manager that reacts on {@code TestUtilTaskCreated} event and
+     * The dummy process manager that reacts on {@code TUTaskCreated} event and
      * routes a nested command.
      */
     public static class EventReactingProcessManager
@@ -96,7 +96,7 @@ public class ProcessManagerEventReactionTestShouldEnv {
     }
 
     /**
-     * The test class for the {@code TestUtilTaskCreated} event handler in
+     * The test class for the {@code TUTaskCreated} event handler in
      * {@code EventReactingProcessManager}.
      */
     public static class EventReactingProcessManagerTest

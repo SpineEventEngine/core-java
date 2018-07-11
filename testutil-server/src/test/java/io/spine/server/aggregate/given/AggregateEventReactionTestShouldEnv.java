@@ -62,8 +62,8 @@ public class AggregateEventReactionTestShouldEnv {
     }
 
     /**
-     * A dummy aggregate that reacts on the {@code TestUtilProjectCreated} event and emits
-     * {@code TestUtilProjectAssigned} event as a result.
+     * A dummy aggregate that reacts on the {@code TUProjectCreated} event and emits
+     * {@code TUProjectAssigned} event as a result.
      */
     public static final class EventReactingAggregate
             extends Aggregate<TUProjectId,
@@ -92,7 +92,7 @@ public class AggregateEventReactionTestShouldEnv {
     }
 
     /**
-     * The test class for the {@code TestUtilProjectAssigned} event handler in
+     * The test class for the {@code TUProjectAssigned} event handler in
      * {@code EventReactingAggregate}.
      */
     public static class EventReactingAggregateTest

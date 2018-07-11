@@ -71,8 +71,8 @@ public class AggregatePartCommandTestShouldEnv {
     }
 
     /**
-     * A dummy aggregate part that handles {@code TestUtilAddComment} command and applies
-     * the corresponding {@code TestUtilCommentAdded}.
+     * A dummy aggregate part that handles {@code TUAddComment} command and applies
+     * the corresponding {@code TUCommentAdded}.
      */
     public static final class CommentsAggregatePart
             extends AggregatePart<TUProjectId,
@@ -111,7 +111,7 @@ public class AggregatePartCommandTestShouldEnv {
     }
 
     /**
-     * The test class for the {@code TestUtilAddComment} command handler in
+     * The test class for the {@code TUAddComment} command handler in
      * {@code CommentsAggregatePart}.
      */
     public static class TimeCounterTest

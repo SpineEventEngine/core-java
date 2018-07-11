@@ -21,7 +21,6 @@
 package io.spine.server.aggregate.given;
 
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateCommandTest;
 import io.spine.server.aggregate.AggregateRepository;
@@ -32,9 +31,10 @@ import io.spine.server.entity.given.Given;
 import io.spine.server.expected.CommandHandlerExpected;
 import io.spine.test.testutil.TUAssignProject;
 import io.spine.test.testutil.TUCreateProject;
-import io.spine.test.testutil.TUFailedToCreateProject;
+import io.spine.test.testutil.TUFailedToAssignProject;
 import io.spine.test.testutil.TUProjectAggregate;
 import io.spine.test.testutil.TUProjectAggregateVBuilder;
+import io.spine.test.testutil.TUProjectAssigned;
 import io.spine.test.testutil.TUProjectCreated;
 import io.spine.test.testutil.TUProjectId;
 import org.junit.jupiter.api.BeforeEach;
@@ -87,9 +87,8 @@ public class AggregateCommandTestShouldEnv {
         }
 
         @Assign
-        public Timestamp handle(TUAssignProject command)
-                throws TUFailedToCreateProject {
-            throw new TUFailedToCreateProject(getId());
+        public TUProjectAssigned handle(TUAssignProject command) throws TUFailedToAssignProject {
+            throw new TUFailedToAssignProject(getId());
         }
 
         @Apply
@@ -103,7 +102,7 @@ public class AggregateCommandTestShouldEnv {
     }
 
     /**
-     * The test class for the {@code TestUtilCreateProject} command handler in
+     * The test class for the {@code TUCreateProject} command handler in
      * {@code CommandHandlingAggregate}.
      */
     public static class CommandHandlingTest

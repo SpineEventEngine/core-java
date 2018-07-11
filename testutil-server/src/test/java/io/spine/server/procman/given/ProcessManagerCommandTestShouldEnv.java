@@ -43,7 +43,7 @@ import static com.google.protobuf.util.Timestamps.fromNanos;
 /**
  * @author Vladyslav Lubenskyi
  */
-public class ProcessManagerCommandTestTestEnv {
+public class ProcessManagerCommandTestShouldEnv {
 
     private static final TUProjectId ID = TUProjectId.newBuilder()
                                                      .setValue("test pm id")
@@ -52,7 +52,7 @@ public class ProcessManagerCommandTestTestEnv {
     /**
      * Prevents direct instantiation.
      */
-    private ProcessManagerCommandTestTestEnv() {
+    private ProcessManagerCommandTestShouldEnv() {
     }
 
     public static CommandHandlingProcessManager processManager() {
@@ -62,7 +62,7 @@ public class ProcessManagerCommandTestTestEnv {
     }
 
     /**
-     * A dummy process manager that handles a {@code TestUtilCreateTask} command and routes a nested
+     * A dummy process manager that handles a {@code TUCreateTask} command and routes a nested
      * command.
      */
     public static class CommandHandlingProcessManager
@@ -105,10 +105,10 @@ public class ProcessManagerCommandTestTestEnv {
     }
 
     /**
-     * The test class for the {@code TestUtilCreateTask} command handler in
+     * The test class for the {@code TUCreateTask} command handler in
      * {@code CommandHandlingProcessManager}.
      */
-    public static class TimestampProcessManagerTest
+    public static class TaskCreationProcessManagerTest
             extends ProcessManagerCommandTest<TUProjectId,
                                               TUCreateTask,
                                               TUTaskCreationPm,
