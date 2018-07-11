@@ -31,6 +31,11 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 
 /**
+ * The aggregate representing the lifecycle of a command.
+ *
+ * <p>All the commands in the system (except the commands in the {@code System} bounded context)
+ * have an associated {@code CommandLifecycle}.
+ *
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("OverlyCoupledClass") // OK for an aggregate class.

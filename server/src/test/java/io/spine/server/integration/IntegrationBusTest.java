@@ -43,7 +43,6 @@ import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.validate.Validate;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -378,7 +377,6 @@ class IntegrationBusTest {
             assertNull(ProjectCountAggregate.getExternalEvent());
         }
 
-        @Disabled // TODO:2018-07-06:dmytro.dashenkov: Restore.
         @Test
         @DisplayName("rejections")
         void rejectionsIfNeedExternal() {

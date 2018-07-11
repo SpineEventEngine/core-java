@@ -69,6 +69,11 @@ public interface TransactionListener<I,
     void onTransactionFailed(Throwable t, E entity, S state,
                              Version version, LifecycleFlags lifecycleFlags);
 
+    /**
+     * A callback invoked after a successful commit.
+     *
+     * @param change the change of the entity under transaction
+     */
     void onAfterCommit(EntityRecordChange change);
 
     /**

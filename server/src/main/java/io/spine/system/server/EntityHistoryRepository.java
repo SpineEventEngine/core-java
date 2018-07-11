@@ -23,6 +23,8 @@ package io.spine.system.server;
 import io.spine.server.aggregate.AggregateRepository;
 
 /**
+ * The repository for {@link CommandLifecycleAggregate}s.
+ *
  * @author Dmytro Dashenkov
  */
 public final class EntityHistoryRepository

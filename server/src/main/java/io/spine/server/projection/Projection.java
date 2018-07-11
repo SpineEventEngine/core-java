@@ -20,7 +20,6 @@
 
 package io.spine.server.projection;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
@@ -96,7 +95,6 @@ public abstract class Projection<I,
      *
      * @return {@code true} if the projection state was changed as the result of playing the events
      */
-    @VisibleForTesting
     static boolean play(Projection projection, Iterable<Event> events) {
         final ProjectionTransaction tx = ProjectionTransaction.start(projection);
         projection.play(events);

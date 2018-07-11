@@ -365,7 +365,6 @@ public abstract class ProcessManagerRepository<I,
         }
     }
 
-
     void onCommandDispatched(I id, Command command) {
         lifecycleOf(id).onDispatchCommand(command);
     }

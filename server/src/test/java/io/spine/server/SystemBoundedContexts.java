@@ -23,6 +23,8 @@ package io.spine.server;
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
+ * A test utility for working with {@link SystemBoundedContext}s.
+ *
  * @author Dmytro Dashenkov
  */
 public final class SystemBoundedContexts {
@@ -33,6 +35,9 @@ public final class SystemBoundedContexts {
     private SystemBoundedContexts() {
     }
 
+    /**
+     * Extracts the {@code System} bounded context from the given bounded context.
+     */
     public static BoundedContext systemOf(BoundedContext context) {
         checkArgument(context instanceof DefaultBoundedContext);
         DefaultBoundedContext defaultContext = (DefaultBoundedContext) context;

@@ -313,6 +313,17 @@ public abstract class Transaction<I,
         entity.releaseTransaction();
     }
 
+    /**
+     * Creates an {@link EntityRecord} for the entity under transaction.
+     *
+     * <p>Since an entity transaction delegates its {@link EntityWithLifecycle#getLifecycleFlags()}
+     * to the transaction, an instance of {@link LifecycleFlags} should be passed as an argument.
+     *
+     * @param lifecycleFlags flags to include into the record
+     * @return new {@link EntityRecord}
+     * @see #lifecycleFlags
+     * @see #initialLifecycleFlags
+     */
     private EntityRecord record(LifecycleFlags lifecycleFlags) {
         E entity = getEntity();
         Any entityId = Identifier.pack(entity.getId());
@@ -454,6 +465,13 @@ public abstract class Transaction<I,
         return transactionListener;
     }
 
+    /**
+     * Injects a {@linkplain TransactionListener listener} into this transaction.
+     *
+     * <p>Each next invocation overrides the previous one.
+     *
+     * @param listener the listener to use in this transaction
+     */
     public void setListener(TransactionListener<I, E, S, B> listener) {
         checkNotNull(listener);
         this.transactionListener = listener;
@@ -535,6 +553,9 @@ public abstract class Transaction<I,
             return underlyingTransaction;
         }
 
+        /**
+         * Obtains the ID of the event applied during this {@code Phase}.
+         */
         EventId eventId() {
             return event.getId();
         }

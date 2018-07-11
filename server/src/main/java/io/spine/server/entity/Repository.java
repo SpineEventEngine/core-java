@@ -126,7 +126,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     protected final EntityClass<E> entityClass() {
         if (entityClass == null) {
             @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
-                    Class<E> cast = (Class<E>) ENTITY.getArgumentIn(getClass());
+            Class<E> cast = (Class<E>) ENTITY.getArgumentIn(getClass());
             entityClass = getModelClass(cast);
         }
         return entityClass;
@@ -394,6 +394,12 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                            .postCommand(systemCommand);
     }
 
+    /**
+     * Obtains an instance of {@link Lifecycle} for the entity with the given ID.
+     *
+     * @param id the ID of the target entity
+     * @return {@link Lifecycle} of the given entity
+     */
     @Internal
     protected Lifecycle lifecycleOf(I id) {
         checkNotNull(id);
@@ -686,6 +692,5 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                 );
             }
         }
-
     }
 }

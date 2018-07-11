@@ -57,6 +57,11 @@ public final class MonitorTransactionListener<I,
         this.acknowledgedMessageIds = newLinkedList();
     }
 
+    /**
+     * Creates a new instance of {@code MonitorTransactionListener}.
+     *
+     * @param repository the repository of the entity under transaction
+     */
     public static
     <I,
      E extends TransactionalEntity<I, S, B>,
@@ -67,6 +72,11 @@ public final class MonitorTransactionListener<I,
         return new MonitorTransactionListener<>(repository);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Memoizes the ID of the event applied by the given phase.
+     */
     @Override
     public void onAfterPhase(Transaction.Phase<I, E, S, B> phase) {
         Message messageId = phase.eventId();
@@ -78,6 +88,11 @@ public final class MonitorTransactionListener<I,
         // NoOp.
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Notifies the {@link Lifecycle} of the entity state change.
+     */
     @Override
     public void onAfterCommit(EntityRecordChange change) {
         Set<Message> messageIds = copyOf(acknowledgedMessageIds);
@@ -87,6 +102,11 @@ public final class MonitorTransactionListener<I,
         lifecycle.onStateChanged(change, messageIds);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Logs the occurred {@link Throwable}.
+     */
     @Override
     public void onTransactionFailed(Throwable t, E entity, S state, Version version,
                                     LifecycleFlags lifecycleFlags) {

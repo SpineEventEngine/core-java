@@ -28,7 +28,8 @@ import io.spine.server.entity.Repository;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+
+import static java.util.concurrent.Executors.newFixedThreadPool;
 
 /**
  * The helper class used to dispatch numerous messages of a certain kind to the entities,
@@ -94,7 +95,7 @@ public abstract class ParallelDispatcher<I extends Message, M extends Message> {
                                                      .getNumberOfShards();
         getStats().assertIdCount(0);
 
-        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        ExecutorService executorService = newFixedThreadPool(threadCount);
         ImmutableList.Builder<Callable<Object>> builder = ImmutableList.builder();
 
         for (int i = 0; i < messageCount; i++) {

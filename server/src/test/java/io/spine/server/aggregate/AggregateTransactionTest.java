@@ -91,7 +91,6 @@ class AggregateTransactionTest
                                              Aggregate<ProjectId, Project, PatchedProjectBuilder>,
                                              Project,
                                              PatchedProjectBuilder> listener) {
-
         AggregateTransaction<ProjectId, Project, PatchedProjectBuilder> transaction =
                 new AggregateTransaction<>(entity);
         transaction.setListener(listener);
