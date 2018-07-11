@@ -53,7 +53,7 @@ public class ErrorAttributeCriteria extends ErrorCriteria {
 
     /** {@inheritDoc} */
     @Override
-    public boolean test(Error error) {
+    public boolean matches(Error error) {
         Map<String, Value> attributes = error.getAttributesMap();
         return attributes.containsKey(name);
     }
@@ -74,7 +74,7 @@ public class ErrorAttributeCriteria extends ErrorCriteria {
             }
 
             @Override
-            public boolean test(Error error) {
+            public boolean matches(Error error) {
                 Map<String, Value> attributes = error.getAttributesMap();
                 return value.equals(attributes.get(name));
             }

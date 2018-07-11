@@ -125,7 +125,7 @@ public class Acknowledgements {
     public boolean containErrors(ErrorCriteria criteria) {
         checkNotNull(criteria);
         return errors.stream()
-                     .anyMatch(criteria::test);
+                     .anyMatch(criteria::matches);
     }
 
     /**
@@ -136,7 +136,7 @@ public class Acknowledgements {
     public long countErrors(ErrorCriteria criteria) {
         checkNotNull(criteria);
         return errors.stream()
-                     .filter(criteria::test)
+                     .filter(criteria::matches)
                      .count();
     }
 

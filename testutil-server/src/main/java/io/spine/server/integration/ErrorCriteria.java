@@ -48,7 +48,13 @@ public abstract class ErrorCriteria {
      */
     public abstract String description();
 
-    public abstract boolean test(Error error);
+    /**
+     * Checks if the error matches the criteria.
+     *
+     * @param error a Spine Error instance that is part of a {@link io.spine.core.Ack ack response}
+     * @return {@code true} if the error matches the criteria, {@code false} otherwise
+     */
+    public abstract boolean matches(Error error);
 
     /**
      * Verifies that the {@link Error#getType() errors type} matches the provided one.
@@ -65,7 +71,7 @@ public abstract class ErrorCriteria {
             }
 
             @Override
-            public boolean test(Error error) {
+            public boolean matches(Error error) {
                 return type.equals(error.getType());
             }
         };
@@ -85,7 +91,7 @@ public abstract class ErrorCriteria {
             }
 
             @Override
-            public boolean test(Error error) {
+            public boolean matches(Error error) {
                 return code == error.getCode();
             }
         };
@@ -105,14 +111,14 @@ public abstract class ErrorCriteria {
             }
 
             @Override
-            public boolean test(Error error) {
+            public boolean matches(Error error) {
                 return message.equals(error.getMessage());
             }
         };
     }
 
     /**
-     * A static factory method for creating an {@link ErrorAttributeCriteria error attribute 
+     * A static factory method for creating an {@link ErrorAttributeCriteria error attribute
      * criteria}.
      *
      * <p>An error attribute verifier checks that the error contains an
@@ -141,7 +147,7 @@ public abstract class ErrorCriteria {
             }
 
             @Override
-            public boolean test(Error error) {
+            public boolean matches(Error error) {
                 Map<String, Value> attributes = error.getAttributesMap();
                 return !attributes.containsKey(name);
             }

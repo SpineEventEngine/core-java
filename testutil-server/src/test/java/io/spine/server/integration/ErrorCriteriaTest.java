@@ -154,7 +154,7 @@ class ErrorCriteriaTest {
 
     private List<Error> filterErrors(ErrorCriteria criteria) {
         return errors.stream()
-                     .filter(criteria::test)
+                     .filter(criteria::matches)
                      .collect(toList());
     }
 }
