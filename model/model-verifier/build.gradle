@@ -22,10 +22,6 @@ buildscript {
     apply from: "$rootDir/ext.gradle"
 }
 
-ext {
-    jUnitPioneerVersion = '0.1-SNAPSHOT'
-}
-
 group 'io.spine.tools'
 
 repositories {
@@ -49,8 +45,8 @@ dependencies {
     implementation project(':model-assembler')
 
     testImplementation gradleTestKit()
+    testImplementation "io.spine:spine-testlib:$spineBaseVersion"
     testImplementation "io.spine.tools:spine-plugin-testlib:$spineBaseVersion"
-    testImplementation "org.junit-pioneer:junit-pioneer:$jUnitPioneerVersion"
 }
 
 test {
