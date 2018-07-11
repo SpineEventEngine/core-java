@@ -32,8 +32,8 @@ import java.util.stream.Stream;
  * An implementation of {@link BoundedContext} used for the system bounded contexts.
  *
  * <p>Orchestrates the system entities, such as
- * {@link io.spine.system.server.EntityHistory EntityHistory} and
- * {@link io.spine.system.server.CommandLifecycle CommandLifecycle}.
+ * {@link io.spine.system.server.EntityHistoryAggregate EntityHistory} and
+ * {@link io.spine.system.server.CommandLifecycleAggregate CommandLifecycle}.
  *
  * <p>Users should not access a system bounded context directly. See {@link SystemGateway} for
  * the front-acing API of the system bounded context.
@@ -51,9 +51,10 @@ final class SystemBoundedContext extends BoundedContext {
 
     @Override
     void init() {
-        Stream.<Repository<?, ?>>of(new EntityHistoryRepository(),
-                                    new CommandLifecycleRepository())
-              .forEach(this::register);
+        Stream.<Repository<?, ?>>of(
+                new EntityHistoryRepository(),
+                new CommandLifecycleRepository()
+        ).forEach(this::register);
     }
 
     @Override
