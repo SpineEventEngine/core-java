@@ -24,7 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
-import io.spine.test.TimeTests;
+import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

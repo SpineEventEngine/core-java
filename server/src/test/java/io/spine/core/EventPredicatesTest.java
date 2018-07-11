@@ -32,8 +32,8 @@ import static io.spine.base.Time.getCurrentTime;
 import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.TimeTests.Past.minutesAgo;
-import static io.spine.test.TimeTests.Past.secondsAgo;
+import static io.spine.time.testing.TimeTests.Past.minutesAgo;
+import static io.spine.time.testing.TimeTests.Past.secondsAgo;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -90,7 +90,7 @@ class EventPredicatesTest {
         @Test
         @DisplayName("`IsAfter` predicate")
         void isAfter() {
-            final Predicate<Event> predicate = EventPredicates.isAfter(minutesAgo(100));
+            Predicate<Event> predicate = EventPredicates.isAfter(minutesAgo(100));
             assertTrue(predicate.apply(GivenEvent.occurredMinutesAgo(20)));
             assertFalse(predicate.apply(GivenEvent.occurredMinutesAgo(360)));
         }

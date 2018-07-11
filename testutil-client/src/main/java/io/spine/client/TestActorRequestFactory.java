@@ -67,20 +67,20 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     }
 
     public static TestActorRequestFactory newInstance(Class<?> testClass) {
-        return newInstance(testClass.getName(), ZoneOffsets.UTC);
+        return newInstance(testClass.getName(), ZoneOffsets.utc());
     }
 
     public static TestActorRequestFactory newInstance(UserId actor) {
-        return newInstance(actor, ZoneOffsets.UTC);
+        return newInstance(actor, ZoneOffsets.utc());
     }
 
     public static TestActorRequestFactory newInstance(UserId actor, TenantId tenantId) {
-        return new TestActorRequestFactory(actor, ZoneOffsets.UTC, tenantId);
+        return new TestActorRequestFactory(actor, ZoneOffsets.utc(), tenantId);
     }
 
     public static TestActorRequestFactory newInstance(Class<?> testClass, TenantId tenantId) {
         return new TestActorRequestFactory(of(testClass.getName()),
-                                           ZoneOffsets.UTC, tenantId);
+                                           ZoneOffsets.utc(), tenantId);
     }
 
     /** Creates new command with the passed timestamp. */

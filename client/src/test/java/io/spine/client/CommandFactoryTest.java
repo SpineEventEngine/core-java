@@ -29,7 +29,7 @@ import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.core.given.GivenTenantId;
 import io.spine.core.given.GivenUserId;
-import io.spine.test.TimeTests;
+import io.spine.time.testing.TimeTests;
 import io.spine.test.commands.RequiredFieldCommand;
 import io.spine.time.Timestamps2;
 import io.spine.time.ZoneOffset;

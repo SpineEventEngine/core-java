@@ -45,7 +45,7 @@ import static io.spine.server.commandbus.CommandScheduler.setSchedule;
 import static io.spine.server.commandbus.Given.ACommand.addTask;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.commandbus.Given.ACommand.startProject;
-import static io.spine.test.TimeTests.Past.minutesAgo;
+import static io.spine.time.testing.TimeTests.Past.minutesAgo;
 import static io.spine.time.Durations2.minutes;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
