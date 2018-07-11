@@ -45,10 +45,6 @@ public abstract class TenantFunction<T> extends TenantAware implements Function<
         super(TenantAware.getCurrentTenant(multitenant));
     }
 
-    public TenantFunction() {
-
-    }
-
     /**
      * Applies the function and returns the result.
      *
