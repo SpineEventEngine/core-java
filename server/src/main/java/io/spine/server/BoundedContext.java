@@ -57,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Set;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -469,6 +470,38 @@ public abstract class BoundedContext
         }
 
         public BoundedContext build() {
+            SystemBoundedContext system = buildSystem();
+            BoundedContext result = buildDefault(system);
+            log().info(result.nameForLogging() + " created.");
+            return result;
+        }
+
+        private BoundedContext buildDefault(SystemBoundedContext system) {
+            BoundedContext result =
+                    buildPartial(builder -> new DefaultBoundedContext(builder, system));
+            return result;
+        }
+
+        @SuppressWarnings("ResultOfMethodCallIgnored") // Builder methods.
+        private SystemBoundedContext buildSystem() {
+            BoundedContext.Builder system = newBuilder()
+                    .setMultitenant(multitenant)
+                    .setName(BoundedContextNames.system(name))
+                    .setTransportFactory(getTransportFactory());
+            Optional<? extends Supplier<StorageFactory>> storage = getStorageFactorySupplier();
+            if (storage.isPresent()) {
+                system.setStorageFactorySupplier(storage.get());
+            }
+            Optional<? extends TenantIndex> tenantIndex = getTenantIndex();
+            if (tenantIndex.isPresent()) {
+                system.setTenantIndex(tenantIndex.get());
+            }
+            SystemBoundedContext result = system.buildPartial(SystemBoundedContext::new);
+            return result;
+        }
+
+        private <B extends BoundedContext> B
+        buildPartial(Function<Builder, B> instanceFactory) {
             StorageFactory storageFactory = getStorageFactory();
 
             TransportFactory transportFactory = getTransportFactory();
@@ -479,27 +512,9 @@ public abstract class BoundedContext
             initStand(storageFactory);
             initIntegrationBus(transportFactory);
 
-            SystemBoundedContext system = createSystemContext();
-            DefaultBoundedContext built = new DefaultBoundedContext(this, system);
-
-            built.init();
-
-            BoundedContext result = built;
-
-            log().info(result.nameForLogging() + " created.");
+            B result = instanceFactory.apply(this);
+            result.init();
             return result;
-        }
-
-        @SuppressWarnings("ResultOfMethodCallIgnored") // Builder method.
-        private SystemBoundedContext createSystemContext() {
-            BoundedContextName name = getName();
-            BoundedContextName systemName = BoundedContextNames.system(name);
-            this.setName(systemName);
-            SystemBoundedContext systemContext = new SystemBoundedContext(this);
-            this.setName(name);
-            systemContext.init();
-
-            return systemContext;
         }
 
         private StorageFactory getStorageFactory() {
