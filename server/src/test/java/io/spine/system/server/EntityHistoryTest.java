@@ -448,9 +448,9 @@ class EntityHistoryTest {
             @Override
             @CanIgnoreReturnValue
             public @Nullable M apply() {
-                Iterator<Command> commands = system.getCommandBus()
-                                                   .commandStore()
-                                                   .iterator(CommandStatus.OK);
+                Iterator<Command> commands = context.getCommandBus()
+                                                    .commandStore()
+                                                    .iterator(CommandStatus.OK);
                 CommandId expected = dispatchedCommand.getCommand();
                 String errorMessage = format("Command with ID %s not found.", expected.getUuid());
                 Any result = Streams.stream(commands)
@@ -469,9 +469,9 @@ class EntityHistoryTest {
 
     private <M extends Message> M findEvent(DispatchedEvent dispatchedEvent) {
         MemoizingObserver<Event> eventObserver = memoizingObserver();
-        system.getEventBus()
-              .getEventStore()
-              .read(EventStreamQuery.getDefaultInstance(), eventObserver);
+        context.getEventBus()
+               .getEventStore()
+               .read(EventStreamQuery.getDefaultInstance(), eventObserver);
         EventId expectedId = dispatchedEvent.getEvent();
         String errorMessage = format("Event with ID %s not found.", expectedId.getValue());
         Any result = eventObserver.responses()
