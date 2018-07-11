@@ -39,7 +39,6 @@ import static io.spine.grpc.StreamObservers.noOpObserver;
  * The default implementation of a {@link SystemGateway}.
  *
  * @author Dmytro Dashenkov
- * @see io.spine.server.DefaultBoundedContext
  */
 @Internal
 public final class DefaultSystemGateway implements SystemGateway {

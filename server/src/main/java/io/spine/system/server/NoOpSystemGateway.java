@@ -32,7 +32,6 @@ import io.spine.annotation.Internal;
  * bounded context for a system bounded context.
  *
  * @author Dmytro Dashenkov
- * @see io.spine.server.SystemBoundedContext
  */
 @Internal
 public enum NoOpSystemGateway implements SystemGateway {
