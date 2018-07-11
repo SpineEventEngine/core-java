@@ -30,8 +30,6 @@ option java_package = "io.spine.change";
 
 import "google/protobuf/timestamp.proto";
 
-import "spine/time/time.proto";
-
 //
 // This file provides messages that define changes of fields in other messages.
 // The `Change` messages can be use as a request to change a value (e.g. as a field of a command),
