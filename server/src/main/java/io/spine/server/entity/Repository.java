@@ -372,8 +372,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * <p>The formatted message has the following parameters:
      * <ol>
-     * <li>The name of the message class.
-     * <li>The message ID.
+     *     <li>The name of the message class.
+     *     <li>The message ID.
      * </ol>
      *
      * @param msgFormat the format of the message
