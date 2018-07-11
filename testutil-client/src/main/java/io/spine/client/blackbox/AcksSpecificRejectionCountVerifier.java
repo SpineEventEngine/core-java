@@ -44,6 +44,7 @@ class AcksSpecificRejectionCountVerifier<T extends Message> extends Acknowledgem
      */
     AcksSpecificRejectionCountVerifier(int expectedCount, Class<T> type,
                                        RejectionCriterion<T> criterion) {
+        super();
         this.expectedCount = expectedCount;
         this.type = type;
         this.criterion = criterion;

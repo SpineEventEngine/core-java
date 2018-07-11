@@ -39,6 +39,7 @@ class AcksSpecificErrorCountVerifier extends AcknowledgementsVerifier {
      *                      of acknowledgement
      */
     AcksSpecificErrorCountVerifier(int expectedCount, ErrorCriterion criterion) {
+        super();
         this.expectedCount = expectedCount;
         this.criterion = criterion;
     }

@@ -34,6 +34,7 @@ class AcksRejectionCountVerifier extends AcknowledgementsVerifier {
 
     /** @param expectedCount an amount of rejection that are expected in Bounded Context */
     AcksRejectionCountVerifier(int expectedCount) {
+        super();
         this.expectedCount = expectedCount;
     }
 

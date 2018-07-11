@@ -42,6 +42,7 @@ class AcksRejectionOfTypeCountVerifier extends AcknowledgementsVerifier {
      * @param type          rejection type in a form of {@link RejectionClass RejectionClass}
      */
     AcksRejectionOfTypeCountVerifier(RejectionClass type, int expectedCount) {
+        super();
         this.type = type;
         this.expectedCount = expectedCount;
     }

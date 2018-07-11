@@ -38,6 +38,7 @@ class AcksRejectionOfTypePresenceVerifier extends AcknowledgementsVerifier {
 
     /** @param type rejection type in a form of {@link RejectionClass RejectionClass} */
     AcksRejectionOfTypePresenceVerifier(RejectionClass type) {
+        super();
         this.type = type;
     }
 

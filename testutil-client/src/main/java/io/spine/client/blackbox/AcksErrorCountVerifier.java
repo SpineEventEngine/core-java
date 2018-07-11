@@ -36,6 +36,7 @@ class AcksErrorCountVerifier extends AcknowledgementsVerifier {
 
     /** @param expectedCount an amount of errors that are expected to be observed in acks */
     AcksErrorCountVerifier(int expectedCount) {
+        super();
         this.expectedCount = expectedCount;
     }
 

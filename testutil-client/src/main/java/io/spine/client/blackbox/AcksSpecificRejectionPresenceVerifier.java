@@ -42,6 +42,7 @@ class AcksSpecificRejectionPresenceVerifier<T extends Message> extends Acknowled
      */
     AcksSpecificRejectionPresenceVerifier(Class<T> type,
                                           RejectionCriterion<T> criterion) {
+        super();
         this.type = type;
         this.criterion = criterion;
     }

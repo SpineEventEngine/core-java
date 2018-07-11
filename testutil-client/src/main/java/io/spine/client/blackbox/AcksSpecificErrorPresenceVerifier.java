@@ -37,6 +37,7 @@ class AcksSpecificErrorPresenceVerifier extends AcknowledgementsVerifier {
      *                 of acknowledgement
      */
     AcksSpecificErrorPresenceVerifier(ErrorCriterion criterion) {
+        super();
         this.criterion = criterion;
     }
 
