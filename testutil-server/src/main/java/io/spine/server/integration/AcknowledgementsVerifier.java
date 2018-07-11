@@ -29,7 +29,9 @@ import io.spine.core.RejectionClass;
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
- * An abstract verifier of acknowledgements.
+ * An abstract verifier of Bounded Context acknowledgements. Its intended to be executed by the
+ * {@link BlackBoxBoundedContext Black Box Bounded Context}. Its implementations throw assertion
+ * errors if the acknowledgements observed in the Bounded Context do not meet the verifier criteria.
  *
  * <p>Contains static factory methods for creating acknowledgement verifiers, checking that
  * commands were acknowledged, responded with rejections, and errors.
