@@ -28,8 +28,10 @@ import io.spine.server.entity.Repository;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 
-import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * The helper class used to dispatch numerous messages of a certain kind to the entities,
@@ -92,11 +94,15 @@ public abstract class ParallelDispatcher<I extends Message, M extends Message> {
         boundedContext.register(repository);
 
         int numberOfShards = ((Shardable) repository).getShardingStrategy()
-                                                           .getNumberOfShards();
-
+                                                     .getNumberOfShards();
         getStats().assertIdCount(0);
 
-        ExecutorService executorService = newFixedThreadPool(threadCount);
+        // Fixed thread pool executor with keep alive time.
+        ExecutorService executorService = new ThreadPoolExecutor(threadCount,
+                                                                 threadCount,
+                                                                 dispatchWaitTime,
+                                                                 MILLISECONDS,
+                                                                 new LinkedBlockingQueue<>());
         ImmutableList.Builder<Callable<Object>> builder = ImmutableList.builder();
 
         for (int i = 0; i < messageCount; i++) {
