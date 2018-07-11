@@ -54,13 +54,9 @@ public abstract class EventReactionTest<I,
                                         E extends CommandHandlingEntity<I, S, ?>>
         extends MessageHandlerTest<I, M, S, E, EventHandlerExpected<S>> {
 
-    private final TestEventFactory eventFactory;
-    private final ActorRequestFactory requestFactory;
-
     protected EventReactionTest() {
         super();
-        this.eventFactory = TestEventFactory.newInstance(getClass());
-        this.requestFactory = TestActorRequestFactory.newInstance(getClass());
+
     }
 
     @Override
@@ -78,6 +74,7 @@ public abstract class EventReactionTest<I,
      * @return a new {@link Event}
      */
     protected final Event createEvent(M message) {
+        TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
         Event event = eventFactory.createEvent(message);
         EventContext context = event.getContext()
                                           .toBuilder()
