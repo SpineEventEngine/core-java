@@ -66,6 +66,7 @@ class DispatchingQueue<E extends MessageEnvelope> {
      * @param observer the observer to receive the outcome of the operation
      */
     // TODO:2018-07-11:dmytro.dashenkov: Rewrite synchronization properly.
+    // todo                              https://github.com/SpineEventEngine/core-java/issues/746
     public synchronized void add(E envelope, StreamObserver<Ack> observer) {
         checkNotNull(envelope);
         checkNotNull(observer);
