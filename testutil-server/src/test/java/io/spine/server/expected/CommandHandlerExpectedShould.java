@@ -29,6 +29,7 @@ import org.opentest4j.AssertionFailedError;
 
 import static io.spine.server.expected.given.CommandExpectedTestEnv.blankExpected;
 import static io.spine.server.expected.given.CommandExpectedTestEnv.commandExpected;
+import static io.spine.server.expected.given.CommandExpectedTestEnv.commandExpectedWithCommand;
 import static io.spine.server.expected.given.CommandExpectedTestEnv.commandExpectedWithEvent;
 import static io.spine.server.expected.given.CommandExpectedTestEnv.commandExpectedWithRejection;
 import static io.spine.server.expected.given.CommandExpectedTestEnv.emptyExpected;
@@ -40,8 +41,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author Vladyslav Lubenskyi
  */
 @SuppressWarnings("DuplicateStringLiteralInspection")
-@DisplayName("CommandExpected should")
-class CommandExpectedShould {
+@DisplayName("CommandHandlerExpected should")
+class CommandHandlerExpectedShould {
 
     @Test
     @DisplayName("validate the rejection")
@@ -97,6 +98,26 @@ class CommandExpectedShould {
         CommandHandlerExpected<UInt64Value> expected = commandExpectedWithEvent(expectedEvent);
         expected.producesEvent(StringValue.class, event -> {
             assertEquals(expectedEvent, event);
+        });
+    }
+
+    @Test
+    @DisplayName("track routed commands")
+    void trackCommands() {
+        CommandHandlerExpected<UInt64Value> expected = commandExpected();
+        expected.routesCommands(StringValue.class, StringValue.class);
+        assertThrows(AssertionFailedError.class, () -> expected.routesCommands(StringValue.class));
+    }
+
+    @Test
+    @DisplayName("validate the single routed command")
+    void trackSingleCommand() {
+        StringValue expectedCommand = StringValue.newBuilder()
+                                                 .setValue("single routed command")
+                                                 .build();
+        CommandHandlerExpected<UInt64Value> expected = commandExpectedWithCommand(expectedCommand);
+        expected.routesCommand(StringValue.class, command -> {
+            assertEquals(expectedCommand, command);
         });
     }
 }

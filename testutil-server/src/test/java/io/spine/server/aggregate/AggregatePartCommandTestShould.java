@@ -22,14 +22,18 @@ package io.spine.server.aggregate;
 
 import io.spine.server.aggregate.given.AggregatePartCommandTestShouldEnv.CommentsAggregatePart;
 import io.spine.server.aggregate.given.AggregatePartCommandTestShouldEnv.TimeCounterTest;
+import io.spine.testutil.server.aggregate.TestUtilProjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.aggregate.given.AggregatePartCommandTestShouldEnv.ID;
 import static io.spine.server.aggregate.given.AggregatePartCommandTestShouldEnv.TimeCounterTest.TEST_COMMAND;
 import static io.spine.server.aggregate.given.AggregatePartCommandTestShouldEnv.aggregatePart;
+import static io.spine.server.aggregate.given.AggregatePartCommandTestShouldEnv.aggregateRoot;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -57,10 +61,22 @@ class AggregatePartCommandTestShould {
     @DisplayName("dispatch tested command")
     void shouldDispatchCommand() {
         aggregatePartCommandTest.setUp();
-        CommentsAggregatePart testPart = aggregatePart();
+        CommentsAggregatePart testPart = aggregatePart(aggregateRoot(ID));
         aggregatePartCommandTest.expectThat(testPart)
                                 .hasState(state -> {
                                     assertTrue(isNotDefault(state.getTimestamp()));
                                 });
+    }
+
+    @Test
+    @DisplayName("create new part")
+    void shouldCreatePart() {
+        TestUtilProjectId id = TestUtilProjectId.newBuilder()
+                                                .setValue("tested ID")
+                                                .build();
+        aggregatePartCommandTest.setUp();
+        CommentsAggregatePart part = aggregatePartCommandTest.createPart(id);
+        assertNotNull(part);
+        assertEquals(id, part.getId());
     }
 }

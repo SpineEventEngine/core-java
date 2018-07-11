@@ -87,6 +87,16 @@ public class CommandExpectedTestEnv {
         return expected;
     }
 
+    public static CommandHandlerExpected<UInt64Value> commandExpectedWithCommand(Message command) {
+        CommandHandlerExpected<UInt64Value> expected =
+                new CommandHandlerExpected<>(events(),
+                                             null,
+                                             oldState(),
+                                             newState(),
+                                             singletonList(command));
+        return expected;
+    }
+
     public static CommandHandlerExpected<UInt64Value> commandExpected(
 
     ) {

@@ -44,9 +44,9 @@ import org.junit.jupiter.api.BeforeEach;
  */
 public class AggregatePartCommandTestShouldEnv {
 
-    private static final TestUtilProjectId ID = TestUtilProjectId.newBuilder()
-                                                                 .setValue("test id")
-                                                                 .build();
+    public static final TestUtilProjectId ID = TestUtilProjectId.newBuilder()
+                                                                .setValue("test id")
+                                                                .build();
 
     /**
      * Prevents instantiation of this utility class.
@@ -54,21 +54,20 @@ public class AggregatePartCommandTestShouldEnv {
     private AggregatePartCommandTestShouldEnv() {
     }
 
-    public static CommentsAggregatePart aggregatePart() {
-        CommentsRoot root = aggregateRoot();
+    public static CommentsAggregatePart aggregatePart(CommentsRoot root) {
         CommentsAggregatePart result =
                 Given.aggregatePartOfClass(CommentsAggregatePart.class)
                                    .withRoot(root)
-                                   .withId(ID)
+                                   .withId(root.getId())
                                    .withVersion(5)
                                    .build();
         return result;
     }
 
-    private static CommentsRoot aggregateRoot() {
+    public static CommentsRoot aggregateRoot(TestUtilProjectId id) {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .build();
-        return new CommentsRoot(boundedContext, ID);
+        return new CommentsRoot(boundedContext, id);
     }
 
     /**
@@ -160,12 +159,17 @@ public class AggregatePartCommandTestShouldEnv {
 
         @Override
         protected CommentsRoot newRoot(TestUtilProjectId id) {
-            return aggregateRoot();
+            return aggregateRoot(id);
         }
+
+        public CommentsAggregatePart createPart(TestUtilProjectId id) {
+            return newPart(id);
+        }
+
 
         @Override
         protected CommentsAggregatePart newPart(CommentsRoot root) {
-            return aggregatePart();
+            return aggregatePart(root);
         }
     }
 }
