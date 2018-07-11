@@ -21,19 +21,12 @@
 package io.spine.server.integration;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 
-import java.util.Collection;
-import java.util.List;
-
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.collect.Lists.newArrayList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * An abstract verifier of acknowledgements.
@@ -67,33 +60,7 @@ public abstract class AcknowledgementsVerifier {
      */
     public static AcknowledgementsVerifier acked(int expectedCount) {
         checkArgument(expectedCount >= 0, "0 or more acknowledgements must be expected.");
-
-        return new AcknowledgementsVerifier() {
-            @Override
-            public void verify(Acknowledgements acks) {
-                int actualCount = acks.count();
-                String moreOrLess = compare(actualCount, expectedCount);
-                assertEquals(
-                        expectedCount, actualCount,
-                        "Bounded Context acknowledged " + moreOrLess + " commands than expected"
-                );
-            }
-        };
-    }
-
-    /**
-     * Compares two integers returning a string stating if the first value is less, more or
-     * same number as the second.
-     */
-    @SuppressWarnings("DuplicateStringLiteralInspection")
-    private static String compare(int firstValue, int secondValue) {
-        if (firstValue > secondValue) {
-            return "more";
-        }
-        if (firstValue < secondValue) {
-            return "less";
-        }
-        return "same number";
+        return new AcksCountVerifier(expectedCount);
     }
 
     /*
@@ -106,34 +73,21 @@ public abstract class AcknowledgementsVerifier {
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public static AcknowledgementsVerifier ackedWithoutErrors() {
-        return new AcknowledgementsVerifier() {
-            @Override
-            public void verify(Acknowledgements acks) {
-                if (acks.containErrors()) {
-                    fail("Bounded Context unexpectedly thrown an error");
-                }
-            }
-        };
+        return new AcksErrorAbsenceVerifier();
     }
 
     /**
-     * Verifies that a command was handled responding with some {@link Error error}.
+     * Verifies that a command or an event was handled responding with some {@link Error error}.
      *
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public static AcknowledgementsVerifier ackedWithErrors() {
-        return new AcknowledgementsVerifier() {
-            @Override
-            public void verify(Acknowledgements acks) {
-                if (!acks.containErrors()) {
-                    fail("Bounded Context unexpectedly did not throw an error");
-                }
-            }
-        };
+        return new AcksErrorPresenceVerifier();
     }
 
     /**
-     * Verifies that a command was handled responding with specified number of {@link Error errors}.
+     * Verifies that a command or an event was handled responding with specified number of
+     * {@link Error errors}.
      *
      * @param expectedCount an amount of errors that are expected to match the qualifier
      * @return a new {@link AcknowledgementsVerifier} instance
@@ -141,17 +95,11 @@ public abstract class AcknowledgementsVerifier {
     public static AcknowledgementsVerifier ackedWithErrors(int expectedCount) {
         checkArgument(expectedCount >= 0,
                       "0 or more errors must be expected.");
-        return new AcknowledgementsVerifier() {
-            @Override
-            public void verify(Acknowledgements acks) {
-                assertEquals(expectedCount, acks.countErrors(), 
-                             "Bounded context did not contain an expected amount of errors");
-            }
-        };
+        return new AcksErrorCountVerifier(expectedCount);
     }
 
     /**
-     * Verifies that a command was handled responding with an error matching a provided
+     * Verifies that a command or an event was handled responding with an error matching a provided
      * {@link ErrorQualifier error qualifier}.
      *
      * @param qualifier an error qualifier specifying which kind of error should be a part
@@ -159,19 +107,11 @@ public abstract class AcknowledgementsVerifier {
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public static AcknowledgementsVerifier ackedWithErrors(ErrorQualifier qualifier) {
-        return new AcknowledgementsVerifier() {
-            @Override
-            public void verify(Acknowledgements acks) {
-                if (!acks.containErrors(qualifier)) {
-                    fail("Bounded Context did not contain an expected error. "
-                                 + qualifier.description());
-                }
-            }
-        };
+        return new AcksSpecificErrorPresenceVerifier(qualifier);
     }
 
     /**
-     * Verifies that a command was handled responding with an error matching a provided
+     * Verifies that a command or an event was handled responding with an error matching a provided
      * {@link ErrorQualifier error qualifier}.
      *
      * @param expectedCount an amount of errors that are expected to match the qualifier
@@ -179,16 +119,10 @@ public abstract class AcknowledgementsVerifier {
      *                      of acknowledgement
      * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static AcknowledgementsVerifier ackedWithErrors(int expectedCount, ErrorQualifier qualifier) {
+    public static AcknowledgementsVerifier ackedWithErrors(int expectedCount,
+                                                           ErrorQualifier qualifier) {
         checkArgument(expectedCount >= 0, "0 or more errors matching qualifier must be expected.");
-        return new AcknowledgementsVerifier() {
-            @Override
-            public void verify(Acknowledgements acks) {
-                assertEquals(expectedCount, acks.countErrors(qualifier),
-                             "Bounded Context did not contain an expected count of errors. "
-                                     + qualifier.description());
-            }
-        };
+        return new AcksSpecificErrorCountVerifier(expectedCount, qualifier);
     }
 
     /*
@@ -201,34 +135,21 @@ public abstract class AcknowledgementsVerifier {
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public static AcknowledgementsVerifier ackedWithoutRejections() {
-        return new AcknowledgementsVerifier() {
-            @Override
-            public void verify(Acknowledgements acks) {
-                if (acks.containRejections()) {
-                    fail("Bounded Context unexpectedly rejected a message");
-                }
-            }
-        };
+        return new AcksRejectionAbsenceVerifier();
     }
 
     /**
-     * Verifies that a command was handled responding with some {@link Rejection rejection}.
+     * Verifies that a command or an event was handled responding with some
+     * {@link Rejection rejection}.
      *
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public static AcknowledgementsVerifier ackedWithRejections() {
-        return new AcknowledgementsVerifier() {
-            @Override
-            public void verify(Acknowledgements acks) {
-                if (!acks.containRejections()) {
-                    fail("Bounded Context did not reject any messages");
-                }
-            }
-        };
+        return new AcksRejectionPresenceVerifier();
     }
 
     /**
-     * Verifies that a command was handled responding with a {@link Rejection rejection}
+     * Verifies that a command or an event was handled responding with a {@link Rejection rejection}
      * of the provided type.
      *
      * @param type rejection type in a form of message class
@@ -240,65 +161,44 @@ public abstract class AcknowledgementsVerifier {
     }
 
     /**
-     * Verifies that a command was handled responding with a {@link Rejection rejection}
+     * Verifies that a command or an event was handled responding with a {@link Rejection rejection}
      * of the provided type.
      *
      * @param type rejection type in a form of {@link RejectionClass RejectionClass}
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public static AcknowledgementsVerifier ackedWithRejections(RejectionClass type) {
-        Class<? extends Message> domainRejection = type.value();
-        return new AcknowledgementsVerifier() {
-            @Override
-            public void verify(Acknowledgements acks) {
-                if (!acks.containRejections(type)) {
-                    fail("Bounded Context did not reject a message of type:" +
-                                 domainRejection.getSimpleName());
-                }
-            }
-        };
+        return new AcksRejectionOfTypePresenceVerifier(type);
     }
 
     /**
-     * Verifies that a command was handled responding with a provided {@link Rejection rejection}.
+     * Verifies that a command or an event was handled responding with rejection matching the
+     * provided predicate.
      *
+     * @param type      a type of a domain rejection specified by a message class
      * @param predicate a predicate filtering the domain rejections
      * @param <T>       a domain rejection type
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public static <T extends Message> AcknowledgementsVerifier
-    ackedWithRejections(Class<T> clazz, RejectionPredicate<T> predicate) {
-        return new AcknowledgementsVerifier() {
-            @Override
-            public void verify(Acknowledgements acks) {
-                if (!acks.containRejection(clazz, predicate)) {
-                    fail("Bounded Context did not reject a message:"
-                                 + predicate.message());
-                }
-            }
-        };
+    ackedWithRejections(Class<T> type, RejectionPredicate<T> predicate) {
+        return new AcksSpecificRejectionPresenceVerifier<>(type, predicate);
     }
 
     /**
-     * Verifies that a command was handled responding with a provided domain rejection
-     * specified amount of times.
+     * Verifies that a command or an event was handled responding with a rejection specified
+     * amount of times.
      *
      * @param expectedCount an amount of rejection that are expected in Bounded Context
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public static AcknowledgementsVerifier ackedWithRejections(int expectedCount) {
         checkArgument(expectedCount >= 0, "0 or more rejections must be expected.");
-        return new AcknowledgementsVerifier() {
-            @Override
-            public void verify(Acknowledgements acks) {
-                assertEquals(expectedCount, acks.countRejections(),
-                             "Bounded Context did not contain a rejection expected amount of times.");
-            }
-        };
+        return new AcksRejectionCountVerifier(expectedCount);
     }
 
     /**
-     * Verifies that a command was handled responding with a {@link Rejection rejection}
+     * Verifies that a command or an event was handled responding with a {@link Rejection rejection}
      * of a provided type specified amount of times.
      *
      * @param expectedCount an amount of rejection that are expected in Bounded Context
@@ -314,51 +214,38 @@ public abstract class AcknowledgementsVerifier {
     }
 
     /**
-     * Verifies that a command was handled responding with a {@link Rejection rejection}
+     * Verifies that a command or an event was handled responding with a {@link Rejection rejection}
      * of a provided type specified amount of times.
      *
      * @param expectedCount an amount of rejection that are expected in Bounded Context
      * @param type          rejection type in a form of {@link RejectionClass RejectionClass}
      * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static AcknowledgementsVerifier ackedWithRejections(int expectedCount, RejectionClass type) {
+    public static AcknowledgementsVerifier ackedWithRejections(int expectedCount,
+                                                               RejectionClass type) {
         checkArgument(expectedCount >= 0,
                       "0 or more rejections of rejecetions of class must be expected.");
-        return new AcknowledgementsVerifier() {
-            @Override
-            public void verify(Acknowledgements acks) {
-                Class<? extends Message> rejectionClass = type.value();
-                assertEquals(expectedCount, acks.countRejections(type),
-                             "Bounded Context did not contain " + rejectionClass.getSimpleName() +
-                                     "rejection expected amount of times.");
-            }
-        };
+        return new AcksRejectionOfTypeCountVerifier(type, expectedCount);
     }
 
     /**
-     * Verifies that a command was handled responding with a provided domain rejection
+     * Verifies that a command or an event was handled responding with a provided domain rejection
      * specified amount of times.
      *
      * @param expectedCount an amount of rejection that are expected in Bounded Context
+     * @param type          a type of a domain rejection specified by a message class
      * @param predicate     a predicate filtering domain rejections
      * @param <T>           a domain rejection type
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public static <T extends Message> AcknowledgementsVerifier
-    ackedWithRejections(int expectedCount, Class<T> clazz, RejectionPredicate<T> predicate) {
+    ackedWithRejections(int expectedCount, Class<T> type, RejectionPredicate<T> predicate) {
         checkArgument(expectedCount >= 0, "0 or more specified rejections must be expected.");
-        return new AcknowledgementsVerifier() {
-            @Override
-            public void verify(Acknowledgements acks) {
-                assertEquals(expectedCount, acks.countRejections(clazz, predicate),
-                             "Bounded Context did not contain a rejection expected amount of times:"
-                                     + predicate.message());
-            }
-        };
+        return new AcksSpecificRejectionCountVerifier<>(expectedCount, type, predicate);
     }
 
     /*
-     * Acknowledgements verifier combination.
+     * Verifier combination shortcuts.
      ******************************************************************************/
 
     /**
@@ -370,76 +257,6 @@ public abstract class AcknowledgementsVerifier {
     public AcknowledgementsVerifier and(AcknowledgementsVerifier otherVerifier) {
         return AcksVerifierCombination.of(this, otherVerifier);
     }
-
-    /**
-     * A special kind of a {@link AcknowledgementsVerifier Acknowledgements Verifier} that
-     * executes a list of assertions one by one.
-     */
-    private static class AcksVerifierCombination extends AcknowledgementsVerifier {
-
-        private final List<AcknowledgementsVerifier> verifiers;
-
-        /**
-         * Creates a combination of two verifiers. More verifiers are appended using
-         * {@link #and(AcknowledgementsVerifier) and()}.
-         */
-        private AcksVerifierCombination(Collection<AcknowledgementsVerifier> verifiers) {
-            super();
-            this.verifiers = ImmutableList.copyOf(verifiers);
-        }
-
-        public static AcksVerifierCombination of(AcknowledgementsVerifier first,
-                                                 AcknowledgementsVerifier second) {
-            List<AcknowledgementsVerifier> verifiers = newArrayList();
-            addVerifierToList(first, verifiers);
-            addVerifierToList(second, verifiers);
-            return new AcksVerifierCombination(verifiers);
-        }
-
-        public static AcksVerifierCombination of(Iterable<AcknowledgementsVerifier> items,
-                                                 AcknowledgementsVerifier newVerifier) {
-            List<AcknowledgementsVerifier> verifiers = newArrayList(items);
-            addVerifierToList(newVerifier, verifiers);
-            return new AcksVerifierCombination(verifiers);
-        }
-
-        private static void addVerifierToList(AcknowledgementsVerifier verifier,
-                                              Collection<AcknowledgementsVerifier> items) {
-            if (verifier instanceof AcksVerifierCombination) {
-                items.addAll(((AcksVerifierCombination) verifier).verifiers);
-            } else {
-                items.add(verifier);
-            }
-        }
-
-        /**
-         * Executes all of the verifiers that were combined using
-         * {@link #and(AcknowledgementsVerifier) and()}.
-         *
-         * @param acks acknowledgements of handling commands by the Bounded Context
-         */
-        @Override
-        public void verify(Acknowledgements acks) {
-            for (AcknowledgementsVerifier verifier : verifiers) {
-                verifier.verify(acks);
-            }
-        }
-
-        /**
-         * Creates a new verifier appending the provided verifier to the current combination.
-         *
-         * @param verifier a verifier to be added to a combination
-         * @return a new verifier instance
-         */
-        @Override
-        public AcksVerifierCombination and(AcknowledgementsVerifier verifier) {
-            return of(verifiers, verifier);
-        }
-    }
-
-    /*
-     * Verifier combination shortcuts.
-     ******************************************************************************/
 
     /**
      * Creates a new verifier adding a check to not contain any {@link Error errors}.
@@ -563,7 +380,8 @@ public abstract class AcknowledgementsVerifier {
      * @param type          rejection type in a form of message class
      * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public AcknowledgementsVerifier withRejections(int expectedCount, Class<? extends Message> type) {
+    public AcknowledgementsVerifier withRejections(int expectedCount,
+                                                   Class<? extends Message> type) {
         AcknowledgementsVerifier rejectedType = ackedWithRejections(expectedCount, type);
         return this.and(rejectedType);
     }
