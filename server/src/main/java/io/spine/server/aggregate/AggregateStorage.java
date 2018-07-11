@@ -89,7 +89,7 @@ public abstract class AggregateStorage<I>
      * @param events non empty aggregate state record to store
      */
     @Override
-    public synchronized void write(I id, AggregateStateRecord events) {
+    public void write(I id, AggregateStateRecord events) {
         checkNotClosedAndArguments(id, events);
 
         List<Event> eventList = events.getEventList();
