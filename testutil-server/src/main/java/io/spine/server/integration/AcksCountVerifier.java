@@ -23,7 +23,8 @@ package io.spine.server.integration;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Verifies that a command or an event was handled responding with specified number of {@link io.spine.base.Error errors}.
+ * Verifies that a command or an event was handled responding with specified number of
+ * {@link io.spine.core.Ack acks}.
  *
  * @author Mykhailo Drachuk
  */
@@ -31,7 +32,7 @@ class AcksCountVerifier extends AcknowledgementsVerifier {
 
     private final int expectedCount;
 
-    /** @param expectedCount an amount of errors that are expected to match the qualifier */
+    /** @param expectedCount an amount acks that are expected be observed */
     AcksCountVerifier(int expectedCount) {
         this.expectedCount = expectedCount;
     }

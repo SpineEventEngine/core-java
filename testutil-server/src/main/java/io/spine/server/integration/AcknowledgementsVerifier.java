@@ -91,7 +91,7 @@ public abstract class AcknowledgementsVerifier {
      * Verifies that a command or an event was handled responding with specified number of
      * {@link Error errors}.
      *
-     * @param expectedCount an amount of errors that are expected to match the qualifier
+     * @param expectedCount an amount of errors that are expected to be observed
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public static AcknowledgementsVerifier ackedWithErrors(int expectedCount) {
@@ -102,29 +102,29 @@ public abstract class AcknowledgementsVerifier {
 
     /**
      * Verifies that a command or an event was handled responding with an error matching a provided
-     * {@link ErrorQualifier error qualifier}.
+     * {@link ErrorCriteria error criteria}.
      *
-     * @param qualifier an error qualifier specifying which kind of error should be a part
-     *                  of acknowledgement
+     * @param criteria an error criteria specifying which kind of error should be a part
+     *                 of acknowledgement
      * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static AcknowledgementsVerifier ackedWithErrors(ErrorQualifier qualifier) {
-        return new AcksSpecificErrorPresenceVerifier(qualifier);
+    public static AcknowledgementsVerifier ackedWithErrors(ErrorCriteria criteria) {
+        return new AcksSpecificErrorPresenceVerifier(criteria);
     }
 
     /**
      * Verifies that a command or an event was handled responding with an error matching a provided
-     * {@link ErrorQualifier error qualifier}.
+     * {@link ErrorCriteria error criteria}.
      *
-     * @param expectedCount an amount of errors that are expected to match the qualifier
-     * @param qualifier     an error qualifier specifying which kind of error should be a part
+     * @param expectedCount an amount of errors that are expected to match the criteria
+     * @param criteria      an error criteria specifying which kind of error should be a part
      *                      of acknowledgement
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public static AcknowledgementsVerifier ackedWithErrors(int expectedCount,
-                                                           ErrorQualifier qualifier) {
-        checkArgument(expectedCount >= 0, "0 or more errors matching qualifier must be expected.");
-        return new AcksSpecificErrorCountVerifier(expectedCount, qualifier);
+                                                           ErrorCriteria criteria) {
+        checkArgument(expectedCount >= 0, "0 or more errors matching criteria must be expected.");
+        return new AcksSpecificErrorCountVerifier(expectedCount, criteria);
     }
 
     /*
@@ -293,28 +293,28 @@ public abstract class AcknowledgementsVerifier {
 
     /**
      * Creates a new verifier adding a check to contain an {@link Error error} that
-     * matches the qualifier.
+     * matches the criteria.
      *
-     * @param qualifier an error qualifier specifying which kind of error should be a part
-     *                  of acknowledgement
+     * @param criteria an error criteria specifying which kind of error should be a part
+     *                 of acknowledgement
      * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public AcknowledgementsVerifier withErrors(ErrorQualifier qualifier) {
-        AcknowledgementsVerifier withError = ackedWithErrors(qualifier);
+    public AcknowledgementsVerifier withErrors(ErrorCriteria criteria) {
+        AcknowledgementsVerifier withError = ackedWithErrors(criteria);
         return this.and(withError);
     }
 
     /**
      * Creates a new verifier adding a check to contain an {@link Error error} that
-     * matches the qualifier.
+     * matches the criteria.
      *
-     * @param expectedCount an amount of errors that are expected to match the qualifier
-     * @param qualifier     an error qualifier specifying which kind of error should be a part
+     * @param expectedCount an amount of errors that are expected to match the criteria
+     * @param criteria      an error criteria specifying which kind of error should be a part
      *                      of acknowledgement
      * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public AcknowledgementsVerifier withErrors(int expectedCount, ErrorQualifier qualifier) {
-        AcknowledgementsVerifier withError = ackedWithErrors(expectedCount, qualifier);
+    public AcknowledgementsVerifier withErrors(int expectedCount, ErrorCriteria criteria) {
+        AcknowledgementsVerifier withError = ackedWithErrors(expectedCount, criteria);
         return this.and(withError);
     }
 

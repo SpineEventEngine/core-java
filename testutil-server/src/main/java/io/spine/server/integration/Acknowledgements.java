@@ -119,24 +119,24 @@ public class Acknowledgements {
     }
 
     /**
-     * @return {@code true} if an error which matches the provided qualifier did occur in
+     * @return {@code true} if an error which matches the provided criteria did occur in
      * the Bounded Context during command handling, {@code false} otherwise.
      */
-    public boolean containErrors(ErrorQualifier qualifier) {
-        checkNotNull(qualifier);
+    public boolean containErrors(ErrorCriteria criteria) {
+        checkNotNull(criteria);
         return errors.stream()
-                     .anyMatch(qualifier::test);
+                     .anyMatch(criteria::test);
     }
 
     /**
-     * @param qualifier an error qualifier specifying which kind of an error to count
-     * @return a total number of times errors matching the provided qualifier were 
+     * @param criteria an error criteria specifying which kind of an error to count
+     * @return a total number of times errors matching the provided criteria were 
      * observed in the Bounded Context responses
      */
-    public long countErrors(ErrorQualifier qualifier) {
-        checkNotNull(qualifier);
+    public long countErrors(ErrorCriteria criteria) {
+        checkNotNull(criteria);
         return errors.stream()
-                     .filter(qualifier::test)
+                     .filter(criteria::test)
                      .count();
     }
 

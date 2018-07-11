@@ -24,29 +24,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Verifies that a command or an event was handled responding with an error matching a provided
- * {@link ErrorQualifier error qualifier}.
+ * {@link ErrorCriteria error criteria}.
  *
  * @author Mykhailo Drachuk
  */
 class AcksSpecificErrorCountVerifier extends AcknowledgementsVerifier {
 
     private final int expectedCount;
-    private final ErrorQualifier qualifier;
+    private final ErrorCriteria criteria;
 
     /**
-     * @param expectedCount an amount of errors that are expected to match the qualifier
-     * @param qualifier     an error qualifier specifying which kind of error should be a part
+     * @param expectedCount an amount of errors that are expected to match the criteria
+     * @param criteria      an error criteria specifying which kind of error should be a part
      *                      of acknowledgement
      */
-    AcksSpecificErrorCountVerifier(int expectedCount, ErrorQualifier qualifier) {
+    AcksSpecificErrorCountVerifier(int expectedCount, ErrorCriteria criteria) {
         this.expectedCount = expectedCount;
-        this.qualifier = qualifier;
+        this.criteria = criteria;
     }
 
     @Override
     public void verify(Acknowledgements acks) {
-        assertEquals(expectedCount, acks.countErrors(qualifier),
+        assertEquals(expectedCount, acks.countErrors(criteria),
                      "Bounded Context did not contain an expected count of errors. "
-                             + qualifier.description());
+                             + criteria.description());
     }
 }

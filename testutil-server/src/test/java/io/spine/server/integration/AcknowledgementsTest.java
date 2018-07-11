@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.server.integration.ErrorQualifier.withType;
+import static io.spine.server.integration.ErrorCriteria.withType;
 import static io.spine.server.integration.given.CommandAcksTestEnv.*;
 import static io.spine.server.integration.given.CommandAcksTestEnv.DUPLICATE_ERROR_TYPE;
 import static io.spine.server.integration.given.CommandAcksTestEnv.MISSING_ERROR_TYPE;
@@ -236,7 +236,7 @@ class AcknowledgementsTest {
     }
 
     @Test
-    @DisplayName("return true if contain errors matched by qualifier")
+    @DisplayName("return true if contain errors matched by criteria")
     void containErrorsUsingQualifier() {
         List<Ack> items = ImmutableList.of(newErrorAck(newError(PRESENT_ERROR_TYPE)));
         Acknowledgements acks = new Acknowledgements(items);
@@ -246,7 +246,7 @@ class AcknowledgementsTest {
     }
 
     @Test
-    @DisplayName("return proper total error count matched by qualifier")
+    @DisplayName("return proper total error count matched by criteria")
     void countErrorsUsingQualifier() {
         Acknowledgements acks = new Acknowledgements(asList(
                 newErrorAck(newError(UNIQUE_ERROR_TYPE)),

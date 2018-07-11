@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.server.integration.AcknowledgementsVerifier.acked;
 import static io.spine.server.integration.AcknowledgementsVerifier.ackedWithErrors;
 import static io.spine.server.integration.AcknowledgementsVerifier.ackedWithRejections;
-import static io.spine.server.integration.ErrorQualifier.withType;
+import static io.spine.server.integration.ErrorCriteria.withType;
 import static io.spine.server.integration.given.CommandAcksTestEnv.DUPLICATE_ERROR_TYPE;
 import static io.spine.server.integration.given.CommandAcksTestEnv.DUPLICATE_TASK_TITLE;
 import static io.spine.server.integration.given.CommandAcksTestEnv.MISSING_ERROR_TYPE;
@@ -107,8 +107,8 @@ class AcknowledgementsVerifierTest {
 
 
     @Test
-    @DisplayName("verify error by a qualifier")
-    void containErrorByQualifier() {
+    @DisplayName("verify error presence by a criteria")
+    void containErrorByCriteria() {
         Acknowledgements errorAcks = new Acknowledgements(ImmutableList.of(
                 newErrorAck(newError(PRESENT_ERROR_TYPE))
         ));
@@ -119,8 +119,8 @@ class AcknowledgementsVerifierTest {
     }
 
     @Test
-    @DisplayName("verify error by a qualifier")
-    void countErrorByQualifier() {
+    @DisplayName("verify error count by a criteria")
+    void countErrorByCriteria() {
         Acknowledgements errorAcks = new Acknowledgements(ImmutableList.of(
                 newErrorAck(newError(DUPLICATE_ERROR_TYPE)),
                 newErrorAck(newError(DUPLICATE_ERROR_TYPE))

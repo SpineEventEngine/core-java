@@ -33,16 +33,16 @@ import static java.lang.String.format;
  * An abstract predicate testing {@link Error Spine errors} to
  * match some simple rules.
  *
- * <p>This qualifiers are consumed by acks verifier
- * {@link AcknowledgementsVerifier#ackedWithErrors(ErrorQualifier) ackedWithError method}.
+ * <p>These criterias are consumed by acks verifier
+ * {@link AcknowledgementsVerifier#ackedWithErrors(ErrorCriteria) ackedWithError method}.
  *
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
-public abstract class ErrorQualifier {
+public abstract class ErrorCriteria {
 
     /**
-     * A message describing the qualifier.
+     * A message describing the criteria.
      *
      * <p>Used to report an assertion error.
      */
@@ -54,11 +54,11 @@ public abstract class ErrorQualifier {
      * Verifies that the {@link Error#getType() errors type} matches the provided one.
      *
      * @param type a type that is to be matched in error
-     * @return new {@link ErrorQualifier error qualifier} instance
+     * @return new {@link ErrorCriteria error criteria} instance
      */
-    public static ErrorQualifier withType(String type) {
+    public static ErrorCriteria withType(String type) {
         checkNotNull(type);
-        return new ErrorQualifier() {
+        return new ErrorCriteria() {
             @Override
             public String description() {
                 return format("Error type is %s", type);
@@ -75,10 +75,10 @@ public abstract class ErrorQualifier {
      * Verifies that the {@link Error#getCode() errors code} matches the provided one.
      *
      * @param code a code that is to be matched in error
-     * @return new {@link ErrorQualifier error qualifier} instance
+     * @return new {@link ErrorCriteria error criteria} instance
      */
-    public static ErrorQualifier withCode(int code) {
-        return new ErrorQualifier() {
+    public static ErrorCriteria withCode(int code) {
+        return new ErrorCriteria() {
             @Override
             public String description() {
                 return format("Error code is \"%s\"", code);
@@ -95,10 +95,10 @@ public abstract class ErrorQualifier {
      * Verifies that the {@link Error#getMessage() errors message} matches the provided one.
      *
      * @param message a message that is to be matched in error
-     * @return new {@link ErrorQualifier error qualifier} instance
+     * @return new {@link ErrorCriteria error criteria} instance
      */
-    public static ErrorQualifier withMessage(String message) {
-        return new ErrorQualifier() {
+    public static ErrorCriteria withMessage(String message) {
+        return new ErrorCriteria() {
             @Override
             public String description() {
                 return format("Error contains following message: %s", message);
@@ -112,18 +112,18 @@ public abstract class ErrorQualifier {
     }
 
     /**
-     * A static factory method for creating an {@link ErrorAttributeQualifier
-     * error attribute qualifier}.
+     * A static factory method for creating an {@link ErrorAttributeCriteria error attribute 
+     * criteria}.
      *
      * <p>An error attribute verifier checks that the error contains an
      * {@link Error#getAttributes() attribute} with a provided name.
      *
-     * @param name name of an attribute which is check by a qualifier
-     * @return a new {@link ErrorAttributeQualifier error attribute qualifier} instance
+     * @param name name of an attribute which looked for by this criteria
+     * @return a new {@link ErrorAttributeCriteria error attribute criteria} instance
      */
     @SuppressWarnings("ClassReferencesSubclass")
-    public static ErrorAttributeQualifier withAttribute(String name) {
-        return new ErrorAttributeQualifier(name);
+    public static ErrorAttributeCriteria withAttribute(String name) {
+        return new ErrorAttributeCriteria(name);
     }
 
     /**
@@ -131,10 +131,10 @@ public abstract class ErrorQualifier {
      * with a provided name.
      *
      * @param name a name of an attribute that must be absent in error
-     * @return new {@link ErrorQualifier error qualifier} instance
+     * @return new {@link ErrorCriteria error criteria} instance
      */
-    public static ErrorQualifier withoutAttribute(String name) {
-        return new ErrorQualifier() {
+    public static ErrorCriteria withoutAttribute(String name) {
+        return new ErrorCriteria() {
             @Override
             public String description() {
                 return format("Error does not contain an attribute \"%s\"", name);
@@ -142,7 +142,7 @@ public abstract class ErrorQualifier {
 
             @Override
             public boolean test(Error error) {
-                Map<String, Value> attributes = error.getAttributes();
+                Map<String, Value> attributes = error.getAttributesMap();
                 return !attributes.containsKey(name);
             }
         };

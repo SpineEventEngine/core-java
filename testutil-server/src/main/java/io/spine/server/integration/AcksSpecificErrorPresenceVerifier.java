@@ -24,27 +24,27 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Verifies that a command or an event was handled responding with an error matching a provided
- * {@link ErrorQualifier error qualifier}.
+ * {@link ErrorCriteria error criteria}.
  *
  * @author Mykhailo Drachuk
  */
 class AcksSpecificErrorPresenceVerifier extends AcknowledgementsVerifier {
 
-    private final ErrorQualifier qualifier;
+    private final ErrorCriteria criteria;
 
     /**
-     * @param qualifier an error qualifier specifying which kind of error should be a part
-     *                  of acknowledgement
+     * @param criteria an error criteria specifying which kind of error should be a part
+     *                 of acknowledgement
      */
-    AcksSpecificErrorPresenceVerifier(ErrorQualifier qualifier) {
-        this.qualifier = qualifier;
+    AcksSpecificErrorPresenceVerifier(ErrorCriteria criteria) {
+        this.criteria = criteria;
     }
 
     @Override
     public void verify(Acknowledgements acks) {
-        if (!acks.containErrors(qualifier)) {
+        if (!acks.containErrors(criteria)) {
             fail("Bounded Context did not contain an expected error. "
-                         + qualifier.description());
+                         + criteria.description());
         }
     }
 }

@@ -30,17 +30,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
- * An specific {@link ErrorQualifier error qualifier} that checks the errors
+ * An specific {@link ErrorCriteria error criteria} that checks the errors
  * {@link Error#getAttributes() attributes}.
  *
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
-public class ErrorAttributeQualifier extends ErrorQualifier {
+public class ErrorAttributeCriteria extends ErrorCriteria {
 
     private final String name;
 
-    ErrorAttributeQualifier(String name) {
+    ErrorAttributeCriteria(String name) {
         super();
         this.name = name;
     }
@@ -54,7 +54,7 @@ public class ErrorAttributeQualifier extends ErrorQualifier {
     /** {@inheritDoc} */
     @Override
     public boolean test(Error error) {
-        Map<String, Value> attributes = error.getAttributes();
+        Map<String, Value> attributes = error.getAttributesMap();
         return attributes.containsKey(name);
     }
 
@@ -62,11 +62,11 @@ public class ErrorAttributeQualifier extends ErrorQualifier {
      * Verifies the value of the attribute under current name.
      *
      * @param value a value that is expected by an attribute name
-     * @return a new {@link ErrorQualifier error qualifier} instance
+     * @return a new {@link ErrorCriteria error criteria} instance
      */
-    public ErrorQualifier value(Value value) {
+    public ErrorCriteria value(Value value) {
         checkNotNull(value);
-        return new ErrorQualifier() {
+        return new ErrorCriteria() {
             @Override
             public String description() {
                 return format("Error contains an attribute \"%s\" with following value: %s",
@@ -75,7 +75,7 @@ public class ErrorAttributeQualifier extends ErrorQualifier {
 
             @Override
             public boolean test(Error error) {
-                Map<String, Value> attributes = error.getAttributes();
+                Map<String, Value> attributes = error.getAttributesMap();
                 return value.equals(attributes.get(name));
             }
         };
