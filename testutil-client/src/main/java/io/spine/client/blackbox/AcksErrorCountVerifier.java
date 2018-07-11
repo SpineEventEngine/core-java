@@ -18,10 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    compile project(path: ':client')
-    api project(path: ':testutil-core')
-    api "io.spine:spine-testutil-time:$spineTimeVersion"
-}
+package io.spine.client.blackbox;
 
-apply from: testArtifactsScript
+import io.spine.base.Error;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+/**
+ * Verifies that a command or an event was handled responding with specified number of
+ * {@link Error errors}.
+ *
+ * @author Mykhailo Drachuk
+ */
+class AcksErrorCountVerifier extends AcknowledgementsVerifier {
+
+    private final int expectedCount;
+
+    /** @param expectedCount an amount of errors that are expected to be observed in acks */
+    AcksErrorCountVerifier(int expectedCount) {
+        this.expectedCount = expectedCount;
+    }
+
+    @Override
+    public void verify(Acknowledgements acks) {
+        assertEquals(expectedCount, acks.countErrors(),
+                     "Bounded context did not contain an expected amount of errors");
+    }
+}

@@ -18,10 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    compile project(path: ':client')
-    api project(path: ':testutil-core')
-    api "io.spine:spine-testutil-time:$spineTimeVersion"
-}
+package io.spine.client.blackbox;
 
-apply from: testArtifactsScript
+import io.spine.base.Error;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
+/**
+ * Verifies that the command handling did not respond with {@link Error error}.
+ *
+ * @author Mykhailo Drachuk
+ */
+class AcksErrorAbsenceVerifier extends AcknowledgementsVerifier {
+
+    @Override
+    public void verify(Acknowledgements acks) {
+        if (acks.containErrors()) {
+            fail("Bounded Context unexpectedly thrown an error");
+        }
+    }
+}

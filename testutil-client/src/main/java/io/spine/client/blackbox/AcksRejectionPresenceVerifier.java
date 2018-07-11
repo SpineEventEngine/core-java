@@ -18,10 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    compile project(path: ':client')
-    api project(path: ':testutil-core')
-    api "io.spine:spine-testutil-time:$spineTimeVersion"
-}
+package io.spine.client.blackbox;
 
-apply from: testArtifactsScript
+import io.spine.core.Rejection;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
+/**
+ * Verifies that a command or an event was handled responding with some {@link Rejection rejection}.
+ *
+ * @author Mykhailo Drachuk
+ */
+class AcksRejectionPresenceVerifier extends AcknowledgementsVerifier {
+
+    @Override
+    public void verify(Acknowledgements acks) {
+        if (!acks.containRejections()) {
+            fail("Bounded Context did not reject any messages");
+        }
+    }
+}

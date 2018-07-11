@@ -18,10 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    compile project(path: ':client')
-    api project(path: ':testutil-core')
-    api "io.spine:spine-testutil-time:$spineTimeVersion"
-}
+package io.spine.client.blackbox;
 
-apply from: testArtifactsScript
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+/**
+ * Verifies that a command or an event was handled responding with a rejection specified
+ * amount of times.
+ *
+ * @author Mykhailo Drachuk
+ */
+class AcksRejectionCountVerifier extends AcknowledgementsVerifier {
+
+    private final int expectedCount;
+
+    /** @param expectedCount an amount of rejection that are expected in Bounded Context */
+    AcksRejectionCountVerifier(int expectedCount) {
+        this.expectedCount = expectedCount;
+    }
+
+    @Override
+    public void verify(Acknowledgements acks) {
+        assertEquals(expectedCount, acks.countRejections(),
+                     "Bounded Context did not contain a rejection expected amount of times.");
+    }
+}

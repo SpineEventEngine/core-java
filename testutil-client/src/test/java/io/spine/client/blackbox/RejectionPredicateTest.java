@@ -18,10 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    compile project(path: ':client')
-    api project(path: ':testutil-core')
-    api "io.spine:spine-testutil-time:$spineTimeVersion"
-}
+package io.spine.client.blackbox;
 
-apply from: testArtifactsScript
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+/**
+ * @author Mykhailo Drachuk
+ */
+@DisplayName("Rejection Predicate should")
+class RejectionPredicateTest {
+
+    @Test
+    @DisplayName("contain default error message")
+    void containDefaultErrorMessage() {
+        RejectionPredicate predicate = acceptAll();
+        String message = predicate.message();
+        assertNotNull(message);
+    }
+
+    private static RejectionPredicate acceptAll() {
+        return target -> true;
+    }
+}

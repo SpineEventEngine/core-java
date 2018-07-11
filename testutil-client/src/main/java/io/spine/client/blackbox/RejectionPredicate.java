@@ -18,10 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    compile project(path: ':client')
-    api project(path: ':testutil-core')
-    api "io.spine:spine-testutil-time:$spineTimeVersion"
-}
+package io.spine.client.blackbox;
 
-apply from: testArtifactsScript
+import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Message;
+
+import java.util.function.Predicate;
+
+/**
+ * A predicate filtering domain rejections to be used in tests.
+ *
+ * <p>Optionally can contain an error message.
+ *
+ * @param <T> a domain message wrapped by the Spine Rejection
+ * @author Mykhailo Drachuk
+ */
+@VisibleForTesting
+@FunctionalInterface
+public interface RejectionPredicate<T extends Message> extends Predicate<T> {
+
+    /**
+     * @return a message specifying the reason the rejection did not match the predicate
+     */
+    default String message() {
+        return "Domain rejection did not match a predicate.";
+    }
+}

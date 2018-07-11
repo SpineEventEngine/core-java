@@ -18,10 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    compile project(path: ':client')
-    api project(path: ':testutil-core')
-    api "io.spine:spine-testutil-time:$spineTimeVersion"
-}
+package io.spine.server.blackbox.given;
 
-apply from: testArtifactsScript
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.test.server.blackbox.ProjectId;
+
+/**
+ * @author Mykhailo Drachuk
+ */
+public abstract class RepositoryThrowingExceptionOnClose
+        extends AggregateRepository<ProjectId, IntProjectAggregate> {
+
+    @Override
+    public void close() {
+        super.close();
+        throwException();
+    }
+    
+    protected abstract void throwException();
+}

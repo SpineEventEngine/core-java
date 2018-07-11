@@ -18,10 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    compile project(path: ':client')
-    api project(path: ':testutil-core')
-    api "io.spine:spine-testutil-time:$spineTimeVersion"
-}
+package io.spine.client.blackbox;
 
-apply from: testArtifactsScript
+import static org.junit.jupiter.api.Assertions.fail;
+
+/**
+ * Verifies that a command or an event was handled responding with an error matching a provided
+ * {@link ErrorCriteria error criteria}.
+ *
+ * @author Mykhailo Drachuk
+ */
+class AcksSpecificErrorPresenceVerifier extends AcknowledgementsVerifier {
+
+    private final ErrorCriteria criteria;
+
+    /**
+     * @param criteria an error criteria specifying which kind of error should be a part
+     *                 of acknowledgement
+     */
+    AcksSpecificErrorPresenceVerifier(ErrorCriteria criteria) {
+        this.criteria = criteria;
+    }
+
+    @Override
+    public void verify(Acknowledgements acks) {
+        if (!acks.containErrors(criteria)) {
+            fail("Bounded Context did not contain an expected error. "
+                         + criteria.description());
+        }
+    }
+}

@@ -18,10 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-dependencies {
-    compile project(path: ':client')
-    api project(path: ':testutil-core')
-    api "io.spine:spine-testutil-time:$spineTimeVersion"
-}
+package io.spine.client.blackbox;
 
-apply from: testArtifactsScript
+import com.google.protobuf.Message;
+import io.spine.core.Rejection;
+import io.spine.core.RejectionClass;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
+/**
+ * Verifies that a command or an event was handled responding with a {@link Rejection rejection}
+ * of the provided type.
+ *
+ * @author Mykhailo Drachuk
+ */
+class AcksRejectionOfTypePresenceVerifier extends AcknowledgementsVerifier {
+
+    private final RejectionClass type;
+
+    /** @param type rejection type in a form of {@link RejectionClass RejectionClass} */
+    AcksRejectionOfTypePresenceVerifier(RejectionClass type) {
+        this.type = type;
+    }
+
+    @Override
+    public void verify(Acknowledgements acks) {
+        if (!acks.containRejections(type)) {
+            Class<? extends Message> domainRejection = type.value();
+            fail("Bounded Context did not reject a message of type:" +
+                         domainRejection.getSimpleName());
+        }
+    }
+}
