@@ -22,10 +22,15 @@ buildscript {
     apply from: "$rootDir/ext.gradle"
 }
 
+ext {
+    jUnitPioneerVersion = '0.1-SNAPSHOT'
+}
+
 group 'io.spine.tools'
 
 repositories {
     mavenCentral()
+    maven { url = repos.sonatypeSnapshots }
 }
 
 sourceSets {
@@ -45,13 +50,10 @@ dependencies {
 
     testImplementation gradleTestKit()
     testImplementation "io.spine.tools:spine-plugin-testlib:$spineBaseVersion"
+    testImplementation "org.junit-pioneer:junit-pioneer:$jUnitPioneerVersion"
 }
 
 test {
-    useJUnitPlatform {
-        includeEngines 'junit-jupiter', 'junit-vintage'
-    }
-
     dependsOn publishToMavenLocal
     dependsOn project(':core').publishToMavenLocal
     dependsOn project(':client').publishToMavenLocal

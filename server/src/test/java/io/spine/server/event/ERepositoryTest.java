@@ -33,8 +33,8 @@ import java.util.List;
 
 import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.server.event.ERepository.toEntityFilters;
-import static junit.framework.TestCase.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Dmytro Grankin
