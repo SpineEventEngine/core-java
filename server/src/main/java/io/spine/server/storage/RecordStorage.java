@@ -145,7 +145,7 @@ public abstract class RecordStorage<I>
      * @throws IllegalStateException if the storage is closed
      * @see   #write(Object, EntityRecord)
      */
-    public void write(I id, EntityRecordWithColumns record) {
+    public synchronized void write(I id, EntityRecordWithColumns record) {
         checkNotNull(id);
         checkArgument(record.getRecord()
                             .hasState(), "Record does not have state field.");
@@ -158,7 +158,7 @@ public abstract class RecordStorage<I>
      * {@inheritDoc}
      */
     @Override
-    public void write(I id, EntityRecord record) {
+    public synchronized void write(I id, EntityRecord record) {
         final EntityRecordWithColumns recordWithStorageFields =
                 EntityRecordWithColumns.of(record);
         write(id, recordWithStorageFields);
@@ -172,7 +172,7 @@ public abstract class RecordStorage<I>
      * @param  records an ID to record map with the entries to store
      * @throws IllegalStateException if the storage is closed
      */
-    public void write(Map<I, EntityRecordWithColumns> records) {
+    public synchronized void write(Map<I, EntityRecordWithColumns> records) {
         checkNotNull(records);
         checkNotClosed();
 
@@ -191,7 +191,7 @@ public abstract class RecordStorage<I>
     }
 
     @Override
-    public void writeLifecycleFlags(I id, LifecycleFlags flags) {
+    public synchronized void writeLifecycleFlags(I id, LifecycleFlags flags) {
         final RecordReadRequest<I> request = new RecordReadRequest<>(id);
         final Optional<EntityRecord> optional = read(request);
         if (optional.isPresent()) {

@@ -215,7 +215,7 @@ public abstract class Bus<T extends Message,
      *
      * @see DispatchingQueue
      */
-    private DispatchingQueue<E> queue() {
+    private synchronized DispatchingQueue<E> queue() {
         if (queue == null) {
             queue = new DispatchingQueue<>(this::dispatch);
         }

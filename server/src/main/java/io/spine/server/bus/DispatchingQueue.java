@@ -65,7 +65,7 @@ class DispatchingQueue<E extends MessageEnvelope> {
      * @param envelope the envelope to dispatch
      * @param observer the observer to receive the outcome of the operation
      */
-    public void add(E envelope, StreamObserver<Ack> observer) {
+    public synchronized void add(E envelope, StreamObserver<Ack> observer) {
         checkNotNull(envelope);
         checkNotNull(observer);
 
