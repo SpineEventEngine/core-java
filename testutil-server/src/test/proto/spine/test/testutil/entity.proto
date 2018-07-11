@@ -32,27 +32,27 @@ option java_generate_equals_and_hash = true;
 import "google/protobuf/timestamp.proto";
 import "spine/core/user_id.proto";
 
-message TestUtilProjectId {
+message TUProjectId {
     string value = 1;
 }
 
-message TestUtilProjectAggregate {
+message TUProjectAggregate {
 
-    TestUtilProjectId id = 1;
-
-    google.protobuf.Timestamp timestamp = 2;
-}
-
-message TestUtilCommentsAggregatePart {
-
-    TestUtilProjectId id = 1;
+    TUProjectId id = 1;
 
     google.protobuf.Timestamp timestamp = 2;
 }
 
-message TestUtilTaskCreationPm {
+message TUCommentsAggregatePart {
 
-    TestUtilProjectId id = 1;
+    TUProjectId id = 1;
+
+    google.protobuf.Timestamp timestamp = 2;
+}
+
+message TUTaskCreationPm {
+
+    TUProjectId id = 1;
 
     google.protobuf.Timestamp timestamp = 2;
 }

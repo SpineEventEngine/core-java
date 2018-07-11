@@ -23,8 +23,8 @@ package io.spine.server.procman;
 import io.spine.server.expected.CommandHandlerExpected;
 import io.spine.server.procman.given.ProcessManagerCommandTestTestEnv.CommandHandlingProcessManager;
 import io.spine.server.procman.given.ProcessManagerCommandTestTestEnv.TimestampProcessManagerTest;
-import io.spine.test.testutil.TestUtilAssignTask;
-import io.spine.test.testutil.TestUtilTaskCreationPm;
+import io.spine.test.testutil.TUAssignTask;
+import io.spine.test.testutil.TUTaskCreationPm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,10 +62,10 @@ class ProcessManagerCommandTestShould {
         pmCommandTest.setUp();
         pmCommandTest.init();
         CommandHandlingProcessManager testPm = processManager();
-        CommandHandlerExpected<TestUtilTaskCreationPm> expected =
+        CommandHandlerExpected<TUTaskCreationPm> expected =
                 pmCommandTest.expectThat(testPm);
 
-        expected.routesCommand(TestUtilAssignTask.class, command -> {
+        expected.routesCommand(TUAssignTask.class, command -> {
             assertEquals(NESTED_COMMAND, command);
         });
     }

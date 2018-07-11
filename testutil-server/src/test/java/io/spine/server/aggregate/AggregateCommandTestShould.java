@@ -26,7 +26,7 @@ import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.CommandHand
 import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.RejectionCommandHandlerTest;
 import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.CommandHandlingTest;
 import io.spine.server.expected.CommandHandlerExpected;
-import io.spine.test.testutil.TestUtilProjectAggregate;
+import io.spine.test.testutil.TUProjectAggregate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -76,7 +76,7 @@ class AggregateCommandTestShould {
     void shouldHandleRejection() {
         aggregateRejectionCommandTest.setUp();
         CommandHandlingAggregate testAggregate = aggregate();
-        CommandHandlerExpected<TestUtilProjectAggregate> expected =
+        CommandHandlerExpected<TUProjectAggregate> expected =
                 aggregateRejectionCommandTest.expectThat(testAggregate);
         expected.throwsRejection(Rejection.class);
     }

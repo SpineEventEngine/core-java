@@ -31,22 +31,22 @@ option java_generate_equals_and_hash = true;
 
 import "spine/test/testutil/entity.proto";
 
-message TestUtilProjectCreated {
-    TestUtilProjectId id = 1;
+message TUProjectCreated {
+    TUProjectId id = 1;
 }
 
-message TestUtilProjectAssigned {
-    TestUtilProjectId id = 1;
+message TUProjectAssigned {
+    TUProjectId id = 1;
 }
 
-message TestUtilCommentAdded {
-    TestUtilProjectId id = 1;
+message TUCommentAdded {
+    TUProjectId id = 1;
 }
 
-message TestUtilTaskCreated {
-    TestUtilProjectId id = 1;
+message TUTaskCreated {
+    TUProjectId id = 1;
 }
 
-message TestUtilTaskAssigned {
-    TestUtilProjectId id = 1;
+message TUTaskAssigned {
+    TUProjectId id = 1;
 }

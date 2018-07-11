@@ -29,23 +29,25 @@ import io.spine.server.entity.given.Given;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerCommandTest;
 import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.test.testutil.TestUtilAssignTask;
-import io.spine.test.testutil.TestUtilCreateTask;
-import io.spine.test.testutil.TestUtilProjectId;
-import io.spine.test.testutil.TestUtilTaskAssigned;
-import io.spine.test.testutil.TestUtilTaskCreated;
-import io.spine.test.testutil.TestUtilTaskCreationPm;
-import io.spine.test.testutil.TestUtilTaskCreationPmVBuilder;
+import io.spine.test.testutil.TUAssignTask;
+import io.spine.test.testutil.TUCreateTask;
+import io.spine.test.testutil.TUProjectId;
+import io.spine.test.testutil.TUTaskAssigned;
+import io.spine.test.testutil.TUTaskCreated;
+import io.spine.test.testutil.TUTaskCreationPm;
+import io.spine.test.testutil.TUTaskCreationPmVBuilder;
 import org.junit.jupiter.api.BeforeEach;
+
+import static com.google.protobuf.util.Timestamps.fromNanos;
 
 /**
  * @author Vladyslav Lubenskyi
  */
 public class ProcessManagerCommandTestTestEnv {
 
-    private static final TestUtilProjectId ID = TestUtilProjectId.newBuilder()
-                                                                 .setValue("test pm id")
-                                                                 .build();
+    private static final TUProjectId ID = TUProjectId.newBuilder()
+                                                     .setValue("test pm id")
+                                                     .build();
 
     /**
      * Prevents direct instantiation.
@@ -64,42 +66,42 @@ public class ProcessManagerCommandTestTestEnv {
      * command.
      */
     public static class CommandHandlingProcessManager
-            extends ProcessManager<TestUtilProjectId,
-                                   TestUtilTaskCreationPm,
-                                   TestUtilTaskCreationPmVBuilder> {
+            extends ProcessManager<TUProjectId,
+                                   TUTaskCreationPm,
+                                   TUTaskCreationPmVBuilder> {
 
-        public static final TestUtilAssignTask NESTED_COMMAND =
-                TestUtilAssignTask.newBuilder()
-                                  .setId(ID)
-                                  .build();
+        public static final TUAssignTask NESTED_COMMAND =
+                TUAssignTask.newBuilder()
+                            .setId(ID)
+                            .build();
 
-        protected CommandHandlingProcessManager(TestUtilProjectId id) {
+        protected CommandHandlingProcessManager(TUProjectId id) {
             super(id);
         }
 
         @Assign
         @SuppressWarnings("CheckReturnValue")
-        TestUtilTaskCreated handle(TestUtilCreateTask command, CommandContext context) {
+        TUTaskCreated handle(TUCreateTask command, CommandContext context) {
             newRouterFor(command, context).add(NESTED_COMMAND)
                                           .routeAll();
-            return TestUtilTaskCreated.newBuilder()
-                                      .setId(command.getId())
-                                      .build();
+            return TUTaskCreated.newBuilder()
+                                .setId(command.getId())
+                                .build();
         }
 
         @Assign
-        TestUtilTaskAssigned handle(TestUtilAssignTask command) {
-            getBuilder().setTimestamp(Timestamps.fromNanos(123456));
-            return TestUtilTaskAssigned.newBuilder()
-                                       .setId(command.getId())
-                                       .build();
+        TUTaskAssigned handle(TUAssignTask command) {
+            getBuilder().setTimestamp(fromNanos(123456));
+            return TUTaskAssigned.newBuilder()
+                                 .setId(command.getId())
+                                 .build();
         }
     }
 
     private static class CommandHandlingProcessManagerRepository
-            extends ProcessManagerRepository<TestUtilProjectId,
+            extends ProcessManagerRepository<TUProjectId,
                                              CommandHandlingProcessManager,
-                                             TestUtilTaskCreationPm> {
+            TUTaskCreationPm> {
     }
 
     /**
@@ -107,15 +109,15 @@ public class ProcessManagerCommandTestTestEnv {
      * {@code CommandHandlingProcessManager}.
      */
     public static class TimestampProcessManagerTest
-            extends ProcessManagerCommandTest<TestUtilProjectId,
-                                              TestUtilCreateTask,
-                                              TestUtilTaskCreationPm,
+            extends ProcessManagerCommandTest<TUProjectId,
+                                              TUCreateTask,
+                                              TUTaskCreationPm,
                                               CommandHandlingProcessManager> {
 
-        public static final TestUtilCreateTask TEST_COMMAND =
-                TestUtilCreateTask.newBuilder()
-                                  .setId(ID)
-                                  .build();
+        public static final TUCreateTask TEST_COMMAND =
+                TUCreateTask.newBuilder()
+                            .setId(ID)
+                            .build();
 
         @BeforeEach
         @Override
@@ -124,17 +126,17 @@ public class ProcessManagerCommandTestTestEnv {
         }
 
         @Override
-        protected TestUtilProjectId newId() {
+        protected TUProjectId newId() {
             return ID;
         }
 
         @Override
-        protected TestUtilCreateTask createMessage() {
+        protected TUCreateTask createMessage() {
             return TEST_COMMAND;
         }
 
         @Override
-        protected Repository<TestUtilProjectId, CommandHandlingProcessManager>
+        protected Repository<TUProjectId, CommandHandlingProcessManager>
         createEntityRepository() {
             return new CommandHandlingProcessManagerRepository();
         }

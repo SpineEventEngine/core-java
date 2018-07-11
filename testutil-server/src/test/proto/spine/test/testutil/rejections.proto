@@ -29,6 +29,6 @@ option java_generate_equals_and_hash = true;
 
 import "spine/test/testutil/entity.proto";
 
-message TestUtilFailedToCreateProject {
-    TestUtilProjectId id = 1;
+message TUFailedToCreateProject {
+    TUProjectId id = 1;
 }

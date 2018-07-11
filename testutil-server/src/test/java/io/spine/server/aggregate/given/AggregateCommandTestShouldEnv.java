@@ -30,13 +30,13 @@ import io.spine.server.command.Assign;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.given.Given;
 import io.spine.server.expected.CommandHandlerExpected;
-import io.spine.test.testutil.TestUtilAssignProject;
-import io.spine.test.testutil.TestUtilCreateProject;
-import io.spine.test.testutil.TestUtilFailedToCreateProject;
-import io.spine.test.testutil.TestUtilProjectAggregate;
-import io.spine.test.testutil.TestUtilProjectAggregateVBuilder;
-import io.spine.test.testutil.TestUtilProjectCreated;
-import io.spine.test.testutil.TestUtilProjectId;
+import io.spine.test.testutil.TUAssignProject;
+import io.spine.test.testutil.TUCreateProject;
+import io.spine.test.testutil.TUFailedToCreateProject;
+import io.spine.test.testutil.TUProjectAggregate;
+import io.spine.test.testutil.TUProjectAggregateVBuilder;
+import io.spine.test.testutil.TUProjectCreated;
+import io.spine.test.testutil.TUProjectId;
 import org.junit.jupiter.api.BeforeEach;
 
 import static com.google.protobuf.util.Timestamps.fromMillis;
@@ -46,9 +46,9 @@ import static com.google.protobuf.util.Timestamps.fromMillis;
  */
 public class AggregateCommandTestShouldEnv {
 
-    private static final TestUtilProjectId ID = TestUtilProjectId.newBuilder()
-                                                                 .setValue("project id util")
-                                                                 .build();
+    private static final TUProjectId ID = TUProjectId.newBuilder()
+                                                     .setValue("project id util")
+                                                     .build();
 
     /**
      * Prevents instantiation of this utility class.
@@ -68,38 +68,38 @@ public class AggregateCommandTestShouldEnv {
      * A dummy aggregate that handles two command messages:
      *
      * <ul>
-     *     <li>accepts {@code TestUtilCreateProject}.
-     *     <li>rejects {@code TestUtilAssignProject}.
+     *     <li>accepts {@code TUCreateProject}.
+     *     <li>rejects {@code TUAssignProject}.
      * </ul>
      */
     public static final class CommandHandlingAggregate
-            extends Aggregate<TestUtilProjectId,
-                              TestUtilProjectAggregate,
-                              TestUtilProjectAggregateVBuilder> {
+            extends Aggregate<TUProjectId,
+                              TUProjectAggregate,
+                              TUProjectAggregateVBuilder> {
 
-        CommandHandlingAggregate(TestUtilProjectId id) {
+        CommandHandlingAggregate(TUProjectId id) {
             super(id);
         }
 
         @Assign
-        public TestUtilProjectCreated handle(TestUtilCreateProject command) {
-            return TestUtilProjectCreated.getDefaultInstance();
+        public TUProjectCreated handle(TUCreateProject command) {
+            return TUProjectCreated.getDefaultInstance();
         }
 
         @Assign
-        public Timestamp handle(TestUtilAssignProject command)
-                throws TestUtilFailedToCreateProject {
-            throw new TestUtilFailedToCreateProject(getId());
+        public Timestamp handle(TUAssignProject command)
+                throws TUFailedToCreateProject {
+            throw new TUFailedToCreateProject(getId());
         }
 
         @Apply
-        void on(TestUtilProjectCreated event) {
+        void on(TUProjectCreated event) {
             getBuilder().setTimestamp(fromMillis(1234567));
         }
     }
 
     private static final class CommandHandlingAggregateRepository
-            extends AggregateRepository<TestUtilProjectId, CommandHandlingAggregate> {
+            extends AggregateRepository<TUProjectId, CommandHandlingAggregate> {
     }
 
     /**
@@ -107,23 +107,23 @@ public class AggregateCommandTestShouldEnv {
      * {@code CommandHandlingAggregate}.
      */
     public static class CommandHandlingTest
-            extends AggregateCommandTest<TestUtilProjectId,
-                                         TestUtilCreateProject,
-                                         TestUtilProjectAggregate,
+            extends AggregateCommandTest<TUProjectId,
+                                         TUCreateProject,
+                                         TUProjectAggregate,
                                          CommandHandlingAggregate> {
 
-        public static final TestUtilCreateProject TEST_COMMAND =
-                TestUtilCreateProject.newBuilder()
-                                     .setId(ID)
-                                     .build();
+        public static final TUCreateProject TEST_COMMAND =
+                TUCreateProject.newBuilder()
+                               .setId(ID)
+                               .build();
 
         @Override
-        protected TestUtilProjectId newId() {
+        protected TUProjectId newId() {
             return ID;
         }
 
         @Override
-        protected TestUtilCreateProject createMessage() {
+        protected TUCreateProject createMessage() {
             return TEST_COMMAND;
         }
 
@@ -134,13 +134,13 @@ public class AggregateCommandTestShouldEnv {
         }
 
         @Override
-        protected Repository<TestUtilProjectId, CommandHandlingAggregate>
+        protected Repository<TUProjectId, CommandHandlingAggregate>
         createEntityRepository() {
             return new CommandHandlingAggregateRepository();
         }
 
         @Override
-        public CommandHandlerExpected<TestUtilProjectAggregate>
+        public CommandHandlerExpected<TUProjectAggregate>
         expectThat(CommandHandlingAggregate entity) {
             return super.expectThat(entity);
         }
@@ -151,27 +151,27 @@ public class AggregateCommandTestShouldEnv {
     }
 
     /**
-     * The test class for the {@code TestUtilAssignProject} command handler in
+     * The test class for the {@code TUAssignProject} command handler in
      * {@code CommandHandlingAggregate}.
      */
     public static class RejectionCommandHandlerTest
-            extends AggregateCommandTest<TestUtilProjectId,
-                                         TestUtilAssignProject,
-                                         TestUtilProjectAggregate,
+            extends AggregateCommandTest<TUProjectId,
+                                         TUAssignProject,
+                                         TUProjectAggregate,
                                          CommandHandlingAggregate> {
 
-        public static final TestUtilAssignProject TEST_COMMAND =
-                TestUtilAssignProject.newBuilder()
-                                     .setId(ID)
-                                     .build();
+        public static final TUAssignProject TEST_COMMAND =
+                TUAssignProject.newBuilder()
+                               .setId(ID)
+                               .build();
 
         @Override
-        protected TestUtilProjectId newId() {
+        protected TUProjectId newId() {
             return ID;
         }
 
         @Override
-        protected TestUtilAssignProject createMessage() {
+        protected TUAssignProject createMessage() {
             return TEST_COMMAND;
         }
 
@@ -182,13 +182,12 @@ public class AggregateCommandTestShouldEnv {
         }
 
         @Override
-        protected Repository<TestUtilProjectId, CommandHandlingAggregate>
-        createEntityRepository() {
+        protected Repository<TUProjectId, CommandHandlingAggregate> createEntityRepository() {
             return new CommandHandlingAggregateRepository();
         }
 
         @Override
-        public CommandHandlerExpected<TestUtilProjectAggregate>
+        public CommandHandlerExpected<TUProjectAggregate>
         expectThat(CommandHandlingAggregate entity) {
             return super.expectThat(entity);
         }

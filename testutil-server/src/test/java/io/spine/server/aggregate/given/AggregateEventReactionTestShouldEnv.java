@@ -29,11 +29,11 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.given.Given;
 import io.spine.server.expected.EventHandlerExpected;
-import io.spine.test.testutil.TestUtilProjectAggregate;
-import io.spine.test.testutil.TestUtilProjectAggregateVBuilder;
-import io.spine.test.testutil.TestUtilProjectAssigned;
-import io.spine.test.testutil.TestUtilProjectCreated;
-import io.spine.test.testutil.TestUtilProjectId;
+import io.spine.test.testutil.TUProjectAggregate;
+import io.spine.test.testutil.TUProjectAggregateVBuilder;
+import io.spine.test.testutil.TUProjectAssigned;
+import io.spine.test.testutil.TUProjectCreated;
+import io.spine.test.testutil.TUProjectId;
 import org.junit.jupiter.api.BeforeEach;
 
 import static com.google.protobuf.util.Timestamps.fromMillis;
@@ -43,9 +43,9 @@ import static com.google.protobuf.util.Timestamps.fromMillis;
  */
 public class AggregateEventReactionTestShouldEnv {
 
-    private static final TestUtilProjectId ID = TestUtilProjectId.newBuilder()
-                                                                 .setValue("test id")
-                                                                 .build();
+    private static final TUProjectId ID = TUProjectId.newBuilder()
+                                                     .setValue("test id")
+                                                     .build();
 
     /**
      * Prevents direct instantiation.
@@ -66,29 +66,29 @@ public class AggregateEventReactionTestShouldEnv {
      * {@code TestUtilProjectAssigned} event as a result.
      */
     public static final class EventReactingAggregate
-            extends Aggregate<TestUtilProjectId,
-                              TestUtilProjectAggregate,
-                              TestUtilProjectAggregateVBuilder> {
+            extends Aggregate<TUProjectId,
+                              TUProjectAggregate,
+                              TUProjectAggregateVBuilder> {
 
-        EventReactingAggregate(TestUtilProjectId id) {
+        EventReactingAggregate(TUProjectId id) {
             super(id);
         }
 
         @React
-        public TestUtilProjectAssigned handle(TestUtilProjectCreated event) {
-            return TestUtilProjectAssigned.newBuilder()
-                                          .setId(event.getId())
-                                          .build();
+        public TUProjectAssigned handle(TUProjectCreated event) {
+            return TUProjectAssigned.newBuilder()
+                                    .setId(event.getId())
+                                    .build();
         }
 
         @Apply
-        void on(TestUtilProjectAssigned event) {
+        void on(TUProjectAssigned event) {
             getBuilder().setTimestamp(fromMillis(123456));
         }
     }
 
     private static class EventReactingAggregateRepository
-            extends AggregateRepository<TestUtilProjectId, EventReactingAggregate> {
+            extends AggregateRepository<TUProjectId, EventReactingAggregate> {
     }
 
     /**
@@ -96,15 +96,15 @@ public class AggregateEventReactionTestShouldEnv {
      * {@code EventReactingAggregate}.
      */
     public static class EventReactingAggregateTest
-            extends AggregateEventReactionTest<TestUtilProjectId,
-                                               TestUtilProjectCreated,
-                                               TestUtilProjectAggregate,
+            extends AggregateEventReactionTest<TUProjectId,
+                                               TUProjectCreated,
+                                               TUProjectAggregate,
                                                EventReactingAggregate> {
 
-        public static final TestUtilProjectCreated TEST_EVENT =
-                TestUtilProjectCreated.newBuilder()
-                                      .setId(ID)
-                                      .build();
+        public static final TUProjectCreated TEST_EVENT =
+                TUProjectCreated.newBuilder()
+                                .setId(ID)
+                                .build();
 
         @BeforeEach
         @Override
@@ -113,24 +113,22 @@ public class AggregateEventReactionTestShouldEnv {
         }
 
         @Override
-        protected TestUtilProjectId newId() {
+        protected TUProjectId newId() {
             return ID;
         }
 
         @Override
-        protected TestUtilProjectCreated createMessage() {
+        protected TUProjectCreated createMessage() {
             return TEST_EVENT;
         }
 
         @Override
-        protected Repository<TestUtilProjectId, EventReactingAggregate>
-        createEntityRepository() {
+        protected Repository<TUProjectId, EventReactingAggregate> createEntityRepository() {
             return new EventReactingAggregateRepository();
         }
 
         @Override
-        public EventHandlerExpected<TestUtilProjectAggregate>
-        expectThat(EventReactingAggregate entity) {
+        public EventHandlerExpected<TUProjectAggregate> expectThat(EventReactingAggregate entity) {
             return super.expectThat(entity);
         }
 

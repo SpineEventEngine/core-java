@@ -23,9 +23,9 @@ package io.spine.server.procman;
 import io.spine.server.expected.EventHandlerExpected;
 import io.spine.server.procman.given.ProcessManagerEventReactionTestShouldEnv.EventReactingProcessManager;
 import io.spine.server.procman.given.ProcessManagerEventReactionTestShouldEnv.EventReactingProcessManagerTest;
-import io.spine.test.testutil.TestUtilAssignTask;
-import io.spine.test.testutil.TestUtilTaskAssigned;
-import io.spine.test.testutil.TestUtilTaskCreationPm;
+import io.spine.test.testutil.TUAssignTask;
+import io.spine.test.testutil.TUTaskAssigned;
+import io.spine.test.testutil.TUTaskCreationPm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,11 +64,11 @@ class ProcessManagerEventReactionTestShould {
         pmEventTest.setUp();
         pmEventTest.init();
         EventReactingProcessManager testPm = processManager();
-        EventHandlerExpected<TestUtilTaskCreationPm> expected = pmEventTest.expectThat(testPm);
-        expected.routesCommand(TestUtilAssignTask.class, command -> {
+        EventHandlerExpected<TUTaskCreationPm> expected = pmEventTest.expectThat(testPm);
+        expected.routesCommand(TUAssignTask.class, command -> {
             assertEquals(command, NESTED_COMMAND);
         });
-        expected.producesEvent(TestUtilTaskAssigned.class, event -> {
+        expected.producesEvent(TUTaskAssigned.class, event -> {
             assertEquals(event, RESULT_EVENT);
         });
     }

@@ -22,7 +22,7 @@ package io.spine.server.aggregate;
 
 import io.spine.server.aggregate.given.AggregatePartCommandTestShouldEnv.CommentsAggregatePart;
 import io.spine.server.aggregate.given.AggregatePartCommandTestShouldEnv.TimeCounterTest;
-import io.spine.test.testutil.TestUtilProjectId;
+import io.spine.test.testutil.TUProjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -71,9 +71,9 @@ class AggregatePartCommandTestShould {
     @Test
     @DisplayName("create new part")
     void shouldCreatePart() {
-        TestUtilProjectId id = TestUtilProjectId.newBuilder()
-                                                .setValue("tested ID")
-                                                .build();
+        TUProjectId id = TUProjectId.newBuilder()
+                                    .setValue("tested ID")
+                                    .build();
         aggregatePartCommandTest.setUp();
         CommentsAggregatePart part = aggregatePartCommandTest.createPart(id);
         assertNotNull(part);

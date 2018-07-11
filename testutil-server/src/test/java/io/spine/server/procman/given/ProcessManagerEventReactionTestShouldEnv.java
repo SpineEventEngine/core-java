@@ -29,12 +29,12 @@ import io.spine.server.entity.given.Given;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerEventReactionTest;
 import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.test.testutil.TestUtilAssignTask;
-import io.spine.test.testutil.TestUtilProjectId;
-import io.spine.test.testutil.TestUtilTaskAssigned;
-import io.spine.test.testutil.TestUtilTaskCreated;
-import io.spine.test.testutil.TestUtilTaskCreationPm;
-import io.spine.test.testutil.TestUtilTaskCreationPmVBuilder;
+import io.spine.test.testutil.TUAssignTask;
+import io.spine.test.testutil.TUProjectId;
+import io.spine.test.testutil.TUTaskAssigned;
+import io.spine.test.testutil.TUTaskCreated;
+import io.spine.test.testutil.TUTaskCreationPm;
+import io.spine.test.testutil.TUTaskCreationPmVBuilder;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
@@ -42,9 +42,9 @@ import org.junit.jupiter.api.BeforeEach;
  */
 public class ProcessManagerEventReactionTestShouldEnv {
 
-    private static final TestUtilProjectId ID = TestUtilProjectId.newBuilder()
-                                                                 .setValue("test pm id")
-                                                                 .build();
+    private static final TUProjectId ID = TUProjectId.newBuilder()
+                                                     .setValue("test pm id")
+                                                     .build();
 
     /**
      * Prevents direct instantiation.
@@ -63,26 +63,26 @@ public class ProcessManagerEventReactionTestShouldEnv {
      * routes a nested command.
      */
     public static class EventReactingProcessManager
-            extends ProcessManager<TestUtilProjectId,
-                                   TestUtilTaskCreationPm,
-                                   TestUtilTaskCreationPmVBuilder> {
+            extends ProcessManager<TUProjectId,
+            TUTaskCreationPm,
+            TUTaskCreationPmVBuilder> {
 
-        public static final TestUtilTaskAssigned RESULT_EVENT =
-                TestUtilTaskAssigned.newBuilder()
-                                    .setId(ID)
-                                    .build();
-        public static final TestUtilAssignTask NESTED_COMMAND =
-                TestUtilAssignTask.newBuilder()
-                                  .setId(ID)
-                                  .build();
+        public static final TUTaskAssigned RESULT_EVENT =
+                TUTaskAssigned.newBuilder()
+                              .setId(ID)
+                              .build();
+        public static final TUAssignTask NESTED_COMMAND =
+                TUAssignTask.newBuilder()
+                            .setId(ID)
+                            .build();
 
-        protected EventReactingProcessManager(TestUtilProjectId id) {
+        protected EventReactingProcessManager(TUProjectId id) {
             super(id);
         }
 
         @React
         @SuppressWarnings("CheckReturnValue")
-        TestUtilTaskAssigned on(TestUtilTaskCreated event, EventContext context) {
+        TUTaskAssigned on(TUTaskCreated event, EventContext context) {
             newRouterFor(event, context.getCommandContext()).add(NESTED_COMMAND)
                                                             .routeAll();
             return RESULT_EVENT;
@@ -90,9 +90,9 @@ public class ProcessManagerEventReactionTestShouldEnv {
     }
 
     private static class EventReactingProcessManagerRepository
-            extends ProcessManagerRepository<TestUtilProjectId,
+            extends ProcessManagerRepository<TUProjectId,
                                              EventReactingProcessManager,
-                                             TestUtilTaskCreationPm> {
+                                             TUTaskCreationPm> {
     }
 
     /**
@@ -100,15 +100,15 @@ public class ProcessManagerEventReactionTestShouldEnv {
      * {@code EventReactingProcessManager}.
      */
     public static class EventReactingProcessManagerTest
-            extends ProcessManagerEventReactionTest<TestUtilProjectId,
-                                                    TestUtilTaskCreated,
-                                                    TestUtilTaskCreationPm,
+            extends ProcessManagerEventReactionTest<TUProjectId,
+                                                    TUTaskCreated,
+                                                    TUTaskCreationPm,
                                                     EventReactingProcessManager> {
 
-        public static final TestUtilTaskCreated TEST_EVENT =
-                TestUtilTaskCreated.newBuilder()
-                                   .setId(ID)
-                                   .build();
+        public static final TUTaskCreated TEST_EVENT =
+                TUTaskCreated.newBuilder()
+                             .setId(ID)
+                             .build();
 
         @BeforeEach
         @Override
@@ -117,18 +117,17 @@ public class ProcessManagerEventReactionTestShouldEnv {
         }
 
         @Override
-        protected TestUtilProjectId newId() {
+        protected TUProjectId newId() {
             return ID;
         }
 
         @Override
-        protected TestUtilTaskCreated createMessage() {
+        protected TUTaskCreated createMessage() {
             return TEST_EVENT;
         }
 
         @Override
-        protected Repository<TestUtilProjectId, EventReactingProcessManager>
-        createEntityRepository() {
+        protected Repository<TUProjectId, EventReactingProcessManager> createEntityRepository() {
             return new EventReactingProcessManagerRepository();
         }
 

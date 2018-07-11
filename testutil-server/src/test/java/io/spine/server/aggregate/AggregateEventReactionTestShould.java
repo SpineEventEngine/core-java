@@ -23,8 +23,8 @@ package io.spine.server.aggregate;
 import io.spine.server.expected.EventHandlerExpected;
 import io.spine.server.aggregate.given.AggregateEventReactionTestShouldEnv.EventReactingAggregate;
 import io.spine.server.aggregate.given.AggregateEventReactionTestShouldEnv.EventReactingAggregateTest;
-import io.spine.test.testutil.TestUtilProjectAggregate;
-import io.spine.test.testutil.TestUtilProjectAssigned;
+import io.spine.test.testutil.TUProjectAggregate;
+import io.spine.test.testutil.TUProjectAssigned;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,9 +64,9 @@ class AggregateEventReactionTestShould {
         aggregateEventTest.setUp();
         aggregateEventTest.init();
         EventReactingAggregate aggregate = aggregate();
-        EventHandlerExpected<TestUtilProjectAggregate> expected = aggregateEventTest.expectThat(aggregate);
+        EventHandlerExpected<TUProjectAggregate> expected = aggregateEventTest.expectThat(aggregate);
 
-        expected.producesEvent(TestUtilProjectAssigned.class, event -> {
+        expected.producesEvent(TUProjectAssigned.class, event -> {
             assertNotNull(event);
             assertTrue(isNotDefault(aggregate.getState().getTimestamp()));
         });

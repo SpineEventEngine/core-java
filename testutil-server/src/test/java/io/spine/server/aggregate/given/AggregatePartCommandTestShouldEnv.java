@@ -32,11 +32,11 @@ import io.spine.server.command.Assign;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.given.Given;
 import io.spine.server.expected.CommandHandlerExpected;
-import io.spine.test.testutil.TestUtilAddComment;
-import io.spine.test.testutil.TestUtilCommentAdded;
-import io.spine.test.testutil.TestUtilCommentsAggregatePart;
-import io.spine.test.testutil.TestUtilCommentsAggregatePartVBuilder;
-import io.spine.test.testutil.TestUtilProjectId;
+import io.spine.test.testutil.TUAddComment;
+import io.spine.test.testutil.TUCommentAdded;
+import io.spine.test.testutil.TUCommentsAggregatePart;
+import io.spine.test.testutil.TUCommentsAggregatePartVBuilder;
+import io.spine.test.testutil.TUProjectId;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
@@ -44,9 +44,9 @@ import org.junit.jupiter.api.BeforeEach;
  */
 public class AggregatePartCommandTestShouldEnv {
 
-    public static final TestUtilProjectId ID = TestUtilProjectId.newBuilder()
-                                                                .setValue("test id")
-                                                                .build();
+    public static final TUProjectId ID = TUProjectId.newBuilder()
+                                                    .setValue("test id")
+                                                    .build();
 
     /**
      * Prevents instantiation of this utility class.
@@ -64,7 +64,7 @@ public class AggregatePartCommandTestShouldEnv {
         return result;
     }
 
-    public static CommentsRoot aggregateRoot(TestUtilProjectId id) {
+    public static CommentsRoot aggregateRoot(TUProjectId id) {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .build();
         return new CommentsRoot(boundedContext, id);
@@ -75,9 +75,9 @@ public class AggregatePartCommandTestShouldEnv {
      * the corresponding {@code TestUtilCommentAdded}.
      */
     public static final class CommentsAggregatePart
-            extends AggregatePart<TestUtilProjectId,
-                                  TestUtilCommentsAggregatePart,
-                                  TestUtilCommentsAggregatePartVBuilder,
+            extends AggregatePart<TUProjectId,
+                                  TUCommentsAggregatePart,
+                                  TUCommentsAggregatePartVBuilder,
                                   CommentsRoot> {
 
         private CommentsAggregatePart(CommentsRoot root) {
@@ -85,27 +85,27 @@ public class AggregatePartCommandTestShouldEnv {
         }
 
         @Assign
-        public TestUtilCommentAdded handle(TestUtilAddComment command) {
-            return TestUtilCommentAdded.newBuilder()
-                                       .setId(command.getId())
-                                       .build();
+        public TUCommentAdded handle(TUAddComment command) {
+            return TUCommentAdded.newBuilder()
+                                 .setId(command.getId())
+                                 .build();
         }
 
         @Apply
-        void on(TestUtilCommentAdded event) {
+        void on(TUCommentAdded event) {
             getBuilder().setTimestamp(Timestamps.fromMillis(123));
         }
     }
 
     private static final class CommentsAggregatePartRepository
-            extends AggregatePartRepository<TestUtilProjectId,
+            extends AggregatePartRepository<TUProjectId,
                                             CommentsAggregatePart,
                                             CommentsRoot> {
     }
 
-    private static class CommentsRoot extends AggregateRoot<TestUtilProjectId> {
+    private static class CommentsRoot extends AggregateRoot<TUProjectId> {
 
-        private CommentsRoot(BoundedContext boundedContext, TestUtilProjectId id) {
+        private CommentsRoot(BoundedContext boundedContext, TUProjectId id) {
             super(boundedContext, id);
         }
     }
@@ -115,29 +115,29 @@ public class AggregatePartCommandTestShouldEnv {
      * {@code CommentsAggregatePart}.
      */
     public static class TimeCounterTest
-            extends AggregatePartCommandTest<TestUtilProjectId,
-                                             TestUtilAddComment,
-                                             TestUtilCommentsAggregatePart,
+            extends AggregatePartCommandTest<TUProjectId,
+                                             TUAddComment,
+                                             TUCommentsAggregatePart,
                                              CommentsAggregatePart,
                                              CommentsRoot> {
 
-        public static final TestUtilAddComment TEST_COMMAND =
-                TestUtilAddComment.newBuilder()
-                                  .setId(ID)
-                                  .build();
+        public static final TUAddComment TEST_COMMAND =
+                TUAddComment.newBuilder()
+                            .setId(ID)
+                            .build();
 
         @Override
-        protected TestUtilProjectId newId() {
+        protected TUProjectId newId() {
             return ID;
         }
 
         @Override
-        protected TestUtilAddComment createMessage() {
+        protected TUAddComment createMessage() {
             return TEST_COMMAND;
         }
 
         @Override
-        protected Repository<TestUtilProjectId, CommentsAggregatePart> createEntityRepository() {
+        protected Repository<TUProjectId, CommentsAggregatePart> createEntityRepository() {
             return new CommentsAggregatePartRepository();
         }
 
@@ -148,7 +148,7 @@ public class AggregatePartCommandTestShouldEnv {
         }
 
         @Override
-        public CommandHandlerExpected<TestUtilCommentsAggregatePart>
+        public CommandHandlerExpected<TUCommentsAggregatePart>
         expectThat(CommentsAggregatePart entity) {
             return super.expectThat(entity);
         }
@@ -158,11 +158,11 @@ public class AggregatePartCommandTestShouldEnv {
         }
 
         @Override
-        protected CommentsRoot newRoot(TestUtilProjectId id) {
+        protected CommentsRoot newRoot(TUProjectId id) {
             return aggregateRoot(id);
         }
 
-        public CommentsAggregatePart createPart(TestUtilProjectId id) {
+        public CommentsAggregatePart createPart(TUProjectId id) {
             return newPart(id);
         }
 
