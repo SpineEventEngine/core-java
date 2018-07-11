@@ -48,12 +48,12 @@ import io.spine.system.server.ChangeEntityState;
 import io.spine.system.server.CreateEntity;
 import io.spine.system.server.DeleteEntity;
 import io.spine.system.server.DispatchCommandToHandler;
-import io.spine.system.server.DispatchEventToApplier;
 import io.spine.system.server.DispatchEventToReactor;
 import io.spine.system.server.DispatchEventToSubscriber;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.ExtractEntityFromArchive;
+import io.spine.system.server.PassEventToApplier;
 import io.spine.system.server.RestoreEntity;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
@@ -520,10 +520,10 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         }
 
         /**
-         * Posts the {@link DispatchEventToApplier} system command.
+         * Posts the {@link PassEventToApplier} system command.
          */
-        public void onDispatchEventToApplier(Event event) {
-            DispatchEventToApplier systemCommand = DispatchEventToApplier
+        public void onPassEventToApplier(Event event) {
+            PassEventToApplier systemCommand = PassEventToApplier
                     .newBuilder()
                     .setReceiver(id)
                     .setEventId(event.getId())
@@ -531,6 +531,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             postSystem(systemCommand);
         }
 
+        /**
+         * Posts the {@link DispatchEventToSubscriber} system command.
+         */
         public void onDispatchEventToSubscriber(Event event) {
             DispatchEventToSubscriber systemCommand = DispatchEventToSubscriber
                     .newBuilder()
@@ -540,6 +543,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             postSystem(systemCommand);
         }
 
+        /**
+         * Posts the {@link DispatchEventToReactor} system command.
+         */
         public void onDispatchEventToReactor(Event event) {
             DispatchEventToReactor systemCommand = DispatchEventToReactor
                     .newBuilder()

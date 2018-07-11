@@ -28,6 +28,17 @@ import io.spine.server.command.Assign;
 import static io.spine.base.Time.getCurrentTime;
 
 /**
+ * The aggregate which manages the history of a single entity.
+ *
+ * <p>Each {@link Aggregate}, {@link io.spine.server.projection.Projection Projection},
+ * and {@link io.spine.server.procman.ProcessManager ProcessManager} in the system has
+ * a corresponding entity history.
+ *
+ * <p>The aggregate stores IDs of all the messages ever dispatched to the associated entity.
+ *
+ * <p>This aggregate belongs to the {@code System} bounded context. The aggregate doesn't have
+ * an own entity history.
+ *
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("OverlyCoupledClass") // OK for an Aggregate class.
@@ -74,16 +85,16 @@ public final class EntityHistoryAggregate
     }
 
     @Assign
-    EventDispatchedToApplier handle(DispatchEventToApplier command) {
+    EventPassedToApplier handle(PassEventToApplier command) {
         DispatchedEvent dispatchedEvent = DispatchedEvent
                 .newBuilder()
                 .setEvent(command.getEventId())
                 .setWhenDispatched(getCurrentTime())
                 .build();
-        return EventDispatchedToApplier.newBuilder()
-                                       .setReceiver(command.getReceiver())
-                                       .setPayload(dispatchedEvent)
-                                       .build();
+        return EventPassedToApplier.newBuilder()
+                                   .setReceiver(command.getReceiver())
+                                   .setPayload(dispatchedEvent)
+                                   .build();
     }
 
     @Assign
@@ -156,7 +167,7 @@ public final class EntityHistoryAggregate
     }
 
     @Apply
-    private void on(EventDispatchedToApplier event) {
+    private void on(EventPassedToApplier event) {
         getBuilder().addEvents(event.getPayload());
     }
 

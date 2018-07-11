@@ -49,9 +49,9 @@ import io.spine.system.server.EntityDeleted;
 import io.spine.system.server.EntityExtractedFromArchive;
 import io.spine.system.server.EntityRestored;
 import io.spine.system.server.EntityStateChanged;
-import io.spine.system.server.EventDispatchedToApplier;
 import io.spine.system.server.EventDispatchedToReactor;
 import io.spine.system.server.EventDispatchedToSubscriber;
+import io.spine.system.server.EventPassedToApplier;
 import io.spine.system.server.HidePerson;
 import io.spine.system.server.Person;
 import io.spine.system.server.PersonCreated;
@@ -139,7 +139,7 @@ public final class EntityHistoryTestEnv {
         }
 
         @Subscribe
-        public void on(EventDispatchedToApplier event) {
+        public void on(EventPassedToApplier event) {
             events.add(event);
         }
 

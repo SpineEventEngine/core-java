@@ -417,7 +417,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     void onEventApplied(I id, Event event) {
-        lifecycleOf(id).onDispatchEventToApplier(event);
+        lifecycleOf(id).onPassEventToApplier(event);
     }
 
     /**

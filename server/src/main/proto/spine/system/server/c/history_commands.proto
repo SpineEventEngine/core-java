@@ -76,11 +76,13 @@ message DispatchEventToReactor {
     spine.core.EventId event_id = 2 [(required) = true, (valid) = true];
 }
 
-// A command to dispatch an event to an applier.
+// A command to pass an event to an applier.
 //
 // This command is relevant only to histories of Aggregates.
 //
-message DispatchEventToApplier {
+// This command is not posted if applying the event to the Aggregate fails.
+//
+message PassEventToApplier {
 
     // The ID of the entity, which the event is dispatched to.
     EntityHistoryId receiver = 1 [(required) = true];
