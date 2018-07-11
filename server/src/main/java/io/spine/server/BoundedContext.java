@@ -491,9 +491,10 @@ public abstract class BoundedContext
 
         @SuppressWarnings("ResultOfMethodCallIgnored") // Builder methods.
         private SystemBoundedContext buildSystem() {
-            BoundedContext.Builder system = newBuilder()
+            BoundedContextName name = BoundedContextNames.system(this.name);
+            Builder system = newBuilder()
                     .setMultitenant(multitenant)
-                    .setName(BoundedContextNames.system(name))
+                    .setName(name)
                     .setTransportFactory(getTransportFactory());
             Optional<? extends Supplier<StorageFactory>> storage = getStorageFactorySupplier();
             if (storage.isPresent()) {
