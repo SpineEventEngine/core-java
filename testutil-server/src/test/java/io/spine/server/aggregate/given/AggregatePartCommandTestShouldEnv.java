@@ -21,8 +21,6 @@
 package io.spine.server.aggregate.given;
 
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
-import com.google.protobuf.UInt32Value;
 import com.google.protobuf.util.Timestamps;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregatePart;
@@ -37,7 +35,7 @@ import io.spine.server.expected.CommandHandlerExpected;
 import io.spine.testutil.server.aggregate.TestUtilAddComment;
 import io.spine.testutil.server.aggregate.TestUtilCommentAdded;
 import io.spine.testutil.server.aggregate.TestUtilCommentsAggregatePart;
-import io.spine.testutil.server.aggregate.TestUtilProjectCommentsAggregatePartVBuilder;
+import io.spine.testutil.server.aggregate.TestUtilCommentsAggregatePartVBuilder;
 import io.spine.testutil.server.aggregate.TestUtilProjectId;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -80,7 +78,7 @@ public class AggregatePartCommandTestShouldEnv {
     public static final class CommentsAggregatePart
             extends AggregatePart<TestUtilProjectId,
                                   TestUtilCommentsAggregatePart,
-                                  TestUtilProjectCommentsAggregatePartVBuilder,
+                                  TestUtilCommentsAggregatePartVBuilder,
                                   CommentsRoot> {
 
         private CommentsAggregatePart(CommentsRoot root) {

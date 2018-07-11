@@ -21,7 +21,6 @@
 package io.spine.server.aggregate.given;
 
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.core.React;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateEventReactionTest;
