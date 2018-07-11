@@ -32,11 +32,11 @@ import io.spine.server.command.Assign;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.given.Given;
 import io.spine.server.expected.CommandHandlerExpected;
-import io.spine.testutil.server.aggregate.TestUtilAddComment;
-import io.spine.testutil.server.aggregate.TestUtilCommentAdded;
-import io.spine.testutil.server.aggregate.TestUtilCommentsAggregatePart;
-import io.spine.testutil.server.aggregate.TestUtilCommentsAggregatePartVBuilder;
-import io.spine.testutil.server.aggregate.TestUtilProjectId;
+import io.spine.test.testutil.TestUtilAddComment;
+import io.spine.test.testutil.TestUtilCommentAdded;
+import io.spine.test.testutil.TestUtilCommentsAggregatePart;
+import io.spine.test.testutil.TestUtilCommentsAggregatePartVBuilder;
+import io.spine.test.testutil.TestUtilProjectId;
 import org.junit.jupiter.api.BeforeEach;
 
 /**

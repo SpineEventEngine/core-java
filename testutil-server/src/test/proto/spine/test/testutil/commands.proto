@@ -19,20 +19,34 @@
 //
 syntax = "proto3";
 
-package spine.test.util;
+package spine.test.testutil;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.util";
-option java_outer_classname = "AggregateEventsProto";
+option java_package="io.spine.test.testutil";
+option java_outer_classname = "CommandsProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
-import "spine/core/user_id.proto";
+import "spine/test/testutil/entity.proto";
 
-message UserCreated {
-    core.UserId userId = 1;
+message TestUtilCreateProject {
+    TestUtilProjectId id = 1;
+}
 
+message TestUtilAssignProject {
+    TestUtilProjectId id = 1;
+}
 
+message TestUtilAddComment {
+    TestUtilProjectId id = 1;
+}
+
+message TestUtilCreateTask {
+    TestUtilProjectId id = 1;
+}
+
+message TestUtilAssignTask {
+    TestUtilProjectId id = 1;
 }

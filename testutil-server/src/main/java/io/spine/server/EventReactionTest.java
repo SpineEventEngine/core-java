@@ -54,7 +54,6 @@ public abstract class EventReactionTest<I,
 
     protected EventReactionTest() {
         super();
-
     }
 
     @Override

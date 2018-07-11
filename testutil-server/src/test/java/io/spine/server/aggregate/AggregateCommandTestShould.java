@@ -26,7 +26,7 @@ import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.CommandHand
 import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.RejectionCommandHandlerTest;
 import io.spine.server.aggregate.given.AggregateCommandTestShouldEnv.CommandHandlingTest;
 import io.spine.server.expected.CommandHandlerExpected;
-import io.spine.testutil.server.aggregate.TestUtilProjectAggregate;
+import io.spine.test.testutil.TestUtilProjectAggregate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

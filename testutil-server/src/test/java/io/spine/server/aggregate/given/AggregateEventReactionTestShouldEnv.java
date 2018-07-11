@@ -29,11 +29,11 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.given.Given;
 import io.spine.server.expected.EventHandlerExpected;
-import io.spine.testutil.server.aggregate.TestUtilProjectAggregate;
-import io.spine.testutil.server.aggregate.TestUtilProjectAggregateVBuilder;
-import io.spine.testutil.server.aggregate.TestUtilProjectAssigned;
-import io.spine.testutil.server.aggregate.TestUtilProjectCreated;
-import io.spine.testutil.server.aggregate.TestUtilProjectId;
+import io.spine.test.testutil.TestUtilProjectAggregate;
+import io.spine.test.testutil.TestUtilProjectAggregateVBuilder;
+import io.spine.test.testutil.TestUtilProjectAssigned;
+import io.spine.test.testutil.TestUtilProjectCreated;
+import io.spine.test.testutil.TestUtilProjectId;
 import org.junit.jupiter.api.BeforeEach;
 
 import static com.google.protobuf.util.Timestamps.fromMillis;

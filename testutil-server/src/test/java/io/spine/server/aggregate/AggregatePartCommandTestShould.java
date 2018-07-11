@@ -22,7 +22,7 @@ package io.spine.server.aggregate;
 
 import io.spine.server.aggregate.given.AggregatePartCommandTestShouldEnv.CommentsAggregatePart;
 import io.spine.server.aggregate.given.AggregatePartCommandTestShouldEnv.TimeCounterTest;
-import io.spine.testutil.server.aggregate.TestUtilProjectId;
+import io.spine.test.testutil.TestUtilProjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

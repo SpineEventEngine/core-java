@@ -19,34 +19,40 @@
 //
 syntax = "proto3";
 
-package spine.testutil.server.aggregate;
+package spine.test.testutil;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.testutil.server.aggregate";
-option java_outer_classname = "CommandsProto";
+option java_package="io.spine.test.testutil";
+option java_outer_classname = "EntitiesProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
-import "spine/testutil/server/aggregate/entity.proto";
+import "google/protobuf/timestamp.proto";
+import "spine/core/user_id.proto";
 
-message TestUtilCreateProject {
-    TestUtilProjectId id = 1;
+message TestUtilProjectId {
+    string value = 1;
 }
 
-message TestUtilAssignProject {
+message TestUtilProjectAggregate {
+
     TestUtilProjectId id = 1;
+
+    google.protobuf.Timestamp timestamp = 2;
 }
 
-message TestUtilAddComment {
+message TestUtilCommentsAggregatePart {
+
     TestUtilProjectId id = 1;
+
+    google.protobuf.Timestamp timestamp = 2;
 }
 
-message TestUtilCreateTask {
-    TestUtilProjectId id = 1;
-}
+message TestUtilTaskCreationPm {
 
-message TestUtilAssignTask {
     TestUtilProjectId id = 1;
+
+    google.protobuf.Timestamp timestamp = 2;
 }

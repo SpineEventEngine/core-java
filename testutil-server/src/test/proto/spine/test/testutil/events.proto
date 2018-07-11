@@ -19,17 +19,17 @@
 //
 syntax = "proto3";
 
-package spine.testutil.server.aggregate;
+package spine.test.testutil;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.testutil.server.aggregate";
+option java_package="io.spine.test.testutil";
 option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
-import "spine/testutil/server/aggregate/entity.proto";
+import "spine/test/testutil/entity.proto";
 
 message TestUtilProjectCreated {
     TestUtilProjectId id = 1;

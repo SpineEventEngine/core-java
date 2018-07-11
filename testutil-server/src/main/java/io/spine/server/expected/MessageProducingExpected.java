@@ -61,7 +61,6 @@ public abstract class MessageProducingExpected<S extends Message,
     @Override
     public X ignoresMessage() {
         assertTrue(commands.isEmpty(), format("Message produced commands: %s", commands));
-
         if (!events.isEmpty()) {
             assertEquals(1, events.size());
             assertTrue(Empty.class.isInstance(events.get(0)));

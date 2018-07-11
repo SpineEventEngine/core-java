@@ -29,13 +29,13 @@ import io.spine.server.entity.given.Given;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerCommandTest;
 import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.testutil.server.aggregate.TestUtilAssignTask;
-import io.spine.testutil.server.aggregate.TestUtilCreateTask;
-import io.spine.testutil.server.aggregate.TestUtilProjectId;
-import io.spine.testutil.server.aggregate.TestUtilTaskAssigned;
-import io.spine.testutil.server.aggregate.TestUtilTaskCreated;
-import io.spine.testutil.server.aggregate.TestUtilTaskCreationPm;
-import io.spine.testutil.server.aggregate.TestUtilTaskCreationPmVBuilder;
+import io.spine.test.testutil.TestUtilAssignTask;
+import io.spine.test.testutil.TestUtilCreateTask;
+import io.spine.test.testutil.TestUtilProjectId;
+import io.spine.test.testutil.TestUtilTaskAssigned;
+import io.spine.test.testutil.TestUtilTaskCreated;
+import io.spine.test.testutil.TestUtilTaskCreationPm;
+import io.spine.test.testutil.TestUtilTaskCreationPmVBuilder;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
