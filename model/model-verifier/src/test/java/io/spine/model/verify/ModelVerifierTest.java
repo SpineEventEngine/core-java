@@ -30,6 +30,7 @@ import io.spine.model.verify.given.ModelVerifierTestEnv.Int32HandlerAggregate;
 import io.spine.model.verify.given.ModelVerifierTestEnv.Int64HandlerProcMan;
 import io.spine.server.model.DuplicateCommandHandlerError;
 import org.gradle.api.Project;
+import org.gradle.api.initialization.dsl.ScriptHandler;
 import org.gradle.api.tasks.TaskCollection;
 import org.gradle.api.tasks.TaskContainer;
 import org.gradle.api.tasks.compile.JavaCompile;
@@ -67,8 +68,12 @@ class ModelVerifierTest {
     @BeforeEach
     void setUp() {
         project = mock(Project.class);
+        ScriptHandler buildScript = mock(ScriptHandler.class);
+        when(buildScript.getClassLoader()).thenReturn(ModelVerifierTest.class.getClassLoader());
         when(project.getSubprojects()).thenReturn(emptySet());
         when(project.getRootProject()).thenReturn(project);
+        when(project.getBuildscript()).thenReturn(buildScript);
+
         TaskContainer tasks = mock(TaskContainer.class);
         TaskCollection emptyTaskCollection = mock(TaskCollection.class);
         when(emptyTaskCollection.iterator()).thenReturn(Iterators.emptyIterator());
