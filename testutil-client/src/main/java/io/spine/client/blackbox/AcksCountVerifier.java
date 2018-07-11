@@ -34,6 +34,7 @@ class AcksCountVerifier extends AcknowledgementsVerifier {
 
     /** @param expectedCount an amount acks that are expected be observed */
     AcksCountVerifier(int expectedCount) {
+        super();
         this.expectedCount = expectedCount;
     }
 
