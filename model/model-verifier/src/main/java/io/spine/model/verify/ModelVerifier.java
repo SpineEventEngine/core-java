@@ -28,12 +28,12 @@ import io.spine.server.command.CommandHandler;
 import io.spine.server.model.Model;
 import io.spine.server.procman.ProcessManager;
 import io.spine.tools.gradle.ProjectHierarchy;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.compile.JavaCompile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -127,9 +127,11 @@ final class ModelVerifier {
         final URL[] compiledCodePath = extractDestinationDirs(tasks);
         log().debug("Initializing ClassLoader for URLs: {}", deepToString(compiledCodePath));
         try {
+            ClassLoader projectClassloader = project.getBuildscript()
+                                                    .getClassLoader();
             @SuppressWarnings("ClassLoaderInstantiation") // Caught exception.
             final URLClassLoader result =
-                    new URLClassLoader(compiledCodePath, ModelVerifier.class.getClassLoader());
+                    new URLClassLoader(compiledCodePath, projectClassloader);
             return result;
         } catch (SecurityException e) {
             throw new IllegalStateException("Cannot analyze project source code.", e);
