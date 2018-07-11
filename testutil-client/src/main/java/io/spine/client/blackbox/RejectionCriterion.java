@@ -20,26 +20,28 @@
 
 package io.spine.client.blackbox;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Message;
 
 /**
+ * Specifies the rules a rejection must match.
+ *
+ * <p>Optionally can contain an the criterion description, useful for display by test assertions.
+ *
+ *  <p>These criteria are consumed by acks verifier
+ * {@link AcknowledgementsVerifier#ackedWithErrors(ErrorCriterion) ackedWithError method}.
+ *
+ * @param <T> a domain rejection type
  * @author Mykhailo Drachuk
  */
-@DisplayName("Rejection Predicate should")
-class RejectionPredicateTest {
+@VisibleForTesting
+public interface RejectionCriterion<T extends Message> extends MessageCriterion<T> {
 
-    @Test
-    @DisplayName("contain default error message")
-    void containDefaultErrorMessage() {
-        RejectionPredicate predicate = acceptAll();
-        String message = predicate.message();
-        assertNotNull(message);
-    }
-
-    private static RejectionPredicate acceptAll() {
-        return target -> true;
+    /**
+     * @return a message specifying the reason the rejection did not match the predicate
+     */
+    @Override
+    default String description() {
+        return "Domain rejection did not match a predicate.";
     }
 }

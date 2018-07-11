@@ -20,6 +20,7 @@
 
 package io.spine.client.blackbox;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 
 import java.util.Collection;
@@ -31,6 +32,7 @@ import static com.google.common.collect.Lists.newArrayList;
  * A special kind of a {@link AcknowledgementsVerifier Acknowledgements Verifier} that
  * executes a list of assertions one by one.
  */
+@VisibleForTesting
 class AcksVerifierCombination extends AcknowledgementsVerifier {
 
     private final List<AcknowledgementsVerifier> verifiers;

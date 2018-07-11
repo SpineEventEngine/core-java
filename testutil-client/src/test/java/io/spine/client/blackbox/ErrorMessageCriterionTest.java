@@ -30,11 +30,11 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static io.spine.client.blackbox.ErrorCriteria.withAttribute;
-import static io.spine.client.blackbox.ErrorCriteria.withCode;
-import static io.spine.client.blackbox.ErrorCriteria.withMessage;
-import static io.spine.client.blackbox.ErrorCriteria.withType;
-import static io.spine.client.blackbox.ErrorCriteria.withoutAttribute;
+import static io.spine.client.blackbox.ErrorCriterion.withAttribute;
+import static io.spine.client.blackbox.ErrorCriterion.withCode;
+import static io.spine.client.blackbox.ErrorCriterion.withMessage;
+import static io.spine.client.blackbox.ErrorCriterion.withType;
+import static io.spine.client.blackbox.ErrorCriterion.withoutAttribute;
 import static io.spine.client.blackbox.given.ErrorQualifierTestEnv.Code;
 import static io.spine.client.blackbox.given.ErrorQualifierTestEnv.Height;
 import static io.spine.client.blackbox.given.ErrorQualifierTestEnv.Pangram;
@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @author Mykhailo Drachuk
  */
 @DisplayName("Error Qualifier should")
-class ErrorCriteriaTest {
+class ErrorMessageCriterionTest {
 
     private List<Error> errors;
 
@@ -67,15 +67,15 @@ class ErrorCriteriaTest {
     @Test
     @DisplayName("filter by type")
     void filterByType() {
-        ErrorCriteria type1Qualifier = withType(Type.FIRST.value());
+        ErrorCriterion type1Qualifier = withType(Type.FIRST.value());
         List<Error> type1Errors = filterErrors(type1Qualifier);
         assertEquals(1, type1Errors.size());
 
-        ErrorCriteria type2Qualifier = withType(Type.SECOND.value());
+        ErrorCriterion type2Qualifier = withType(Type.SECOND.value());
         List<Error> type2Errors = filterErrors(type2Qualifier);
         assertEquals(1, type2Errors.size());
 
-        ErrorCriteria type11Qualifier = withType(Type.ELEVEN.value());
+        ErrorCriterion type11Qualifier = withType(Type.ELEVEN.value());
         List<Error> type11Errors = filterErrors(type11Qualifier);
         assertEquals(0, type11Errors.size());
         assertNotNull(type11Qualifier.description());
@@ -84,15 +84,15 @@ class ErrorCriteriaTest {
     @Test
     @DisplayName("filter by code")
     void filterByCode() {
-        ErrorCriteria code0Qualifier = withCode(Code.ZERO.value());
+        ErrorCriterion code0Qualifier = withCode(Code.ZERO.value());
         List<Error> code0Errors = filterErrors(code0Qualifier);
         assertEquals(2, code0Errors.size());
 
-        ErrorCriteria code2Qualifier = withCode(Code.TWO.value());
+        ErrorCriterion code2Qualifier = withCode(Code.TWO.value());
         List<Error> code2Errors = filterErrors(code2Qualifier);
         assertEquals(1, code2Errors.size());
 
-        ErrorCriteria code17Qualifier = withCode(Code.SEVENTEEN.value());
+        ErrorCriterion code17Qualifier = withCode(Code.SEVENTEEN.value());
         List<Error> code17Errors = filterErrors(code17Qualifier);
         assertEquals(0, code17Errors.size());
         assertNotNull(code17Qualifier.description());
@@ -101,15 +101,15 @@ class ErrorCriteriaTest {
     @Test
     @DisplayName("filter by message")
     void filterByMessage() {
-        ErrorCriteria firstMessage = withMessage(Pangram.FIRST.text());
+        ErrorCriterion firstMessage = withMessage(Pangram.FIRST.text());
         List<Error> firstMessageErrors = filterErrors(firstMessage);
         assertEquals(1, firstMessageErrors.size());
 
-        ErrorCriteria secondMessage = withMessage(Pangram.SECOND.text());
+        ErrorCriterion secondMessage = withMessage(Pangram.SECOND.text());
         List<Error> secondMessageErrors = filterErrors(secondMessage);
         assertEquals(3, secondMessageErrors.size());
 
-        ErrorCriteria missingMessage = withMessage(Pangram.THIRD.text());
+        ErrorCriterion missingMessage = withMessage(Pangram.THIRD.text());
         List<Error> missingMessageErrors = filterErrors(missingMessage);
         assertEquals(0, missingMessageErrors.size());
         assertNotNull(missingMessage.description());
@@ -118,13 +118,13 @@ class ErrorCriteriaTest {
     @Test
     @DisplayName("filter by attributes absence")
     void filterWithoutAttribute() {
-        ErrorCriteria missingAttribute = withoutAttribute(Attribute.WEIGHT.title());
+        ErrorCriterion missingAttribute = withoutAttribute(Attribute.WEIGHT.title());
         List<Error> errorsWithoutWeight = filterErrors(missingAttribute);
 
         assertEquals(6, errorsWithoutWeight.size());
         assertNotNull(missingAttribute.description());
 
-        ErrorCriteria attributePresentInSome = withoutAttribute(Attribute.HEIGHT.title());
+        ErrorCriterion attributePresentInSome = withoutAttribute(Attribute.HEIGHT.title());
         List<Error> errorsWithoutHeight = filterErrors(attributePresentInSome);
         
         assertEquals(4, errorsWithoutHeight.size());
@@ -133,7 +133,7 @@ class ErrorCriteriaTest {
     @Test
     @DisplayName("filter by attributes presence")
     void filterWithAttribute() {
-        ErrorCriteria withHeight = withAttribute(Attribute.HEIGHT.title());
+        ErrorCriterion withHeight = withAttribute(Attribute.HEIGHT.title());
         List<Error> errors = filterErrors(withHeight);
 
         assertEquals(2, errors.size());
@@ -145,16 +145,16 @@ class ErrorCriteriaTest {
     void filterByAttributeValue() {
         String height = Attribute.HEIGHT.title();
         Value value = Height.BRYANT.value();
-        ErrorCriteria withHeightValue = withAttribute(height).value(value);
+        ErrorCriterion withHeightValue = withAttribute(height).value(value);
         List<Error> errors = filterErrors(withHeightValue);
 
         assertEquals(1, errors.size());
         assertNotNull(withHeightValue.description());
     }
 
-    private List<Error> filterErrors(ErrorCriteria criteria) {
+    private List<Error> filterErrors(ErrorCriterion criterion) {
         return errors.stream()
-                     .filter(criteria::matches)
+                     .filter(criterion::matches)
                      .collect(toList());
     }
 }

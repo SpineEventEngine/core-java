@@ -30,17 +30,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
- * An specific {@link ErrorCriteria error criteria} that checks the errors
+ * A special {@link ErrorCriterion error criterion} that checks the errors 
  * {@link Error#getAttributes() attributes}.
  *
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
-public class ErrorAttributeCriteria extends ErrorCriteria {
+public class ErrorAttributeCriterion implements ErrorCriterion {
 
     private final String name;
 
-    ErrorAttributeCriteria(String name) {
+    ErrorAttributeCriterion(String name) {
         super();
         this.name = name;
     }
@@ -62,11 +62,11 @@ public class ErrorAttributeCriteria extends ErrorCriteria {
      * Verifies the value of the attribute under current name.
      *
      * @param value a value that is expected by an attribute name
-     * @return a new {@link ErrorCriteria error criteria} instance
+     * @return a new {@link ErrorCriterion error criterion} instance
      */
-    public ErrorCriteria value(Value value) {
+    public ErrorCriterion value(Value value) {
         checkNotNull(value);
-        return new ErrorCriteria() {
+        return new ErrorCriterion() {
             @Override
             public String description() {
                 return format("Error contains an attribute \"%s\" with following value: %s",

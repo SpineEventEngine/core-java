@@ -35,24 +35,24 @@ class AcksSpecificRejectionCountVerifier<T extends Message> extends Acknowledgem
 
     private final int expectedCount;
     private final Class<T> type;
-    private final RejectionPredicate<T> predicate;
+    private final RejectionCriterion<T> criterion;
 
     /**
      * @param expectedCount an amount of rejection that are expected in Bounded Context
      * @param type          a type of a domain rejection specified by a message class
-     * @param predicate     a predicate filtering domain rejections
+     * @param criterion     a criterion filtering domain rejections
      */
     AcksSpecificRejectionCountVerifier(int expectedCount, Class<T> type,
-                                       RejectionPredicate<T> predicate) {
+                                       RejectionCriterion<T> criterion) {
         this.expectedCount = expectedCount;
         this.type = type;
-        this.predicate = predicate;
+        this.criterion = criterion;
     }
 
     @Override
     public void verify(Acknowledgements acks) {
-        assertEquals(expectedCount, acks.countRejections(type, predicate),
+        assertEquals(expectedCount, acks.countRejections(type, criterion),
                      "Bounded Context did not contain a rejection expected amount of times:"
-                             + predicate.message());
+                             + criterion.description());
     }
 }

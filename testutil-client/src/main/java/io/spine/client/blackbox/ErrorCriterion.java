@@ -21,6 +21,7 @@
 package io.spine.client.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
 
@@ -30,41 +31,32 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
- * An abstract predicate testing {@link Error Spine errors} to
- * match some simple rules.
- *
- * <p>These criterias are consumed by acks verifier
- * {@link AcknowledgementsVerifier#ackedWithErrors(ErrorCriteria) ackedWithError method}.
+ * Specifies the rules a {@link Error Spine errors} must match.
+ * 
+ * <p>Optionally can contain an the criterion description, useful for display by test assertions.
+ * 
+ * <p>These criteria are consumed by acks verifier
+ * {@link AcknowledgementsVerifier#ackedWithErrors(ErrorCriterion) ackedWithError method}.
  *
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
-public abstract class ErrorCriteria {
+public interface ErrorCriterion extends MessageCriterion<Error> {
 
-    /**
-     * A message describing the criteria.
-     *
-     * <p>Used to report an assertion error.
-     */
-    public abstract String description();
-
-    /**
-     * Checks if the error matches the criteria.
-     *
-     * @param error a Spine Error instance that is part of a {@link io.spine.core.Ack ack response}
-     * @return {@code true} if the error matches the criteria, {@code false} otherwise
-     */
-    public abstract boolean matches(Error error);
+    @Override
+    default String description() {
+        return "A message did not match the provided error.";
+    }
 
     /**
      * Verifies that the {@link Error#getType() errors type} matches the provided one.
      *
      * @param type a type that is to be matched in error
-     * @return new {@link ErrorCriteria error criteria} instance
+     * @return new {@link ErrorCriterion error criterion} instance
      */
-    public static ErrorCriteria withType(String type) {
+    static ErrorCriterion withType(String type) {
         checkNotNull(type);
-        return new ErrorCriteria() {
+        return new ErrorCriterion() {
             @Override
             public String description() {
                 return format("Error type is %s", type);
@@ -81,10 +73,10 @@ public abstract class ErrorCriteria {
      * Verifies that the {@link Error#getCode() errors code} matches the provided one.
      *
      * @param code a code that is to be matched in error
-     * @return new {@link ErrorCriteria error criteria} instance
+     * @return new {@link ErrorCriterion error criterion} instance
      */
-    public static ErrorCriteria withCode(int code) {
-        return new ErrorCriteria() {
+    static ErrorCriterion withCode(int code) {
+        return new ErrorCriterion() {
             @Override
             public String description() {
                 return format("Error code is \"%s\"", code);
@@ -101,10 +93,10 @@ public abstract class ErrorCriteria {
      * Verifies that the {@link Error#getMessage() errors message} matches the provided one.
      *
      * @param message a message that is to be matched in error
-     * @return new {@link ErrorCriteria error criteria} instance
+     * @return new {@link ErrorCriterion error criterion} instance
      */
-    public static ErrorCriteria withMessage(String message) {
-        return new ErrorCriteria() {
+    static ErrorCriterion withMessage(String message) {
+        return new ErrorCriterion() {
             @Override
             public String description() {
                 return format("Error contains following message: %s", message);
@@ -118,18 +110,18 @@ public abstract class ErrorCriteria {
     }
 
     /**
-     * A static factory method for creating an {@link ErrorAttributeCriteria error attribute
-     * criteria}.
+     * A static factory method for creating an {@link ErrorAttributeCriterion error attribute
+     * criterion}.
      *
      * <p>An error attribute verifier checks that the error contains an
      * {@link Error#getAttributes() attribute} with a provided name.
      *
-     * @param name name of an attribute which looked for by this criteria
-     * @return a new {@link ErrorAttributeCriteria error attribute criteria} instance
+     * @param name name of an attribute which looked for by this criterion
+     * @return a new {@link ErrorAttributeCriterion error attribute criterion} instance
      */
     @SuppressWarnings("ClassReferencesSubclass")
-    public static ErrorAttributeCriteria withAttribute(String name) {
-        return new ErrorAttributeCriteria(name);
+    static ErrorAttributeCriterion withAttribute(String name) {
+        return new ErrorAttributeCriterion(name);
     }
 
     /**
@@ -137,10 +129,10 @@ public abstract class ErrorCriteria {
      * with a provided name.
      *
      * @param name a name of an attribute that must be absent in error
-     * @return new {@link ErrorCriteria error criteria} instance
+     * @return new {@link ErrorCriterion error criterion} instance
      */
-    public static ErrorCriteria withoutAttribute(String name) {
-        return new ErrorCriteria() {
+    static ErrorCriterion withoutAttribute(String name) {
+        return new ErrorCriterion() {
             @Override
             public String description() {
                 return format("Error does not contain an attribute \"%s\"", name);

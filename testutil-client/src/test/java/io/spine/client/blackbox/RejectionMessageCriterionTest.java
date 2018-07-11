@@ -20,33 +20,26 @@
 
 package io.spine.client.blackbox;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * Verifies that a command or an event was handled responding with an error matching a provided
- * {@link ErrorCriterion error criterion}.
- *
  * @author Mykhailo Drachuk
  */
-class AcksSpecificErrorCountVerifier extends AcknowledgementsVerifier {
+@DisplayName("Rejection Predicate should")
+class RejectionMessageCriterionTest {
 
-    private final int expectedCount;
-    private final ErrorCriterion criterion;
-
-    /**
-     * @param expectedCount an amount of errors that are expected to match the criterion
-     * @param criterion      an error criterion specifying which kind of error should be a part
-     *                      of acknowledgement
-     */
-    AcksSpecificErrorCountVerifier(int expectedCount, ErrorCriterion criterion) {
-        this.expectedCount = expectedCount;
-        this.criterion = criterion;
+    @Test
+    @DisplayName("contain default error message")
+    void containDefaultErrorMessage() {
+        RejectionCriterion predicate = acceptAll();
+        String message = predicate.description();
+        assertNotNull(message);
     }
 
-    @Override
-    public void verify(Acknowledgements acks) {
-        assertEquals(expectedCount, acks.countErrors(criterion),
-                     "Bounded Context did not contain an expected count of errors. "
-                             + criterion.description());
+    private static RejectionCriterion acceptAll() {
+        return target -> true;
     }
 }

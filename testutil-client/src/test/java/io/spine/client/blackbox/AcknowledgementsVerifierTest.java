@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.client.blackbox.AcknowledgementsVerifier.ackedWithErrors;
 import static io.spine.client.blackbox.AcknowledgementsVerifier.ackedWithRejections;
-import static io.spine.client.blackbox.ErrorCriteria.withType;
+import static io.spine.client.blackbox.ErrorCriterion.withType;
 import static io.spine.client.blackbox.given.CommandAcksTestEnv.DUPLICATE_ERROR_TYPE;
 import static io.spine.client.blackbox.given.CommandAcksTestEnv.DUPLICATE_TASK_TITLE;
 import static io.spine.client.blackbox.given.CommandAcksTestEnv.MISSING_ERROR_TYPE;
@@ -108,8 +108,8 @@ class AcknowledgementsVerifierTest {
     }
 
     @Test
-    @DisplayName("verify error presence by a criteria")
-    void containErrorByCriteria() {
+    @DisplayName("verify error presence by a criterion")
+    void containErrorBycriterion() {
         Acknowledgements errorAcks = new Acknowledgements(ImmutableList.of(
                 newErrorAck(newError(PRESENT_ERROR_TYPE))
         ));
@@ -120,8 +120,8 @@ class AcknowledgementsVerifierTest {
     }
 
     @Test
-    @DisplayName("verify error count by a criteria")
-    void countErrorByCriteria() {
+    @DisplayName("verify error count by a criterion")
+    void countErrorBycriterion() {
         Acknowledgements errorAcks = new Acknowledgements(ImmutableList.of(
                 newErrorAck(newError(DUPLICATE_ERROR_TYPE)),
                 newErrorAck(newError(DUPLICATE_ERROR_TYPE))
@@ -161,14 +161,14 @@ class AcknowledgementsVerifierTest {
                 newRejectionAck(taskCreatedInCompletedProject(newTask(PRESENT_TASK_TITLE)))
         ));
 
-        RejectionPredicate<IntTaskCreatedInCompletedProject> whichIsPresent =
+        RejectionCriterion<IntTaskCreatedInCompletedProject> whichIsPresent =
                 rejection -> PRESENT_TASK_TITLE.equals(getTaskTitle(rejection));
         Class<IntTaskCreatedInCompletedProject> taskInCompleteProject =
                 IntTaskCreatedInCompletedProject.class;
         verify(acked(2).withRejections(taskInCompleteProject, whichIsPresent), rejectionAcks);
 
         assertThrows(AssertionError.class, () -> {
-            RejectionPredicate<IntTaskCreatedInCompletedProject> whichIsMissing =
+            RejectionCriterion<IntTaskCreatedInCompletedProject> whichIsMissing =
                     rejection -> MISSING_TASK_TITLE.equals(getTaskTitle(rejection));
             verify(acked(2).withRejections(taskInCompleteProject, whichIsMissing), rejectionAcks);
         });
@@ -201,7 +201,7 @@ class AcknowledgementsVerifierTest {
         assertThrows(AssertionError.class, () ->
                 verify(ackedWithRejections(2, projectAlreadyStarted), rejectionAcks));
 
-        RejectionPredicate<IntTaskCreatedInCompletedProject> withDuplicateName =
+        RejectionCriterion<IntTaskCreatedInCompletedProject> withDuplicateName =
                 rejection -> DUPLICATE_TASK_TITLE.equals(getTaskTitle(rejection));
         Class<IntTaskCreatedInCompletedProject> taskInCompleteProject =
                 IntTaskCreatedInCompletedProject.class;

@@ -41,8 +41,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
- * Contains the data on all acknowledgements in a {@link BlackBoxBoundedContext Bounded Context}.
- * Can be queried for information about acks, errors, and rejections.
+ * Contains the data on provided acknowledgements, allowing it to be queried about acks, errors, 
+ * and rejections.
  *
  * @author Mykhailo Drachuk
  */
@@ -119,24 +119,24 @@ public class Acknowledgements {
     }
 
     /**
-     * @return {@code true} if an error which matches the provided criteria did occur in
+     * @return {@code true} if an error which matches the provided criterion did occur in
      * the Bounded Context during command handling, {@code false} otherwise.
      */
-    public boolean containErrors(ErrorCriteria criteria) {
-        checkNotNull(criteria);
+    public boolean containErrors(ErrorCriterion criterion) {
+        checkNotNull(criterion);
         return errors.stream()
-                     .anyMatch(criteria::matches);
+                     .anyMatch(criterion::matches);
     }
 
     /**
-     * @param criteria an error criteria specifying which kind of an error to count
-     * @return a total number of times errors matching the provided criteria were
+     * @param criterion an error criterion specifying which kind of an error to count
+     * @return a total number of times errors matching the provided criterion were
      * observed in the Bounded Context responses
      */
-    public long countErrors(ErrorCriteria criteria) {
-        checkNotNull(criteria);
+    public long countErrors(ErrorCriterion criterion) {
+        checkNotNull(criterion);
         return errors.stream()
-                     .filter(criteria::matches)
+                     .filter(criterion::matches)
                      .count();
     }
 
@@ -183,7 +183,8 @@ public class Acknowledgements {
      * @return {@code true} if the rejection matching the predicate was observed
      * in the Bounded Context, {@code false} otherwise
      */
-    public <T extends Message> boolean containRejection(Class<T> type, Predicate<T> predicate) {
+    public <T extends Message> boolean containRejection(Class<T> type,
+                                                        RejectionCriterion<T> predicate) {
         return rejections.stream()
                          .anyMatch(new RejectionFilter<>(type, predicate));
     }
@@ -194,7 +195,8 @@ public class Acknowledgements {
      * @param <T>       a domain rejection type
      * @return an amount of rejections matching the predicate observed in Bounded Context
      */
-    public <T extends Message> long countRejections(Class<T> type, Predicate<T> predicate) {
+    public <T extends Message> long countRejections(Class<T> type,
+                                                    RejectionCriterion<T> predicate) {
         return rejections.stream()
                          .filter(new RejectionFilter<>(type, predicate))
                          .count();
@@ -206,9 +208,9 @@ public class Acknowledgements {
     private static class RejectionFilter<T extends Message> implements Predicate<Rejection> {
 
         private final TypeUrl typeUrl;
-        private final Predicate<T> predicate;
+        private final RejectionCriterion<T> predicate;
 
-        private RejectionFilter(Class<T> rejectionType, Predicate<T> predicate) {
+        private RejectionFilter(Class<T> rejectionType, RejectionCriterion<T> predicate) {
             this.typeUrl = TypeUrl.of(rejectionType);
             this.predicate = predicate;
         }
@@ -216,7 +218,7 @@ public class Acknowledgements {
         @Override
         public boolean test(Rejection rejection) {
             T message = unpack(rejection.getMessage());
-            return typeUrl.equals(TypeUrl.of(message)) && predicate.test(message);
+            return typeUrl.equals(TypeUrl.of(message)) && predicate.matches(message);
         }
     }
 }

@@ -20,27 +20,31 @@
 
 package io.spine.client.blackbox;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 
-import java.util.function.Predicate;
-
 /**
- * A predicate filtering domain rejections to be used in tests.
+ * Specifies the rules a message must match.
  *
- * <p>Optionally can contain an error message.
+ * <p>Optionally can contain an the criterion description, useful for display by test assertions.
  *
- * @param <T> a domain message wrapped by the Spine Rejection
+ * @param <T> a protobuf message type, that is checked to match criterion
  * @author Mykhailo Drachuk
  */
-@VisibleForTesting
 @FunctionalInterface
-public interface RejectionPredicate<T extends Message> extends Predicate<T> {
+interface MessageCriterion<T extends Message> {
 
     /**
-     * @return a message specifying the reason the rejection did not match the predicate
+     * Checks if target matches the criterion.
+     *
+     * @param target an object ot check
+     * @return {@code true} if target matches the criterion, {@code false} otherwise
      */
-    default String message() {
-        return "Domain rejection did not match a predicate.";
+    boolean matches(T target);
+
+    /**
+     * @return a message describing the criterion
+     */
+    default String description() {
+        return "The message must match the criterion.";
     }
 }

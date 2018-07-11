@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * An abstract verifier of Bounded Context acknowledgements. Its implementations throw assertion
- * errors if the acknowledgements observed in the Bounded Context do not meet the verifier criteria.
+ * errors if the acknowledgements observed in the Bounded Context do not meet the verifier criterion.
  *
  * <p>Contains static factory methods for creating acknowledgement verifiers, checking that
  * commands were acknowledged, responded with rejections, and errors.
@@ -101,29 +101,29 @@ public abstract class AcknowledgementsVerifier {
 
     /**
      * Verifies that a command or an event was handled responding with an error matching a provided
-     * {@link ErrorCriteria error criteria}.
+     * {@link ErrorCriterion error criterion}.
      *
-     * @param criteria an error criteria specifying which kind of error should be a part
+     * @param criterion an error criterion specifying which kind of error should be a part
      *                 of acknowledgement
      * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public static AcknowledgementsVerifier ackedWithErrors(ErrorCriteria criteria) {
-        return new AcksSpecificErrorPresenceVerifier(criteria);
+    public static AcknowledgementsVerifier ackedWithErrors(ErrorCriterion criterion) {
+        return new AcksSpecificErrorPresenceVerifier(criterion);
     }
 
     /**
      * Verifies that a command or an event was handled responding with an error matching a provided
-     * {@link ErrorCriteria error criteria}.
+     * {@link ErrorCriterion error criterion}.
      *
-     * @param expectedCount an amount of errors that are expected to match the criteria
-     * @param criteria      an error criteria specifying which kind of error should be a part
+     * @param expectedCount an amount of errors that are expected to match the criterion
+     * @param criterion      an error criterion specifying which kind of error should be a part
      *                      of acknowledgement
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public static AcknowledgementsVerifier ackedWithErrors(int expectedCount,
-                                                           ErrorCriteria criteria) {
-        checkArgument(expectedCount >= 0, "0 or more errors matching criteria must be expected.");
-        return new AcksSpecificErrorCountVerifier(expectedCount, criteria);
+                                                           ErrorCriterion criterion) {
+        checkArgument(expectedCount >= 0, "0 or more errors matching criterion must be expected.");
+        return new AcksSpecificErrorCountVerifier(expectedCount, criterion);
     }
 
     /*
@@ -182,7 +182,7 @@ public abstract class AcknowledgementsVerifier {
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public static <T extends Message> AcknowledgementsVerifier
-    ackedWithRejections(Class<T> type, RejectionPredicate<T> predicate) {
+    ackedWithRejections(Class<T> type, RejectionCriterion<T> predicate) {
         return new AcksSpecificRejectionPresenceVerifier<>(type, predicate);
     }
 
@@ -240,7 +240,7 @@ public abstract class AcknowledgementsVerifier {
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public static <T extends Message> AcknowledgementsVerifier
-    ackedWithRejections(int expectedCount, Class<T> type, RejectionPredicate<T> predicate) {
+    ackedWithRejections(int expectedCount, Class<T> type, RejectionCriterion<T> predicate) {
         checkArgument(expectedCount >= 0, "0 or more specified rejections must be expected.");
         return new AcksSpecificRejectionCountVerifier<>(expectedCount, type, predicate);
     }
@@ -292,28 +292,28 @@ public abstract class AcknowledgementsVerifier {
 
     /**
      * Creates a new verifier adding a check to contain an {@link Error error} that
-     * matches the criteria.
+     * matches the criterion.
      *
-     * @param criteria an error criteria specifying which kind of error should be a part
+     * @param criterion an error criterion specifying which kind of error should be a part
      *                 of acknowledgement
      * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public AcknowledgementsVerifier withErrors(ErrorCriteria criteria) {
-        AcknowledgementsVerifier withError = ackedWithErrors(criteria);
+    public AcknowledgementsVerifier withErrors(ErrorCriterion criterion) {
+        AcknowledgementsVerifier withError = ackedWithErrors(criterion);
         return this.and(withError);
     }
 
     /**
      * Creates a new verifier adding a check to contain an {@link Error error} that
-     * matches the criteria.
+     * matches the criterion.
      *
-     * @param expectedCount an amount of errors that are expected to match the criteria
-     * @param criteria      an error criteria specifying which kind of error should be a part
+     * @param expectedCount an amount of errors that are expected to match the criterion
+     * @param criterion      an error criterion specifying which kind of error should be a part
      *                      of acknowledgement
      * @return a new {@link AcknowledgementsVerifier} instance
      */
-    public AcknowledgementsVerifier withErrors(int expectedCount, ErrorCriteria criteria) {
-        AcknowledgementsVerifier withError = ackedWithErrors(expectedCount, criteria);
+    public AcknowledgementsVerifier withErrors(int expectedCount, ErrorCriterion criterion) {
+        AcknowledgementsVerifier withError = ackedWithErrors(expectedCount, criterion);
         return this.and(withError);
     }
 
@@ -409,7 +409,7 @@ public abstract class AcknowledgementsVerifier {
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public <T extends Message> AcknowledgementsVerifier
-    withRejections(Class<T> type, RejectionPredicate<T> predicate) {
+    withRejections(Class<T> type, RejectionCriterion<T> predicate) {
         AcknowledgementsVerifier oneRejection = ackedWithRejections(type, predicate);
         return this.and(oneRejection);
     }
@@ -424,7 +424,7 @@ public abstract class AcknowledgementsVerifier {
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public <T extends Message> AcknowledgementsVerifier
-    withRejections(int expectedCount, Class<T> type, RejectionPredicate<T> predicate) {
+    withRejections(int expectedCount, Class<T> type, RejectionCriterion<T> predicate) {
         AcknowledgementsVerifier oneRejection = ackedWithRejections(expectedCount, type, predicate);
         return this.and(oneRejection);
     }

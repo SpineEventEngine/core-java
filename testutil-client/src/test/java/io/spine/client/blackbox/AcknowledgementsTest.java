@@ -30,7 +30,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.client.blackbox.ErrorCriteria.withType;
+import static io.spine.client.blackbox.ErrorCriterion.withType;
 import static io.spine.client.blackbox.given.CommandAcksTestEnv.DUPLICATE_ERROR_TYPE;
 import static io.spine.client.blackbox.given.CommandAcksTestEnv.DUPLICATE_TASK_TITLE;
 import static io.spine.client.blackbox.given.CommandAcksTestEnv.MISSING_ERROR_TYPE;
@@ -165,11 +165,11 @@ class AcknowledgementsTest {
         Class<IntTaskCreatedInCompletedProject> taskInCompletedProject =
                 IntTaskCreatedInCompletedProject.class;
 
-        RejectionPredicate<IntTaskCreatedInCompletedProject> withPresentTitle =
+        RejectionCriterion<IntTaskCreatedInCompletedProject> withPresentTitle =
                 rejection -> PRESENT_TASK_TITLE.equals(rejection.getTask().getTitle());
         assertTrue(acks.containRejection(taskInCompletedProject, withPresentTitle));
 
-        RejectionPredicate<IntTaskCreatedInCompletedProject> withMissingTitle =
+        RejectionCriterion<IntTaskCreatedInCompletedProject> withMissingTitle =
                 rejection -> MISSING_TASK_TITLE.equals(rejection.getTask().getTitle());
         assertFalse(acks.containRejection(taskInCompletedProject, withMissingTitle));
     }
@@ -188,15 +188,15 @@ class AcknowledgementsTest {
         Class<IntTaskCreatedInCompletedProject> taskInCompletedProject =
                 IntTaskCreatedInCompletedProject.class;
 
-        RejectionPredicate<IntTaskCreatedInCompletedProject> withMissingTitle =
+        RejectionCriterion<IntTaskCreatedInCompletedProject> withMissingTitle =
                 rejection -> MISSING_TASK_TITLE.equals(rejection.getTask().getTitle());
         assertEquals(0, acks.countRejections(taskInCompletedProject, withMissingTitle));
 
-        RejectionPredicate<IntTaskCreatedInCompletedProject> withUniqueTitle =
+        RejectionCriterion<IntTaskCreatedInCompletedProject> withUniqueTitle =
                 rejection -> UNIQUE_TASK_TITLEE.equals(rejection.getTask().getTitle());
         assertEquals(1, acks.countRejections(taskInCompletedProject, withUniqueTitle));
 
-        RejectionPredicate<IntTaskCreatedInCompletedProject> withDuplicatedTitle =
+        RejectionCriterion<IntTaskCreatedInCompletedProject> withDuplicatedTitle =
                 rejection -> DUPLICATE_TASK_TITLE.equals(rejection.getTask().getTitle());
         assertEquals(2, acks.countRejections(taskInCompletedProject, withDuplicatedTitle));
     }
@@ -238,7 +238,7 @@ class AcknowledgementsTest {
     }
 
     @Test
-    @DisplayName("return true if contain errors matched by criteria")
+    @DisplayName("return true if contain errors matched by criterion")
     void containErrorsUsingQualifier() {
         List<Ack> items = ImmutableList.of(newErrorAck(newError(PRESENT_ERROR_TYPE)));
         Acknowledgements acks = new Acknowledgements(items);
@@ -248,7 +248,7 @@ class AcknowledgementsTest {
     }
 
     @Test
-    @DisplayName("return proper total error count matched by criteria")
+    @DisplayName("return proper total error count matched by criterion")
     void countErrorsUsingQualifier() {
         Acknowledgements acks = new Acknowledgements(asList(
                 newErrorAck(newError(UNIQUE_ERROR_TYPE)),

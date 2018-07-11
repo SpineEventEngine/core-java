@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Verifies that a command or an event was handled responding with rejection matching the
- * provided predicate.
+ * provided criterion.
  *
  * @param <T> a domain rejection type
  * @author Mykhailo Drachuk
@@ -34,23 +34,23 @@ import static org.junit.jupiter.api.Assertions.fail;
 class AcksSpecificRejectionPresenceVerifier<T extends Message> extends AcknowledgementsVerifier {
 
     private final Class<T> type;
-    private final RejectionPredicate<T> predicate;
+    private final RejectionCriterion<T> criterion;
 
     /**
      * @param type      a type of a domain rejection specified by a message class
-     * @param predicate a predicate filtering the domain rejections
+     * @param criterion a criterion filtering the domain rejections
      */
     AcksSpecificRejectionPresenceVerifier(Class<T> type,
-                                          RejectionPredicate<T> predicate) {
+                                          RejectionCriterion<T> criterion) {
         this.type = type;
-        this.predicate = predicate;
+        this.criterion = criterion;
     }
 
     @Override
     public void verify(Acknowledgements acks) {
-        if (!acks.containRejection(type, predicate)) {
+        if (!acks.containRejection(type, criterion)) {
             fail("Bounded Context did not reject a message:"
-                         + predicate.message());
+                         + criterion.description());
         }
     }
 }
