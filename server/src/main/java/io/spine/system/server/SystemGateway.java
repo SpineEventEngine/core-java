@@ -24,10 +24,17 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 
 /**
+ * A gateway for sending messages into a system bounded context.
+ *
  * @author Dmytro Dashenkov
  */
 @Internal
 public interface SystemGateway {
 
-    void post(Message systemCommand);
+    /**
+     * Post a system command.
+     *
+     * @param systemCommand command message
+     */
+    void postCommand(Message systemCommand);
 }

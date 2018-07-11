@@ -25,7 +25,13 @@ import io.spine.system.server.DefaultSystemGateway;
 import io.spine.system.server.SystemGateway;
 
 /**
+ * The default implementation of a {@link BoundedContext}.
+ *
+ * <p>All the user integrations with the system (such as repository registration, command posting,
+ * query processing, etc.) happen through this bounded context.
+ *
  * @author Dmytro Dashenkov
+ * @see SystemBoundedContext
  */
 final class DefaultBoundedContext extends BoundedContext {
 

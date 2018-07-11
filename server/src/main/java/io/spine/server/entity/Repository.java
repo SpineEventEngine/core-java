@@ -391,7 +391,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
     private void postSystem(Message systemCommand) {
         getBoundedContext().getSystemGateway()
-                           .post(systemCommand);
+                           .postCommand(systemCommand);
     }
 
     @Internal
@@ -464,7 +464,14 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         }
     }
 
+    /**
+     * The lifecycle of an entity.
+     *
+     * <p>An instance of {@code Lifecycle} posts the system commands related to the entity
+     * lifecycle.
+     */
     @Internal
+    @SuppressWarnings("OverlyCoupledClass") // Posts system events.
     protected final class Lifecycle {
 
         private final EntityHistoryId id;
@@ -473,6 +480,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             this.id = historyId(id);
         }
 
+        /**
+         * Posts the {@link CreateEntity} system command.
+         */
         public void onCreateEntity(EntityOption.Kind entityKind) {
             CreateEntity command = CreateEntity
                     .newBuilder()
@@ -482,6 +492,10 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             postSystem(command);
         }
 
+        /**
+         * Posts the {@link ChangeEntityState} system command and the commands related to
+         * the lifecycle flags.
+         */
         public void onStateChanged(EntityRecordChange change,
                                    Set<? extends Message> messageIds) {
             Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
@@ -493,6 +507,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             postOnRestored(change, dispatchedMessageIds);
         }
 
+        /**
+         * Posts the {@link DispatchCommandToHandler} system command.
+         */
         public void onDispatchCommand(Command command) {
             DispatchCommandToHandler systemCommand = DispatchCommandToHandler
                     .newBuilder()
@@ -502,6 +519,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             postSystem(systemCommand);
         }
 
+        /**
+         * Posts the {@link DispatchEventToApplier} system command.
+         */
         public void onDispatchEventToApplier(Event event) {
             DispatchEventToApplier systemCommand = DispatchEventToApplier
                     .newBuilder()

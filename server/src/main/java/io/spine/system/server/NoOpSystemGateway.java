@@ -24,7 +24,15 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 
 /**
+ * An implementation of {@link SystemGateway} which never performs an operation.
+ *
+ * <p>All the methods inherited from {@link SystemGateway} exit without any action or exception.
+ *
+ * <p>This implementation is used by the system bounded context itself, since there is no system
+ * bounded context for a system bounded context.
+ *
  * @author Dmytro Dashenkov
+ * @see io.spine.server.SystemBoundedContext
  */
 @Internal
 public enum NoOpSystemGateway implements SystemGateway {
@@ -32,7 +40,7 @@ public enum NoOpSystemGateway implements SystemGateway {
     INSTANCE;
 
     @Override
-    public void post(Message systemCommand) {
+    public void postCommand(Message systemCommand) {
         // NOP.
     }
 }

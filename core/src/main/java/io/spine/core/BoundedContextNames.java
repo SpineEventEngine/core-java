@@ -20,6 +20,8 @@
 
 package io.spine.core;
 
+import io.spine.annotation.Internal;
+
 import static java.lang.String.format;
 
 /**
@@ -29,7 +31,9 @@ import static java.lang.String.format;
  * <p>Must be unique in scope of the application.
  *
  * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
+@Internal
 public final class BoundedContextNames {
 
     private static final BoundedContextName MAIN =
@@ -43,10 +47,19 @@ public final class BoundedContextNames {
     private BoundedContextNames() {
     }
 
+    /**
+     * Obtains the name of the {@code Main} bounded context.
+     */
     public static BoundedContextName mainBoundedContext() {
         return MAIN;
     }
 
+    /**
+     * Obtains the name of the system bounded context for the bounded context with the given name.
+     *
+     * @param name the name of the original bounded context
+     * @return the name of the system bounded context
+     */
     public static BoundedContextName system(BoundedContextName name) {
         String value = format(SYSTEM_TEMPLATE, name.getValue());
         BoundedContextName result = BoundedContextName

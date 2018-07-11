@@ -36,11 +36,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 
 /**
+ * The default implementation of a {@link SystemGateway}.
+ *
  * @author Dmytro Dashenkov
+ * @see io.spine.server.DefaultBoundedContext
  */
 @Internal
 public final class DefaultSystemGateway implements SystemGateway {
 
+    /**
+     * The which posts the system events.
+     */
     private static final UserId SYSTEM = UserId
             .newBuilder()
             .setValue("SYSTEM")
@@ -53,7 +59,7 @@ public final class DefaultSystemGateway implements SystemGateway {
     }
 
     @Override
-    public void post(Message systemCommand) {
+    public void postCommand(Message systemCommand) {
         CommandFactory commandFactory = buildRequestFactory().command();
         Command command = commandFactory.create(systemCommand);
         system.getCommandBus()
@@ -63,7 +69,7 @@ public final class DefaultSystemGateway implements SystemGateway {
     private ActorRequestFactory buildRequestFactory() {
         ActorRequestFactory result = system.isMultitenant()
                                      ? buildMultitenantFactory()
-                                     : buildSingleTenantFaltory();
+                                     : buildSingleTenantFactory();
         return result;
     }
 
@@ -73,6 +79,7 @@ public final class DefaultSystemGateway implements SystemGateway {
                     @Override
                     @CanIgnoreReturnValue
                     public ActorRequestFactory apply(@Nullable TenantId input) {
+                        checkNotNull(input);
                         return ActorRequestFactory.newBuilder()
                                                   .setTenantId(input)
                                                   .setActor(SYSTEM)
@@ -84,7 +91,7 @@ public final class DefaultSystemGateway implements SystemGateway {
         return result;
     }
 
-    private static ActorRequestFactory buildSingleTenantFaltory() {
+    private static ActorRequestFactory buildSingleTenantFactory() {
         return ActorRequestFactory.newBuilder()
                                   .setActor(SYSTEM)
                                   .build();

@@ -37,6 +37,9 @@ import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.Lists.newLinkedList;
 
 /**
+ * An implementation of {@link TransactionListener} which monitors the transaction flow and
+ * triggers the {@linkplain Repository.Lifecycle entity lifecycle}.
+ *
  * @author Dmytro Dashenkov
  */
 @Internal

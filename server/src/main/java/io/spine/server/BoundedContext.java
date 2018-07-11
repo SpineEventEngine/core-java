@@ -117,6 +117,12 @@ public abstract class BoundedContext
                                                     .build();
     }
 
+    /**
+     * Initializes this bounded context.
+     *
+     * <p>This method should be called at once after the {@code BoundedContext} instance creation.
+     * It performs registry initialization which, otherwise, would be performed in the constructor.
+     */
     abstract void init();
 
     /**
@@ -299,6 +305,7 @@ public abstract class BoundedContext
         return this.integrationBus;
     }
 
+    /** Obtains instance of {@link SystemGateway} of this {@code BoundedContext}. */
     @Internal
     public abstract SystemGateway getSystemGateway();
 
