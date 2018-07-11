@@ -21,20 +21,7 @@
 package io.spine.server.expected;
 
 import com.google.protobuf.Message;
-import io.spine.base.CommandMessage;
-import io.spine.base.EventMessage;
-
-import javax.annotation.Nullable;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-
-import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Assertions for an event applier or reactor invocation results.

@@ -22,7 +22,6 @@ package io.spine.server;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
