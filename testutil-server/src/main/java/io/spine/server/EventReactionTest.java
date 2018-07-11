@@ -20,16 +20,11 @@
 
 package io.spine.server;
 
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.Rejection;
-import io.spine.core.RejectionContext;
-import io.spine.core.Rejections;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.expected.EventHandlerExpected;
