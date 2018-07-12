@@ -43,6 +43,7 @@ import "spine/client/entities.proto";
 // the commads of the `System` bounded contexts, which do not have an explicit lifecycle.
 //
 message CommandLifecycle {
+    option (entity).kind = AGGREGATE;
 
     // The ID of the command.
     spine.core.CommandId id = 1;
