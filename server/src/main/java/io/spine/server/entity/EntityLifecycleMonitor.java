@@ -26,8 +26,6 @@ import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.server.entity.Repository.Lifecycle;
 import io.spine.validate.ValidatingBuilder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
@@ -43,22 +41,22 @@ import static com.google.common.collect.Lists.newLinkedList;
  * @author Dmytro Dashenkov
  */
 @Internal
-public final class MonitorTransactionListener<I,
-                                              E extends TransactionalEntity<I, S, B>,
-                                              S extends Message,
-                                              B extends ValidatingBuilder<S, ? extends Message.Builder>>
+public final class EntityLifecycleMonitor<I,
+                                          E extends TransactionalEntity<I, S, B>,
+                                          S extends Message,
+                                          B extends ValidatingBuilder<S, ? extends Message.Builder>>
         implements TransactionListener<I, E, S, B> {
 
     private final Repository<I, ?> repository;
     private final List<Message> acknowledgedMessageIds;
 
-    private MonitorTransactionListener(Repository<I, ?> repository) {
+    private EntityLifecycleMonitor(Repository<I, ?> repository) {
         this.repository = repository;
         this.acknowledgedMessageIds = newLinkedList();
     }
 
     /**
-     * Creates a new instance of {@code MonitorTransactionListener}.
+     * Creates a new instance of {@code EntityLifecycleMonitor}.
      *
      * @param repository the repository of the entity under transaction
      */
@@ -67,9 +65,9 @@ public final class MonitorTransactionListener<I,
      E extends TransactionalEntity<I, S, B>,
      S extends Message,
      B extends ValidatingBuilder<S, ? extends Message.Builder>>
-    TransactionListener<I, E, S, B> instance(Repository<I, ?> repository) {
+    TransactionListener<I, E, S, B> newInstance(Repository<I, ?> repository) {
         checkNotNull(repository);
-        return new MonitorTransactionListener<>(repository);
+        return new EntityLifecycleMonitor<>(repository);
     }
 
     /**
@@ -110,16 +108,6 @@ public final class MonitorTransactionListener<I,
     @Override
     public void onTransactionFailed(Throwable t, E entity, S state, Version version,
                                     LifecycleFlags lifecycleFlags) {
-        log().warn("Transaction failed.", t);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(MonitorTransactionListener.class);
+        // NoOp.
     }
 }

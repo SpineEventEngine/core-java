@@ -27,8 +27,8 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.delivery.Delivery;
+import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
-import io.spine.server.entity.MonitorTransactionListener;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.TransactionListener;
 
@@ -75,7 +75,7 @@ class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         P projection = repository().findOrCreate(entityId);
         ProjectionTransaction<I, ?, ?> tx =
                 ProjectionTransaction.start((Projection<I, ?, ?>) projection);
-        TransactionListener listener = MonitorTransactionListener.instance(repository());
+        TransactionListener listener = EntityLifecycleMonitor.newInstance(repository());
         tx.setListener(listener);
         EventEnvelope envelope = envelope();
         doDispatch(projection, envelope);
