@@ -345,7 +345,7 @@ public abstract class BoundedContext
     @SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
     public static class Builder {
 
-        private BoundedContextName name = BoundedContextNames.mainBoundedContext();
+        private BoundedContextName name = BoundedContextNames.defaultName();
         private boolean multitenant;
         private TenantIndex tenantIndex;
         private Supplier<StorageFactory> storageFactorySupplier;

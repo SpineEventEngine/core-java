@@ -50,7 +50,7 @@ public final class BoundedContextNames {
     /**
      * Obtains the name of the {@code Main} bounded context.
      */
-    public static BoundedContextName mainBoundedContext() {
+    public static BoundedContextName defaultName() {
         return MAIN;
     }
 
