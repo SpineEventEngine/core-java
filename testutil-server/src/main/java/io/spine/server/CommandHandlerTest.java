@@ -23,11 +23,11 @@ package io.spine.server;
 import com.google.protobuf.Message;
 import io.spine.base.ThrowableMessage;
 import io.spine.client.ActorRequestFactory;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.expected.CommandHandlerExpected;
 import io.spine.server.model.HandlerMethodFailedException;
+import io.spine.testing.client.TestActorRequestFactory;
 
 import java.util.List;
 
@@ -62,7 +62,7 @@ public abstract class CommandHandlerTest<I,
     private final ActorRequestFactory requestFactory;
 
     /**
-     * Creates a new instance with {@link TestActorRequestFactory TestActorRequestFactory's}.
+     * Creates a new instance with {@link TestActorRequestFactory}.
      */
     protected CommandHandlerTest() {
         super();

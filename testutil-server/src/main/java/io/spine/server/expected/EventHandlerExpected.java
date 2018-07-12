@@ -21,6 +21,7 @@
 package io.spine.server.expected;
 
 import com.google.protobuf.Message;
+
 import java.util.List;
 
 /**
