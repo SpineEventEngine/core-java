@@ -55,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 abstract class ActorRequestFactoryTest {
 
     private final UserId actor = of(newUuid());
-    private final ZoneOffset zoneOffset = ZoneOffsets.utc();
+    private final ZoneOffset zoneOffset = ZoneOffsets.getDefault();
 
     private ActorRequestFactory factory;
 

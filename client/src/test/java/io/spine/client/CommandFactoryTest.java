@@ -83,7 +83,8 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
             assertTrue(Timestamps2.isBetween(
                     command.getContext()
                            .getActorContext()
-                           .getTimestamp(), beforeCall, afterCall));
+                           .getTimestamp(), beforeCall, afterCall)
+            );
         }
 
         @Test
@@ -103,8 +104,7 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
                     .newBuilder()
                     .setValue(getClass().getSimpleName())
                     .build();
-            ActorRequestFactory mtFactory = ActorRequestFactory
-                    .newBuilder()
+            ActorRequestFactory mtFactory = builder()
                     .setTenantId(tenantId)
                     .setActor(actor())
                     .setZoneOffset(zoneOffset())
@@ -122,10 +122,12 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
     @DisplayName("throw ValidationException when creating command")
     class NotAccept {
 
+        private final RequiredFieldCommand invalidCommand =
+                RequiredFieldCommand.getDefaultInstance();
+
         @Test
         @DisplayName("from invalid Message")
         void invalidMessage() {
-            RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
             assertThrows(ValidationException.class, () -> factory().command()
                                                                    .create(invalidCommand));
         }
@@ -133,7 +135,6 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("from invalid Message with version")
         void invalidMessageWithVersion() {
-            RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
             assertThrows(ValidationException.class, () -> factory().command()
                                                                    .create(invalidCommand, 42));
         }
