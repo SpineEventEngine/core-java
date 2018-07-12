@@ -28,7 +28,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.client.blackbox.Count;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
