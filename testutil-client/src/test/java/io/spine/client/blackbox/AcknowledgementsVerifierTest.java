@@ -48,9 +48,9 @@ import static io.spine.client.blackbox.given.CommandAcksTestEnv.newTask;
 import static io.spine.client.blackbox.given.CommandAcksTestEnv.projectAlreadyStarted;
 import static io.spine.client.blackbox.given.CommandAcksTestEnv.taskCreatedInCompletedProject;
 import static io.spine.client.blackbox.given.CommandAcksTestEnv.taskLimitReached;
-import static io.spine.test.client.blackbox.Rejections.IntProjectAlreadyStarted;
-import static io.spine.test.client.blackbox.Rejections.IntTaskCreatedInCompletedProject;
-import static io.spine.test.client.blackbox.Rejections.IntTaskLimitReached;
+import static io.spine.testing.client.blackbox.Rejections.IntProjectAlreadyStarted;
+import static io.spine.testing.client.blackbox.Rejections.IntTaskCreatedInCompletedProject;
+import static io.spine.testing.client.blackbox.Rejections.IntTaskLimitReached;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

@@ -29,10 +29,10 @@ import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.Rejection;
 import io.spine.core.Status;
-import io.spine.test.client.blackbox.ProjectId;
-import io.spine.test.client.blackbox.Rejections;
-import io.spine.test.client.blackbox.Task;
-import io.spine.test.client.blackbox.TaskId;
+import io.spine.testing.client.blackbox.ProjectId;
+import io.spine.testing.client.blackbox.Rejections;
+import io.spine.testing.client.blackbox.Task;
+import io.spine.testing.client.blackbox.TaskId;
 
 import java.util.Collection;
 import java.util.List;

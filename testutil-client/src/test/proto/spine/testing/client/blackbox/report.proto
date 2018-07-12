@@ -19,39 +19,24 @@
 //
 syntax = "proto3";
 
-package io.spine.test.client.blackbox;
+package spine.testing.client.blackbox;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.client.blackbox";
-option java_outer_classname = "TestIntEventsProto";
+option java_package = "io.spine.testing.client.blackbox";
+option java_outer_classname = "IntReportProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
-import "io/spine/test/client/blackbox/project.proto";
-import "io/spine/test/client/blackbox/report.proto";
+import "spine/testing/client/blackbox/project.proto";
 
-message IntProjectCreated {
-    ProjectId project_id = 1 [(required) = true];
+message ReportId {
+    string id = 1;
 }
 
-message IntTaskAdded {
-    ProjectId project_id = 1 [(required) = true];
-    Task task = 2;
-}
-
-message IntProjectStarted {
-    ProjectId project_id = 1 [(required) = true];
-}
-
-message IntReportCreated {
-    ReportId report_id = 1 [(required) = true];
-    repeated ProjectId project_id = 2;
-}
-
-message IntTaskAddedToReport {
-    ReportId report_id = 1 [(required) = true];
-    ProjectId project_id = 2;
-    Task task = 3;
+message Report {
+    ReportId id = 1;
+    repeated ProjectId project_ids = 2;
+    repeated Task tasks = 3;
 }
