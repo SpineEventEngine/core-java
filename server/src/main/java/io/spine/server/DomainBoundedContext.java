@@ -33,19 +33,19 @@ import io.spine.system.server.SystemGateway;
  * @author Dmytro Dashenkov
  * @see SystemBoundedContext
  */
-final class DefaultBoundedContext extends BoundedContext {
+final class DomainBoundedContext extends BoundedContext {
 
     private final SystemBoundedContext system;
     private final SystemGateway systemGateway;
 
-    private DefaultBoundedContext(Builder builder, SystemBoundedContext system) {
+    private DomainBoundedContext(Builder builder, SystemBoundedContext system) {
         super(builder);
         this.system = system;
         this.systemGateway = new DefaultSystemGateway(system);
     }
 
-    static DefaultBoundedContext newInstance(Builder builder, SystemBoundedContext system) {
-        DefaultBoundedContext result = new DefaultBoundedContext(builder, system);
+    static DomainBoundedContext newInstance(Builder builder, SystemBoundedContext system) {
+        DomainBoundedContext result = new DomainBoundedContext(builder, system);
         result.init();
         return result;
     }

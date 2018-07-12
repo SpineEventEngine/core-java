@@ -41,7 +41,7 @@ import java.util.stream.Stream;
  * @author Dmytro Dashenkov
  * @see SystemGateway
  * @see BoundedContext
- * @see DefaultBoundedContext
+ * @see DomainBoundedContext
  */
 final class SystemBoundedContext extends BoundedContext {
 

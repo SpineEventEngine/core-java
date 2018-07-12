@@ -460,7 +460,7 @@ public abstract class BoundedContext
 
         private BoundedContext buildDefault(SystemBoundedContext system) {
             BoundedContext result =
-                    buildPartial(builder -> DefaultBoundedContext.newInstance(builder, system));
+                    buildPartial(builder -> DomainBoundedContext.newInstance(builder, system));
             return result;
         }
 
