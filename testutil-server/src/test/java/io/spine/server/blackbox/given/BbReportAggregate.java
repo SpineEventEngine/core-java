@@ -24,13 +24,13 @@ import io.spine.core.React;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.testing.server.blackbox.BbCreateReport;
-import io.spine.testing.server.blackbox.BbReportCreated;
-import io.spine.testing.server.blackbox.BbTaskAdded;
-import io.spine.testing.server.blackbox.BbTaskAddedToReport;
-import io.spine.testing.server.blackbox.Report;
-import io.spine.testing.server.blackbox.ReportId;
-import io.spine.testing.server.blackbox.ReportVBuilder;
+import io.spine.test.testutil.blackbox.BbCreateReport;
+import io.spine.test.testutil.blackbox.BbReportCreated;
+import io.spine.test.testutil.blackbox.BbTaskAdded;
+import io.spine.test.testutil.blackbox.BbTaskAddedToReport;
+import io.spine.test.testutil.blackbox.Report;
+import io.spine.test.testutil.blackbox.ReportId;
+import io.spine.test.testutil.blackbox.ReportVBuilder;
 
 /**
  * @author Mykhailo Drachuk

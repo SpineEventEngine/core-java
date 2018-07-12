@@ -26,9 +26,9 @@ import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.BbProjectCreated;
-import io.spine.testing.server.blackbox.BbTaskAdded;
-import io.spine.testing.server.blackbox.ProjectId;
+import io.spine.test.testutil.blackbox.BbProjectCreated;
+import io.spine.test.testutil.blackbox.BbTaskAdded;
+import io.spine.test.testutil.blackbox.ProjectId;
 
 import java.util.List;
 import java.util.function.Supplier;

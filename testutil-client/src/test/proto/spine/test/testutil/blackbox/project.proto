@@ -19,12 +19,12 @@
 //
 syntax = "proto3";
 
-package spine.testing.client.blackbox;
+package spine.test.testutil.blackbox;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.testing.client.blackbox";
+option java_package = "io.spine.test.testutil.blackbox";
 option java_outer_classname = "BbProjectProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;

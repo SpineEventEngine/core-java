@@ -29,10 +29,12 @@ import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.Rejection;
 import io.spine.core.Status;
-import io.spine.testing.client.blackbox.ProjectId;
-import io.spine.testing.client.blackbox.Rejections;
-import io.spine.testing.client.blackbox.Task;
-import io.spine.testing.client.blackbox.TaskId;
+import io.spine.test.testutil.blackbox.ProjectId;
+import io.spine.test.testutil.blackbox.Rejections.BbProjectAlreadyStarted;
+import io.spine.test.testutil.blackbox.Rejections.BbTaskCreatedInCompletedProject;
+import io.spine.test.testutil.blackbox.Rejections.BbTaskLimitReached;
+import io.spine.test.testutil.blackbox.Task;
+import io.spine.test.testutil.blackbox.TaskId;
 
 import java.util.Collection;
 import java.util.List;
@@ -143,16 +145,16 @@ public class CommandAcksTestEnv {
                         .build();
     }
 
-    public static Rejections.BbProjectAlreadyStarted projectAlreadyStarted() {
-        return Rejections.BbProjectAlreadyStarted.newBuilder()
-                                                  .setProjectId(newProjectId())
-                                                  .build();
+    public static BbProjectAlreadyStarted projectAlreadyStarted() {
+        return BbProjectAlreadyStarted.newBuilder()
+                                      .setProjectId(newProjectId())
+                                      .build();
     }
 
-    public static Rejections.BbTaskLimitReached taskLimitReached() {
-        return Rejections.BbTaskLimitReached.newBuilder()
-                                             .setProjectId(newProjectId())
-                                             .build();
+    public static BbTaskLimitReached taskLimitReached() {
+        return BbTaskLimitReached.newBuilder()
+                                 .setProjectId(newProjectId())
+                                 .build();
 
     }
 
@@ -169,9 +171,8 @@ public class CommandAcksTestEnv {
                      .build();
     }
 
-    public static Rejections.BbTaskCreatedInCompletedProject
-    taskCreatedInCompletedProject(Task task) {
-        return Rejections.BbTaskCreatedInCompletedProject
+    public static BbTaskCreatedInCompletedProject taskCreatedInCompletedProject(Task task) {
+        return BbTaskCreatedInCompletedProject
                 .newBuilder()
                 .setProjectId(newProjectId())
                 .setTask(task)

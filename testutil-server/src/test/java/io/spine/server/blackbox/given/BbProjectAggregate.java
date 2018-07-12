@@ -23,22 +23,22 @@ package io.spine.server.blackbox.given;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.testing.server.blackbox.BbAddTask;
-import io.spine.testing.server.blackbox.BbCreateProject;
-import io.spine.testing.server.blackbox.BbProjectAlreadyStarted;
-import io.spine.testing.server.blackbox.BbProjectCreated;
-import io.spine.testing.server.blackbox.BbProjectStarted;
-import io.spine.testing.server.blackbox.BbStartProject;
-import io.spine.testing.server.blackbox.BbTaskAdded;
-import io.spine.testing.server.blackbox.BbTaskCreatedInCompletedProject;
-import io.spine.testing.server.blackbox.Project;
-import io.spine.testing.server.blackbox.ProjectId;
-import io.spine.testing.server.blackbox.ProjectVBuilder;
-import io.spine.testing.server.blackbox.Task;
+import io.spine.test.testutil.blackbox.BbAddTask;
+import io.spine.test.testutil.blackbox.BbCreateProject;
+import io.spine.test.testutil.blackbox.BbProjectAlreadyStarted;
+import io.spine.test.testutil.blackbox.BbProjectCreated;
+import io.spine.test.testutil.blackbox.BbProjectStarted;
+import io.spine.test.testutil.blackbox.BbStartProject;
+import io.spine.test.testutil.blackbox.BbTaskAdded;
+import io.spine.test.testutil.blackbox.BbTaskCreatedInCompletedProject;
+import io.spine.test.testutil.blackbox.Project;
+import io.spine.test.testutil.blackbox.ProjectId;
+import io.spine.test.testutil.blackbox.ProjectVBuilder;
+import io.spine.test.testutil.blackbox.Task;
 
-import static io.spine.testing.server.blackbox.Project.Status.COMPLETED;
-import static io.spine.testing.server.blackbox.Project.Status.CREATED;
-import static io.spine.testing.server.blackbox.Project.Status.STARTED;
+import static io.spine.test.testutil.blackbox.Project.Status.COMPLETED;
+import static io.spine.test.testutil.blackbox.Project.Status.CREATED;
+import static io.spine.test.testutil.blackbox.Project.Status.STARTED;
 
 /**
  * @author Mykhailo Drachuk
