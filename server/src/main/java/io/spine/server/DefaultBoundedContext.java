@@ -21,7 +21,6 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.system.server.DefaultSystemGateway;
 import io.spine.system.server.SystemGateway;
 
 /**
@@ -38,10 +37,12 @@ final class DefaultBoundedContext extends BoundedContext {
     private final SystemBoundedContext system;
     private final SystemGateway systemGateway;
 
-    DefaultBoundedContext(Builder builder, SystemBoundedContext systemBoundedContext) {
+    DefaultBoundedContext(Builder builder,
+                          SystemBoundedContext systemBoundedContext,
+                          SystemGateway gateway) {
         super(builder);
         this.system = systemBoundedContext;
-        this.systemGateway = new DefaultSystemGateway(system);
+        this.systemGateway = gateway;
     }
 
     @Override

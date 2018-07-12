@@ -37,6 +37,7 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.rejection.RejectionBus;
+import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Deque;
@@ -72,6 +73,8 @@ public class CommandBus extends Bus<Command,
     private final RejectionBus rejectionBus;
 
     private final Log log;
+
+    private final SystemGateway systemGateway;
 
     /**
      * Is {@code true}, if the {@code BoundedContext} (to which this {@code CommandBus} belongs)
@@ -115,6 +118,7 @@ public class CommandBus extends Bus<Command,
         this.log = builder.log;
         this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
         this.rejectionBus = builder.rejectionBus;
+        this.systemGateway = builder.systemGateway;
         this.filterChain = builder.getFilters();
         this.deadCommandHandler = new DeadCommandHandler();
     }
@@ -333,6 +337,8 @@ public class CommandBus extends Bus<Command,
 
         private RejectionBus rejectionBus;
 
+        private SystemGateway systemGateway;
+
         /**
          * Checks whether the manual {@link Thread} spawning is allowed within
          * the current runtime environment.
@@ -408,6 +414,19 @@ public class CommandBus extends Bus<Command,
         @CanIgnoreReturnValue
         public Builder setThreadSpawnAllowed(boolean threadSpawnAllowed) {
             this.threadSpawnAllowed = threadSpawnAllowed;
+            return this;
+        }
+
+        /**
+         * Inject the {@link SystemGateway} of the bounded context to which the built bus belongs.
+         *
+         * <p>This method is {@link Internal} to the framework. The name of the method starts with
+         * {@code inject} prefix so that this method does not appear in an autocomplete hint for
+         * {@code set} prefix.
+         */
+        @Internal
+        public Builder injectSystemGateway(SystemGateway gateway) {
+            this.systemGateway = checkNotNull(gateway);
             return this;
         }
 
