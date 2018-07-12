@@ -35,6 +35,11 @@ import java.util.stream.Stream;
  * {@link io.spine.system.server.EntityHistoryAggregate EntityHistory} and
  * {@link io.spine.system.server.CommandLifecycleAggregate CommandLifecycle}.
  *
+ * <p>Each {@link DomainBoundedContext} has an associated {@code SystemBoundedContext}.
+ * The system entities describe the meta information about the domain entities of the associated
+ * {@link DomainBoundedContext}. A system bounded context does NOT have an associated bounded
+ * context.
+ *
  * <p>Users should not access a System bounded context directly. See {@link SystemGateway} for
  * the front-facing API of the System bounded context.
  *
@@ -49,6 +54,13 @@ final class SystemBoundedContext extends BoundedContext {
         super(builder);
     }
 
+    /**
+     * Creates a new instance of {@code SystemBoundedContext} from the given
+     * {@link BoundedContext.Builder}.
+     *
+     * @param builder the configuration of the instance to create
+     * @return new {@code SystemBoundedContext}
+     */
     static SystemBoundedContext newInstance(Builder builder) {
         SystemBoundedContext result = new SystemBoundedContext(builder);
         result.init();
@@ -62,8 +74,14 @@ final class SystemBoundedContext extends BoundedContext {
         ).forEach(this::register);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Since a system bounded context does not have an associated system bounded context, returns
+     * a {@link NoOpSystemGateway} instance.
+     */
     @Override
-    public SystemGateway getSystemGateway() {
+    public NoOpSystemGateway getSystemGateway() {
         return NoOpSystemGateway.INSTANCE;
     }
 }

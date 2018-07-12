@@ -30,6 +30,9 @@ import io.spine.system.server.SystemGateway;
  * <p>All the user interactions with the system (such as repository registration, command posting,
  * query processing, etc.) happen through an instance of this class.
  *
+ * <p>Each {@code DomainBoundedContext} has an associated {@link SystemBoundedContext}, which
+ * manages the meta information about this bounded context entities.
+ *
  * @author Dmytro Dashenkov
  * @see SystemBoundedContext
  */
