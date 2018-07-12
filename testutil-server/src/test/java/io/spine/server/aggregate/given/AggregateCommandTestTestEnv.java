@@ -30,7 +30,6 @@ import io.spine.server.aggregate.AggregateCommandTest;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.given.Given;
-import io.spine.time.ZoneOffsets;
 import io.spine.validate.StringValueVBuilder;
 
 import static io.spine.core.given.GivenUserId.newUuid;
@@ -48,7 +47,6 @@ public class AggregateCommandTestTestEnv {
     public static ActorRequestFactory newRequestFactory(Class<?> clazz) {
         return ActorRequestFactory.newBuilder()
                                   .setActor(newUuid())
-                                  .setZoneOffset(ZoneOffsets.utc())
                                   .setTenantId(TenantId.newBuilder()
                                                        .setValue(clazz.getSimpleName())
                                                        .build())

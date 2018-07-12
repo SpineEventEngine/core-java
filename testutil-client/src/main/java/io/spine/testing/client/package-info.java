@@ -18,27 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandbus;
-
-import com.google.protobuf.Message;
-import io.spine.core.Command;
-import io.spine.testing.client.TestActorRequestFactory;
-import org.junit.jupiter.api.DisplayName;
-
 /**
- * @author Alexander Yevsyukov
+ * This package provides utilities for testing client-side code.
  */
-@DisplayName("Single tenant CommandStore should")
-class SingleTenantCommandStoreTest extends CommandStoreTest {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testing.client;
 
-    SingleTenantCommandStoreTest() {
-        super(false);
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    @Override
-    protected Command newCommand() {
-        final Message commandMessage = Given.CommandMessage.createProjectMessage();
-        return TestActorRequestFactory.newInstance(SingleTenantCommandBusTest.class)
-                                      .createCommand(commandMessage);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

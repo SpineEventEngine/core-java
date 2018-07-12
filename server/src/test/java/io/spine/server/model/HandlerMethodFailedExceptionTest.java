@@ -20,8 +20,8 @@
 
 package io.spine.server.model;
 
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandEnvelope;
+import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -22,7 +22,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.AnAggregatePart;
@@ -38,6 +37,7 @@ import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.user.User;
 import io.spine.testdata.Sample;
+import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

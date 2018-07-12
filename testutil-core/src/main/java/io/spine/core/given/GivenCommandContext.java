@@ -27,7 +27,6 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
-import io.spine.time.ZoneOffsets;
 
 import static io.spine.base.Time.getCurrentTime;
 
@@ -64,7 +63,6 @@ public class GivenCommandContext {
         final ActorContext.Builder actorContext = ActorContext.newBuilder()
                                                               .setActor(actor)
                                                               .setTimestamp(when)
-                                                              .setZoneOffset(ZoneOffsets.utc())
                                                               .setTenantId(tenantId);
         final CommandContext.Builder builder = CommandContext.newBuilder()
                                                              .setActorContext(actorContext);

@@ -24,7 +24,6 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.client.CommandFactory;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
@@ -38,6 +37,7 @@ import io.spine.test.command.CmdStartProject;
 import io.spine.test.command.FirstCmdCreateProject;
 import io.spine.test.command.ProjectId;
 import io.spine.test.command.SecondCmdStartProject;
+import io.spine.testing.client.TestActorRequestFactory;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;

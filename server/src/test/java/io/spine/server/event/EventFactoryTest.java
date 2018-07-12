@@ -21,10 +21,10 @@
 package io.spine.server.event;
 
 import com.google.protobuf.Any;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandEnvelope;
 import io.spine.test.Tests;
 import io.spine.test.command.event.MandatoryFieldEvent;
+import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.validate.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

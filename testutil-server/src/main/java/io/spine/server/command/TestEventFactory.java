@@ -23,14 +23,13 @@ package io.spine.server.command;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.server.event.EventFactory;
-
+import io.spine.testing.client.TestActorRequestFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;

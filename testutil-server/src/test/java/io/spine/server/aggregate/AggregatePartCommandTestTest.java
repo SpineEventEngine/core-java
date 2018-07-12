@@ -27,7 +27,6 @@ import io.spine.server.aggregate.given.AggregatePartCommandTestTestEnv.TimerCoun
 import io.spine.server.aggregate.given.AggregatePartCommandTestTestEnv.TimerCountingTest;
 import io.spine.server.command.CommandTest;
 import io.spine.server.model.ModelTests;
-import io.spine.time.ZoneOffsets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -51,7 +50,6 @@ class AggregatePartCommandTestTest {
                                           .build();
         return ActorRequestFactory.newBuilder()
                                   .setActor(newUuid())
-                                  .setZoneOffset(ZoneOffsets.utc())
                                   .setTenantId(tenantId)
                                   .build();
     }

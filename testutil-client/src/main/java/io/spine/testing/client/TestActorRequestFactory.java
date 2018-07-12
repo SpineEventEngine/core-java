@@ -18,13 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.client;
+package io.spine.testing.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.client.ActorRequestFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;

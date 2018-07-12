@@ -24,10 +24,10 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.client.ActorRequestFactory;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.testing.client.TestActorRequestFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
