@@ -469,6 +469,27 @@ public abstract class BoundedContext
             return this;
         }
 
+        /**
+         * Creates a new instance of {@code BoundedContext} with the set configurations.
+         *
+         * <p>The resulting domain-specific bounded context has as internal System bounded context.
+         * The entities of the System domain describe the entities of the resulting bounded context.
+         *
+         * <p>The System bounded contexts shares some configuration with the domain bounded context,
+         * such as:
+         * <ul>
+         *     <li>{@linkplain #getTenantIndex()} tenancy;
+         *     <li>{@linkplain #getStorageFactory()} storage facilities;
+         *     <li>{@linkplain #getTransportFactory()} transport facilities.
+         * </ul>
+         *
+         * <p>All the other configuration is NOT shared.
+         *
+         * <p>The name of the System bounded context is derived from the name of the domain bounded
+         * context.
+         *
+         * @return new {@code BoundedContext}
+         */
         public BoundedContext build() {
             SystemBoundedContext system = buildSystem();
             BoundedContext result = buildDefault(system);
