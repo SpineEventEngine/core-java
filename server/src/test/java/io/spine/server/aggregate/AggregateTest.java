@@ -82,6 +82,7 @@ import java.util.Set;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.client.blackbox.Count.once;
+import static io.spine.client.blackbox.Count.twice;
 import static io.spine.core.CommandEnvelope.of;
 import static io.spine.core.Events.getRootCommandId;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -816,7 +817,7 @@ public class AggregateTest {
                     .with(new TaskAggregateRepository())
                     .receivesCommand(createTask())
                     .verifiesThat(acked(once()).withoutErrorsOrRejections())
-                    .verifiesThat(emitted(1))
+                    .verifiesThat(emitted(once()))
                     .close();
         }
 
@@ -836,7 +837,7 @@ public class AggregateTest {
                     .with(new TaskAggregateRepository())
                     .receivesCommand(assignTask())
                     .verifiesThat(acked(once()).withoutErrorsOrRejections())
-                    .verifiesThat(emitted(2))
+                    .verifiesThat(emitted(twice()))
                     .verifiesThat(emitted(AggTaskAssigned.class))
                     .verifiesThat(emitted(AggUserNotified.class))
                     .close();
@@ -858,7 +859,7 @@ public class AggregateTest {
                     .with(new TaskAggregateRepository())
                     .receivesCommand(reassignTask())
                     .verifiesThat(acked(once()).withoutErrorsOrRejections())
-                    .verifiesThat(emitted(1))
+                    .verifiesThat(emitted(once()))
                     .verifiesThat(emitted(AggUserNotified.class))
                     .close();
         }

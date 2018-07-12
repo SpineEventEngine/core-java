@@ -75,6 +75,9 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.client.blackbox.Count.count;
+import static io.spine.client.blackbox.Count.none;
+import static io.spine.client.blackbox.Count.once;
 import static io.spine.client.blackbox.Count.twice;
 import static io.spine.core.Commands.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -422,10 +425,10 @@ class ProcessManagerTest {
                     .with(new QuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
                     .verifiesThat(acked(twice()).withoutErrorsOrRejections())
-                    .verifiesThat(emitted(2))
+                    .verifiesThat(emitted(twice()))
                     .verifiesThat(emitted(PmQuizStarted.class))
                     .verifiesThat(emitted(PmQuestionAnswered.class))
-                    .verifiesThat(emitted(0, Empty.class))
+                    .verifiesThat(emitted(Empty.class, none()))
                     .close();
         }
 
@@ -460,9 +463,9 @@ class ProcessManagerTest {
                     .with(new DirectQuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
                     .verifiesThat(acked(twice()).withoutErrorsOrRejections())
-                    .verifiesThat(emitted(1))
+                    .verifiesThat(emitted(once()))
                     .verifiesThat(emitted(PmQuizStarted.class))
-                    .verifiesThat(emitted(0, Empty.class))
+                    .verifiesThat(emitted(Empty.class, none()))
                     .close();
         }
     }

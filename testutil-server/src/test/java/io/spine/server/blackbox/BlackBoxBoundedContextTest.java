@@ -21,8 +21,8 @@
 package io.spine.server.blackbox;
 
 import io.spine.server.blackbox.given.IntProjectRepository;
-import io.spine.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import io.spine.server.blackbox.given.IntReportRepository;
+import io.spine.server.blackbox.given.RepositoryThrowingExceptionOnClose;
 import io.spine.test.server.blackbox.IntProjectCreated;
 import io.spine.test.server.blackbox.IntReportCreated;
 import io.spine.test.server.blackbox.IntTaskAdded;
@@ -36,6 +36,7 @@ import org.junit.jupiter.api.Test;
 import static io.spine.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.client.blackbox.Count.count;
 import static io.spine.client.blackbox.Count.once;
+import static io.spine.client.blackbox.Count.thrice;
 import static io.spine.client.blackbox.Count.twice;
 import static io.spine.server.blackbox.EmittedEventsVerifier.emitted;
 import static io.spine.server.blackbox.given.BlackBoxBoundedContextTestEnv.addTask;
@@ -69,7 +70,7 @@ class BlackBoxBoundedContextTest {
     void receivesACommand() {
         project.receivesCommand(createProject())
                .verifiesThat(acked(once()).withoutErrorsOrRejections())
-               .verifiesThat(emitted(1, IntProjectCreated.class));
+               .verifiesThat(emitted(IntProjectCreated.class, once()));
     }
 
     @SuppressWarnings("ReturnValueIgnored")
@@ -80,9 +81,9 @@ class BlackBoxBoundedContextTest {
         project.receivesCommand(createProject(projectId))
                .receivesCommands(addTask(projectId), addTask(projectId), addTask(projectId))
                .verifiesThat(acked(count(4)).withoutErrorsOrRejections())
-               .verifiesThat(emitted(4))
-               .verifiesThat(emitted(1, IntProjectCreated.class))
-               .verifiesThat(emitted(3, IntTaskAdded.class));
+               .verifiesThat(emitted(count(4)))
+               .verifiesThat(emitted(IntProjectCreated.class, once()))
+               .verifiesThat(emitted(IntTaskAdded.class, thrice()));
     }
 
     @SuppressWarnings("ReturnValueIgnored")
@@ -94,9 +95,9 @@ class BlackBoxBoundedContextTest {
                .receivesCommand(createReport(projectId))
                .receivesEvent(taskAdded(projectId))
                .verifiesThat(acked(twice()).withoutErrorsOrRejections())
-               .verifiesThat(emitted(3))
-               .verifiesThat(emitted(1, IntReportCreated.class))
-               .verifiesThat(emitted(1, IntTaskAddedToReport.class));
+               .verifiesThat(emitted(thrice()))
+               .verifiesThat(emitted(IntReportCreated.class, once()))
+               .verifiesThat(emitted(IntTaskAddedToReport.class, once()));
     }
 
     @SuppressWarnings("ReturnValueIgnored")
@@ -108,9 +109,9 @@ class BlackBoxBoundedContextTest {
                .receivesCommand(createReport(projectId))
                .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
                .verifiesThat(acked(count(4)).withoutErrorsOrRejections())
-               .verifiesThat(emitted(7))
-               .verifiesThat(emitted(1, IntReportCreated.class))
-               .verifiesThat(emitted(3, IntTaskAddedToReport.class));
+               .verifiesThat(emitted(count(7)))
+               .verifiesThat(emitted(IntReportCreated.class, once()))
+               .verifiesThat(emitted(IntTaskAddedToReport.class, thrice()));
     }
 
     @Test

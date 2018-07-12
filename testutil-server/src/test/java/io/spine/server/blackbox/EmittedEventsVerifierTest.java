@@ -27,6 +27,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.client.blackbox.Count.count;
+import static io.spine.client.blackbox.Count.none;
+import static io.spine.client.blackbox.Count.once;
+import static io.spine.client.blackbox.Count.thrice;
+import static io.spine.client.blackbox.Count.twice;
 import static io.spine.server.blackbox.EmittedEventsVerifier.emitted;
 import static io.spine.server.blackbox.given.EmittedEventsTestEnv.event;
 import static io.spine.server.blackbox.given.EmittedEventsTestEnv.projectCreated;
@@ -53,11 +58,11 @@ class EmittedEventsVerifierTest {
 
     @Test
     @DisplayName("verify count")
-    void count() {
-        emitted(3).verify(emittedEvents);
+    void countEvents() {
+        emitted(thrice()).verify(emittedEvents);
 
-        assertThrows(AssertionError.class, () -> verify(emitted(2)));
-        assertThrows(AssertionError.class, () -> verify(emitted(4)));
+        assertThrows(AssertionError.class, () -> verify(emitted(twice())));
+        assertThrows(AssertionError.class, () -> verify(emitted(count(4))));
     }
 
     @Test
@@ -74,14 +79,14 @@ class EmittedEventsVerifierTest {
     @Test
     @DisplayName("verify contains classes represented by list")
     void verifyNumberOfEvents() {
-        verify(emitted(0, IntProjectStarted.class));
-        verify(emitted(1, IntProjectCreated.class));
-        verify(emitted(2, IntTaskAdded.class));
+        verify(emitted(IntProjectStarted.class, none()));
+        verify(emitted(IntProjectCreated.class, once()));
+        verify(emitted(IntTaskAdded.class, twice()));
 
         assertThrows(AssertionError.class,
-                     () -> verify(emitted(1, IntProjectStarted.class)));
+                     () -> verify(emitted(IntProjectStarted.class, once())));
         assertThrows(AssertionError.class,
-                     () -> verify(emitted(3, IntTaskAdded.class)));
+                     () -> verify(emitted(IntTaskAdded.class, thrice())));
     }
 
     private void verify(EmittedEventsVerifier verifier) {

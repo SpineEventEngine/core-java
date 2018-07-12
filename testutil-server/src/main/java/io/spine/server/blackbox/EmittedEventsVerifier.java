@@ -22,6 +22,7 @@ package io.spine.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.spine.client.blackbox.Count;
 
 import java.util.List;
 
@@ -48,18 +49,19 @@ public abstract class EmittedEventsVerifier {
      * Verifies that there was an expected amount of events of any type emitted
      * in the Bounded Context.
      *
+     * @param expectedCount an amount of events that should be emitted in the Bounded Context
      * @return new {@link EmittedEventsVerifier emitted events verifier} instance
      */
-    public static EmittedEventsVerifier emitted(int expectedCount) {
-        checkArgument(expectedCount >= 0, "0 or more emitted events must be expected.");
+    public static EmittedEventsVerifier emitted(Count expectedCount) {
+        checkArgument(expectedCount.isNotNegative(), "0 or more emitted events must be expected.");
 
         return new EmittedEventsVerifier() {
-
             @Override
             public void verify(EmittedEvents events) {
                 int actualCount = events.count();
-                String moreOrLess = compare(actualCount, expectedCount);
-                assertEquals(expectedCount, actualCount,
+                int expectedCountValue = expectedCount.value();
+                String moreOrLess = compare(actualCount, expectedCountValue);
+                assertEquals(expectedCountValue, actualCount,
                              "Bounded Context emitted " + moreOrLess + " events than expected");
             }
         };
@@ -105,14 +107,14 @@ public abstract class EmittedEventsVerifier {
      * Verifies that there was a specific number of events of the provided event type emitted
      * in the Bounded Context.
      *
+     * @param eventType     a class of a domain event message
      * @param expectedCount an amount of events of a provided event type that should
      *                      be emitted in the Bounded Context
-     * @param eventType     a class of a domain event message
      * @return new {@link EmittedEventsVerifier emitted events verifier} instance
      */
     public static EmittedEventsVerifier
-    emitted(int expectedCount, Class<? extends Message> eventType) {
-        checkArgument(expectedCount >= 0, 
+    emitted(Class<? extends Message> eventType, Count expectedCount) {
+        checkArgument(expectedCount.isNotNegative(),
                       "Zero or more events must be expected to be emitted for type");
         return new EmittedEventsVerifier() {
 
@@ -120,8 +122,9 @@ public abstract class EmittedEventsVerifier {
             public void verify(EmittedEvents events) {
                 String eventName = eventType.getName();
                 int actualCount = events.count(eventType);
-                String moreOrLess = compare(actualCount, expectedCount);
-                assertEquals(expectedCount, actualCount,
+                int expectedCountValue = expectedCount.value();
+                String moreOrLess = compare(actualCount, expectedCountValue);
+                assertEquals(expectedCountValue, actualCount,
                              format("Bounded Context emitted %s %s events than expected",
                                     moreOrLess, eventName));
             }
