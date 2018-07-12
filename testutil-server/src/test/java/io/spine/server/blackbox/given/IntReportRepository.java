@@ -22,7 +22,7 @@ package io.spine.server.blackbox.given;
 
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.AbstractEntity;
-import io.spine.testing.server.blackbox.IntTaskAdded;
+import io.spine.testing.server.blackbox.BbTaskAdded;
 import io.spine.testing.server.blackbox.ProjectId;
 import io.spine.testing.server.blackbox.ReportId;
 import io.spine.server.route.EventRoute;
@@ -34,23 +34,23 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toSet;
 
 /**
- * A Report repository routing the {@link IntTaskAdded Task Added} events to all reports containing
+ * A Report repository routing the {@link BbTaskAdded Task Added} events to all reports containing
  * corresponding project.
  *
  * @author Mykhailo Drachuk
  */
-public class IntReportRepository extends AggregateRepository<ReportId, IntReportAggregate> {
+public class BbReportRepository extends AggregateRepository<ReportId, BbReportAggregate> {
 
-    private final List<IntReportAggregate> aggregates = newArrayList();
+    private final List<BbReportAggregate> aggregates = newArrayList();
 
-    public IntReportRepository() {
-        getEventRouting().route(IntTaskAdded.class, (EventRoute<ReportId, IntTaskAdded>)
+    public BbReportRepository() {
+        getEventRouting().route(BbTaskAdded.class, (EventRoute<ReportId, BbTaskAdded>)
                 (event, context) -> getReportsContainingProject(event.getProjectId()));
     }
 
     @Override
-    public IntReportAggregate create(ReportId id) {
-        IntReportAggregate aggregate = super.create(id);
+    public BbReportAggregate create(ReportId id) {
+        BbReportAggregate aggregate = super.create(id);
         aggregates.add(aggregate);
         return aggregate;
     }
@@ -63,7 +63,7 @@ public class IntReportRepository extends AggregateRepository<ReportId, IntReport
                 .collect(toSet());
     }
 
-    private static boolean reportContainsProject(IntReportAggregate report, ProjectId projectId) {
+    private static boolean reportContainsProject(BbReportAggregate report, ProjectId projectId) {
         return report.getState()
                      .getProjectIdsList()
                      .contains(projectId);

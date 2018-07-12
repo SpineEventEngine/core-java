@@ -21,10 +21,10 @@
 package io.spine.server.blackbox.given;
 
 
-import io.spine.testing.server.blackbox.IntAddTask;
-import io.spine.testing.server.blackbox.IntCreateProject;
-import io.spine.testing.server.blackbox.IntCreateReport;
-import io.spine.testing.server.blackbox.IntTaskAdded;
+import io.spine.testing.server.blackbox.BbAddTask;
+import io.spine.testing.server.blackbox.BbCreateProject;
+import io.spine.testing.server.blackbox.BbCreateReport;
+import io.spine.testing.server.blackbox.BbTaskAdded;
 import io.spine.testing.server.blackbox.ProjectId;
 import io.spine.testing.server.blackbox.ReportId;
 import io.spine.testing.server.blackbox.Task;
@@ -41,15 +41,15 @@ public class BlackBoxBoundedContextTestEnv {
         // Does nothing.
     }
 
-    public static IntAddTask addTask(ProjectId projectId) {
-        return IntAddTask.newBuilder()
+    public static BbAddTask addTask(ProjectId projectId) {
+        return BbAddTask.newBuilder()
                          .setProjectId(projectId)
                          .setTask(newTask())
                          .build();
     }
 
-    public static IntTaskAdded taskAdded(ProjectId projectId) {
-        return IntTaskAdded.newBuilder()
+    public static BbTaskAdded taskAdded(ProjectId projectId) {
+        return BbTaskAdded.newBuilder()
                            .setProjectId(projectId)
                            .setTask(newTask())
                            .build();
@@ -61,8 +61,8 @@ public class BlackBoxBoundedContextTestEnv {
                    .build();
     }
 
-    public static IntCreateReport createReport(ProjectId projectId) {
-        return IntCreateReport.newBuilder()
+    public static BbCreateReport createReport(ProjectId projectId) {
+        return BbCreateReport.newBuilder()
                               .setReportId(newReportId())
                               .addProjectId(projectId)
                               .build();
@@ -74,12 +74,12 @@ public class BlackBoxBoundedContextTestEnv {
                        .build();
     }
 
-    public static IntCreateProject createProject() {
+    public static BbCreateProject createProject() {
         return createProject(newProjectId());
     }
 
-    public static IntCreateProject createProject(ProjectId projectId) {
-        return IntCreateProject.newBuilder()
+    public static BbCreateProject createProject(ProjectId projectId) {
+        return BbCreateProject.newBuilder()
                                .setProjectId(projectId)
                                .build();
     }

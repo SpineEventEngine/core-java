@@ -29,16 +29,16 @@ option java_generate_equals_and_hash = true;
 
 import "spine/testing/server/blackbox/project.proto";
 
-message IntProjectAlreadyStarted {
+message BbProjectAlreadyStarted {
     ProjectId project_id = 1;
 }
 
-message IntTaskLimitReached {
+message BbTaskLimitReached {
     ProjectId project_id = 1;
     Task task = 2;
 }
 
-message IntTaskCreatedInCompletedProject {
+message BbTaskCreatedInCompletedProject {
     ProjectId project_id = 1;
     Task task = 2;
 }

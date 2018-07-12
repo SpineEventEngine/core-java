@@ -32,20 +32,20 @@ option java_generate_equals_and_hash = true;
 import "spine/testing/client/blackbox/project.proto";
 import "spine/testing/client/blackbox/report.proto";
 
-message IntCreateProject {
+message BbCreateProject {
     ProjectId project_id = 1;
 }
 
-message IntAddTask {
+message BbAddTask {
     ProjectId project_id = 1;
     Task task = 2;
 }
 
-message IntStartProject {
+message BbStartProject {
     ProjectId project_id = 1;
 }
 
-message IntCreateReport {
+message BbCreateReport {
     ReportId report_id = 1;
     repeated ProjectId project_id = 2;
 }

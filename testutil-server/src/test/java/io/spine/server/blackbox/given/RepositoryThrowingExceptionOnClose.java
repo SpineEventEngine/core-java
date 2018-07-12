@@ -27,7 +27,7 @@ import io.spine.testing.server.blackbox.ProjectId;
  * @author Mykhailo Drachuk
  */
 public abstract class RepositoryThrowingExceptionOnClose
-        extends AggregateRepository<ProjectId, IntProjectAggregate> {
+        extends AggregateRepository<ProjectId, BbProjectAggregate> {
 
     @Override
     public void close() {

@@ -23,9 +23,9 @@ package io.spine.server.blackbox;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.server.blackbox.given.EmittedEventsTestEnv;
-import io.spine.testing.server.blackbox.IntProjectCreated;
-import io.spine.testing.server.blackbox.IntProjectStarted;
-import io.spine.testing.server.blackbox.IntTaskAdded;
+import io.spine.testing.server.blackbox.BbProjectCreated;
+import io.spine.testing.server.blackbox.BbProjectStarted;
+import io.spine.testing.server.blackbox.BbTaskAdded;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -75,9 +75,9 @@ class EmittedEventsTest {
                 event(taskAdded())
         );
         EmittedEvents emittedEvents = new EmittedEvents(events);
-        assertEquals(0, emittedEvents.count(IntProjectStarted.class));
-        assertEquals(1, emittedEvents.count(IntProjectCreated.class));
-        assertEquals(2, emittedEvents.count(IntTaskAdded.class));
+        assertEquals(0, emittedEvents.count(BbProjectStarted.class));
+        assertEquals(1, emittedEvents.count(BbProjectCreated.class));
+        assertEquals(2, emittedEvents.count(BbTaskAdded.class));
     }
 
     @Test
@@ -89,9 +89,9 @@ class EmittedEventsTest {
                 event(taskAdded())
         );
         EmittedEvents emittedEvents = new EmittedEvents(events);
-        assertEquals(0, emittedEvents.count(EventClass.of(IntProjectStarted.class)));
-        assertEquals(1, emittedEvents.count(EventClass.of(IntProjectCreated.class)));
-        assertEquals(2, emittedEvents.count(EventClass.of(IntTaskAdded.class)));
+        assertEquals(0, emittedEvents.count(EventClass.of(BbProjectStarted.class)));
+        assertEquals(1, emittedEvents.count(EventClass.of(BbProjectCreated.class)));
+        assertEquals(2, emittedEvents.count(EventClass.of(BbTaskAdded.class)));
     }
 
     @Test
@@ -103,9 +103,9 @@ class EmittedEventsTest {
                 event(taskAdded())
         );
         EmittedEvents emittedEvents = new EmittedEvents(events);
-        assertFalse(emittedEvents.contain(IntProjectStarted.class));
-        assertTrue(emittedEvents.contain(IntProjectCreated.class));
-        assertTrue(emittedEvents.contain(IntTaskAdded.class));
+        assertFalse(emittedEvents.contain(BbProjectStarted.class));
+        assertTrue(emittedEvents.contain(BbProjectCreated.class));
+        assertTrue(emittedEvents.contain(BbTaskAdded.class));
     }
 
     @Test
@@ -117,8 +117,8 @@ class EmittedEventsTest {
                 event(taskAdded())
         );
         EmittedEvents emittedEvents = new EmittedEvents(events);
-        assertFalse(emittedEvents.contain(EventClass.of(IntProjectStarted.class)));
-        assertTrue(emittedEvents.contain(EventClass.of(IntProjectCreated.class)));
-        assertTrue(emittedEvents.contain(EventClass.of(IntTaskAdded.class)));
+        assertFalse(emittedEvents.contain(EventClass.of(BbProjectStarted.class)));
+        assertTrue(emittedEvents.contain(EventClass.of(BbProjectCreated.class)));
+        assertTrue(emittedEvents.contain(EventClass.of(BbTaskAdded.class)));
     }
 }

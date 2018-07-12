@@ -48,9 +48,9 @@ import static io.spine.client.blackbox.given.CommandAcksTestEnv.newTask;
 import static io.spine.client.blackbox.given.CommandAcksTestEnv.projectAlreadyStarted;
 import static io.spine.client.blackbox.given.CommandAcksTestEnv.taskCreatedInCompletedProject;
 import static io.spine.client.blackbox.given.CommandAcksTestEnv.taskLimitReached;
-import static io.spine.testing.client.blackbox.Rejections.IntProjectAlreadyStarted;
-import static io.spine.testing.client.blackbox.Rejections.IntTaskCreatedInCompletedProject;
-import static io.spine.testing.client.blackbox.Rejections.IntTaskLimitReached;
+import static io.spine.testing.client.blackbox.Rejections.BbProjectAlreadyStarted;
+import static io.spine.testing.client.blackbox.Rejections.BbTaskCreatedInCompletedProject;
+import static io.spine.testing.client.blackbox.Rejections.BbTaskLimitReached;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -147,14 +147,14 @@ class AcknowledgementsVerifierTest {
                 newRejectionAck(taskLimitReached())
         ));
 
-        RejectionClass taskLimitReached = RejectionClass.of(IntTaskLimitReached.class);
-        Class<IntProjectAlreadyStarted> projectAlreadyStarted = IntProjectAlreadyStarted.class;
+        RejectionClass taskLimitReached = RejectionClass.of(BbTaskLimitReached.class);
+        Class<BbProjectAlreadyStarted> projectAlreadyStarted = BbProjectAlreadyStarted.class;
         verify(acked(thrice()).withRejections(projectAlreadyStarted), rejectionAcks);
         verify(acked(thrice()).withRejections(taskLimitReached), rejectionAcks);
 
         assertThrows(AssertionError.class, () -> {
             RejectionClass taskInCompletedProject =
-                    RejectionClass.of(IntTaskCreatedInCompletedProject.class);
+                    RejectionClass.of(BbTaskCreatedInCompletedProject.class);
             verify(acked(thrice()).withRejections(taskInCompletedProject), rejectionAcks);
         });
     }
@@ -167,22 +167,22 @@ class AcknowledgementsVerifierTest {
                 newRejectionAck(taskCreatedInCompletedProject(newTask(PRESENT_TASK_TITLE)))
         ));
 
-        RejectionCriterion<IntTaskCreatedInCompletedProject> whichIsPresent =
+        RejectionCriterion<BbTaskCreatedInCompletedProject> whichIsPresent =
                 rejection -> PRESENT_TASK_TITLE.equals(getTaskTitle(rejection));
-        Class<IntTaskCreatedInCompletedProject> taskInCompleteProject =
-                IntTaskCreatedInCompletedProject.class;
+        Class<BbTaskCreatedInCompletedProject> taskInCompleteProject =
+                BbTaskCreatedInCompletedProject.class;
         verify(acked(twice()).withRejections(taskInCompleteProject, whichIsPresent), 
                rejectionAcks);
 
         assertThrows(AssertionError.class, () -> {
-            RejectionCriterion<IntTaskCreatedInCompletedProject> whichIsMissing =
+            RejectionCriterion<BbTaskCreatedInCompletedProject> whichIsMissing =
                     rejection -> MISSING_TASK_TITLE.equals(getTaskTitle(rejection));
             verify(acked(twice()).withRejections(taskInCompleteProject, whichIsMissing),
                    rejectionAcks);
         });
     }
 
-    private static String getTaskTitle(IntTaskCreatedInCompletedProject rejection) {
+    private static String getTaskTitle(BbTaskCreatedInCompletedProject rejection) {
         return rejection.getTask()
                         .getTitle();
     }
@@ -198,8 +198,8 @@ class AcknowledgementsVerifierTest {
                 newRejectionAck(taskCreatedInCompletedProject(newTask(DUPLICATE_TASK_TITLE)))
         ));
 
-        RejectionClass taskLimitReached = RejectionClass.of(IntTaskLimitReached.class);
-        Class<IntProjectAlreadyStarted> projectAlreadyStarted = IntProjectAlreadyStarted.class;
+        RejectionClass taskLimitReached = RejectionClass.of(BbTaskLimitReached.class);
+        Class<BbProjectAlreadyStarted> projectAlreadyStarted = BbProjectAlreadyStarted.class;
 
         verify(ackedWithRejections(count(5)), rejectionAcks);
         verify(acked(count(5)).withRejections(projectAlreadyStarted, once()), rejectionAcks);
@@ -210,10 +210,10 @@ class AcknowledgementsVerifierTest {
         assertThrows(AssertionError.class, () ->
                 verify(ackedWithRejections(projectAlreadyStarted, twice()), rejectionAcks));
 
-        RejectionCriterion<IntTaskCreatedInCompletedProject> withDuplicateName =
+        RejectionCriterion<BbTaskCreatedInCompletedProject> withDuplicateName =
                 rejection -> DUPLICATE_TASK_TITLE.equals(getTaskTitle(rejection));
-        Class<IntTaskCreatedInCompletedProject> taskInCompleteProject =
-                IntTaskCreatedInCompletedProject.class;
+        Class<BbTaskCreatedInCompletedProject> taskInCompleteProject =
+                BbTaskCreatedInCompletedProject.class;
 
         verify(acked(count(5)).withRejections(taskInCompleteProject, twice(), withDuplicateName),
                rejectionAcks);

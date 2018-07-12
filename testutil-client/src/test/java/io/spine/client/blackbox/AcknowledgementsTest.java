@@ -48,9 +48,9 @@ import static io.spine.client.blackbox.given.CommandAcksTestEnv.newTask;
 import static io.spine.client.blackbox.given.CommandAcksTestEnv.projectAlreadyStarted;
 import static io.spine.client.blackbox.given.CommandAcksTestEnv.taskCreatedInCompletedProject;
 import static io.spine.client.blackbox.given.CommandAcksTestEnv.taskLimitReached;
-import static io.spine.testing.client.blackbox.Rejections.IntProjectAlreadyStarted;
-import static io.spine.testing.client.blackbox.Rejections.IntTaskCreatedInCompletedProject;
-import static io.spine.testing.client.blackbox.Rejections.IntTaskLimitReached;
+import static io.spine.testing.client.blackbox.Rejections.BbProjectAlreadyStarted;
+import static io.spine.testing.client.blackbox.Rejections.BbTaskCreatedInCompletedProject;
+import static io.spine.testing.client.blackbox.Rejections.BbTaskLimitReached;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -125,13 +125,13 @@ class AcknowledgementsTest {
         ));
 
         RejectionClass taskInCompletedProject =
-                RejectionClass.of(IntTaskCreatedInCompletedProject.class);
+                RejectionClass.of(BbTaskCreatedInCompletedProject.class);
         assertEquals(0, acks.countRejections(taskInCompletedProject));
 
-        RejectionClass projectAlreadyStarted = RejectionClass.of(IntProjectAlreadyStarted.class);
+        RejectionClass projectAlreadyStarted = RejectionClass.of(BbProjectAlreadyStarted.class);
         assertEquals(1, acks.countRejections(projectAlreadyStarted));
 
-        RejectionClass taskLimitReached = RejectionClass.of(IntTaskLimitReached.class);
+        RejectionClass taskLimitReached = RejectionClass.of(BbTaskLimitReached.class);
         assertEquals(2, acks.countRejections(taskLimitReached));
     }
 
@@ -145,13 +145,13 @@ class AcknowledgementsTest {
         );
         Acknowledgements acks = new Acknowledgements(items);
 
-        RejectionClass completedProject = RejectionClass.of(IntTaskCreatedInCompletedProject.class);
+        RejectionClass completedProject = RejectionClass.of(BbTaskCreatedInCompletedProject.class);
         assertFalse(acks.containRejections(completedProject));
 
-        RejectionClass projectAlreadyStarted = RejectionClass.of(IntProjectAlreadyStarted.class);
+        RejectionClass projectAlreadyStarted = RejectionClass.of(BbProjectAlreadyStarted.class);
         assertTrue(acks.containRejections(projectAlreadyStarted));
 
-        RejectionClass taskLimitReached = RejectionClass.of(IntTaskLimitReached.class);
+        RejectionClass taskLimitReached = RejectionClass.of(BbTaskLimitReached.class);
         assertTrue(acks.containRejections(taskLimitReached));
     }
 
@@ -162,14 +162,14 @@ class AcknowledgementsTest {
                 newRejectionAck(taskCreatedInCompletedProject(newTask(PRESENT_TASK_TITLE)))
         );
         Acknowledgements acks = new Acknowledgements(items);
-        Class<IntTaskCreatedInCompletedProject> taskInCompletedProject =
-                IntTaskCreatedInCompletedProject.class;
+        Class<BbTaskCreatedInCompletedProject> taskInCompletedProject =
+                BbTaskCreatedInCompletedProject.class;
 
-        RejectionCriterion<IntTaskCreatedInCompletedProject> withPresentTitle =
+        RejectionCriterion<BbTaskCreatedInCompletedProject> withPresentTitle =
                 rejection -> PRESENT_TASK_TITLE.equals(rejection.getTask().getTitle());
         assertTrue(acks.containRejection(taskInCompletedProject, withPresentTitle));
 
-        RejectionCriterion<IntTaskCreatedInCompletedProject> withMissingTitle =
+        RejectionCriterion<BbTaskCreatedInCompletedProject> withMissingTitle =
                 rejection -> MISSING_TASK_TITLE.equals(rejection.getTask().getTitle());
         assertFalse(acks.containRejection(taskInCompletedProject, withMissingTitle));
     }
@@ -185,18 +185,18 @@ class AcknowledgementsTest {
         );
         Acknowledgements acks = new Acknowledgements(items);
 
-        Class<IntTaskCreatedInCompletedProject> taskInCompletedProject =
-                IntTaskCreatedInCompletedProject.class;
+        Class<BbTaskCreatedInCompletedProject> taskInCompletedProject =
+                BbTaskCreatedInCompletedProject.class;
 
-        RejectionCriterion<IntTaskCreatedInCompletedProject> withMissingTitle =
+        RejectionCriterion<BbTaskCreatedInCompletedProject> withMissingTitle =
                 rejection -> MISSING_TASK_TITLE.equals(rejection.getTask().getTitle());
         assertEquals(0, acks.countRejections(taskInCompletedProject, withMissingTitle));
 
-        RejectionCriterion<IntTaskCreatedInCompletedProject> withUniqueTitle =
+        RejectionCriterion<BbTaskCreatedInCompletedProject> withUniqueTitle =
                 rejection -> UNIQUE_TASK_TITLEE.equals(rejection.getTask().getTitle());
         assertEquals(1, acks.countRejections(taskInCompletedProject, withUniqueTitle));
 
-        RejectionCriterion<IntTaskCreatedInCompletedProject> withDuplicatedTitle =
+        RejectionCriterion<BbTaskCreatedInCompletedProject> withDuplicatedTitle =
                 rejection -> DUPLICATE_TASK_TITLE.equals(rejection.getTask().getTitle());
         assertEquals(2, acks.countRejections(taskInCompletedProject, withDuplicatedTitle));
     }

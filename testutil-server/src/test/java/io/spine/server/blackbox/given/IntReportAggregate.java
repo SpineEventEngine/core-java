@@ -24,10 +24,10 @@ import io.spine.core.React;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.testing.server.blackbox.IntCreateReport;
-import io.spine.testing.server.blackbox.IntReportCreated;
-import io.spine.testing.server.blackbox.IntTaskAdded;
-import io.spine.testing.server.blackbox.IntTaskAddedToReport;
+import io.spine.testing.server.blackbox.BbCreateReport;
+import io.spine.testing.server.blackbox.BbReportCreated;
+import io.spine.testing.server.blackbox.BbTaskAdded;
+import io.spine.testing.server.blackbox.BbTaskAddedToReport;
 import io.spine.testing.server.blackbox.Report;
 import io.spine.testing.server.blackbox.ReportId;
 import io.spine.testing.server.blackbox.ReportVBuilder;
@@ -35,15 +35,15 @@ import io.spine.testing.server.blackbox.ReportVBuilder;
 /**
  * @author Mykhailo Drachuk
  */
-public class IntReportAggregate extends Aggregate<ReportId, Report, ReportVBuilder> {
+public class BbReportAggregate extends Aggregate<ReportId, Report, ReportVBuilder> {
 
-    protected IntReportAggregate(ReportId id) {
+    protected BbReportAggregate(ReportId id) {
         super(id);
     }
 
     @Assign
-    IntReportCreated handle(IntCreateReport command) {
-        return IntReportCreated
+    BbReportCreated handle(BbCreateReport command) {
+        return BbReportCreated
                 .newBuilder()
                 .setReportId(command.getReportId())
                 .addAllProjectId(command.getProjectIdList())
@@ -51,8 +51,8 @@ public class IntReportAggregate extends Aggregate<ReportId, Report, ReportVBuild
     }
 
     @React
-    IntTaskAddedToReport on(IntTaskAdded event) {
-        return IntTaskAddedToReport
+    BbTaskAddedToReport on(BbTaskAdded event) {
+        return BbTaskAddedToReport
                 .newBuilder()
                 .setReportId(getId())
                 .setProjectId(event.getProjectId())
@@ -63,14 +63,14 @@ public class IntReportAggregate extends Aggregate<ReportId, Report, ReportVBuild
 
     @SuppressWarnings("ReturnValueIgnored")
     @Apply
-    void on(IntReportCreated event) {
+    void on(BbReportCreated event) {
         getBuilder().setId(event.getReportId())
                     .addAllProjectIds(event.getProjectIdList());
     }
 
     @SuppressWarnings("ReturnValueIgnored")
     @Apply
-    void on(IntTaskAddedToReport event) {
+    void on(BbTaskAddedToReport event) {
         getBuilder().addTasks(event.getTask());
     }
 }

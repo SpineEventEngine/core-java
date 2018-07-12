@@ -20,13 +20,13 @@
 
 package io.spine.server.blackbox;
 
-import io.spine.server.blackbox.given.IntProjectRepository;
-import io.spine.server.blackbox.given.IntReportRepository;
+import io.spine.server.blackbox.given.BbProjectRepository;
+import io.spine.server.blackbox.given.BbReportRepository;
 import io.spine.server.blackbox.given.RepositoryThrowingExceptionOnClose;
-import io.spine.testing.server.blackbox.IntProjectCreated;
-import io.spine.testing.server.blackbox.IntReportCreated;
-import io.spine.testing.server.blackbox.IntTaskAdded;
-import io.spine.testing.server.blackbox.IntTaskAddedToReport;
+import io.spine.testing.server.blackbox.BbProjectCreated;
+import io.spine.testing.server.blackbox.BbReportCreated;
+import io.spine.testing.server.blackbox.BbTaskAdded;
+import io.spine.testing.server.blackbox.BbTaskAddedToReport;
 import io.spine.testing.server.blackbox.ProjectId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +56,7 @@ class BlackBoxBoundedContextTest {
 
     @BeforeEach
     void setUp() {
-        project = BlackBoxBoundedContext.with(new IntProjectRepository());
+        project = BlackBoxBoundedContext.with(new BbProjectRepository());
     }
 
     @AfterEach
@@ -70,7 +70,7 @@ class BlackBoxBoundedContextTest {
     void receivesACommand() {
         project.receivesCommand(createProject())
                .verifiesThat(acked(once()).withoutErrorsOrRejections())
-               .verifiesThat(emitted(IntProjectCreated.class, once()));
+               .verifiesThat(emitted(BbProjectCreated.class, once()));
     }
 
     @SuppressWarnings("ReturnValueIgnored")
@@ -82,8 +82,8 @@ class BlackBoxBoundedContextTest {
                .receivesCommands(addTask(projectId), addTask(projectId), addTask(projectId))
                .verifiesThat(acked(count(4)).withoutErrorsOrRejections())
                .verifiesThat(emitted(count(4)))
-               .verifiesThat(emitted(IntProjectCreated.class, once()))
-               .verifiesThat(emitted(IntTaskAdded.class, thrice()));
+               .verifiesThat(emitted(BbProjectCreated.class, once()))
+               .verifiesThat(emitted(BbTaskAdded.class, thrice()));
     }
 
     @SuppressWarnings("ReturnValueIgnored")
@@ -91,13 +91,13 @@ class BlackBoxBoundedContextTest {
     @DisplayName("receive and react on single event")
     void receivesEvent() {
         ProjectId projectId = newProjectId();
-        project.andWith(new IntReportRepository())
+        project.andWith(new BbReportRepository())
                .receivesCommand(createReport(projectId))
                .receivesEvent(taskAdded(projectId))
                .verifiesThat(acked(twice()).withoutErrorsOrRejections())
                .verifiesThat(emitted(thrice()))
-               .verifiesThat(emitted(IntReportCreated.class, once()))
-               .verifiesThat(emitted(IntTaskAddedToReport.class, once()));
+               .verifiesThat(emitted(BbReportCreated.class, once()))
+               .verifiesThat(emitted(BbTaskAddedToReport.class, once()));
     }
 
     @SuppressWarnings("ReturnValueIgnored")
@@ -105,13 +105,13 @@ class BlackBoxBoundedContextTest {
     @DisplayName("receive and react on multiple events")
     void receivesEvents() {
         ProjectId projectId = newProjectId();
-        project.andWith(new IntReportRepository())
+        project.andWith(new BbReportRepository())
                .receivesCommand(createReport(projectId))
                .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
                .verifiesThat(acked(count(4)).withoutErrorsOrRejections())
                .verifiesThat(emitted(count(7)))
-               .verifiesThat(emitted(IntReportCreated.class, once()))
-               .verifiesThat(emitted(IntTaskAddedToReport.class, thrice()));
+               .verifiesThat(emitted(BbReportCreated.class, once()))
+               .verifiesThat(emitted(BbTaskAddedToReport.class, thrice()));
     }
 
     @Test

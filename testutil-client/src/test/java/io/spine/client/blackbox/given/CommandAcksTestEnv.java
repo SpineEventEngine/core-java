@@ -143,14 +143,14 @@ public class CommandAcksTestEnv {
                         .build();
     }
 
-    public static Rejections.IntProjectAlreadyStarted projectAlreadyStarted() {
-        return Rejections.IntProjectAlreadyStarted.newBuilder()
+    public static Rejections.BbProjectAlreadyStarted projectAlreadyStarted() {
+        return Rejections.BbProjectAlreadyStarted.newBuilder()
                                                   .setProjectId(newProjectId())
                                                   .build();
     }
 
-    public static Rejections.IntTaskLimitReached taskLimitReached() {
-        return Rejections.IntTaskLimitReached.newBuilder()
+    public static Rejections.BbTaskLimitReached taskLimitReached() {
+        return Rejections.BbTaskLimitReached.newBuilder()
                                              .setProjectId(newProjectId())
                                              .build();
 
@@ -169,9 +169,9 @@ public class CommandAcksTestEnv {
                      .build();
     }
 
-    public static Rejections.IntTaskCreatedInCompletedProject
+    public static Rejections.BbTaskCreatedInCompletedProject
     taskCreatedInCompletedProject(Task task) {
-        return Rejections.IntTaskCreatedInCompletedProject
+        return Rejections.BbTaskCreatedInCompletedProject
                 .newBuilder()
                 .setProjectId(newProjectId())
                 .setTask(task)

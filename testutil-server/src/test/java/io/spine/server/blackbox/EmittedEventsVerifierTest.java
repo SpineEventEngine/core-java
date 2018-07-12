@@ -20,9 +20,9 @@
 
 package io.spine.server.blackbox;
 
-import io.spine.testing.server.blackbox.IntProjectCreated;
-import io.spine.testing.server.blackbox.IntProjectStarted;
-import io.spine.testing.server.blackbox.IntTaskAdded;
+import io.spine.testing.server.blackbox.BbProjectCreated;
+import io.spine.testing.server.blackbox.BbProjectStarted;
+import io.spine.testing.server.blackbox.BbTaskAdded;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -68,25 +68,25 @@ class EmittedEventsVerifierTest {
     @Test
     @DisplayName("verify contains classes")
     void containsClasses() {
-        verify(emitted(IntProjectCreated.class, IntTaskAdded.class));
+        verify(emitted(BbProjectCreated.class, BbTaskAdded.class));
 
-        assertThrows(AssertionError.class, () -> verify(emitted(IntProjectStarted.class)));
-        assertThrows(AssertionError.class, () -> verify(emitted(IntTaskAdded.class,
-                                                                IntProjectCreated.class,
-                                                                IntProjectStarted.class)));
+        assertThrows(AssertionError.class, () -> verify(emitted(BbProjectStarted.class)));
+        assertThrows(AssertionError.class, () -> verify(emitted(BbTaskAdded.class,
+                                                                BbProjectCreated.class,
+                                                                BbProjectStarted.class)));
     }
 
     @Test
     @DisplayName("verify contains classes represented by list")
     void verifyNumberOfEvents() {
-        verify(emitted(IntProjectStarted.class, none()));
-        verify(emitted(IntProjectCreated.class, once()));
-        verify(emitted(IntTaskAdded.class, twice()));
+        verify(emitted(BbProjectStarted.class, none()));
+        verify(emitted(BbProjectCreated.class, once()));
+        verify(emitted(BbTaskAdded.class, twice()));
 
         assertThrows(AssertionError.class,
-                     () -> verify(emitted(IntProjectStarted.class, once())));
+                     () -> verify(emitted(BbProjectStarted.class, once())));
         assertThrows(AssertionError.class,
-                     () -> verify(emitted(IntTaskAdded.class, thrice())));
+                     () -> verify(emitted(BbTaskAdded.class, thrice())));
     }
 
     private void verify(EmittedEventsVerifier verifier) {

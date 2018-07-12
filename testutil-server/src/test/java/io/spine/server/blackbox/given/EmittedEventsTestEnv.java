@@ -26,8 +26,8 @@ import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.IntProjectCreated;
-import io.spine.testing.server.blackbox.IntTaskAdded;
+import io.spine.testing.server.blackbox.BbProjectCreated;
+import io.spine.testing.server.blackbox.BbTaskAdded;
 import io.spine.testing.server.blackbox.ProjectId;
 
 import java.util.List;
@@ -79,14 +79,14 @@ public class EmittedEventsTestEnv {
                         .build();
     }
 
-    public static IntProjectCreated projectCreated() {
-        return IntProjectCreated.newBuilder()
+    public static BbProjectCreated projectCreated() {
+        return BbProjectCreated.newBuilder()
                                 .setProjectId(newProjectId())
                                 .build();
     }
 
-    public static IntTaskAdded taskAdded() {
-        return IntTaskAdded.newBuilder()
+    public static BbTaskAdded taskAdded() {
+        return BbTaskAdded.newBuilder()
                            .setProjectId(newProjectId())
                            .build();
 

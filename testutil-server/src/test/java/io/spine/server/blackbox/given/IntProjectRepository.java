@@ -26,5 +26,5 @@ import io.spine.testing.server.blackbox.ProjectId;
 /**
  * @author Mykhailo Drachuk
  */
-public class IntProjectRepository extends AggregateRepository<ProjectId, IntProjectAggregate> {
+public class BbProjectRepository extends AggregateRepository<ProjectId, BbProjectAggregate> {
 }

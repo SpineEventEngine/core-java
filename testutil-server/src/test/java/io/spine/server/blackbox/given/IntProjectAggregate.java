@@ -23,14 +23,14 @@ package io.spine.server.blackbox.given;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.testing.server.blackbox.IntAddTask;
-import io.spine.testing.server.blackbox.IntCreateProject;
-import io.spine.testing.server.blackbox.IntProjectAlreadyStarted;
-import io.spine.testing.server.blackbox.IntProjectCreated;
-import io.spine.testing.server.blackbox.IntProjectStarted;
-import io.spine.testing.server.blackbox.IntStartProject;
-import io.spine.testing.server.blackbox.IntTaskAdded;
-import io.spine.testing.server.blackbox.IntTaskCreatedInCompletedProject;
+import io.spine.testing.server.blackbox.BbAddTask;
+import io.spine.testing.server.blackbox.BbCreateProject;
+import io.spine.testing.server.blackbox.BbProjectAlreadyStarted;
+import io.spine.testing.server.blackbox.BbProjectCreated;
+import io.spine.testing.server.blackbox.BbProjectStarted;
+import io.spine.testing.server.blackbox.BbStartProject;
+import io.spine.testing.server.blackbox.BbTaskAdded;
+import io.spine.testing.server.blackbox.BbTaskCreatedInCompletedProject;
 import io.spine.testing.server.blackbox.Project;
 import io.spine.testing.server.blackbox.ProjectId;
 import io.spine.testing.server.blackbox.ProjectVBuilder;
@@ -43,39 +43,39 @@ import static io.spine.testing.server.blackbox.Project.Status.STARTED;
 /**
  * @author Mykhailo Drachuk
  */
-public class IntProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+public class BbProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
-    protected IntProjectAggregate(ProjectId id) {
+    protected BbProjectAggregate(ProjectId id) {
         super(id);
     }
 
     @Assign
-    IntProjectCreated handle(IntCreateProject command) {
-        return IntProjectCreated
+    BbProjectCreated handle(BbCreateProject command) {
+        return BbProjectCreated
                 .newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
     }
 
     @Assign
-    IntProjectStarted handle(IntStartProject command) throws IntProjectAlreadyStarted {
+    BbProjectStarted handle(BbStartProject command) throws BbProjectAlreadyStarted {
         if (getState().getStatus() != CREATED) {
-            throw new IntProjectAlreadyStarted(command.getProjectId());
+            throw new BbProjectAlreadyStarted(command.getProjectId());
         }
-        return IntProjectStarted
+        return BbProjectStarted
                 .newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
     }
 
     @Assign
-    IntTaskAdded handle(IntAddTask command) throws IntTaskCreatedInCompletedProject {
+    BbTaskAdded handle(BbAddTask command) throws BbTaskCreatedInCompletedProject {
         ProjectId projectId = command.getProjectId();
         Task task = command.getTask();
         if (getState().getStatus() == COMPLETED) {
-            throw new IntTaskCreatedInCompletedProject(projectId, task);
+            throw new BbTaskCreatedInCompletedProject(projectId, task);
         }
-        return IntTaskAdded
+        return BbTaskAdded
                 .newBuilder()
                 .setProjectId(projectId)
                 .setTask(task)
@@ -84,19 +84,19 @@ public class IntProjectAggregate extends Aggregate<ProjectId, Project, ProjectVB
 
     @SuppressWarnings("ReturnValueIgnored")
     @Apply
-    void on(IntProjectCreated event) {
+    void on(BbProjectCreated event) {
         getBuilder().setId(event.getProjectId());
     }
 
     @SuppressWarnings("ReturnValueIgnored")
     @Apply
-    void on(IntProjectStarted event) {
+    void on(BbProjectStarted event) {
         getBuilder().setStatus(STARTED);
     }
 
     @SuppressWarnings("ReturnValueIgnored")
     @Apply
-    void on(IntTaskAdded event) {
+    void on(BbTaskAdded event) {
         getBuilder().addTask(event.getTask());
     }
 }
