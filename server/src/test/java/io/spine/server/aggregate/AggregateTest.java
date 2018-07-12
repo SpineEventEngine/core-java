@@ -794,9 +794,7 @@ public class AggregateTest {
         CommandEnvelope envelope = of(createCommand);
         repository.dispatch(envelope);
 
-        assertThrows(DuplicateCommandException.class, () -> {
-            repository.dispatch(envelope);
-        });
+        assertThrows(DuplicateCommandException.class, () -> repository.dispatch(envelope));
     }
 
     @Nested
