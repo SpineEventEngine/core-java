@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 /**
  * Specifies the rules a message must match.
  *
- * <p>Optionally can contain an the criterion description, useful for display by test assertions.
+ * <p>Optionally can contain a criterion description, useful for display by test assertions.
  *
  * @param <T> a protobuf message type, that is checked to match criterion
  * @author Mykhailo Drachuk
