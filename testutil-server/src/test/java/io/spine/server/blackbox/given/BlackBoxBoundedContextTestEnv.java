@@ -21,13 +21,13 @@
 package io.spine.server.blackbox.given;
 
 
-import io.spine.test.server.blackbox.IntAddTask;
-import io.spine.test.server.blackbox.IntCreateProject;
-import io.spine.test.server.blackbox.IntCreateReport;
-import io.spine.test.server.blackbox.IntTaskAdded;
-import io.spine.test.server.blackbox.ProjectId;
-import io.spine.test.server.blackbox.ReportId;
-import io.spine.test.server.blackbox.Task;
+import io.spine.testing.server.blackbox.IntAddTask;
+import io.spine.testing.server.blackbox.IntCreateProject;
+import io.spine.testing.server.blackbox.IntCreateReport;
+import io.spine.testing.server.blackbox.IntTaskAdded;
+import io.spine.testing.server.blackbox.ProjectId;
+import io.spine.testing.server.blackbox.ReportId;
+import io.spine.testing.server.blackbox.Task;
 
 import static io.spine.base.Identifier.newUuid;
 

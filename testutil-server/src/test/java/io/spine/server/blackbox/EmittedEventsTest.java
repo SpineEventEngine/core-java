@@ -23,9 +23,9 @@ package io.spine.server.blackbox;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.server.blackbox.given.EmittedEventsTestEnv;
-import io.spine.test.server.blackbox.IntProjectCreated;
-import io.spine.test.server.blackbox.IntProjectStarted;
-import io.spine.test.server.blackbox.IntTaskAdded;
+import io.spine.testing.server.blackbox.IntProjectCreated;
+import io.spine.testing.server.blackbox.IntProjectStarted;
+import io.spine.testing.server.blackbox.IntTaskAdded;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

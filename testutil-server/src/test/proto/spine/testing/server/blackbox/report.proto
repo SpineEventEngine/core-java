@@ -19,44 +19,24 @@
 //
 syntax = "proto3";
 
-package io.spine.test.server.blackbox;
+package spine.testing.server.blackbox;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.server.blackbox";
-option java_outer_classname = "IntProjectProto";
+option java_package = "io.spine.testing.server.blackbox";
+option java_outer_classname = "IntReportProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
-message ProjectId {
+import "spine/testing/server/blackbox/project.proto";
+
+message ReportId {
     string id = 1;
 }
 
-message Project {
-    ProjectId id = 1;
-
-    string name = 2;
-
-    repeated Task task = 3;
-
-    enum Status {
-        UNDEFINED = 0;
-        CREATED = 1;
-        STARTED = 2;
-        COMPLETED = 3;
-        CANCELLED = 4;
-    }
-
-    Status status = 4;
-}
-
-message TaskId {
-    string id = 1;
-}
-
-message Task {
-    TaskId task_id = 1;
-    string title = 2;
-    string description = 3;
+message Report {
+    ReportId id = 1;
+    repeated ProjectId project_ids = 2;
+    repeated Task tasks = 3;
 }
