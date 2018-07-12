@@ -28,6 +28,7 @@ import io.spine.core.UserId;
 import io.spine.test.client.TestEntity;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -41,7 +42,6 @@ import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.time.Timestamps2.isLaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -57,26 +57,33 @@ abstract class ActorRequestFactoryTest {
     private final UserId actor = of(newUuid());
     private final ZoneOffset zoneOffset = ZoneOffsets.utc();
 
+    private ActorRequestFactory factory;
+
     protected ActorRequestFactory.Builder builder() {
         return ActorRequestFactory.newBuilder();
     }
 
-    protected UserId getActor() {
+    protected UserId actor() {
         return actor;
     }
 
-    protected ZoneOffset getZoneOffset() {
+    ZoneOffset zoneOffset() {
         return zoneOffset;
     }
 
     protected ActorRequestFactory factory() {
-        return builder().setZoneOffset(zoneOffset)
-                        .setActor(actor)
-                        .build();
+        return factory;
     }
 
-    ActorContext actorContext() {
+    private ActorContext actorContext() {
         return factory().actorContext();
+    }
+
+    @BeforeEach
+    void createFactory() {
+        factory = builder().setZoneOffset(zoneOffset)
+                           .setActor(actor)
+                           .build();
     }
 
     @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
@@ -98,8 +105,10 @@ abstract class ActorRequestFactoryTest {
     @Test
     @DisplayName("require actor in Builder")
     void requireActorInBuilder() {
-        assertThrows(NullPointerException.class, () -> builder().setZoneOffset(zoneOffset)
-                                                                .build());
+        assertThrows(NullPointerException.class,
+                     () -> builder().setZoneOffset(zoneOffset)
+                                    .build()
+        );
     }
 
     @Test
@@ -108,8 +117,9 @@ abstract class ActorRequestFactoryTest {
         ActorRequestFactory.Builder builder = builder()
                 .setActor(actor)
                 .setZoneOffset(zoneOffset);
-        assertNotNull(builder.getActor());
-        assertNotNull(builder.getZoneOffset());
+
+        assertEquals(actor, builder.getActor());
+        assertEquals(zoneOffset, builder.getZoneOffset());
         assertNull(builder.getTenantId());
     }
 
@@ -141,8 +151,9 @@ abstract class ActorRequestFactoryTest {
         @Test
         @DisplayName("given user and timezone")
         void givenUserAndTimezone() {
-            assertEquals(actor, factory().getActor());
-            assertEquals(zoneOffset, factory().getZoneOffset());
+            ActorRequestFactory factory = factory();
+            assertEquals(actor, factory.getActor());
+            assertEquals(zoneOffset, factory.getZoneOffset());
         }
     }
 

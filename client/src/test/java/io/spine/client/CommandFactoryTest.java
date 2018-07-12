@@ -106,8 +106,8 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
             ActorRequestFactory mtFactory = ActorRequestFactory
                     .newBuilder()
                     .setTenantId(tenantId)
-                    .setActor(getActor())
-                    .setZoneOffset(getZoneOffset())
+                    .setActor(actor())
+                    .setZoneOffset(zoneOffset())
                     .build();
             Command command = mtFactory.command()
                                        .create(StringValue.getDefaultInstance());
