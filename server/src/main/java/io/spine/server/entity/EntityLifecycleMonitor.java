@@ -83,7 +83,7 @@ public final class EntityLifecycleMonitor<I,
 
     @Override
     public void onBeforeCommit(E entity, S state, Version version, LifecycleFlags lifecycleFlags) {
-        // NoOp.
+        // NOP.
     }
 
     /**
@@ -108,6 +108,6 @@ public final class EntityLifecycleMonitor<I,
     @Override
     public void onTransactionFailed(Throwable t, E entity, S state, Version version,
                                     LifecycleFlags lifecycleFlags) {
-        // NoOp.
+        // NOP.
     }
 }
