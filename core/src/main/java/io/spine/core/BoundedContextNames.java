@@ -34,7 +34,6 @@ import static java.lang.String.format;
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
-@Internal
 public final class BoundedContextNames {
 
     private static final BoundedContextName MAIN = newName("Main");
@@ -67,6 +66,7 @@ public final class BoundedContextNames {
     /**
      * Obtains the name of the {@code Main} bounded context.
      */
+    @Internal
     public static BoundedContextName defaultName() {
         return MAIN;
     }
@@ -77,6 +77,7 @@ public final class BoundedContextNames {
      * @param name the name of the original bounded context
      * @return the name of the system bounded context
      */
+    @Internal
     public static BoundedContextName system(BoundedContextName name) {
         String value = format(SYSTEM_TEMPLATE, name.getValue());
         BoundedContextName result = BoundedContextName
