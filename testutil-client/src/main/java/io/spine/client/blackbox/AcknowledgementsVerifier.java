@@ -26,8 +26,6 @@ import io.spine.base.Error;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 /**
  * An abstract verifier of Bounded Context acknowledgements. Its implementations throw assertion
  * errors if the acknowledgements observed in the Bounded Context do not meet the verifier criterion.
