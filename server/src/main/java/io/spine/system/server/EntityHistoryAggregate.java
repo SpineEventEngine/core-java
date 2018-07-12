@@ -39,6 +39,11 @@ import static io.spine.base.Time.getCurrentTime;
  * and {@link io.spine.server.procman.ProcessManager ProcessManager} in the system has
  * a corresponding entity history.
  *
+ * <p>An {@code EntityHistory} gives the record-based entities (such as {@code Projection}s and
+ * {@code ProcessManager}s) traits of an event-sourced entity. For instance, with the help
+ * of {@code EntityHistory} the history of a record-based entity can be investigated and
+ * manipulated. The major use case for this facility is implementing idempotent message handlers.
+ *
  * <p>The aggregate stores IDs of all the messages ever dispatched to the associated entity.
  *
  * <p>This aggregate belongs to the {@code System} bounded context. The aggregate doesn't have

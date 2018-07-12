@@ -40,6 +40,9 @@ import java.util.stream.Stream;
  * {@link DomainBoundedContext}. A system bounded context does NOT have an associated bounded
  * context.
  *
+ * <p>The system entities serve the goal of monitoring, auditing, and debugging the domain-specific
+ * entities.
+ *
  * <p>Users should not access a System bounded context directly. See {@link SystemGateway} for
  * the front-facing API of the System bounded context.
  *
