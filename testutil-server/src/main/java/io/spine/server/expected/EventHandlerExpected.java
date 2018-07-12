@@ -18,38 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.given;
+package io.spine.server.expected;
 
-import com.google.protobuf.StringValue;
-import io.spine.client.ActorRequestFactory;
-import io.spine.server.command.CommandTest;
+import com.google.protobuf.Message;
+import java.util.List;
 
 /**
- * @author Alexander Yevsyukov
- * @author Dmytro Kuzmin
+ * Assertions for an event applier or reactor invocation results.
+ *
+ * @author Dmytro Dashenkov
  */
-public class CommandTestTestEnv {
+public class EventHandlerExpected<S extends Message>
+        extends MessageProducingExpected<S, EventHandlerExpected<S>> {
 
-    /** Prevents instantiation of this utility class. */
-    private CommandTestTestEnv() {
+    public EventHandlerExpected(List<? extends Message> events,
+                                S initialState,
+                                S state,
+                                List<Message> interceptedCommands) {
+        super(events, initialState, state, interceptedCommands);
     }
 
-    /**
-     * The test class for verifying the behaviour of the abstract parent.
-     */
-    public static class TestCommandTest extends CommandTest<StringValue> {
-
-        public TestCommandTest(ActorRequestFactory requestFactory) {
-            super(requestFactory);
-        }
-
-        public TestCommandTest() {
-            super();
-        }
-
-        @Override
-        protected void setUp() {
-            // We don't have an object under test for this test harness class.
-        }
+    @Override
+    protected EventHandlerExpected<S> self() {
+        return this;
     }
 }
