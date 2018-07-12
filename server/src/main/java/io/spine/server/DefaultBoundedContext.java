@@ -38,14 +38,19 @@ final class DefaultBoundedContext extends BoundedContext {
     private final SystemBoundedContext system;
     private final SystemGateway systemGateway;
 
-    DefaultBoundedContext(Builder builder, SystemBoundedContext systemBoundedContext) {
+    private DefaultBoundedContext(Builder builder, SystemBoundedContext system) {
         super(builder);
-        this.system = systemBoundedContext;
+        this.system = system;
         this.systemGateway = new DefaultSystemGateway(system);
     }
 
-    @Override
-    void init() {
+    static DefaultBoundedContext newInstance(Builder builder, SystemBoundedContext system) {
+        DefaultBoundedContext result = new DefaultBoundedContext(builder, system);
+        result.init();
+        return result;
+    }
+
+    private void init() {
         getStand().onCreated(this);
     }
 

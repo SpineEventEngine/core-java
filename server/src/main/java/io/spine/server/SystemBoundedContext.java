@@ -45,12 +45,17 @@ import java.util.stream.Stream;
  */
 final class SystemBoundedContext extends BoundedContext {
 
-    SystemBoundedContext(Builder builder) {
+    private SystemBoundedContext(Builder builder) {
         super(builder);
     }
 
-    @Override
-    void init() {
+    static SystemBoundedContext newInstance(Builder builder) {
+        SystemBoundedContext result = new SystemBoundedContext(builder);
+        result.init();
+        return result;
+    }
+
+    private void init() {
         Stream.<Repository<?, ?>>of(
                 new EntityHistoryRepository(),
                 new CommandLifecycleRepository()

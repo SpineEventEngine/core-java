@@ -117,14 +117,6 @@ public abstract class BoundedContext
     }
 
     /**
-     * Initializes this bounded context.
-     *
-     * <p>This method should be called at once after the {@code BoundedContext} instance creation.
-     * It performs registry initialization which, otherwise, would be performed in the constructor.
-     */
-    abstract void init();
-
-    /**
      * Creates a new builder for {@code BoundedContext}.
      *
      * @return new builder instance
@@ -466,7 +458,7 @@ public abstract class BoundedContext
 
         private BoundedContext buildDefault(SystemBoundedContext system) {
             BoundedContext result =
-                    buildPartial(builder -> new DefaultBoundedContext(builder, system));
+                    buildPartial(builder -> DefaultBoundedContext.newInstance(builder, system));
             return result;
         }
 
@@ -485,7 +477,7 @@ public abstract class BoundedContext
             if (tenantIndex.isPresent()) {
                 system.setTenantIndex(tenantIndex.get());
             }
-            SystemBoundedContext result = system.buildPartial(SystemBoundedContext::new);
+            SystemBoundedContext result = system.buildPartial(SystemBoundedContext::newInstance);
             return result;
         }
 
@@ -502,7 +494,6 @@ public abstract class BoundedContext
             initIntegrationBus(transportFactory);
 
             B result = instanceFactory.apply(this);
-            result.init();
             return result;
         }
 
