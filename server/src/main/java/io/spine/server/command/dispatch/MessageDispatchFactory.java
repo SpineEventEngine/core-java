@@ -37,15 +37,15 @@ public abstract class MessageDispatchFactory<E extends MessageEnvelope, M extend
         this.envelope = envelope;
     }
 
-    protected E envelope() {
-        return envelope;
-    }
-
     /**
      * @param context an object instance the method belongs to
      * @param method  handler method that processes the message and emits the events
      * @return a new dispatch which deals with a message by invoking the target method
-     *         in the provided context.
+     * in the provided context.
      */
     public abstract Dispatch<E> to(Object context, M method);
+
+    protected E envelope() {
+        return envelope;
+    }
 }
