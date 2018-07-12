@@ -103,6 +103,8 @@ abstract class ActorRequestFactoryTest {
                 .setDefault((new TypeToken<Set<? extends Message>>() {
                             }).getRawType(),
                             newHashSet(Any.getDefaultInstance()))
+                .setDefault(ZoneId.class, ZoneIds.systemDefault())
+                .setDefault(ZoneOffset.class, ZoneOffsets.getDefault())
                 .testInstanceMethods(factory(), NullPointerTester.Visibility.PUBLIC);
     }
 
@@ -166,8 +168,13 @@ abstract class ActorRequestFactoryTest {
     @Test
     @DisplayName("support moving between timezones")
     void moveBetweenTimezones() {
+        java.time.ZoneId id = java.time.ZoneId.of("Australia/Darwin");
+        java.time.ZoneOffset offset = java.time.OffsetTime.now(id)
+                                                          .getOffset();
+
         ActorRequestFactory factoryInAnotherTimezone =
-                factory().switchTimezone(ZoneOffsets.ofHours(-8));
+                factory().switchTimezone(ZoneOffsets.of(offset),
+                                         ZoneIds.of(id));
         assertNotEquals(factory().getZoneOffset(), factoryInAnotherTimezone.getZoneOffset());
     }
 

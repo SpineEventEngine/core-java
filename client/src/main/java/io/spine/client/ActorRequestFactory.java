@@ -111,15 +111,20 @@ public class ActorRequestFactory {
     }
 
     /**
-     * Creates new factory with the same user and tenant ID, but with new time zone offset.
+     * Creates new factory with the same user and tenant ID, but with new time zone ID and offset.
      *
-     * @param zoneOffset the offset of the time zone
-     * @return new factory at new time zone
+     * <p>The purpose of this method is to provide a new instance of the request factory
+     * which corresponds to new location of the actor.
+     *
+     * @param zoneOffset the offset of the new time zone
+     * @param zoneId     the ID of the new time zone
+     * @return new factory at the new time zone
      */
-    public ActorRequestFactory switchTimezone(ZoneOffset zoneOffset) {
+    public ActorRequestFactory switchTimezone(ZoneOffset zoneOffset, ZoneId zoneId) {
         ActorRequestFactory result =
                 newBuilder().setActor(getActor())
                             .setZoneOffset(zoneOffset)
+                            .setZoneId(zoneId)
                             .setTenantId(getTenantId())
                             .build();
         return result;
