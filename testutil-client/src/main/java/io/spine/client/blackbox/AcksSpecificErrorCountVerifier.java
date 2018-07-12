@@ -30,15 +30,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 class AcksSpecificErrorCountVerifier extends AcknowledgementsVerifier {
 
-    private final int expectedCount;
+    private final Count expectedCount;
     private final ErrorCriterion criterion;
 
     /**
-     * @param expectedCount an amount of errors that are expected to match the criterion
      * @param criterion      an error criterion specifying which kind of error should be a part
      *                      of acknowledgement
+     * @param expectedCount an amount of errors that are expected to match the criterion
      */
-    AcksSpecificErrorCountVerifier(int expectedCount, ErrorCriterion criterion) {
+    AcksSpecificErrorCountVerifier(ErrorCriterion criterion, Count expectedCount) {
         super();
         this.expectedCount = expectedCount;
         this.criterion = criterion;
@@ -46,7 +46,7 @@ class AcksSpecificErrorCountVerifier extends AcknowledgementsVerifier {
 
     @Override
     public void verify(Acknowledgements acks) {
-        assertEquals(expectedCount, acks.countErrors(criterion),
+        assertEquals(expectedCount.value(), acks.countErrors(criterion),
                      "Bounded Context did not contain an expected count of errors. "
                              + criterion.description());
     }

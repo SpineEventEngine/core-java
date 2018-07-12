@@ -31,9 +31,9 @@ import static java.lang.String.format;
 
 /**
  * Specifies the rules a {@link Error Spine errors} must match.
- * 
+ *
  * <p>Optionally can contain an the criterion description, useful for display by test assertions.
- * 
+ *
  * <p>These criteria are consumed by acks verifier
  * {@link AcknowledgementsVerifier#ackedWithErrors(ErrorCriterion) ackedWithError method}.
  *

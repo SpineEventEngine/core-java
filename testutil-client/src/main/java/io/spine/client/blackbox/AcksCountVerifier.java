@@ -30,10 +30,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 class AcksCountVerifier extends AcknowledgementsVerifier {
 
-    private final int expectedCount;
+    private final Count expectedCount;
 
     /** @param expectedCount an amount acks that are expected be observed */
-    AcksCountVerifier(int expectedCount) {
+    AcksCountVerifier(Count expectedCount) {
         super();
         this.expectedCount = expectedCount;
     }
@@ -41,6 +41,7 @@ class AcksCountVerifier extends AcknowledgementsVerifier {
     @Override
     public void verify(Acknowledgements acks) {
         int actualCount = acks.count();
+        int expectedCount = this.expectedCount.value();
         String moreOrLess = compare(actualCount, expectedCount);
         assertEquals(
                 expectedCount, actualCount,

@@ -20,27 +20,44 @@
 
 package io.spine.client.blackbox;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+public final class Count {
 
-/**
- * Verifies that a command or an event was handled responding with a rejection specified
- * amount of times.
- *
- * @author Mykhailo Drachuk
- */
-class AcksRejectionCountVerifier extends AcknowledgementsVerifier {
+    private static final Count NONE = new Count(0);
+    private static final Count ONCE = new Count(1);
+    private static final Count TWICE = new Count(2);
+    private static final Count THRICE = new Count(3);
 
-    private final Count expectedCount;
+    private final int value;
 
-    /** @param expectedCount an amount of rejection that are expected in Bounded Context */
-    AcksRejectionCountVerifier(Count expectedCount) {
-        super();
-        this.expectedCount = expectedCount;
+    private Count(int value) {
+        this.value = value;
     }
 
-    @Override
-    public void verify(Acknowledgements acks) {
-        assertEquals(expectedCount.value(), acks.countRejections(),
-                     "Bounded Context did not contain a rejection expected amount of times.");
+    public int value() {
+        return value;
+    }
+
+    public static Count count(int value) {
+        return new Count(value);
+    }
+
+    public static Count none() {
+        return NONE;
+    }
+
+    public static Count once() {
+        return ONCE;
+    }
+
+    public static Count twice() {
+        return TWICE;
+    }
+
+    public static Count thrice() {
+        return THRICE;
+    }
+
+    public boolean isNotNegative() {
+        return value >= 0;
     }
 }

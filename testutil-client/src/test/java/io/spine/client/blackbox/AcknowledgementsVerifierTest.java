@@ -29,6 +29,10 @@ import org.junit.jupiter.api.Test;
 import static io.spine.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.client.blackbox.AcknowledgementsVerifier.ackedWithErrors;
 import static io.spine.client.blackbox.AcknowledgementsVerifier.ackedWithRejections;
+import static io.spine.client.blackbox.Count.count;
+import static io.spine.client.blackbox.Count.once;
+import static io.spine.client.blackbox.Count.thrice;
+import static io.spine.client.blackbox.Count.twice;
 import static io.spine.client.blackbox.ErrorCriterion.withType;
 import static io.spine.client.blackbox.given.CommandAcksTestEnv.DUPLICATE_ERROR_TYPE;
 import static io.spine.client.blackbox.given.CommandAcksTestEnv.DUPLICATE_TASK_TITLE;
@@ -65,19 +69,19 @@ class AcknowledgementsVerifierTest {
 
     @Test
     @DisplayName("verifies acknowledgements count")
-    void count() {
-        verify(acked(3));
-        assertThrows(AssertionError.class, () -> verify(acked(2)));
-        assertThrows(AssertionError.class, () -> verify(acked(4)));
+    void countAny() {
+        verify(acked(thrice()));
+        assertThrows(AssertionError.class, () -> verify(acked(twice())));
+        assertThrows(AssertionError.class, () -> verify(acked(count(4))));
     }
 
     @Test
     @DisplayName("verifies acknowledgements count without rejections or errors")
     void countWithoutRejectionsOrErrors() {
-        verify(acked(3).withoutErrorsOrRejections());
+        verify(acked(thrice()).withoutErrorsOrRejections());
 
-        assertThrows(AssertionError.class, () -> verify(acked(3).withRejections()));
-        assertThrows(AssertionError.class, () -> verify(acked(3).withErrors()));
+        assertThrows(AssertionError.class, () -> verify(acked(thrice()).withRejections()));
+        assertThrows(AssertionError.class, () -> verify(acked(thrice()).withErrors()));
     }
 
     @Test
@@ -89,9 +93,11 @@ class AcknowledgementsVerifierTest {
                 newErrorAck()
         ));
 
-        verify(acked(3).withRejections().and(ackedWithErrors()), diverseAcks);
-        assertThrows(AssertionError.class, () -> verify(acked(3).withoutRejections(), diverseAcks));
-        assertThrows(AssertionError.class, () -> verify(acked(3).withoutErrors(), diverseAcks));
+        verify(acked(thrice()).withRejections().and(ackedWithErrors()), diverseAcks);
+        assertThrows(AssertionError.class, () -> 
+                verify(acked(thrice()).withoutRejections(), diverseAcks));
+        assertThrows(AssertionError.class, () -> 
+                verify(acked(thrice()).withoutErrors(), diverseAcks));
     }
 
     @Test
@@ -103,8 +109,8 @@ class AcknowledgementsVerifierTest {
                 newErrorAck()
         ));
 
-        verify(acked(3).withErrors(3), errorAcks);
-        assertThrows(AssertionError.class, () -> verify(ackedWithErrors(2), errorAcks));
+        verify(acked(thrice()).withErrors(thrice()), errorAcks);
+        assertThrows(AssertionError.class, () -> verify(ackedWithErrors(twice()), errorAcks));
     }
 
     @Test
@@ -114,9 +120,9 @@ class AcknowledgementsVerifierTest {
                 newErrorAck(newError(PRESENT_ERROR_TYPE))
         ));
 
-        verify(acked(1).withErrors(withType(PRESENT_ERROR_TYPE)), errorAcks);
+        verify(acked(once()).withErrors(withType(PRESENT_ERROR_TYPE)), errorAcks);
         assertThrows(AssertionError.class, () ->
-                verify(acked(1).withErrors(withType(MISSING_ERROR_TYPE)), errorAcks));
+                verify(acked(once()).withErrors(withType(MISSING_ERROR_TYPE)), errorAcks));
     }
 
     @Test
@@ -127,9 +133,9 @@ class AcknowledgementsVerifierTest {
                 newErrorAck(newError(DUPLICATE_ERROR_TYPE))
         ));
 
-        verify(acked(2).withErrors(2, withType(DUPLICATE_ERROR_TYPE)), errorAcks);
+        verify(acked(twice()).withErrors(withType(DUPLICATE_ERROR_TYPE), twice()), errorAcks);
         assertThrows(AssertionError.class, () ->
-                verify(ackedWithErrors(1, withType(DUPLICATE_ERROR_TYPE)), errorAcks));
+                verify(ackedWithErrors(withType(DUPLICATE_ERROR_TYPE), once()), errorAcks));
     }
 
     @Test
@@ -143,13 +149,13 @@ class AcknowledgementsVerifierTest {
 
         RejectionClass taskLimitReached = RejectionClass.of(IntTaskLimitReached.class);
         Class<IntProjectAlreadyStarted> projectAlreadyStarted = IntProjectAlreadyStarted.class;
-        verify(acked(3).withRejections(projectAlreadyStarted), rejectionAcks);
-        verify(acked(3).withRejections(taskLimitReached), rejectionAcks);
+        verify(acked(thrice()).withRejections(projectAlreadyStarted), rejectionAcks);
+        verify(acked(thrice()).withRejections(taskLimitReached), rejectionAcks);
 
         assertThrows(AssertionError.class, () -> {
             RejectionClass taskInCompletedProject =
                     RejectionClass.of(IntTaskCreatedInCompletedProject.class);
-            verify(acked(3).withRejections(taskInCompletedProject), rejectionAcks);
+            verify(acked(thrice()).withRejections(taskInCompletedProject), rejectionAcks);
         });
     }
 
@@ -165,12 +171,14 @@ class AcknowledgementsVerifierTest {
                 rejection -> PRESENT_TASK_TITLE.equals(getTaskTitle(rejection));
         Class<IntTaskCreatedInCompletedProject> taskInCompleteProject =
                 IntTaskCreatedInCompletedProject.class;
-        verify(acked(2).withRejections(taskInCompleteProject, whichIsPresent), rejectionAcks);
+        verify(acked(twice()).withRejections(taskInCompleteProject, whichIsPresent), 
+               rejectionAcks);
 
         assertThrows(AssertionError.class, () -> {
             RejectionCriterion<IntTaskCreatedInCompletedProject> whichIsMissing =
                     rejection -> MISSING_TASK_TITLE.equals(getTaskTitle(rejection));
-            verify(acked(2).withRejections(taskInCompleteProject, whichIsMissing), rejectionAcks);
+            verify(acked(twice()).withRejections(taskInCompleteProject, whichIsMissing),
+                   rejectionAcks);
         });
     }
 
@@ -193,23 +201,25 @@ class AcknowledgementsVerifierTest {
         RejectionClass taskLimitReached = RejectionClass.of(IntTaskLimitReached.class);
         Class<IntProjectAlreadyStarted> projectAlreadyStarted = IntProjectAlreadyStarted.class;
 
-        verify(ackedWithRejections(5), rejectionAcks);
-        verify(acked(5).withRejections(1, projectAlreadyStarted), rejectionAcks);
-        verify(acked(5).withRejections(2, taskLimitReached), rejectionAcks);
+        verify(ackedWithRejections(count(5)), rejectionAcks);
+        verify(acked(count(5)).withRejections(projectAlreadyStarted, once()), rejectionAcks);
+        verify(acked(count(5)).withRejections(taskLimitReached, twice()), rejectionAcks);
 
-        assertThrows(AssertionError.class, () -> verify(ackedWithRejections(4), rejectionAcks));
         assertThrows(AssertionError.class, () ->
-                verify(ackedWithRejections(2, projectAlreadyStarted), rejectionAcks));
+                verify(ackedWithRejections(count(4)), rejectionAcks));
+        assertThrows(AssertionError.class, () ->
+                verify(ackedWithRejections(projectAlreadyStarted, twice()), rejectionAcks));
 
         RejectionCriterion<IntTaskCreatedInCompletedProject> withDuplicateName =
                 rejection -> DUPLICATE_TASK_TITLE.equals(getTaskTitle(rejection));
         Class<IntTaskCreatedInCompletedProject> taskInCompleteProject =
                 IntTaskCreatedInCompletedProject.class;
 
-        verify(acked(5).withRejections(2, taskInCompleteProject, withDuplicateName), rejectionAcks);
+        verify(acked(count(5)).withRejections(taskInCompleteProject, twice(), withDuplicateName),
+               rejectionAcks);
 
         assertThrows(AssertionError.class, () ->
-                verify(ackedWithRejections(3, taskInCompleteProject, withDuplicateName),
+                verify(ackedWithRejections(taskInCompleteProject, thrice(), withDuplicateName),
                        rejectionAcks));
     }
 

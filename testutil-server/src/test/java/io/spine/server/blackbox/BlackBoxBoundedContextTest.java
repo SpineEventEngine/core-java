@@ -34,6 +34,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.client.blackbox.AcknowledgementsVerifier.acked;
+import static io.spine.client.blackbox.Count.count;
+import static io.spine.client.blackbox.Count.once;
+import static io.spine.client.blackbox.Count.twice;
 import static io.spine.server.blackbox.EmittedEventsVerifier.emitted;
 import static io.spine.server.blackbox.given.BlackBoxBoundedContextTestEnv.addTask;
 import static io.spine.server.blackbox.given.BlackBoxBoundedContextTestEnv.createProject;
@@ -65,7 +68,7 @@ class BlackBoxBoundedContextTest {
     @DisplayName("receive and handle a single commands")
     void receivesACommand() {
         project.receivesCommand(createProject())
-               .verifiesThat(acked(1).withoutErrorsOrRejections())
+               .verifiesThat(acked(once()).withoutErrorsOrRejections())
                .verifiesThat(emitted(1, IntProjectCreated.class));
     }
 
@@ -76,7 +79,7 @@ class BlackBoxBoundedContextTest {
         ProjectId projectId = newProjectId();
         project.receivesCommand(createProject(projectId))
                .receivesCommands(addTask(projectId), addTask(projectId), addTask(projectId))
-               .verifiesThat(acked(4).withoutErrorsOrRejections())
+               .verifiesThat(acked(count(4)).withoutErrorsOrRejections())
                .verifiesThat(emitted(4))
                .verifiesThat(emitted(1, IntProjectCreated.class))
                .verifiesThat(emitted(3, IntTaskAdded.class));
@@ -90,7 +93,7 @@ class BlackBoxBoundedContextTest {
         project.andWith(new IntReportRepository())
                .receivesCommand(createReport(projectId))
                .receivesEvent(taskAdded(projectId))
-               .verifiesThat(acked(2).withoutErrorsOrRejections())
+               .verifiesThat(acked(twice()).withoutErrorsOrRejections())
                .verifiesThat(emitted(3))
                .verifiesThat(emitted(1, IntReportCreated.class))
                .verifiesThat(emitted(1, IntTaskAddedToReport.class));
@@ -104,7 +107,7 @@ class BlackBoxBoundedContextTest {
         project.andWith(new IntReportRepository())
                .receivesCommand(createReport(projectId))
                .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
-               .verifiesThat(acked(4).withoutErrorsOrRejections())
+               .verifiesThat(acked(count(4)).withoutErrorsOrRejections())
                .verifiesThat(emitted(7))
                .verifiesThat(emitted(1, IntReportCreated.class))
                .verifiesThat(emitted(3, IntTaskAddedToReport.class));

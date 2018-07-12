@@ -28,6 +28,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.client.blackbox.Count;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -75,6 +76,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.client.blackbox.Count.twice;
 import static io.spine.core.Commands.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -420,7 +422,7 @@ class ProcessManagerTest {
             BlackBoxBoundedContext
                     .with(new QuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
-                    .verifiesThat(acked(2).withoutErrorsOrRejections())
+                    .verifiesThat(acked(twice()).withoutErrorsOrRejections())
                     .verifiesThat(emitted(2))
                     .verifiesThat(emitted(PmQuizStarted.class))
                     .verifiesThat(emitted(PmQuestionAnswered.class))
@@ -458,7 +460,7 @@ class ProcessManagerTest {
             BlackBoxBoundedContext
                     .with(new DirectQuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
-                    .verifiesThat(acked(2).withoutErrorsOrRejections())
+                    .verifiesThat(acked(twice()).withoutErrorsOrRejections())
                     .verifiesThat(emitted(1))
                     .verifiesThat(emitted(PmQuizStarted.class))
                     .verifiesThat(emitted(0, Empty.class))

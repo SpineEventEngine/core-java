@@ -32,17 +32,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 class AcksErrorCountVerifier extends AcknowledgementsVerifier {
 
-    private final int expectedCount;
+    private final Count expectedCount;
 
     /** @param expectedCount an amount of errors that are expected to be observed in acks */
-    AcksErrorCountVerifier(int expectedCount) {
+    AcksErrorCountVerifier(Count expectedCount) {
         super();
         this.expectedCount = expectedCount;
     }
 
     @Override
     public void verify(Acknowledgements acks) {
-        assertEquals(expectedCount, acks.countErrors(),
+        assertEquals(expectedCount.value(), acks.countErrors(),
                      "Bounded context did not contain an expected amount of errors");
     }
 }

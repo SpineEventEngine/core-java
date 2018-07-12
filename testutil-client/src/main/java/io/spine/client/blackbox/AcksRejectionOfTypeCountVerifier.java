@@ -35,13 +35,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class AcksRejectionOfTypeCountVerifier extends AcknowledgementsVerifier {
 
     private final RejectionClass type;
-    private final int expectedCount;
+    private final Count expectedCount;
 
     /**
      * @param expectedCount an amount of rejection that are expected in Bounded Context
      * @param type          rejection type in a form of {@link RejectionClass RejectionClass}
      */
-    AcksRejectionOfTypeCountVerifier(RejectionClass type, int expectedCount) {
+    AcksRejectionOfTypeCountVerifier(RejectionClass type, Count expectedCount) {
         super();
         this.type = type;
         this.expectedCount = expectedCount;
@@ -50,7 +50,7 @@ class AcksRejectionOfTypeCountVerifier extends AcknowledgementsVerifier {
     @Override
     public void verify(Acknowledgements acks) {
         Class<? extends Message> rejectionClass = type.value();
-        assertEquals(expectedCount, acks.countRejections(type),
+        assertEquals(expectedCount.value(), acks.countRejections(type),
                      "Bounded Context did not contain " + rejectionClass.getSimpleName() +
                              "rejection expected amount of times.");
     }
