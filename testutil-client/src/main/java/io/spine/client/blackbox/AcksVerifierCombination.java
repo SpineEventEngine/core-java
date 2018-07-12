@@ -31,6 +31,8 @@ import static com.google.common.collect.Lists.newArrayList;
 /**
  * A special kind of a {@link AcknowledgementsVerifier Acknowledgements Verifier} that
  * executes a list of assertions one by one.
+ * 
+ * @author Mykhailo Drachuk
  */
 @VisibleForTesting
 class AcksVerifierCombination extends AcknowledgementsVerifier {
