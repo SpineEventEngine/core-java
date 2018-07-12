@@ -38,6 +38,11 @@ import static com.google.common.collect.Lists.newLinkedList;
  * An implementation of {@link TransactionListener} which monitors the transaction flow and
  * triggers the {@linkplain Repository.Lifecycle entity lifecycle}.
  *
+ * <p>On a successful {@link Transaction.Phase}, memoizes the ID of the applied message. After
+ * a successful transaction commit, passes the memoized IDs to the {@link Repository.Lifecycle}
+ * of the entity under transaction, along with the information about the mutations performed under
+ * the transaction - an {@link EntityRecordChange}.
+ *
  * @author Dmytro Dashenkov
  */
 @Internal

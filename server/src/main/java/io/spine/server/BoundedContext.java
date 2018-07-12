@@ -65,11 +65,29 @@ import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * A facade for configuration and entry point for handling commands.
+ * A logical and structural boundary of a model.
+ *
+ * <p>Logically, a bounded context represents a sub-system, built to be described with the same
+ * ubiquitous language. Any term within a single bounded context has a single meaning and
+ * may or may not map to another term in the language of another bounded context.
+ *
+ * <p>The ubiquitous language of a bounded context is represented by the entity state, event,
+ * and command types, entity types, etc. An entity and its adjacent types belong to the bounded
+ * context, which the entity {@link Repository} is
+ * {@linkplain BoundedContext#register(Repository) registered} in.
+ *
+ * <p>Structurally, a bounded context brings together all the infrastructure required for
+ * the components of a model to cooperate.
+ *
+ * <p>An instance of {@code BoundedContext} acts as a major point of configuration for all
+ * the model elements which belong to it.
  *
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  * @author Dmitry Ganzha
+ * @author Dmytro Dashenkov
+ * @see <a href="https://martinfowler.com/bliki/BoundedContext.html">
+ * Blog post on bounded contexts</a>
  */
 public abstract class BoundedContext
         extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
