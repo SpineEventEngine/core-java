@@ -20,10 +20,15 @@
 
 package io.spine.system.server;
 
+import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.entity.LifecycleFlags;
+
+import java.util.function.UnaryOperator;
 
 import static io.spine.base.Time.getCurrentTime;
 
@@ -41,7 +46,7 @@ import static io.spine.base.Time.getCurrentTime;
  *
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings("OverlyCoupledClass") // OK for an Aggregate class.
+@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // OK for an Aggregate class.
 @Internal
 public final class EntityHistoryAggregate
         extends Aggregate<EntityHistoryId, EntityHistory, EntityHistoryVBuilder> {
@@ -120,34 +125,42 @@ public final class EntityHistoryAggregate
     }
 
     @Assign
-    EntityArchived handle(ArchiveEntity command) {
+    EntityArchived handle(ArchiveEntity command, CommandContext context) {
         return EntityArchived.newBuilder()
                              .setId(command.getId())
                              .addAllMessageId(command.getMessageIdList())
+                             .setWhen(context.getActorContext()
+                                             .getTimestamp())
                              .build();
     }
 
     @Assign
-    EntityDeleted handle(DeleteEntity command) {
+    EntityDeleted handle(DeleteEntity command, CommandContext context) {
         return EntityDeleted.newBuilder()
                             .setId(command.getId())
                             .addAllMessageId(command.getMessageIdList())
+                            .setWhen(context.getActorContext()
+                                            .getTimestamp())
                             .build();
     }
 
     @Assign
-    EntityExtractedFromArchive handle(ExtractEntityFromArchive command) {
+    EntityExtractedFromArchive handle(ExtractEntityFromArchive command, CommandContext context) {
         return EntityExtractedFromArchive.newBuilder()
                                          .setId(command.getId())
                                          .addAllMessageId(command.getMessageIdList())
+                                         .setWhen(context.getActorContext()
+                                                         .getTimestamp())
                                          .build();
     }
 
     @Assign
-    EntityRestored handle(RestoreEntity command) {
+    EntityRestored handle(RestoreEntity command, CommandContext context) {
         return EntityRestored.newBuilder()
                              .setId(command.getId())
                              .addAllMessageId(command.getMessageIdList())
+                             .setWhen(context.getActorContext()
+                                             .getTimestamp())
                              .build();
     }
 
@@ -158,22 +171,22 @@ public final class EntityHistoryAggregate
 
     @Apply
     private void on(EventDispatchedToSubscriber event) {
-        getBuilder().addEvents(event.getPayload());
+        getBuilder().addEvent(event.getPayload());
     }
 
     @Apply
     private void on(EventDispatchedToReactor event) {
-        getBuilder().addEvents(event.getPayload());
+        getBuilder().addEvent(event.getPayload());
     }
 
     @Apply
     private void on(EventPassedToApplier event) {
-        getBuilder().addEvents(event.getPayload());
+        getBuilder().addEvent(event.getPayload());
     }
 
     @Apply
     private void on(CommandDispatchedToHandler event) {
-        getBuilder().addCommands(event.getPayload());
+        getBuilder().addCommand(event.getPayload());
     }
 
     @Apply
@@ -183,21 +196,49 @@ public final class EntityHistoryAggregate
 
     @Apply
     private void on(EntityArchived event) {
-        // NOP.
+        updateLifecycleFlags(builder -> builder.setArchived(true));
+        Timestamp whenOccurred = event.getWhen();
+        updateLifecycleTimestamp(builder -> builder.setWhenArchived(whenOccurred));
     }
 
     @Apply
     private void on(EntityDeleted event) {
-        // NOP.
+        updateLifecycleFlags(builder -> builder.setDeleted(true));
+        Timestamp whenOccurred = event.getWhen();
+        updateLifecycleTimestamp(builder -> builder.setWhenDeleted(whenOccurred));
     }
 
     @Apply
     private void on(EntityExtractedFromArchive event) {
-        // NOP.
+        updateLifecycleFlags(builder -> builder.setArchived(false));
+        Timestamp whenOccurred = event.getWhen();
+        updateLifecycleTimestamp(builder -> builder.setWhenExtractedFromArchive(whenOccurred));
     }
 
     @Apply
     private void on(EntityRestored event) {
-        // NOP.
+        updateLifecycleFlags(builder -> builder.setDeleted(false));
+        Timestamp whenOccurred = event.getWhen();
+        updateLifecycleTimestamp(builder -> builder.setWhenRestored(whenOccurred));
+    }
+
+    private void updateLifecycleFlags(UnaryOperator<LifecycleFlags.Builder> mutation) {
+        LifecycleHistory oldLifecycleHistory = getBuilder().getLifecycle();
+        LifecycleFlags.Builder flagsBuilder = oldLifecycleHistory.getLifecycleFlags()
+                                                                 .toBuilder();
+        LifecycleFlags newFlags = mutation.apply(flagsBuilder)
+                                          .build();
+        LifecycleHistory newLifecycleHistory = oldLifecycleHistory.toBuilder()
+                                                                  .setLifecycleFlags(newFlags)
+                                                                  .build();
+        getBuilder().setLifecycle(newLifecycleHistory);
+    }
+
+    private void updateLifecycleTimestamp(UnaryOperator<LifecycleHistory.Builder> mutation) {
+        LifecycleHistory.Builder builder = getBuilder().getLifecycle()
+                                                       .toBuilder();
+        LifecycleHistory newHistory = mutation.apply(builder)
+                                              .build();
+        getBuilder().setLifecycle(newHistory);
     }
 }

@@ -37,6 +37,7 @@ import "google/protobuf/timestamp.proto";
 import "spine/core/command.proto";
 import "spine/core/event.proto";
 import "spine/client/entities.proto";
+import "spine/server/entity/entity.proto";
 
 // An identifier of an entity history.
 //
@@ -65,14 +66,57 @@ message EntityHistory {
     EntityOption.Kind kind = 2;
 
     // All the commands ever dispatched to the entity.
-    repeated DispatchedCommand commands = 3;
+    repeated DispatchedCommand command = 3;
 
     // All the events ever dispatched to the entity.
     //
     // In case of Aggregates, this includes both the applied events of the aggregate itself and
     // the events dispatched to the reactor methods.
     //
-    repeated DispatchedEvent events = 4;
+    repeated DispatchedEvent event = 4;
+
+    LifecycleHistory lifecycle = 5;
+}
+
+// The history of an entity lifecycle.
+//
+// Contains the current `LifecycleFlags` and the timestamps of the instants when
+// the lifecycle-changing mutations have occured to the entity for the most recent time.
+//
+// Since none of the lifecycle states is terminal, none of the fields are mutually exclusive.
+//
+message LifecycleHistory {
+
+    // Current `LifecycleFlags` of the entity.
+    spine.server.entity.LifecycleFlags lifecycle_flags = 1;
+
+    // Instant when the entity was archived.
+    //
+    // If the entity has been archived for multiple times in its history, this timestamp represents
+    // the most recent occurance.
+    //
+    google.protobuf.Timestamp when_archived = 2;
+
+    // Instant when the entity was deleted.
+    //
+    // If the entity has been deleted for multiple times in its history, this timestamp represents
+    // the most recent occurance.
+    //
+    google.protobuf.Timestamp when_deleted = 3;
+
+    // Instant when the entity was extracted from archive.
+    //
+    // If the entity has been extracted for multiple times in its history, this timestamp represents
+    // the most recent occurance.
+    //
+    google.protobuf.Timestamp when_extracted_from_archive = 4;
+
+    // Instant when the entity was restored after deletion.
+    //
+    // If the entity has been restored for multiple times in its history, this timestamp represents
+    // the most recent occurance.
+    //
+    google.protobuf.Timestamp when_restored = 5;
 }
 
 // A record of an event dispatched to a certain entity.
