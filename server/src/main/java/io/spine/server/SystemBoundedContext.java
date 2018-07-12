@@ -29,14 +29,14 @@ import io.spine.system.server.SystemGateway;
 import java.util.stream.Stream;
 
 /**
- * An implementation of {@link BoundedContext} used for the system bounded contexts.
+ * An implementation of {@link BoundedContext} used for the System domain.
  *
  * <p>Orchestrates the system entities, such as
  * {@link io.spine.system.server.EntityHistoryAggregate EntityHistory} and
  * {@link io.spine.system.server.CommandLifecycleAggregate CommandLifecycle}.
  *
- * <p>Users should not access a system bounded context directly. See {@link SystemGateway} for
- * the front-acing API of the system bounded context.
+ * <p>Users should not access a System bounded context directly. See {@link SystemGateway} for
+ * the front-facing API of the System bounded context.
  *
  * @author Dmytro Dashenkov
  * @see SystemGateway
