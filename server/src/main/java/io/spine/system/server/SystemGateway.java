@@ -32,7 +32,9 @@ import io.spine.annotation.Internal;
 public interface SystemGateway {
 
     /**
-     * Post a system command.
+     * Posts a system command.
+     *
+     * <p>In a multitenant environment, the command is posted for the current tenant.
      *
      * @param systemCommand command message
      */
