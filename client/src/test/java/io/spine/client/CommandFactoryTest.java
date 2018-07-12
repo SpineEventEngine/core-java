@@ -99,9 +99,10 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("with own tenant ID")
         void withOwnTenantId() {
-            TenantId tenantId = TenantId.newBuilder()
-                                        .setValue(getClass().getSimpleName())
-                                        .build();
+            TenantId tenantId = TenantId
+                    .newBuilder()
+                    .setValue(getClass().getSimpleName())
+                    .build();
             ActorRequestFactory mtFactory = ActorRequestFactory
                     .newBuilder()
                     .setTenantId(tenantId)

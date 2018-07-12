@@ -105,7 +105,7 @@ abstract class ActorRequestFactoryTest {
     @Test
     @DisplayName("return values set in Builder")
     void returnValuesSetInBuilder() {
-        final ActorRequestFactory.Builder builder = builder()
+        ActorRequestFactory.Builder builder = builder()
                 .setActor(actor)
                 .setZoneOffset(zoneOffset);
         assertNotNull(builder.getActor());
@@ -127,9 +127,9 @@ abstract class ActorRequestFactoryTest {
         @Test
         @DisplayName("given user")
         void givenUser() {
-            final int currentOffset = ZoneOffsets.getDefault()
-                                                 .getAmountSeconds();
-            final ActorRequestFactory aFactory = builder()
+            int currentOffset = ZoneOffsets.getDefault()
+                                           .getAmountSeconds();
+            ActorRequestFactory aFactory = builder()
                     .setActor(actor)
                     .build();
 
@@ -149,25 +149,25 @@ abstract class ActorRequestFactoryTest {
     @Test
     @DisplayName("support moving between timezones")
     void moveBetweenTimezones() {
-        final ActorRequestFactory factoryInAnotherTimezone =
+        ActorRequestFactory factoryInAnotherTimezone =
                 factory().switchTimezone(ZoneOffsets.ofHours(-8));
         assertNotEquals(factory().getZoneOffset(), factoryInAnotherTimezone.getZoneOffset());
     }
 
-    void verifyContext(ActorContext actualContext) {
-        final ActorContext expectedContext = actorContext();
+    void verifyContext(ActorContext actual) {
+        ActorContext expected = actorContext();
 
-        assertEquals(expectedContext.getTenantId(), actualContext.getTenantId());
-        assertEquals(expectedContext.getActor(), actualContext.getActor());
-        assertEquals(expectedContext.getLanguage(), actualContext.getLanguage());
-        assertEquals(expectedContext.getZoneOffset(), actualContext.getZoneOffset());
+        assertEquals(expected.getTenantId(), actual.getTenantId());
+        assertEquals(expected.getActor(), actual.getActor());
+        assertEquals(expected.getLanguage(), actual.getLanguage());
+        assertEquals(expected.getZoneOffset(), actual.getZoneOffset());
 
         // It's impossible to get the same creation time for the `expected` value,
         //    so checking that the `actual` value is not later than `expected`.
-        assertTrue(actualContext.getTimestamp()
-                                .equals(expectedContext.getTimestamp())
+        assertTrue(actual.getTimestamp()
+                         .equals(expected.getTimestamp())
                            ||
-                           isLaterThan(expectedContext.getTimestamp(),
-                                       actualContext.getTimestamp()));
+                           isLaterThan(expected.getTimestamp(),
+                                       actual.getTimestamp()));
     }
 }
