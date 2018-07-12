@@ -79,7 +79,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.client.blackbox.Count.once;
@@ -107,7 +106,6 @@ import static io.spine.server.entity.given.Given.aggregateOfClass;
 import static io.spine.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.server.blackbox.EmittedEventsVerifier.emitted;
 import static io.spine.test.Verify.assertSize;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -160,23 +158,6 @@ public class AggregateTest {
                 .add(event(projectStarted(ID), 4))
                 .build();
         return events;
-    }
-
-    /**
-     * A convenience method for closing the bounded context.
-     *
-     * <p>Instead of a checked {@link java.io.IOException IOException}, wraps any issues
-     * that may occur while closing, into an {@link IllegalStateException}.
-     *
-     * @param boundedContext a bounded context to close
-     */
-    private static void closeContext(BoundedContext boundedContext) {
-        checkNotNull(boundedContext);
-        try {
-            boundedContext.close();
-        } catch (Exception e) {
-            throw illegalStateWithCauseOf(e);
-        }
     }
 
     /**
