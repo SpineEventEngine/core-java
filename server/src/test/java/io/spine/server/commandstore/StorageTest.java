@@ -45,6 +45,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.core.CommandStatus.ERROR;
 import static io.spine.core.CommandStatus.OK;
 import static io.spine.core.CommandStatus.RECEIVED;
@@ -52,7 +53,6 @@ import static io.spine.core.CommandStatus.REJECTED;
 import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.Commands.generateId;
 import static io.spine.core.given.GivenTenantId.newUuid;
-import static io.spine.server.BoundedContext.newName;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static io.spine.server.commandstore.CommandTestUtil.checkRecord;
 import static io.spine.server.commandstore.Records.newRecordBuilder;

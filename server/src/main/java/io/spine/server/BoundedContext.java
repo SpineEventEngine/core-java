@@ -62,7 +62,6 @@ import java.util.function.Function;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
 /**
  * A facade for configuration and entry point for handling commands.
@@ -124,24 +123,6 @@ public abstract class BoundedContext
      * It performs registry initialization which, otherwise, would be performed in the constructor.
      */
     abstract void init();
-
-    /**
-     * Creates a new value object for a bounded context name.
-     *
-     * <p>The {@code name} argument value must not be {@code null} or empty.
-     *
-     * <p>This method, however, does not check for the uniqueness of the value passed.
-     *
-     * @param name the unique string name of the {@code BoundedContext}
-     * @return a newly created name
-     */
-    public static BoundedContextName newName(String name) {
-        checkNotEmptyOrBlank(name, "name");
-        final BoundedContextName result = BoundedContextName.newBuilder()
-                                                            .setValue(name)
-                                                            .build();
-        return result;
-    }
 
     /**
      * Creates a new builder for {@code BoundedContext}.
@@ -214,7 +195,7 @@ public abstract class BoundedContext
      *
      * <p>The ID allows to identify a bounded context if a multi-context application.
      * If the ID was not defined, during the building process, the context would get
-     * {@link BoundedContextNames#mainBoundedContext()} name.
+     * {@link BoundedContextNames#defaultName()} name.
      *
      * @return the ID of this {@code BoundedContext}
      */
@@ -360,7 +341,7 @@ public abstract class BoundedContext
          * Sets the value of the name for a new bounded context.
          *
          * <p>If the name is not defined in the builder, the context will get
-         * {@link BoundedContextNames#mainBoundedContext()} name.
+         * {@link BoundedContextNames#defaultName()} name.
          *
          * <p>It is the responsibility of an application developer to provide meaningful and unique
          * names for bounded contexts. The framework does not check for duplication of names.
@@ -369,14 +350,14 @@ public abstract class BoundedContext
          *             Cannot be null, empty, or blank
          */
         public Builder setName(String name) {
-            return setName(newName(name));
+            return setName(BoundedContextNames.newName(name));
         }
 
         /**
          * Sets the name for a new bounded context.
          *
          * <p>If the name is not defined in the builder, the context will get
-         * {@link BoundedContextNames#mainBoundedContext()} name.
+         * {@link BoundedContextNames#defaultName()} name.
          *
          * <p>It is the responsibility of an application developer to provide meaningful and unique
          * names for bounded contexts. The framework does not check for duplication of names.
@@ -390,7 +371,7 @@ public abstract class BoundedContext
         }
 
         /**
-         * Returns the previously set name or {@link BoundedContextNames#mainBoundedContext()}
+         * Returns the previously set name or {@link BoundedContextNames#defaultName()}
          * if the name was not explicitly set.
          */
         public BoundedContextName getName() {

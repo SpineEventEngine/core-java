@@ -22,6 +22,7 @@ package io.spine.core;
 
 import io.spine.annotation.Internal;
 
+import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.String.format;
 
 /**
@@ -36,15 +37,31 @@ import static java.lang.String.format;
 @Internal
 public final class BoundedContextNames {
 
-    private static final BoundedContextName MAIN =
-            BoundedContextName.newBuilder().setValue("Main")
-                        .build();
+    private static final BoundedContextName MAIN = newName("Main");
     private static final String SYSTEM_TEMPLATE = "%s_System";
 
     /**
      * Prevents the utility class instantiation.
      */
     private BoundedContextNames() {
+    }
+
+    /**
+     * Creates a new value object for a bounded context name.
+     *
+     * <p>The {@code name} argument value must not be {@code null} or empty.
+     *
+     * <p>This method, however, does not check for the uniqueness of the value passed.
+     *
+     * @param name the unique string name of the {@code BoundedContext}
+     * @return a newly created name
+     */
+    public static BoundedContextName newName(String name) {
+        checkNotEmptyOrBlank(name, "name");
+        final BoundedContextName result = BoundedContextName.newBuilder()
+                                                            .setValue(name)
+                                                            .build();
+        return result;
     }
 
     /**
