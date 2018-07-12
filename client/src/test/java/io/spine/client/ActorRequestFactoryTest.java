@@ -26,6 +26,8 @@ import com.google.protobuf.Message;
 import io.spine.core.ActorContext;
 import io.spine.core.UserId;
 import io.spine.test.client.TestEntity;
+import io.spine.time.ZoneId;
+import io.spine.time.ZoneIds;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,6 +58,7 @@ abstract class ActorRequestFactoryTest {
 
     private final UserId actor = of(newUuid());
     private final ZoneOffset zoneOffset = ZoneOffsets.getDefault();
+    private final ZoneId zoneId = ZoneIds.systemDefault();
 
     private ActorRequestFactory factory;
 
@@ -82,6 +85,7 @@ abstract class ActorRequestFactoryTest {
     @BeforeEach
     void createFactory() {
         factory = builder().setZoneOffset(zoneOffset)
+                           .setZoneId(zoneId)
                            .setActor(actor)
                            .build();
     }
@@ -116,11 +120,12 @@ abstract class ActorRequestFactoryTest {
     void returnValuesSetInBuilder() {
         ActorRequestFactory.Builder builder = builder()
                 .setActor(actor)
-                .setZoneOffset(zoneOffset);
+                .setZoneOffset(zoneOffset)
+                .setZoneId(zoneId);
 
         assertEquals(actor, builder.getActor());
         assertEquals(zoneOffset, builder.getZoneOffset());
-        assertNull(builder.getTenantId());
+        assertEquals(zoneId, builder.getZoneId());
     }
 
     @Test
@@ -154,6 +159,7 @@ abstract class ActorRequestFactoryTest {
             ActorRequestFactory factory = factory();
             assertEquals(actor, factory.getActor());
             assertEquals(zoneOffset, factory.getZoneOffset());
+            assertEquals(zoneId, factory.getZoneId());
         }
     }
 
@@ -172,6 +178,7 @@ abstract class ActorRequestFactoryTest {
         assertEquals(expected.getActor(), actual.getActor());
         assertEquals(expected.getLanguage(), actual.getLanguage());
         assertEquals(expected.getZoneOffset(), actual.getZoneOffset());
+        assertEquals(expected.getZoneId(), actual.getZoneId());
 
         // It's impossible to get the same creation time for the `expected` value,
         //    so checking that the `actual` value is not later than `expected`.
