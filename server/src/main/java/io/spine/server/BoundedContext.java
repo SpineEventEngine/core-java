@@ -138,18 +138,18 @@ public abstract class BoundedContext
      *
      * <p>This method performs the following:
      * <ol>
-     * <li>Closes associated {@link StorageFactory}.
-     * <li>Closes {@link CommandBus}.
-     * <li>Closes {@link EventBus}.
-     * <li>Closes {@link IntegrationBus}.
-     * <li>Closes {@link CommandStore}.
-     * <li>Closes {@link io.spine.server.event.EventStore EventStore}.
-     * <li>Closes {@link Stand}.
-     * <li>Shuts down all registered repositories. Each registered repository is:
+     *     <li>Closes associated {@link StorageFactory}.
+     *     <li>Closes {@link CommandBus}.
+     *     <li>Closes {@link EventBus}.
+     *     <li>Closes {@link IntegrationBus}.
+     *     <li>Closes {@link CommandStore}.
+     *     <li>Closes {@link io.spine.server.event.EventStore EventStore}.
+     *     <li>Closes {@link Stand}.
+     *     <li>Shuts down all registered repositories. Each registered repository is:
      *      <ul>
-     *      <li>un-registered from {@link CommandBus}
-     *      <li>un-registered from {@link EventBus}
-     *      <li>detached from its storage
+     *          <li>un-registered from {@link CommandBus}
+     *          <li>un-registered from {@link EventBus}
+     *          <li>detached from its storage
      *      </ul>
      * </ol>
      *
