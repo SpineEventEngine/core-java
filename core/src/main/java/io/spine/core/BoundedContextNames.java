@@ -22,6 +22,7 @@ package io.spine.core;
 
 import io.spine.annotation.Internal;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.String.format;
 
@@ -56,11 +57,16 @@ public final class BoundedContextNames {
      * @return a newly created name
      */
     public static BoundedContextName newName(String name) {
-        checkNotEmptyOrBlank(name, "name");
         final BoundedContextName result = BoundedContextName.newBuilder()
                                                             .setValue(name)
                                                             .build();
+        checkValid(result);
         return result;
+    }
+
+    public static void checkValid(BoundedContextName name) {
+        checkNotNull(name);
+        checkNotEmptyOrBlank(name.getValue(), "name");
     }
 
     /**

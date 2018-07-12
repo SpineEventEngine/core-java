@@ -61,6 +61,7 @@ import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -342,7 +343,7 @@ public abstract class BoundedContext
          *             Cannot be null, empty, or blank
          */
         public Builder setName(String name) {
-            return setName(BoundedContextNames.newName(name));
+            return setName(newName(name));
         }
 
         /**
@@ -358,6 +359,7 @@ public abstract class BoundedContext
          *             Cannot be null, empty, or blank
          */
         public Builder setName(BoundedContextName name) {
+            BoundedContextNames.checkValid(name);
             this.name = name;
             return this;
         }
