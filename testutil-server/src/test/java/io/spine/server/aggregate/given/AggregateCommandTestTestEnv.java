@@ -48,7 +48,7 @@ public class AggregateCommandTestTestEnv {
     public static ActorRequestFactory newRequestFactory(Class<?> clazz) {
         return ActorRequestFactory.newBuilder()
                                   .setActor(newUuid())
-                                  .setZoneOffset(ZoneOffsets.UTC)
+                                  .setZoneOffset(ZoneOffsets.utc())
                                   .setTenantId(TenantId.newBuilder()
                                                        .setValue(clazz.getSimpleName())
                                                        .build())

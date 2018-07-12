@@ -29,7 +29,7 @@ import io.spine.core.Command;
 import io.spine.core.Commands;
 import io.spine.core.TenantId;
 import io.spine.server.command.given.CommandTestTestEnv.TestCommandTest;
-import io.spine.test.TimeTests;
+import io.spine.time.testing.TimeTests;
 import io.spine.time.ZoneOffsets;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -79,7 +79,7 @@ class CommandTestTest {
     static ActorRequestFactory newRequestFactory(Class<?> clazz) {
         return ActorRequestFactory.newBuilder()
                                   .setActor(newUuid())
-                                  .setZoneOffset(ZoneOffsets.UTC)
+                                  .setZoneOffset(ZoneOffsets.utc())
                                   .setTenantId(TenantId.newBuilder()
                                                        .setValue(clazz.getSimpleName())
                                                        .build())

@@ -51,7 +51,7 @@ class AggregatePartCommandTestTest {
                                           .build();
         return ActorRequestFactory.newBuilder()
                                   .setActor(newUuid())
-                                  .setZoneOffset(ZoneOffsets.UTC)
+                                  .setZoneOffset(ZoneOffsets.utc())
                                   .setTenantId(tenantId)
                                   .build();
     }
