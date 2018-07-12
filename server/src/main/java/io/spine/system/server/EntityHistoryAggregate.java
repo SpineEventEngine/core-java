@@ -116,11 +116,13 @@ public final class EntityHistoryAggregate
     }
 
     @Assign
-    EntityStateChanged handle(ChangeEntityState command) {
+    EntityStateChanged handle(ChangeEntityState command, CommandContext context) {
         return EntityStateChanged.newBuilder()
                                  .setId(command.getId())
                                  .addAllMessageId(command.getMessageIdList())
                                  .setNewState(command.getNewState())
+                                 .setWhen(context.getActorContext()
+                                                 .getTimestamp())
                                  .build();
     }
 
@@ -191,7 +193,7 @@ public final class EntityHistoryAggregate
 
     @Apply
     private void on(EntityStateChanged event) {
-        // NOP.
+        getBuilder().setLastStateChange(event.getWhen());
     }
 
     @Apply

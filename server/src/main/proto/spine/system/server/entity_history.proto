@@ -75,7 +75,11 @@ message EntityHistory {
     //
     repeated DispatchedEvent event = 4;
 
+    // The history of lifecycle flags changes.
     LifecycleHistory lifecycle = 5;
+
+    // The most recent time when
+    google.protobuf.Timestamp last_state_change = 6;
 }
 
 // The history of an entity lifecycle.

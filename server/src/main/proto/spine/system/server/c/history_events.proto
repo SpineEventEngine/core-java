@@ -117,6 +117,9 @@ message EntityStateChanged {
 
     // The IDs of the messages which caused the mutation.
     repeated DispatchedMessageId message_id = 3;
+
+    // The instant when the entity was archived.
+    google.protobuf.Timestamp when = 4;
 }
 
 // An event emmited when an entity is marked as archived.
