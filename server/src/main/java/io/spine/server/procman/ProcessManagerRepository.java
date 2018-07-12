@@ -395,7 +395,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public P create(I id) {
         P procman = super.create(id);
-        lifecycleOf(id).onCreateEntity(PROCESS_MANAGER);
+        lifecycleOf(id).onEntityCreated(PROCESS_MANAGER);
         return procman;
     }
 

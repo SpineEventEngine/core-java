@@ -489,7 +489,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         /**
          * Posts the {@link CreateEntity} system command.
          */
-        public void onCreateEntity(EntityOption.Kind entityKind) {
+        public void onEntityCreated(EntityOption.Kind entityKind) {
             CreateEntity command = CreateEntity
                     .newBuilder()
                     .setId(id)

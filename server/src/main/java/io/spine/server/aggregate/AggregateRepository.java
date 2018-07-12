@@ -500,7 +500,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             A result = play(id, eventsFromStorage.get());
             return Optional.of(result);
         } else {
-            lifecycleOf(id).onCreateEntity(AGGREGATE);
+            lifecycleOf(id).onEntityCreated(AGGREGATE);
             return Optional.absent();
         }
     }
