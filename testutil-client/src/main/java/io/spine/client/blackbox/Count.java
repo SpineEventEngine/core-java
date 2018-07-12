@@ -20,11 +20,16 @@
 
 package io.spine.client.blackbox;
 
+import com.google.common.annotations.VisibleForTesting;
+
 import static com.google.common.base.Preconditions.checkArgument;
 
 /**
  * An integer Tiny Type representing a numeric value that can not be negative.
+ *
+ * @author Mykhailo Drachuk
  */
+@VisibleForTesting
 public final class Count {
 
     private static final Count NONE = new Count(0);
