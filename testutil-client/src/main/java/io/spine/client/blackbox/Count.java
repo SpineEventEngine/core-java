@@ -20,6 +20,11 @@
 
 package io.spine.client.blackbox;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
+/**
+ * An integer Tiny Type representing a numeric value that can not be negative.
+ */
 public final class Count {
 
     private static final Count NONE = new Count(0);
@@ -33,31 +38,58 @@ public final class Count {
         this.value = value;
     }
 
+    /** @return an integer value of the current count. */
     public int value() {
         return value;
     }
 
+    /**
+     * {@link Count Count} static factory creating an instance with the provided value.
+     *
+     * <p>Additionally checks the value to be equal or more than 0, because count
+     * cannot be negative.
+     *
+     * @param value a value for a new count instance
+     * @return an instance of count with a provided value
+     */
     public static Count count(int value) {
+        checkArgument(value >= 0, "Count can not be negative");
         return new Count(value);
     }
 
+    /**
+     * A literate shortcut for {@code count(0)}.
+     *
+     * @return an instance of {@link Count Count} with 0 as a value
+     */
     public static Count none() {
         return NONE;
     }
 
+    /**
+     * A literate shortcut for {@code count(1)}.
+     *
+     * @return an instance of {@link Count Count} with 1 as a value
+     */
     public static Count once() {
         return ONCE;
     }
 
+    /**
+     * A literate shortcut for {@code count(2)}.
+     *
+     * @return an instance of {@link Count Count} with 2 as a value
+     */
     public static Count twice() {
         return TWICE;
     }
 
+    /**
+     * A literate shortcut for {@code count(3)}.
+     *
+     * @return an instance of {@link Count Count} with 3 as a value
+     */
     public static Count thrice() {
         return THRICE;
-    }
-
-    public boolean isNotNegative() {
-        return value >= 0;
     }
 }

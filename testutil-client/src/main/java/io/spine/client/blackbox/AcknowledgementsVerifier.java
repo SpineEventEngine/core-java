@@ -60,8 +60,6 @@ public abstract class AcknowledgementsVerifier {
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public static AcknowledgementsVerifier acked(Count expectedCount) {
-        checkArgument(expectedCount.isNotNegative(),
-                      "0 or more acknowledgements must be expected.");
         return new AcksCountVerifier(expectedCount);
     }
 
@@ -95,7 +93,6 @@ public abstract class AcknowledgementsVerifier {
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public static AcknowledgementsVerifier ackedWithErrors(Count expectedCount) {
-        checkArgument(expectedCount.isNotNegative(), "0 or more errors must be expected.");
         return new AcksErrorCountVerifier(expectedCount);
     }
 
@@ -122,8 +119,6 @@ public abstract class AcknowledgementsVerifier {
      */
     public static AcknowledgementsVerifier ackedWithErrors(ErrorCriterion criterion,
                                                            Count expectedCount) {
-        checkArgument(expectedCount.isNotNegative(),
-                      "0 or more errors matching criterion must be expected.");
         return new AcksSpecificErrorCountVerifier(criterion, expectedCount);
     }
 
@@ -195,7 +190,6 @@ public abstract class AcknowledgementsVerifier {
      * @return a new {@link AcknowledgementsVerifier} instance
      */
     public static AcknowledgementsVerifier ackedWithRejections(Count expectedCount) {
-        checkArgument(expectedCount.isNotNegative(), "0 or more rejections must be expected.");
         return new AcksRejectionCountVerifier(expectedCount);
     }
 
@@ -209,8 +203,6 @@ public abstract class AcknowledgementsVerifier {
      */
     public static AcknowledgementsVerifier ackedWithRejections(Class<? extends Message> type,
                                                                Count expectedCount) {
-        checkArgument(expectedCount.isNotNegative(),
-                      "0 or more rejections of rejections of message class type must be expected.");
         RejectionClass rejectionClass = RejectionClass.of(type);
         return ackedWithRejections(rejectionClass, expectedCount);
     }
@@ -225,8 +217,6 @@ public abstract class AcknowledgementsVerifier {
      */
     public static AcknowledgementsVerifier ackedWithRejections(RejectionClass type,
                                                                Count expectedCount) {
-        checkArgument(expectedCount.isNotNegative(),
-                      "0 or more rejections of rejections of class must be expected.");
         return new AcksRejectionOfTypeCountVerifier(type, expectedCount);
     }
 
@@ -242,8 +232,6 @@ public abstract class AcknowledgementsVerifier {
      */
     public static <T extends Message> AcknowledgementsVerifier
     ackedWithRejections(Class<T> type, Count expectedCount, RejectionCriterion<T> criterion) {
-        checkArgument(expectedCount.isNotNegative(),
-                      "0 or more specified rejections must be expected.");
         return new AcksSpecificRejectionCountVerifier<>(type, expectedCount, criterion);
     }
 

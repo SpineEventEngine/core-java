@@ -53,8 +53,6 @@ public abstract class EmittedEventsVerifier {
      * @return new {@link EmittedEventsVerifier emitted events verifier} instance
      */
     public static EmittedEventsVerifier emitted(Count expectedCount) {
-        checkArgument(expectedCount.isNotNegative(), "0 or more emitted events must be expected.");
-
         return new EmittedEventsVerifier() {
             @Override
             public void verify(EmittedEvents events) {
@@ -114,8 +112,6 @@ public abstract class EmittedEventsVerifier {
      */
     public static EmittedEventsVerifier
     emitted(Class<? extends Message> eventType, Count expectedCount) {
-        checkArgument(expectedCount.isNotNegative(),
-                      "Zero or more events must be expected to be emitted for type");
         return new EmittedEventsVerifier() {
 
             @Override
