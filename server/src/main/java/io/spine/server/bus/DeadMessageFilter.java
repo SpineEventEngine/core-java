@@ -44,7 +44,7 @@ final class DeadMessageFilter<T extends Message,
                               E extends MessageEnvelope<?, T, ?>,
                               C extends MessageClass,
                               D extends MessageDispatcher<C, E, ?>>
-        extends AbstractBusFilter<E> {
+        implements BusFilter<E> {
 
     private final DeadMessageHandler<E> deadMessageHandler;
     private final DispatcherRegistry<C, D> registry;

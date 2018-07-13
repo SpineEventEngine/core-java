@@ -20,7 +20,6 @@
 
 package io.spine.server;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
@@ -42,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.ImmutableList.copyOf;
@@ -49,6 +49,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -203,9 +205,9 @@ public abstract class MessageHandlerTest<I,
             @SuppressWarnings("unchecked")
             Class<? extends Message> messageType = (Class<? extends Message>) cls;
             CommandClass commandClass = CommandClass.of(messageType);
-            return Optional.of(commandClass);
+            return of(commandClass);
         } else {
-            return Optional.absent();
+            return empty();
         }
     }
 
@@ -277,12 +279,7 @@ public abstract class MessageHandlerTest<I,
         public java.util.Optional<Ack> accept(CommandEnvelope envelope) {
             interceptedCommands.add(unpack(envelope.getCommand()
                                                    .getMessage()));
-            return java.util.Optional.empty();
-        }
-
-        @Override
-        public void close() {
-            // NoOp.
+            return empty();
         }
     }
 

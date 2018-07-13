@@ -55,6 +55,13 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      */
     Optional<Ack> accept(E envelope);
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>By default, performs no action.
+     */
     @Override
-    default void close() throws Exception {}
+    default void close() throws Exception {
+        // NoOp by default.
+    }
 }

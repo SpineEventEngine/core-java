@@ -42,7 +42,7 @@ import static java.util.Optional.of;
  * @author Dmytro Dashenkov
  */
 final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Message>
-        extends AbstractBusFilter<E> {
+        implements BusFilter<E> {
 
     private final EnvelopeValidator<E> validator;
 

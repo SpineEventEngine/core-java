@@ -41,7 +41,7 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.bus.AbstractBusFilter;
+import io.spine.server.bus.BusFilter;
 import io.spine.server.command.Assign;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventBus;
@@ -248,7 +248,7 @@ public class EventBusTestEnv {
      * Filters out the {@link EBTaskAdded} events which have their {@link Task#getDone()}
      * property set to {@code true}.
      */
-    public static class TaskCreatedFilter extends AbstractBusFilter<EventEnvelope> {
+    public static class TaskCreatedFilter implements BusFilter<EventEnvelope> {
 
         private static final EventClass TASK_ADDED_CLASS = EventClass.of(EBTaskAdded.class);
 
