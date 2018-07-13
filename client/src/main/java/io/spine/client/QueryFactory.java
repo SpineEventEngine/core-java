@@ -59,7 +59,7 @@ public final class QueryFactory {
     }
 
     private static QueryId newQueryId() {
-        final String formattedId = format(QUERY_ID_FORMAT, newUuid());
+        String formattedId = format(QUERY_ID_FORMAT, newUuid());
         return QueryId.newBuilder()
                       .setValue(formattedId)
                       .build();
@@ -74,7 +74,7 @@ public final class QueryFactory {
      */
     public QueryBuilder select(Class<? extends Message> targetType) {
         checkNotNull(targetType);
-        final QueryBuilder queryBuilder = new QueryBuilder(targetType, this);
+        QueryBuilder queryBuilder = new QueryBuilder(targetType, this);
         return queryBuilder;
     }
 
@@ -106,10 +106,10 @@ public final class QueryFactory {
         checkNotNull(ids);
         checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
 
-        final FieldMask fieldMask = FieldMask.newBuilder()
+        FieldMask fieldMask = FieldMask.newBuilder()
                                              .addAllPaths(Arrays.asList(maskPaths))
                                              .build();
-        final Query result = composeQuery(entityClass, ids, null, fieldMask);
+        Query result = composeQuery(entityClass, ids, null, fieldMask);
         return result;
     }
 
@@ -153,10 +153,10 @@ public final class QueryFactory {
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query allWithMask(Class<? extends Message> entityClass, String... maskPaths) {
-        final FieldMask fieldMask = FieldMask.newBuilder()
+        FieldMask fieldMask = FieldMask.newBuilder()
                                              .addAllPaths(Arrays.asList(maskPaths))
                                              .build();
-        final Query result = composeQuery(entityClass, null, null, fieldMask);
+        Query result = composeQuery(entityClass, null, null, fieldMask);
         return result;
     }
 

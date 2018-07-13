@@ -193,7 +193,7 @@ public final class QueryBuilder {
      * @see #where(CompositeColumnFilter...)
      */
     public QueryBuilder where(ColumnFilter... predicate) {
-        final CompositeColumnFilter aggregatingFilter = all(asList(predicate));
+        CompositeColumnFilter aggregatingFilter = all(asList(predicate));
         columns = singleton(aggregatingFilter);
         return this;
     }
@@ -307,10 +307,10 @@ public final class QueryBuilder {
      * @return the built {@link Query}
      */
     public Query build() {
-        final FieldMask mask = composeMask();
-        final Set<Any> entityIds = composeIdPredicate();
+        FieldMask mask = composeMask();
+        Set<Any> entityIds = composeIdPredicate();
 
-        final Query result = queryFactory.composeQuery(targetType, entityIds, columns, mask);
+        Query result = queryFactory.composeQuery(targetType, entityIds, columns, mask);
         return result;
     }
 
@@ -319,7 +319,7 @@ public final class QueryBuilder {
         if (fieldMask == null || fieldMask.isEmpty()) {
             return null;
         }
-        final FieldMask mask = FieldMask.newBuilder()
+        FieldMask mask = FieldMask.newBuilder()
                                         .addAllPaths(fieldMask)
                                         .build();
         return mask;
@@ -330,16 +330,16 @@ public final class QueryBuilder {
         if (ids == null || ids.isEmpty()) {
             return null;
         }
-        final Collection<Any> entityIds = transform(ids, new Function<Object, Any>() {
+        Collection<Any> entityIds = transform(ids, new Function<Object, Any>() {
             @Nullable
             @Override
             public Any apply(@Nullable Object o) {
                 checkNotNull(o);
-                final Any id = Identifier.pack(o);
+                Any id = Identifier.pack(o);
                 return id;
             }
         });
-        final Set<Any> result = newHashSet(entityIds);
+        Set<Any> result = newHashSet(entityIds);
         return result;
     }
 
@@ -347,8 +347,8 @@ public final class QueryBuilder {
         // OK for this method as it's used primarily for debugging
     @Override
     public String toString() {
-        final String valueSeparator = "; ";
-        final StringBuilder sb = new StringBuilder();
+        String valueSeparator = "; ";
+        StringBuilder sb = new StringBuilder();
         sb.append(QueryBuilder.class.getSimpleName())
           .append('(')
           .append("SELECT ");

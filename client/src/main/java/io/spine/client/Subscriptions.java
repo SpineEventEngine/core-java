@@ -49,7 +49,7 @@ public final class Subscriptions {
      * @return new subscription identifier.
      */
     public static SubscriptionId generateId() {
-        final String formattedId = format(SUBSCRIPTION_ID_FORMAT, Identifier.newUuid());
+        String formattedId = format(SUBSCRIPTION_ID_FORMAT, Identifier.newUuid());
         return newId(formattedId);
     }
 

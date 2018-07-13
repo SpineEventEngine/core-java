@@ -58,7 +58,7 @@ public final class Targets {
         checkNotNull(entityClass);
         checkNotNull(ids);
 
-        final Target result = composeTarget(entityClass, ids, null);
+        Target result = composeTarget(entityClass, ids, null);
         return result;
     }
 
@@ -71,7 +71,7 @@ public final class Targets {
     public static Target allOf(Class<? extends Message> entityClass) {
         checkNotNull(entityClass);
 
-        final Target result = composeTarget(entityClass, null, null);
+        Target result = composeTarget(entityClass, null, null);
         return result;
     }
 
@@ -79,30 +79,30 @@ public final class Targets {
     static Target composeTarget(Class<? extends Message> entityClass,
                                 @Nullable Set<? extends Message> ids,
                                 @Nullable Set<CompositeColumnFilter> columnFilters) {
-        final boolean includeAll = (ids == null && columnFilters == null);
+        boolean includeAll = (ids == null && columnFilters == null);
 
-        final Set<? extends Message> entityIds = nullToEmpty(ids);
-        final Set<CompositeColumnFilter> entityColumnValues = nullToEmpty(columnFilters);
+        Set<? extends Message> entityIds = nullToEmpty(ids);
+        Set<CompositeColumnFilter> entityColumnValues = nullToEmpty(columnFilters);
 
-        final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
+        EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
 
         if (!includeAll) {
             for (Message rawId : entityIds) {
-                final Any packedId = AnyPacker.pack(rawId);
-                final EntityId entityId = EntityId.newBuilder()
+                Any packedId = AnyPacker.pack(rawId);
+                EntityId entityId = EntityId.newBuilder()
                                                   .setId(packedId)
                                                   .build();
                 idFilterBuilder.addIds(entityId);
             }
         }
-        final EntityIdFilter idFilter = idFilterBuilder.build();
-        final EntityFilters filters = EntityFilters.newBuilder()
+        EntityIdFilter idFilter = idFilterBuilder.build();
+        EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
                                                    .addAllFilter(entityColumnValues)
                                                    .build();
-        final String typeUrl = TypeUrl.of(entityClass)
+        String typeUrl = TypeUrl.of(entityClass)
                                       .value();
-        final Target.Builder builder = Target.newBuilder()
+        Target.Builder builder = Target.newBuilder()
                                              .setType(typeUrl);
         if (includeAll) {
             builder.setIncludeAll(true);

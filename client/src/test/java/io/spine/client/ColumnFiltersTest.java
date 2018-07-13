@@ -121,7 +121,7 @@ class ColumnFiltersTest {
         @Test
         @DisplayName("`equals` for enumerated types")
         void equalsForEnum() {
-            final ColumnFilter filter = eq(ENUM_COLUMN_NAME, ENUM_COLUMN_VALUE);
+            ColumnFilter filter = eq(ENUM_COLUMN_NAME, ENUM_COLUMN_VALUE);
             assertEquals(ENUM_COLUMN_NAME, filter.getColumnName());
             assertEquals(toAny(ENUM_COLUMN_VALUE), filter.getValue());
             assertEquals(EQUAL, filter.getOperator());
@@ -142,7 +142,7 @@ class ColumnFiltersTest {
         @Test
         @DisplayName("`all`")
         void all() {
-            final ColumnFilter[] filters = {
+            ColumnFilter[] filters = {
                     le(COLUMN_NAME, COLUMN_VALUE),
                     ge(COLUMN_NAME, COLUMN_VALUE)
             };
@@ -152,7 +152,7 @@ class ColumnFiltersTest {
         @Test
         @DisplayName("`either`")
         void either() {
-            final ColumnFilter[] filters = {
+            ColumnFilter[] filters = {
                     lt(COLUMN_NAME, COLUMN_VALUE),
                     gt(COLUMN_NAME, COLUMN_VALUE)
             };
@@ -174,22 +174,22 @@ class ColumnFiltersTest {
         @Test
         @DisplayName("for numbers")
         void forNumbers() {
-            final double number = 3.14;
-            final ColumnFilter filter = le("doubleColumn", number);
+            double number = 3.14;
+            ColumnFilter filter = le("doubleColumn", number);
             assertNotNull(filter);
             assertEquals(LESS_OR_EQUAL, filter.getOperator());
-            final DoubleValue value = AnyPacker.unpack(filter.getValue());
+            DoubleValue value = AnyPacker.unpack(filter.getValue());
             assertEquals(number, value.getValue());
         }
 
         @Test
         @DisplayName("for strings")
         void forStrings() {
-            final String theString = "abc";
-            final ColumnFilter filter = gt("stringColumn", theString);
+            String theString = "abc";
+            ColumnFilter filter = gt("stringColumn", theString);
             assertNotNull(filter);
             assertEquals(GREATER_THAN, filter.getOperator());
-            final StringValue value = AnyPacker.unpack(filter.getValue());
+            StringValue value = AnyPacker.unpack(filter.getValue());
             assertEquals(theString, value.getValue());
         }
     }
@@ -208,14 +208,14 @@ class ColumnFiltersTest {
         @Test
         @DisplayName("for non primitive number types")
         void forNonPrimitiveNumbers() {
-            final AtomicInteger number = new AtomicInteger(42);
+            AtomicInteger number = new AtomicInteger(42);
             assertThrows(IllegalArgumentException.class, () -> ge("atomicColumn", number));
         }
 
         @Test
         @DisplayName("for not supported types")
         void forUnsupportedTypes() {
-            final Comparable<?> value = Calendar.getInstance(); // Comparable but not supported
+            Comparable<?> value = Calendar.getInstance(); // Comparable but not supported
             assertThrows(IllegalArgumentException.class, () -> le("invalidColumn", value));
         }
     }

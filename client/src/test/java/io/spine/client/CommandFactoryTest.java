@@ -49,17 +49,17 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
     @Test
     @DisplayName("create command context for given parameters")
     void createCommandContext() {
-        final TenantId tenantId = GivenTenantId.newUuid();
-        final UserId userId = GivenUserId.newUuid();
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(-3);
-        final int targetVersion = 100500;
+        TenantId tenantId = GivenTenantId.newUuid();
+        UserId userId = GivenUserId.newUuid();
+        ZoneOffset zoneOffset = ZoneOffsets.ofHours(-3);
+        int targetVersion = 100500;
 
-        final CommandContext commandContext = CommandFactory.createContext(tenantId,
+        CommandContext commandContext = CommandFactory.createContext(tenantId,
                                                                            userId,
                                                                            zoneOffset,
                                                                            targetVersion);
 
-        final ActorContext actorContext = commandContext.getActorContext();
+        ActorContext actorContext = commandContext.getActorContext();
 
         assertEquals(tenantId, actorContext.getTenantId());
         assertEquals(userId, actorContext.getActor());
@@ -77,10 +77,10 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
             // We are creating a range of +/- second between the call to make sure the timestamp
             // would fit into this range. The purpose of this test is to make sure it works with
             // this precision and to add coverage.
-            final Timestamp beforeCall = TimeTests.Past.secondsAgo(1);
-            final Command command = factory().command()
+            Timestamp beforeCall = TimeTests.Past.secondsAgo(1);
+            Command command = factory().command()
                                              .create(StringValue.getDefaultInstance());
-            final Timestamp afterCall = TimeTests.Future.secondsFromNow(1);
+            Timestamp afterCall = TimeTests.Future.secondsFromNow(1);
 
             assertTrue(Timestamps2.isBetween(
                     command.getContext()
@@ -91,7 +91,7 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("with given entity version")
         void withEntityVersion() {
-            final Command command = factory().command()
+            Command command = factory().command()
                                              .create(StringValue.getDefaultInstance(), 2);
 
             assertEquals(2, command.getContext()
@@ -101,15 +101,15 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("with own tenant ID")
         void withOwnTenantID() {
-            final TenantId tenantId = TenantId.newBuilder()
+            TenantId tenantId = TenantId.newBuilder()
                                               .setValue(getClass().getSimpleName())
                                               .build();
-            final ActorRequestFactory mtFactory = ActorRequestFactory.newBuilder()
+            ActorRequestFactory mtFactory = ActorRequestFactory.newBuilder()
                                                                      .setTenantId(tenantId)
                                                                      .setActor(getActor())
                                                                      .setZoneOffset(getZoneOffset())
                                                                      .build();
-            final Command command = mtFactory.command()
+            Command command = mtFactory.command()
                                              .create(StringValue.getDefaultInstance());
 
             assertEquals(tenantId, command.getContext()
@@ -125,7 +125,7 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("from invalid Message")
         void invalidMessage() {
-            final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
+            RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
             assertThrows(ValidationException.class, () -> factory().command()
                                                                    .create(invalidCommand));
         }
@@ -133,7 +133,7 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("from invalid Message with version")
         void invalidMessageWithVersion() {
-            final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
+            RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
             assertThrows(ValidationException.class, () -> factory().command()
                                                                    .create(invalidCommand, 42));
         }

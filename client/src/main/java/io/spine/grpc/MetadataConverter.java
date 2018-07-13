@@ -60,7 +60,7 @@ public class MetadataConverter {
      */
     public static Metadata toMetadata(Error error) {
         checkNotNull(error);
-        final Metadata metadata = new Metadata();
+        Metadata metadata = new Metadata();
         metadata.put(KEY, error.toByteArray());
         return metadata;
     }
@@ -74,14 +74,14 @@ public class MetadataConverter {
      */
     public static Optional<Error> toError(Metadata metadata) {
         checkNotNull(metadata);
-        final byte[] bytes = metadata.get(KEY);
+        byte[] bytes = metadata.get(KEY);
 
         if (bytes == null) {
             return Optional.absent();
         }
 
         try {
-            final Error error = Error.parseFrom(bytes);
+            Error error = Error.parseFrom(bytes);
             return Optional.of(error);
         } catch (InvalidProtocolBufferException e) {
             throw Exceptions.illegalStateWithCauseOf(e);

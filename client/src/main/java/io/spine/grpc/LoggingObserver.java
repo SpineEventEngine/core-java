@@ -90,14 +90,14 @@ public final class LoggingObserver<V> implements StreamObserver<V> {
     }
 
     private void doLog(String format, @Nullable V v) {
-        final String out;
+        String out;
         if (v != null) {
-            final String value = Stringifiers.toString(v);
+            String value = Stringifiers.toString(v);
             out = format(format, value);
         } else {
             out = format;
         }
-        final Logger logger = log();
+        Logger logger = log();
         switch (level) {
             case TRACE:
                 logger.trace(out);

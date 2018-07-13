@@ -103,7 +103,7 @@ class StreamObserversTest {
     @Test
     @DisplayName("create proper memoizing observer")
     void createMemoizingObserver() {
-        final MemoizingObserver<Object> observer = memoizingObserver();
+        MemoizingObserver<Object> observer = memoizingObserver();
 
         checkFirstResponse(observer);
         checkOnNext(observer);
@@ -188,8 +188,8 @@ class StreamObserversTest {
         @Test
         @DisplayName("from Throwable which is not status exception")
         void fromGenericThrowable() {
-            final String msg = "Neither a StatusException nor a StatusRuntimeException.";
-            final Exception exception = new Exception(msg);
+            String msg = "Neither a StatusException nor a StatusRuntimeException.";
+            Exception exception = new Exception(msg);
 
             assertFalse(fromStreamError(exception).isPresent());
         }

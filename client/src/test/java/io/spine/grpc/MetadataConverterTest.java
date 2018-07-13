@@ -68,8 +68,8 @@ class MetadataConverterTest {
     @Test
     @DisplayName("convert Metadata to Error")
     void convertMetadata() {
-        final Error expectedError = Error.getDefaultInstance();
-        final Metadata metadata = MetadataConverter.toMetadata(expectedError);
+        Error expectedError = Error.getDefaultInstance();
+        Metadata metadata = MetadataConverter.toMetadata(expectedError);
 
         Optional<Error> optional = MetadataConverter.toError(metadata);
         assertTrue(optional.isPresent());

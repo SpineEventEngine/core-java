@@ -105,7 +105,7 @@ abstract class ActorRequestFactoryTest {
     @Test
     @DisplayName("return values set in Builder")
     void returnValuesSetInBuilder() {
-        final ActorRequestFactory.Builder builder = builder()
+        ActorRequestFactory.Builder builder = builder()
                 .setActor(actor)
                 .setZoneOffset(zoneOffset);
         assertNotNull(builder.getActor());
@@ -127,9 +127,9 @@ abstract class ActorRequestFactoryTest {
         @Test
         @DisplayName("given user")
         void givenUser() {
-            final int currentOffset = ZoneOffsets.getDefault()
+            int currentOffset = ZoneOffsets.getDefault()
                                                  .getAmountSeconds();
-            final ActorRequestFactory aFactory = builder()
+            ActorRequestFactory aFactory = builder()
                     .setActor(actor)
                     .build();
 
@@ -149,13 +149,13 @@ abstract class ActorRequestFactoryTest {
     @Test
     @DisplayName("support moving between timezones")
     void moveBetweenTimezones() {
-        final ActorRequestFactory factoryInAnotherTimezone =
+        ActorRequestFactory factoryInAnotherTimezone =
                 factory().switchTimezone(ZoneOffsets.ofHours(-8));
         assertNotEquals(factory().getZoneOffset(), factoryInAnotherTimezone.getZoneOffset());
     }
 
     void verifyContext(ActorContext actualContext) {
-        final ActorContext expectedContext = actorContext();
+        ActorContext expectedContext = actorContext();
 
         assertEquals(expectedContext.getTenantId(), actualContext.getTenantId());
         assertEquals(expectedContext.getActor(), actualContext.getActor());

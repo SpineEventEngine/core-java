@@ -97,7 +97,7 @@ public class StreamObservers {
      * @return delegating observer, which only proxies errors.
      */
     @Internal
-    public static <T> StreamObserver<T> forwardErrorsOnly(final StreamObserver<?> delegate) {
+    public static <T> StreamObserver<T> forwardErrorsOnly(StreamObserver<?> delegate) {
         return new StreamObserver<T>() {
             @Override
             public void onError(Throwable t) {
@@ -150,11 +150,11 @@ public class StreamObservers {
         checkNotNull(throwable);
 
         if (throwable instanceof StatusRuntimeException) {
-            final Metadata metadata = ((StatusRuntimeException) throwable).getTrailers();
+            Metadata metadata = ((StatusRuntimeException) throwable).getTrailers();
             return MetadataConverter.toError(metadata);
         }
         if (throwable instanceof StatusException) {
-            final Metadata metadata = ((StatusException) throwable).getTrailers();
+            Metadata metadata = ((StatusException) throwable).getTrailers();
             return MetadataConverter.toError(metadata);
         }
 
