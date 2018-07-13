@@ -21,7 +21,6 @@ package io.spine.server.entity;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -32,6 +31,8 @@ import io.spine.core.TenantId;
 import io.spine.core.Version;
 import io.spine.string.Stringifiers;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Optional;
 
 import static io.spine.util.Exceptions.unsupported;
 
@@ -155,7 +156,7 @@ public final class EntityStateEnvelope<I, S extends Message>
     }
 
     public Optional<Version> getEntityVersion() {
-        return Optional.fromNullable(entityVersion);
+        return Optional.ofNullable(entityVersion);
     }
 
     public TenantId getTenantId() {

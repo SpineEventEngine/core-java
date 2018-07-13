@@ -19,7 +19,6 @@
  */
 package io.spine.server;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.protobuf.Message;
@@ -54,6 +53,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -396,7 +396,7 @@ public final class BoundedContext
         }
 
         public Optional<Supplier<StorageFactory>> getStorageFactorySupplier() {
-            return Optional.fromNullable(storageFactorySupplier);
+            return Optional.ofNullable(storageFactorySupplier);
         }
 
         public Builder setCommandBus(CommandBus.Builder commandBus) {
@@ -405,11 +405,11 @@ public final class BoundedContext
         }
 
         public Optional<CommandBus.Builder> getCommandBus() {
-            return Optional.fromNullable(commandBus);
+            return Optional.ofNullable(commandBus);
         }
 
         public Optional<? extends TenantIndex> getTenantIndex() {
-            return Optional.fromNullable(tenantIndex);
+            return Optional.ofNullable(tenantIndex);
         }
 
         public Builder setEventBus(EventBus.Builder eventBus) {
@@ -418,7 +418,7 @@ public final class BoundedContext
         }
 
         public Optional<EventBus.Builder> getEventBus() {
-            return Optional.fromNullable(eventBus);
+            return Optional.ofNullable(eventBus);
         }
 
         public Builder setStand(Stand.Builder stand) {
@@ -427,7 +427,7 @@ public final class BoundedContext
         }
 
         public Optional<Stand.Builder> getStand() {
-            return Optional.fromNullable(stand);
+            return Optional.ofNullable(stand);
         }
 
         public Builder setIntegrationBus(IntegrationBus.Builder integrationBus) {
@@ -436,7 +436,7 @@ public final class BoundedContext
         }
 
         public Optional<IntegrationBus.Builder> getIntegrationBus() {
-            return Optional.fromNullable(integrationBus);
+            return Optional.ofNullable(integrationBus);
         }
 
         public Builder setTenantIndex(TenantIndex tenantIndex) {

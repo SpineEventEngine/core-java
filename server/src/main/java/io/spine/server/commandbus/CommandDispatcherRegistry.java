@@ -21,13 +21,13 @@
 package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
 import io.spine.core.CommandClass;
 import io.spine.server.bus.DispatcherRegistry;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -83,7 +83,7 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
     Optional<? extends CommandDispatcher<?>> getDispatcher(CommandClass commandClass) {
         Set<CommandDispatcher<?>> dispatchers = getDispatchers(commandClass);
         if (dispatchers.isEmpty()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         // Since there can be only one dispatcher per command the returned set

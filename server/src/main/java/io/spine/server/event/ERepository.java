@@ -22,7 +22,6 @@ package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
@@ -37,6 +36,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -188,14 +188,14 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
      *
      * @param builder the builder of the filter
      * @return {@code Optional} of the {@code CompositeColumnFilter}, if there are column filters
-     * in the builder; {@code Optional.absent()} otherwise
+     * in the builder; {@code Optional.empty()} otherwise
      */
     private static Optional<CompositeColumnFilter> buildFilter(
             CompositeColumnFilter.Builder builder) {
         boolean filterIsEmpty = builder.getFilterList()
                                              .isEmpty();
         return filterIsEmpty
-               ? Optional.<CompositeColumnFilter>absent()
+               ? Optional.empty()
                : Optional.of(builder.build());
     }
 

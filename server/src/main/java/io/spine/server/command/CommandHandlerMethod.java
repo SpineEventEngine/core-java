@@ -20,7 +20,6 @@
 
 package io.spine.server.command;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -40,6 +39,7 @@ import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Throwables.getRootCause;
 
@@ -139,7 +139,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
         } else if (target instanceof CommandHandler) {
             producerId = Identifier.pack(((CommandHandler) target).getId());
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
         return Optional.of(producerId);
     }

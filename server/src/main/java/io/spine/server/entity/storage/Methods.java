@@ -20,7 +20,6 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 
 import java.io.Serializable;
@@ -29,6 +28,7 @@ import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -72,7 +72,7 @@ class Methods {
                                          .name()
                                          .trim();
         return trimmedName.isEmpty()
-               ? Optional.absent()
+               ? Optional.empty()
                : Optional.of(trimmedName);
     }
 
@@ -154,7 +154,7 @@ class Methods {
                            "Found the annotated versions: %s.", annotatedVersions);
 
         if (annotatedVersions.isEmpty()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         Method annotatedVersion = annotatedVersions.iterator()
@@ -188,7 +188,7 @@ class Methods {
                                                        method.getParameterTypes());
             return Optional.of(methodFromTarget);
         } catch (NoSuchMethodException ignored) {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 }

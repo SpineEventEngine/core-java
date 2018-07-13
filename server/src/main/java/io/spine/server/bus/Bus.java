@@ -21,7 +21,6 @@
 package io.spine.server.bus;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
@@ -32,6 +31,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Deque;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -253,7 +253,7 @@ public abstract class Bus<T extends Message,
      * @param messages the message to filter
      * @param observer the observer to receive the negative outcome of the operation
      * @return the message itself if it passes the filtering or
-     * {@link Optional#absent() Optional.absent()} otherwise
+     * {@link Optional#empty() Optional.empty()} otherwise
      */
     private Iterable<T> filter(Iterable<T> messages, StreamObserver<Ack> observer) {
         checkNotNull(messages);
@@ -277,11 +277,11 @@ public abstract class Bus<T extends Message,
      * the returned {@link Optional} contains a value with either status.
      *
      * <p>If the message should be passed to the dispatchers, the result of this method is
-     * {@link Optional#absent() Optional.absent()}.
+     * {@link Optional#empty() Optional.empty()}.
      *
      * @param message the {@linkplain MessageEnvelope message envelope} to pre-process
      * @return the result of message processing by this bus if any, or
-     * {@link Optional#absent() Optional.absent()} otherwise
+     * {@link Optional#empty() Optional.empty()} otherwise
      */
     private Optional<Ack> filter(E message) {
         Optional<Ack> filterOutput = filterChain().accept(message);

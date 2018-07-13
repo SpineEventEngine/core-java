@@ -22,7 +22,6 @@ package io.spine.server.commandstore;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
@@ -36,6 +35,7 @@ import io.spine.server.entity.DefaultRecordBasedRepository;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 import static com.google.common.collect.Iterators.transform;
 import static io.spine.core.CommandStatus.RECEIVED;

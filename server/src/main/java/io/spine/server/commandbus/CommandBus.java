@@ -20,7 +20,6 @@
 package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
@@ -40,6 +39,7 @@ import io.spine.server.rejection.RejectionBus;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Deque;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -364,11 +364,11 @@ public class CommandBus extends Bus<Command,
         }
 
         public Optional<CommandScheduler> getCommandScheduler() {
-            return Optional.fromNullable(commandScheduler);
+            return Optional.ofNullable(commandScheduler);
         }
 
         public Optional<RejectionBus> getRejectionBus() {
-            return Optional.fromNullable(rejectionBus);
+            return Optional.ofNullable(rejectionBus);
         }
 
         @CanIgnoreReturnValue

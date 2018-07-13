@@ -20,7 +20,6 @@
 
 package io.spine.server.storage;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -47,6 +46,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -94,7 +94,7 @@ public abstract class RecordStorage<I>
      * Reads a record, which matches the specified {@linkplain RecordReadRequest request}.
      *
      * @param  request the request to read the record
-     * @return a record instance or {@code Optional.absent()} if there is no record with this ID
+     * @return a record instance or {@code Optional.empty()} if there is no record with this ID
      */
     @Override
     public Optional<EntityRecord> read(RecordReadRequest<I> request) {
@@ -120,7 +120,7 @@ public abstract class RecordStorage<I>
         Optional<EntityRecord> rawResult = read(request);
 
         if (!rawResult.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         EntityRecord.Builder builder = EntityRecord.newBuilder(rawResult.get());
@@ -183,11 +183,7 @@ public abstract class RecordStorage<I>
     public Optional<LifecycleFlags> readLifecycleFlags(I id) {
         RecordReadRequest<I> request = new RecordReadRequest<>(id);
         Optional<EntityRecord> optional = read(request);
-        if (optional.isPresent()) {
-            return Optional.of(optional.get()
-                                       .getLifecycleFlags());
-        }
-        return Optional.absent();
+        return optional.map(EntityRecord::getLifecycleFlags);
     }
 
     @Override

@@ -20,7 +20,6 @@
 
 package io.spine.server.bus;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
@@ -28,6 +27,8 @@ import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.MessageInvalid;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.bus.Buses.reject;
@@ -58,7 +59,7 @@ final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Messa
             Ack result = reject(packedId, error);
             return Optional.of(result);
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 }

@@ -19,7 +19,6 @@
  */
 package io.spine.server.aggregate;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import io.spine.annotation.SPI;
@@ -60,6 +59,7 @@ import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -484,7 +484,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * {@linkplain #play restored} from its state history.
      *
      * @param id the ID of the aggregate
-     * @return the loaded instance or {@code Optional.absent()} if there is no {@code Aggregate}
+     * @return the loaded instance or {@code Optional.empty()} if there is no {@code Aggregate}
      *         with the ID
      */
     private Optional<A> load(I id) {
@@ -493,7 +493,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             A result = play(id, eventsFromStorage.get());
             return Optional.of(result);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -552,7 +552,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * it is loaded and returned.
      *
      * @param  id the ID of the aggregate to load
-     * @return the loaded object or {@link Optional#absent()} if there are no events for the aggregate
+     * @return the loaded object or {@link Optional#empty()} if there are no events for the aggregate
      * @throws IllegalStateException
      *         if the storage of the repository is not {@linkplain #initStorage(StorageFactory)
      *         initialized} prior to this call

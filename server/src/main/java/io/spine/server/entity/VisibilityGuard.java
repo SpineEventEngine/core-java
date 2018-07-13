@@ -21,7 +21,6 @@
 package io.spine.server.entity;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
@@ -33,6 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -98,7 +98,7 @@ public final class VisibilityGuard {
      * Obtains the repository for the passed entity state class.
      *
      * @param stateClass the class of the state of entities managed by the repository
-     * @return the repository wrapped into {@code Optional} or {@code Optional#absent()} if the
+     * @return the repository wrapped into {@code Optional} or {@code Optional#empty()} if the
      * entity state is {@linkplain Visibility#NONE not visible}
      * @throws IllegalArgumentException if the repository for the passed state class was not
      *                                  {@linkplain #register(Repository) registered} with the guard
@@ -180,8 +180,8 @@ public final class VisibilityGuard {
 
         private Optional<Repository> get() {
             return (visibility == Visibility.NONE)
-                    ? Optional.<Repository>absent()
-                    : Optional.of(repository);
+                   ? Optional.empty()
+                   : Optional.of(repository);
         }
     }
 }

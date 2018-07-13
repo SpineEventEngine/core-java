@@ -20,7 +20,7 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 import com.google.protobuf.Message;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.Repository;

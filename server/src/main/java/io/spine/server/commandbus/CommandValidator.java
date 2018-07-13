@@ -21,7 +21,6 @@
 package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
@@ -35,9 +34,10 @@ import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
 
 import java.util.List;
+import java.util.Optional;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.of;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static io.spine.base.Identifier.EMPTY_ID;
 import static io.spine.server.commandbus.InvalidCommandException.onConstraintViolations;
 import static io.spine.server.commandbus.InvalidCommandException.onInapplicableTenantId;
@@ -93,7 +93,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
                 return of(report);
             }
         }
-        return absent();
+        return empty();
     }
 
     private Optional<MessageInvalid> isCommandValid(CommandEnvelope envelope) {
@@ -105,7 +105,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
             commandBus.commandStore().storeWithError(command, exception);
 
         }
-        return Optional.<MessageInvalid>fromNullable(exception);
+        return Optional.ofNullable(exception);
     }
 
     /**

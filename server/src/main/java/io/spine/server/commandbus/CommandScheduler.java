@@ -20,7 +20,6 @@
 
 package io.spine.server.commandbus;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Ack;
@@ -31,10 +30,11 @@ import io.spine.core.CommandId;
 import io.spine.server.bus.BusFilter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.of;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
@@ -84,7 +84,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
             scheduleAndStore(envelope);
             return of(acknowledge(envelope.getId()));
         }
-        return absent();
+        return empty();
     }
 
     private void scheduleAndStore(CommandEnvelope commandEnvelope) {

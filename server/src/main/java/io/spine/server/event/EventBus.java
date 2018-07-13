@@ -20,7 +20,6 @@
 package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
@@ -43,6 +42,7 @@ import io.spine.validate.MessageValidator;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Deque;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -326,7 +326,7 @@ public class EventBus
         }
 
         public Optional<StorageFactory> getStorageFactory() {
-            return Optional.fromNullable(storageFactory);
+            return Optional.ofNullable(storageFactory);
         }
 
         /**
@@ -350,7 +350,7 @@ public class EventBus
         }
 
         public Optional<EventStore> getEventStore() {
-            return Optional.fromNullable(eventStore);
+            return Optional.ofNullable(eventStore);
         }
 
         /**
@@ -373,7 +373,7 @@ public class EventBus
         }
 
         public Optional<Executor> getEventStoreStreamExecutor() {
-            return Optional.fromNullable(eventStoreStreamExecutor);
+            return Optional.ofNullable(eventStoreStreamExecutor);
         }
 
         @CanIgnoreReturnValue
@@ -383,7 +383,7 @@ public class EventBus
         }
 
         public Optional<MessageValidator> getEventValidator() {
-            return Optional.fromNullable(eventValidator);
+            return Optional.ofNullable(eventValidator);
         }
 
         /**
@@ -402,7 +402,7 @@ public class EventBus
         }
 
         public Optional<EventEnricher> getEnricher() {
-            return Optional.fromNullable(enricher);
+            return Optional.ofNullable(enricher);
         }
 
         /**
