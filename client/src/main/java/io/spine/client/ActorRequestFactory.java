@@ -123,16 +123,17 @@ public class ActorRequestFactory {
     }
 
     /**
-     * Creates new factory with the same user and tenant ID, but with new time zone ID and offset.
+     * Creates a copy of this factory placed at new time zone with the passed offset and ID.
      *
-     * <p>The purpose of this method is to provide a new instance of the request factory
-     * which corresponds to new location of the actor.
+     * <p>Use this method for obtaining new request factory as the user moves to a new location.
      *
      * @param zoneOffset the offset of the new time zone
      * @param zoneId     the ID of the new time zone
      * @return new factory at the new time zone
      */
-    public ActorRequestFactory switchTimezone(ZoneOffset zoneOffset, ZoneId zoneId) {
+    public ActorRequestFactory switchTimeZone(ZoneOffset zoneOffset, ZoneId zoneId) {
+        checkNotNull(zoneOffset);
+        checkNotNull(zoneId);
         ActorRequestFactory result =
                 newBuilder().setActor(getActor())
                             .setZoneOffset(zoneOffset)
@@ -140,6 +141,22 @@ public class ActorRequestFactory {
                             .setTenantId(getTenantId())
                             .build();
         return result;
+    }
+
+    /**
+     * Creates a copy of this factory placed at new time zone with the passed ID.
+     *
+     * <p>The zone offset is calculated using the current time.
+     *
+     * @param zoneId the ID of the new time zone
+     * @return new factory at the new time zone
+     */
+    public ActorRequestFactory switchTimeZone(ZoneId zoneId) {
+        checkNotNull(zoneId);
+        java.time.ZoneId id = java.time.ZoneId.of(zoneId.getValue());
+        java.time.ZoneOffset offset = java.time.OffsetTime.now(id)
+                                                          .getOffset();
+        return switchTimeZone(ZoneOffsets.of(offset), zoneId);
     }
 
     /**

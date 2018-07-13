@@ -53,6 +53,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author Alex Tymchenko
  */
+@SuppressWarnings("unused") /* We're suppressing this warning since IDEA does not recognize
+    nested JUnit classes in an abstract test base class. They are used via reflection by JUnit. */
 @DisplayName("Actor request factory should")
 abstract class ActorRequestFactoryTest {
 
@@ -136,7 +138,6 @@ abstract class ActorRequestFactoryTest {
         assertNull(factory().getTenantId());
     }
 
-    @SuppressWarnings("unused") // Used via reflection by JUnit.
     @Nested
     @DisplayName("when created, store")
     class Store {
@@ -165,17 +166,42 @@ abstract class ActorRequestFactoryTest {
         }
     }
 
-    @Test
-    @DisplayName("support moving between timezones")
-    void moveBetweenTimezones() {
-        java.time.ZoneId id = java.time.ZoneId.of("Australia/Darwin");
-        java.time.ZoneOffset offset = java.time.OffsetTime.now(id)
-                                                          .getOffset();
 
-        ActorRequestFactory factoryInAnotherTimezone =
-                factory().switchTimezone(ZoneOffsets.of(offset),
-                                         ZoneIds.of(id));
-        assertNotEquals(factory().getZoneOffset(), factoryInAnotherTimezone.getZoneOffset());
+    @Nested
+    @DisplayName("Support moving between timezones")
+    class TimeZoneMove {
+
+        @Test
+        @DisplayName("by ZoneOffset and ZoneId")
+        void byOffsetAndId() {
+            java.time.ZoneId id = java.time.ZoneId.of("Australia/Darwin");
+            java.time.ZoneOffset offset = java.time.OffsetTime.now(id)
+                                                              .getOffset();
+
+            ZoneOffset zoneOffset = ZoneOffsets.of(offset);
+            ZoneId zoneId = ZoneIds.of(id);
+
+            ActorRequestFactory movedFactory = factory().switchTimeZone(zoneOffset, zoneId);
+
+            assertNotEquals(factory().getZoneOffset(), movedFactory.getZoneOffset());
+            assertEquals(zoneOffset, movedFactory.getZoneOffset());
+
+            assertNotEquals(factory().getZoneId(), movedFactory.getZoneId());
+            assertEquals(zoneId, movedFactory.getZoneId());
+        }
+
+        @Test
+        @DisplayName("by ZoneId")
+        void byZoneId() {
+            java.time.ZoneId id = java.time.ZoneId.of("Asia/Ho_Chi_Minh");
+
+            ZoneId zoneId = ZoneIds.of(id);
+            ActorRequestFactory movedFactory = factory().switchTimeZone(zoneId);
+
+            assertNotEquals(factory().getZoneOffset(), movedFactory.getZoneOffset());
+            assertNotEquals(factory().getZoneId(), movedFactory.getZoneId());
+            assertEquals(zoneId, movedFactory.getZoneId());
+        }
     }
 
     void verifyContext(ActorContext actual) {
