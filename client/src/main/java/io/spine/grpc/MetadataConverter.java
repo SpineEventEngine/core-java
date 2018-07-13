@@ -21,13 +21,14 @@
 package io.spine.grpc;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Metadata;
 import io.grpc.Metadata.Key;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.util.Exceptions;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.grpc.Metadata.BINARY_BYTE_MARSHALLER;
@@ -77,7 +78,7 @@ public class MetadataConverter {
         byte[] bytes = metadata.get(KEY);
 
         if (bytes == null) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         try {

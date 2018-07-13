@@ -19,7 +19,6 @@
  */
 package io.spine.grpc;
 
-import com.google.common.base.Optional;
 import io.grpc.Metadata;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
@@ -28,6 +27,8 @@ import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.core.Response;
 import io.spine.core.Responses;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Responses.ok;
@@ -158,6 +159,6 @@ public class StreamObservers {
             return MetadataConverter.toError(metadata);
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 }

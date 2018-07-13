@@ -20,13 +20,14 @@
 
 package io.spine.grpc;
 
-import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Metadata;
 import io.spine.base.Error;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
