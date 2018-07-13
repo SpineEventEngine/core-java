@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -45,6 +44,7 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectVBuilder;
 import io.spine.test.projection.command.PrjCreateProject;
 import io.spine.test.projection.event.PrjProjectCreated;
+import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.validate.StringValueVBuilder;
 
 import java.util.Collections;

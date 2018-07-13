@@ -26,8 +26,11 @@ import com.google.protobuf.Message;
 import io.spine.core.ActorContext;
 import io.spine.core.UserId;
 import io.spine.test.client.TestEntity;
+import io.spine.time.ZoneId;
+import io.spine.time.ZoneIds;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -41,7 +44,6 @@ import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.time.Timestamps2.isLaterThan;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -51,32 +53,43 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author Alex Tymchenko
  */
+@SuppressWarnings("unused") /* We're suppressing this warning since IDEA does not recognize
+    nested JUnit classes in an abstract test base class. They are used via reflection by JUnit. */
 @DisplayName("Actor request factory should")
 abstract class ActorRequestFactoryTest {
 
     private final UserId actor = of(newUuid());
-    private final ZoneOffset zoneOffset = ZoneOffsets.UTC;
+    private final ZoneOffset zoneOffset = ZoneOffsets.getDefault();
+    private final ZoneId zoneId = ZoneIds.systemDefault();
+
+    private ActorRequestFactory factory;
 
     protected ActorRequestFactory.Builder builder() {
         return ActorRequestFactory.newBuilder();
     }
 
-    protected UserId getActor() {
+    protected UserId actor() {
         return actor;
     }
 
-    protected ZoneOffset getZoneOffset() {
+    ZoneOffset zoneOffset() {
         return zoneOffset;
     }
 
     protected ActorRequestFactory factory() {
-        return builder().setZoneOffset(zoneOffset)
-                        .setActor(actor)
-                        .build();
+        return factory;
     }
 
-    ActorContext actorContext() {
+    private ActorContext actorContext() {
         return factory().actorContext();
+    }
+
+    @BeforeEach
+    void createFactory() {
+        factory = builder().setZoneOffset(zoneOffset)
+                           .setZoneId(zoneId)
+                           .setActor(actor)
+                           .build();
     }
 
     @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
@@ -92,25 +105,31 @@ abstract class ActorRequestFactoryTest {
                 .setDefault((new TypeToken<Set<? extends Message>>() {
                             }).getRawType(),
                             newHashSet(Any.getDefaultInstance()))
+                .setDefault(ZoneId.class, ZoneIds.systemDefault())
+                .setDefault(ZoneOffset.class, ZoneOffsets.getDefault())
                 .testInstanceMethods(factory(), NullPointerTester.Visibility.PUBLIC);
     }
 
     @Test
     @DisplayName("require actor in Builder")
     void requireActorInBuilder() {
-        assertThrows(NullPointerException.class, () -> builder().setZoneOffset(zoneOffset)
-                                                                .build());
+        assertThrows(NullPointerException.class,
+                     () -> builder().setZoneOffset(zoneOffset)
+                                    .build()
+        );
     }
 
     @Test
     @DisplayName("return values set in Builder")
     void returnValuesSetInBuilder() {
-        final ActorRequestFactory.Builder builder = builder()
+        ActorRequestFactory.Builder builder = builder()
                 .setActor(actor)
-                .setZoneOffset(zoneOffset);
-        assertNotNull(builder.getActor());
-        assertNotNull(builder.getZoneOffset());
-        assertNull(builder.getTenantId());
+                .setZoneOffset(zoneOffset)
+                .setZoneId(zoneId);
+
+        assertEquals(actor, builder.getActor());
+        assertEquals(zoneOffset, builder.getZoneOffset());
+        assertEquals(zoneId, builder.getZoneId());
     }
 
     @Test
@@ -119,7 +138,6 @@ abstract class ActorRequestFactoryTest {
         assertNull(factory().getTenantId());
     }
 
-    @SuppressWarnings("unused") // Used via reflection by JUnit.
     @Nested
     @DisplayName("when created, store")
     class Store {
@@ -127,9 +145,9 @@ abstract class ActorRequestFactoryTest {
         @Test
         @DisplayName("given user")
         void givenUser() {
-            final int currentOffset = ZoneOffsets.getDefault()
-                                                 .getAmountSeconds();
-            final ActorRequestFactory aFactory = builder()
+            int currentOffset = ZoneOffsets.getDefault()
+                                           .getAmountSeconds();
+            ActorRequestFactory aFactory = builder()
                     .setActor(actor)
                     .build();
 
@@ -141,33 +159,66 @@ abstract class ActorRequestFactoryTest {
         @Test
         @DisplayName("given user and timezone")
         void givenUserAndTimezone() {
-            assertEquals(actor, factory().getActor());
-            assertEquals(zoneOffset, factory().getZoneOffset());
+            ActorRequestFactory factory = factory();
+            assertEquals(actor, factory.getActor());
+            assertEquals(zoneOffset, factory.getZoneOffset());
+            assertEquals(zoneId, factory.getZoneId());
         }
     }
 
-    @Test
-    @DisplayName("support moving between timezones")
-    void moveBetweenTimezones() {
-        final ActorRequestFactory factoryInAnotherTimezone =
-                factory().switchTimezone(ZoneOffsets.ofHours(-8));
-        assertNotEquals(factory().getZoneOffset(), factoryInAnotherTimezone.getZoneOffset());
+
+    @Nested
+    @DisplayName("Support moving between timezones")
+    class TimeZoneMove {
+
+        @Test
+        @DisplayName("by ZoneOffset and ZoneId")
+        void byOffsetAndId() {
+            java.time.ZoneId id = java.time.ZoneId.of("Australia/Darwin");
+            java.time.ZoneOffset offset = java.time.OffsetTime.now(id)
+                                                              .getOffset();
+
+            ZoneOffset zoneOffset = ZoneOffsets.of(offset);
+            ZoneId zoneId = ZoneIds.of(id);
+
+            ActorRequestFactory movedFactory = factory().switchTimeZone(zoneOffset, zoneId);
+
+            assertNotEquals(factory().getZoneOffset(), movedFactory.getZoneOffset());
+            assertEquals(zoneOffset, movedFactory.getZoneOffset());
+
+            assertNotEquals(factory().getZoneId(), movedFactory.getZoneId());
+            assertEquals(zoneId, movedFactory.getZoneId());
+        }
+
+        @Test
+        @DisplayName("by ZoneId")
+        void byZoneId() {
+            java.time.ZoneId id = java.time.ZoneId.of("Asia/Ho_Chi_Minh");
+
+            ZoneId zoneId = ZoneIds.of(id);
+            ActorRequestFactory movedFactory = factory().switchTimeZone(zoneId);
+
+            assertNotEquals(factory().getZoneOffset(), movedFactory.getZoneOffset());
+            assertNotEquals(factory().getZoneId(), movedFactory.getZoneId());
+            assertEquals(zoneId, movedFactory.getZoneId());
+        }
     }
 
-    void verifyContext(ActorContext actualContext) {
-        final ActorContext expectedContext = actorContext();
+    void verifyContext(ActorContext actual) {
+        ActorContext expected = actorContext();
 
-        assertEquals(expectedContext.getTenantId(), actualContext.getTenantId());
-        assertEquals(expectedContext.getActor(), actualContext.getActor());
-        assertEquals(expectedContext.getLanguage(), actualContext.getLanguage());
-        assertEquals(expectedContext.getZoneOffset(), actualContext.getZoneOffset());
+        assertEquals(expected.getTenantId(), actual.getTenantId());
+        assertEquals(expected.getActor(), actual.getActor());
+        assertEquals(expected.getLanguage(), actual.getLanguage());
+        assertEquals(expected.getZoneOffset(), actual.getZoneOffset());
+        assertEquals(expected.getZoneId(), actual.getZoneId());
 
         // It's impossible to get the same creation time for the `expected` value,
         //    so checking that the `actual` value is not later than `expected`.
-        assertTrue(actualContext.getTimestamp()
-                                .equals(expectedContext.getTimestamp())
+        assertTrue(actual.getTimestamp()
+                         .equals(expected.getTimestamp())
                            ||
-                           isLaterThan(expectedContext.getTimestamp(),
-                                       actualContext.getTimestamp()));
+                           isLaterThan(expected.getTimestamp(),
+                                       actual.getTimestamp()));
     }
 }

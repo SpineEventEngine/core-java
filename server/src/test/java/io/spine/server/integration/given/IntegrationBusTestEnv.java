@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -55,6 +54,7 @@ import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
 import io.spine.test.integration.rejection.IntegrationRejections.ItgCannotStartArchivedProject;
 import io.spine.test.integration.rejection.IntegrationRejections.ItgProjectAlreadyExists;
+import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.validate.Int32ValueVBuilder;
 import io.spine.validate.StringValueVBuilder;
 

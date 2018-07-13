@@ -21,7 +21,6 @@
 package io.spine.server.procman.given;
 
 import com.google.protobuf.Message;
-import com.google.protobuf.util.Timestamps;
 import io.spine.core.CommandContext;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.Repository;

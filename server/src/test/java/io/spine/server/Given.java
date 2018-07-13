@@ -26,7 +26,6 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Query;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
@@ -58,6 +57,7 @@ import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.test.commandservice.customer.CustomerVBuilder;
 import io.spine.test.commandservice.customer.command.CreateCustomer;
 import io.spine.test.commandservice.customer.event.CustomerCreated;
+import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.time.LocalDate;
 import io.spine.time.LocalDates;
 
@@ -208,7 +208,7 @@ public class Given {
         static Query readAllProjects() {
             // DO NOT replace the type name with another Project class.
             Query result = requestFactory.query()
-                                               .all(io.spine.test.projection.Project.class);
+                                         .all(io.spine.test.projection.Project.class);
             return result;
         }
     }

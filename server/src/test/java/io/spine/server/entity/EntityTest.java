@@ -32,7 +32,7 @@ import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdString;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.entity.rejection.CannotModifyDeletedEntity;
 import io.spine.test.Tests;
-import io.spine.test.TimeTests;
+import io.spine.time.testing.TimeTests;
 import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
 import org.junit.jupiter.api.BeforeEach;

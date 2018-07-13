@@ -18,29 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.expected;
-
-import com.google.protobuf.Message;
-
-import java.util.List;
-
 /**
- * Assertions for an event applier or reactor invocation results.
- *
- * @author Dmytro Dashenkov
+ * This package provides utilities for testing client-side code.
  */
-public class EventHandlerExpected<S extends Message>
-        extends MessageProducingExpected<S, EventHandlerExpected<S>> {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testing.client;
 
-    public EventHandlerExpected(List<? extends Message> events,
-                                S initialState,
-                                S state,
-                                List<Message> interceptedCommands) {
-        super(events, initialState, state, interceptedCommands);
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    @Override
-    protected EventHandlerExpected<S> self() {
-        return this;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;
