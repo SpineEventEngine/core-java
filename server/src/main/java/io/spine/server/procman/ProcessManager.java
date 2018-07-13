@@ -115,8 +115,8 @@ public abstract class ProcessManager<I,
      * <p>In {@code ProcessManager}, this method must be called from an event reactor, a rejection
      * reactor, or a command handler.
      *
-     * @throws IllegalStateException
-     *         if the method is called from outside an event/rejection reactor or a command handler
+     * @throws IllegalStateException if the method is called from outside an event/rejection reactor
+     *         or a command handler
      */
     @Override
     @VisibleForTesting
@@ -128,25 +128,23 @@ public abstract class ProcessManager<I,
      * Dispatches the command to the handler method and transforms the output
      * into a list of events.
      *
-     * @param  cmd the envelope with the command to dispatch
+     * @param cmd the envelope with the command to dispatch
      * @return the list of events generated as the result of handling the command
      */
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope cmd) {
-        final CommandHandlerMethod method = thisClass().getHandler(cmd.getMessageClass());
-        final List<? extends Message> messages =
+        CommandHandlerMethod method = thisClass().getHandler(cmd.getMessageClass());
+        List<? extends Message> messages =
                 method.invoke(this, cmd.getMessage(), cmd.getCommandContext());
-        final List<Event> result = toEvents(messages, cmd);
+        List<Event> result = toEvents(messages, cmd);
         return result;
     }
 
     /**
      * Transforms the passed list of event messages into the list of events.
      *
-     * @param  eventMessages
-     *         event messages for which generate events
-     * @param  origin
-     *         the envelope with the origin of events
+     * @param eventMessages event messages for which generate events
+     * @param origin        the envelope with the origin of events
      * @return list of events
      */
     private List<Event> toEvents(List<? extends Message> eventMessages, MessageEnvelope origin) {
@@ -156,32 +154,32 @@ public abstract class ProcessManager<I,
     /**
      * Dispatches an event to the event reactor method of the process manager.
      *
-     * @param  event the envelope with the event
+     * @param event the envelope with the event
      * @return a list of produced events or an empty list if the process manager does not
-     *         produce new events because of the passed event
+     * produce new events because of the passed event
      */
-    List<Event> dispatchEvent(EventEnvelope event)  {
-        final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
-        final List<? extends Message> eventMessages =
+    List<Event> dispatchEvent(EventEnvelope event) {
+        EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
+        List<? extends Message> eventMessages =
                 method.invoke(this, event.getMessage(), event.getEventContext());
-        final List<Event> events = toEvents(eventMessages, event);
+        List<Event> events = toEvents(eventMessages, event);
         return events;
     }
 
     /**
      * Dispatches a rejection to the reacting method of the process manager.
      *
-     * @param  rejection the envelope with the rejection
+     * @param rejection the envelope with the rejection
      * @return a list of produced events or an empty list if the process manager does not
-     *         produce new events because of the passed event
+     * produce new events because of the passed event
      */
     List<Event> dispatchRejection(RejectionEnvelope rejection) {
-        final CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
-        final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
-                                                                     commandClass);
-        final List<? extends Message> eventMessages =
-        method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
-        final List<Event> events = toEvents(eventMessages, rejection);
+        CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
+        RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
+                                                               commandClass);
+        List<? extends Message> eventMessages =
+                method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
+        List<Event> events = toEvents(eventMessages, rejection);
         return events;
     }
 
@@ -208,15 +206,15 @@ public abstract class ProcessManager<I,
      * That is, the {@code actor} and {@code zoneOffset} fields of created {@code CommandContext}
      * instances will be the same as in the incoming command.
      *
-     * @param  commandMessage the source command message
-     * @param  commandContext the context of the source command
+     * @param commandMessage the source command message
+     * @param commandContext the context of the source command
      * @return new {@code CommandRouter}
      */
     protected CommandRouter newRouterFor(Message commandMessage, CommandContext commandContext) {
         checkNotNull(commandMessage);
         checkNotNull(commandContext);
-        final CommandBus commandBus = ensureCommandBus();
-        final CommandRouter router = new CommandRouter(commandBus, commandMessage, commandContext);
+        CommandBus commandBus = ensureCommandBus();
+        CommandRouter router = new CommandRouter(commandBus, commandMessage, commandContext);
         return router;
     }
 
@@ -226,7 +224,7 @@ public abstract class ProcessManager<I,
      * <p>An {@code IteratingCommandRouter} allows to create several commands
      * in response to a command received by the {@code ProcessManager} and post these commands
      * one by one.
-     * 
+     *
      * <p>A typical usage looks like this:
      * <pre>
      *     {@literal @}Assign
@@ -247,8 +245,8 @@ public abstract class ProcessManager<I,
      *     }
      * </pre>
      *
-     * @param  commandMessage the source command message
-     * @param  commandContext the context of the source command
+     * @param commandMessage the source command message
+     * @param commandContext the context of the source command
      * @return new {@code IteratingCommandRouter}
      * @see IteratingCommandRouter#routeFirst()
      * @see IteratingCommandRouter#routeNext()
@@ -257,14 +255,14 @@ public abstract class ProcessManager<I,
                                                            CommandContext commandContext) {
         checkNotNull(commandMessage);
         checkNotNull(commandContext);
-        final CommandBus commandBus = ensureCommandBus();
-        final IteratingCommandRouter router =
+        CommandBus commandBus = ensureCommandBus();
+        IteratingCommandRouter router =
                 new IteratingCommandRouter(commandBus, commandMessage, commandContext);
         return router;
     }
 
     private CommandBus ensureCommandBus() {
-        final CommandBus commandBus = getCommandBus();
+        CommandBus commandBus = getCommandBus();
         checkState(commandBus != null, "CommandBus must be initialized");
         return commandBus;
     }

@@ -32,8 +32,8 @@ import io.spine.server.commandbus.CommandBus;
  */
 public class CommandRouter extends AbstractCommandRouter<CommandRouter> {
 
-    CommandRouter(CommandBus commandBus, Message commandMessage, CommandContext commandContext) {
-        super(commandBus, commandMessage, commandContext);
+    CommandRouter(CommandBus commandBus, Message commandMessage, CommandContext context) {
+        super(commandBus, commandMessage, context);
     }
 
     @Override
@@ -52,12 +52,12 @@ public class CommandRouter extends AbstractCommandRouter<CommandRouter> {
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
     public CommandRouted routeAll() {
-        final CommandRouted.Builder result = CommandRouted.newBuilder();
+        CommandRouted.Builder result = CommandRouted.newBuilder();
         result.setSource(getSource());
 
         while (hasNext()) {
-            final Message message = next();
-            final Command command = route(message);
+            Message message = next();
+            Command command = route(message);
             result.addProduced(command);
         }
 
