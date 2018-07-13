@@ -19,7 +19,6 @@
  */
 package io.spine.core;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -32,6 +31,7 @@ import io.spine.time.Timestamps2;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -229,7 +229,7 @@ public final class Events {
      *     response to a rejection.</li>
      * </ol>
      *
-     * <p>If at some point the event origin is not set the {@link Optional#absent()} is returned.
+     * <p>If at some point the event origin is not set the {@link Optional#empty()} is returned.
      */
     private static Optional<CommandContext> getOriginCommandContext(Event event) {
         CommandContext commandContext = null;
@@ -253,7 +253,7 @@ public final class Events {
 
                 case ORIGIN_NOT_SET:
                 default:
-                    return Optional.absent();
+                    return Optional.empty();
             }
         }
 
