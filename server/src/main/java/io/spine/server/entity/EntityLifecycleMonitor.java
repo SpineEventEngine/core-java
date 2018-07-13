@@ -45,9 +45,13 @@ import static com.google.common.collect.Lists.newLinkedList;
  * the transaction - an {@link EntityRecordChange}.
  *
  * <p>An instance of this {@link TransactionListener} is meant to serve for a single
- * {@link Transaction}. When trying to reuse a loistener for multiple transactions,
+ * {@link Transaction}. When trying to reuse a listener for multiple transactions,
  * an {@link IllegalStateException} is thrown.
  *
+ * @param <I> ID type of the entity under transaction
+ * @param <E> type of entity under transaction
+ * @param <S> state type of the entity under transaction
+ * @param <B> type of {@link ValidatingBuilder} of {@code S}
  * @author Dmytro Dashenkov
  */
 @Internal
