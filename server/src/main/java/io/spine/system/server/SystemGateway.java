@@ -22,6 +22,8 @@ package io.spine.system.server;
 
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.core.TenantId;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A gateway for sending messages into a system bounded context.
@@ -38,5 +40,9 @@ public interface SystemGateway {
      *
      * @param systemCommand command message
      */
-    void postCommand(Message systemCommand);
+    default void postCommand(Message systemCommand) {
+        postCommand(systemCommand, null);
+    }
+
+    void postCommand(Message systemCommand, @Nullable TenantId tenantId);
 }

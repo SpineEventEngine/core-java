@@ -23,6 +23,7 @@ package io.spine.server.commandbus;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.TenantId;
 import io.spine.server.bus.BusFilter;
 import io.spine.system.server.ReceiveCommand;
 import io.spine.system.server.SystemGateway;
@@ -51,7 +52,8 @@ final class CommandReceivedTap implements BusFilter<CommandEnvelope> {
     @Override
     public Optional<Ack> accept(CommandEnvelope envelope) {
         ReceiveCommand systemCommand = systemCommand(envelope.getCommand());
-        systemGateway.postCommand(systemCommand);
+        TenantId tenantId = envelope.getTenantId();
+        systemGateway.postCommand(systemCommand, tenantId);
         return Optional.empty();
     }
 

@@ -20,7 +20,6 @@
 
 package io.spine.system.server;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.client.ActorRequestFactory;
@@ -34,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.validate.Validate.isDefault;
 
 /**
  * The point of integration of the domain and the system bounded context.
@@ -60,31 +60,31 @@ public final class DefaultSystemGateway implements SystemGateway {
     }
 
     @Override
-    public void postCommand(Message systemCommand) {
-        CommandFactory commandFactory = buildRequestFactory().command();
+    public void postCommand(Message systemCommand, @Nullable TenantId tenantId) {
+        checkNotNull(systemCommand);
+        CommandFactory commandFactory = buildRequestFactory(tenantId).command();
         Command command = commandFactory.create(systemCommand);
         system.getCommandBus()
               .post(command, noOpObserver());
     }
 
-    private ActorRequestFactory buildRequestFactory() {
-        ActorRequestFactory result = system.isMultitenant()
-                                     ? buildMultitenantFactory()
-                                     : buildSingleTenantFactory();
-        return result;
+    private ActorRequestFactory buildRequestFactory(@Nullable TenantId tenantId) {
+        if (tenantId == null || isDefault(tenantId)) {
+            return system.isMultitenant()
+                   ? buildMultitenantFactory()
+                   : buildSingleTenantFactory();
+        } else {
+            return constructFactory(tenantId);
+        }
     }
 
     private static ActorRequestFactory buildMultitenantFactory() {
         TenantFunction<ActorRequestFactory> contextFactory =
                 new TenantFunction<ActorRequestFactory>(true) {
                     @Override
-                    @CanIgnoreReturnValue
-                    public ActorRequestFactory apply(@Nullable TenantId input) {
-                        checkNotNull(input);
-                        return ActorRequestFactory.newBuilder()
-                                                  .setTenantId(input)
-                                                  .setActor(SYSTEM)
-                                                  .build();
+                    public ActorRequestFactory apply(@Nullable TenantId tenantId) {
+                        checkNotNull(tenantId);
+                        return constructFactory(tenantId);
                     }
                 };
         ActorRequestFactory result = contextFactory.execute();
@@ -93,8 +93,13 @@ public final class DefaultSystemGateway implements SystemGateway {
     }
 
     private static ActorRequestFactory buildSingleTenantFactory() {
+        return constructFactory(TenantId.getDefaultInstance());
+    }
+
+    private static ActorRequestFactory constructFactory(TenantId tenantId) {
         return ActorRequestFactory.newBuilder()
                                   .setActor(SYSTEM)
+                                  .setTenantId(tenantId)
                                   .build();
     }
 }
