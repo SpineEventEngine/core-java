@@ -18,14 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 /**
- * Test environment classes for the {@code io.spine.server.command} package of the
- * {@code testutil-server} module.
+ * @author Vladyslav Lubenskyi
  */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.command.given;
+@DisplayName("TestBoundedContext should")
+class TestBoundedContextShould {
 
-import com.google.errorprone.annotations.CheckReturnValue;
+    @Test
+    @DisplayName("create instance")
+    void create() {
+        BoundedContext context = TestBoundedContext.create();
+        assertNotNull(context);
+    }
 
-import javax.annotation.ParametersAreNonnullByDefault;
+}

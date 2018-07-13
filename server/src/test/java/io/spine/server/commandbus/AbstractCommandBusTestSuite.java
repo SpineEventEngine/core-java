@@ -55,12 +55,12 @@ import org.mockito.ArgumentCaptor;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.BoundedContext.newName;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.test.Verify.assertContainsAll;

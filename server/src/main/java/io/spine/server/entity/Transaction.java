@@ -70,6 +70,7 @@ import static java.lang.String.format;
  * @param <S> the type of entity state
  * @param <B> the type of a {@code ValidatingBuilder} for the entity state
  * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
 @Internal
 public abstract class Transaction<I,
@@ -211,7 +212,6 @@ public abstract class Transaction<I,
         return lifecycleFlags;
     }
 
-    @VisibleForTesting
     E getEntity() {
         return entity;
     }
@@ -235,24 +235,32 @@ public abstract class Transaction<I,
      */
     protected void commit() throws InvalidEntityStateException, IllegalStateException {
         final B builder = getBuilder();
-        final Version pendingVersion = getVersion();
 
         if (builder.isDirty()) {
-            commitChangedState(builder, pendingVersion);
+            commitChangedState(builder);
         } else {
-            commitUnchangedState(pendingVersion);
+            commitUnchangedState();
         }
     }
 
-    private void commitChangedState(B builder, Version pendingVersion) {
+    /**
+     * Commits this transaction and sets the new state to the entity.
+     *
+     * <p>In case if the commit is failed, the transaction is rolled back and the entity keeps
+     * the current state.
+     *
+     * @param builder the {@link ValidatingBuilder} with the new state of the entity
+     */
+    private void commitChangedState(B builder) {
         try {
-            EntityRecord previousRecord = record(initialLifecycleFlags);
+            EntityRecord previousRecord = createRecordWith(initialLifecycleFlags);
             S newState = builder.build();
             markStateChanged();
+            Version pendingVersion = getVersion();
             beforeCommit(newState, pendingVersion);
             entity.updateState(newState, pendingVersion);
             commitAttributeChanges();
-            EntityRecord newRecord = record(lifecycleFlags);
+            EntityRecord newRecord = createRecordWith(lifecycleFlags);
             afterCommit(previousRecord, newRecord);
         } catch (ValidationException exception) {  /* Could only happen if the state
                                                       has been injected not using
@@ -270,16 +278,22 @@ public abstract class Transaction<I,
         }
     }
 
-    private void commitUnchangedState(Version pendingVersion) {
-        EntityRecord previousRecord = record(initialLifecycleFlags);
-        S unmodifiedState = getEntity().getState();
-        beforeCommit(unmodifiedState, pendingVersion);
+    /**
+     * Commits this transaction skipping the entity state update.
+     *
+     * <p>This method is called when none of the transaction phases has changed the entity state.
+     */
+    private void commitUnchangedState() {
+        EntityRecord previousRecord = createRecordWith(initialLifecycleFlags);
+        S unchanged = getEntity().getState();
+        Version pendingVersion = getVersion();
+        beforeCommit(unchanged, pendingVersion);
         if(!pendingVersion.equals(entity.getVersion())) {
-            entity.updateState(unmodifiedState, pendingVersion);
+            entity.updateState(unchanged, pendingVersion);
         }
         commitAttributeChanges();
         releaseTx();
-        EntityRecord newRecord = record(lifecycleFlags);
+        EntityRecord newRecord = createRecordWith(lifecycleFlags);
         afterCommit(previousRecord, newRecord);
     }
 
@@ -317,14 +331,15 @@ public abstract class Transaction<I,
      * Creates an {@link EntityRecord} for the entity under transaction.
      *
      * <p>Since an entity transaction delegates its {@link EntityWithLifecycle#getLifecycleFlags()}
-     * to the transaction, an instance of {@link LifecycleFlags} should be passed as an argument.
+     * method invocations to the transaction, an instance of {@link LifecycleFlags} should be
+     * passed as an argument.
      *
      * @param lifecycleFlags flags to include into the record
      * @return new {@link EntityRecord}
      * @see #lifecycleFlags
      * @see #initialLifecycleFlags
      */
-    private EntityRecord record(LifecycleFlags lifecycleFlags) {
+    private EntityRecord createRecordWith(LifecycleFlags lifecycleFlags) {
         E entity = getEntity();
         Any entityId = Identifier.pack(entity.getId());
         Version version = entity.getVersion();

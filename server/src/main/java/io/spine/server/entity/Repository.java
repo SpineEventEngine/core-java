@@ -489,7 +489,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         /**
          * Posts the {@link CreateEntity} system command.
          */
-        public void onCreateEntity(EntityOption.Kind entityKind) {
+        public void onEntityCreated(EntityOption.Kind entityKind) {
             CreateEntity command = CreateEntity
                     .newBuilder()
                     .setId(id)
@@ -506,11 +506,11 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                                    Set<? extends Message> messageIds) {
             Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
 
-            postOnChanged(change, dispatchedMessageIds);
-            postOnArchived(change, dispatchedMessageIds);
-            postOnDeleted(change, dispatchedMessageIds);
-            postOnExtracted(change, dispatchedMessageIds);
-            postOnRestored(change, dispatchedMessageIds);
+            postIfChanged(change, dispatchedMessageIds);
+            postIfArchived(change, dispatchedMessageIds);
+            postIfDeleted(change, dispatchedMessageIds);
+            postIfExtracted(change, dispatchedMessageIds);
+            postIfRestored(change, dispatchedMessageIds);
         }
 
         /**
@@ -561,7 +561,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             postSystem(systemCommand);
         }
 
-        private void postOnChanged(EntityRecordChange change,
+        private void postIfChanged(EntityRecordChange change,
                                    Collection<DispatchedMessageId> messageIds) {
             Any oldState = change.getPreviousValue().getState();
             Any newState = change.getNewValue().getState();
@@ -577,7 +577,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             }
         }
 
-        private void postOnArchived(EntityRecordChange change,
+        private void postIfArchived(EntityRecordChange change,
                                     Collection<DispatchedMessageId> messageIds) {
             boolean oldValue = change.getPreviousValue()
                                      .getLifecycleFlags()
@@ -595,7 +595,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             }
         }
 
-        private void postOnDeleted(EntityRecordChange change,
+        private void postIfDeleted(EntityRecordChange change,
                                    Collection<DispatchedMessageId> messageIds) {
             boolean oldValue = change.getPreviousValue()
                                      .getLifecycleFlags()
@@ -613,7 +613,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             }
         }
 
-        private void postOnExtracted(EntityRecordChange change,
+        private void postIfExtracted(EntityRecordChange change,
                                      Collection<DispatchedMessageId> messageIds) {
             boolean oldValue = change.getPreviousValue()
                                      .getLifecycleFlags()
@@ -631,7 +631,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             }
         }
 
-        private void postOnRestored(EntityRecordChange change,
+        private void postIfRestored(EntityRecordChange change,
                                     Collection<DispatchedMessageId> messageIds) {
             boolean oldValue = change.getPreviousValue()
                                      .getLifecycleFlags()

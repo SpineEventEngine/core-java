@@ -17,62 +17,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package io.spine.server.aggregate;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import io.spine.client.ActorRequestFactory;
-import io.spine.server.command.CommandTest;
+import io.spine.server.CommandHandlerTest;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import java.util.List;
+
+import static io.spine.core.CommandEnvelope.of;
+import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 
 /**
- * An abstract base for test suites testing aggregate commands.
+ * The implementation base for testing a single command handling in an {@link Aggregate}.
  *
- * @param <C> the type of the command message that we test in the suite
- * @param <A> the type of the aggregate that handles the command
- * @author Alexander Yevsyukov
+ * @param <I> ID message of the aggregate
+ * @param <C> type of the command to test
+ * @param <S> the aggregate state type
+ * @param <A> the {@link Aggregate} type
+ * @author Vladyslav Lubenskyi
  */
-public abstract class AggregateCommandTest<C extends Message, A extends Aggregate>
-        extends CommandTest<C> {
+public abstract class AggregateCommandTest<I,
+                                           C extends Message,
+                                           S extends Message,
+                                           A extends Aggregate<I, S, ?>>
+        extends CommandHandlerTest<I, C, S, A> {
 
-    /** The object under the test. */
-    @Nullable
-    private A aggregate;
-
-    /**
-     * {@inheritDoc}
-     */
-    protected AggregateCommandTest(ActorRequestFactory requestFactory) {
-        super(requestFactory);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    protected AggregateCommandTest() {
-        super();
-    }
-
-    /**
-     * Obtains the aggregate being tested or {@code Optional.absent()} if
-     * the test object has not been created yet.
-     */
-    protected Optional<A> aggregate() {
-        return Optional.fromNullable(aggregate);
-    }
-
-    /**
-     * Creates new test object.
-     */
-    protected abstract A createAggregate();
-
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    protected void setUp() {
-        this.aggregate = createAggregate();
+    protected List<? extends Message> dispatchTo(A entity) {
+        return dispatchCommand(entity, of(createCommand(message())));
     }
 }

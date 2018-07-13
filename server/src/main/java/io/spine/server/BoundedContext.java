@@ -63,15 +63,33 @@ import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
 /**
- * A facade for configuration and entry point for handling commands.
+ * A logical and structural boundary of a model.
+ *
+ * <p>Logically, a bounded context represents a sub-system, built to be described with the same
+ * ubiquitous language. Any term within a single bounded context has a single meaning and
+ * may or may not map to another term in the language of another bounded context.
+ *
+ * <p>The ubiquitous language of a bounded context is represented by the entity state, event,
+ * and command types, entity types, etc. An entity and its adjacent types belong to the bounded
+ * context, which the entity {@link Repository} is
+ * {@linkplain BoundedContext#register(Repository) registered} in.
+ *
+ * <p>Structurally, a bounded context brings together all the infrastructure required for
+ * the components of a model to cooperate.
+ *
+ * <p>An instance of {@code BoundedContext} acts as a major point of configuration for all
+ * the model elements which belong to it.
  *
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  * @author Dmitry Ganzha
+ * @author Dmytro Dashenkov
+ * @see <a href="https://martinfowler.com/bliki/BoundedContext.html">
+ * Blog post on bounded contexts</a>
  */
 public abstract class BoundedContext
         extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
@@ -120,32 +138,6 @@ public abstract class BoundedContext
     }
 
     /**
-     * Initializes this bounded context.
-     *
-     * <p>This method should be called at once after the {@code BoundedContext} instance creation.
-     * It performs registry initialization which, otherwise, would be performed in the constructor.
-     */
-    abstract void init();
-
-    /**
-     * Creates a new value object for a bounded context name.
-     *
-     * <p>The {@code name} argument value must not be {@code null} or empty.
-     *
-     * <p>This method, however, does not check for the uniqueness of the value passed.
-     *
-     * @param name the unique string name of the {@code BoundedContext}
-     * @return a newly created name
-     */
-    public static BoundedContextName newName(String name) {
-        checkNotEmptyOrBlank(name, "name");
-        final BoundedContextName result = BoundedContextName.newBuilder()
-                                                            .setValue(name)
-                                                            .build();
-        return result;
-    }
-
-    /**
      * Creates a new builder for {@code BoundedContext}.
      *
      * @return new builder instance
@@ -159,18 +151,18 @@ public abstract class BoundedContext
      *
      * <p>This method performs the following:
      * <ol>
-     * <li>Closes associated {@link StorageFactory}.
-     * <li>Closes {@link CommandBus}.
-     * <li>Closes {@link EventBus}.
-     * <li>Closes {@link IntegrationBus}.
-     * <li>Closes {@link CommandStore}.
-     * <li>Closes {@link io.spine.server.event.EventStore EventStore}.
-     * <li>Closes {@link Stand}.
-     * <li>Shuts down all registered repositories. Each registered repository is:
+     *     <li>Closes associated {@link StorageFactory}.
+     *     <li>Closes {@link CommandBus}.
+     *     <li>Closes {@link EventBus}.
+     *     <li>Closes {@link IntegrationBus}.
+     *     <li>Closes {@link CommandStore}.
+     *     <li>Closes {@link io.spine.server.event.EventStore EventStore}.
+     *     <li>Closes {@link Stand}.
+     *     <li>Shuts down all registered repositories. Each registered repository is:
      *      <ul>
-     *      <li>un-registered from {@link CommandBus}
-     *      <li>un-registered from {@link EventBus}
-     *      <li>detached from its storage
+     *          <li>un-registered from {@link CommandBus}
+     *          <li>un-registered from {@link EventBus}
+     *          <li>detached from its storage
      *      </ul>
      * </ol>
      *
@@ -216,7 +208,7 @@ public abstract class BoundedContext
      *
      * <p>The ID allows to identify a bounded context if a multi-context application.
      * If the ID was not defined, during the building process, the context would get
-     * {@link BoundedContextNames#mainBoundedContext()} name.
+     * {@link BoundedContextNames#defaultName()} name.
      *
      * @return the ID of this {@code BoundedContext}
      */
@@ -347,7 +339,7 @@ public abstract class BoundedContext
     @SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
     public static class Builder {
 
-        private BoundedContextName name = BoundedContextNames.mainBoundedContext();
+        private BoundedContextName name = BoundedContextNames.defaultName();
         private boolean multitenant;
         private TenantIndex tenantIndex;
         private Supplier<StorageFactory> storageFactorySupplier;
@@ -362,7 +354,7 @@ public abstract class BoundedContext
          * Sets the value of the name for a new bounded context.
          *
          * <p>If the name is not defined in the builder, the context will get
-         * {@link BoundedContextNames#mainBoundedContext()} name.
+         * {@link BoundedContextNames#defaultName()} name.
          *
          * <p>It is the responsibility of an application developer to provide meaningful and unique
          * names for bounded contexts. The framework does not check for duplication of names.
@@ -378,7 +370,7 @@ public abstract class BoundedContext
          * Sets the name for a new bounded context.
          *
          * <p>If the name is not defined in the builder, the context will get
-         * {@link BoundedContextNames#mainBoundedContext()} name.
+         * {@link BoundedContextNames#defaultName()} name.
          *
          * <p>It is the responsibility of an application developer to provide meaningful and unique
          * names for bounded contexts. The framework does not check for duplication of names.
@@ -387,12 +379,13 @@ public abstract class BoundedContext
          *             Cannot be null, empty, or blank
          */
         public Builder setName(BoundedContextName name) {
+            BoundedContextNames.checkValid(name);
             this.name = name;
             return this;
         }
 
         /**
-         * Returns the previously set name or {@link BoundedContextNames#mainBoundedContext()}
+         * Returns the previously set name or {@link BoundedContextNames#defaultName()}
          * if the name was not explicitly set.
          */
         public BoundedContextName getName() {
@@ -478,6 +471,27 @@ public abstract class BoundedContext
             return this;
         }
 
+        /**
+         * Creates a new instance of {@code BoundedContext} with the set configurations.
+         *
+         * <p>The resulting domain-specific bounded context has as internal System bounded context.
+         * The entities of the System domain describe the entities of the resulting bounded context.
+         *
+         * <p>The System bounded contexts shares some configuration with the domain bounded context,
+         * such as:
+         * <ul>
+         *     <li>{@linkplain #getTenantIndex()} tenancy;
+         *     <li>{@linkplain #getStorageFactory()} storage facilities;
+         *     <li>{@linkplain #getTransportFactory()} transport facilities.
+         * </ul>
+         *
+         * <p>All the other configuration is NOT shared.
+         *
+         * <p>The name of the System bounded context is derived from the name of the domain bounded
+         * context.
+         *
+         * @return new {@code BoundedContext}
+         */
         public BoundedContext build() {
             SystemBoundedContext system = buildSystem();
             BoundedContext result = buildDefault(system);
@@ -487,7 +501,7 @@ public abstract class BoundedContext
 
         private BoundedContext buildDefault(SystemBoundedContext system) {
             BiFunction<Builder, SystemGateway, BoundedContext> instanceFactory =
-                    (builder, gateway) -> new DefaultBoundedContext(builder, system, gateway);
+                    (builder, gateway) -> DomainBoundedContext.newInstance(builder, system, gateway);
             SystemGateway gateway = new DefaultSystemGateway(system);
             BoundedContext result = buildPartial(instanceFactory, gateway);
             return result;
@@ -509,7 +523,7 @@ public abstract class BoundedContext
                 system.setTenantIndex(tenantIndex.get());
             }
             BiFunction<Builder, SystemGateway, SystemBoundedContext> instanceFactory =
-                    (builder, systemGateway) -> new SystemBoundedContext(builder);
+                    (builder, systemGateway) -> SystemBoundedContext.newInstance(builder);
             SystemGateway systemGateway = NoOpSystemGateway.INSTANCE;
             SystemBoundedContext result = system.buildPartial(instanceFactory,
                                                               systemGateway);
@@ -530,7 +544,6 @@ public abstract class BoundedContext
             initIntegrationBus(transportFactory);
 
             B result = instanceFactory.apply(this, systemGateway);
-            result.init();
             return result;
         }
 

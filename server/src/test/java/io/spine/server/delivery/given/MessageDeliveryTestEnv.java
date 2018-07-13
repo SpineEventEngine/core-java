@@ -47,7 +47,7 @@ import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.rejection.AggCannotReassignUnassignedTask;
 import io.spine.validate.StringValueVBuilder;
 
-import static io.spine.server.BoundedContext.newName;
+import static io.spine.core.BoundedContextNames.newName;
 
 /**
  * An abstract base for environments, which are created to ease the message delivery testing.

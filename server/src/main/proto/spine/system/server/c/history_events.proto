@@ -32,6 +32,7 @@ option java_outer_classname = "HistoryEventsProto";
 option java_multiple_files = true;
 
 import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
 
 import "spine/core/event.proto";
 import "spine/core/command.proto";
@@ -116,6 +117,9 @@ message EntityStateChanged {
 
     // The IDs of the messages which caused the mutation.
     repeated DispatchedMessageId message_id = 3;
+
+    // The instant when the entity was archived.
+    google.protobuf.Timestamp when = 4;
 }
 
 // An event emmited when an entity is marked as archived.
@@ -127,6 +131,9 @@ message EntityArchived {
 
     // The IDs of the messages which caused the mutation.
     repeated DispatchedMessageId message_id = 2;
+
+    // The instant when the entity was archived.
+    google.protobuf.Timestamp when = 3;
 }
 
 // An event emmited when an entity is marked as deleted.
@@ -138,6 +145,9 @@ message EntityDeleted {
 
     // The IDs of the messages which caused the mutation.
     repeated DispatchedMessageId message_id = 2;
+
+    // The instant when the entity was deleted.
+    google.protobuf.Timestamp when = 3;
 }
 
 // An event emmited when an entity is marked as NOT archived.
@@ -149,6 +159,9 @@ message EntityExtractedFromArchive {
 
     // The IDs of the messages which caused the mutation.
     repeated DispatchedMessageId message_id = 2;
+
+    // The instant when the entity was extracted.
+    google.protobuf.Timestamp when = 3;
 }
 
 // An event emmited when an entity is marked as NOT deleted.
@@ -160,4 +173,7 @@ message EntityRestored {
 
     // The IDs of the messages which caused the mutation.
     repeated DispatchedMessageId message_id = 2;
+
+    // The instant when the entity was restored.
+    google.protobuf.Timestamp when = 3;
 }

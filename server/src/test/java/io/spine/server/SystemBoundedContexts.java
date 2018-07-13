@@ -39,8 +39,8 @@ public final class SystemBoundedContexts {
      * Extracts the {@code System} bounded context from the given bounded context.
      */
     public static BoundedContext systemOf(BoundedContext context) {
-        checkArgument(context instanceof DefaultBoundedContext);
-        DefaultBoundedContext defaultContext = (DefaultBoundedContext) context;
+        checkArgument(context instanceof DomainBoundedContext);
+        DomainBoundedContext defaultContext = (DomainBoundedContext) context;
         return defaultContext.system();
     }
 }

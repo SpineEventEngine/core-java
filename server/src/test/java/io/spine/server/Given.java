@@ -28,6 +28,7 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.client.Query;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.BoundedContextName;
+import io.spine.core.BoundedContextNames;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
@@ -321,7 +322,7 @@ public class Given {
          */
         @Override
         public BoundedContextName getBoundedContextName() {
-            return BoundedContext.newName(PROJECTS_CONTEXT_NAME);
+            return BoundedContextNames.newName(PROJECTS_CONTEXT_NAME);
         }
     }
 

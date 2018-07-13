@@ -36,7 +36,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 
 /**
- * The default implementation of a {@link SystemGateway}.
+ * The point of integration of the domain and the system bounded context.
+ *
+ * <p>All the facilities provided by the system bounded context are available through this gateway.
  *
  * @author Dmytro Dashenkov
  */

@@ -46,8 +46,8 @@ import io.spine.server.delivery.Shardable;
 import io.spine.server.delivery.ShardedStreamConsumer;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
+import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
-import io.spine.server.entity.MonitorTransactionListener;
 import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.ExternalMessageClass;
@@ -350,7 +350,7 @@ public abstract class ProcessManagerRepository<I,
     @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.
     PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
         PmTransaction<I, S, ?> tx = PmTransaction.start((ProcessManager<I, S, ?>) manager);
-        TransactionListener listener = MonitorTransactionListener.instance(this);
+        TransactionListener listener = EntityLifecycleMonitor.newInstance(this);
         tx.setListener(listener);
         return tx;
     }
@@ -395,7 +395,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public P create(I id) {
         P procman = super.create(id);
-        lifecycleOf(id).onCreateEntity(PROCESS_MANAGER);
+        lifecycleOf(id).onEntityCreated(PROCESS_MANAGER);
         return procman;
     }
 

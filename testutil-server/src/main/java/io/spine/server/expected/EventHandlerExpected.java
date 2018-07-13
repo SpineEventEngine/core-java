@@ -18,45 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.server.expected;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.system.server.SystemGateway;
+import com.google.protobuf.Message;
+import java.util.List;
 
 /**
- * The default implementation of a {@link BoundedContext}.
- *
- * <p>All the user interactions with the system (such as repository registration, command posting,
- * query processing, etc.) happen through an instance of this class.
+ * Assertions for an event applier or reactor invocation results.
  *
  * @author Dmytro Dashenkov
- * @see SystemBoundedContext
  */
-final class DefaultBoundedContext extends BoundedContext {
+public class EventHandlerExpected<S extends Message>
+        extends MessageProducingExpected<S, EventHandlerExpected<S>> {
 
-    private final SystemBoundedContext system;
-    private final SystemGateway systemGateway;
-
-    DefaultBoundedContext(Builder builder,
-                          SystemBoundedContext systemBoundedContext,
-                          SystemGateway gateway) {
-        super(builder);
-        this.system = systemBoundedContext;
-        this.systemGateway = gateway;
+    public EventHandlerExpected(List<? extends Message> events,
+                                S initialState,
+                                S state,
+                                List<Message> interceptedCommands) {
+        super(events, initialState, state, interceptedCommands);
     }
 
     @Override
-    void init() {
-        getStand().onCreated(this);
-    }
-
-    @VisibleForTesting
-    BoundedContext system() {
-        return system;
-    }
-
-    @Override
-    public SystemGateway getSystemGateway() {
-        return systemGateway;
+    protected EventHandlerExpected<S> self() {
+        return this;
     }
 }

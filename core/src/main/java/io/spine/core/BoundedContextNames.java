@@ -22,6 +22,8 @@ package io.spine.core;
 
 import io.spine.annotation.Internal;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.String.format;
 
 /**
@@ -33,12 +35,9 @@ import static java.lang.String.format;
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
-@Internal
 public final class BoundedContextNames {
 
-    private static final BoundedContextName MAIN =
-            BoundedContextName.newBuilder().setValue("Main")
-                        .build();
+    private static final BoundedContextName MAIN = newName("Main");
     private static final String SYSTEM_TEMPLATE = "%s_System";
 
     /**
@@ -48,9 +47,33 @@ public final class BoundedContextNames {
     }
 
     /**
+     * Creates a new value object for a bounded context name.
+     *
+     * <p>The {@code name} argument value must not be {@code null} or empty.
+     *
+     * <p>This method, however, does not check for the uniqueness of the value passed.
+     *
+     * @param name the unique string name of the {@code BoundedContext}
+     * @return a newly created name
+     */
+    public static BoundedContextName newName(String name) {
+        final BoundedContextName result = BoundedContextName.newBuilder()
+                                                            .setValue(name)
+                                                            .build();
+        checkValid(result);
+        return result;
+    }
+
+    public static void checkValid(BoundedContextName name) {
+        checkNotNull(name);
+        checkNotEmptyOrBlank(name.getValue(), "name");
+    }
+
+    /**
      * Obtains the name of the {@code Main} bounded context.
      */
-    public static BoundedContextName mainBoundedContext() {
+    @Internal
+    public static BoundedContextName defaultName() {
         return MAIN;
     }
 
@@ -60,6 +83,7 @@ public final class BoundedContextNames {
      * @param name the name of the original bounded context
      * @return the name of the system bounded context
      */
+    @Internal
     public static BoundedContextName system(BoundedContextName name) {
         String value = format(SYSTEM_TEMPLATE, name.getValue());
         BoundedContextName result = BoundedContextName
