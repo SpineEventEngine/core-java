@@ -212,7 +212,6 @@ public abstract class Transaction<I,
         return lifecycleFlags;
     }
 
-    @VisibleForTesting
     E getEntity() {
         return entity;
     }

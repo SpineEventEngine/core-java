@@ -22,15 +22,16 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.server.entity.Repository.Lifecycle;
 import io.spine.validate.ValidatingBuilder;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.Lists.newLinkedList;
 
@@ -43,6 +44,10 @@ import static com.google.common.collect.Lists.newLinkedList;
  * of the entity under transaction, along with the information about the mutations performed under
  * the transaction - an {@link EntityRecordChange}.
  *
+ * <p>An instance of this {@link TransactionListener} is meant to serve for a single
+ * {@link Transaction}. When trying to reuse a loistener for multiple transactions,
+ * an {@link IllegalStateException} is thrown.
+ *
  * @author Dmytro Dashenkov
  */
 @Internal
@@ -54,6 +59,8 @@ public final class EntityLifecycleMonitor<I,
 
     private final Repository<I, ?> repository;
     private final List<Message> acknowledgedMessageIds;
+
+    private @MonotonicNonNull I entityId;
 
     private EntityLifecycleMonitor(Repository<I, ?> repository) {
         this.repository = repository;
@@ -82,6 +89,8 @@ public final class EntityLifecycleMonitor<I,
      */
     @Override
     public void onAfterPhase(Transaction.Phase<I, E, S, B> phase) {
+        checkSameEntity(phase.getUnderlyingTransaction()
+                             .getEntity());
         Message messageId = phase.eventId();
         acknowledgedMessageIds.add(messageId);
     }
@@ -99,9 +108,7 @@ public final class EntityLifecycleMonitor<I,
     @Override
     public void onAfterCommit(EntityRecordChange change) {
         Set<Message> messageIds = copyOf(acknowledgedMessageIds);
-        I id = Identifier.unpack(change.getPreviousValue()
-                                       .getEntityId());
-        Lifecycle lifecycle = repository.lifecycleOf(id);
+        Lifecycle lifecycle = repository.lifecycleOf(entityId);
         lifecycle.onStateChanged(change, messageIds);
     }
 
@@ -114,5 +121,26 @@ public final class EntityLifecycleMonitor<I,
     public void onTransactionFailed(Throwable t, E entity, S state, Version version,
                                     LifecycleFlags lifecycleFlags) {
         // NOP.
+    }
+
+    /**
+     * Ensures that the given entity is the same that was given the previous time.
+     *
+     * <p>An instance of {@code EntityLifecycleMonitor} should not be reused for multiple entity
+     * transactions. Thus, if the given entity is not the same as seen before,
+     * an {@link IllegalStateException} is thrown
+     *
+     * @param entity the entity to check
+     * @throws IllegalStateException if the check fails
+     */
+    private void checkSameEntity(E entity) throws IllegalStateException {
+        I idToCheck = entity.getId();
+        if (entityId == null) {
+            entityId = idToCheck;
+        } else {
+            checkState(entityId.equals(idToCheck),
+                       "Tried to reuse an instance of %s for multiple transactions.",
+                       EntityLifecycleMonitor.class.getSimpleName());
+        }
     }
 }
