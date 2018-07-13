@@ -66,11 +66,11 @@ class QueryParametersTest {
     @Test
     @DisplayName("be serializable")
     void beSerializable() {
-        final String columnName = version.name();
-        final EntityColumn column = findColumn(VersionableEntity.class, columnName);
-        final ColumnFilter filter = ColumnFilters.eq(columnName, 1);
-        final CompositeQueryParameter parameter = aggregatingParameter(column, filter);
-        final QueryParameters parameters = QueryParameters.newBuilder()
+        String columnName = version.name();
+        EntityColumn column = findColumn(VersionableEntity.class, columnName);
+        ColumnFilter filter = ColumnFilters.eq(columnName, 1);
+        CompositeQueryParameter parameter = aggregatingParameter(column, filter);
+        QueryParameters parameters = QueryParameters.newBuilder()
                                                           .add(parameter)
                                                           .build();
         reserializeAndAssert(parameters);
@@ -81,25 +81,25 @@ class QueryParametersTest {
     void supportEquality() {
         // --- Group A ---
         // Consists of 2 empty instances
-        final QueryParameters paramsA1 = newBuilder().build();
-        final QueryParameters paramsA2 = newBuilder().build();
+        QueryParameters paramsA1 = newBuilder().build();
+        QueryParameters paramsA2 = newBuilder().build();
 
         // --- Group B ---
         // Consists of 3 instances with a single filter targeting a String column
-        final EntityColumn bColumn = mockColumn();
-        final ColumnFilter bFilter = ColumnFilters.eq("b", "c");
-        final QueryParameters paramsB1 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
+        EntityColumn bColumn = mockColumn();
+        ColumnFilter bFilter = ColumnFilters.eq("b", "c");
+        QueryParameters paramsB1 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
                                                      .build();
-        final QueryParameters paramsB2 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
+        QueryParameters paramsB2 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
                                                      .build();
-        final QueryParameters paramsB3 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
+        QueryParameters paramsB3 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
                                                      .build();
 
         // --- Group C ---
         // Consists of an instance with a single filter targeting an integer number column
-        final EntityColumn cColumn = mockColumn();
-        final ColumnFilter cFilter = ColumnFilters.eq("a", 42);
-        final QueryParameters paramsC = newBuilder().add(aggregatingParameter(cColumn, cFilter))
+        EntityColumn cColumn = mockColumn();
+        ColumnFilter cFilter = ColumnFilters.eq("a", 42);
+        QueryParameters paramsC = newBuilder().add(aggregatingParameter(cColumn, cFilter))
                                                     .build();
 
         // --- Check ---
@@ -112,24 +112,24 @@ class QueryParametersTest {
     @Test
     @DisplayName("be constructed from empty builder")
     void constructFromEmptyBuilder() {
-        final QueryParameters parameters = newBuilder().build();
+        QueryParameters parameters = newBuilder().build();
         assertNotNull(parameters);
     }
 
     @Test
     @DisplayName("produce iterator over filters")
     void produceFilterIterator() {
-        final ColumnFilter[] filters = {
+        ColumnFilter[] filters = {
                 eq("firstFilter", 1),
                 eq("secondFilter", 42),
                 gt("thirdFilter", getCurrentTime())};
-        final Multimap<EntityColumn, ColumnFilter> columnFilters = of(mockColumn(), filters[0],
+        Multimap<EntityColumn, ColumnFilter> columnFilters = of(mockColumn(), filters[0],
                                                                       mockColumn(), filters[1],
                                                                       mockColumn(), filters[2]);
-        final CompositeQueryParameter parameter = from(columnFilters, ALL);
-        final QueryParameters parameters = newBuilder().add(parameter)
+        CompositeQueryParameter parameter = from(columnFilters, ALL);
+        QueryParameters parameters = newBuilder().add(parameter)
                                                        .build();
-        final Collection<ColumnFilter> results = newLinkedList();
+        Collection<ColumnFilter> results = newLinkedList();
         for (CompositeQueryParameter queryParameter : parameters) {
             results.addAll(queryParameter.getFilters().values());
         }
@@ -139,23 +139,23 @@ class QueryParametersTest {
     @Test
     @DisplayName("retrieve filter by column")
     void retrieveFilterByColumn() {
-        final ColumnFilter[] filters = {
+        ColumnFilter[] filters = {
                 eq("$1nd", 42.0),
                 eq("$2st", "entityColumnValue"),
                 gt("$3d", getCurrentTime())};
-        final EntityColumn[] columns = {mockColumn(), mockColumn(), mockColumn()};
-        final Multimap<EntityColumn, ColumnFilter> columnFilters = of(columns[0], filters[0],
+        EntityColumn[] columns = {mockColumn(), mockColumn(), mockColumn()};
+        Multimap<EntityColumn, ColumnFilter> columnFilters = of(columns[0], filters[0],
                                                                       columns[1], filters[1],
                                                                       columns[2], filters[2]);
-        final CompositeQueryParameter parameter = from(columnFilters, ALL);
-        final QueryParameters parameters = newBuilder().add(parameter)
+        CompositeQueryParameter parameter = from(columnFilters, ALL);
+        QueryParameters parameters = newBuilder().add(parameter)
                                                        .build();
         assertSize(1, newArrayList(parameters));
-        final CompositeQueryParameter singleParameter = parameters.iterator().next();
-        final Multimap<EntityColumn, ColumnFilter> actualFilters = singleParameter.getFilters();
+        CompositeQueryParameter singleParameter = parameters.iterator().next();
+        Multimap<EntityColumn, ColumnFilter> actualFilters = singleParameter.getFilters();
         for (int i = 0; i < columns.length; i++) {
-            final EntityColumn column = columns[i];
-            final Collection<ColumnFilter> readFilters = actualFilters.get(column);
+            EntityColumn column = columns[i];
+            Collection<ColumnFilter> readFilters = actualFilters.get(column);
             assertFalse(readFilters.isEmpty());
             assertSize(1, readFilters);
             assertEquals(filters[i], readFilters.iterator().next());
@@ -165,41 +165,41 @@ class QueryParametersTest {
     @Test
     @DisplayName("keep multiple filters for single column")
     void keepManyFiltersForColumn() throws ParseException {
-        final String columnName = "time";
-        final EntityColumn column = mock(EntityColumn.class);
+        String columnName = "time";
+        EntityColumn column = mock(EntityColumn.class);
 
         // Some valid Timestamp values
-        final Timestamp startTime = Timestamps.parse("2000-01-01T10:00:00.000-05:00");
-        final Timestamp deadline = Timestamps.parse("2017-01-01T10:00:00.000-05:00");
+        Timestamp startTime = Timestamps.parse("2000-01-01T10:00:00.000-05:00");
+        Timestamp deadline = Timestamps.parse("2017-01-01T10:00:00.000-05:00");
 
-        final ColumnFilter startTimeFilter = gt(columnName, startTime);
-        final ColumnFilter deadlineFilter = le(columnName, deadline);
-        final Multimap<EntityColumn, ColumnFilter> columnFilters =
+        ColumnFilter startTimeFilter = gt(columnName, startTime);
+        ColumnFilter deadlineFilter = le(columnName, deadline);
+        Multimap<EntityColumn, ColumnFilter> columnFilters =
                 ImmutableMultimap.<EntityColumn, ColumnFilter>builder()
                         .put(column, startTimeFilter)
                         .put(column, deadlineFilter)
                         .build();
-        final CompositeQueryParameter parameter = from(columnFilters, ALL);
-        final QueryParameters parameters = newBuilder().add(parameter)
+        CompositeQueryParameter parameter = from(columnFilters, ALL);
+        QueryParameters parameters = newBuilder().add(parameter)
                                                        .build();
-        final List<CompositeQueryParameter> aggregatingParameters = newArrayList(parameters);
+        List<CompositeQueryParameter> aggregatingParameters = newArrayList(parameters);
         assertSize(1, aggregatingParameters);
-        final Multimap<EntityColumn, ColumnFilter> actualColumnFilters =
+        Multimap<EntityColumn, ColumnFilter> actualColumnFilters =
                 aggregatingParameters.get(0).getFilters();
-        final Collection<ColumnFilter> timeFilters = actualColumnFilters.get(column);
+        Collection<ColumnFilter> timeFilters = actualColumnFilters.get(column);
         assertSize(2, timeFilters);
         assertContainsAll(timeFilters, startTimeFilter, deadlineFilter);
     }
 
     private static EntityColumn mockColumn() {
-        final EntityColumn column = mock(EntityColumn.class);
+        EntityColumn column = mock(EntityColumn.class);
         return column;
     }
 
     private static CompositeQueryParameter aggregatingParameter(EntityColumn column,
                                                                 ColumnFilter columnFilter) {
-        final Multimap<EntityColumn, ColumnFilter> filter = of(column, columnFilter);
-        final CompositeQueryParameter result = from(filter, ALL);
+        Multimap<EntityColumn, ColumnFilter> filter = of(column, columnFilter);
+        CompositeQueryParameter result = from(filter, ALL);
         return result;
     }
 }

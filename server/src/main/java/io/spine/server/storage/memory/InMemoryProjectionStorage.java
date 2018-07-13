@@ -69,9 +69,9 @@ public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
-    public void writeLastHandledEventTime(final Timestamp timestamp) {
+    public void writeLastHandledEventTime(Timestamp timestamp) {
         checkNotNull(timestamp);
-        final TenantFunction<Void> func = new TenantFunction<Void>(isMultitenant()) {
+        TenantFunction<Void> func = new TenantFunction<Void>(isMultitenant()) {
             @Nullable
             @Override
             public Void apply(@Nullable TenantId tenantId) {
@@ -85,12 +85,12 @@ public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     @Override
     public Timestamp readLastHandledEventTime() {
-        final TenantFunction<Timestamp> func = new TenantFunction<Timestamp>(isMultitenant()) {
+        TenantFunction<Timestamp> func = new TenantFunction<Timestamp>(isMultitenant()) {
             @Nullable
             @Override
             public Timestamp apply(@Nullable TenantId tenantId) {
                 checkNotNull(tenantId);
-                final Timestamp result = timestampOfLastEvent.get(tenantId);
+                Timestamp result = timestampOfLastEvent.get(tenantId);
                 return result;
             }
         };
@@ -115,7 +115,7 @@ public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     @Override
     protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids) {
-        final Iterator<EntityRecord> result = recordStorage.readMultiple(ids);
+        Iterator<EntityRecord> result = recordStorage.readMultiple(ids);
         return result;
     }
 
@@ -127,13 +127,13 @@ public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     @Override
     protected Iterator<EntityRecord> readAllRecords() {
-        final Iterator<EntityRecord> result = recordStorage.readAll();
+        Iterator<EntityRecord> result = recordStorage.readAll();
         return result;
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
-        final Iterator<EntityRecord> result = recordStorage.readAll(fieldMask);
+        Iterator<EntityRecord> result = recordStorage.readAll(fieldMask);
         return result;
     }
 }

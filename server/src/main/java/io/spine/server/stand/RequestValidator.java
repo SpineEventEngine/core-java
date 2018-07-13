@@ -116,24 +116,24 @@ abstract class RequestValidator<M extends Message> {
      * @return an instance of exception or {@code Optional.absent()} if the request is supported.
      */
     private Optional<InvalidRequestException> checkSupported(M request) {
-        final Optional<RequestNotSupported<M>> supported = isSupported(request);
+        Optional<RequestNotSupported<M>> supported = isSupported(request);
         if (!supported.isPresent()) {
             return Optional.absent();
         }
 
-        final RequestNotSupported<M> result = supported.get();
+        RequestNotSupported<M> result = supported.get();
 
-        final ProtocolMessageEnum unsupportedErrorCode = result.getErrorCode();
-        final String errorMessage = result.getErrorMessage();
-        final String errorTypeName = unsupportedErrorCode.getDescriptorForType()
+        ProtocolMessageEnum unsupportedErrorCode = result.getErrorCode();
+        String errorMessage = result.getErrorMessage();
+        String errorTypeName = unsupportedErrorCode.getDescriptorForType()
                                                          .getFullName();
-        final Error.Builder errorBuilder = Error.newBuilder()
+        Error.Builder errorBuilder = Error.newBuilder()
                                                 .setType(errorTypeName)
                                                 .setCode(unsupportedErrorCode.getNumber())
                                                 .setMessage(errorMessage);
-        final Error error = errorBuilder.build();
+        Error error = errorBuilder.build();
 
-        final InvalidRequestException exception = result.createException(errorMessage,
+        InvalidRequestException exception = result.createException(errorMessage,
                                                                          request,
                                                                          error);
         return Optional.of(exception);
@@ -147,30 +147,30 @@ abstract class RequestValidator<M extends Message> {
      *         or {@code Optional.absent()} if the request message is valid.
      */
     private Optional<InvalidRequestException> validateMessage(M request) {
-        final List<ConstraintViolation> violations = MessageValidator.newInstance()
+        List<ConstraintViolation> violations = MessageValidator.newInstance()
                                                                      .validate(request);
         if (violations.isEmpty()) {
             return Optional.absent();
         }
 
-        final ValidationError validationError =
+        ValidationError validationError =
                 ValidationError.newBuilder()
                                .addAllConstraintViolation(violations)
                                .build();
-        final ProtocolMessageEnum errorCode = getInvalidMessageErrorCode();
-        final String typeName = errorCode.getDescriptorForType()
+        ProtocolMessageEnum errorCode = getInvalidMessageErrorCode();
+        String typeName = errorCode.getDescriptorForType()
                                          .getFullName();
-        final String errorTextTemplate = getErrorText(request);
-        final String errorText = format("%s %s",
+        String errorTextTemplate = getErrorText(request);
+        String errorText = format("%s %s",
                                         errorTextTemplate,
                                         toText(violations));
 
-        final Error.Builder errorBuilder = Error.newBuilder()
+        Error.Builder errorBuilder = Error.newBuilder()
                                                 .setType(typeName)
                                                 .setCode(errorCode.getNumber())
                                                 .setValidationError(validationError)
                                                 .setMessage(errorText);
-        final Error error = errorBuilder.build();
+        Error error = errorBuilder.build();
         return Optional.of(onInvalidMessage(formatExceptionMessage(request), request, error));
     }
 
@@ -187,7 +187,7 @@ abstract class RequestValidator<M extends Message> {
 
     private static void feedToResponse(InvalidRequestException cause,
                                        StreamObserver<?> responseObserver) {
-        final StatusRuntimeException validationException = invalidArgumentWithCause(cause);
+        StatusRuntimeException validationException = invalidArgumentWithCause(cause);
         responseObserver.onError(validationException);
     }
 

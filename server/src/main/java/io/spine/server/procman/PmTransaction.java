@@ -87,7 +87,7 @@ class PmTransaction<I,
             S extends Message,
             B extends ValidatingBuilder<S, ? extends Message.Builder>>
     PmTransaction<I, S, B> start(ProcessManager<I, S, B> processManager) {
-        final PmTransaction<I, S, B> tx = new PmTransaction<>(processManager);
+        PmTransaction<I, S, B> tx = new PmTransaction<>(processManager);
         return tx;
     }
 
@@ -112,7 +112,7 @@ class PmTransaction<I,
             B extends ValidatingBuilder<S, ? extends Message.Builder>,
             P extends ProcessManager<I, S, B>>
     PmTransaction<I, S, B> startWith(P processManager, S state, Version version) {
-        final PmTransaction<I, S, B> tx = new PmTransaction<>(processManager, state, version);
+        PmTransaction<I, S, B> tx = new PmTransaction<>(processManager, state, version);
         return tx;
     }
 

@@ -69,25 +69,25 @@ public class Given {
     }
 
     public static Command validCommand() {
-        final TestActorRequestFactory requestFactory =
+        TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(Given.class);
         return requestFactory.command()
                              .create(PrjCreateProject.getDefaultInstance());
     }
 
     public static Event validEvent() {
-        final Command cmd = validCommand();
-        final ProjectId.Builder projectIdBuilder = ProjectId.newBuilder()
+        Command cmd = validCommand();
+        ProjectId.Builder projectIdBuilder = ProjectId.newBuilder()
                                                             .setId("12345AD0");
-        final PrjProjectCreated eventMessage =
+        PrjProjectCreated eventMessage =
                 PrjProjectCreated.newBuilder()
                                  .setProjectId(projectIdBuilder)
                                  .build();
-        final StringValue producerId = toMessage(Given.class.getSimpleName());
-        final EventFactory eventFactory = EventFactory.on(CommandEnvelope.of(cmd),
+        StringValue producerId = toMessage(Given.class.getSimpleName());
+        EventFactory eventFactory = EventFactory.on(CommandEnvelope.of(cmd),
                                                           Identifier.pack(producerId));
-        final Event event = eventFactory.createEvent(eventMessage, nullRef());
-        final Event result = event.toBuilder()
+        Event event = eventFactory.createEvent(eventMessage, nullRef());
+        Event result = event.toBuilder()
                                   .setContext(event.getContext()
                                                    .toBuilder()
                                                    .setEnrichment(Enrichment.newBuilder()

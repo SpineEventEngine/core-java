@@ -56,7 +56,7 @@ public final class ExternalMessages {
         checkNotNull(event);
         checkNotNull(origin);
 
-        final ExternalMessage result = of(event.getId(), event, origin);
+        ExternalMessage result = of(event.getId(), event, origin);
         return result;
     }
 
@@ -71,7 +71,7 @@ public final class ExternalMessages {
         checkNotNull(command);
         checkNotNull(origin);
 
-        final ExternalMessage result = of(command.getId(), command, origin);
+        ExternalMessage result = of(command.getId(), command, origin);
         return result;
     }
 
@@ -86,7 +86,7 @@ public final class ExternalMessages {
         checkNotNull(rejection);
         checkNotNull(origin);
 
-        final ExternalMessage result = of(rejection.getId(), rejection, origin);
+        ExternalMessage result = of(rejection.getId(), rejection, origin);
         return result;
     }
 
@@ -101,8 +101,8 @@ public final class ExternalMessages {
         checkNotNull(request);
         checkNotNull(origin);
 
-        final String idString = Identifier.newUuid();
-        final ExternalMessage result = of(StringValue.newBuilder()
+        String idString = Identifier.newUuid();
+        ExternalMessage result = of(StringValue.newBuilder()
                                                      .setValue(idString)
                                                      .build(),
                                           request,
@@ -121,8 +121,8 @@ public final class ExternalMessages {
         checkNotNull(message);
         checkNotNull(origin);
 
-        final ShardedMessageId id = message.getId();
-        final ExternalMessage result = of(id, message, origin);
+        ShardedMessageId id = message.getId();
+        ExternalMessage result = of(id, message, origin);
         return result;
     }
 
@@ -138,18 +138,18 @@ public final class ExternalMessages {
      */
     public static ShardedMessage asShardedMessage(ExternalMessage value) {
         checkNotNull(value);
-        final Any originalMessage = value.getOriginalMessage();
-        final ShardedMessage result = AnyPacker.unpack(originalMessage);
+        Any originalMessage = value.getOriginalMessage();
+        ShardedMessage result = AnyPacker.unpack(originalMessage);
         return result;
     }
 
     private static ExternalMessage of(Message messageId,
                                       Message message,
                                       BoundedContextName boundedContextName) {
-        final Any packedId = Identifier.pack(messageId);
-        final Any packedMessage = AnyPacker.pack(message);
+        Any packedId = Identifier.pack(messageId);
+        Any packedMessage = AnyPacker.pack(message);
 
-        final ExternalMessage result = ExternalMessage.newBuilder()
+        ExternalMessage result = ExternalMessage.newBuilder()
                                                       .setId(packedId)
                                                       .setOriginalMessage(packedMessage)
                                                       .setBoundedContextName(boundedContextName)

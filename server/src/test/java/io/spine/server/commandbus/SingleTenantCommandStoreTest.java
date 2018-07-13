@@ -37,7 +37,7 @@ class SingleTenantCommandStoreTest extends CommandStoreTest {
 
     @Override
     protected Command newCommand() {
-        final Message commandMessage = Given.CommandMessage.createProjectMessage();
+        Message commandMessage = Given.CommandMessage.createProjectMessage();
         return TestActorRequestFactory.newInstance(SingleTenantCommandBusTest.class)
                                       .createCommand(commandMessage);
     }

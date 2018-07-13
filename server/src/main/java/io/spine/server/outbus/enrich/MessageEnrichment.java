@@ -78,12 +78,12 @@ class MessageEnrichment<S extends Message, T extends Message, C extends Message>
 
     @Override
     void activate() {
-        final ReferenceValidator referenceValidator =
+        ReferenceValidator referenceValidator =
                 new ReferenceValidator(enricher, getSourceClass(), getEnrichmentClass());
-        final ImmutableMultimap.Builder<Class<?>, EnrichmentFunction<?, ?, ?>> map =
+        ImmutableMultimap.Builder<Class<?>, EnrichmentFunction<?, ?, ?>> map =
                                                                       ImmutableMultimap.builder();
-        final ReferenceValidator.ValidationResult validationResult = referenceValidator.validate();
-        final List<EnrichmentFunction<?, ?, ?>> fieldFunctions = validationResult.getFunctions();
+        ReferenceValidator.ValidationResult validationResult = referenceValidator.validate();
+        List<EnrichmentFunction<?, ?, ?>> fieldFunctions = validationResult.getFunctions();
         for (EnrichmentFunction<?, ?, ?> fieldFunction : fieldFunctions) {
             map.put(fieldFunction.getSourceClass(), fieldFunction);
         }
@@ -105,11 +105,11 @@ class MessageEnrichment<S extends Message, T extends Message, C extends Message>
         ensureActive();
         verifyOwnState();
 
-        final T defaultTarget = Internal.getDefaultInstance(getEnrichmentClass());
-        final Message.Builder builder = defaultTarget.toBuilder();
+        T defaultTarget = Internal.getDefaultInstance(getEnrichmentClass());
+        Message.Builder builder = defaultTarget.toBuilder();
         setFields(builder, eventMsg, context);
         @SuppressWarnings("unchecked") // types are checked during the initialization and validation
-        final T result = (T) builder.build();
+        T result = (T) builder.build();
         return result;
     }
 
@@ -136,20 +136,19 @@ class MessageEnrichment<S extends Message, T extends Message, C extends Message>
     )
     private void setFields(Message.Builder builder, S sourceMessage, C context) {
         for (FieldDescriptor srcField : fieldMap.keySet()) {
-            final Object srcFieldValue = getSrcFieldValue(srcField, sourceMessage, context);
-            final Class<?> sourceFieldClass = srcFieldValue.getClass();
-            final Collection<EnrichmentFunction<?, ?, ?>> functions =
+            Object srcFieldValue = getSrcFieldValue(srcField, sourceMessage, context);
+            Class<?> sourceFieldClass = srcFieldValue.getClass();
+            Collection<EnrichmentFunction<?, ?, ?>> functions =
                     fieldFunctions.get(sourceFieldClass);
-            final Collection<FieldDescriptor> targetFields = fieldMap.get(srcField);
+            Collection<FieldDescriptor> targetFields = fieldMap.get(srcField);
             for (FieldDescriptor targetField : targetFields) {
-                final Optional<EnrichmentFunction<?, ?, ?>> function =
+                Optional<EnrichmentFunction<?, ?, ?>> function =
                         firstThat(functions,
                                   SupportsFieldConversion.of(sourceFieldClass,
                                                              Field.getFieldClass(targetField)));
-                final EnrichmentFunction fieldEnrichment = function.get();
+                EnrichmentFunction fieldEnrichment = function.get();
                 @SuppressWarnings("unchecked"
-                        /* the model is checked during the initialization and activation */)
-                final Object targetValue = fieldEnrichment.apply(srcFieldValue, context);
+                        /* the model is checked during the initialization and activation */) Object targetValue = fieldEnrichment.apply(srcFieldValue, context);
                 if (targetValue != null) {
                     builder.setField(targetField, targetValue);
                 }
@@ -158,9 +157,9 @@ class MessageEnrichment<S extends Message, T extends Message, C extends Message>
     }
 
     private Object getSrcFieldValue(FieldDescriptor srcField, S eventMsg, C context) {
-        final boolean isContextField = srcField.getContainingType()
+        boolean isContextField = srcField.getContainingType()
                                                .equals(EventContext.getDescriptor());
-        final Object result = isContextField
+        Object result = isContextField
                               ? context.getField(srcField)
                               : eventMsg.getField(srcField);
         return result;

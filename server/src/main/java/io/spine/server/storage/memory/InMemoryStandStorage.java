@@ -74,15 +74,15 @@ class InMemoryStandStorage extends StandStorage {
     }
 
     @Override
-    public Iterator<EntityRecord> readAllByType(final TypeUrl type) {
+    public Iterator<EntityRecord> readAllByType(TypeUrl type) {
         return readAllByType(type, FieldMask.getDefaultInstance());
     }
 
     @Override
-    public Iterator<EntityRecord> readAllByType(final TypeUrl type,
-                                                           FieldMask fieldMask) {
-        final Iterator<EntityRecord> allRecords = readAll(fieldMask);
-        final Iterator<EntityRecord> result = filterByType(allRecords, type);
+    public Iterator<EntityRecord> readAllByType(TypeUrl type,
+                                                FieldMask fieldMask) {
+        Iterator<EntityRecord> allRecords = readAll(fieldMask);
+        Iterator<EntityRecord> result = filterByType(allRecords, type);
         return result;
     }
 
@@ -110,7 +110,7 @@ class InMemoryStandStorage extends StandStorage {
 
     @Override
     protected Optional<EntityRecord> readRecord(AggregateStateId id) {
-        final RecordReadRequest<AggregateStateId> request = new RecordReadRequest<>(id);
+        RecordReadRequest<AggregateStateId> request = new RecordReadRequest<>(id);
         return recordStorage().read(request);
     }
 
@@ -143,10 +143,10 @@ class InMemoryStandStorage extends StandStorage {
 
     @Override
     protected void writeRecord(AggregateStateId id, EntityRecordWithColumns record) {
-        final TypeUrl recordType = TypeUrl.parse(record.getRecord()
+        TypeUrl recordType = TypeUrl.parse(record.getRecord()
                                                        .getState()
                                                        .getTypeUrl());
-        final TypeUrl recordTypeFromId = id.getStateType();
+        TypeUrl recordTypeFromId = id.getStateType();
         checkState(recordTypeFromId.equals(recordType),
                    TYPE_URL_MISMATCH_MESSAGE_PATTERN,
                    recordType,
@@ -191,7 +191,7 @@ class InMemoryStandStorage extends StandStorage {
          * @return an instance of in-memory storage
          */
         public InMemoryStandStorage build() {
-            final InMemoryStandStorage result = new InMemoryStandStorage(this);
+            InMemoryStandStorage result = new InMemoryStandStorage(this);
             return result;
         }
     }

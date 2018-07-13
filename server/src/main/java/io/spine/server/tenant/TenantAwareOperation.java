@@ -68,7 +68,7 @@ public abstract class TenantAwareOperation extends TenantAware implements Runnab
      * </ol>
      */
     public void execute() {
-        final Optional<TenantId> remembered = CurrentTenant.get();
+        Optional<TenantId> remembered = CurrentTenant.get();
         try {
             CurrentTenant.set(tenantId());
             run();

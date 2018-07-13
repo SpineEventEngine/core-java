@@ -93,10 +93,10 @@ public class DuplicateCommandTestEnv {
     /**
      * Runs the server until its shutdown using {@link TestServer#shutdown()}.
      */
-    public static void runServer(final TestServer server) throws Exception {
-        final CountDownLatch serverStartLatch = new CountDownLatch(1);
+    public static void runServer(TestServer server) throws Exception {
+        CountDownLatch serverStartLatch = new CountDownLatch(1);
 
-        final Thread serverThread = new Thread(() -> {
+        Thread serverThread = new Thread(() -> {
             try {
                 server.start();
                 server.awaitTermination();
@@ -122,8 +122,8 @@ public class DuplicateCommandTestEnv {
 
         @Assign
         DCmdProjectCreated handle(DCmdCreateProject command) {
-            final ProjectId id = command.getProjectId();
-            final DCmdProjectCreated event = projectCreated(id);
+            ProjectId id = command.getProjectId();
+            DCmdProjectCreated event = projectCreated(id);
             return event;
         }
 
@@ -192,11 +192,11 @@ public class DuplicateCommandTestEnv {
                                   .setMultitenant(true)
                                   .build();
             // Create and register a repository with the bounded context.
-            final DCmdProjectAggregateRepository repository = new DCmdProjectAggregateRepository();
+            DCmdProjectAggregateRepository repository = new DCmdProjectAggregateRepository();
             boundedContext.register(repository);
 
             // Create a command service with this bounded context.
-            final CommandService commandService =
+            CommandService commandService =
                     CommandService.newBuilder()
                                   .add(boundedContext)
                                   .build();

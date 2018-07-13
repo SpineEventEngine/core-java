@@ -186,7 +186,7 @@ public abstract class TransactionalEntity<I,
     }
 
     B builderFromState() {
-        final B builder = newBuilderInstance();
+        B builder = newBuilderInstance();
         builder.setOriginalState(getState());
         return builder;
     }
@@ -238,10 +238,10 @@ public abstract class TransactionalEntity<I,
 
     private B newBuilderInstance() {
         @SuppressWarnings("unchecked")   // it's safe, as we rely on the definition of this class.
-        final Class<? extends TransactionalEntity<I, S, B>> cls =
+        Class<? extends TransactionalEntity<I, S, B>> cls =
                 (Class<? extends TransactionalEntity<I, S, B>>) getClass();
-        final Class<B> builderClass = TypeInfo.getBuilderClass(cls);
-        final B builder = ValidatingBuilders.newInstance(builderClass);
+        Class<B> builderClass = TypeInfo.getBuilderClass(cls);
+        B builder = ValidatingBuilders.newInstance(builderClass);
         return builder;
     }
 
@@ -297,7 +297,7 @@ public abstract class TransactionalEntity<I,
         Class<B> getBuilderClass(Class<? extends TransactionalEntity<I, S, B>> entityClass) {
             checkNotNull(entityClass);
             @SuppressWarnings("unchecked") // The type is ensured by this class declaration.
-            final Class<B> builderClass = (Class<B>)STATE_BUILDER.getArgumentIn(entityClass);
+            Class<B> builderClass = (Class<B>)STATE_BUILDER.getArgumentIn(entityClass);
             return builderClass;
         }
     }

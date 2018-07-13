@@ -55,8 +55,8 @@ class TopicValidator extends AbstractTargetValidator<Topic> {
 
     @Override
     protected Optional<RequestNotSupported<Topic>> isSupported(Topic request) {
-        final Target target = request.getTarget();
-        final boolean targetSupported = checkTargetSupported(target);
+        Target target = request.getTarget();
+        boolean targetSupported = checkTargetSupported(target);
         if (targetSupported) {
             return Optional.absent();
         }
@@ -65,7 +65,7 @@ class TopicValidator extends AbstractTargetValidator<Topic> {
     }
 
     private static RequestNotSupported<Topic> missingInRegistry(TypeUrl topicTargetType) {
-        final String errorMessage = format("The topic target type is not supported: %s",
+        String errorMessage = format("The topic target type is not supported: %s",
                                            topicTargetType.getTypeName());
         return new RequestNotSupported<Topic>(UNSUPPORTED_TOPIC_TARGET, errorMessage) {
 

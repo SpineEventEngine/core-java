@@ -47,15 +47,15 @@ class PmRejectionEndpoint<I, P extends ProcessManager<I, ?, ?>>
 
     static <I, P extends ProcessManager<I, ?, ?>>
     Set<I> handle(ProcessManagerRepository<I, P, ?> repository, RejectionEnvelope rejection) {
-        final PmRejectionEndpoint<I, P> endpoint = of(repository, rejection);
-        final Set<I> result = endpoint.handle();
+        PmRejectionEndpoint<I, P> endpoint = of(repository, rejection);
+        Set<I> result = endpoint.handle();
         return result;
     }
 
     @Override
     protected Set<I> getTargets() {
-        final RejectionEnvelope envelope = envelope();
-        final Set<I> ids =
+        RejectionEnvelope envelope = envelope();
+        Set<I> ids =
                 repository().getRejectionRouting()
                             .apply(envelope.getMessage(), envelope.getMessageContext());
         return ids;
@@ -68,7 +68,7 @@ class PmRejectionEndpoint<I, P extends ProcessManager<I, ?, ?>>
 
     @Override
     protected List<Event> doDispatch(P entity, RejectionEnvelope envelope) {
-        final List<Event> events = entity.dispatchRejection(envelope);
+        List<Event> events = entity.dispatchRejection(envelope);
         return events;
     }
 

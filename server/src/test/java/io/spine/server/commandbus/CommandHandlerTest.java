@@ -70,7 +70,7 @@ class CommandHandlerTest {
     @BeforeEach
     void setUp() {
         ModelTests.clearModel();
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
+        BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .setMultitenant(true)
                                                             .build();
         commandBus = boundedContext.getCommandBus();
@@ -121,18 +121,18 @@ class CommandHandlerTest {
     @Test
     @DisplayName("post generated events to EventBus")
     void postGeneratedEventsToBus() {
-        final Command cmd = Given.ACommand.startProject();
+        Command cmd = Given.ACommand.startProject();
 
-        final EventCatcher eventCatcher = new EventCatcher();
+        EventCatcher eventCatcher = new EventCatcher();
         eventBus.register(eventCatcher);
 
         handler.handle(cmd);
 
-        final ImmutableList<Message> expectedMessages = handler.getEventsOnStartProjectCmd();
-        final List<EventEnvelope> actualEvents = eventCatcher.getDispatched();
+        ImmutableList<Message> expectedMessages = handler.getEventsOnStartProjectCmd();
+        List<EventEnvelope> actualEvents = eventCatcher.getDispatched();
         for (int i = 0; i < expectedMessages.size(); i++) {
-            final Message expected = expectedMessages.get(i);
-            final Message actual = Events.getMessage(actualEvents.get(i).getOuterObject());
+            Message expected = expectedMessages.get(i);
+            Message actual = Events.getMessage(actualEvents.get(i).getOuterObject());
             assertEquals(expected, actual);
         }
     }
@@ -144,7 +144,7 @@ class CommandHandlerTest {
         @Test
         @DisplayName("for non-empty handler ID non-zero hashcode is generated")
         void nonZeroForNonEmptyId() {
-            final int hashCode = handler.hashCode();
+            int hashCode = handler.hashCode();
 
             assertTrue(hashCode != 0);
         }
@@ -163,7 +163,7 @@ class CommandHandlerTest {
         @Test
         @DisplayName("same handlers are equal")
         void equalsToSame() {
-            final TestCommandHandler same = new TestCommandHandler(eventBus);
+            TestCommandHandler same = new TestCommandHandler(eventBus);
 
             assertTrue(handler.equals(same));
         }
@@ -192,7 +192,7 @@ class CommandHandlerTest {
     @Test
     @DisplayName("have class-specific logger")
     void haveClassSpecificLogger() {
-        final Logger logger = handler.log();
+        Logger logger = handler.log();
         assertNotNull(logger);
         assertEquals(logger.getName(), handler.getClass()
                                               .getName());
@@ -201,18 +201,18 @@ class CommandHandlerTest {
     @Test
     @DisplayName("log errors")
     void logErrors() {
-        final CommandEnvelope commandEnvelope = givenCommandEnvelope();
+        CommandEnvelope commandEnvelope = givenCommandEnvelope();
 
         // Since we're in the tests mode `Environment` returns `SubstituteLogger` instance.
-        final SubstituteLogger log = (SubstituteLogger) handler.log();
+        SubstituteLogger log = (SubstituteLogger) handler.log();
 
         // Restrict the queue size only to the number of calls we want to make.
-        final Queue<SubstituteLoggingEvent> queue = Queues.newArrayBlockingQueue(1);
+        Queue<SubstituteLoggingEvent> queue = Queues.newArrayBlockingQueue(1);
         log.setDelegate(new EventRecodingLogger(log, queue));
 
         SubstituteLoggingEvent loggingEvent;
 
-        final RuntimeException exception = new RuntimeException("log_errors");
+        RuntimeException exception = new RuntimeException("log_errors");
         handler.onError(commandEnvelope, exception);
 
         loggingEvent = queue.poll();

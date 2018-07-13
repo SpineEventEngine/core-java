@@ -40,11 +40,11 @@ public class AbstractAggregateTestRepository<I, A extends Aggregate<I, ?, ?>>
         extends AggregateRepository<I, A> {
 
     public A loadAggregate(TenantId tenantId, I id) {
-        final TenantAwareFunction<I, A> load =
+        TenantAwareFunction<I, A> load =
                 new TenantAwareFunction<I, A>(tenantId) {
                     @Override
                     public A apply(I input) {
-                        final Optional<A> optional = find(input);
+                        Optional<A> optional = find(input);
                         if (!optional.isPresent()) {
                             fail("Aggregate not found.");
                         }

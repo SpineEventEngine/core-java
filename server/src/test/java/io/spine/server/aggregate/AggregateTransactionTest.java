@@ -119,8 +119,8 @@ class AggregateTransactionTest
             Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
             Event event) {
 
-        final TestAggregate aggregate = (TestAggregate) entity;
-        final Message actualMessage = unpack(event.getMessage());
+        TestAggregate aggregate = (TestAggregate) entity;
+        Message actualMessage = unpack(event.getMessage());
         assertTrue(aggregate.getReceivedEvents()
                             .contains(actualMessage));
     }

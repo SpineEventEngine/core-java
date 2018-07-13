@@ -60,7 +60,7 @@ class Element implements Serializable {
         } else if (value instanceof Optional) {
             this.type = Type.OPTIONAL;
         } else if (value instanceof GeneratedMessageV3) {
-            final GeneratedMessageV3 messageV3 = (GeneratedMessageV3) value;
+            GeneratedMessageV3 messageV3 = (GeneratedMessageV3) value;
             checkNotDefault(messageV3);
             this.type = Type.MESSAGE;
         } else {
@@ -77,7 +77,7 @@ class Element implements Serializable {
      */
     static <T> T value(Tuple tuple, int index) {
         @SuppressWarnings("unchecked") // The caller is responsible for the correct type.
-        final T value = (T) tuple.get(index);
+        T value = (T) tuple.get(index);
         return value;
     }
 
@@ -85,7 +85,7 @@ class Element implements Serializable {
      * Ensures that the passed message is not default or is an instance of {@link Empty}.
      */
     private static void checkNotDefault(Message value) {
-        final String valueClass = value.getClass()
+        String valueClass = value.getClass()
                                        .getName();
         checkArgument(
                 Validate.isNotDefault(value),
@@ -104,7 +104,7 @@ class Element implements Serializable {
             case EITHER:
                 return ((Either) value).getValue();
             case OPTIONAL: {
-                final Optional optional = (Optional) value;
+                Optional optional = (Optional) value;
                 Message result = optional.isPresent()
                                  ? (Message) optional.get()
                                  : Empty.getDefaultInstance();
@@ -132,7 +132,7 @@ class Element implements Serializable {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final Element other = (Element) obj;
+        Element other = (Element) obj;
         return Objects.equals(this.value, other.value)
                 && Objects.equals(this.type, other.type);
     }

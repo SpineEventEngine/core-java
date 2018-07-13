@@ -68,8 +68,8 @@ public class EventEnricherTestEnv {
     }
 
     public static Event createEvent(Message msg) {
-        final TestEventFactory eventFactory = newInstance(EventEnricherTest.class);
-        final Event event = eventFactory.createEvent(msg);
+        TestEventFactory eventFactory = newInstance(EventEnricherTest.class);
+        Event event = eventFactory.createEvent(msg);
         return event;
     }
 
@@ -227,7 +227,7 @@ public class EventEnricherTestEnv {
             @Override
             public @Nullable String apply(@Nullable ProjectId id) {
                 checkNotNull(id);
-                final String name = "prj_" + id.getId();
+                String name = "prj_" + id.getId();
                 return name;
             }
         }

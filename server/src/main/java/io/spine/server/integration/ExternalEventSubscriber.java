@@ -64,24 +64,24 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
 
     @Override
     public Set<ExternalMessageClass> getMessageClasses() {
-        final EventSubscriberClass<?> subscriberClass =
+        EventSubscriberClass<?> subscriberClass =
                 Model.getInstance()
                      .asEventSubscriberClass(delegate.getClass());
-        final Set<EventClass> extSubscriptions =
+        Set<EventClass> extSubscriptions =
                 subscriberClass.getExternalEventSubscriptions();
         return ExternalMessageClass.fromEventClasses(extSubscriptions);
     }
 
     @Override
     public Set<String> dispatch(ExternalMessageEnvelope envelope) {
-        final ExternalMessage externalMessage = envelope.getOuterObject();
-        final Message unpacked = AnyPacker.unpack(externalMessage.getOriginalMessage());
+        ExternalMessage externalMessage = envelope.getOuterObject();
+        Message unpacked = AnyPacker.unpack(externalMessage.getOriginalMessage());
         if (!(unpacked instanceof Event)) {
             throw newIllegalStateException("Unexpected object %s while dispatching " +
                                                    "the external event to the event subscriber.",
                                            Stringifiers.toString(unpacked));
         }
-        final Event event = (Event) unpacked;
+        Event event = (Event) unpacked;
         checkArgument(isExternal(event.getContext()),
                       "External event expected, but got %s",
                       Stringifiers.toString(event));
@@ -93,9 +93,9 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
         checkNotNull(envelope);
         checkNotNull(exception);
 
-        final MessageClass messageClass = envelope.getMessageClass();
-        final String messageId = Stringifiers.toString(envelope.getId());
-        final String errorMessage =
+        MessageClass messageClass = envelope.getMessageClass();
+        String messageId = Stringifiers.toString(envelope.getId());
+        String errorMessage =
                 format("Error handling external event subscription (class: %s id: %s).",
                        messageClass, messageId);
         log().error(errorMessage, exception);

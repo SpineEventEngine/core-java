@@ -86,7 +86,7 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("CommandBus Builder")
         void commandBusBuilder() {
-            final CommandBus.Builder expected = CommandBus.newBuilder();
+            CommandBus.Builder expected = CommandBus.newBuilder();
             builder = BoundedContext.newBuilder()
                                     .setCommandBus(expected);
             assertEquals(expected, builder.getCommandBus()
@@ -96,7 +96,7 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("EventBus Builder")
         void eventBusBuilder() {
-            final EventBus.Builder expected = EventBus.newBuilder();
+            EventBus.Builder expected = EventBus.newBuilder();
             builder.setEventBus(expected);
             assertEquals(expected, builder.getEventBus()
                                           .get());
@@ -105,7 +105,7 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("IntegrationBus Builder")
         void integrationBusBuilder() {
-            final IntegrationBus.Builder expected = IntegrationBus.newBuilder();
+            IntegrationBus.Builder expected = IntegrationBus.newBuilder();
             builder.setIntegrationBus(expected);
             assertEquals(expected, builder.getIntegrationBus()
                                           .get());
@@ -114,7 +114,7 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("name if it was set")
         void name() {
-            final String nameString = getClass().getName();
+            String nameString = getClass().getName();
             assertEquals(nameString, BoundedContext.newBuilder()
                                                    .setName(nameString)
                                                    .getName());
@@ -157,7 +157,7 @@ class BoundedContextBuilderTest {
         @DisplayName("CommandBus")
         void commandBus() {
             // Pass EventBus to builder initialization, and do NOT pass CommandBus.
-            final BoundedContext boundedContext = builder
+            BoundedContext boundedContext = builder
                     .setEventBus(EventBus.newBuilder())
                     .build();
             assertNotNull(boundedContext.getCommandBus());
@@ -167,7 +167,7 @@ class BoundedContextBuilderTest {
         @DisplayName("EventBus")
         void eventBus() {
             // Pass CommandBus.Builder to builder initialization, and do NOT pass EventBus.
-            final BoundedContext boundedContext = builder
+            BoundedContext boundedContext = builder
                     .setMultitenant(true)
                     .setCommandBus(CommandBus.newBuilder())
                     .build();
@@ -177,7 +177,7 @@ class BoundedContextBuilderTest {
         @Test
         @DisplayName("CommandBus and EventBus simultaneously")
         void commandBusAndEventBus() {
-            final BoundedContext boundedContext = builder.build();
+            BoundedContext boundedContext = builder.build();
             assertNotNull(boundedContext.getCommandBus());
             assertNotNull(boundedContext.getEventBus());
         }
@@ -200,7 +200,7 @@ class BoundedContextBuilderTest {
     @Test
     @DisplayName("allow TenantIndex configuration")
     void setTenantIndex() {
-        final TenantIndex tenantIndex = mock(TenantIndex.class);
+        TenantIndex tenantIndex = mock(TenantIndex.class);
         assertEquals(tenantIndex, BoundedContext.newBuilder()
                                                 .setTenantIndex(tenantIndex)
                                                 .getTenantIndex()
@@ -210,7 +210,7 @@ class BoundedContextBuilderTest {
     @Test
     @DisplayName("not accept CommandBus with different multitenancy state")
     void matchCommandBusMultitenancy() {
-        final CommandBus.Builder commandBus = CommandBus.newBuilder()
+        CommandBus.Builder commandBus = CommandBus.newBuilder()
                                                         .setMultitenant(true)
                                                         .setCommandStore(mock(CommandStore.class));
         assertThrows(IllegalStateException.class, () -> BoundedContext.newBuilder()

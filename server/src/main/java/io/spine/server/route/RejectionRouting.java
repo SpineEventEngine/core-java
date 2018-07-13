@@ -110,7 +110,7 @@ public final class RejectionRouting<I>
                                                          RejectionRoute<I, R> via)
         throws IllegalStateException {
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
-        final Route<Message, RejectionContext, Set<I>> casted =
+        Route<Message, RejectionContext, Set<I>> casted =
                 (Route<Message, RejectionContext, Set<I>>) via;
         return (RejectionRouting<I>) doRoute(rejectionClass, casted);
     }
@@ -123,10 +123,10 @@ public final class RejectionRouting<I>
      * @return optionally available route
      */
     public <M extends Message> Optional<RejectionRoute<I, M>> get(Class<M> rejectionClass) {
-        final Optional<? extends Route<Message, RejectionContext, Set<I>>> optional =
+        Optional<? extends Route<Message, RejectionContext, Set<I>>> optional =
                 doGet(rejectionClass);
         if (optional.isPresent()) {
-            final RejectionRoute<I, M> route = (RejectionRoute<I, M>) optional.get();
+            RejectionRoute<I, M> route = (RejectionRoute<I, M>) optional.get();
             return Optional.of(route);
         }
         return Optional.absent();

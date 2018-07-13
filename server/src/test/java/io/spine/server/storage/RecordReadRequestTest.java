@@ -43,9 +43,9 @@ class RecordReadRequestTest {
     @Test
     @DisplayName("consider request with same ID equal")
     void provideEquals() {
-        final String id = "ID";
-        final RecordReadRequest<String> first = new RecordReadRequest<>(id);
-        final RecordReadRequest<String> second = new RecordReadRequest<>(id);
+        String id = "ID";
+        RecordReadRequest<String> first = new RecordReadRequest<>(id);
+        RecordReadRequest<String> second = new RecordReadRequest<>(id);
         new EqualsTester().addEqualityGroup(first, second)
                           .testEquals();
     }

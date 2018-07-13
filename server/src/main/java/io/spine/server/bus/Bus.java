@@ -141,10 +141,10 @@ public abstract class Bus<T extends Message,
         checkNotNull(messages);
         checkNotNull(observer);
 
-        final Iterable<T> filteredMessages = filter(messages, observer);
+        Iterable<T> filteredMessages = filter(messages, observer);
         if (!isEmpty(filteredMessages)) {
             store(filteredMessages);
-            final Iterable<E> envelopes = transform(filteredMessages, toEnvelope());
+            Iterable<E> envelopes = transform(filteredMessages, toEnvelope());
             doPost(envelopes, observer);
         }
         observer.onCompleted();
@@ -197,10 +197,10 @@ public abstract class Bus<T extends Message,
      */
     private BusFilter<E> filterChain() {
         if (filterChain == null) {
-            final Deque<BusFilter<E>> filters = createFilterChain();
-            final BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(),
+            Deque<BusFilter<E>> filters = createFilterChain();
+            BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(),
                                                                        registry());
-            final BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
+            BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
             filters.push(deadMsgFilter);
             filters.push(validatingFilter);
             filterChain = new FilterChain<>(filters);
@@ -258,9 +258,9 @@ public abstract class Bus<T extends Message,
     private Iterable<T> filter(Iterable<T> messages, StreamObserver<Ack> observer) {
         checkNotNull(messages);
         checkNotNull(observer);
-        final Collection<T> result = newLinkedList();
+        Collection<T> result = newLinkedList();
         for (T message : messages) {
-            final Optional<Ack> response = filter(toEnvelope(message));
+            Optional<Ack> response = filter(toEnvelope(message));
             if (response.isPresent()) {
                 observer.onNext(response.get());
             } else {
@@ -284,7 +284,7 @@ public abstract class Bus<T extends Message,
      * {@link Optional#absent() Optional.absent()} otherwise
      */
     private Optional<Ack> filter(E message) {
-        final Optional<Ack> filterOutput = filterChain().accept(message);
+        Optional<Ack> filterOutput = filterChain().accept(message);
         return filterOutput;
     }
 
@@ -414,7 +414,7 @@ public abstract class Bus<T extends Message,
         @Override
         public E apply(@Nullable T message) {
             checkNotNull(message);
-            final E result = toEnvelope(message);
+            E result = toEnvelope(message);
             return result;
         }
     }

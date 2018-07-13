@@ -72,7 +72,7 @@ public class EnricherBuilderTestEnv {
                 if (id == null) {
                     return null;
                 }
-                final String name = "P-" + id.getId();
+                String name = "P-" + id.getId();
                 return name;
             }
         }

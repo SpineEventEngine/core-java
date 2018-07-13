@@ -82,8 +82,8 @@ public class RejectionBusTest {
     @Test   // As the RejectionBus instances do not support enrichment yet.
     @DisplayName("not enrich rejection messages")
     void notEnrichRejectionMessages() {
-        final Rejection original = invalidProjectNameRejection();
-        final RejectionEnvelope enriched = rejectionBus.enrich(RejectionEnvelope.of(original));
+        Rejection original = invalidProjectNameRejection();
+        RejectionEnvelope enriched = rejectionBus.enrich(RejectionEnvelope.of(original));
         assertEquals(original, enriched.getOuterObject());
     }
 
@@ -101,16 +101,16 @@ public class RejectionBusTest {
         @Test
         @DisplayName("subscriber")
         void subscriber() {
-            final RejectionSubscriber subscriberOne = new InvalidProjectNameSubscriber();
-            final RejectionSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
+            RejectionSubscriber subscriberOne = new InvalidProjectNameSubscriber();
+            RejectionSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
 
             rejectionBus.register(subscriberOne);
             rejectionBus.register(subscriberTwo);
 
-            final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
+            RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
             assertTrue(rejectionBus.hasDispatchers(rejectionClass));
 
-            final Collection<RejectionDispatcher<?>> dispatchers = rejectionBus.getDispatchers(
+            Collection<RejectionDispatcher<?>> dispatchers = rejectionBus.getDispatchers(
                     rejectionClass);
             assertTrue(dispatchers.contains(subscriberOne));
             assertTrue(dispatchers.contains(subscriberTwo));
@@ -119,11 +119,11 @@ public class RejectionBusTest {
         @Test
         @DisplayName("dispatcher")
         void dispatcher() {
-            final RejectionDispatcher<?> dispatcher = new BareDispatcher();
+            RejectionDispatcher<?> dispatcher = new BareDispatcher();
 
             rejectionBus.register(dispatcher);
 
-            final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
+            RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
             assertTrue(rejectionBus.getDispatchers(rejectionClass)
                                    .contains(dispatcher));
         }
@@ -136,18 +136,18 @@ public class RejectionBusTest {
         @Test
         @DisplayName("subscriber")
         void subscriber() {
-            final RejectionSubscriber subscriberOne = new InvalidProjectNameSubscriber();
-            final RejectionSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
+            RejectionSubscriber subscriberOne = new InvalidProjectNameSubscriber();
+            RejectionSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
             rejectionBus.register(subscriberOne);
             rejectionBus.register(subscriberTwo);
-            final RejectionClass rejectionClass = RejectionClass.of(
+            RejectionClass rejectionClass = RejectionClass.of(
                     InvalidProjectName.class);
 
             rejectionBus.unregister(subscriberOne);
 
             // Check that the 2nd subscriber with the same rejection subscriber method remains
             // after the 1st subscriber unregisters.
-            final Collection<RejectionDispatcher<?>> subscribers =
+            Collection<RejectionDispatcher<?>> subscribers =
                     rejectionBus.getDispatchers(rejectionClass);
             assertFalse(subscribers.contains(subscriberOne));
             assertTrue(subscribers.contains(subscriberTwo));
@@ -162,14 +162,14 @@ public class RejectionBusTest {
         @Test
         @DisplayName("dispatcher")
         void dispatcher() {
-            final RejectionDispatcher<?> dispatcherOne = new BareDispatcher();
-            final RejectionDispatcher<?> dispatcherTwo = new BareDispatcher();
-            final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
+            RejectionDispatcher<?> dispatcherOne = new BareDispatcher();
+            RejectionDispatcher<?> dispatcherTwo = new BareDispatcher();
+            RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
             rejectionBus.register(dispatcherOne);
             rejectionBus.register(dispatcherTwo);
 
             rejectionBus.unregister(dispatcherOne);
-            final Set<RejectionDispatcher<?>> dispatchers =
+            Set<RejectionDispatcher<?>> dispatchers =
                     rejectionBus.getDispatchers(rejectionClass);
 
             // Check we don't have 1st dispatcher, but have 2nd.
@@ -185,11 +185,11 @@ public class RejectionBusTest {
     @Test
     @DisplayName("unregister registries on close")
     void unregisterAllOnClose() throws Exception {
-        final RejectionBus rejectionBus = RejectionBus.newBuilder()
+        RejectionBus rejectionBus = RejectionBus.newBuilder()
                                                       .build();
         rejectionBus.register(new BareDispatcher());
         rejectionBus.register(new InvalidProjectNameSubscriber());
-        final RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
+        RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
 
         rejectionBus.close();
 
@@ -204,13 +204,13 @@ public class RejectionBusTest {
         @Test
         @DisplayName("subscriber")
         void subscriber() {
-            final InvalidProjectNameSubscriber subscriber = new InvalidProjectNameSubscriber();
-            final Rejection rejection = invalidProjectNameRejection();
+            InvalidProjectNameSubscriber subscriber = new InvalidProjectNameSubscriber();
+            Rejection rejection = invalidProjectNameRejection();
             rejectionBus.register(subscriber);
 
             rejectionBus.post(rejection);
 
-            final Rejection handled = subscriber.getRejectionHandled();
+            Rejection handled = subscriber.getRejectionHandled();
             // Compare the content without command ID, which is different in the remembered.
             assertEquals(rejection.getMessage(), handled.getMessage());
             assertEquals(rejection.getContext()
@@ -230,7 +230,7 @@ public class RejectionBusTest {
         @Test
         @DisplayName("dispatcher")
         void dispatcher() {
-            final BareDispatcher dispatcher = new BareDispatcher();
+            BareDispatcher dispatcher = new BareDispatcher();
 
             rejectionBus.register(dispatcher);
 
@@ -247,10 +247,10 @@ public class RejectionBusTest {
         @Test
         @DisplayName("rejection message only")
         void rejectionOnly() {
-            final MultipleRejectionSubscriber subscriber = new MultipleRejectionSubscriber();
+            MultipleRejectionSubscriber subscriber = new MultipleRejectionSubscriber();
             rejectionBus.register(subscriber);
 
-            final Rejection rejection = cannotModifyDeletedEntity(StringValue.class);
+            Rejection rejection = cannotModifyDeletedEntity(StringValue.class);
             rejectionBus.post(rejection);
 
             assertEquals(1, subscriber.numberOfSubscriberCalls());
@@ -260,11 +260,11 @@ public class RejectionBusTest {
         @Test
         @DisplayName("rejection and command message")
         void rejectionAndCommandMessage() {
-            final MultipleRejectionSubscriber subscriber = new MultipleRejectionSubscriber();
+            MultipleRejectionSubscriber subscriber = new MultipleRejectionSubscriber();
             rejectionBus.register(subscriber);
 
-            final Class<RjStartProject> commandMessageCls = RjStartProject.class;
-            final Rejection rejection = cannotModifyDeletedEntity(commandMessageCls);
+            Class<RjStartProject> commandMessageCls = RjStartProject.class;
+            Rejection rejection = cannotModifyDeletedEntity(commandMessageCls);
             rejectionBus.post(rejection);
 
             assertEquals(1, subscriber.numberOfSubscriberCalls());
@@ -275,7 +275,7 @@ public class RejectionBusTest {
     @Test
     @DisplayName("catch exceptions caused by subscribers")
     void catchSubscriberExceptions() {
-        final VerifiableSubscriber faultySubscriber = new FaultySubscriber();
+        VerifiableSubscriber faultySubscriber = new FaultySubscriber();
 
         rejectionBus.register(faultySubscriber);
         rejectionBus.post(invalidProjectNameRejection());
@@ -290,33 +290,33 @@ public class RejectionBusTest {
         @Test
         @DisplayName("short form")
         void shortForm() {
-            final RejectionMessageSubscriber subscriber = new RejectionMessageSubscriber();
+            RejectionMessageSubscriber subscriber = new RejectionMessageSubscriber();
             checkRejection(subscriber);
         }
 
         @Test
         @DisplayName("context aware")
         void contextAware() {
-            final ContextAwareSubscriber subscriber = new ContextAwareSubscriber();
+            ContextAwareSubscriber subscriber = new ContextAwareSubscriber();
             checkRejection(subscriber);
         }
 
         @Test
         @DisplayName("command message aware")
         void commandMessageAware() {
-            final CommandMessageAwareSubscriber subscriber = new CommandMessageAwareSubscriber();
+            CommandMessageAwareSubscriber subscriber = new CommandMessageAwareSubscriber();
             checkRejection(subscriber);
         }
 
         @Test
         @DisplayName("command aware")
         void commandAware() {
-            final CommandAwareSubscriber subscriber = new CommandAwareSubscriber();
+            CommandAwareSubscriber subscriber = new CommandAwareSubscriber();
             checkRejection(subscriber);
         }
 
         private void checkRejection(VerifiableSubscriber subscriber) {
-            final Rejection rejection = missingOwnerRejection();
+            Rejection rejection = missingOwnerRejection();
             rejectionBus.register(subscriber);
             rejectionBus.post(rejection);
 
@@ -328,7 +328,7 @@ public class RejectionBusTest {
     @Test
     @DisplayName("not support subscriber methods with wrong parameter sequence")
     void rejectWrongArgSequence() {
-        final RejectionDispatcher<?> subscriber = new InvalidOrderSubscriber();
+        RejectionDispatcher<?> subscriber = new InvalidOrderSubscriber();
 
         // In Bus ->  No message types are forwarded by this dispatcher.
         assertThrows(IllegalArgumentException.class,
@@ -338,13 +338,13 @@ public class RejectionBusTest {
     @Test
     @DisplayName("report dead messages")
     void reportDeadMessages() {
-        final MemoizingObserver<Ack> observer = memoizingObserver();
+        MemoizingObserver<Ack> observer = memoizingObserver();
         rejectionBus.post(missingOwnerRejection(), observer);
         assertTrue(observer.isCompleted());
-        final Ack result = observer.firstResponse();
+        Ack result = observer.firstResponse();
         assertNotNull(result);
         assertEquals(ERROR, result.getStatus().getStatusCase());
-        final Error error = result.getStatus().getError();
+        Error error = result.getStatus().getError();
         assertEquals(UnhandledRejectionException.class.getCanonicalName(), error.getType());
     }
 

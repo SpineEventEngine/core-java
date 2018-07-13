@@ -74,10 +74,10 @@ public class EventRootCommandIdTest {
                                        .setMultitenant(true)
                                        .build();
 
-        final ProjectAggregateRepository projectRepository = new ProjectAggregateRepository();
-        final TeamAggregateRepository teamRepository = new TeamAggregateRepository();
-        final TeamCreationRepository teamCreationRepository = new TeamCreationRepository();
-        final UserSignUpRepository userSignUpRepository = new UserSignUpRepository();
+        ProjectAggregateRepository projectRepository = new ProjectAggregateRepository();
+        TeamAggregateRepository teamRepository = new TeamAggregateRepository();
+        TeamCreationRepository teamCreationRepository = new TeamCreationRepository();
+        UserSignUpRepository userSignUpRepository = new UserSignUpRepository();
 
         boundedContext.register(projectRepository);
         boundedContext.register(teamRepository);
@@ -97,22 +97,22 @@ public class EventRootCommandIdTest {
         @Test
         @DisplayName("aggregate")
         void aggregate() {
-            final Command command = command(createProject(projectId(), teamId()));
+            Command command = command(createProject(projectId(), teamId()));
 
             postCommand(command);
 
-            final List<Event> events = readEvents();
+            List<Event> events = readEvents();
             assertEquals(command.getId(), getRootCommandId(events.get(0)));
         }
 
         @Test
         @DisplayName("aggregate in case command returns multiple events")
         void aggregateForMultipleEvents() {
-            final Command command = command(addTasks(projectId(), 3));
+            Command command = command(addTasks(projectId(), 3));
 
             postCommand(command);
 
-            final List<Event> events = readEvents();
+            List<Event> events = readEvents();
             assertSize(3, events);
             assertEquals(command.getId(), getRootCommandId(events.get(0)));
             assertEquals(command.getId(), getRootCommandId(events.get(1)));
@@ -122,25 +122,25 @@ public class EventRootCommandIdTest {
         @Test
         @DisplayName("process manager")
         void processManager() {
-            final Command command = command(addTeamMember(teamId()));
+            Command command = command(addTeamMember(teamId()));
 
             postCommand(command);
 
-            final List<Event> events = readEvents();
+            List<Event> events = readEvents();
             assertSize(1, events);
 
-            final Event event = events.get(0);
+            Event event = events.get(0);
             assertEquals(command.getId(), getRootCommandId(event));
         }
 
         @Test
         @DisplayName("process manager in case command returns multiple events")
         void processManagerForMultipleEvents() {
-            final Command command = command(inviteTeamMembers(teamId(), 3));
+            Command command = command(inviteTeamMembers(teamId(), 3));
 
             postCommand(command);
 
-            final List<Event> events = readEvents();
+            List<Event> events = readEvents();
             assertSize(3, events);
             assertEquals(command.getId(), getRootCommandId(events.get(0)));
             assertEquals(command.getId(), getRootCommandId(events.get(1)));
@@ -168,14 +168,14 @@ public class EventRootCommandIdTest {
         @Test
         @DisplayName("aggregate")
         void aggregate() {
-            final Command command = command(createProject(projectId(), teamId()));
+            Command command = command(createProject(projectId(), teamId()));
 
             postCommand(command);
 
-            final List<Event> events = readEvents();
+            List<Event> events = readEvents();
             assertSize(2, events);
 
-            final Event reaction = events.get(1);
+            Event reaction = events.get(1);
             assertEquals(command.getId(), getRootCommandId(reaction));
         }
 
@@ -196,20 +196,20 @@ public class EventRootCommandIdTest {
         @Test
         @DisplayName("process manager")
         void processManager() {
-            final Command command = command(acceptInvitation(teamId()));
+            Command command = command(acceptInvitation(teamId()));
 
             postCommand(command);
 
-            final List<Event> events = readEvents();
+            List<Event> events = readEvents();
             assertSize(2, events);
 
-            final Event reaction = events.get(1);
+            Event reaction = events.get(1);
             assertEquals(command.getId(), getRootCommandId(reaction));
         }
     }
 
     private void postCommand(Command command) {
-        final StreamObserver<Ack> observer = noOpObserver();
+        StreamObserver<Ack> observer = noOpObserver();
         boundedContext.getCommandBus()
                       .post(command, observer);
     }
@@ -218,9 +218,9 @@ public class EventRootCommandIdTest {
      * Reads all events from the bounded context event store.
      */
     private List<Event> readEvents() {
-        final MemoizingObserver<Event> observer = StreamObservers.memoizingObserver();
+        MemoizingObserver<Event> observer = StreamObservers.memoizingObserver();
 
-        final TenantAwareOperation operation = new TenantAwareOperation(TENANT_ID) {
+        TenantAwareOperation operation = new TenantAwareOperation(TENANT_ID) {
             @Override
             public void run() {
                 boundedContext.getEventBus()
@@ -230,7 +230,7 @@ public class EventRootCommandIdTest {
         };
         operation.execute();
 
-        final List<Event> results = observer.responses();
+        List<Event> results = observer.responses();
         return results;
     }
 }

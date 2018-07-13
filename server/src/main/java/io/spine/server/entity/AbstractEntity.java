@@ -127,10 +127,10 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      */
     @Override
     public S getDefaultState() {
-        final Class<? extends Entity> entityClass = getClass();
+        Class<? extends Entity> entityClass = getClass();
         @SuppressWarnings("unchecked")
         // cast is safe because this type of messages is saved to the map
-        final S result = (S) Model.getInstance()
+        S result = (S) Model.getInstance()
                                   .getDefaultState(entityClass);
         return result;
     }
@@ -172,7 +172,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * @see #checkEntityState(Message)
      */
     private void validate(S newState) throws InvalidEntityStateException {
-        final List<ConstraintViolation> violations = checkEntityState(newState);
+        List<ConstraintViolation> violations = checkEntityState(newState);
         if (!violations.isEmpty()) {
             throw InvalidEntityStateException.onConstraintViolations(newState, violations);
         }

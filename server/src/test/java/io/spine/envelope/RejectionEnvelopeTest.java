@@ -55,13 +55,13 @@ class RejectionEnvelopeTest extends MessageEnvelopeTest<Rejection,
 
     @Override
     protected Rejection outerObject() {
-        final Message commandMessage = Int32Value.getDefaultInstance();
-        final Command command = requestFactory.command()
+        Message commandMessage = Int32Value.getDefaultInstance();
+        Command command = requestFactory.command()
                                               .create(commandMessage);
-        final Message rejectionMessage = CannotPerformBusinessOperation.newBuilder()
+        Message rejectionMessage = CannotPerformBusinessOperation.newBuilder()
                                                                        .setOperationId(newUuid())
                                                                        .build();
-        final Rejection rejection = Rejections.createRejection(rejectionMessage, command);
+        Rejection rejection = Rejections.createRejection(rejectionMessage, command);
         return rejection;
     }
 
@@ -78,29 +78,29 @@ class RejectionEnvelopeTest extends MessageEnvelopeTest<Rejection,
     @Test
     @DisplayName("obtain command context")
     void getCommandContext() {
-        final Rejection rejection = outerObject();
-        final Command command = rejection.getContext()
+        Rejection rejection = outerObject();
+        Command command = rejection.getContext()
                                          .getCommand();
-        final RejectionEnvelope envelope = toEnvelope(rejection);
+        RejectionEnvelope envelope = toEnvelope(rejection);
         assertEquals(command.getContext(), envelope.getCommandContext());
     }
 
     @Test
     @DisplayName("obtain command message")
     void getCommandMessage() {
-        final Rejection rejection = outerObject();
-        final Command command = rejection.getContext()
+        Rejection rejection = outerObject();
+        Command command = rejection.getContext()
                                          .getCommand();
-        final Message commandMessage = AnyPacker.unpack(command.getMessage());
-        final RejectionEnvelope envelope = toEnvelope(rejection);
+        Message commandMessage = AnyPacker.unpack(command.getMessage());
+        RejectionEnvelope envelope = toEnvelope(rejection);
         assertEquals(commandMessage, envelope.getCommandMessage());
     }
 
     @Test
     @DisplayName("obtain actor context")
     void getActorContext() {
-        final RejectionEnvelope rejection = toEnvelope(outerObject());
-        final ActorContext actorContext = rejection.getActorContext();
+        RejectionEnvelope rejection = toEnvelope(outerObject());
+        ActorContext actorContext = rejection.getActorContext();
 
         /* Since we're using `TestActorRequestFactory` initialized with the class of this test suite
            the actor ID should be the suite class name.

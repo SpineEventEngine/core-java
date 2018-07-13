@@ -103,7 +103,7 @@ public class EventStore implements AutoCloseable {
                        StorageFactory storageFactory,
                        @Nullable Logger logger) {
         super();
-        final ERepository eventRepository = new ERepository();
+        ERepository eventRepository = new ERepository();
         eventRepository.initStorage(storageFactory);
         this.storage = eventRepository;
         this.streamExecutor = streamExecutor;
@@ -119,9 +119,9 @@ public class EventStore implements AutoCloseable {
      *
      * @param event the record to append
      */
-    public void append(final Event event) {
+    public void append(Event event) {
         checkNotNull(event);
-        final TenantAwareOperation op = new EventOperation(event) {
+        TenantAwareOperation op = new EventOperation(event) {
             @Override
             public void run() {
                 store(event);
@@ -142,7 +142,7 @@ public class EventStore implements AutoCloseable {
      *
      * @param events the events to append
      */
-    public void appendAll(final Iterable<Event> events) {
+    public void appendAll(Iterable<Event> events) {
         checkNotNull(events);
         Optional<Event> tenantDefiningEvent = tryFind(events, Predicates.notNull());
         if (!tenantDefiningEvent.isPresent()) {
@@ -197,7 +197,7 @@ public class EventStore implements AutoCloseable {
      * @param request          the query with filtering parameters for the event history
      * @param responseObserver observer for the resulting stream
      */
-    public void read(final EventStreamQuery request, final StreamObserver<Event> responseObserver) {
+    public void read(EventStreamQuery request, StreamObserver<Event> responseObserver) {
         checkNotNull(request);
         checkNotNull(responseObserver);
 
@@ -206,9 +206,9 @@ public class EventStore implements AutoCloseable {
         streamExecutor.execute(new Runnable() {
             @Override
             public void run() {
-                final Iterator<Event> eventRecords = iterator(request);
+                Iterator<Event> eventRecords = iterator(request);
                 while (eventRecords.hasNext()) {
-                    final Event event = eventRecords.next();
+                    Event event = eventRecords.next();
                     responseObserver.onNext(event);
                 }
                 responseObserver.onCompleted();
@@ -369,7 +369,7 @@ public class EventStore implements AutoCloseable {
         }
 
         if (logger.isInfoEnabled()) {
-            final String requestData = TextFormat.shortDebugString(request);
+            String requestData = TextFormat.shortDebugString(request);
             logger.info("Creating stream on request: {} for observer: {}",
                         requestData,
                         responseObserver);

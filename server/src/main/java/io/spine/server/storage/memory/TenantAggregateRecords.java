@@ -59,7 +59,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
 
     @Override
     public Iterator<I> index() {
-        final Iterator<I> result = records.keySet()
+        Iterator<I> result = records.keySet()
                                           .iterator();
         return result;
     }
@@ -83,7 +83,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
      * @return immutable list
      */
     List<AggregateEventRecord> getHistoryBackward(AggregateReadRequest<I> request) {
-        final I id = request.getRecordId();
+        I id = request.getRecordId();
         return ImmutableList.copyOf(records.get(id));
     }
 
@@ -96,7 +96,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
      * @return the number of events stored for the aggregate or zero
      */
     int getEventCount(I id) {
-        final Integer count = eventCounts.get(id);
+        Integer count = eventCounts.get(id);
         if (count == null) {
             return 0;
         }
@@ -109,7 +109,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
      * <p>If no status stored, the default instance is returned.
      */
     Optional<LifecycleFlags> getStatus(I id) {
-        final LifecycleFlags entityStatus = statuses.get(id);
+        LifecycleFlags entityStatus = statuses.get(id);
         return Optional.fromNullable(entityStatus);
     }
 
@@ -151,8 +151,8 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
             }
 
             // To define an order:
-            final int firstHashCode = first.hashCode();
-            final int secondHashCode = second.hashCode();
+            int firstHashCode = first.hashCode();
+            int secondHashCode = second.hashCode();
 
             result = Integer.compare(firstHashCode, secondHashCode);
             return result;
@@ -195,8 +195,8 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
          */
         private static int compareSimilarRecords(AggregateEventRecord first,
                                                  AggregateEventRecord second) {
-            final boolean firstIsSnapshot = isSnapshot(first);
-            final boolean secondIsSnapshot = isSnapshot(second);
+            boolean firstIsSnapshot = isSnapshot(first);
+            boolean secondIsSnapshot = isSnapshot(second);
             if (firstIsSnapshot && !secondIsSnapshot) {
                 return -1;
             } else if (secondIsSnapshot && !firstIsSnapshot) {
@@ -214,8 +214,8 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
         private static int compareVersions(AggregateEventRecord first,
                                            AggregateEventRecord second) {
             int result;
-            final int secondEventVersion = versionNumberOf(second);
-            final int firstEventVersion = versionNumberOf(first);
+            int secondEventVersion = versionNumberOf(second);
+            int firstEventVersion = versionNumberOf(first);
             result = Integer.compare(secondEventVersion, firstEventVersion);
             return result;
         }
@@ -226,9 +226,9 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
         }
 
         private static int versionNumberOf(AggregateEventRecord record) {
-            final int versionNumber;
+            int versionNumber;
 
-            final Event event = record.getEvent();
+            Event event = record.getEvent();
             if (isDefault(event)) {
                 versionNumber = record.getSnapshot()
                                       .getVersion()

@@ -64,9 +64,9 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
             return;
         }
 
-        final Optional<E> optional = find(id);
+        Optional<E> optional = find(id);
         if (!optional.isPresent()) {
-            final E newEntity = create(id);
+            E newEntity = create(id);
             store(newEntity);
         }
         cache(id);
@@ -86,7 +86,7 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
      * @return {@code true} if the value was cached before and removed, {@code false} otherwise
      */
     protected boolean unCache(TenantId id) {
-        final boolean result = cache.remove(id);
+        boolean result = cache.remove(id);
         return result;
     }
 
@@ -99,11 +99,11 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
 
     @Override
     public Set<TenantId> getAll() {
-        final Storage<TenantId, ?, ?> storage = getStorage();
-        final Iterator<TenantId> index = storage != null
+        Storage<TenantId, ?, ?> storage = getStorage();
+        Iterator<TenantId> index = storage != null
                                          ? storage.index()
                                          : null;
-        final Set<TenantId> result = index != null
+        Set<TenantId> result = index != null
                                      ? ImmutableSet.copyOf(index)
                                      : ImmutableSet.<TenantId>of();
         cache.addAll(result);

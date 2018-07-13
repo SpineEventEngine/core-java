@@ -74,9 +74,9 @@ public class EEntity extends AbstractEntity<EventId, Event> {
     private static final Comparator<EEntity> comparator = new Comparator<EEntity>() {
         @Override
         public int compare(EEntity e1, EEntity e2) {
-            final Event event1 = e1.getState();
-            final Event event2 = e2.getState();
-            final int result = Events.eventComparator()
+            Event event1 = e1.getState();
+            Event event2 = e2.getState();
+            int result = Events.eventComparator()
                                      .compare(event1, event2);
             return result;
         }
@@ -88,7 +88,7 @@ public class EEntity extends AbstractEntity<EventId, Event> {
 
     EEntity(Event event) {
         this(event.getId());
-        final Event eventWithoutEnrichments = clearEnrichments(event);
+        Event eventWithoutEnrichments = clearEnrichments(event);
         updateState(eventWithoutEnrichments);
     }
 

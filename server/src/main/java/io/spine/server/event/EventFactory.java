@@ -91,9 +91,9 @@ public class EventFactory {
         checkNotNull(messageOrAny);
         validate(messageOrAny);     // we must validate it now before emitting the next ID.
 
-        final EventId eventId = Events.generateId();
-        final EventContext context = createContext(version);
-        final Event result = createEvent(eventId, messageOrAny, context);
+        EventId eventId = Events.generateId();
+        EventContext context = createContext(version);
+        Event result = createEvent(eventId, messageOrAny, context);
         return result;
     }
 
@@ -104,7 +104,7 @@ public class EventFactory {
      * for the validation.
      */
     private static void validate(Message messageOrAny) throws ValidationException {
-        final Message toValidate;
+        Message toValidate;
         toValidate = messageOrAny instanceof Any
                 ? AnyPacker.unpack((Any) messageOrAny)
                 : messageOrAny;
@@ -122,8 +122,8 @@ public class EventFactory {
     private static Event createEvent(EventId id, Message messageOrAny, EventContext context) {
         checkNotNull(messageOrAny);
         checkNotNull(context);
-        final Any packed = pack(messageOrAny);
-        final Event result = Event.newBuilder()
+        Any packed = pack(messageOrAny);
+        Event result = Event.newBuilder()
                                   .setId(id)
                                   .setMessage(packed)
                                   .setContext(context)
@@ -135,17 +135,17 @@ public class EventFactory {
      * Creates an event based on the passed integration event.
      */
     public static Event toEvent(IntegrationEvent integrationEvent) {
-        final IntegrationEventContext sourceContext = integrationEvent.getContext();
-        final EventContext context = toEventContext(sourceContext);
-        final Event result = createEvent(sourceContext.getEventId(),
+        IntegrationEventContext sourceContext = integrationEvent.getContext();
+        EventContext context = toEventContext(sourceContext);
+        Event result = createEvent(sourceContext.getEventId(),
                                          integrationEvent.getMessage(),
                                          context);
         return result;
     }
 
     private static EventContext toEventContext(IntegrationEventContext value) {
-        final Timestamp timestamp = value.getTimestamp();
-        final Any producerId = toAny(value.getBoundedContextName());
+        Timestamp timestamp = value.getTimestamp();
+        Any producerId = toAny(value.getBoundedContextName());
         return EventContext.newBuilder()
                            .setTimestamp(timestamp)
                            .setProducerId(producerId)

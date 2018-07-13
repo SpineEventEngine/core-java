@@ -87,7 +87,7 @@ class AggregateTransaction<I,
      */
     @SuppressWarnings("unchecked")  // to avoid massive generic-related issues.
     static AggregateTransaction start(Aggregate aggregate) {
-        final AggregateTransaction tx = new AggregateTransaction(aggregate);
+        AggregateTransaction tx = new AggregateTransaction(aggregate);
         return tx;
     }
 
@@ -106,7 +106,7 @@ class AggregateTransaction<I,
      */
     @SuppressWarnings("unchecked")  // to avoid massive generic-related issues.
     static AggregateTransaction startWith(Aggregate aggregate, Message state, Version version) {
-        final AggregateTransaction tx = new AggregateTransaction(aggregate, state, version);
+        AggregateTransaction tx = new AggregateTransaction(aggregate, state, version);
         return tx;
     }
 }

@@ -112,16 +112,16 @@ class ProcessManagerRepositoryTest
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProcessManager, Project> createRepository() {
-        final TestProcessManagerRepository repo = new TestProcessManagerRepository();
+        TestProcessManagerRepository repo = new TestProcessManagerRepository();
         return repo;
     }
 
     @Override
     protected TestProcessManager createEntity() {
-        final ProjectId id = ProjectId.newBuilder()
+        ProjectId id = ProjectId.newBuilder()
                                       .setId(newUuid())
                                       .build();
-        final TestProcessManager result = Given.processManagerOfClass(TestProcessManager.class)
+        TestProcessManager result = Given.processManagerOfClass(TestProcessManager.class)
                                                .withId(id)
                                                .build();
         return result;
@@ -129,10 +129,10 @@ class ProcessManagerRepositoryTest
 
     @Override
     protected List<TestProcessManager> createEntities(int count) {
-        final List<TestProcessManager> procmans = Lists.newArrayList();
+        List<TestProcessManager> procmans = Lists.newArrayList();
 
         for (int i = 0; i < count; i++) {
-            final ProjectId id = createId(i);
+            ProjectId id = createId(i);
 
             procmans.add(new TestProcessManager(id));
         }

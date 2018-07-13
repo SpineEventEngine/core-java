@@ -84,9 +84,9 @@ class EventApplierMethodTest {
     @Test
     @DisplayName("be properly created from factory")
     void beCreatedFromFactory() {
-        final Method method = new ValidApplier().getMethod();
+        Method method = new ValidApplier().getMethod();
 
-        final EventApplierMethod actual = factory.create(method);
+        EventApplierMethod actual = factory.create(method);
 
         assertEquals(EventApplierMethod.from(method), actual);
     }
@@ -94,9 +94,9 @@ class EventApplierMethodTest {
     @Test
     @DisplayName("allow invocation")
     void invokeApplierMethod() throws InvocationTargetException {
-        final ValidApplier applierObject = new ValidApplier();
-        final EventApplierMethod applier = EventApplierMethod.from(applierObject.getMethod());
-        final RefProjectCreated event = Sample.messageOfType(RefProjectCreated.class);
+        ValidApplier applierObject = new ValidApplier();
+        EventApplierMethod applier = EventApplierMethod.from(applierObject.getMethod());
+        RefProjectCreated event = Sample.messageOfType(RefProjectCreated.class);
 
         applier.invoke(applierObject, event);
 
@@ -106,7 +106,7 @@ class EventApplierMethodTest {
     @Test
     @DisplayName("check method access modifier")
     void checkMethodAccessModifier() {
-        final Method method = new ValidApplierButNotPackagePrivate().getMethod();
+        Method method = new ValidApplierButNotPackagePrivate().getMethod();
 
         factory.checkAccessModifier(method);
     }
@@ -118,7 +118,7 @@ class EventApplierMethodTest {
         @Test
         @DisplayName("it has one message parameter")
         void hasOneMessageParameter() {
-            final Method applier = new ValidApplier().getMethod();
+            Method applier = new ValidApplier().getMethod();
 
             assertIsEventApplier(applier);
         }
@@ -126,7 +126,7 @@ class EventApplierMethodTest {
         @Test
         @DisplayName("it's not private")
         void isNotPrivate() {
-            final Method method = new ValidApplierButNotPackagePrivate().getMethod();
+            Method method = new ValidApplierButNotPackagePrivate().getMethod();
 
             assertIsEventApplier(method);
         }
@@ -144,7 +144,7 @@ class EventApplierMethodTest {
         @Test
         @DisplayName("it's not annotated")
         void isNotAnnotated() {
-            final Method applier = new InvalidApplierNoAnnotation().getMethod();
+            Method applier = new InvalidApplierNoAnnotation().getMethod();
 
             assertIsNotEventApplier(applier);
         }
@@ -152,7 +152,7 @@ class EventApplierMethodTest {
         @Test
         @DisplayName("it has no params")
         void hasNoParams() {
-            final Method applier = new InvalidApplierNoParams().getMethod();
+            Method applier = new InvalidApplierNoParams().getMethod();
 
             assertIsNotEventApplier(applier);
         }
@@ -160,7 +160,7 @@ class EventApplierMethodTest {
         @Test
         @DisplayName("it has too many params")
         void hasTooManyParams() {
-            final Method applier = new InvalidApplierTooManyParams().getMethod();
+            Method applier = new InvalidApplierTooManyParams().getMethod();
 
             assertIsNotEventApplier(applier);
         }
@@ -168,7 +168,7 @@ class EventApplierMethodTest {
         @Test
         @DisplayName("it has one param of invalid type")
         void hasOneInvalidParam() {
-            final Method applier = new InvalidApplierOneNotMsgParam().getMethod();
+            Method applier = new InvalidApplierOneNotMsgParam().getMethod();
 
             assertIsNotEventApplier(applier);
         }
@@ -176,7 +176,7 @@ class EventApplierMethodTest {
         @Test
         @DisplayName("it has non-void return type")
         void returnsNonVoidType() {
-            final Method applier = new InvalidApplierNotVoid().getMethod();
+            Method applier = new InvalidApplierNotVoid().getMethod();
 
             assertIsNotEventApplier(applier);
         }
@@ -253,7 +253,7 @@ class EventApplierMethodTest {
         private static final String APPLIER_METHOD_NAME = "apply";
 
         public Method getMethod() {
-            final Method[] methods = getClass().getDeclaredMethods();
+            Method[] methods = getClass().getDeclaredMethods();
             for (Method method : methods) {
                 if (method.getName().equals(APPLIER_METHOD_NAME)) {
                     method.setAccessible(true);

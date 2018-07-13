@@ -109,8 +109,8 @@ class PmTransactionTest
             ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
             Event event) {
 
-        final TestProcessManager aggregate = (TestProcessManager) entity;
-        final Message actualMessage = unpack(event.getMessage());
+        TestProcessManager aggregate = (TestProcessManager) entity;
+        Message actualMessage = unpack(event.getMessage());
         assertTrue(aggregate.getReceivedEvents()
                             .contains(actualMessage));
     }

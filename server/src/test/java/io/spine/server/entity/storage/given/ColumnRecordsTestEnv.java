@@ -48,14 +48,14 @@ public class ColumnRecordsTestEnv {
     }
 
     public static Map<String, EntityColumn.MemoizedValue> setupMockColumnsAllowingNulls() {
-        final EntityColumn mockColumn = mock(EntityColumn.class);
+        EntityColumn mockColumn = mock(EntityColumn.class);
         when(mockColumn.getType()).thenReturn(Object.class);
         when(mockColumn.getPersistedType()).thenReturn(Object.class);
-        final Map<String, EntityColumn.MemoizedValue> columns = new HashMap<>(MOCK_COLUMNS_COUNT);
+        Map<String, EntityColumn.MemoizedValue> columns = new HashMap<>(MOCK_COLUMNS_COUNT);
         for (int i = 0; i < MOCK_COLUMNS_COUNT; i++) {
-            final Integer columnValueToPersist = (i % 2 != 0) ? null : i;
+            Integer columnValueToPersist = (i % 2 != 0) ? null : i;
 
-            final EntityColumn.MemoizedValue value = mock(EntityColumn.MemoizedValue.class);
+            EntityColumn.MemoizedValue value = mock(EntityColumn.MemoizedValue.class);
             when(value.getSourceColumn()).thenReturn(mockColumn);
             when(value.getValue()).thenReturn(columnValueToPersist);
 
@@ -65,7 +65,7 @@ public class ColumnRecordsTestEnv {
     }
 
     public static Collection getNonNullColumnValues() {
-        final List<Object> values = new ArrayList<>();
+        List<Object> values = new ArrayList<>();
         for (int i = 0; i < MOCK_COLUMNS_COUNT; i += 2) { // each second value is non-null
             values.add(i);
         }

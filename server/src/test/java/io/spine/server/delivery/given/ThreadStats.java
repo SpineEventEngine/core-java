@@ -38,7 +38,7 @@ public class ThreadStats<I extends Message> {
             Multimaps.synchronizedMultimap(HashMultimap.<Long, I>create());
 
     public void recordCallingThread(I id) {
-        final long currentThreadId = Thread.currentThread()
+        long currentThreadId = Thread.currentThread()
                                            .getId();
         threadToId.put(currentThreadId, id);
     }

@@ -58,7 +58,7 @@ final class FieldEnrichment<S, T, C extends Message> extends EnrichmentFunction<
     FieldEnrichment<S, T, C> of(Class<S> messageFieldClass,
                                 Class<T> enrichmentFieldClass,
                                 Function<S, T> func) {
-        final FieldEnrichment<S, T, C> result =
+        FieldEnrichment<S, T, C> result =
                 new FieldEnrichment<>(messageFieldClass, enrichmentFieldClass, func);
         return result;
     }
@@ -83,7 +83,7 @@ final class FieldEnrichment<S, T, C extends Message> extends EnrichmentFunction<
     @Override
     public T apply(S message, C context) {
         ensureActive();
-        final T result = function.apply(message);
+        T result = function.apply(message);
         return result;
     }
 }

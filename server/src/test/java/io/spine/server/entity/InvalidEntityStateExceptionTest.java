@@ -40,9 +40,9 @@ class InvalidEntityStateExceptionTest {
     @Test
     @DisplayName("create exception with violations")
     void createExceptionWithViolations() {
-        final StringValue entityState = StringValue.getDefaultInstance();
+        StringValue entityState = StringValue.getDefaultInstance();
 
-        final InvalidEntityStateException exception = onConstraintViolations(
+        InvalidEntityStateException exception = onConstraintViolations(
                 entityState,
                 singletonList(ConstraintViolation.getDefaultInstance()));
 

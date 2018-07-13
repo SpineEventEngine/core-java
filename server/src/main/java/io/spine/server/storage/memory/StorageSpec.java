@@ -92,7 +92,7 @@ public final class StorageSpec<I> implements Serializable {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final StorageSpec other = (StorageSpec) obj;
+        StorageSpec other = (StorageSpec) obj;
         return Objects.equals(this.boundedContextName, other.boundedContextName)
                 && Objects.equals(this.entityStateUrl, other.entityStateUrl);
     }

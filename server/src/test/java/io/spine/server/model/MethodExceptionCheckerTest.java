@@ -47,8 +47,8 @@ class MethodExceptionCheckerTest {
     void passNullToleranceCheck() {
         new NullPointerTester().testAllPublicStaticMethods(MethodExceptionChecker.class);
 
-        final Method method = getMethod("methodNoExceptions");
-        final MethodExceptionChecker checker = forMethod(method);
+        Method method = getMethod("methodNoExceptions");
+        MethodExceptionChecker checker = forMethod(method);
         new NullPointerTester().testAllPublicInstanceMethods(checker);
     }
 
@@ -59,12 +59,12 @@ class MethodExceptionCheckerTest {
         @Test
         @DisplayName("no checked exceptions are thrown by method")
         void forNoCheckedThrown() {
-            final Method methodNoExceptions = getMethod("methodNoExceptions");
-            final MethodExceptionChecker noExceptionsChecker = forMethod(methodNoExceptions);
+            Method methodNoExceptions = getMethod("methodNoExceptions");
+            MethodExceptionChecker noExceptionsChecker = forMethod(methodNoExceptions);
             noExceptionsChecker.checkThrowsNoCheckedExceptions();
 
-            final Method methodRuntimeExceptions = getMethod("methodRuntimeException");
-            final MethodExceptionChecker runtimeExceptionsChecker =
+            Method methodRuntimeExceptions = getMethod("methodRuntimeException");
+            MethodExceptionChecker runtimeExceptionsChecker =
                     forMethod(methodRuntimeExceptions);
             runtimeExceptionsChecker.checkThrowsNoCheckedExceptions();
         }
@@ -72,16 +72,16 @@ class MethodExceptionCheckerTest {
         @Test
         @DisplayName("allowed exception types are thrown by method")
         void forAllowedThrown() {
-            final Method methodCustomException = getMethod("methodCustomException");
-            final MethodExceptionChecker checker = forMethod(methodCustomException);
+            Method methodCustomException = getMethod("methodCustomException");
+            MethodExceptionChecker checker = forMethod(methodCustomException);
             checker.checkThrowsNoExceptionsBut(IOException.class);
         }
 
         @Test
         @DisplayName("allowed exception types descendants are thrown by method")
         void forAllowedDescendantsThrown() {
-            final Method methodDescendantException = getMethod("methodDescendantException");
-            final MethodExceptionChecker checker = forMethod(methodDescendantException);
+            Method methodDescendantException = getMethod("methodDescendantException");
+            MethodExceptionChecker checker = forMethod(methodDescendantException);
             checker.checkThrowsNoExceptionsBut(RuntimeException.class);
         }
     }
@@ -93,24 +93,24 @@ class MethodExceptionCheckerTest {
         @Test
         @DisplayName("checked exceptions are thrown by method")
         void forCheckedThrown() {
-            final Method methodCheckedException = getMethod("methodCheckedException");
-            final MethodExceptionChecker checker = forMethod(methodCheckedException);
+            Method methodCheckedException = getMethod("methodCheckedException");
+            MethodExceptionChecker checker = forMethod(methodCheckedException);
             assertThrows(IllegalStateException.class, checker::checkThrowsNoCheckedExceptions);
         }
 
         @Test
         @DisplayName("exception types that are not allowed are thrown by method")
         void forNotAllowedThrown() {
-            final Method methodCustomException = getMethod("methodCustomException");
-            final MethodExceptionChecker checker = forMethod(methodCustomException);
+            Method methodCustomException = getMethod("methodCustomException");
+            MethodExceptionChecker checker = forMethod(methodCustomException);
             assertThrows(IllegalStateException.class,
                          () -> checker.checkThrowsNoExceptionsBut(RuntimeException.class));
         }
     }
 
     private static Method getMethod(String methodName) {
-        final Method method;
-        final Class<?> clazz = StubMethodContainer.class;
+        Method method;
+        Class<?> clazz = StubMethodContainer.class;
         try {
             method = clazz.getDeclaredMethod(methodName);
         } catch (NoSuchMethodException e) {

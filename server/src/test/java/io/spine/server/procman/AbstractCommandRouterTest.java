@@ -93,9 +93,9 @@ abstract class AbstractCommandRouterTest<T extends AbstractCommandRouter> {
 
     @BeforeEach
     void setUp() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
+        BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
-        final CommandBus commandBus = boundedContext.getCommandBus();
+        CommandBus commandBus = boundedContext.getCommandBus();
 
         // Register dispatcher for `StringValue` message type.
         // Otherwise we won't be able to post.
@@ -129,7 +129,7 @@ abstract class AbstractCommandRouterTest<T extends AbstractCommandRouter> {
      */
     protected void assertSource(CommandRouted commandRouted) {
         // Check that the source command is stored.
-        final Command source = commandRouted.getSource();
+        Command source = commandRouted.getSource();
         assertEquals(sourceMessage, Commands.getMessage(source));
         assertEquals(sourceContext, source.getContext());
     }

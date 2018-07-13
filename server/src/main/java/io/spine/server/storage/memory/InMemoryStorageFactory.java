@@ -76,7 +76,7 @@ public class InMemoryStorageFactory implements StorageFactory {
 
     @Override
     public StandStorage createStandStorage() {
-        final InMemoryStandStorage result =
+        InMemoryStandStorage result =
                 InMemoryStandStorage.newBuilder()
                                     .setBoundedContextName(boundedContextName)
                                     .setMultitenant(isMultitenant())
@@ -97,28 +97,28 @@ public class InMemoryStorageFactory implements StorageFactory {
     @Override
     public <I> RecordStorage<I>
     createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
-        final EntityClass<?> modelClass = Model.getInstance().asEntityClass(entityClass);
-        final Class<? extends Message> stateClass = modelClass.getStateClass();
-        final TypeUrl typeUrl = TypeUrl.of(stateClass);
+        EntityClass<?> modelClass = Model.getInstance().asEntityClass(entityClass);
+        Class<? extends Message> stateClass = modelClass.getStateClass();
+        TypeUrl typeUrl = TypeUrl.of(stateClass);
         @SuppressWarnings("unchecked") // The cast is protected by generic params of the method.
-        final Class<I> idClass = (Class<I>) modelClass.getIdClass();
-        final StorageSpec<I> spec = StorageSpec.of(boundedContextName, typeUrl, idClass);
+        Class<I> idClass = (Class<I>) modelClass.getIdClass();
+        StorageSpec<I> spec = StorageSpec.of(boundedContextName, typeUrl, idClass);
         return InMemoryRecordStorage.newInstance(spec, isMultitenant(), entityClass);
     }
 
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(
             Class<? extends Projection<I, ?, ?>> projectionClass) {
-        final ProjectionClass<?> modelClass =
+        ProjectionClass<?> modelClass =
                 Model.getInstance().asProjectionClass(projectionClass);
-        final Class<? extends Message> stateClass = modelClass.getStateClass();
+        Class<? extends Message> stateClass = modelClass.getStateClass();
         @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the method.
-        final Class<I> idClass = (Class<I>) modelClass.getIdClass();
-        final TypeUrl stateUrl = TypeUrl.of(stateClass);
-        final StorageSpec<I> spec = StorageSpec.of(boundedContextName, stateUrl, idClass);
+        Class<I> idClass = (Class<I>) modelClass.getIdClass();
+        TypeUrl stateUrl = TypeUrl.of(stateClass);
+        StorageSpec<I> spec = StorageSpec.of(boundedContextName, stateUrl, idClass);
 
-        final boolean multitenant = isMultitenant();
-        final InMemoryRecordStorage<I> entityStorage =
+        boolean multitenant = isMultitenant();
+        InMemoryRecordStorage<I> entityStorage =
                 InMemoryRecordStorage.newInstance(spec, multitenant, projectionClass);
         return InMemoryProjectionStorage.newInstance(entityStorage);
     }

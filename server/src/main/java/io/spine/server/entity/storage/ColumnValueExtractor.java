@@ -103,12 +103,12 @@ public class ColumnValueExtractor {
         checkNotNull(entityColumns);
         checkNotNull(entity);
 
-        final Class<? extends Entity> entityClass = entity.getClass();
+        Class<? extends Entity> entityClass = entity.getClass();
         if (!canExtractColumns(entityClass)) {
             return Collections.emptyMap();
         }
 
-        final Map<String, EntityColumn.MemoizedValue> values = readColumnValues();
+        Map<String, EntityColumn.MemoizedValue> values = readColumnValues();
         return values;
     }
 
@@ -123,7 +123,7 @@ public class ColumnValueExtractor {
     private boolean canExtractColumns(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
 
-        final int modifiers = entityClass.getModifiers();
+        int modifiers = entityClass.getModifiers();
         if (!Modifier.isPublic(modifiers)) {
             logNonPublicClass(entityClass);
             return false;
@@ -140,10 +140,10 @@ public class ColumnValueExtractor {
      * @see EntityColumn.MemoizedValue
      */
     private Map<String, EntityColumn.MemoizedValue> readColumnValues() {
-        final Map<String, EntityColumn.MemoizedValue> values = new HashMap<>(entityColumns.size());
+        Map<String, EntityColumn.MemoizedValue> values = new HashMap<>(entityColumns.size());
         for (EntityColumn column : entityColumns) {
-            final String name = column.getStoredName();
-            final EntityColumn.MemoizedValue value = column.memoizeFor(entity);
+            String name = column.getStoredName();
+            EntityColumn.MemoizedValue value = column.memoizeFor(entity);
             values.put(name, value);
         }
         return values;
@@ -154,8 +154,8 @@ public class ColumnValueExtractor {
      * represents one of the Spine internal {@link Entity} implementations.
      */
     private static void logNonPublicClass(Class<? extends Entity> cls) {
-        final String className = cls.getCanonicalName();
-        final boolean internal = className.startsWith(SPINE_PACKAGE);
+        String className = cls.getCanonicalName();
+        boolean internal = className.startsWith(SPINE_PACKAGE);
         if (internal) {
             log().trace(format(NON_PUBLIC_INTERNAL_CLASS_WARNING, className));
         } else {

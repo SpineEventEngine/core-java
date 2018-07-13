@@ -93,7 +93,7 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         public static boolean processed(Message message) {
-            final boolean result = messagesDelivered.containsValue(message);
+            boolean result = messagesDelivered.containsValue(message);
             return result;
         }
 
@@ -111,7 +111,7 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         private void handleProjectCreated(ProjectId projectId) {
-            final Project newState = getState().toBuilder()
+            Project newState = getState().toBuilder()
                                                .setId(projectId)
                                                .setStatus(Project.Status.CREATED)
                                                .build();
@@ -119,14 +119,14 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         private void handleTaskAdded(Task task) {
-            final Project newState = getState().toBuilder()
+            Project newState = getState().toBuilder()
                                                .addTask(task)
                                                .build();
             getBuilder().mergeFrom(newState);
         }
 
         private void handleProjectStarted() {
-            final Project newState = getState().toBuilder()
+            Project newState = getState().toBuilder()
                                                .setStatus(Project.Status.STARTED)
                                                .build();
             getBuilder().mergeFrom(newState);
@@ -136,7 +136,7 @@ public class ProcessManagerRepositoryTestEnv {
         PmProjectCreated handle(PmCreateProject command, CommandContext ignored) {
             keep(command);
 
-            final PmProjectCreated event = ((PmProjectCreated.Builder)
+            PmProjectCreated event = ((PmProjectCreated.Builder)
                     Sample.builderForType(PmProjectCreated.class))
                           .setProjectId(command.getProjectId())
                           .build();
@@ -147,7 +147,7 @@ public class ProcessManagerRepositoryTestEnv {
         PmTaskAdded handle(PmAddTask command, CommandContext ignored) {
             keep(command);
 
-            final PmTaskAdded event = ((PmTaskAdded.Builder)
+            PmTaskAdded event = ((PmTaskAdded.Builder)
                     Sample.builderForType(PmTaskAdded.class))
                           .setProjectId(command.getProjectId())
                           .build();
@@ -158,7 +158,7 @@ public class ProcessManagerRepositoryTestEnv {
         CommandRouted handle(PmStartProject command, CommandContext context) {
             keep(command);
 
-            final Message addTask = ((PmAddTask.Builder)
+            Message addTask = ((PmAddTask.Builder)
                     Sample.builderForType(PmAddTask.class))
                           .setProjectId(command.getProjectId())
                           .build();
@@ -209,7 +209,7 @@ public class ProcessManagerRepositoryTestEnv {
         public Empty on(PmTaskAdded event) {
             keep(event);
 
-            final Task task = event.getTask();
+            Task task = event.getTask();
             handleTaskAdded(task);
             return withNothing();
         }

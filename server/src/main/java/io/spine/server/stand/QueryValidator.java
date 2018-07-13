@@ -54,8 +54,8 @@ class QueryValidator extends AbstractTargetValidator<Query> {
 
     @Override
     protected Optional<RequestNotSupported<Query>> isSupported(Query request) {
-        final Target target = request.getTarget();
-        final boolean targetSupported = checkTargetSupported(target);
+        Target target = request.getTarget();
+        boolean targetSupported = checkTargetSupported(target);
 
         if (targetSupported) {
             return Optional.absent();
@@ -65,7 +65,7 @@ class QueryValidator extends AbstractTargetValidator<Query> {
     }
 
     private static RequestNotSupported<Query> missingInRegistry(TypeUrl topicTargetType) {
-        final String errorMessage = format("The query target type is not supported: %s",
+        String errorMessage = format("The query target type is not supported: %s",
                                            topicTargetType.getTypeName());
         return new RequestNotSupported<Query>(UNSUPPORTED_QUERY_TARGET, errorMessage) {
 

@@ -71,7 +71,7 @@ public class EventProducers {
 
         @Override
         public Set<I> apply(Message message, EventContext context) {
-            final I id = Events.getProducer(context);
+            I id = Events.getProducer(context);
             return ImmutableSet.of(id);
         }
 
@@ -92,7 +92,7 @@ public class EventProducers {
 
         @Override
         public Set<I> apply(Message message, EventContext context) {
-            final I id = func.apply(message, context);
+            I id = func.apply(message, context);
             return ImmutableSet.of(id);
         }
 

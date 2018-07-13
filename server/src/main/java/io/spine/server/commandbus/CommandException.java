@@ -74,9 +74,9 @@ public abstract class CommandException extends RuntimeException implements Messa
      * @param commandMessage a command message to get the type from
      */
     public static Map<String, Value> commandTypeAttribute(Message commandMessage) {
-        final String commandType = TypeName.of(commandMessage)
+        String commandType = TypeName.of(commandMessage)
                                            .value();
-        final Value value = Value.newBuilder()
+        Value value = Value.newBuilder()
                                  .setStringValue(commandType)
                                  .build();
         return ImmutableMap.of(ATTR_COMMAND_TYPE_NAME, value);
@@ -85,15 +85,15 @@ public abstract class CommandException extends RuntimeException implements Messa
     protected static Error createError(String format,
                                        Command command,
                                        CommandValidationError errorCode) {
-        final Message commandMessage = CommandEnvelope.of(command)
+        Message commandMessage = CommandEnvelope.of(command)
                                                       .getMessage();
 
-        final String commandType = commandMessage.getDescriptorForType()
+        String commandType = commandMessage.getDescriptorForType()
                                                  .getFullName();
-        final String errMsg = format(format, commandType);
-        final String descriptorName = CommandValidationError.getDescriptor()
+        String errMsg = format(format, commandType);
+        String descriptorName = CommandValidationError.getDescriptor()
                                                             .getFullName();
-        final Error.Builder error =
+        Error.Builder error =
                 Error.newBuilder()
                      .setType(descriptorName)
                      .setMessage(errMsg)
@@ -125,12 +125,12 @@ public abstract class CommandException extends RuntimeException implements Messa
      * <p>The second parameter is a {@link TypeName} of the command message.
      */
     protected static String messageFormat(String format, Command command) {
-        final CommandEnvelope envelope = CommandEnvelope.of(command);
-        final Class<? extends Message> commandClass = envelope.getMessageClass()
+        CommandEnvelope envelope = CommandEnvelope.of(command);
+        Class<? extends Message> commandClass = envelope.getMessageClass()
                                                               .value();
-        final ClassName commandClassName = ClassName.of(commandClass);
-        final TypeName typeName = envelope.getTypeName();
-        final String result = format(format, commandClassName, typeName);
+        ClassName commandClassName = ClassName.of(commandClass);
+        TypeName typeName = envelope.getTypeName();
+        String result = format(format, commandClassName, typeName);
         return result;
     }
 }

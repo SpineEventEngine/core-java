@@ -92,22 +92,22 @@ public class EventBusTestEnv {
     }
 
     private static ProjectId projectId() {
-        final ProjectId id = ProjectId.newBuilder()
+        ProjectId id = ProjectId.newBuilder()
                                       .setId(newUuid())
                                       .build();
         return id;
     }
 
     private static TenantId tenantId() {
-        final String value = EventBusTestEnv.class.getName();
-        final TenantId id = TenantId.newBuilder()
+        String value = EventBusTestEnv.class.getName();
+        TenantId id = TenantId.newBuilder()
                                     .setValue(value)
                                     .build();
         return id;
     }
 
     public static EBCreateProject createProject() {
-        final EBCreateProject command =
+        EBCreateProject command =
                 ((EBCreateProject.Builder) Sample.builderForType(EBCreateProject.class))
                         .setProjectId(PROJECT_ID)
                         .build();
@@ -115,19 +115,19 @@ public class EventBusTestEnv {
     }
 
     public static EBAddTasks addTasks(Task... tasks) {
-        final EBAddTasks.Builder builder =
+        EBAddTasks.Builder builder =
                 ((EBAddTasks.Builder) Sample.builderForType(EBAddTasks.class))
                         .setProjectId(PROJECT_ID)
                         .clearTask();
         for (Task task : tasks) {
             builder.addTask(task);
         }
-        final EBAddTasks command = builder.build();
+        EBAddTasks command = builder.build();
         return command;
     }
 
     public static Task newTask(boolean done) {
-        final Task task = ((Task.Builder) Sample.builderForType(Task.class))
+        Task task = ((Task.Builder) Sample.builderForType(Task.class))
                 .setDone(done)
                 .build();
         return task;
@@ -138,7 +138,7 @@ public class EventBusTestEnv {
      * {@link EBArchiveProject#getReason()} field.
      */
     public static EBArchiveProject invalidArchiveProject() {
-        final EBArchiveProject command =
+        EBArchiveProject command =
                 ((EBArchiveProject.Builder) Sample.builderForType(EBArchiveProject.class))
                         .setProjectId(PROJECT_ID)
                         .build();
@@ -154,9 +154,9 @@ public class EventBusTestEnv {
      * Reads all events from the event bus event store for a tenant specified by
      * the {@link EventBusTestEnv#TENANT_ID}.
      */
-    public static List<Event> readEvents(final EventBus eventBus) {
-        final MemoizingObserver<Event> observer = memoizingObserver();
-        final TenantAwareOperation operation = new TenantAwareOperation(TENANT_ID) {
+    public static List<Event> readEvents(EventBus eventBus) {
+        MemoizingObserver<Event> observer = memoizingObserver();
+        TenantAwareOperation operation = new TenantAwareOperation(TENANT_ID) {
             @Override
             public void run() {
                 eventBus.getEventStore()
@@ -165,7 +165,7 @@ public class EventBusTestEnv {
         };
         operation.execute();
 
-        final List<Event> results = observer.responses();
+        List<Event> results = observer.responses();
         return results;
     }
 
@@ -192,16 +192,16 @@ public class EventBusTestEnv {
 
         @Assign
         EBProjectCreated on(EBCreateProject command, CommandContext ctx) {
-            final EBProjectCreated event = projectCreated(command.getProjectId());
+            EBProjectCreated event = projectCreated(command.getProjectId());
             return event;
         }
 
         @Assign
         List<EBTaskAdded> on(EBAddTasks command, CommandContext ctx) {
-            final ImmutableList.Builder<EBTaskAdded> events = ImmutableList.builder();
+            ImmutableList.Builder<EBTaskAdded> events = ImmutableList.builder();
 
             for (Task task : command.getTaskList()) {
-                final EBTaskAdded event = taskAdded(command.getProjectId(), task);
+                EBTaskAdded event = taskAdded(command.getProjectId(), task);
                 events.add(event);
             }
 
@@ -256,12 +256,12 @@ public class EventBusTestEnv {
         @Override
         public Optional<Ack> accept(EventEnvelope envelope) {
             if (TASK_ADDED_CLASS.equals(envelope.getMessageClass())) {
-                final EBTaskAdded message = (EBTaskAdded) envelope.getMessage();
-                final Task task = message.getTask();
+                EBTaskAdded message = (EBTaskAdded) envelope.getMessage();
+                Task task = message.getTask();
                 if (task.getDone()) {
-                    final Error error = error();
-                    final Any packedId = Identifier.pack(envelope.getId());
-                    final Ack result = reject(packedId, error);
+                    Error error = error();
+                    Any packedId = Identifier.pack(envelope.getId());
+                    Ack result = reject(packedId, error);
                     return Optional.of(result);
                 }
             }
@@ -404,14 +404,14 @@ public class EventBusTestEnv {
         }
 
         public static Event projectStarted() {
-            final ProjectStarted msg = EventMessage.projectStarted();
-            final Event event = eventFactory().createEvent(msg);
+            ProjectStarted msg = EventMessage.projectStarted();
+            Event event = eventFactory().createEvent(msg);
             return event;
         }
 
         public static Event projectCreated(ProjectId projectId) {
-            final ProjectCreated msg = EventMessage.projectCreated(projectId);
-            final Event event = eventFactory().createEvent(msg);
+            ProjectCreated msg = EventMessage.projectCreated(projectId);
+            Event event = eventFactory().createEvent(msg);
             return event;
         }
     }

@@ -80,7 +80,7 @@ class EnrichmentsMapTest {
     @Test
     @DisplayName("return map instance")
     void returnMapInstance() {
-        final ImmutableMultimap<String, String> map = EnrichmentsMap.getInstance();
+        ImmutableMultimap<String, String> map = EnrichmentsMap.getInstance();
 
         assertFalse(map.isEmpty());
     }
@@ -269,10 +269,10 @@ class EnrichmentsMapTest {
     private static void assertEnrichmentIsAvailableForEvents(
             Class<? extends Message> enrichmentClass,
             Class<? extends Message>... eventClassesExpected) {
-        final Collection<String> eventTypesActual = getEventTypes(enrichmentClass);
+        Collection<String> eventTypesActual = getEventTypes(enrichmentClass);
 
         for (Class<? extends Message> expectedClass : FluentIterable.from(eventClassesExpected)) {
-            final String expectedTypeName = TypeName.of(expectedClass)
+            String expectedTypeName = TypeName.of(expectedClass)
                                                     .value();
             assertTrue(eventTypesActual.contains(expectedTypeName));
         }
@@ -282,7 +282,7 @@ class EnrichmentsMapTest {
     private static void assertEnrichmentIsUsedOnlyInEvents(
             Class<? extends Message> enrichmentClass,
             Class<? extends Message>... eventClassesExpected) {
-        final Collection<String> eventTypesActual = getEventTypes(enrichmentClass);
+        Collection<String> eventTypesActual = getEventTypes(enrichmentClass);
         assertEquals(eventClassesExpected.length, eventTypesActual.size());
         assertEnrichmentIsAvailableForEvents(enrichmentClass, eventClassesExpected);
     }

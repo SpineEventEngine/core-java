@@ -70,7 +70,7 @@ abstract class TenantAware {
     @Internal
     @VisibleForTesting
     public static boolean isTenantSet() {
-        final Optional<TenantId> currentTenant = CurrentTenant.get();
+        Optional<TenantId> currentTenant = CurrentTenant.get();
         return currentTenant.isPresent();
     }
 

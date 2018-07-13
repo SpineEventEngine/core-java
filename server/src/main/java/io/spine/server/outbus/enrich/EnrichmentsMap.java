@@ -82,16 +82,16 @@ class EnrichmentsMap {
     }
 
     static Collection<String> getEventTypes(Class<? extends Message> enrichmentClass) {
-        final String enrichmentType = TypeName.of(enrichmentClass)
+        String enrichmentType = TypeName.of(enrichmentClass)
                                               .value();
-        final ImmutableCollection<String> result = getInstance().get(enrichmentType);
+        ImmutableCollection<String> result = getInstance().get(enrichmentType);
         return result;
     }
 
     private static ImmutableMultimap<String, String> buildEnrichmentsMap() {
-        final Set<Properties> propertiesSet = loadAllProperties(Resources.ENRICHMENTS);
-        final Builder builder = new Builder(propertiesSet);
-        final ImmutableMultimap<String, String> result = builder.build();
+        Set<Properties> propertiesSet = loadAllProperties(Resources.ENRICHMENTS);
+        Builder builder = new Builder(propertiesSet);
+        ImmutableMultimap<String, String> result = builder.build();
         return result;
     }
 
@@ -120,10 +120,10 @@ class EnrichmentsMap {
         }
 
         private void put(Properties props) {
-            final Set<String> enrichmentTypes = props.stringPropertyNames();
+            Set<String> enrichmentTypes = props.stringPropertyNames();
             for (String enrichmentType : enrichmentTypes) {
-                final String eventTypesStr = props.getProperty(enrichmentType);
-                final Iterable<String> eventTypes = eventTypeSplitter.split(eventTypesStr);
+                String eventTypesStr = props.getProperty(enrichmentType);
+                Iterable<String> eventTypes = eventTypeSplitter.split(eventTypesStr);
                 put(enrichmentType, eventTypes);
             }
         }
@@ -147,14 +147,14 @@ class EnrichmentsMap {
          *                       the event to enrich
          */
         private void putAllTypesFromPackage(String enrichmentType, String eventsPackage) {
-            final int lastSignificantCharPos = eventsPackage.length() -
+            int lastSignificantCharPos = eventsPackage.length() -
                                                PACKAGE_WILDCARD_INDICATOR.length();
-            final String packageName = eventsPackage.substring(0, lastSignificantCharPos);
-            final Set<String> boundFields = getBoundFields(enrichmentType);
-            final Collection<TypeUrl> eventTypes = KnownTypes.instance()
+            String packageName = eventsPackage.substring(0, lastSignificantCharPos);
+            Set<String> boundFields = getBoundFields(enrichmentType);
+            Collection<TypeUrl> eventTypes = KnownTypes.instance()
                                                              .getAllFromPackage(packageName);
             for (TypeUrl type : eventTypes) {
-                final String typeQualifier = type.getTypeName();
+                String typeQualifier = type.getTypeName();
                 if (hasOneOfTargetFields(typeQualifier, boundFields)) {
                     builder.put(enrichmentType, typeQualifier);
                 }
@@ -162,27 +162,27 @@ class EnrichmentsMap {
         }
 
         private static Set<String> getBoundFields(String enrichmentType) {
-            final Descriptor enrichmentDescriptor = TypeName.of(enrichmentType)
+            Descriptor enrichmentDescriptor = TypeName.of(enrichmentType)
                                                             .getMessageDescriptor();
-            final Set<String> result = new HashSet<>();
+            Set<String> result = new HashSet<>();
             for (FieldDescriptor field : enrichmentDescriptor.getFields()) {
-                final String extension = field.getOptions()
+                String extension = field.getOptions()
                                               .getExtension(OptionsProto.by);
-                final Collection<String> fieldNames = parseFieldNames(extension);
+                Collection<String> fieldNames = parseFieldNames(extension);
                 result.addAll(fieldNames);
             }
             return result;
         }
 
         private static Collection<String> parseFieldNames(String qualifiers) {
-            final Collection<String> result = new LinkedList<>();
-            final String[] fieldNames = pipeSeparatorPattern.split(qualifiers);
+            Collection<String> result = new LinkedList<>();
+            String[] fieldNames = pipeSeparatorPattern.split(qualifiers);
             for (String singleFieldName : fieldNames) {
-                final String normalizedFieldName = singleFieldName.trim();
+                String normalizedFieldName = singleFieldName.trim();
                 if (normalizedFieldName.isEmpty()) {
                     continue;
                 }
-                final String fieldName = getSimpleFieldName(normalizedFieldName);
+                String fieldName = getSimpleFieldName(normalizedFieldName);
                 result.add(fieldName);
             }
             return result;
@@ -193,16 +193,16 @@ class EnrichmentsMap {
             startIndex = startIndex > 0 // 0 is an invalid value, see line above
                          ? startIndex
                          : 0;
-            final String fieldName = qualifier.substring(startIndex);
+            String fieldName = qualifier.substring(startIndex);
             return fieldName;
         }
 
         private static boolean hasOneOfTargetFields(String eventType,
                                                     Collection<String> targetFields) {
-            final Descriptor eventDescriptor = TypeName.of(eventType)
+            Descriptor eventDescriptor = TypeName.of(eventType)
                                                        .getMessageDescriptor();
-            final List<FieldDescriptor> fields = eventDescriptor.getFields();
-            final Collection<String> fieldNames = Collections2.transform(
+            List<FieldDescriptor> fields = eventDescriptor.getFields();
+            Collection<String> fieldNames = Collections2.transform(
                     fields,
                     new Function<FieldDescriptor, String>() {
                         @Override
@@ -227,10 +227,10 @@ class EnrichmentsMap {
             checkNotNull(qualifier);
             checkArgument(!qualifier.isEmpty());
 
-            final int indexOfWildcardChar = qualifier.indexOf(PACKAGE_WILDCARD_INDICATOR);
-            final int qualifierLength = qualifier.length();
+            int indexOfWildcardChar = qualifier.indexOf(PACKAGE_WILDCARD_INDICATOR);
+            int qualifierLength = qualifier.length();
 
-            final boolean result =
+            boolean result =
                     indexOfWildcardChar == (qualifierLength - PACKAGE_WILDCARD_INDICATOR.length());
             return result;
         }

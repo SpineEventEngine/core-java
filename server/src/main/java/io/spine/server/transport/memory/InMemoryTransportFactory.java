@@ -61,14 +61,14 @@ public class InMemoryTransportFactory implements TransportFactory {
 
     @Override
     public final synchronized Publisher createPublisher(ChannelId channelId) {
-        final InMemoryPublisher result = new InMemoryPublisher(channelId,
+        InMemoryPublisher result = new InMemoryPublisher(channelId,
                                                                providerOf(subscribers));
         return result;
     }
 
     @Override
     public final synchronized Subscriber createSubscriber(ChannelId channelId) {
-        final Subscriber subscriber = newSubscriber(channelId);
+        Subscriber subscriber = newSubscriber(channelId);
         subscribers.put(channelId, subscriber);
         return subscriber;
     }
@@ -94,7 +94,7 @@ public class InMemoryTransportFactory implements TransportFactory {
      * @return a provider function allowing to fetch subscribers by the channel ID.
      */
     private static Function<ChannelId, Iterable<Subscriber>>
-    providerOf(final Multimap<ChannelId, Subscriber> subscribers) {
+    providerOf(Multimap<ChannelId, Subscriber> subscribers) {
         return new Function<ChannelId, Iterable<Subscriber>>() {
             @Override
             public Iterable<Subscriber> apply(@Nullable ChannelId channelId) {

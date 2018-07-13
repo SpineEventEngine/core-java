@@ -83,14 +83,14 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> givenIds,
                                                                    FieldMask fieldMask) {
-        final TenantRecords<I> storage = getStorage();
+        TenantRecords<I> storage = getStorage();
 
         // It is not possible to return an immutable collection,
         // since null may be present in it.
-        final Collection<EntityRecord> result = Lists.newLinkedList();
+        Collection<EntityRecord> result = Lists.newLinkedList();
 
         for (I givenId : givenIds) {
-            final EntityRecord matchingResult = storage.findAndApplyFieldMask(givenId, fieldMask);
+            EntityRecord matchingResult = storage.findAndApplyFieldMask(givenId, fieldMask);
             result.add(matchingResult);
         }
         return result.iterator();
@@ -139,7 +139,7 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected void writeRecords(Map<I, EntityRecordWithColumns> records) {
-        final TenantRecords<I> storage = getStorage();
+        TenantRecords<I> storage = getStorage();
         for (Map.Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
             storage.put(record.getKey(), record.getValue());
         }

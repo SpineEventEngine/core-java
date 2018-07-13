@@ -71,7 +71,7 @@ public class MessageDeliveryTestEnv {
     }
 
     public static void setShardingTransport(InMemoryTransportFactory transport) {
-        final Sharding inProcessSharding = new InProcessSharding(transport);
+        Sharding inProcessSharding = new InProcessSharding(transport);
         ServerEnvironment.getInstance()
                          .replaceSharding(inProcessSharding);
     }
@@ -154,8 +154,8 @@ public class MessageDeliveryTestEnv {
 
         @Override
         public EntityClass getShardedModelClass() {
-            final Class<DeliveryEqualityProject> someAggregate = DeliveryEqualityProject.class;
-            final AggregateClass<?> result = Model.getInstance()
+            Class<DeliveryEqualityProject> someAggregate = DeliveryEqualityProject.class;
+            AggregateClass<?> result = Model.getInstance()
                                                   .asAggregateClass(someAggregate);
             return result;
         }

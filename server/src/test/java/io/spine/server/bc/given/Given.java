@@ -47,7 +47,7 @@ public class Given {
         }
 
         public static ProjectId newProjectId() {
-            final String uuid = newUuid();
+            String uuid = newUuid();
             return ProjectId.newBuilder()
                             .setId(uuid)
                             .build();
@@ -91,14 +91,14 @@ public class Given {
         }
 
         public static IntegrationEvent projectCreated(ProjectId projectId) {
-            final IntegrationEventContext context = createIntegrationEventContext(projectId);
+            IntegrationEventContext context = createIntegrationEventContext(projectId);
             return projectCreated(projectId, context);
         }
 
         public static IntegrationEvent projectCreated(ProjectId projectId,
                                                       IntegrationEventContext eventContext) {
-            final BcProjectCreated event = EventMessage.projectCreated(projectId);
-            final IntegrationEvent.Builder builder =
+            BcProjectCreated event = EventMessage.projectCreated(projectId);
+            IntegrationEvent.Builder builder =
                     IntegrationEvent.newBuilder()
                                     .setContext(eventContext)
                                     .setMessage(AnyPacker.pack(event));
@@ -108,11 +108,11 @@ public class Given {
         public static IntegrationEventContext createIntegrationEventContext(Message aggregateId) {
             // An integration event ID may have a value which does not follow our internal
             // conventions. We simulate this in the initialization below
-            final EventId eventId = EventId.newBuilder()
+            EventId eventId = EventId.newBuilder()
                                            .setValue("ieid-" + newUuid())
                                            .build();
 
-            final IntegrationEventContext.Builder builder =
+            IntegrationEventContext.Builder builder =
                     IntegrationEventContext.newBuilder()
                                            .setEventId(eventId)
                                            .setTimestamp(getCurrentTime())

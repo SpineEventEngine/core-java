@@ -70,7 +70,7 @@ class CommandDispatcherRegistryTest {
     void setUp() {
         ModelTests.clearModel();
 
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
+        BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .setName(getClass().getSimpleName())
                                                             .build();
         eventBus = boundedContext.getEventBus();
@@ -79,20 +79,20 @@ class CommandDispatcherRegistryTest {
 
     @SafeVarargs
     private final void assertSupported(Class<? extends Message>... cmdClasses) {
-        final Set<CommandClass> supportedClasses = registry.getRegisteredMessageClasses();
+        Set<CommandClass> supportedClasses = registry.getRegisteredMessageClasses();
 
         for (Class<? extends Message> clazz : cmdClasses) {
-            final CommandClass cmdClass = CommandClass.of(clazz);
+            CommandClass cmdClass = CommandClass.of(clazz);
             assertTrue(supportedClasses.contains(cmdClass));
         }
     }
 
     @SafeVarargs
     private final void assertNotSupported(Class<? extends Message>... cmdClasses) {
-        final Set<CommandClass> supportedClasses = registry.getRegisteredMessageClasses();
+        Set<CommandClass> supportedClasses = registry.getRegisteredMessageClasses();
 
         for (Class<? extends Message> clazz : cmdClasses) {
-            final CommandClass cmdClass = CommandClass.of(clazz);
+            CommandClass cmdClass = CommandClass.of(clazz);
             assertFalse(supportedClasses.contains(cmdClass));
         }
     }
@@ -125,7 +125,7 @@ class CommandDispatcherRegistryTest {
         @Test
         @DisplayName("command dispatcher")
         void commandDispatcher() {
-            final CommandDispatcher<Message> dispatcher = new AllCommandDispatcher();
+            CommandDispatcher<Message> dispatcher = new AllCommandDispatcher();
 
             registry.register(dispatcher);
             registry.unregister(dispatcher);
@@ -136,7 +136,7 @@ class CommandDispatcherRegistryTest {
         @Test
         @DisplayName("command handler")
         void commandHandler() {
-            final AllCommandHandler handler = new AllCommandHandler(eventBus);
+            AllCommandHandler handler = new AllCommandHandler(eventBus);
 
             registry.register(handler);
             registry.unregister(handler);
@@ -183,7 +183,7 @@ class CommandDispatcherRegistryTest {
     @Test
     @DisplayName("accept empty process manager repository dispatcher")
     void acceptEmptyProcessManagerRepository() {
-        final NoCommandsDispatcherRepo pmRepo = new NoCommandsDispatcherRepo();
+        NoCommandsDispatcherRepo pmRepo = new NoCommandsDispatcherRepo();
         registry.register(DelegatingCommandDispatcher.of(pmRepo));
     }
 

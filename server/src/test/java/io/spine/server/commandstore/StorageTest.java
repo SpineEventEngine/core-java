@@ -83,7 +83,7 @@ class StorageTest extends TenantAwareTest {
     private CommandId id;
 
     private Optional<CommandRecord> readRecord(CommandId commandId) {
-        final Optional<CEntity> entity = repository.find(commandId);
+        Optional<CEntity> entity = repository.find(commandId);
         if (entity.isPresent()) {
             return Optional.of(entity.get()
                                      .getState());
@@ -95,7 +95,7 @@ class StorageTest extends TenantAwareTest {
     void setUpCommandStorageTest() {
         setCurrentTenant(newUuid());
         repository = new CRepository();
-        final StorageFactorySwitch storageSwitch =
+        StorageFactorySwitch storageSwitch =
                 StorageFactorySwitch.newInstance(newName(getClass().getSimpleName()), true);
         repository.initStorage(storageSwitch.get());
     }
@@ -146,11 +146,11 @@ class StorageTest extends TenantAwareTest {
         @Test
         @DisplayName("command")
         void command() {
-            final Command command = Given.ACommand.createProject();
-            final CommandId commandId = command.getId();
+            Command command = Given.ACommand.createProject();
+            CommandId commandId = command.getId();
 
             repository.store(command);
-            final CommandRecord record = readRecord(commandId).get();
+            CommandRecord record = readRecord(commandId).get();
 
             checkRecord(record, command, RECEIVED);
         }
@@ -159,12 +159,12 @@ class StorageTest extends TenantAwareTest {
         @Test
         @DisplayName("command with error")
         void commandWithError() {
-            final Command command = Given.ACommand.createProject();
-            final CommandId commandId = command.getId();
-            final Error error = newError();
+            Command command = Given.ACommand.createProject();
+            CommandId commandId = command.getId();
+            Error error = newError();
 
             repository.store(command, error);
-            final CommandRecord record = readRecord(commandId).get();
+            CommandRecord record = readRecord(commandId).get();
 
             checkRecord(record, command, ERROR);
             assertEquals(error, record.getStatus()
@@ -174,15 +174,15 @@ class StorageTest extends TenantAwareTest {
         @Test
         @DisplayName("command with error having no ID")
         void commandWithErrorWithoutId() {
-            final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
-            final Command command = factory.createCommand(createProjectMessage());
-            final Error error = newError();
+            TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
+            Command command = factory.createCommand(createProjectMessage());
+            Error error = newError();
 
             repository.store(command, error);
-            final List<CommandRecord> records = Lists.newArrayList(repository.iterator(ERROR));
+            List<CommandRecord> records = Lists.newArrayList(repository.iterator(ERROR));
 
             assertEquals(1, records.size());
-            final String commandIdStr = Identifier.toString(records.get(0)
+            String commandIdStr = Identifier.toString(records.get(0)
                                                                    .getCommandId());
             assertFalse(commandIdStr.isEmpty());
         }
@@ -191,12 +191,12 @@ class StorageTest extends TenantAwareTest {
         @Test
         @DisplayName("command with status")
         void commandWithStatus() {
-            final Command command = Given.ACommand.createProject();
-            final CommandId commandId = command.getId();
-            final CommandStatus status = SCHEDULED;
+            Command command = Given.ACommand.createProject();
+            CommandId commandId = command.getId();
+            CommandStatus status = SCHEDULED;
 
             repository.store(command, status);
-            final CommandRecord record = readRecord(commandId).get();
+            CommandRecord record = readRecord(commandId).get();
 
             checkRecord(record, command, status);
         }
@@ -204,17 +204,17 @@ class StorageTest extends TenantAwareTest {
         @Test
         @DisplayName("multiple commands with status")
         void multipleCommandsWithStatus() {
-            final List<Command> commands = ImmutableList.of(Given.ACommand.createProject(),
+            List<Command> commands = ImmutableList.of(Given.ACommand.createProject(),
                                                             Given.ACommand.addTask(),
                                                             Given.ACommand.startProject());
-            final CommandStatus status = SCHEDULED;
+            CommandStatus status = SCHEDULED;
 
             store(commands, status);
             // store an extra command with another status
             repository.store(Given.ACommand.createProject(), ERROR);
 
-            final Iterator<CommandRecord> iterator = repository.iterator(status);
-            final List<Command> actualCommands = newArrayList(toCommandIterator(iterator));
+            Iterator<CommandRecord> iterator = repository.iterator(status);
+            List<Command> actualCommands = newArrayList(toCommandIterator(iterator));
             assertEquals(commands.size(), actualCommands.size());
             for (Command cmd : actualCommands) {
                 assertTrue(commands.contains(cmd));
@@ -240,7 +240,7 @@ class StorageTest extends TenantAwareTest {
 
             repository.setOkStatus(id);
 
-            final CommandRecord actual = readRecord(id).get();
+            CommandRecord actual = readRecord(id).get();
             assertEquals(OK, actual.getStatus()
                                    .getCode());
         }
@@ -250,11 +250,11 @@ class StorageTest extends TenantAwareTest {
         @DisplayName("`ERROR`")
         void error() {
             storeNewRecord();
-            final Error error = newError();
+            Error error = newError();
 
             repository.updateStatus(id, error);
 
-            final CommandRecord actual = readRecord(id).get();
+            CommandRecord actual = readRecord(id).get();
             assertEquals(ERROR, actual.getStatus()
                                       .getCode());
             assertEquals(error, actual.getStatus()
@@ -266,11 +266,11 @@ class StorageTest extends TenantAwareTest {
         @DisplayName("`REJECTED`")
         void rejection() {
             storeNewRecord();
-            final Rejection rejection = newRejection();
+            Rejection rejection = newRejection();
 
             repository.updateStatus(id, rejection);
 
-            final CommandRecord actual = readRecord(id).get();
+            CommandRecord actual = readRecord(id).get();
             assertEquals(REJECTED, actual.getStatus()
                                          .getCode());
             assertEquals(rejection, actual.getStatus()
@@ -278,7 +278,7 @@ class StorageTest extends TenantAwareTest {
         }
 
         private void storeNewRecord() {
-            final CommandRecord record = newStorageRecord();
+            CommandRecord record = newStorageRecord();
             id = record.getCommandId();
             repository.store(record.getCommand());
         }
@@ -288,10 +288,10 @@ class StorageTest extends TenantAwareTest {
     @Test
     @DisplayName("convert command to record")
     void convertCommandToRecord() {
-        final Command command = Given.ACommand.createProject();
-        final CommandStatus status = RECEIVED;
+        Command command = Given.ACommand.createProject();
+        CommandStatus status = RECEIVED;
 
-        final CommandRecord record = newRecordBuilder(command, status, null).build();
+        CommandRecord record = newRecordBuilder(command, status, null).build();
 
         checkRecord(record, command, status);
     }

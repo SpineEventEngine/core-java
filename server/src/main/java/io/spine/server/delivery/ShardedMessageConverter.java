@@ -50,16 +50,16 @@ abstract class ShardedMessageConverter<I, M extends Message, E extends MessageEn
 
     protected ShardedMessage convert(I targetId, E envelope) {
 
-        final Message id = envelope.getId();
-        final M originalMessage = envelope.getOuterObject();
-        final String stringId = Stringifiers.toString(id);
-        final ShardedMessageId shardedMessageId = ShardedMessageId.newBuilder()
+        Message id = envelope.getId();
+        M originalMessage = envelope.getOuterObject();
+        String stringId = Stringifiers.toString(id);
+        ShardedMessageId shardedMessageId = ShardedMessageId.newBuilder()
                                                                   .setValue(stringId)
                                                                   .build();
-        final Any packedOriginalMsg = AnyPacker.pack(originalMessage);
-        final Message message = TypeConverter.toMessage(targetId);
-        final Any packedTargetId = AnyPacker.pack(message);
-        final ShardedMessage result = ShardedMessage.newBuilder()
+        Any packedOriginalMsg = AnyPacker.pack(originalMessage);
+        Message message = TypeConverter.toMessage(targetId);
+        Any packedTargetId = AnyPacker.pack(message);
+        ShardedMessage result = ShardedMessage.newBuilder()
                                                     .setId(shardedMessageId)
                                                     .setTargetId(packedTargetId)
                                                     .setOriginalMessage(packedOriginalMsg)
@@ -69,14 +69,14 @@ abstract class ShardedMessageConverter<I, M extends Message, E extends MessageEn
     }
 
     I targetIdOf(ShardedMessage message, Class<I> idClass) {
-        final Any asAny = message.getTargetId();
-        final I result = TypeConverter.toObject(asAny, idClass);
+        Any asAny = message.getTargetId();
+        I result = TypeConverter.toObject(asAny, idClass);
         return result;
     }
 
     E envelopeOf(ShardedMessage message) {
-        final Any packedOriginalMessage = message.getOriginalMessage();
-        final E result = toEnvelope(packedOriginalMessage);
+        Any packedOriginalMessage = message.getOriginalMessage();
+        E result = toEnvelope(packedOriginalMessage);
         return result;
     }
 }

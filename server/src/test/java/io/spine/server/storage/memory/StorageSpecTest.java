@@ -54,11 +54,11 @@ class StorageSpecTest {
     @Test
     @DisplayName("create new instances")
     void createNewInstances() {
-        final BoundedContextName bcName = newName(getClass().getName());
-        final TypeUrl stateUrl = TypeUrl.of(StringValue.class);
-        final Class<Long> idClass = Long.class;
+        BoundedContextName bcName = newName(getClass().getName());
+        TypeUrl stateUrl = TypeUrl.of(StringValue.class);
+        Class<Long> idClass = Long.class;
 
-        final StorageSpec<Long> spec = StorageSpec.of(bcName, stateUrl, idClass);
+        StorageSpec<Long> spec = StorageSpec.of(bcName, stateUrl, idClass);
 
         assertEquals(bcName, spec.getBoundedContextName());
         assertEquals(stateUrl, spec.getEntityStateUrl());
@@ -68,7 +68,7 @@ class StorageSpecTest {
     @Test
     @DisplayName("provide `equals` based on values")
     void provideEquals() {
-        final BoundedContextName bcName = newName(getClass().getName());
+        BoundedContextName bcName = newName(getClass().getName());
 
         new EqualsTester()
                 .addEqualityGroup(

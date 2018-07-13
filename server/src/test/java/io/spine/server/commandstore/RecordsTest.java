@@ -52,10 +52,10 @@ class RecordsTest {
     @Test
     @DisplayName("convert command to record")
     void convertCmdToRecord() {
-        final Command command = Given.ACommand.createProject();
-        final CommandStatus status = CommandStatus.RECEIVED;
+        Command command = Given.ACommand.createProject();
+        CommandStatus status = CommandStatus.RECEIVED;
 
-        final CommandRecord record = newRecordBuilder(command,
+        CommandRecord record = newRecordBuilder(command,
                                                       status,
                                                       null).build();
 

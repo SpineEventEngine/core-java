@@ -57,7 +57,7 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>, F extends BusFilter<
         checkNotNull(envelope);
         checkNotClosed();
         for (F filter : chain) {
-            final Optional<Ack> output = filter.accept(envelope);
+            Optional<Ack> output = filter.accept(envelope);
             if (output.isPresent()) {
                 return output;
             }
@@ -79,9 +79,9 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>, F extends BusFilter<
     public void close() throws Exception {
         checkNotClosed();
         closed = true;
-        final Iterator<F> filters = chain.descendingIterator();
+        Iterator<F> filters = chain.descendingIterator();
         while (filters.hasNext()) {
-            final F filter = filters.next();
+            F filter = filters.next();
             filter.close();
         }
     }

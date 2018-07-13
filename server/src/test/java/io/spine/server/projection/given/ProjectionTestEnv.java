@@ -50,22 +50,22 @@ public class ProjectionTestEnv {
 
         @Subscribe
         public void on(StringValue event) {
-            final StringValue newState = createNewState("stringState", event.getValue());
+            StringValue newState = createNewState("stringState", event.getValue());
             getBuilder().mergeFrom(newState);
         }
 
         @Subscribe
         public void on(Int32Value event) {
-            final StringValue newState = createNewState("integerState",
+            StringValue newState = createNewState("integerState",
                                                         String.valueOf(event.getValue()));
             getBuilder().mergeFrom(newState);
         }
 
         private StringValue createNewState(String type, String value) {
             // Get the current state within the transaction.
-            final String currentState = getBuilder().internalBuild()
+            String currentState = getBuilder().internalBuild()
                                                     .getValue();
-            final String result = currentState + (currentState.length() > 0 ? " + " : "") +
+            String result = currentState + (currentState.length() > 0 ? " + " : "") +
                     type + '(' + value + ')' + System.lineSeparator();
             return toMessage(result);
         }

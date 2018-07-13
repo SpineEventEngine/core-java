@@ -166,7 +166,7 @@ public class EntityColumnCache {
      * class are incorrect
      */
     private void obtainAndCacheColumns() {
-        final Collection<EntityColumn> columns = Columns.getAllColumns(entityClass);
+        Collection<EntityColumn> columns = Columns.getAllColumns(entityClass);
         cacheEntityColumns(columns);
     }
 

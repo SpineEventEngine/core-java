@@ -58,27 +58,27 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Optional<EntityRecord> readRecord(I id) {
-        final RecordStorage<I> storage = recordStorage();
-        final RecordReadRequest<I> request = new RecordReadRequest<>(id);
-        final Optional<EntityRecord> record = storage.read(request);
+        RecordStorage<I> storage = recordStorage();
+        RecordReadRequest<I> request = new RecordReadRequest<>(id);
+        Optional<EntityRecord> record = storage.read(request);
         return record;
     }
 
     @Override
     protected void writeRecord(I id, EntityRecordWithColumns record) {
-        final RecordStorage<I> storage = recordStorage();
+        RecordStorage<I> storage = recordStorage();
         storage.write(id, record);
     }
 
     @Override
     protected void writeRecords(Map<I, EntityRecordWithColumns> records) {
-        final RecordStorage<I> storage = recordStorage();
+        RecordStorage<I> storage = recordStorage();
         storage.write(records);
     }
 
     @Override
     protected Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
-        final RecordStorage<I> storage = recordStorage();
+        RecordStorage<I> storage = recordStorage();
         return storage.readAll(query, fieldMask);
     }
 

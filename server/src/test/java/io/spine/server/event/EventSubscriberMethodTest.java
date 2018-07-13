@@ -69,11 +69,11 @@ class EventSubscriberMethodTest {
     @Test
     @DisplayName("invoke subscriber method")
     void invokeSubscriberMethod() throws InvocationTargetException {
-        final ValidTwoParams subscriberObject;
+        ValidTwoParams subscriberObject;
         subscriberObject = spy(new ValidTwoParams());
-        final EventSubscriberMethod subscriber =
+        EventSubscriberMethod subscriber =
                 EventSubscriberMethod.from(subscriberObject.getMethod());
-        final RefProjectCreated msg = Given.EventMessage.projectCreated();
+        RefProjectCreated msg = Given.EventMessage.projectCreated();
 
         subscriber.invoke(subscriberObject, msg, EventContext.getDefaultInstance());
 
@@ -88,7 +88,7 @@ class EventSubscriberMethodTest {
         @Test
         @DisplayName("one Message parameter")
         void oneMessageParam() {
-            final Method subscriber = new ValidOneParam().getMethod();
+            Method subscriber = new ValidOneParam().getMethod();
 
             assertIsEventSubscriber(subscriber, true);
         }
@@ -96,7 +96,7 @@ class EventSubscriberMethodTest {
         @Test
         @DisplayName("Message and Context parameters")
         void messageAndContextParams() {
-            final Method subscriber = new ValidTwoParams().getMethod();
+            Method subscriber = new ValidTwoParams().getMethod();
 
             assertIsEventSubscriber(subscriber, true);
         }
@@ -104,7 +104,7 @@ class EventSubscriberMethodTest {
         @Test
         @DisplayName("non-public access")
         void nonPublicAccess() {
-            final Method method = new ValidButPrivate().getMethod();
+            Method method = new ValidButPrivate().getMethod();
 
             assertIsEventSubscriber(method, true);
         }
@@ -117,7 +117,7 @@ class EventSubscriberMethodTest {
         @Test
         @DisplayName("no annotation")
         void noAnnotation() {
-            final Method subscriber = new InvalidNoAnnotation().getMethod();
+            Method subscriber = new InvalidNoAnnotation().getMethod();
 
             assertIsEventSubscriber(subscriber, false);
         }
@@ -125,7 +125,7 @@ class EventSubscriberMethodTest {
         @Test
         @DisplayName("no params")
         void noParams() {
-            final Method subscriber = new InvalidNoParams().getMethod();
+            Method subscriber = new InvalidNoParams().getMethod();
 
             assertIsEventSubscriber(subscriber, false);
         }
@@ -133,7 +133,7 @@ class EventSubscriberMethodTest {
         @Test
         @DisplayName("too many params")
         void tooManyParams() {
-            final Method subscriber = new InvalidTooManyParams().getMethod();
+            Method subscriber = new InvalidTooManyParams().getMethod();
 
             assertIsEventSubscriber(subscriber, false);
         }
@@ -141,7 +141,7 @@ class EventSubscriberMethodTest {
         @Test
         @DisplayName("one invalid param")
         void oneInvalidParam() {
-            final Method subscriber = new InvalidOneNotMsgParam().getMethod();
+            Method subscriber = new InvalidOneNotMsgParam().getMethod();
 
             assertIsEventSubscriber(subscriber, false);
         }
@@ -149,7 +149,7 @@ class EventSubscriberMethodTest {
         @Test
         @DisplayName("first non-Message param")
         void firstNonMessageParam() {
-            final Method subscriber = new InvalidTwoParamsFirstInvalid().getMethod();
+            Method subscriber = new InvalidTwoParamsFirstInvalid().getMethod();
 
             assertIsEventSubscriber(subscriber, false);
         }
@@ -157,7 +157,7 @@ class EventSubscriberMethodTest {
         @Test
         @DisplayName("second non-Context param")
         void secondNonContextParam() {
-            final Method subscriber = new InvalidTwoParamsSecondInvalid().getMethod();
+            Method subscriber = new InvalidTwoParamsSecondInvalid().getMethod();
 
             assertIsEventSubscriber(subscriber, false);
         }
@@ -165,7 +165,7 @@ class EventSubscriberMethodTest {
         @Test
         @DisplayName("non-void return type")
         void nonVoidReturnType() {
-            final Method subscriber = new InvalidNotVoid().getMethod();
+            Method subscriber = new InvalidNotVoid().getMethod();
 
             assertIsEventSubscriber(subscriber, false);
         }
@@ -173,7 +173,7 @@ class EventSubscriberMethodTest {
         @Test
         @DisplayName("Rejection type")
         void rejectionClassType() {
-            final Method rejectionSubscriber = new ARejectionSubscriber().getMethod();
+            Method rejectionSubscriber = new ARejectionSubscriber().getMethod();
 
             assertIsEventSubscriber(rejectionSubscriber, false);
         }

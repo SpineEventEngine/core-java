@@ -56,8 +56,8 @@ public abstract class TenantAwareFunction<F, T> extends TenantAware implements F
      * </ol>
      */
     public T execute(F input) {
-        final T result;
-        final Optional<TenantId> remembered = CurrentTenant.get();
+        T result;
+        Optional<TenantId> remembered = CurrentTenant.get();
         try {
             CurrentTenant.set(tenantId());
             result = apply(input);

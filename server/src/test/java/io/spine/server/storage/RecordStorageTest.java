@@ -506,14 +506,14 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
     @Test
     @DisplayName("filter records by ordinal enum columns")
     protected void filterByOrdinalEnumColumns() {
-        final String columnPath = "projectStatusOrdinal";
+        String columnPath = "projectStatusOrdinal";
         checkEnumColumnFilter(columnPath);
     }
 
     @Test
     @DisplayName("filter records by string enum columns")
     protected void filterByStringEnumColumns() {
-        final String columnPath = "projectStatusString";
+        String columnPath = "projectStatusString";
         checkEnumColumnFilter(columnPath);
     }
 
@@ -738,63 +738,63 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
      * enumerated column returning {@link Project.Status}.
      */
     private void checkEnumColumnFilter(String columnPath) {
-        final Project.Status requiredValue = DONE;
-        final Project.Status value = Enum.valueOf(Project.Status.class, requiredValue.name());
-        final ColumnFilter status = eq(columnPath, value);
-        final CompositeColumnFilter aggregatingFilter = CompositeColumnFilter.newBuilder()
+        Project.Status requiredValue = DONE;
+        Project.Status value = Enum.valueOf(Project.Status.class, requiredValue.name());
+        ColumnFilter status = eq(columnPath, value);
+        CompositeColumnFilter aggregatingFilter = CompositeColumnFilter.newBuilder()
                                                                              .setOperator(ALL)
                                                                              .addFilter(status)
                                                                              .build();
-        final EntityFilters filters = EntityFilters.newBuilder()
+        EntityFilters filters = EntityFilters.newBuilder()
                                                    .addFilter(aggregatingFilter)
                                                    .build();
 
-        final RecordStorage<I> storage = getStorage();
+        RecordStorage<I> storage = getStorage();
 
-        final EntityQuery<I> query = from(filters, storage);
-        final I idMatching = newId();
-        final I idWrong = newId();
+        EntityQuery<I> query = from(filters, storage);
+        I idMatching = newId();
+        I idWrong = newId();
 
-        final TestCounterEntity<I> matchingEntity = new TestCounterEntity<>(idMatching);
-        final TestCounterEntity<I> wrongEntity = new TestCounterEntity<>(idWrong);
+        TestCounterEntity<I> matchingEntity = new TestCounterEntity<>(idMatching);
+        TestCounterEntity<I> wrongEntity = new TestCounterEntity<>(idWrong);
 
         matchingEntity.assignStatus(requiredValue);
         wrongEntity.assignStatus(CANCELLED);
 
-        final EntityRecord fineRecord = newStorageRecord(idMatching, newState(idMatching));
-        final EntityRecord notFineRecord = newStorageRecord(idWrong, newState(idWrong));
+        EntityRecord fineRecord = newStorageRecord(idMatching, newState(idMatching));
+        EntityRecord notFineRecord = newStorageRecord(idWrong, newState(idWrong));
 
-        final EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity, storage);
-        final EntityRecordWithColumns recordWrong = create(notFineRecord, wrongEntity, storage);
+        EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity, storage);
+        EntityRecordWithColumns recordWrong = create(notFineRecord, wrongEntity, storage);
 
         storage.write(idMatching, recordRight);
         storage.write(idWrong, recordWrong);
 
-        final Iterator<EntityRecord> readRecords = storage.readAll(query,
+        Iterator<EntityRecord> readRecords = storage.readAll(query,
                                                                    FieldMask.getDefaultInstance());
         assertSingleRecord(fineRecord, readRecords);
     }
 
     protected static EntityRecordWithColumns withLifecycleColumns(EntityRecord record) {
-        final LifecycleFlags flags = record.getLifecycleFlags();
-        final Map<String, MemoizedValue> columns = ImmutableMap.of(
+        LifecycleFlags flags = record.getLifecycleFlags();
+        Map<String, MemoizedValue> columns = ImmutableMap.of(
                 LifecycleColumns.ARCHIVED.columnName(),
                 booleanColumn(LifecycleColumns.ARCHIVED.column(), flags.getArchived()),
                 LifecycleColumns.DELETED.columnName(),
                 booleanColumn(LifecycleColumns.DELETED.column(), flags.getDeleted())
         );
-        final EntityRecordWithColumns result = createRecord(record, columns);
+        EntityRecordWithColumns result = createRecord(record, columns);
         return result;
     }
 
     private static MemoizedValue booleanColumn(EntityColumn column, boolean value) {
-        final MemoizedValue memoizedValue = mock(MemoizedValue.class);
+        MemoizedValue memoizedValue = mock(MemoizedValue.class);
         when(memoizedValue.getSourceColumn()).thenReturn(column);
         when(memoizedValue.getValue()).thenReturn(value);
         return memoizedValue;
     }
 
-    private static EntityRecordWithColumns withRecordAndNoFields(final EntityRecord record) {
+    private static EntityRecordWithColumns withRecordAndNoFields(EntityRecord record) {
         return argThat(argument -> argument.getRecord()
                                            .equals(record)
                 && !argument.hasColumns());
@@ -802,7 +802,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
 
     private static void assertSingleRecord(EntityRecord expected, Iterator<EntityRecord> actual) {
         assertTrue(actual.hasNext());
-        final EntityRecord singleRecord = actual.next();
+        EntityRecord singleRecord = actual.next();
         assertFalse(actual.hasNext());
         assertEquals(expected, singleRecord);
     }

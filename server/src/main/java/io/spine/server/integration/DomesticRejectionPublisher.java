@@ -66,12 +66,12 @@ final class DomesticRejectionPublisher extends RejectionSubscriber {
 
     @Override
     public Set<String> dispatch(RejectionEnvelope envelope) {
-        final Rejection rejection = envelope.getOuterObject();
-        final ExternalMessage message = ExternalMessages.of(rejection, boundedContextName);
-        final ExternalMessageClass messageClass =
+        Rejection rejection = envelope.getOuterObject();
+        ExternalMessage message = ExternalMessages.of(rejection, boundedContextName);
+        ExternalMessageClass messageClass =
                 ExternalMessageClass.of(envelope.getMessageClass());
-        final ChannelId channelId = IntegrationChannels.toId(messageClass);
-        final Publisher channel = publisherHub.get(channelId);
+        ChannelId channelId = IntegrationChannels.toId(messageClass);
+        Publisher channel = publisherHub.get(channelId);
         channel.publish(AnyPacker.pack(envelope.getId()), message);
 
         return ImmutableSet.of(channel.toString());

@@ -92,8 +92,8 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
      */
     @Override
     public List<? extends Message> invoke(Object target, Message message, CommandContext context) {
-        final Object handlingResult = super.invoke(target, message, context);
-        final List<? extends Message> events = toList(handlingResult);
+        Object handlingResult = super.invoke(target, message, context);
+        List<? extends Message> events = toList(handlingResult);
         return events;
     }
 
@@ -108,14 +108,14 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
                                                      Message message,
                                                      CommandContext context,
                                                      Exception cause) {
-        final HandlerMethodFailedException exception =
+        HandlerMethodFailedException exception =
                 super.whyFailed(target, message, context, cause);
 
-        final Throwable rootCause = getRootCause(exception);
+        Throwable rootCause = getRootCause(exception);
         if (rootCause instanceof ThrowableMessage) {
-            final ThrowableMessage thrownMessage = (ThrowableMessage)rootCause;
+            ThrowableMessage thrownMessage = (ThrowableMessage)rootCause;
 
-            final Optional<Any> producerId = idOf(target);
+            Optional<Any> producerId = idOf(target);
 
             if (producerId.isPresent()) {
                 thrownMessage.initProducer(producerId.get());
@@ -133,7 +133,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
      */
     @SuppressWarnings("ChainOfInstanceofChecks")
     private static Optional<Any> idOf(Object target) {
-        final Any producerId;
+        Any producerId;
         if (target instanceof Entity) {
             producerId = Identifier.pack(((Entity) target).getId());
         } else if (target instanceof CommandHandler) {
@@ -167,7 +167,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
 
         @Override
         public void checkAccessModifier(Method method) {
-            final MethodAccessChecker checker = MethodAccessChecker.forMethod(method);
+            MethodAccessChecker checker = MethodAccessChecker.forMethod(method);
             checker.checkPackagePrivate("Command handler method {} should be package-private.");
         }
 
@@ -180,7 +180,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
          */
         @Override
         protected void checkThrownExceptions(Method method) {
-            final MethodExceptionChecker checker = MethodExceptionChecker.forMethod(method);
+            MethodExceptionChecker checker = MethodExceptionChecker.forMethod(method);
             checker.checkThrowsNoExceptionsBut(RuntimeException.class, ThrowableMessage.class);
         }
 
@@ -203,7 +203,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            final boolean result = returnsMessageOrIterable(method);
+            boolean result = returnsMessageOrIterable(method);
             return result;
         }
     }

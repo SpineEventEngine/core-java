@@ -99,7 +99,7 @@ public class ReferenceValidatorTestEnv {
                 if (id == null) {
                     return null;
                 }
-                final String name = "prj-" + id.getId();
+                String name = "prj-" + id.getId();
                 return name;
             }
         }

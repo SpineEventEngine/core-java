@@ -50,7 +50,7 @@ class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     static <I, A extends Aggregate<I, ?, ?>>
     Set<I> handle(AggregateRepository<I, A> repository, EventEnvelope event) {
-        final AggregateEventEndpoint<I, A> endpoint = of(repository, event);
+        AggregateEventEndpoint<I, A> endpoint = of(repository, event);
 
         return endpoint.handle();
     }
@@ -84,8 +84,8 @@ class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     protected Set<I> getTargets() {
-        final EventEnvelope envelope = envelope();
-        final Set<I> ids = repository().getEventRouting()
+        EventEnvelope envelope = envelope();
+        Set<I> ids = repository().getEventRouting()
                                        .apply(envelope.getMessage(), envelope.getEventContext());
         return ids;
     }

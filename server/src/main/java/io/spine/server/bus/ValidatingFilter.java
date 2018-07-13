@@ -51,11 +51,11 @@ final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Messa
     @Override
     public Optional<Ack> accept(E envelope) {
         checkNotNull(envelope);
-        final Optional<MessageInvalid> violation = validator.validate(envelope);
+        Optional<MessageInvalid> violation = validator.validate(envelope);
         if (violation.isPresent()) {
-            final Error error = violation.get().asError();
-            final Any packedId = Identifier.pack(envelope.getId());
-            final Ack result = reject(packedId, error);
+            Error error = violation.get().asError();
+            Any packedId = Identifier.pack(envelope.getId());
+            Ack result = reject(packedId, error);
             return Optional.of(result);
         } else {
             return Optional.absent();

@@ -63,7 +63,7 @@ class AggregateRootTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() throws NoSuchMethodException {
-        final Constructor<AnAggregateRoot> ctor =
+        Constructor<AnAggregateRoot> ctor =
                 AnAggregateRoot.class.getDeclaredConstructor(BoundedContext.class, String.class);
         new NullPointerTester()
                 .setDefault(Constructor.class, ctor)
@@ -74,10 +74,10 @@ class AggregateRootTest {
     @Test
     @DisplayName("obtain part state by its class")
     void returnPartStateByClass() {
-        final Message definitionPart = aggregateRoot.getPartState(ProjectDefinition.class);
+        Message definitionPart = aggregateRoot.getPartState(ProjectDefinition.class);
         assertNotNull(definitionPart);
 
-        final Message lifeCyclePart = aggregateRoot.getPartState(ProjectLifecycle.class);
+        Message lifeCyclePart = aggregateRoot.getPartState(ProjectLifecycle.class);
         assertNotNull(lifeCyclePart);
     }
 }

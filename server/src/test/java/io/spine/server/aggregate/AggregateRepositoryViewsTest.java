@@ -69,7 +69,7 @@ class AggregateRepositoryViewsTest {
      * for being processed by the repository.
      */
     private void postCommand(String cmd) {
-        final Command command =
+        Command command =
                 requestFactory.command()
                               .create(RepoOfAggregateWithLifecycle.createCommandMessage(id, cmd));
         boundedContext.getCommandBus()
@@ -82,7 +82,7 @@ class AggregateRepositoryViewsTest {
         aggregate = repository.find(id);
 
         assertTrue(aggregate.isPresent());
-        final AggregateWithLifecycle agg = aggregate.get();
+        AggregateWithLifecycle agg = aggregate.get();
         assertFalse(agg.isArchived());
         assertFalse(agg.isDeleted());
     }
@@ -95,7 +95,7 @@ class AggregateRepositoryViewsTest {
         aggregate = repository.find(id);
 
         assertTrue(aggregate.isPresent());
-        final AggregateWithLifecycle agg = aggregate.get();
+        AggregateWithLifecycle agg = aggregate.get();
         assertTrue(agg.isArchived());
         assertFalse(agg.isDeleted());
     }
@@ -108,7 +108,7 @@ class AggregateRepositoryViewsTest {
         aggregate = repository.find(id);
 
         assertTrue(aggregate.isPresent());
-        final AggregateWithLifecycle agg = aggregate.get();
+        AggregateWithLifecycle agg = aggregate.get();
         assertFalse(agg.isArchived());
         assertTrue(agg.isDeleted());
     }

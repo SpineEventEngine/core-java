@@ -77,32 +77,32 @@ class EntityQueryTest {
     @Test
     @DisplayName("be serializable")
     void beSerializable() {
-        final String columnName = deleted.name();
-        final EntityColumn column = findColumn(EntityWithLifecycle.class, columnName);
-        final ColumnFilter filter = ColumnFilters.eq(columnName, false);
-        final Multimap<EntityColumn, ColumnFilter> filters = of(column, filter);
-        final CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
-        final QueryParameters parameters = QueryParameters.newBuilder()
+        String columnName = deleted.name();
+        EntityColumn column = findColumn(EntityWithLifecycle.class, columnName);
+        ColumnFilter filter = ColumnFilters.eq(columnName, false);
+        Multimap<EntityColumn, ColumnFilter> filters = of(column, filter);
+        CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
+        QueryParameters parameters = QueryParameters.newBuilder()
                                                           .add(parameter)
                                                           .build();
-        final Set<String> ids = singleton("my-awesome-ID");
-        final EntityQuery<String> query = EntityQuery.of(ids, parameters);
+        Set<String> ids = singleton("my-awesome-ID");
+        EntityQuery<String> query = EntityQuery.of(ids, parameters);
         reserializeAndAssert(query);
     }
 
     @Test
     @DisplayName("support `toString`")
     void supportToString() {
-        final Object someId = Sample.messageOfType(ProjectId.class);
-        final Collection<Object> ids = singleton(someId);
-        final EntityColumn someColumn = mockColumn();
-        final Object someValue = "something";
+        Object someId = Sample.messageOfType(ProjectId.class);
+        Collection<Object> ids = singleton(someId);
+        EntityColumn someColumn = mockColumn();
+        Object someValue = "something";
 
-        final Map<EntityColumn, Object> params = new HashMap<>(1);
+        Map<EntityColumn, Object> params = new HashMap<>(1);
         params.put(someColumn, someValue);
 
-        final EntityQuery query = EntityQuery.of(ids, paramsFromValues(params));
-        final String repr = query.toString();
+        EntityQuery query = EntityQuery.of(ids, paramsFromValues(params));
+        String repr = query.toString();
 
         assertContains(query.getIds()
                             .toString(), repr);
@@ -113,7 +113,7 @@ class EntityQueryTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        final EqualsTester tester = new EqualsTester();
+        EqualsTester tester = new EqualsTester();
         addEqualityGroupA(tester);
         addEqualityGroupB(tester);
         addEqualityGroupC(tester);
@@ -124,16 +124,16 @@ class EntityQueryTest {
     @Test
     @DisplayName("fail to append lifecycle columns if they are already present")
     void notDuplicateLifecycleColumns() {
-        final EntityColumn deletedColumn =
+        EntityColumn deletedColumn =
                 Columns.findColumn(EntityWithLifecycle.class, deleted.name());
-        final CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
+        CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
                 ImmutableMultimap.of(deletedColumn, ColumnFilter.getDefaultInstance()),
                 ALL
         );
-        final QueryParameters parameters = QueryParameters.newBuilder()
+        QueryParameters parameters = QueryParameters.newBuilder()
                                                           .add(queryParameter)
                                                           .build();
-        final EntityQuery<String> query =
+        EntityQuery<String> query =
                 EntityQuery.of(Collections.<String>emptySet(), parameters);
         assertFalse(query.canAppendLifecycleFlags());
     }
@@ -143,11 +143,11 @@ class EntityQueryTest {
      * the given {@link EqualsTester}.
      */
     private static void addEqualityGroupA(EqualsTester tester) {
-        final Collection<?> ids = Arrays.asList(Sample.messageOfType(ProjectId.class), 0);
-        final Map<EntityColumn, Object> params = new IdentityHashMap<>(2);
+        Collection<?> ids = Arrays.asList(Sample.messageOfType(ProjectId.class), 0);
+        Map<EntityColumn, Object> params = new IdentityHashMap<>(2);
         params.put(mockColumn(), "anything");
         params.put(mockColumn(), 5);
-        final EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(params));
+        EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(params));
         tester.addEqualityGroup(query);
     }
 
@@ -156,11 +156,11 @@ class EntityQueryTest {
      * to the given {@link EqualsTester}.
      */
     private static void addEqualityGroupB(EqualsTester tester) {
-        final Collection<?> ids = emptyList();
-        final Map<EntityColumn, Object> params = new HashMap<>(1);
+        Collection<?> ids = emptyList();
+        Map<EntityColumn, Object> params = new HashMap<>(1);
         params.put(mockColumn(), 5);
-        final EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params));
-        final EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params));
+        EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params));
+        EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params));
         tester.addEqualityGroup(query1, query2);
     }
 
@@ -172,13 +172,13 @@ class EntityQueryTest {
      * {@linkplain #addEqualityGroupB(EqualsTester) group C}.
      */
     private static void addEqualityGroupC(EqualsTester tester) {
-        final Collection<?> ids = emptySet();
-        final EntityColumn column = mockColumn();
-        final Object value = 42;
-        final Map<EntityColumn, Object> params = new HashMap<>(1);
+        Collection<?> ids = emptySet();
+        EntityColumn column = mockColumn();
+        Object value = 42;
+        Map<EntityColumn, Object> params = new HashMap<>(1);
         params.put(column, value);
-        final EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params));
-        final EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params));
+        EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params));
+        EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params));
         tester.addEqualityGroup(query1, query2);
     }
 
@@ -187,26 +187,26 @@ class EntityQueryTest {
      * to the given {@link EqualsTester}.
      */
     private static void addEqualityGroupD(EqualsTester tester) {
-        final Collection<ProjectId> ids = singleton(Sample.messageOfType(ProjectId.class));
-        final Map<EntityColumn, Object> columns = Collections.emptyMap();
-        final EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(columns));
+        Collection<ProjectId> ids = singleton(Sample.messageOfType(ProjectId.class));
+        Map<EntityColumn, Object> columns = Collections.emptyMap();
+        EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(columns));
         tester.addEqualityGroup(query);
     }
 
     private static EntityColumn mockColumn() {
         @SuppressWarnings("unchecked") // Mock cannot have type parameters
-        final EntityColumn column = mock(EntityColumn.class);
+        EntityColumn column = mock(EntityColumn.class);
         when(column.getName()).thenReturn("mockColumn");
         return column;
     }
 
     private static QueryParameters paramsFromValues(Map<EntityColumn, Object> values) {
-        final QueryParameters.Builder builder = QueryParameters.newBuilder();
-        final Multimap<EntityColumn, ColumnFilter> filters = HashMultimap.create(values.size(),
+        QueryParameters.Builder builder = QueryParameters.newBuilder();
+        Multimap<EntityColumn, ColumnFilter> filters = HashMultimap.create(values.size(),
                                                                                  1);
         for (Map.Entry<EntityColumn, Object> param : values.entrySet()) {
-            final EntityColumn column = param.getKey();
-            final ColumnFilter filter = ColumnFilter.newBuilder()
+            EntityColumn column = param.getKey();
+            ColumnFilter filter = ColumnFilter.newBuilder()
                                                     .setOperator(EQUAL)
                                                     .setValue(toAny(param.getValue()))
                                                     .setColumnName(column.getName())

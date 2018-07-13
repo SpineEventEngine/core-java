@@ -115,28 +115,27 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
      * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
      */
     public static Class<? extends Message> getFirstParamType(Method handler) {
-        @SuppressWarnings("unchecked") /* we always expect first param as {@link Message} */
-        final Class<? extends Message> result =
+        @SuppressWarnings("unchecked") /* we always expect first param as {@link Message} */ Class<? extends Message> result =
                 (Class<? extends Message>) handler.getParameterTypes()[0];
         return result;
     }
 
-    public static List<Event> toEvents(final Any producerId,
-                                       @Nullable final Version version,
-                                       final List<? extends Message> eventMessages,
-                                       final MessageEnvelope origin) {
+    public static List<Event> toEvents(Any producerId,
+                                       @Nullable Version version,
+                                       List<? extends Message> eventMessages,
+                                       MessageEnvelope origin) {
         checkNotNull(producerId);
         checkNotNull(eventMessages);
         checkNotNull(origin);
 
-        final EventFactory eventFactory =
+        EventFactory eventFactory =
                 EventFactory.on(origin, producerId);
 
         return Lists.transform(eventMessages, new Function<Message, Event>() {
             @Override
             public Event apply(@Nullable Message eventMessage) {
                 checkNotNull(eventMessage);
-                final Event result = eventFactory.createEvent(eventMessage, version);
+                Event result = eventFactory.createEvent(eventMessage, version);
                 return result;
             }
         });
@@ -153,13 +152,13 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
 
     /** Returns {@code true} if the method is declared {@code public}, {@code false} otherwise. */
     protected boolean isPublic() {
-        final boolean result = Modifier.isPublic(getModifiers());
+        boolean result = Modifier.isPublic(getModifiers());
         return result;
     }
 
     /** Returns {@code true} if the method is declared {@code private}, {@code false} otherwise. */
     protected boolean isPrivate() {
-        final boolean result = Modifier.isPrivate(getModifiers());
+        boolean result = Modifier.isPrivate(getModifiers());
         return result;
     }
 
@@ -175,7 +174,7 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
 
     private static Set<MethodAttribute<?>> discoverAttributes(Method method) {
         checkNotNull(method);
-        final ExternalAttribute externalAttribute = ExternalAttribute.of(method);
+        ExternalAttribute externalAttribute = ExternalAttribute.of(method);
         return ImmutableSet.<MethodAttribute<?>>of(externalAttribute);
     }
 
@@ -202,7 +201,7 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
         if (output instanceof List) {
             // Cast to the list of messages as it is the one of the return types
             // we expect by methods we call.
-            final List<? extends Message> result = (List<? extends Message>) output;
+            List<? extends Message> result = (List<? extends Message>) output;
             return result;
         }
 
@@ -212,7 +211,7 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
         }
 
         // Another type of result is single event message (as Message).
-        final List<Message> result = singletonList((Message) output);
+        List<Message> result = singletonList((Message) output);
         return result;
     }
 
@@ -269,7 +268,7 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
+        int prime = 31;
         return (prime + method.hashCode());
     }
 
@@ -281,7 +280,7 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final HandlerMethod other = (HandlerMethod) obj;
+        HandlerMethod other = (HandlerMethod) obj;
 
         return Objects.equals(this.method, other.method);
     }
@@ -348,7 +347,7 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
          * @see MethodExceptionChecker
          */
         protected void checkThrownExceptions(Method method) {
-            final MethodExceptionChecker checker = forMethod(method);
+            MethodExceptionChecker checker = forMethod(method);
             checker.checkThrowsNoCheckedExceptions();
         }
     }

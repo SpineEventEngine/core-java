@@ -220,7 +220,7 @@ public class EventBus
         if (enricher == null || !enricher.canBeEnriched(event)) {
             return event;
         }
-        final EventEnvelope enriched = enricher.enrich(event);
+        EventEnvelope enriched = enricher.enrich(event);
         return enriched;
     }
 
@@ -432,7 +432,7 @@ public class EventBus
         @Override
         @Internal
         public EventBus build() {
-            final String message = "Either storageFactory or eventStore must be " +
+            String message = "Either storageFactory or eventStore must be " +
                                    "set to build the EventBus instance";
             checkState(storageFactory != null || eventStore != null, message);
 
@@ -453,7 +453,7 @@ public class EventBus
                 eventValidator = MessageValidator.newInstance();
             }
 
-            final EventBus result = new EventBus(this);
+            EventBus result = new EventBus(this);
             return result;
         }
 
@@ -474,11 +474,11 @@ public class EventBus
         @Override
         public UnsupportedEventException handle(EventEnvelope envelope) {
 
-            final Event event = envelope.getOuterObject();
+            Event event = envelope.getOuterObject();
             store(of(event));
 
-            final Message message = envelope.getMessage();
-            final UnsupportedEventException exception = new UnsupportedEventException(message);
+            Message message = envelope.getMessage();
+            UnsupportedEventException exception = new UnsupportedEventException(message);
             return exception;
         }
     }

@@ -51,7 +51,7 @@ class Records {
                     if (record == null) {
                         return Command.getDefaultInstance();
                     }
-                    final Command cmd = record.getCommand();
+                    Command cmd = record.getCommand();
                     return cmd;
                 }
             };
@@ -76,15 +76,15 @@ class Records {
     static CommandRecord.Builder newRecordBuilder(Command command,
                                                   CommandStatus status,
                                                   @Nullable CommandId generatedCommandId) {
-        final CommandId commandId = generatedCommandId != null
+        CommandId commandId = generatedCommandId != null
                 ? generatedCommandId
                 : command.getId();
 
-        final String commandType = CommandEnvelope.of(command)
+        String commandType = CommandEnvelope.of(command)
                                                   .getTypeName()
                                                   .getSimpleName();
 
-        final CommandRecord.Builder builder =
+        CommandRecord.Builder builder =
                 CommandRecord.newBuilder()
                              .setCommandId(commandId)
                              .setCommandType(commandType)

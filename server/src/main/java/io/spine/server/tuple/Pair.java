@@ -58,7 +58,7 @@ public final class Pair<A extends Message, B>
      * Creates a new pair of values.
      */
     public static <A extends Message, B extends Message> Pair<A, B> of(A a, B b) {
-        final Pair<A, B> result = new Pair<>(checkNotNullOrEmpty(Pair.class, a),
+        Pair<A, B> result = new Pair<>(checkNotNullOrEmpty(Pair.class, a),
                                              checkNotNullOrEmpty(Pair.class, b));
         return result;
     }
@@ -70,7 +70,7 @@ public final class Pair<A extends Message, B>
     Pair<A, Optional<B>> withNullable(A a, @Nullable B b) {
         checkNotNullOrEmpty(Pair.class, a);
         checkNotEmpty(Pair.class, b);
-        final Pair<A, Optional<B>> result = new Pair<>(a, fromNullable(b));
+        Pair<A, Optional<B>> result = new Pair<>(a, fromNullable(b));
         return result;
     }
 
@@ -80,7 +80,7 @@ public final class Pair<A extends Message, B>
     public static <A extends Message, B extends Either> Pair<A, B> withEither(A a, B b) {
         checkNotNullOrEmpty(Pair.class, a);
         checkNotNull(b);
-        final Pair<A, B> result = new Pair<>(a, b);
+        Pair<A, B> result = new Pair<>(a, b);
         return result;
     }
 

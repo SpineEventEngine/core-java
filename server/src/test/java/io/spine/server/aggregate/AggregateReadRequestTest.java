@@ -52,9 +52,9 @@ class AggregateReadRequestTest {
     @Test
     @DisplayName("consider request with same ID equal")
     void considerRequestWithSameIdEqual() {
-        final AggregateReadRequest<String> first = new AggregateReadRequest<>(ID, BATCH_SIZE);
-        final int differentBatch = first.getBatchSize() * 2;
-        final AggregateReadRequest<String> second = new AggregateReadRequest<>(ID,
+        AggregateReadRequest<String> first = new AggregateReadRequest<>(ID, BATCH_SIZE);
+        int differentBatch = first.getBatchSize() * 2;
+        AggregateReadRequest<String> second = new AggregateReadRequest<>(ID,
                                                                                differentBatch);
         new EqualsTester().addEqualityGroup(first, second)
                           .testEquals();

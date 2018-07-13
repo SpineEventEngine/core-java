@@ -57,7 +57,7 @@ class IteratingCommandRouterTest
     @Test
     @DisplayName("return CommandRouted from `routeFirst`")
     void returnRoutedFirst() throws Exception {
-        final CommandRouted commandRouted = router().routeFirst();
+        CommandRouted commandRouted = router().routeFirst();
 
         assertSource(commandRouted);
 
@@ -65,8 +65,8 @@ class IteratingCommandRouterTest
         assertEquals(1, commandRouted.getProducedCount());
 
         // Test that there's only one produced command and it has correct message.
-        final Command produced = commandRouted.getProduced(0);
-        final StringValue commandMessage = Commands.getMessage(produced);
+        Command produced = commandRouted.getProduced(0);
+        StringValue commandMessage = Commands.getMessage(produced);
         assertEquals(messages().get(0), commandMessage);
 
         assertActorAndTenant(produced);
@@ -74,7 +74,7 @@ class IteratingCommandRouterTest
         // Test that the event contains messages to follow.
         assertEquals(messages().size() - 1, commandRouted.getMessageToFollowCount());
 
-        final List<Any> messageToFollow = commandRouted.getMessageToFollowList();
+        List<Any> messageToFollow = commandRouted.getMessageToFollowList();
         assertArrayEquals(messages().subList(1, messages().size()).toArray(),
                           unpackAll(messageToFollow).toArray());
     }
@@ -91,26 +91,26 @@ class IteratingCommandRouterTest
         current Timestamp obtained from the wall-clock provider.
         */
         Time.setProvider(() -> {
-            final Timestamp millis = Timestamps.fromMillis(System.currentTimeMillis());
-            final Timestamp nanos = Timestamps.fromNanos(System.nanoTime());
+            Timestamp millis = Timestamps.fromMillis(System.currentTimeMillis());
+            Timestamp nanos = Timestamps.fromNanos(System.nanoTime());
 
-            final Timestamp result = millis.toBuilder()
+            Timestamp result = millis.toBuilder()
                                            .setNanos(nanos.toBuilder()
                                                           .getNanos())
                                            .build();
             return result;
         });
 
-        final CommandRouted firstRouted = router().routeFirst();
+        CommandRouted firstRouted = router().routeFirst();
         assertTrue(router().hasNext());
 
-        final Command command = router().routeNext();
+        Command command = router().routeNext();
 
         // Test that 2nd command message is in the next routed command.
         assertEquals(messages().get(1), Commands.getMessage(command));
 
         // Verify that the context for the next routed command has been created, not just copied.
-        final Command firstCommand = firstRouted.getSource();
+        Command firstCommand = firstRouted.getSource();
         assertNotEquals(firstCommand.getContext()
                                     .getActorContext()
                                     .getTimestamp(),

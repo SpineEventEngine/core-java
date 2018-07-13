@@ -98,7 +98,7 @@ public class TestAggregate
     @Assign
     AggProjectCreated handle(AggCreateProject cmd, CommandContext ctx) {
         isCreateProjectCommandHandled = true;
-        final AggProjectCreated event = projectCreated(cmd.getProjectId(),
+        AggProjectCreated event = projectCreated(cmd.getProjectId(),
                                                        cmd.getName());
         return event;
     }
@@ -106,7 +106,7 @@ public class TestAggregate
     @Assign
     AggTaskAdded handle(AggAddTask cmd, CommandContext ctx) {
         isAddTaskCommandHandled = true;
-        final AggTaskAdded event = taskAdded(cmd.getProjectId());
+        AggTaskAdded event = taskAdded(cmd.getProjectId());
         return event.toBuilder()
                     .setTask(cmd.getTask())
                     .build();
@@ -115,7 +115,7 @@ public class TestAggregate
     @Assign
     List<AggProjectStarted> handle(AggStartProject cmd, CommandContext ctx) {
         isStartProjectCommandHandled = true;
-        final AggProjectStarted message = projectStarted(cmd.getProjectId());
+        AggProjectStarted message = projectStarted(cmd.getProjectId());
         return newArrayList(message);
     }
 
@@ -163,7 +163,7 @@ public class TestAggregate
     @VisibleForTesting
     public void dispatchCommands(Command... commands) {
         for (Command cmd : commands) {
-            final Message commandMessage = Commands.getMessage(cmd);
+            Message commandMessage = Commands.getMessage(cmd);
             AggregateMessageDispatcher.dispatchCommand(this, env(commandMessage));
         }
     }

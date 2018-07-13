@@ -52,7 +52,7 @@ public class RejectionReactorMethodTestEnv {
         private static final String HANDLER_METHOD_NAME = "handle";
 
         public Method getMethod() {
-            final Method[] methods = getClass().getDeclaredMethods();
+            Method[] methods = getClass().getDeclaredMethods();
             for (Method method : methods) {
                 if (method.getName()
                           .equals(HANDLER_METHOD_NAME)) {

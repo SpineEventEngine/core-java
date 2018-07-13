@@ -145,7 +145,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * Obtains the version number of the entity.
      */
     protected int versionNumber() {
-        final int result = getVersion().getNumber();
+        int result = getVersion().getNumber();
         return result;
     }
 
@@ -155,8 +155,8 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
             return;
         }
 
-        final int currentVersionNumber = versionNumber();
-        final int newVersionNumber = newVersion.getNumber();
+        int currentVersionNumber = versionNumber();
+        int newVersionNumber = newVersion.getNumber();
         if (currentVersionNumber > newVersionNumber) {
             throw newIllegalArgumentException(
                     "A version with the lower number (%d) passed to `updateVersion()` " +
@@ -221,7 +221,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      */
     @Override
     public LifecycleFlags getLifecycleFlags() {
-        final LifecycleFlags result = this.lifecycleFlags == null
+        LifecycleFlags result = this.lifecycleFlags == null
                 ? LifecycleFlags.getDefaultInstance()
                 : this.lifecycleFlags;
         return result;
@@ -274,7 +274,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      */
     protected void checkNotArchived() throws CannotModifyArchivedEntity {
         if (getLifecycleFlags().getArchived()) {
-            final Any packedId = Identifier.pack(getId());
+            Any packedId = Identifier.pack(getId());
             throw new CannotModifyArchivedEntity(packedId);
         }
     }
@@ -288,7 +288,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      */
     protected void checkNotDeleted() throws CannotModifyDeletedEntity {
         if (getLifecycleFlags().getDeleted()) {
-            final Any packedId = Identifier.pack(getId());
+            Any packedId = Identifier.pack(getId());
             throw new CannotModifyDeletedEntity(packedId);
         }
     }

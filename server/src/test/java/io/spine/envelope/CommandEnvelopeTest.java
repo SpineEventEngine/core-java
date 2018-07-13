@@ -59,8 +59,8 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
     @Test
     @DisplayName("obtain command context")
     void getCommandContext() {
-        final Command command = outerObject();
-        final CommandEnvelope envelope = toEnvelope(command);
+        Command command = outerObject();
+        CommandEnvelope envelope = toEnvelope(command);
         assertEquals(command.getContext(), envelope.getCommandContext());
         assertSame(envelope.getCommandContext(), envelope.getMessageContext());
     }
@@ -68,8 +68,8 @@ class CommandEnvelopeTest extends MessageEnvelopeTest<Command, CommandEnvelope, 
     @Test
     @DisplayName("obtain actor context")
     void getActorContext() {
-        final Command command = outerObject();
-        final CommandEnvelope envelope = toEnvelope(command);
+        Command command = outerObject();
+        CommandEnvelope envelope = toEnvelope(command);
 
         assertEquals(command.getContext()
                             .getActorContext(), envelope.getActorContext());

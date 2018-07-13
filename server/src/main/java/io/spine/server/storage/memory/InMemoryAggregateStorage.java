@@ -70,7 +70,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected int readEventCountAfterLastSnapshot(I id) {
         checkNotClosed();
-        final int result = getStorage().getEventCount(id);
+        int result = getStorage().getEventCount(id);
         return result;
     }
 
@@ -101,7 +101,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected Iterator<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
         checkNotNull(request);
-        final List<AggregateEventRecord> records = getStorage().getHistoryBackward(request);
+        List<AggregateEventRecord> records = getStorage().getHistoryBackward(request);
         return records.iterator();
     }
 }

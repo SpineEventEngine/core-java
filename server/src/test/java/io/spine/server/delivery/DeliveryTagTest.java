@@ -46,16 +46,16 @@ class DeliveryTagTest {
     @DisplayName("support equality")
     void supportEquality() {
         ModelTests.clearModel();
-        final DeliveryEqualityRepository repository = new DeliveryEqualityRepository();
+        DeliveryEqualityRepository repository = new DeliveryEqualityRepository();
 
-        final DeliveryTag eventTag = DeliveryTag.forEventsOf(repository);
-        final DeliveryTag secondEventTag = DeliveryTag.forEventsOf(repository);
+        DeliveryTag eventTag = DeliveryTag.forEventsOf(repository);
+        DeliveryTag secondEventTag = DeliveryTag.forEventsOf(repository);
 
-        final DeliveryTag commandTag = DeliveryTag.forCommandsOf(repository);
-        final DeliveryTag anotherCommandTag = DeliveryTag.forCommandsOf(repository);
+        DeliveryTag commandTag = DeliveryTag.forCommandsOf(repository);
+        DeliveryTag anotherCommandTag = DeliveryTag.forCommandsOf(repository);
 
-        final DeliveryTag rejectionTag = DeliveryTag.forRejectionsOf(repository);
-        final DeliveryTag anotherRejectionTag = DeliveryTag.forRejectionsOf(repository);
+        DeliveryTag rejectionTag = DeliveryTag.forRejectionsOf(repository);
+        DeliveryTag anotherRejectionTag = DeliveryTag.forRejectionsOf(repository);
 
         new EqualsTester().addEqualityGroup(eventTag, secondEventTag)
                           .addEqualityGroup(commandTag, anotherCommandTag)

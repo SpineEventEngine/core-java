@@ -61,14 +61,14 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
     protected String toString(AggregateStateId id) {
         checkNotNull(id);
 
-        final String typeUrl = id.getStateType()
+        String typeUrl = id.getStateType()
                                  .value();
-        final Object genericId = id.getAggregateId();
-        final Class genericIdType = genericId.getClass();
-        final String idTypeString = idTypeToString(genericIdType);
-        final String genericIdString = Stringifiers.toString(genericId);
+        Object genericId = id.getAggregateId();
+        Class genericIdType = genericId.getClass();
+        String idTypeString = idTypeToString(genericIdType);
+        String genericIdString = Stringifiers.toString(genericId);
 
-        final String result = new StringBuilder(MEAN_STRING_LENGTH).append(typeUrl)
+        String result = new StringBuilder(MEAN_STRING_LENGTH).append(typeUrl)
                                                                    .append(DIVIDER)
                                                                    .append(idTypeString)
                                                                    .append(DIVIDER)
@@ -81,30 +81,30 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
     protected AggregateStateId fromString(String s) {
         checkNotNull(s);
 
-        final int typeUrlEndIndex = s.indexOf(DIVIDER);
+        int typeUrlEndIndex = s.indexOf(DIVIDER);
         checkArgument(typeUrlEndIndex > 0,
                       "Passed string does not contain a type URL.");
-        final String typeUrlString = s.substring(0, typeUrlEndIndex);
-        final TypeUrl typeUrl = TypeUrl.parse(typeUrlString);
+        String typeUrlString = s.substring(0, typeUrlEndIndex);
+        TypeUrl typeUrl = TypeUrl.parse(typeUrlString);
 
-        final int idTypeStartIndex = typeUrlEndIndex + 1;
-        final int idTypeEndIndex = s.indexOf(DIVIDER, idTypeStartIndex);
+        int idTypeStartIndex = typeUrlEndIndex + 1;
+        int idTypeEndIndex = s.indexOf(DIVIDER, idTypeStartIndex);
         checkArgument(idTypeEndIndex > 0,
                       "Passed string does not contain the ID type.");
-        final String idTypeString = s.substring(idTypeStartIndex, idTypeEndIndex);
-        final Class idType = idTypeFromString(idTypeString);
+        String idTypeString = s.substring(idTypeStartIndex, idTypeEndIndex);
+        Class idType = idTypeFromString(idTypeString);
 
-        final String idStringValue = s.substring(idTypeEndIndex + 1);
-        final Object genericId = Stringifiers.fromString(idStringValue, idType);
+        String idStringValue = s.substring(idTypeEndIndex + 1);
+        Object genericId = Stringifiers.fromString(idStringValue, idType);
 
-        final AggregateStateId result = AggregateStateId.of(genericId, typeUrl);
+        AggregateStateId result = AggregateStateId.of(genericId, typeUrl);
 
         return result;
     }
 
     private static String idTypeToString(Class idType) {
         checkSupported(idType);
-        final String result;
+        String result;
         if (Message.class.isAssignableFrom(idType)) {
             result = TypeName.of(idType).value();
         } else {
@@ -114,9 +114,9 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
     }
 
     private static Class idTypeFromString(String idTypeString) {
-        final Class result;
+        Class result;
         if (idTypeString.contains(TYPE_NAME_DIVIDER)) {
-            final TypeName typeName = TypeName.of(idTypeString);
+            TypeName typeName = TypeName.of(idTypeString);
             result = typeName.getJavaClass();
         } else {
             try {

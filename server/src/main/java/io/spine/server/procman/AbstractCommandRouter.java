@@ -120,7 +120,7 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
      * @return {@code true} if the queue is empty, {@code false} otherwise
      */
     protected boolean hasNext() {
-        final boolean result = !queue.isEmpty();
+        boolean result = !queue.isEmpty();
         return result;
     }
 
@@ -138,11 +138,11 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
      * @return the created and posted {@code Command}
      */
     protected Command route(Message message) {
-        final Command command = produceCommand(message);
-        final SettableFuture<Ack> finishFuture = SettableFuture.create();
-        final StreamObserver<Ack> observer = newAckingObserver(finishFuture);
+        Command command = produceCommand(message);
+        SettableFuture<Ack> finishFuture = SettableFuture.create();
+        StreamObserver<Ack> observer = newAckingObserver(finishFuture);
         commandBus.post(command, observer);
-        final Ack ack;
+        Ack ack;
         // Wait till the call is completed.
         try {
             ack = finishFuture.get();
@@ -154,9 +154,9 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
     }
 
     private Command produceCommand(Message commandMessage) {
-        final CommandContext sourceContext = source.getContext();
-        final CommandFactory commandFactory = commandFactory(sourceContext);
-        final Command result = commandFactory.createBasedOnContext(commandMessage, sourceContext);
+        CommandContext sourceContext = source.getContext();
+        CommandFactory commandFactory = commandFactory(sourceContext);
+        Command result = commandFactory.createBasedOnContext(commandMessage, sourceContext);
         return result;
     }
 
@@ -167,12 +167,12 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
      * @throws NoSuchElementException if the queue is already empty
      */
     protected Message next() throws NoSuchElementException {
-        final Message result = queue.remove();
+        Message result = queue.remove();
         return result;
     }
 
     private static StreamObserver<Ack> newAckingObserver(
-            final SettableFuture<Ack> finishFuture) {
+            SettableFuture<Ack> finishFuture) {
         return new StreamObserver<Ack>() {
             @Override
             public void onNext(Ack value) {
@@ -197,8 +197,8 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
      * zone offset} from the given command context.
      */
     private static CommandFactory commandFactory(CommandContext sourceContext) {
-        final ActorContext actorContext = sourceContext.getActorContext();
-        final ActorRequestFactory factory =
+        ActorContext actorContext = sourceContext.getActorContext();
+        ActorRequestFactory factory =
                 ActorRequestFactory.newBuilder()
                                    .setActor(actorContext.getActor())
                                    .setTenantId(actorContext.getTenantId())
@@ -208,14 +208,14 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
     }
 
     private static Command asCommand(Message message, CommandContext context) {
-        final Command command = commandFactory(context).createWithContext(message, context);
+        Command command = commandFactory(context).createWithContext(message, context);
         return command;
     }
 
     private static void checkSent(Command command, Ack ack) {
-        final Status status = ack.getStatus();
-        final CommandId routedCommandId = unpack(ack.getMessageId());
-        final CommandId commandId = command.getId();
+        Status status = ack.getStatus();
+        CommandId routedCommandId = unpack(ack.getMessageId());
+        CommandId commandId = command.getId();
         checkState(commandId.equals(routedCommandId),
                    "Unexpected command posted. Intending (%s) but was (%s).",
                    commandId,

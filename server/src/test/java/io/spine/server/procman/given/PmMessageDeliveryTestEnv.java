@@ -63,26 +63,26 @@ public class PmMessageDeliveryTestEnv {
     }
 
     public static Command createProject() {
-        final ProjectId projectId = projectId();
-        final Command command = createCommand(PmCreateProject.newBuilder()
+        ProjectId projectId = projectId();
+        Command command = createCommand(PmCreateProject.newBuilder()
                                                              .setProjectId(projectId)
                                                              .build());
         return command;
     }
 
     public static Event projectStarted() {
-        final ProjectId projectId = projectId();
-        final TestEventFactory eventFactory =
+        ProjectId projectId = projectId();
+        TestEventFactory eventFactory =
                 TestEventFactory.newInstance(
                         AnyPacker.pack(projectId),
                         PmMessageDeliveryTestEnv.class
                 );
 
-        final PmProjectStarted msg = PmProjectStarted.newBuilder()
+        PmProjectStarted msg = PmProjectStarted.newBuilder()
                                                      .setProjectId(projectId)
                                                      .build();
 
-        final Event result = eventFactory.createEvent(msg);
+        Event result = eventFactory.createEvent(msg);
         return result;
     }
 
@@ -93,13 +93,13 @@ public class PmMessageDeliveryTestEnv {
     }
 
     public static Rejection cannotStartProject() {
-        final ProjectId projectId = projectId();
+        ProjectId projectId = projectId();
 
-        final PmStartProject cmdMessage = PmStartProject.newBuilder()
+        PmStartProject cmdMessage = PmStartProject.newBuilder()
                                                         .setProjectId(projectId)
                                                         .build();
-        final Command command = createCommand(cmdMessage);
-        final Rejection result = toRejection(throwableWith(projectId), command);
+        Command command = createCommand(cmdMessage);
+        Rejection result = toRejection(throwableWith(projectId), command);
         return result;
     }
 
@@ -109,7 +109,7 @@ public class PmMessageDeliveryTestEnv {
     }
 
     private static Command createCommand(Message cmdMessage) {
-        final Command result =
+        Command result =
                 TestActorRequestFactory.newInstance(AggregateMessageDeliveryTestEnv.class)
                                        .createCommand(cmdMessage);
         return result;
@@ -122,7 +122,7 @@ public class PmMessageDeliveryTestEnv {
 
             @Override
             public Set<ProjectId> apply(Message raw, RejectionContext context) {
-                final PmCannotStartArchivedProject msg = (PmCannotStartArchivedProject) raw;
+                PmCannotStartArchivedProject msg = (PmCannotStartArchivedProject) raw;
                 return ImmutableSet.of(msg.getProjectId());
             }
         };

@@ -81,7 +81,7 @@ public class GrpcContainer {
      * @see GrpcContainer#shutdown()
      */
     public boolean isShutdown() {
-        final boolean isShutdown = grpcServer == null;
+        boolean isShutdown = grpcServer == null;
         return isShutdown;
     }
 
@@ -117,12 +117,12 @@ public class GrpcContainer {
      * @return {@code true}, if the given gRPC service for deployment; {@code false} otherwise
      */
     public boolean isScheduledForDeployment(BindableService service) {
-        final String nameOfInterest = service.bindService()
+        String nameOfInterest = service.bindService()
                                              .getServiceDescriptor()
                                              .getName();
         boolean serviceIsPresent = false;
         for (ServerServiceDefinition serverServiceDefinition : services) {
-            final String scheduledServiceName = serverServiceDefinition.getServiceDescriptor()
+            String scheduledServiceName = serverServiceDefinition.getServiceDescriptor()
                                                                        .getName();
             serviceIsPresent = serviceIsPresent || scheduledServiceName.equals(nameOfInterest);
         }
@@ -142,9 +142,9 @@ public class GrpcContainer {
      *         {@code false} otherwise
      */
     public boolean isLive(BindableService service) {
-        final boolean inShutdownState = isShutdown();
-        final boolean scheduledForDeployment = isScheduledForDeployment(service);
-        final boolean result = !inShutdownState && scheduledForDeployment;
+        boolean inShutdownState = isShutdown();
+        boolean scheduledForDeployment = isScheduledForDeployment(service);
+        boolean result = !inShutdownState && scheduledForDeployment;
         return result;
     }
 
@@ -160,7 +160,7 @@ public class GrpcContainer {
 
     @VisibleForTesting
     Server createGrpcServer() {
-        final ServerBuilder builder = ServerBuilder.forPort(port);
+        ServerBuilder builder = ServerBuilder.forPort(port);
         for (ServerServiceDefinition service : services) {
             builder.addService(service);
         }
@@ -173,7 +173,7 @@ public class GrpcContainer {
     @VisibleForTesting
     Runnable getOnShutdownCallback() {
         return () -> {
-            final String serverClass = getClass().getName();
+            String serverClass = getClass().getName();
             try {
                 if (!isShutdown()) {
                     System.err.println("Shutting down " +

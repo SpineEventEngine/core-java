@@ -68,7 +68,7 @@ class ProjectionTest {
     @Test
     @DisplayName("handle events")
     void handleEvents() {
-        final String stringValue = newUuid();
+        String stringValue = newUuid();
 
         dispatch(projection, toMessage(stringValue), EventContext.getDefaultInstance());
         assertTrue(projection.getState()
@@ -77,7 +77,7 @@ class ProjectionTest {
 
         assertTrue(projection.isChanged());
 
-        final Integer integerValue = 1024;
+        Integer integerValue = 1024;
         dispatch(projection, toMessage(integerValue), EventContext.getDefaultInstance());
         assertTrue(projection.getState()
                              .getValue()
@@ -98,7 +98,7 @@ class ProjectionTest {
     @Test
     @DisplayName("return handled event classes")
     void exposeEventClasses() {
-        final Set<EventClass> classes = ProjectionClass.of(TestProjection.class)
+        Set<EventClass> classes = ProjectionClass.of(TestProjection.class)
                                                        .getEventSubscriptions();
 
         assertEquals(TestProjection.HANDLING_EVENT_COUNT, classes.size());
@@ -109,20 +109,20 @@ class ProjectionTest {
     @Test
     @DisplayName("expose `play events` operation to package")
     void exposePlayingEvents() {
-        final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
-        final StringValue strValue = StringValue.newBuilder()
+        TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
+        StringValue strValue = StringValue.newBuilder()
                                                 .setValue("eins zwei drei")
                                                 .build();
-        final Int32Value intValue = Int32Value.newBuilder()
+        Int32Value intValue = Int32Value.newBuilder()
                                               .setValue(123)
                                               .build();
-        final Version nextVersion = Versions.increment(projection.getVersion());
-        final Event e1 = eventFactory.createEvent(strValue, nextVersion);
-        final Event e2 = eventFactory.createEvent(intValue, Versions.increment(nextVersion));
+        Version nextVersion = Versions.increment(projection.getVersion());
+        Event e1 = eventFactory.createEvent(strValue, nextVersion);
+        Event e2 = eventFactory.createEvent(intValue, Versions.increment(nextVersion));
 
-        final boolean projectionChanged = Projection.play(projection, ImmutableList.of(e1, e2));
+        boolean projectionChanged = Projection.play(projection, ImmutableList.of(e1, e2));
 
-        final String projectionState = projection.getState()
+        String projectionState = projection.getState()
                                                  .getValue();
 
         assertTrue(projectionChanged);

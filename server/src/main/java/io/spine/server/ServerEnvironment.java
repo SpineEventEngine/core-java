@@ -64,7 +64,7 @@ public class ServerEnvironment {
      * {@code false} otherwise.
      */
     public boolean isAppEngine() {
-        final boolean isVersionPresent = (appEngineRuntimeVersion != null) &&
+        boolean isVersionPresent = (appEngineRuntimeVersion != null) &&
                 !appEngineRuntimeVersion.isEmpty();
         return isVersionPresent;
     }

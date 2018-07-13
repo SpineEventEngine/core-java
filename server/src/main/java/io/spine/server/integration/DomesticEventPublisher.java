@@ -68,12 +68,12 @@ final class DomesticEventPublisher extends EventSubscriber {
 
     @Override
     public Set<String> dispatch(EventEnvelope envelope) {
-        final Event event = envelope.getOuterObject();
-        final ExternalMessage msg = ExternalMessages.of(event, boundedContextName);
-        final ExternalMessageClass messageClass =
+        Event event = envelope.getOuterObject();
+        ExternalMessage msg = ExternalMessages.of(event, boundedContextName);
+        ExternalMessageClass messageClass =
                 ExternalMessageClass.of(envelope.getMessageClass());
-        final ChannelId channelId = toId(messageClass);
-        final Publisher channel = publisherHub.get(channelId);
+        ChannelId channelId = toId(messageClass);
+        Publisher channel = publisherHub.get(channelId);
         channel.publish(AnyPacker.pack(envelope.getId()), msg);
 
         return ImmutableSet.of(channel.toString());

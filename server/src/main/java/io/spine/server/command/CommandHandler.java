@@ -96,7 +96,7 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
      */
     protected CommandHandler(EventBus eventBus) {
         this.eventBus = eventBus;
-        final StringValue className = toMessage(getClass().getName());
+        StringValue className = toMessage(getClass().getName());
         this.producerId = AnyPacker.pack(className);
     }
 
@@ -122,10 +122,10 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
      */
     @Override
     public String dispatch(CommandEnvelope envelope) {
-        final CommandHandlerMethod method = thisClass.getHandler(envelope.getMessageClass());
-        final List<? extends Message> eventMessages =
+        CommandHandlerMethod method = thisClass.getHandler(envelope.getMessageClass());
+        List<? extends Message> eventMessages =
                 method.invoke(this, envelope.getMessage(), envelope.getCommandContext());
-        final List<Event> events = toEvents(eventMessages, envelope);
+        List<Event> events = toEvents(eventMessages, envelope);
         postEvents(events);
         return getId();
     }
@@ -134,9 +134,9 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
-        final MessageClass messageClass = envelope.getMessageClass();
-        final String messageId = Stringifiers.toString(envelope.getId());
-        final String errorMessage =
+        MessageClass messageClass = envelope.getMessageClass();
+        String messageId = Stringifiers.toString(envelope.getId());
+        String errorMessage =
                 format("Error handling command (class: %s id: %s).", messageClass, messageId);
         log().error(errorMessage, exception);
     }
@@ -181,14 +181,14 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
             getClass() != otherObj.getClass()) {
             return false;
         }
-        final CommandHandler otherHandler = (CommandHandler) otherObj;
-        final boolean equals = getMessageClasses().equals(otherHandler.getMessageClasses());
+        CommandHandler otherHandler = (CommandHandler) otherObj;
+        boolean equals = getMessageClasses().equals(otherHandler.getMessageClasses());
         return equals;
     }
 
     @Override
     public int hashCode() {
-        final int result = getMessageClasses().hashCode();
+        int result = getMessageClasses().hashCode();
         return result;
     }
 }

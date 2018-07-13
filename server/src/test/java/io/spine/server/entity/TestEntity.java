@@ -34,14 +34,14 @@ import static io.spine.base.Identifier.newUuid;
 public class TestEntity extends AbstractVersionableEntity<String, Project> {
 
     static TestEntity newInstance(String id) {
-        final TestEntity result = Given.entityOfClass(TestEntity.class)
+        TestEntity result = Given.entityOfClass(TestEntity.class)
                                        .withId(id)
                                        .build();
         return result;
     }
 
     static TestEntity withState() {
-        final TestEntity result = Given.entityOfClass(TestEntity.class)
+        TestEntity result = Given.entityOfClass(TestEntity.class)
                                        .withId(newUuid())
                                        .withState(Sample.messageOfType(Project.class))
                                        .withVersion(3)
@@ -50,7 +50,7 @@ public class TestEntity extends AbstractVersionableEntity<String, Project> {
     }
 
     static TestEntity withStateOf(TestEntity entity) {
-        final TestEntity result = Given.entityOfClass(TestEntity.class)
+        TestEntity result = Given.entityOfClass(TestEntity.class)
                                        .withId(entity.getId())
                                        .withState(entity.getState())
                                        .withVersion(entity.getVersion()

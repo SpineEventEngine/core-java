@@ -67,7 +67,7 @@ class InMemoryTypeRegistry implements TypeRegistry {
     @SuppressWarnings("ChainOfInstanceofChecks")
     @Override
     public <I, E extends VersionableEntity<I, ?>> void register(Repository<I, E> repository) {
-        final TypeUrl entityType = repository.getEntityStateType();
+        TypeUrl entityType = repository.getEntityStateType();
 
         if (repository instanceof RecordBasedRepository) {
             typeToRepositoryMap.put(entityType,
@@ -81,30 +81,30 @@ class InMemoryTypeRegistry implements TypeRegistry {
 
     @Override
     public Optional<? extends RecordBasedRepository<?, ?, ?>> getRecordRepository(TypeUrl type) {
-        final RecordBasedRepository<?, ?, ? > repo = typeToRepositoryMap.get(type);
-        final Optional<? extends RecordBasedRepository<?, ?, ?>> result = fromNullable(repo);
+        RecordBasedRepository<?, ?, ? > repo = typeToRepositoryMap.get(type);
+        Optional<? extends RecordBasedRepository<?, ?, ?>> result = fromNullable(repo);
         return result;
     }
 
     @Override
     public ImmutableSet<TypeUrl> getTypes() {
-        final ImmutableSet.Builder<TypeUrl> resultBuilder = ImmutableSet.builder();
-        final Set<TypeUrl> projectionTypes = typeToRepositoryMap.keySet();
+        ImmutableSet.Builder<TypeUrl> resultBuilder = ImmutableSet.builder();
+        Set<TypeUrl> projectionTypes = typeToRepositoryMap.keySet();
         resultBuilder.addAll(projectionTypes)
                      .addAll(knownAggregateTypes);
-        final ImmutableSet<TypeUrl> result = resultBuilder.build();
+        ImmutableSet<TypeUrl> result = resultBuilder.build();
         return result;
     }
 
     @Override
     public ImmutableSet<TypeUrl> getAggregateTypes() {
-        final ImmutableSet<TypeUrl> result = ImmutableSet.copyOf(knownAggregateTypes);
+        ImmutableSet<TypeUrl> result = ImmutableSet.copyOf(knownAggregateTypes);
         return result;
     }
 
     @Override
     public boolean hasAggregateType(TypeUrl typeUrl) {
-        final boolean result = knownAggregateTypes.contains(typeUrl);
+        boolean result = knownAggregateTypes.contains(typeUrl);
         return result;
     }
 

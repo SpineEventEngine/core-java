@@ -93,21 +93,21 @@ public abstract class ParallelDispatcher<I extends Message, M extends Message> {
      * @throws Exception in case the multithreading message propagation breaks
      */
     public void dispatchMessagesTo(Repository<I, ?> repository) throws Exception {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
+        BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
         boundedContext.register(repository);
 
-        final int numberOfShards = ((Shardable) repository).getShardingStrategy()
+        int numberOfShards = ((Shardable) repository).getShardingStrategy()
                                                            .getNumberOfShards();
 
         assertTrue(getStats().getThreadToId()
                              .isEmpty());
 
-        final ExecutorService executorService = newFixedThreadPool(threadCount);
-        final ImmutableList.Builder<Callable<Object>> builder = ImmutableList.builder();
+        ExecutorService executorService = newFixedThreadPool(threadCount);
+        ImmutableList.Builder<Callable<Object>> builder = ImmutableList.builder();
 
         for (int i = 0; i < messageCount; i++) {
-            final M message = newMessage();
+            M message = newMessage();
 
             builder.add(() -> {
                 postToBus(boundedContext, message);
@@ -115,7 +115,7 @@ public abstract class ParallelDispatcher<I extends Message, M extends Message> {
             });
         }
 
-        final List<Callable<Object>> commandPostingJobs = builder.build();
+        List<Callable<Object>> commandPostingJobs = builder.build();
         executorService.invokeAll(commandPostingJobs);
 
         Thread.sleep(dispatchWaitTime);
@@ -127,11 +127,11 @@ public abstract class ParallelDispatcher<I extends Message, M extends Message> {
     }
 
     private void verifyStats(int totalMessages, int numberOfShards) {
-        final Map<Long, Collection<I>> whoProcessedWhat = getStats().getThreadToId()
+        Map<Long, Collection<I>> whoProcessedWhat = getStats().getThreadToId()
                                                                     .asMap();
-        final Collection<I> actualIds = newHashSet(getStats().getThreadToId()
+        Collection<I> actualIds = newHashSet(getStats().getThreadToId()
                                                              .values());
-        final Set<Long> actualThreads = whoProcessedWhat.keySet();
+        Set<Long> actualThreads = whoProcessedWhat.keySet();
 
         assertEquals(numberOfShards, actualThreads.size());
         assertEquals(totalMessages, actualIds.size());

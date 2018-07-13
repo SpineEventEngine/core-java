@@ -66,7 +66,7 @@ public final class Quintet<A extends Message, B, C, D, E>
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
     Quintet<A, B, C, D, E> of(A a, B b, C c, D d, E e) {
         checkAllNotNullOrEmpty(Quintet.class, a, b, c, d, e);
-        final Quintet<A, B, C, D, E> result = new Quintet<>(a, b, c, d, e);
+        Quintet<A, B, C, D, E> result = new Quintet<>(a, b, c, d, e);
         return result;
     }
 
@@ -79,7 +79,7 @@ public final class Quintet<A extends Message, B, C, D, E>
     withNullable(A a, B b, C c, D d, @Nullable E e) {
         checkAllNotNullOrEmpty(Quintet.class, a, b, c, d);
         checkNotEmpty(Quintet.class, e);
-        final Quintet<A, B, C, D, Optional<E>> result = new Quintet<>(a, b, c, d, fromNullable(e));
+        Quintet<A, B, C, D, Optional<E>> result = new Quintet<>(a, b, c, d, fromNullable(e));
         return result;
     }
 
@@ -92,7 +92,7 @@ public final class Quintet<A extends Message, B, C, D, E>
     withNullable2(A a, B b, C c, @Nullable D d, @Nullable E e) {
         checkAllNotNullOrEmpty(Quintet.class, a, b, c);
         checkAllNotEmpty(Quintet.class, e, d);
-        final Quintet<A, B, C, Optional<D>, Optional<E>> result =
+        Quintet<A, B, C, Optional<D>, Optional<E>> result =
                 new Quintet<>(a, b, c, fromNullable(d), fromNullable(e));
         return result;
     }
@@ -106,7 +106,7 @@ public final class Quintet<A extends Message, B, C, D, E>
     withNullable3(A a, B b, @Nullable C c, @Nullable D d, @Nullable E e) {
         checkAllNotNullOrEmpty(Quintet.class, a, b);
         checkAllNotEmpty(Quintet.class, c, d, e);
-        final Quintet<A, B, Optional<C>, Optional<D>, Optional<E>> result =
+        Quintet<A, B, Optional<C>, Optional<D>, Optional<E>> result =
                 new Quintet<>(a, b, fromNullable(c), fromNullable(d), fromNullable(e));
         return result;
     }
@@ -120,7 +120,7 @@ public final class Quintet<A extends Message, B, C, D, E>
     withNullable4(A a, @Nullable B b, @Nullable C c, @Nullable D d, @Nullable E e) {
         checkNotNullOrEmpty(Quintet.class, a);
         checkAllNotEmpty(Quintet.class, b, c, d, e);
-        final Quintet<A, Optional<B>, Optional<C>, Optional<D>, Optional<E>> result =
+        Quintet<A, Optional<B>, Optional<C>, Optional<D>, Optional<E>> result =
                 new Quintet<>(a, fromNullable(b), fromNullable(c), fromNullable(d), fromNullable(e));
         return result;
     }

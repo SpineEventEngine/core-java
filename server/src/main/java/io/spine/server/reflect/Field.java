@@ -72,14 +72,14 @@ public final class Field {
         checkNotNull(messageClass);
         checkNotNull(name);
 
-        final Method getter;
+        Method getter;
         try {
             getter = getterForFieldOf(name, messageClass);
         } catch (NoSuchMethodException ignored) {
             return Optional.absent();
         }
 
-        final Field field = new Field(name, getter);
+        Field field = new Field(name, getter);
         return Optional.of(field);
     }
 
@@ -95,13 +95,13 @@ public final class Field {
                                             FieldFilter filter) {
         checkNotNull(messageClass);
         checkNotNull(filter);
-        final String fieldName = getFieldName(filter);
+        String fieldName = getFieldName(filter);
         return newField(messageClass, fieldName);
     }
 
     private static String getFieldName(FieldFilter filter) {
-        final String fieldPath = filter.getFieldPath();
-        final String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.') + 1);
+        String fieldPath = filter.getFieldPath();
+        String fieldName = fieldPath.substring(fieldPath.lastIndexOf('.') + 1);
 
         if (fieldName.isEmpty()) {
             throw newIllegalArgumentException(
@@ -121,8 +121,8 @@ public final class Field {
     @SuppressWarnings("OverlyComplexMethod")    // as each branch is a fairly simple.
     public static Class<?> getFieldClass(FieldDescriptor field) {
         checkNotNull(field);
-        final FieldDescriptor.JavaType javaType = field.getJavaType();
-        final TypeUrl typeUrl;
+        FieldDescriptor.JavaType javaType = field.getJavaType();
+        TypeUrl typeUrl;
         switch (javaType) {
             case INT:
                 return Integer.class;
@@ -140,11 +140,11 @@ public final class Field {
                 return ByteString.class;
             case ENUM:
                 typeUrl = TypeUrl.from(field.getEnumType());
-                final Class<?> enumClass = typeUrl.getJavaClass();
+                Class<?> enumClass = typeUrl.getJavaClass();
                 return enumClass;
             case MESSAGE:
                 typeUrl = TypeUrl.from(field.getMessageType());
-                final Class<? extends Message> msgClass = typeUrl.getMessageClass();
+                Class<? extends Message> msgClass = typeUrl.getMessageClass();
                 return msgClass;
             default:
                 throw newIllegalArgumentException("Unknown field type discovered: %s",
@@ -167,10 +167,9 @@ public final class Field {
         checkNotNull(cls);
         checkNotNull(fieldName);
 
-        @SuppressWarnings("DuplicateStringLiteralInspection")
-        final String fieldGetterName = "get" + fieldName.substring(0, 1)
-                                                        .toUpperCase() + fieldName.substring(1);
-        final Method fieldGetter = cls.getMethod(fieldGetterName);
+        @SuppressWarnings("DuplicateStringLiteralInspection") String fieldGetterName = "get" + fieldName.substring(0, 1)
+                                                                                                        .toUpperCase() + fieldName.substring(1);
+        Method fieldGetter = cls.getMethod(fieldGetterName);
         return fieldGetter;
     }
 
@@ -192,12 +191,12 @@ public final class Field {
      *                               The root cause will be available from the thrown instance.
      */
     public Optional<Message> getValue(Message object) {
-        final Message fieldValue;
-        final Message result;
+        Message fieldValue;
+        Message result;
         try {
             fieldValue = (Message) getter.invoke(object);
             if (fieldValue instanceof Any) {
-                final Any any = (Any)fieldValue;
+                Any any = (Any)fieldValue;
                 if (isDefault(any)) {
                     return Optional.absent();
                 }

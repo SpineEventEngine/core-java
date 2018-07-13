@@ -107,10 +107,10 @@ class RejectionsTest {
     @Test
     @DisplayName("generate rejection ID upon command ID")
     void generateRejectionIdUponCommandId() {
-        final CommandId commandId = Commands.generateId();
-        final RejectionId actual = Rejections.generateId(commandId);
+        CommandId commandId = Commands.generateId();
+        RejectionId actual = Rejections.generateId(commandId);
 
-        final String expected = format(Rejections.REJECTION_ID_FORMAT, commandId.getUuid());
+        String expected = format(Rejections.REJECTION_ID_FORMAT, commandId.getUuid());
         assertEquals(expected, actual.getValue());
     }
 
@@ -123,7 +123,7 @@ class RejectionsTest {
                              .isEmpty());
         assertTrue(Timestamps.isValid(rejection.getContext()
                                                .getTimestamp()));
-        final Command commandFromContext = rejection.getContext()
+        Command commandFromContext = rejection.getContext()
                                                     .getCommand();
         assertEquals(command, commandFromContext);
     }
@@ -132,15 +132,15 @@ class RejectionsTest {
     @DisplayName("obtain rejection producer if set")
     void getRejectionProducerIfSet() {
         // We initialized producer ID as the name of this test class in setUp().
-        final Optional<Object> producer = Rejections.getProducer(rejection.getContext());
+        Optional<Object> producer = Rejections.getProducer(rejection.getContext());
         assertEquals(getClass().getName(), producer.get());
     }
 
     @Test
     @DisplayName("return absent if rejection producer is not set")
     void returnAbsentOnEmptyProducer() {
-        final TestThrowableMessage freshThrowable = new TestThrowableMessage(rejectionMessage);
-        final Rejection freshRejection = toRejection(freshThrowable, command);
+        TestThrowableMessage freshThrowable = new TestThrowableMessage(rejectionMessage);
+        Rejection freshRejection = toRejection(freshThrowable, command);
         assertFalse(getProducer(freshRejection.getContext()).isPresent());
     }
 
@@ -152,7 +152,7 @@ class RejectionsTest {
     @DisplayName("tell if RuntimeException was caused by command rejection")
     void recognizeExceptionCausedByRejection() {
         assertFalse(causedByRejection(new RuntimeException()));
-        final ThrowableMessage throwableMessage = new ThrowableMessage(Time.getCurrentTime()) {
+        ThrowableMessage throwableMessage = new ThrowableMessage(Time.getCurrentTime()) {
             private static final long serialVersionUID = 0L;
         };
         assertTrue(causedByRejection(new IllegalStateException(throwableMessage)));

@@ -105,8 +105,8 @@ abstract class AbstractCommandBusTestSuite {
     }
 
     static Command newCommandWithoutContext() {
-        final Command cmd = createProject();
-        final Command invalidCmd = cmd.toBuilder()
+        Command cmd = createProject();
+        Command invalidCmd = cmd.toBuilder()
                                       .setContext(CommandContext.getDefaultInstance())
                                       .build();
         return invalidCmd;
@@ -126,12 +126,12 @@ abstract class AbstractCommandBusTestSuite {
                                   CommandValidationError validationError,
                                   String errorType,
                                   Command cmd) {
-        final Status status = sendingResult.getStatus();
+        Status status = sendingResult.getStatus();
         assertEquals(status.getStatusCase(), Status.StatusCase.ERROR);
-        final CommandId commandId = cmd.getId();
+        CommandId commandId = cmd.getId();
         assertEquals(commandId, unpack(sendingResult.getMessageId()));
 
-        final Error error = status.getError();
+        Error error = status.getError();
         assertEquals(errorType,
                      error.getType());
         assertEquals(validationError.getNumber(), error.getCode());
@@ -145,11 +145,11 @@ abstract class AbstractCommandBusTestSuite {
     }
 
     protected static Command newCommandWithoutTenantId() {
-        final Command cmd = createProject();
-        final ActorContext.Builder withNoTenant =
+        Command cmd = createProject();
+        ActorContext.Builder withNoTenant =
                 ActorContext.newBuilder()
                             .setTenantId(TenantId.getDefaultInstance());
-        final Command invalidCmd =
+        Command invalidCmd =
                 cmd.toBuilder()
                    .setContext(cmd.getContext()
                                   .toBuilder()
@@ -159,10 +159,10 @@ abstract class AbstractCommandBusTestSuite {
     }
 
     protected static Command clearTenantId(Command cmd) {
-        final ActorContext.Builder withNoTenant =
+        ActorContext.Builder withNoTenant =
                 ActorContext.newBuilder()
                             .setTenantId(TenantId.getDefaultInstance());
-        final Command result = cmd.toBuilder()
+        Command result = cmd.toBuilder()
                                   .setContext(cmd.getContext()
                                                  .toBuilder()
                                                  .setActorContext(withNoTenant))
@@ -174,10 +174,10 @@ abstract class AbstractCommandBusTestSuite {
     void setUp() {
         ModelTests.clearModel();
 
-        final InMemoryStorageFactory storageFactory =
+        InMemoryStorageFactory storageFactory =
                 InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
                                                    this.multitenant);
-        final TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(this.multitenant,
+        TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(this.multitenant,
                                                                           storageFactory);
         commandStore = spy(new CommandStore(storageFactory, tenantIndex));
         scheduler = spy(new ExecutorCommandScheduler());
@@ -214,28 +214,27 @@ abstract class AbstractCommandBusTestSuite {
     @Test
     @DisplayName("post commands in bulk")
     void postCommandsInBulk() {
-        final Command first = newCommand();
-        final Command second = newCommand();
-        final List<Command> commands = newArrayList(first, second);
+        Command first = newCommand();
+        Command second = newCommand();
+        List<Command> commands = newArrayList(first, second);
 
         // Some derived test suite classes may register the handler in setUp().
         // This prevents the repeating registration (which is an illegal operation).
         commandBus.unregister(createProjectHandler);
         commandBus.register(createProjectHandler);
 
-        final CommandBus spy = spy(commandBus);
+        CommandBus spy = spy(commandBus);
         spy.post(commands, memoizingObserver());
 
-        @SuppressWarnings("unchecked")
-        final ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);
+        @SuppressWarnings("unchecked") ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);
         verify(spy).store(storingCaptor.capture());
-        final Iterable<Command> storingArgs = storingCaptor.getValue();
+        Iterable<Command> storingArgs = storingCaptor.getValue();
         assertSize(commands.size(), storingArgs);
         assertContainsAll(storingArgs, first, second);
 
-        final ArgumentCaptor<CommandEnvelope> postingCaptor = forClass(CommandEnvelope.class);
+        ArgumentCaptor<CommandEnvelope> postingCaptor = forClass(CommandEnvelope.class);
         verify(spy, times(2)).dispatch(postingCaptor.capture());
-        final List<CommandEnvelope> postingArgs = postingCaptor.getAllValues();
+        List<CommandEnvelope> postingArgs = postingCaptor.getAllValues();
         assertSize(commands.size(), postingArgs);
         assertEquals(commands.get(0), postingArgs.get(0).getCommand());
         assertEquals(commands.get(1), postingArgs.get(1).getCommand());
@@ -250,7 +249,7 @@ abstract class AbstractCommandBusTestSuite {
     protected void checkResult(Command cmd) {
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
-        final CommandId commandId = unpack(observer.firstResponse().getMessageId());
+        CommandId commandId = unpack(observer.firstResponse().getMessageId());
         assertEquals(cmd.getId(), commandId);
     }
 
@@ -258,7 +257,7 @@ abstract class AbstractCommandBusTestSuite {
                           Duration delay,
                           Timestamp schedulingTime) {
         for (Command cmd : commands) {
-            final Command cmdWithSchedule = setSchedule(cmd, delay, schedulingTime);
+            Command cmdWithSchedule = setSchedule(cmd, delay, schedulingTime);
             commandStore.store(cmdWithSchedule, SCHEDULED);
         }
     }

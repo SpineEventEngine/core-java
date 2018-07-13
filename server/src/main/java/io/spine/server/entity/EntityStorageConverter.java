@@ -86,9 +86,9 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
 
     @Override
     protected EntityRecord doForward(E entity) {
-        final Any entityId = Identifier.pack(entity.getId());
-        final Any stateAny = pack(entity.getState());
-        final EntityRecord.Builder builder = EntityRecord.newBuilder()
+        Any entityId = Identifier.pack(entity.getId());
+        Any stateAny = pack(entity.getState());
+        EntityRecord.Builder builder = EntityRecord.newBuilder()
                                                          .setEntityId(entityId)
                                                          .setState(stateAny);
         updateBuilder(builder, entity);
@@ -111,11 +111,11 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
     @Override
     @SuppressWarnings("unchecked")
     protected E doBackward(EntityRecord entityRecord) {
-        final S unpacked = unpack(entityRecord.getState());
-        final S state = FieldMasks.applyMask(getFieldMask(), unpacked, entityStateType);
+        S unpacked = unpack(entityRecord.getState());
+        S state = FieldMasks.applyMask(getFieldMask(), unpacked, entityStateType);
 
-        final I id = Identifier.unpack(entityRecord.getEntityId());
-        final E entity = entityFactory.create(id);
+        I id = Identifier.unpack(entityRecord.getEntityId());
+        E entity = entityFactory.create(id);
 
         if (entity != null) {
             injectState(entity, state, entityRecord);
@@ -145,7 +145,7 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final EntityStorageConverter other = (EntityStorageConverter) obj;
+        EntityStorageConverter other = (EntityStorageConverter) obj;
         return Objects.equals(this.entityStateType, other.entityStateType)
                 && Objects.equals(this.entityFactory, other.entityFactory)
                 && Objects.equals(this.fieldMask, other.fieldMask);

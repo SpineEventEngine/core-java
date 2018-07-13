@@ -171,7 +171,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
 
             storeEntity(entity);
 
-            final Optional<E> optional = find(entity.getId());
+            Optional<E> optional = find(entity.getId());
             assertTrue(optional.isPresent());
 
             Entity<?, ?> found = optional.get();

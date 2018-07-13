@@ -58,7 +58,7 @@ public class OutputDispatcherRegistry<C extends MessageClass,
     @Override
     protected void register(D dispatcher) {
         checkNotNull(dispatcher);
-        final Set<C> eventClasses = dispatcher.getMessageClasses();
+        Set<C> eventClasses = dispatcher.getMessageClasses();
         checkNotEmpty(dispatcher, eventClasses);
 
         super.register(dispatcher);
@@ -67,15 +67,15 @@ public class OutputDispatcherRegistry<C extends MessageClass,
     @Override
     protected void unregister(D dispatcher) {
         checkNotNull(dispatcher);
-        final Set<C> eventClasses = dispatcher.getMessageClasses();
+        Set<C> eventClasses = dispatcher.getMessageClasses();
         checkNotEmpty(dispatcher, eventClasses);
 
         super.unregister(dispatcher);
     }
 
     protected boolean hasDispatchersFor(C eventClass) {
-        final Set<D> dispatchers = getDispatchers(eventClass);
-        final boolean result = !dispatchers.isEmpty();
+        Set<D> dispatchers = getDispatchers(eventClass);
+        boolean result = !dispatchers.isEmpty();
         return result;
     }
 

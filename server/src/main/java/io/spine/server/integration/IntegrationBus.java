@@ -134,7 +134,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     @SuppressWarnings("ConstantConditions")     // `TransportFactory` has already been initialized.
     private IntegrationBus(Builder builder) {
-        final TransportFactory transportFactory = builder.getTransportFactory()
+        TransportFactory transportFactory = builder.getTransportFactory()
                                                          .get();
         this.boundedContextName = builder.boundedContextName;
         this.subscriberHub = new SubscriberHub(transportFactory);
@@ -200,8 +200,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     @Override
     protected ExternalMessageEnvelope toEnvelope(ExternalMessage message) {
-        final BusAdapter<?, ?> adapter = adapterFor(message);
-        final ExternalMessageEnvelope result = adapter.toExternalEnvelope(message);
+        BusAdapter<?, ?> adapter = adapterFor(message);
+        ExternalMessageEnvelope result = adapter.toExternalEnvelope(message);
         return result;
     }
 
@@ -211,8 +211,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     @Override
     protected void dispatch(ExternalMessageEnvelope envelope) {
-        final ExternalMessageEnvelope markedEnvelope = markExternal(envelope);
-        final int dispatchersCalled = callDispatchers(markedEnvelope);
+        ExternalMessageEnvelope markedEnvelope = markExternal(envelope);
+        int dispatchersCalled = callDispatchers(markedEnvelope);
 
         checkState(dispatchersCalled != 0,
                    format("External message %s has no local dispatchers.",
@@ -220,13 +220,13 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     }
 
     private  ExternalMessageEnvelope markExternal(ExternalMessageEnvelope envelope) {
-        final ExternalMessage externalMessage = envelope.getOuterObject();
-        final BusAdapter<?, ?> adapter = adapterFor(externalMessage);
+        ExternalMessage externalMessage = envelope.getOuterObject();
+        BusAdapter<?, ?> adapter = adapterFor(externalMessage);
         return adapter.markExternal(externalMessage);
     }
 
     private BusAdapter<?, ?> adapterFor(ExternalMessage message) {
-        final Message unpackedOriginal = AnyPacker.unpack(message.getOriginalMessage());
+        Message unpackedOriginal = AnyPacker.unpack(message.getOriginalMessage());
         return adapterFor(unpackedOriginal.getClass());
     }
 
@@ -245,12 +245,12 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         super.register(dispatcher);
 
         // Remember the channel IDs, that we have been subscribed before.
-        final Set<ChannelId> requestedBefore = subscriberHub.ids();
+        Set<ChannelId> requestedBefore = subscriberHub.ids();
 
         // Subscribe to incoming messages of requested types.
         subscribeToIncoming(dispatcher);
 
-        final Set<ChannelId> currentlyRequested = subscriberHub.ids();
+        Set<ChannelId> currentlyRequested = subscriberHub.ids();
         if (!currentlyRequested.equals(requestedBefore)) {
 
             // Notify others that the requested message set has been changed.
@@ -269,12 +269,12 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         super.unregister(dispatcher);
 
         // Remember the IDs of channels, that we have been subscribed before.
-        final Set<ChannelId> requestedBefore = subscriberHub.ids();
+        Set<ChannelId> requestedBefore = subscriberHub.ids();
 
         // Unsubscribe from the types requested by this dispatcher.
         unsubscribeFromIncoming(dispatcher);
 
-        final Set<ChannelId> currentlyRequested = subscriberHub.ids();
+        Set<ChannelId> currentlyRequested = subscriberHub.ids();
         if (!currentlyRequested.equals(requestedBefore)) {
             notifyOfNeeds(currentlyRequested);
         }
@@ -311,8 +311,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      *
      * @param eventSubscriber the subscriber to register.
      */
-    public void register(final EventSubscriber eventSubscriber) {
-        final ExternalEventSubscriber wrapped = new ExternalEventSubscriber(eventSubscriber);
+    public void register(EventSubscriber eventSubscriber) {
+        ExternalEventSubscriber wrapped = new ExternalEventSubscriber(eventSubscriber);
         register(wrapped);
     }
 
@@ -322,8 +322,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      *
      * @param rejectionSubscriber the subscriber to register.
      */
-    public void register(final RejectionSubscriber rejectionSubscriber) {
-        final ExternalRejectionSubscriber wrapped =
+    public void register(RejectionSubscriber rejectionSubscriber) {
+        ExternalRejectionSubscriber wrapped =
                 new ExternalRejectionSubscriber(rejectionSubscriber);
         register(wrapped);
     }
@@ -334,17 +334,17 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      *
      * @param eventSubscriber the subscriber to register.
      */
-    public void unregister(final EventSubscriber eventSubscriber) {
-        final ExternalEventSubscriber wrapped = new ExternalEventSubscriber(eventSubscriber);
+    public void unregister(EventSubscriber eventSubscriber) {
+        ExternalEventSubscriber wrapped = new ExternalEventSubscriber(eventSubscriber);
         unregister(wrapped);
     }
 
     private void subscribeToIncoming(ExternalMessageDispatcher<?> dispatcher) {
-        final IntegrationBus integrationBus = this;
-        final Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
-        for (final ExternalMessageClass imClass : transformed) {
-            final ChannelId channelId = toId(imClass);
-            final Subscriber subscriber = subscriberHub.get(channelId);
+        IntegrationBus integrationBus = this;
+        Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
+        for (ExternalMessageClass imClass : transformed) {
+            ChannelId channelId = toId(imClass);
+            Subscriber subscriber = subscriberHub.get(channelId);
             subscriber.addObserver(new ExternalMessageObserver(boundedContextName,
                                                                imClass.value(),
                                                                integrationBus));
@@ -352,11 +352,11 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     }
     
     private void unsubscribeFromIncoming(ExternalMessageDispatcher<?> dispatcher) {
-        final IntegrationBus integrationBus = this;
-        final Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
-        for (final ExternalMessageClass imClass : transformed) {
-            final ChannelId channelId = toId(imClass);
-            final Subscriber subscriber = subscriberHub.get(channelId);
+        IntegrationBus integrationBus = this;
+        Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
+        for (ExternalMessageClass imClass : transformed) {
+            ChannelId channelId = toId(imClass);
+            Subscriber subscriber = subscriberHub.get(channelId);
             subscriber.removeObserver(new ExternalMessageObserver(boundedContextName,
                                                                   imClass.value(),
                                                                   integrationBus));
@@ -427,7 +427,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         }
 
         public Optional<BoundedContextName> getBoundedContextName() {
-            final BoundedContextName value = Validate.isDefault(this.boundedContextName)
+            BoundedContextName value = Validate.isDefault(this.boundedContextName)
                                              ? null
                                              : this.boundedContextName;
             return Optional.fromNullable(value);

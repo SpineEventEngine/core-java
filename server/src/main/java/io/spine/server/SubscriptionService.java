@@ -70,9 +70,9 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
         log().debug("Creating the subscription to a topic: {}", topic);
 
         try {
-            final Target target = topic.getTarget();
-            final BoundedContext boundedContext = selectBoundedContext(target);
-            final Stand stand = boundedContext.getStand();
+            Target target = topic.getTarget();
+            BoundedContext boundedContext = selectBoundedContext(target);
+            Stand stand = boundedContext.getStand();
 
             stand.subscribe(topic, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
@@ -82,18 +82,18 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
     }
 
     @Override
-    public void activate(final Subscription subscription,
-                         final StreamObserver<SubscriptionUpdate> responseObserver) {
+    public void activate(Subscription subscription,
+                         StreamObserver<SubscriptionUpdate> responseObserver) {
         log().debug("Activating the subscription: {}", subscription);
 
         try {
-            final BoundedContext boundedContext = selectBoundedContext(subscription);
+            BoundedContext boundedContext = selectBoundedContext(subscription);
 
-            final Stand.EntityUpdateCallback updateCallback = new Stand.EntityUpdateCallback() {
+            Stand.EntityUpdateCallback updateCallback = new Stand.EntityUpdateCallback() {
                 @Override
                 public void onStateChanged(EntityStateUpdate stateUpdate) {
                     checkNotNull(subscription);
-                    final SubscriptionUpdate update =
+                    SubscriptionUpdate update =
                             SubscriptionUpdate.newBuilder()
                                               .setSubscription(subscription)
                                               .setResponse(Responses.ok())
@@ -102,7 +102,7 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
                     responseObserver.onNext(update);
                 }
             };
-            final Stand targetStand = boundedContext.getStand();
+            Stand targetStand = boundedContext.getStand();
             targetStand.activate(subscription,
                                  updateCallback,
                                  StreamObservers.<Response>forwardErrorsOnly(responseObserver));
@@ -116,9 +116,9 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
     public void cancel(Subscription subscription, StreamObserver<Response> responseObserver) {
         log().debug("Incoming cancel request for the subscription topic: {}", subscription);
 
-        final BoundedContext boundedContext = selectBoundedContext(subscription);
+        BoundedContext boundedContext = selectBoundedContext(subscription);
         try {
-            final Stand stand = boundedContext.getStand();
+            Stand stand = boundedContext.getStand();
             stand.cancel(subscription, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             log().error("Error processing cancel subscription request", e);
@@ -127,14 +127,14 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
     }
 
     private BoundedContext selectBoundedContext(Subscription subscription) {
-        final Target target = subscription.getTopic().getTarget();
-        final BoundedContext context = selectBoundedContext(target);
+        Target target = subscription.getTopic().getTarget();
+        BoundedContext context = selectBoundedContext(target);
         return context;
     }
 
     private BoundedContext selectBoundedContext(Target target) {
-        final TypeUrl type = TypeUrl.parse(target.getType());
-        final BoundedContext result = typeToContextMap.get(type);
+        TypeUrl type = TypeUrl.parse(target.getType());
+        BoundedContext result = typeToContextMap.get(type);
         return result;
     }
 
@@ -167,13 +167,13 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
                 throw new IllegalStateException(
                         "Subscription service must have at least one bounded context.");
             }
-            final ImmutableMap<TypeUrl, BoundedContext> map = createMap();
-            final SubscriptionService result = new SubscriptionService(map);
+            ImmutableMap<TypeUrl, BoundedContext> map = createMap();
+            SubscriptionService result = new SubscriptionService(map);
             return result;
         }
 
         private ImmutableMap<TypeUrl, BoundedContext> createMap() {
-            final ImmutableMap.Builder<TypeUrl, BoundedContext> builder = ImmutableMap.builder();
+            ImmutableMap.Builder<TypeUrl, BoundedContext> builder = ImmutableMap.builder();
             for (BoundedContext boundedContext : boundedContexts) {
                 putIntoMap(boundedContext, builder);
             }
@@ -182,8 +182,8 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
 
         private static void putIntoMap(BoundedContext boundedContext,
                                        ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder) {
-            final Stand stand = boundedContext.getStand();
-            final ImmutableSet<TypeUrl> exposedTypes = stand.getExposedTypes();
+            Stand stand = boundedContext.getStand();
+            ImmutableSet<TypeUrl> exposedTypes = stand.getExposedTypes();
             for (TypeUrl availableType : exposedTypes) {
                 mapBuilder.put(availableType, boundedContext);
             }

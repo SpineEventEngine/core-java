@@ -115,7 +115,7 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
     public <E extends Message> EventRouting<I> route(Class<E> eventClass, EventRoute<I, E> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
-        final Route<Message, EventContext, Set<I>> casted =
+        Route<Message, EventContext, Set<I>> casted =
                 (Route<Message, EventContext, Set<I>>) via;
         return (EventRouting<I>) doRoute(eventClass, casted);
     }
@@ -128,9 +128,9 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      * @return optionally available route
      */
     public <M extends Message> Optional<EventRoute<I, M>> get(Class<M> eventClass) {
-        final Optional<? extends Route<Message, EventContext, Set<I>>> optional = doGet(eventClass);
+        Optional<? extends Route<Message, EventContext, Set<I>>> optional = doGet(eventClass);
         if (optional.isPresent()) {
-            final EventRoute<I, M> route = (EventRoute<I, M>) optional.get();
+            EventRoute<I, M> route = (EventRoute<I, M>) optional.get();
             return Optional.of(route);
         }
         return Optional.absent();

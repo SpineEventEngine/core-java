@@ -68,7 +68,7 @@ class Methods {
     }
 
     static Optional<String> nameFromAnnotation(Method getter) {
-        final String trimmedName = getter.getAnnotation(Column.class)
+        String trimmedName = getter.getAnnotation(Column.class)
                                          .name()
                                          .trim();
         return trimmedName.isEmpty()

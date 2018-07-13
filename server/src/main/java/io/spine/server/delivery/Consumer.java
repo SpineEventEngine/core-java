@@ -58,7 +58,7 @@ public abstract class Consumer<I,
     public ShardedStream<I, ?, M> bindToTransport(BoundedContextName name,
                                                   ShardingKey key,
                                                   TransportFactory transportFactory) {
-        final S stream = newShardedStreamBuilder().setBoundedContextName(name)
+        S stream = newShardedStreamBuilder().setBoundedContextName(name)
                                                   .setKey(key)
                                                   .setTag(deliveryTag)
                                                   .setTargetIdClass(repository.getIdClass())
@@ -84,10 +84,10 @@ public abstract class Consumer<I,
      * @param id              an ID of an entity to deliver the envelope to
      * @param envelopeMessage an envelope to deliver
      */
-    protected void deliverNow(final I id, final M envelopeMessage) {
-        final TenantId tenantId = envelopeMessage.getActorContext()
+    protected void deliverNow(I id, M envelopeMessage) {
+        TenantId tenantId = envelopeMessage.getActorContext()
                                                  .getTenantId();
-        final TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
+        TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
                 passToEndpoint(id, envelopeMessage);

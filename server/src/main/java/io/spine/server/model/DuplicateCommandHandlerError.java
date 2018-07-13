@@ -50,7 +50,7 @@ public class DuplicateCommandHandlerError extends ModelError {
                               Map<Set<CommandClass>, CommandHandlingClass> registeredHandlers) {
         checkNotNull(duplicatingClass);
         checkNotNull(registeredHandlers);
-        final StringBuilder builder = new StringBuilder(512);
+        StringBuilder builder = new StringBuilder(512);
         builder.append(format("The class %s declares handler methods for commands that are " +
                               "already handled by other classes.", duplicatingClass));
         for (Set<CommandClass> commandClasses : registeredHandlers.keySet()) {

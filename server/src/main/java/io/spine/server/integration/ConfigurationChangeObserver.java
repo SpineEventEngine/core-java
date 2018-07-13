@@ -61,9 +61,9 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
 
     @Override
     public void handle(ExternalMessage value) {
-        final RequestForExternalMessages request = AnyPacker.unpack(value.getOriginalMessage());
+        RequestForExternalMessages request = AnyPacker.unpack(value.getOriginalMessage());
 
-        final BoundedContextName origin = value.getBoundedContextName();
+        BoundedContextName origin = value.getBoundedContextName();
         addNewSubscriptions(request.getRequestedMessageTypesList(), origin);
         clearStaleSubscriptions(request.getRequestedMessageTypesList(), origin);
     }
@@ -71,7 +71,7 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
     private void addNewSubscriptions(Iterable<ExternalMessageType> types,
                                      BoundedContextName origin) {
         for (ExternalMessageType newType : types) {
-            final Collection<BoundedContextName> contextsWithSameRequest =
+            Collection<BoundedContextName> contextsWithSameRequest =
                     requestedTypes.get(newType);
             if (contextsWithSameRequest.isEmpty()) {
 
@@ -85,27 +85,27 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
     }
 
     private void registerInAdapter(ExternalMessageType newType) {
-        final Class<Message> wrapperCls = asClassOfMsg(newType.getWrapperTypeUrl());
-        final Class<Message> messageCls = asClassOfMsg(newType.getMessageTypeUrl());
-        final BusAdapter<?, ?> adapter = getAdapter(wrapperCls);
+        Class<Message> wrapperCls = asClassOfMsg(newType.getWrapperTypeUrl());
+        Class<Message> messageCls = asClassOfMsg(newType.getMessageTypeUrl());
+        BusAdapter<?, ?> adapter = getAdapter(wrapperCls);
         adapter.register(messageCls);
     }
 
     private BusAdapter<?, ?> getAdapter(Class<Message> javaClass) {
-        final BusAdapter<?, ?> adapter = adapterByClass.apply(javaClass);
+        BusAdapter<?, ?> adapter = adapterByClass.apply(javaClass);
         return checkNotNull(adapter);
     }
 
     private void clearStaleSubscriptions(Collection<ExternalMessageType> types,
                                          BoundedContextName origin) {
 
-        final Set<ExternalMessageType> toRemove = findStale(types, origin);
+        Set<ExternalMessageType> toRemove = findStale(types, origin);
 
         for (ExternalMessageType itemForRemoval : toRemove) {
-            final boolean wereNonEmpty = !requestedTypes.get(itemForRemoval)
+            boolean wereNonEmpty = !requestedTypes.get(itemForRemoval)
                                                         .isEmpty();
             requestedTypes.remove(itemForRemoval, origin);
-            final boolean emptyNow = requestedTypes.get(itemForRemoval)
+            boolean emptyNow = requestedTypes.get(itemForRemoval)
                                                    .isEmpty();
 
             if (wereNonEmpty && emptyNow) {
@@ -116,18 +116,18 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
 
     private void unregisterInAdapter(ExternalMessageType itemForRemoval) {
         // It's now the time to remove the local bus subscription.
-        final Class<Message> wrapperCls = asClassOfMsg(itemForRemoval.getWrapperTypeUrl());
-        final Class<Message> messageCls = asClassOfMsg(itemForRemoval.getMessageTypeUrl());
-        final BusAdapter<?, ?> adapter = getAdapter(wrapperCls);
+        Class<Message> wrapperCls = asClassOfMsg(itemForRemoval.getWrapperTypeUrl());
+        Class<Message> messageCls = asClassOfMsg(itemForRemoval.getMessageTypeUrl());
+        BusAdapter<?, ?> adapter = getAdapter(wrapperCls);
         adapter.unregister(messageCls);
     }
 
     private Set<ExternalMessageType> findStale(Collection<ExternalMessageType> types,
                                                BoundedContextName origin) {
-        final ImmutableSet.Builder<ExternalMessageType> result = ImmutableSet.builder();
+        ImmutableSet.Builder<ExternalMessageType> result = ImmutableSet.builder();
 
         for (ExternalMessageType previouslyRequestedType : requestedTypes.keySet()) {
-            final Collection<BoundedContextName> contextsThatRequested =
+            Collection<BoundedContextName> contextsThatRequested =
                     requestedTypes.get(previouslyRequestedType);
 
             if (contextsThatRequested.contains(origin) &&
@@ -149,7 +149,7 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
     }
 
     private static Class<Message> asClassOfMsg(String classStr) {
-        final TypeUrl typeUrl = TypeUrl.parse(classStr);
+        TypeUrl typeUrl = TypeUrl.parse(classStr);
         return typeUrl.getMessageClass();
     }
 

@@ -46,9 +46,9 @@ public class UnhandledRejectionException extends RuntimeException implements Mes
     }
 
     private static String msgFormat(Message msg) {
-        final RejectionClass cls = RejectionClass.of(msg);
-        final String typeName = TypeName.of(msg).value();
-        final String result = format(
+        RejectionClass cls = RejectionClass.of(msg);
+        String typeName = TypeName.of(msg).value();
+        String result = format(
                 "There is no registered handler for the rejection class: `%s`. Protobuf type: `%s`",
                 cls, typeName
         );
@@ -71,7 +71,7 @@ public class UnhandledRejectionException extends RuntimeException implements Mes
      * <p>This method is called in the constructor; it uses the exception message and stack trace.
      */
     private Error buildError() {
-        final Error error = Error.newBuilder()
+        Error error = Error.newBuilder()
                                  .setType(UnhandledRejectionException.class.getCanonicalName())
                                  .setMessage(getMessage())
                                  .setStacktrace(getStackTraceAsString(this))

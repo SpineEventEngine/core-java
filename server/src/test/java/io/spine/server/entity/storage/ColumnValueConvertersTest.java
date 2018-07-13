@@ -55,35 +55,35 @@ class ColumnValueConvertersTest {
     @Test
     @DisplayName("create identity instance for non-enum type getter")
     void createForNonEnum() {
-        final ColumnValueConverter converter = ofGetter("getLong");
+        ColumnValueConverter converter = ofGetter("getLong");
         assertEquals(IdentityConverter.class, converter.getClass());
     }
 
     @Test
     @DisplayName("create ordinal converter for ordinal enum getter")
     void createForOrdinalEnum() {
-        final ColumnValueConverter converter = ofGetter("getEnumOrdinal");
+        ColumnValueConverter converter = ofGetter("getEnumOrdinal");
         assertEquals(OrdinalEnumConverter.class, converter.getClass());
     }
 
     @Test
     @DisplayName("create string converter for string enum getter")
     void createForStringEnum() {
-        final ColumnValueConverter converter = ofGetter("getEnumString");
+        ColumnValueConverter converter = ofGetter("getEnumString");
         assertEquals(StringEnumConverter.class, converter.getClass());
     }
 
     @Test
     @DisplayName("create ordinal converter for non-annotated enum getter")
     void createForNotAnnotated() {
-        final ColumnValueConverter converter = ofGetter("getEnumNotAnnotated");
+        ColumnValueConverter converter = ofGetter("getEnumNotAnnotated");
         assertEquals(OrdinalEnumConverter.class, converter.getClass());
     }
 
     private static ColumnValueConverter ofGetter(String name) {
         try {
-            final Method getter = TestEntity.class.getDeclaredMethod(name);
-            final ColumnValueConverter converter = of(getter);
+            Method getter = TestEntity.class.getDeclaredMethod(name);
+            ColumnValueConverter converter = of(getter);
             return converter;
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);

@@ -81,12 +81,12 @@ public abstract class EventException extends RuntimeException implements Message
      * @param eventMessage an event message to get the type from
      */
     public static Map<String, Value> eventTypeAttribute(Message eventMessage) {
-        final String type = TypeName.of(eventMessage)
+        String type = TypeName.of(eventMessage)
                                     .value();
-        final Value value = Value.newBuilder()
+        Value value = Value.newBuilder()
                                  .setStringValue(type)
                                  .build();
-        final Map<String, Value> result = ImmutableMap.of(ATTR_EVENT_TYPE_NAME, value);
+        Map<String, Value> result = ImmutableMap.of(ATTR_EVENT_TYPE_NAME, value);
         return result;
     }
 
@@ -95,7 +95,7 @@ public abstract class EventException extends RuntimeException implements Message
      */
     public Message getEventMessage() {
         if (eventMessage instanceof Any) {
-            final Any any = (Any) eventMessage;
+            Any any = (Any) eventMessage;
             Message unpacked = AnyPacker.unpack(any);
             return unpacked;
         }

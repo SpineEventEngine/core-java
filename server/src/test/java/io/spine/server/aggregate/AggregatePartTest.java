@@ -85,7 +85,7 @@ class AggregatePartTest {
         prepareAggregatePart();
         taskDescriptionPart = new TaskDescriptionPart(root);
         taskRepository = new TaskRepository();
-        final TaskDescriptionRepository taskDescriptionRepository =
+        TaskDescriptionRepository taskDescriptionRepository =
                 new TaskDescriptionRepository();
         boundedContext.register(taskRepository);
         boundedContext.register(taskDescriptionRepository);
@@ -103,7 +103,7 @@ class AggregatePartTest {
     @DisplayName("return aggregate part state by class")
     void returnAggregatePartStateByClass() {
         taskRepository.store(taskPart);
-        final Task task = taskDescriptionPart.getPartState(Task.class);
+        Task task = taskDescriptionPart.getPartState(Task.class);
         assertEquals(TASK_DESCRIPTION, task.getDescription());
     }
 
@@ -111,7 +111,7 @@ class AggregatePartTest {
     @Test
     @DisplayName("throw InvalidEntityStateException if entity state is invalid")
     void throwOnInvalidState() {
-        final User user = User.newBuilder()
+        User user = User.newBuilder()
                               .setFirstName("|")
                               .setLastName("|")
                               .build();

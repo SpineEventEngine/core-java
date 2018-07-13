@@ -62,7 +62,7 @@ class SubscriptionValidator extends RequestValidator<Subscription> {
 
     @Override
     protected Optional<RequestNotSupported<Subscription>> isSupported(Subscription request) {
-        final boolean includedInRegistry = checkInRegistry(request);
+        boolean includedInRegistry = checkInRegistry(request);
 
         if (includedInRegistry) {
             return Optional.absent();
@@ -86,15 +86,15 @@ class SubscriptionValidator extends RequestValidator<Subscription> {
     }
 
     private boolean checkInRegistry(Subscription request) {
-        final TenantId tenantId = request.getTopic()
+        TenantId tenantId = request.getTopic()
                                          .getContext()
                                          .getTenantId();
-        final Boolean result = new TenantAwareFunction<Subscription, Boolean>(tenantId) {
+        Boolean result = new TenantAwareFunction<Subscription, Boolean>(tenantId) {
 
             @Override
             public Boolean apply(@Nullable Subscription input) {
                 checkNotNull(input);
-                final boolean result = registry.containsId(input.getId());
+                boolean result = registry.containsId(input.getId());
                 return result;
             }
         }.execute(request);

@@ -44,8 +44,8 @@ public class CommandExpiredException extends CommandException {
 
     /** Creates an instance of the command expired error. */
     static Error commandExpired(Command command) {
-        final String format = "Scheduled command of type `%s` expired.";
-        final CommandValidationError errorCode = CommandValidationError.EXPIRED;
+        String format = "Scheduled command of type `%s` expired.";
+        CommandValidationError errorCode = CommandValidationError.EXPIRED;
         return createError(format, command, errorCode);
     }
 }

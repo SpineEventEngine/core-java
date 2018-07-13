@@ -63,42 +63,42 @@ public class AggregateMessageDeliveryTestEnv {
     }
 
     public static Command startProject() {
-        final ProjectId projectId = projectId();
-        final Command command = createCommand(AggStartProject.newBuilder()
+        ProjectId projectId = projectId();
+        Command command = createCommand(AggStartProject.newBuilder()
                                                              .setProjectId(projectId)
                                                              .build());
         return command;
     }
 
     public static Event projectStarted() {
-        final ProjectId projectId = projectId();
-        final TestEventFactory eventFactory =
+        ProjectId projectId = projectId();
+        TestEventFactory eventFactory =
                 TestEventFactory.newInstance(
                         pack(projectId),
                         AggregateMessageDeliveryTestEnv.class
                 );
 
-        final AggProjectStarted msg = AggProjectStarted.newBuilder()
+        AggProjectStarted msg = AggProjectStarted.newBuilder()
                                                        .setProjectId(projectId)
                                                        .build();
 
-        final Event result = eventFactory.createEvent(msg);
+        Event result = eventFactory.createEvent(msg);
         return result;
     }
 
     public static Event projectCancelled() {
-        final ProjectId projectId = projectId();
-        final TestEventFactory eventFactory =
+        ProjectId projectId = projectId();
+        TestEventFactory eventFactory =
                 TestEventFactory.newInstance(
                         pack(projectId),
                         AggregateMessageDeliveryTestEnv.class
                 );
 
-        final AggProjectCancelled msg = AggProjectCancelled.newBuilder()
+        AggProjectCancelled msg = AggProjectCancelled.newBuilder()
                                                            .setProjectId(projectId)
                                                            .build();
 
-        final Event result = eventFactory.createEvent(msg);
+        Event result = eventFactory.createEvent(msg);
         return result;
     }
 
@@ -109,14 +109,14 @@ public class AggregateMessageDeliveryTestEnv {
     }
 
     public static Rejection cannotStartProject() {
-        final ProjectId projectId = projectId();
+        ProjectId projectId = projectId();
 
-        final AggStartProject cmdMessage = AggStartProject.newBuilder()
+        AggStartProject cmdMessage = AggStartProject.newBuilder()
                                                           .setProjectId(projectId)
                                                           .build();
-        final Command command = createCommand(cmdMessage);
+        Command command = createCommand(cmdMessage);
 
-        final Rejection result = Rejections.toRejection(
+        Rejection result = Rejections.toRejection(
                 new io.spine.test.aggregate.rejection.AggCannotStartArchivedProject(
                         projectId, Lists.newArrayList()),
                 command);
@@ -124,7 +124,7 @@ public class AggregateMessageDeliveryTestEnv {
     }
 
     private static Command createCommand(Message cmdMessage) {
-        final Command result =
+        Command result =
                 TestActorRequestFactory.newInstance(AggregateMessageDeliveryTestEnv.class)
                                        .createCommand(cmdMessage);
         return result;
@@ -137,7 +137,7 @@ public class AggregateMessageDeliveryTestEnv {
 
             @Override
             public Set<ProjectId> apply(Message raw, RejectionContext context) {
-                final AggCannotStartArchivedProject msg = (AggCannotStartArchivedProject) raw;
+                AggCannotStartArchivedProject msg = (AggCannotStartArchivedProject) raw;
                 return ImmutableSet.of(msg.getProjectId());
             }
         };
@@ -164,7 +164,7 @@ public class AggregateMessageDeliveryTestEnv {
         @Assign
         AggProjectStarted on(AggStartProject cmd) {
             stats.recordCallingThread(getId());
-            final AggProjectStarted event = AggProjectStarted.newBuilder()
+            AggProjectStarted event = AggProjectStarted.newBuilder()
                                                              .setProjectId(cmd.getProjectId())
                                                              .build();
             return event;

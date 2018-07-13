@@ -133,10 +133,10 @@ public abstract class ProcessManager<I,
      */
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope cmd) {
-        final CommandHandlerMethod method = thisClass().getHandler(cmd.getMessageClass());
-        final List<? extends Message> messages =
+        CommandHandlerMethod method = thisClass().getHandler(cmd.getMessageClass());
+        List<? extends Message> messages =
                 method.invoke(this, cmd.getMessage(), cmd.getCommandContext());
-        final List<Event> result = toEvents(messages, cmd);
+        List<Event> result = toEvents(messages, cmd);
         return result;
     }
 
@@ -161,10 +161,10 @@ public abstract class ProcessManager<I,
      *         produce new events because of the passed event
      */
     List<Event> dispatchEvent(EventEnvelope event)  {
-        final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
-        final List<? extends Message> eventMessages =
+        EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
+        List<? extends Message> eventMessages =
                 method.invoke(this, event.getMessage(), event.getEventContext());
-        final List<Event> events = toEvents(eventMessages, event);
+        List<Event> events = toEvents(eventMessages, event);
         return events;
     }
 
@@ -176,12 +176,12 @@ public abstract class ProcessManager<I,
      *         produce new events because of the passed event
      */
     List<Event> dispatchRejection(RejectionEnvelope rejection) {
-        final CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
-        final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
+        CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
+        RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
                                                                      commandClass);
-        final List<? extends Message> eventMessages =
+        List<? extends Message> eventMessages =
         method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
-        final List<Event> events = toEvents(eventMessages, rejection);
+        List<Event> events = toEvents(eventMessages, rejection);
         return events;
     }
 
@@ -215,8 +215,8 @@ public abstract class ProcessManager<I,
     protected CommandRouter newRouterFor(Message commandMessage, CommandContext commandContext) {
         checkNotNull(commandMessage);
         checkNotNull(commandContext);
-        final CommandBus commandBus = ensureCommandBus();
-        final CommandRouter router = new CommandRouter(commandBus, commandMessage, commandContext);
+        CommandBus commandBus = ensureCommandBus();
+        CommandRouter router = new CommandRouter(commandBus, commandMessage, commandContext);
         return router;
     }
 
@@ -257,14 +257,14 @@ public abstract class ProcessManager<I,
                                                            CommandContext commandContext) {
         checkNotNull(commandMessage);
         checkNotNull(commandContext);
-        final CommandBus commandBus = ensureCommandBus();
-        final IteratingCommandRouter router =
+        CommandBus commandBus = ensureCommandBus();
+        IteratingCommandRouter router =
                 new IteratingCommandRouter(commandBus, commandMessage, commandContext);
         return router;
     }
 
     private CommandBus ensureCommandBus() {
-        final CommandBus commandBus = getCommandBus();
+        CommandBus commandBus = getCommandBus();
         checkState(commandBus != null, "CommandBus must be initialized");
         return commandBus;
     }

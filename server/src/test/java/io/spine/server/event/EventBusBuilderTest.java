@@ -130,7 +130,7 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
         @Test
         @DisplayName("EventValidator")
         void eventValidator() {
-            final MessageValidator validator = MessageValidator.newInstance();
+            MessageValidator validator = MessageValidator.newInstance();
             assertEquals(validator, builder().setEventValidator(validator)
                                              .getEventValidator()
                                              .get());

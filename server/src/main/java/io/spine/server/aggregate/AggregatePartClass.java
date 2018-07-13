@@ -94,7 +94,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
     protected Constructor<A> findConstructor() {
         Class<? extends A> cls = value();
         checkNotNull(cls);
-        final Constructor<? extends A> ctor;
+        Constructor<? extends A> ctor;
         try {
             ctor = cls.getDeclaredConstructor(rootClass());
             ctor.setAccessible(true);
@@ -102,7 +102,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
             throw noSuchConstructor(cls, rootClass());
         }
         @SuppressWarnings("unchecked") // The cast is protected by generic params.
-        final Constructor<A> result = (Constructor<A>) ctor;
+        Constructor<A> result = (Constructor<A>) ctor;
         return result;
     }
 
@@ -113,10 +113,10 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
         checkNotNull(bc);
         checkNotNull(aggregateId);
         @SuppressWarnings("unchecked") // Protected by generic parameters of the calling code.
-        final Class<R> rootClass = (Class<R>) rootClass();
+        Class<R> rootClass = (Class<R>) rootClass();
         R result;
         try {
-            final Constructor<R> ctor =
+            Constructor<R> ctor =
                     rootClass.getDeclaredConstructor(bc.getClass(), aggregateId.getClass());
             ctor.setAccessible(true);
             result = ctor.newInstance(bc, aggregateId);
@@ -129,11 +129,11 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
 
     private static ModelError noSuchConstructor(Class<?> aggregatePartClass,
                                                 Class<?> aggregateRootClass) {
-        final String errMsg =
+        String errMsg =
                 format("%s class must declare a constructor with one parameter of the %s type.",
                        aggregatePartClass.getName(),
                        aggregateRootClass.getName());
-        final NoSuchMethodException cause = new NoSuchMethodException(errMsg);
+        NoSuchMethodException cause = new NoSuchMethodException(errMsg);
         throw new ModelError(cause);
     }
 }

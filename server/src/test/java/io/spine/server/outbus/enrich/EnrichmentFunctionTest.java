@@ -135,7 +135,7 @@ class EnrichmentFunctionTest {
     @Test
     @DisplayName("have `toString`")
     void haveToString() {
-        final String str = fieldEnrichment.toString();
+        String str = fieldEnrichment.toString();
         assertTrue(str.contains(ProjectCreated.class.getName()));
         assertTrue(str.contains(ProjectCreated.Enrichment.class.getName()));
     }

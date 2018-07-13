@@ -59,7 +59,7 @@ class Rescheduler {
     }
 
     void rescheduleCommands() {
-        final Runnable reschedulingAction = new Runnable() {
+        Runnable reschedulingAction = new Runnable() {
             @Override
             public void run() {
                 doRescheduleCommands();
@@ -67,7 +67,7 @@ class Rescheduler {
         };
 
         if (commandBus.isThreadSpawnAllowed()) {
-            final Thread thread = new Thread(reschedulingAction, "CommandBus-rescheduleCommands");
+            Thread thread = new Thread(reschedulingAction, "CommandBus-rescheduleCommands");
             thread.start();
         } else {
             reschedulingAction.run();
@@ -88,15 +88,15 @@ class Rescheduler {
 
     @VisibleForTesting
     private void doRescheduleCommands() {
-        final Set<TenantId> tenants = commandStore().getTenantIndex()
+        Set<TenantId> tenants = commandStore().getTenantIndex()
                                                     .getAll();
         for (TenantId tenantId : tenants) {
             rescheduleForTenant(tenantId);
         }
     }
 
-    private void rescheduleForTenant(final TenantId tenantId) {
-        final TenantAwareFunction0<Iterator<Command>> func =
+    private void rescheduleForTenant(TenantId tenantId) {
+        TenantAwareFunction0<Iterator<Command>> func =
                 new TenantAwareFunction0<Iterator<Command>>(tenantId) {
                     @Override
                     public Iterator<Command> apply() {
@@ -104,13 +104,13 @@ class Rescheduler {
                     }
                 };
 
-        final Iterator<Command> commands = func.execute(Empty.getDefaultInstance());
+        Iterator<Command> commands = func.execute(Empty.getDefaultInstance());
 
-        final TenantAwareOperation op = new TenantAwareOperation(tenantId) {
+        TenantAwareOperation op = new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
                 while (commands.hasNext()) {
-                    final Command command = commands.next();
+                    Command command = commands.next();
                     reschedule(command);
                 }
             }
@@ -119,22 +119,22 @@ class Rescheduler {
     }
 
     private void reschedule(Command command) {
-        final Timestamp now = getCurrentTime();
-        final Timestamp timeToPost = getTimeToPost(command);
+        Timestamp now = getCurrentTime();
+        Timestamp timeToPost = getTimeToPost(command);
         if (isLaterThan(now, /*than*/ timeToPost)) {
             onScheduledCommandExpired(command);
         } else {
-            final Interval interval = Intervals.between(now, timeToPost);
-            final Duration newDelay = Intervals.toDuration(interval);
-            final Command updatedCommand = CommandScheduler.setSchedule(command, newDelay, now);
+            Interval interval = Intervals.between(now, timeToPost);
+            Duration newDelay = Intervals.toDuration(interval);
+            Command updatedCommand = CommandScheduler.setSchedule(command, newDelay, now);
             scheduler().schedule(updatedCommand);
         }
     }
 
     private static Timestamp getTimeToPost(Command command) {
-        final CommandContext.Schedule schedule = command.getContext()
+        CommandContext.Schedule schedule = command.getContext()
                                                         .getSchedule();
-        final Timestamp timeToPost = add(command.getSystemProperties()
+        Timestamp timeToPost = add(command.getSystemProperties()
                                                 .getSchedulingTime(), schedule.getDelay());
         return timeToPost;
     }
@@ -149,11 +149,11 @@ class Rescheduler {
      * @see CommandExpiredException
      */
     private void onScheduledCommandExpired(Command command) {
-        final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
-        final Message msg = commandEnvelope.getMessage();
-        final CommandId id = commandEnvelope.getId();
+        CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
+        Message msg = commandEnvelope.getMessage();
+        CommandId id = commandEnvelope.getId();
 
-        final Error error = CommandExpiredException.commandExpired(command);
+        Error error = CommandExpiredException.commandExpired(command);
         commandStore().setToError(commandEnvelope, error);
         log().errorExpiredCommand(msg, id);
     }

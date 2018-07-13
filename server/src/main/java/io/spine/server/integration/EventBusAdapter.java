@@ -52,26 +52,26 @@ final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>
 
     @Override
     ExternalMessageEnvelope toExternalEnvelope(ExternalMessage message) {
-        final Message unpacked = AnyPacker.unpack(message.getOriginalMessage());
-        final Event event = (Event) unpacked;
-        final ExternalMessageEnvelope result =
+        Message unpacked = AnyPacker.unpack(message.getOriginalMessage());
+        Event event = (Event) unpacked;
+        ExternalMessageEnvelope result =
                 ExternalMessageEnvelope.of(message, Events.getMessage(event));
         return result;
     }
 
     @Override
     ExternalMessageEnvelope markExternal(ExternalMessage externalMsg) {
-        final Any packedEvent = externalMsg.getOriginalMessage();
-        final Event event = AnyPacker.unpack(packedEvent);
-        final Event.Builder eventBuilder = event.toBuilder();
-        final EventContext modifiedContext = eventBuilder.getContext()
+        Any packedEvent = externalMsg.getOriginalMessage();
+        Event event = AnyPacker.unpack(packedEvent);
+        Event.Builder eventBuilder = event.toBuilder();
+        EventContext modifiedContext = eventBuilder.getContext()
                                                          .toBuilder()
                                                          .setExternal(true)
                                                          .build();
 
-        final Event marked = eventBuilder.setContext(modifiedContext)
+        Event marked = eventBuilder.setContext(modifiedContext)
                                          .build();
-        final ExternalMessage result = ExternalMessages.of(marked,
+        ExternalMessage result = ExternalMessages.of(marked,
                                                            externalMsg.getBoundedContextName());
         return ExternalMessageEnvelope.of(result, Events.getMessage(event));
     }
@@ -83,7 +83,7 @@ final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>
 
     @Override
     EventDispatcher<?> createDispatcher(Class<? extends Message> messageClass) {
-        final DomesticEventPublisher result =
+        DomesticEventPublisher result =
                 new DomesticEventPublisher(getBoundedContextName(),
                                            getPublisherHub(),
                                            EventClass.of(messageClass));

@@ -79,7 +79,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
     @Override
     public Optional<Ack> accept(CommandEnvelope envelope) {
-        final Command command = envelope.getCommand();
+        Command command = envelope.getCommand();
         if (isScheduled(command)) {
             scheduleAndStore(envelope);
             return of(acknowledge(envelope.getId()));
@@ -88,7 +88,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
     }
 
     private void scheduleAndStore(CommandEnvelope commandEnvelope) {
-        final Command command = commandEnvelope.getCommand();
+        Command command = commandEnvelope.getCommand();
         schedule(command);
         commandBus().commandStore()
                     .store(command, SCHEDULED);
@@ -112,7 +112,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         if (isScheduledAlready(command)) {
             return;
         }
-        final Command commandUpdated = setSchedulingTime(command, getCurrentTime());
+        Command commandUpdated = setSchedulingTime(command, getCurrentTime());
         doSchedule(commandUpdated);
         rememberAsScheduled(commandUpdated);
     }
@@ -151,13 +151,13 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
     }
 
     private static boolean isScheduledAlready(Command command) {
-        final CommandId id = command.getId();
-        final boolean isScheduledAlready = scheduledCommandIds.contains(id);
+        CommandId id = command.getId();
+        boolean isScheduledAlready = scheduledCommandIds.contains(id);
         return isScheduledAlready;
     }
 
     private static void rememberAsScheduled(Command command) {
-        final CommandId id = command.getId();
+        CommandId id = command.getId();
         scheduledCommandIds.add(id);
     }
 
@@ -183,10 +183,10 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         checkNotNull(command);
         checkNotNull(schedulingTime);
 
-        final Duration delay = command.getContext()
+        Duration delay = command.getContext()
                                       .getSchedule()
                                       .getDelay();
-        final Command result = setSchedule(command, delay, schedulingTime);
+        Command result = setSchedule(command, delay, schedulingTime);
         return result;
     }
 
@@ -204,20 +204,20 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         checkNotNull(schedulingTime);
         checkValid(schedulingTime);
 
-        final CommandContext context = command.getContext();
-        final CommandContext.Schedule scheduleUpdated = context.getSchedule()
+        CommandContext context = command.getContext();
+        CommandContext.Schedule scheduleUpdated = context.getSchedule()
                                                                .toBuilder()
                                                                .setDelay(delay)
                                                                .build();
-        final CommandContext contextUpdated = context.toBuilder()
+        CommandContext contextUpdated = context.toBuilder()
                                                      .setSchedule(scheduleUpdated)
                                                      .build();
 
-        final Command.SystemProperties sysProps = command.getSystemProperties()
+        Command.SystemProperties sysProps = command.getSystemProperties()
                                                          .toBuilder()
                                                          .setSchedulingTime(schedulingTime)
                                                          .build();
-        final Command result = command.toBuilder()
+        Command result = command.toBuilder()
                                       .setContext(contextUpdated)
                                       .setSystemProperties(sysProps)
                                       .build();

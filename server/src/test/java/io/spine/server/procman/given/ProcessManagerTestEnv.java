@@ -80,7 +80,7 @@ public class ProcessManagerTestEnv {
          */
         public void injectCommandBus(CommandBus commandBus) {
             try {
-                final Method method = ProcessManager.class.getDeclaredMethod("setCommandBus",
+                Method method = ProcessManager.class.getDeclaredMethod("setCommandBus",
                                                                              CommandBus.class);
                 method.setAccessible(true);
                 method.invoke(this, commandBus);
@@ -113,10 +113,10 @@ public class ProcessManagerTestEnv {
         CommandRouted handle(PmStartProject command, CommandContext context) {
             getBuilder().mergeFrom(pack(command));
 
-            final Message addTask = ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
+            Message addTask = ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
                     .setProjectId(command.getProjectId())
                     .build();
-            final CommandRouted route = newRouterFor(command, context)
+            CommandRouted route = newRouterFor(command, context)
                     .add(addTask)
                     .routeAll();
             return route;

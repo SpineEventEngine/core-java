@@ -47,9 +47,9 @@ class CommandTestUtil {
     static void checkRecord(CommandRecord record,
                             Command cmd,
                             CommandStatus statusExpected) {
-        final CommandContext context = cmd.getContext();
-        final CommandId commandId = cmd.getId();
-        final CmdCreateProject message = unpack(cmd.getMessage());
+        CommandContext context = cmd.getContext();
+        CommandId commandId = cmd.getId();
+        CmdCreateProject message = unpack(cmd.getMessage());
         assertEquals(cmd.getMessage(), record.getCommand()
                                              .getMessage());
         assertTrue(record.getTimestamp()

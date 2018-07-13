@@ -45,7 +45,7 @@ public class Log {
     }
 
     public void errorHandling(Exception exception, Message commandMessage, CommandId commandId) {
-        final String msg = formatMessageTypeAndId(
+        String msg = formatMessageTypeAndId(
                 "Exception while handling command `%s` (ID: `%s`).",
                 commandMessage,
                 commandId);
@@ -53,7 +53,7 @@ public class Log {
     }
 
     public void rejectedWith(ThrowableMessage rej, Message commandMessage, CommandId commandId) {
-        final String msg = formatMessageTypeAndId(
+        String msg = formatMessageTypeAndId(
                 "The command `%s` (ID: `%s`) was rejected.",
                 commandMessage,
                 commandId);
@@ -63,7 +63,7 @@ public class Log {
     public void errorHandlingUnknown(Throwable throwable,
                                      Message commandMessage,
                                      CommandId commandId) {
-        final String msg = formatMessageTypeAndId(
+        String msg = formatMessageTypeAndId(
                 "Throwable encountered when handling command `%s` (ID: `%s`).",
                 commandMessage,
                 commandId);
@@ -71,7 +71,7 @@ public class Log {
     }
 
     void errorExpiredCommand(Message commandMsg, CommandId id) {
-        final String msg = formatMessageTypeAndId(
+        String msg = formatMessageTypeAndId(
                 "Expired scheduled command `%s` (ID: `%s`).",
                 commandMsg,
                 id);
@@ -94,10 +94,10 @@ public class Log {
         checkNotNull(format);
         checkNotEmptyOrBlank(format, "format string");
 
-        final String cmdType = TypeName.of(commandMessage)
+        String cmdType = TypeName.of(commandMessage)
                                        .value();
-        final String id = Identifier.toString(commandId);
-        final String result = format(format, cmdType, id);
+        String id = Identifier.toString(commandId);
+        String result = format(format, cmdType, id);
         return result;
     }
 

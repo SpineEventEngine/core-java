@@ -70,26 +70,26 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
 
     @Override
     public Optional<MessageInvalid> validate(CommandEnvelope envelope) {
-        final Optional<MessageInvalid> tenantCheckResult = isTenantIdValid(envelope);
+        Optional<MessageInvalid> tenantCheckResult = isTenantIdValid(envelope);
         if (tenantCheckResult.isPresent()) {
             return tenantCheckResult;
         }
-        final Optional<MessageInvalid> commandValid = isCommandValid(envelope);
+        Optional<MessageInvalid> commandValid = isCommandValid(envelope);
         return commandValid;
     }
 
     private Optional<MessageInvalid> isTenantIdValid(CommandEnvelope envelope) {
-        final TenantId tenantId = envelope.getTenantId();
-        final boolean tenantSpecified = !isDefault(tenantId);
-        final Command command = envelope.getCommand();
+        TenantId tenantId = envelope.getTenantId();
+        boolean tenantSpecified = !isDefault(tenantId);
+        Command command = envelope.getCommand();
         if (commandBus.isMultitenant()) {
             if (!tenantSpecified) {
-                final MessageInvalid report = missingTenantId(command);
+                MessageInvalid report = missingTenantId(command);
                 return of(report);
             }
         } else {
             if (tenantSpecified) {
-                final MessageInvalid report = tenantIdInapplicable(command);
+                MessageInvalid report = tenantIdInapplicable(command);
                 return of(report);
             }
         }
@@ -97,8 +97,8 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
     }
 
     private Optional<MessageInvalid> isCommandValid(CommandEnvelope envelope) {
-        final Command command = envelope.getCommand();
-        final List<ConstraintViolation> violations = inspect(envelope);
+        Command command = envelope.getCommand();
+        List<ConstraintViolation> violations = inspect(envelope);
         InvalidCommandException exception = null;
         if (!violations.isEmpty()) {
             exception = onConstraintViolations(command, violations);
@@ -117,18 +117,18 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
      */
     @VisibleForTesting
     static List<ConstraintViolation> inspect(CommandEnvelope envelope) {
-        final ViolationCheck result = new ViolationCheck(envelope);
+        ViolationCheck result = new ViolationCheck(envelope);
         return result.build();
     }
 
     private InvalidCommandException missingTenantId(Command command) {
-        final InvalidCommandException noTenantDefined = onMissingTenantId(command);
+        InvalidCommandException noTenantDefined = onMissingTenantId(command);
         commandBus.commandStore().storeWithError(command, noTenantDefined);
         return noTenantDefined;
     }
 
     private InvalidCommandException tenantIdInapplicable(Command command) {
-        final InvalidCommandException tenantIdInapplicable = onInapplicableTenantId(command);
+        InvalidCommandException tenantIdInapplicable = onInapplicableTenantId(command);
         commandBus.commandStore().storeWithError(command, tenantIdInapplicable);
         return tenantIdInapplicable;
     }
@@ -154,18 +154,18 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         }
 
         private void validateId() {
-            final String commandId = Identifier.toString(command.getId());
+            String commandId = Identifier.toString(command.getId());
             if (commandId.equals(EMPTY_ID)) {
                 addViolation("Command ID cannot be empty or blank.");
             }
         }
 
         private void validateMessage() {
-            final Message message = command.getMessage();
+            Message message = command.getMessage();
             if (isDefault(message)) {
                 addViolation("Non-default command message must be set.");
             }
-            final List<ConstraintViolation> messageViolations = MessageValidator.newInstance()
+            List<ConstraintViolation> messageViolations = MessageValidator.newInstance()
                                                                                 .validate(message);
             result.addAll(messageViolations);
         }
@@ -177,10 +177,10 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         }
 
         private void validateTargetId() {
-            final Message message = command.getMessage();
-            final Optional targetId = DefaultCommandRoute.asOptional(message);
+            Message message = command.getMessage();
+            Optional targetId = DefaultCommandRoute.asOptional(message);
             if (targetId.isPresent()) {
-                final String targetIdString = Identifier.toString(targetId.get());
+                String targetIdString = Identifier.toString(targetId.get());
                 if (targetIdString.equals(EMPTY_ID)) {
                     addViolation("Command target entity ID cannot be empty or blank.");
                 }

@@ -99,7 +99,7 @@ class ProjectionTransaction<I,
     ProjectionTransaction<I, M, B> start(Projection<I, M, B> projection) {
         checkNotNull(projection);
 
-        final ProjectionTransaction<I, M, B> tx = new ProjectionTransaction<>(projection);
+        ProjectionTransaction<I, M, B> tx = new ProjectionTransaction<>(projection);
         return tx;
     }
 
@@ -126,7 +126,7 @@ class ProjectionTransaction<I,
         checkNotNull(state);
         checkNotNull(version);
 
-        final ProjectionTransaction<I, M, B> tx =
+        ProjectionTransaction<I, M, B> tx =
                 new ProjectionTransaction<>(projection, state, version);
         return tx;
     }

@@ -67,16 +67,16 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
         if (input == null) {
             return false;
         }
-        final boolean result = idMatches(input) && columnValuesMatch(input);
+        boolean result = idMatches(input) && columnValuesMatch(input);
         return result;
     }
 
     private boolean idMatches(EntityRecordWithColumns record) {
         if (!acceptedIds.isEmpty()) {
-            final Any entityId = record.getRecord()
+            Any entityId = record.getRecord()
                                        .getEntityId();
-            final I genericId = Identifier.unpack(entityId);
-            final boolean idMatches = acceptedIds.contains(genericId);
+            I genericId = Identifier.unpack(entityId);
+            boolean idMatches = acceptedIds.contains(genericId);
             if (!idMatches) {
                 return false;
             }
@@ -88,7 +88,7 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
     private boolean columnValuesMatch(EntityRecordWithColumns record) {
         boolean match;
         for (CompositeQueryParameter filter : queryParams) {
-            final CompositeOperator operator = filter.getOperator();
+            CompositeOperator operator = filter.getOperator();
             switch (operator) {
                 case ALL:
                     match = checkAll(filter.getFilters(), record);
@@ -110,11 +110,11 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
     private static boolean checkAll(Multimap<EntityColumn, ColumnFilter> filters,
                                     EntityRecordWithColumns record) {
         for (Map.Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
-            final Optional<MemoizedValue> columnValue = getColumnValue(record, filter.getKey());
+            Optional<MemoizedValue> columnValue = getColumnValue(record, filter.getKey());
             if (!columnValue.isPresent()) {
                 return false;
             }
-            final boolean matches = checkSingleParameter(filter.getValue(), columnValue.get());
+            boolean matches = checkSingleParameter(filter.getValue(), columnValue.get());
             if (!matches) {
                 return false;
             }
@@ -125,9 +125,9 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
     private static boolean checkEither(Multimap<EntityColumn, ColumnFilter> filters,
                                        EntityRecordWithColumns record) {
         for (Map.Entry<EntityColumn, ColumnFilter> filter : filters.entries()) {
-            final Optional<MemoizedValue> columnValue = getColumnValue(record, filter.getKey());
+            Optional<MemoizedValue> columnValue = getColumnValue(record, filter.getKey());
             if (columnValue.isPresent()) {
-                final boolean matches = checkSingleParameter(filter.getValue(), columnValue.get());
+                boolean matches = checkSingleParameter(filter.getValue(), columnValue.get());
                 if (matches) {
                     return true;
                 }
@@ -141,29 +141,29 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
         if (actualValue == null) {
             return false;
         }
-        final Object filterValue;
-        final Any wrappedValue = filter.getValue();
-        final EntityColumn sourceColumn = actualValue.getSourceColumn();
-        final Class<?> sourceClass = sourceColumn.getType();
+        Object filterValue;
+        Any wrappedValue = filter.getValue();
+        EntityColumn sourceColumn = actualValue.getSourceColumn();
+        Class<?> sourceClass = sourceColumn.getType();
         if (sourceClass != Any.class) {
             filterValue = toObject(wrappedValue, sourceClass);
         } else {
             filterValue = wrappedValue;
         }
-        final Object columnValue = sourceColumn.toPersistedValue(filterValue);
-        final boolean result = eval(actualValue.getValue(), filter.getOperator(), columnValue);
+        Object columnValue = sourceColumn.toPersistedValue(filterValue);
+        boolean result = eval(actualValue.getValue(), filter.getOperator(), columnValue);
         return result;
     }
 
     private static Optional<MemoizedValue> getColumnValue(EntityRecordWithColumns record,
                                                           EntityColumn column) {
-        final String storedName = column.getStoredName();
+        String storedName = column.getStoredName();
         if (!record.getColumnNames()
                    .contains(storedName)) {
             return Optional.absent();
         }
 
-        final MemoizedValue value = record.getColumnValue(storedName);
+        MemoizedValue value = record.getColumnValue(storedName);
         return Optional.of(value);
     }
 }

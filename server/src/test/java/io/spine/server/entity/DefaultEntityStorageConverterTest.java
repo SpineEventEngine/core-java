@@ -44,12 +44,12 @@ class DefaultEntityStorageConverterTest {
 
     @BeforeEach
     void setUp() {
-        final BoundedContext bc = BoundedContext.newBuilder()
+        BoundedContext bc = BoundedContext.newBuilder()
                                                 .build();
         RecordBasedRepository<Long, TestEntity, StringValue> repository = new TestRepository();
         bc.register(repository);
 
-        final TypeUrl stateType = repository.entityClass()
+        TypeUrl stateType = repository.entityClass()
                                             .getStateType();
         converter = forAllFields(stateType, repository.entityFactory());
     }
@@ -63,18 +63,18 @@ class DefaultEntityStorageConverterTest {
     @Test
     @DisplayName("create instance with FieldMask")
     void createWithFieldMask() throws Exception {
-        final FieldMask fieldMask = FieldMask.newBuilder()
+        FieldMask fieldMask = FieldMask.newBuilder()
                                              .addPaths("foo.bar")
                                              .build();
 
-        final EntityStorageConverter<Long, TestEntity, StringValue> withMasks =
+        EntityStorageConverter<Long, TestEntity, StringValue> withMasks =
                 converter.withFieldMask(fieldMask);
 
         assertEquals(fieldMask, withMasks.getFieldMask());
     }
 
     private static TestEntity createEntity(Long id, StringValue state) {
-        final TestEntity result = new TestEntity(id);
+        TestEntity result = new TestEntity(id);
         result.setState(state);
         return result;
     }
@@ -82,11 +82,11 @@ class DefaultEntityStorageConverterTest {
     @Test
     @DisplayName("convert forward and backward")
     void convertForwardAndBackward() throws Exception {
-        final StringValue entityState = toMessage("back and forth");
-        final TestEntity entity = createEntity(100L, entityState);
+        StringValue entityState = toMessage("back and forth");
+        TestEntity entity = createEntity(100L, entityState);
 
-        final EntityRecord out = converter.convert(entity);
-        final TestEntity back = converter.reverse()
+        EntityRecord out = converter.convert(entity);
+        TestEntity back = converter.reverse()
                                          .convert(out);
         assertEquals(entity, back);
     }

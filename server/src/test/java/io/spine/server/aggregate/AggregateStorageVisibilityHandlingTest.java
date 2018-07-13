@@ -60,11 +60,11 @@ public abstract class AggregateStorageVisibilityHandlingTest {
     @Test
     @DisplayName("write entity status of aggregate")
     void writeEntityStatusOfAggregate() {
-        final LifecycleFlags status = LifecycleFlags.newBuilder()
+        LifecycleFlags status = LifecycleFlags.newBuilder()
                                                     .setArchived(true)
                                                     .build();
         storage.writeLifecycleFlags(id, status);
-        final Optional<LifecycleFlags> readStatus = storage.readLifecycleFlags(id);
+        Optional<LifecycleFlags> readStatus = storage.readLifecycleFlags(id);
         assertTrue(readStatus.isPresent());
         assertEquals(status, readStatus.get());
     }
@@ -72,21 +72,21 @@ public abstract class AggregateStorageVisibilityHandlingTest {
     @Test
     @DisplayName("save whole status")
     void saveWholeStatus() {
-        final boolean archived = true;
-        final boolean deleted = true;
-        final LifecycleFlags expected = LifecycleFlags.newBuilder()
+        boolean archived = true;
+        boolean deleted = true;
+        LifecycleFlags expected = LifecycleFlags.newBuilder()
                                                       .setArchived(archived)
                                                       .setDeleted(deleted)
                                                       .build();
         storage.writeLifecycleFlags(id, expected);
-        final Optional<LifecycleFlags> optionalActual = storage.readLifecycleFlags(id);
+        Optional<LifecycleFlags> optionalActual = storage.readLifecycleFlags(id);
         assertStatus(optionalActual, true, true);
     }
 
     @Test
     @DisplayName("retrieve empty status if it is never written")
     void getEmptyStatusIfNeverWritten() {
-        final Optional<LifecycleFlags> entityStatus = storage.readLifecycleFlags(id);
+        Optional<LifecycleFlags> entityStatus = storage.readLifecycleFlags(id);
         assertNotNull(entityStatus);
         assertFalse(entityStatus.isPresent());
     }
@@ -96,7 +96,7 @@ public abstract class AggregateStorageVisibilityHandlingTest {
                                      boolean archived,
                                      boolean deleted) {
         assertTrue(entityStatus.isPresent());
-        final LifecycleFlags status = entityStatus.get();
+        LifecycleFlags status = entityStatus.get();
         assertEquals(archived, status.getArchived());
         assertEquals(deleted, status.getDeleted());
     }

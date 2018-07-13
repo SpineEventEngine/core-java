@@ -37,7 +37,7 @@ class PredicatesTest {
     @Test
     @DisplayName("consider archived entity invisible")
     void stateArchivedEntityInvisible() {
-        final LifecycleFlags status =
+        LifecycleFlags status =
                 LifecycleFlags.newBuilder()
                               .setArchived(true)
                               .build();
@@ -47,7 +47,7 @@ class PredicatesTest {
     @Test
     @DisplayName("consider deleted entity invisible")
     void stateDeletedEntityInvisible() {
-        final LifecycleFlags status =
+        LifecycleFlags status =
                 LifecycleFlags.newBuilder()
                               .setDeleted(true)
                               .build();
@@ -57,7 +57,7 @@ class PredicatesTest {
     @Test
     @DisplayName("consider archived record invisible")
     void stateArchivedRecordInvisible() {
-        final EntityRecord record =
+        EntityRecord record =
                 EntityRecord
                         .newBuilder()
                         .setLifecycleFlags(LifecycleFlags.newBuilder()
@@ -69,7 +69,7 @@ class PredicatesTest {
     @Test
     @DisplayName("consider deleted record invisible")
     void stateDeletedRecordInvisible() {
-        final EntityRecord record =
+        EntityRecord record =
                 EntityRecord
                         .newBuilder()
                         .setLifecycleFlags(LifecycleFlags.newBuilder()

@@ -45,7 +45,7 @@ public class InMemoryRecordStorageTest
 
     @Override
     protected InMemoryRecordStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
-        final StorageSpec<ProjectId> spec = StorageSpec.of(newName(getClass().getSimpleName()),
+        StorageSpec<ProjectId> spec = StorageSpec.of(newName(getClass().getSimpleName()),
                                                            TypeUrl.of(Project.class),
                                                            ProjectId.class);
         return InMemoryRecordStorage.newInstance(spec, false, cls);
@@ -53,7 +53,7 @@ public class InMemoryRecordStorageTest
 
     @Override
     protected ProjectId newId() {
-        final ProjectId id = ProjectId.newBuilder()
+        ProjectId id = ProjectId.newBuilder()
                                       .setId(newUuid())
                                       .build();
         return id;
@@ -61,8 +61,8 @@ public class InMemoryRecordStorageTest
 
     @Override
     protected Message newState(ProjectId id) {
-        final String uniqueName = format("record-storage-test-%s-%s", id.getId(), nanoTime());
-        final Project project = Project.newBuilder()
+        String uniqueName = format("record-storage-test-%s-%s", id.getId(), nanoTime());
+        Project project = Project.newBuilder()
                                        .setId(id)
                                        .setStatus(Project.Status.CREATED)
                                        .setName(uniqueName)
@@ -74,7 +74,7 @@ public class InMemoryRecordStorageTest
     @Test
     @DisplayName("return storage spec")
     void returnStorageSpec() {
-        final StorageSpec spec = getStorage().getSpec();
+        StorageSpec spec = getStorage().getSpec();
         assertEquals(ProjectId.class, spec.getIdClass());
     }
 }

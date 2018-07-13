@@ -59,7 +59,7 @@ class IntegrationChannels {
     static ChannelId toId(ExternalMessageClass messageCls) {
         checkNotNull(messageCls);
 
-        final ChannelId result = toId(messageCls.value());
+        ChannelId result = toId(messageCls.value());
         return result;
     }
 
@@ -73,13 +73,13 @@ class IntegrationChannels {
     static ChannelId toId(Class<? extends Message> messageType) {
         checkNotNull(messageType);
 
-        final TypeUrl typeUrl = TypeUrl.of(messageType);
+        TypeUrl typeUrl = TypeUrl.of(messageType);
 
-        final StringValue asStringValue = StringValue.newBuilder()
+        StringValue asStringValue = StringValue.newBuilder()
                                                      .setValue(typeUrl.value())
                                                      .build();
-        final Any packed = AnyPacker.pack(asStringValue);
-        final ChannelId channelId = ChannelId.newBuilder()
+        Any packed = AnyPacker.pack(asStringValue);
+        ChannelId channelId = ChannelId.newBuilder()
                                              .setIdentifier(packed)
                                              .build();
         return channelId;
@@ -97,13 +97,13 @@ class IntegrationChannels {
     static ExternalMessageType fromId(ChannelId channelId) {
         checkNotNull(channelId);
 
-        final StringValue rawValue = AnyPacker.unpack(channelId.getIdentifier());
-        final TypeUrl typeUrl = TypeUrl.parse(rawValue.getValue());
+        StringValue rawValue = AnyPacker.unpack(channelId.getIdentifier());
+        TypeUrl typeUrl = TypeUrl.parse(rawValue.getValue());
 
-        final boolean isRejection = Rejections.isRejection(typeUrl.getMessageClass());
-        final String wrapperTypeUrl = isRejection ? REJECTION_TYPE_URL.value()
+        boolean isRejection = Rejections.isRejection(typeUrl.getMessageClass());
+        String wrapperTypeUrl = isRejection ? REJECTION_TYPE_URL.value()
                                                   : EVENT_TYPE_URL.value();
-        final ExternalMessageType result = ExternalMessageType.newBuilder()
+        ExternalMessageType result = ExternalMessageType.newBuilder()
                                                              .setMessageTypeUrl(typeUrl.value())
                                                              .setWrapperTypeUrl(wrapperTypeUrl)
                                                              .build();

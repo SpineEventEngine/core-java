@@ -59,8 +59,8 @@ public class DefaultCommandRoute<I> extends FieldAtIndex<I, Message, CommandCont
      */
     public static <I> Optional<I> asOptional(Message commandMessage) {
         try {
-            final DefaultCommandRoute<I> function = newInstance();
-            final I id = function.apply(commandMessage, CommandContext.getDefaultInstance());
+            DefaultCommandRoute<I> function = newInstance();
+            I id = function.apply(commandMessage, CommandContext.getDefaultInstance());
             return Optional.of(id);
         } catch (MessageFieldException | ClassCastException ignored) {
             return Optional.absent();

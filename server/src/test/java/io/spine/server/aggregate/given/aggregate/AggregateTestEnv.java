@@ -64,10 +64,10 @@ public class AggregateTestEnv {
     /**
      * Reads all events from the bounded context for the provided tenant.
      */
-    public static List<Event> readAllEvents(final BoundedContext boundedContext,
+    public static List<Event> readAllEvents(BoundedContext boundedContext,
                                             TenantId tenantId) {
-        final MemoizingObserver<Event> queryObserver = memoizingObserver();
-        final TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
+        MemoizingObserver<Event> queryObserver = memoizingObserver();
+        TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
                 boundedContext.getEventBus()
@@ -77,7 +77,7 @@ public class AggregateTestEnv {
         };
         operation.execute();
 
-        final List<Event> responses = queryObserver.responses();
+        List<Event> responses = queryObserver.responses();
         return responses;
     }
 
@@ -112,7 +112,7 @@ public class AggregateTestEnv {
      * {@linkplain TaskAggregateRepository task repository}.
      */
     public static BoundedContext newTaskBoundedContext() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
+        BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .setMultitenant(true)
                                                             .build();
         boundedContext.register(new TaskAggregateRepository());
@@ -143,8 +143,8 @@ public class AggregateTestEnv {
      * Obtains the {@link TypeUrl} of the message from the provided event.
      */
     public static TypeUrl typeUrlOf(Event event) {
-        final Any message = event.getMessage();
-        final TypeUrl result = TypeUrl.parse(message.getTypeUrl());
+        Any message = event.getMessage();
+        TypeUrl result = TypeUrl.parse(message.getTypeUrl());
         return result;
     }
 
@@ -168,11 +168,11 @@ public class AggregateTestEnv {
 
     public static RejectionEnvelope
     cannotModifyDeletedEntity(Class<? extends Message> commandMessageCls) {
-        final CannotModifyDeletedEntity rejectionMsg = CannotModifyDeletedEntity.newBuilder()
+        CannotModifyDeletedEntity rejectionMsg = CannotModifyDeletedEntity.newBuilder()
                                                                                 .build();
-        final Command command = io.spine.server.commandbus.Given.ACommand.withMessage(
+        Command command = io.spine.server.commandbus.Given.ACommand.withMessage(
                 Sample.messageOfType(commandMessageCls));
-        final Rejection rejection = Rejections.createRejection(rejectionMsg, command);
+        Rejection rejection = Rejections.createRejection(rejectionMsg, command);
         return RejectionEnvelope.of(rejection);
     }
 

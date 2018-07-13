@@ -42,7 +42,7 @@ public class TestTransaction {
      * <p>To be used in tests only.
      */
     public static void injectState(TransactionalEntity entity, Message state, Version version) {
-        final TestTx tx = new TestTx(entity, state, version);
+        TestTx tx = new TestTx(entity, state, version);
         tx.commit();
     }
 
@@ -53,7 +53,7 @@ public class TestTransaction {
      * <p>To be used in tests only.
      */
     public static void archive(TransactionalEntity entity) {
-        final TestTx tx = new TestTx(entity) {
+        TestTx tx = new TestTx(entity) {
 
             @Override
             protected void dispatch(TransactionalEntity entity, EventEnvelope event) {
@@ -72,7 +72,7 @@ public class TestTransaction {
      * <p>To be used in tests only.
      */
     public static void delete(TransactionalEntity entity) {
-        final TestTx tx = new TestTx(entity) {
+        TestTx tx = new TestTx(entity) {
 
             @Override
             protected void dispatch(TransactionalEntity entity, EventEnvelope event) {

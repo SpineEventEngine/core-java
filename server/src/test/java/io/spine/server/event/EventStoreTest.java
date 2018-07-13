@@ -90,30 +90,30 @@ public class EventStoreTest {
         @Test
         @DisplayName("time bounds")
         void timeBounds() {
-            final Duration delta = Durations2.seconds(111);
-            final Timestamp present = getCurrentTime();
-            final Timestamp past = subtract(present, delta);
-            final Timestamp future = add(present, delta);
+            Duration delta = Durations2.seconds(111);
+            Timestamp present = getCurrentTime();
+            Timestamp past = subtract(present, delta);
+            Timestamp future = add(present, delta);
 
-            final Event eventInPast = projectCreated(past);
-            final Event eventInPresent = projectCreated(present);
-            final Event eventInFuture = projectCreated(future);
+            Event eventInPast = projectCreated(past);
+            Event eventInPresent = projectCreated(present);
+            Event eventInFuture = projectCreated(future);
 
             eventStore.append(eventInPast);
             eventStore.append(eventInPresent);
             eventStore.append(eventInFuture);
 
-            final EventStreamQuery query = EventStreamQuery.newBuilder()
+            EventStreamQuery query = EventStreamQuery.newBuilder()
                                                            .setAfter(past)
                                                            .setBefore(future)
                                                            .build();
-            final AtomicBoolean done = new AtomicBoolean(false);
-            final Collection<Event> resultEvents = newConcurrentHashSet();
+            AtomicBoolean done = new AtomicBoolean(false);
+            Collection<Event> resultEvents = newConcurrentHashSet();
             eventStore.read(query, new ResponseObserver(resultEvents, done));
             assertDone(done);
 
             assertSize(1, resultEvents);
-            final Event event = resultEvents.iterator()
+            Event event = resultEvents.iterator()
                                             .next();
             assertEquals(eventInPresent, event);
         }
@@ -121,24 +121,24 @@ public class EventStoreTest {
         @Test
         @DisplayName("type")
         void type() {
-            final Timestamp now = getCurrentTime();
+            Timestamp now = getCurrentTime();
 
-            final Event taskAdded1 = taskAdded(now);
-            final Event projectCreated = projectCreated(now);
-            final Event teasAdded2 = taskAdded(now);
+            Event taskAdded1 = taskAdded(now);
+            Event projectCreated = projectCreated(now);
+            Event teasAdded2 = taskAdded(now);
 
             eventStore.append(taskAdded1);
             eventStore.append(projectCreated);
             eventStore.append(teasAdded2);
 
-            final EventFilter taskAddedType = EventFilter.newBuilder()
+            EventFilter taskAddedType = EventFilter.newBuilder()
                                                          .setEventType(of(TaskAdded.class).value())
                                                          .build();
-            final EventStreamQuery query = EventStreamQuery.newBuilder()
+            EventStreamQuery query = EventStreamQuery.newBuilder()
                                                            .addFilter(taskAddedType)
                                                            .build();
-            final AtomicBoolean done = new AtomicBoolean(false);
-            final Collection<Event> resultEvents = newConcurrentHashSet();
+            AtomicBoolean done = new AtomicBoolean(false);
+            Collection<Event> resultEvents = newConcurrentHashSet();
             eventStore.read(query, new ResponseObserver(resultEvents, done));
             assertDone(done);
 
@@ -149,33 +149,33 @@ public class EventStoreTest {
         @Test
         @DisplayName("time bounds and type")
         void timeBoundsAndType() {
-            final Duration delta = Durations2.seconds(111);
-            final Timestamp present = getCurrentTime();
-            final Timestamp past = subtract(present, delta);
-            final Timestamp future = add(present, delta);
+            Duration delta = Durations2.seconds(111);
+            Timestamp present = getCurrentTime();
+            Timestamp past = subtract(present, delta);
+            Timestamp future = add(present, delta);
 
-            final Event eventInPast = taskAdded(past);
-            final Event eventInPresent = projectCreated(present);
-            final Event eventInFuture = taskAdded(future);
+            Event eventInPast = taskAdded(past);
+            Event eventInPresent = projectCreated(present);
+            Event eventInFuture = taskAdded(future);
 
             eventStore.append(eventInPast);
             eventStore.append(eventInPresent);
             eventStore.append(eventInFuture);
 
-            final EventFilter taskAddedType = EventFilter.newBuilder()
+            EventFilter taskAddedType = EventFilter.newBuilder()
                                                          .setEventType(of(TaskAdded.class).value())
                                                          .build();
-            final EventStreamQuery query = EventStreamQuery.newBuilder()
+            EventStreamQuery query = EventStreamQuery.newBuilder()
                                                            .setAfter(past)
                                                            .addFilter(taskAddedType)
                                                            .build();
-            final AtomicBoolean done = new AtomicBoolean(false);
-            final Collection<Event> resultEvents = newConcurrentHashSet();
+            AtomicBoolean done = new AtomicBoolean(false);
+            Collection<Event> resultEvents = newConcurrentHashSet();
             eventStore.read(query, new ResponseObserver(resultEvents, done));
             assertDone(done);
 
             assertSize(1, resultEvents);
-            final Event event = resultEvents.iterator()
+            Event event = resultEvents.iterator()
                                             .next();
             assertEquals(eventInFuture, event);
         }
@@ -200,37 +200,37 @@ public class EventStoreTest {
     @Test
     @DisplayName("fail to store events of different tenants in single operation")
     void rejectEventsFromDifferentTenants() {
-        final TenantId firstTenantId = TenantId.newBuilder()
+        TenantId firstTenantId = TenantId.newBuilder()
                                                .setValue("abc")
                                                .build();
-        final TenantId secondTenantId = TenantId.newBuilder()
+        TenantId secondTenantId = TenantId.newBuilder()
                                                 .setValue("xyz")
                                                 .build();
-        final ActorContext firstTenantActor = ActorContext.newBuilder()
+        ActorContext firstTenantActor = ActorContext.newBuilder()
                                                           .setTenantId(firstTenantId)
                                                           .build();
-        final ActorContext secondTenantActor = ActorContext.newBuilder()
+        ActorContext secondTenantActor = ActorContext.newBuilder()
                                                            .setTenantId(secondTenantId)
                                                            .build();
-        final CommandContext firstTenantCommand = CommandContext.newBuilder()
+        CommandContext firstTenantCommand = CommandContext.newBuilder()
                                                                 .setActorContext(firstTenantActor)
                                                                 .build();
-        final CommandContext secondTenantCommand = CommandContext.newBuilder()
+        CommandContext secondTenantCommand = CommandContext.newBuilder()
                                                                  .setActorContext(secondTenantActor)
                                                                  .build();
-        final EventContext firstTenantContext = EventContext.newBuilder()
+        EventContext firstTenantContext = EventContext.newBuilder()
                                                             .setCommandContext(firstTenantCommand)
                                                             .build();
-        final EventContext secondTenantContext = EventContext.newBuilder()
+        EventContext secondTenantContext = EventContext.newBuilder()
                                                              .setCommandContext(secondTenantCommand)
                                                              .build();
-        final Event firstTenantEvent = Event.newBuilder()
+        Event firstTenantEvent = Event.newBuilder()
                                             .setContext(firstTenantContext)
                                             .build();
-        final Event secondTenantEvent = Event.newBuilder()
+        Event secondTenantEvent = Event.newBuilder()
                                              .setContext(secondTenantContext)
                                              .build();
-        final Collection<Event> event = ImmutableSet.of(firstTenantEvent, secondTenantEvent);
+        Collection<Event> event = ImmutableSet.of(firstTenantEvent, secondTenantEvent);
 
         assertThrows(IllegalArgumentException.class, () -> eventStore.appendAll(event));
     }
@@ -241,16 +241,16 @@ public class EventStoreTest {
         @Test
         @DisplayName("EventContext")
         void eventContext() {
-            final Event event = projectCreated(Time.getCurrentTime());
-            final Event enriched = event.toBuilder()
+            Event event = projectCreated(Time.getCurrentTime());
+            Event enriched = event.toBuilder()
                                         .setContext(event.getContext()
                                                          .toBuilder()
                                                          .setEnrichment(withOneAttribute()))
                                         .build();
             eventStore.append(enriched);
-            final MemoizingObserver<Event> observer = memoizingObserver();
+            MemoizingObserver<Event> observer = memoizingObserver();
             eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
-            final EventContext context = observer.responses()
+            EventContext context = observer.responses()
                                                  .get(0)
                                                  .getContext();
             assertTrue(isDefault(context.getEnrichment()));
@@ -259,20 +259,20 @@ public class EventStoreTest {
         @Test
         @DisplayName("origin of RejectionContext type")
         void rejectionContextOrigin() {
-            final RejectionContext originContext =
+            RejectionContext originContext =
                     RejectionContext.newBuilder()
                                     .setEnrichment(withOneAttribute())
                                     .build();
-            final Event event = projectCreated(Time.getCurrentTime());
-            final Event enriched = event.toBuilder()
+            Event event = projectCreated(Time.getCurrentTime());
+            Event enriched = event.toBuilder()
                                         .setContext(event.getContext()
                                                          .toBuilder()
                                                          .setRejectionContext(originContext))
                                         .build();
             eventStore.append(enriched);
-            final MemoizingObserver<Event> observer = memoizingObserver();
+            MemoizingObserver<Event> observer = memoizingObserver();
             eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
-            final RejectionContext loadedOriginContext = observer.responses()
+            RejectionContext loadedOriginContext = observer.responses()
                                                                  .get(0)
                                                                  .getContext()
                                                                  .getRejectionContext();
@@ -282,19 +282,19 @@ public class EventStoreTest {
         @Test
         @DisplayName("origin of EventContext type")
         void eventContextOrigin() {
-            final EventContext.Builder originContext =
+            EventContext.Builder originContext =
                     EventContext.newBuilder()
                                 .setEnrichment(withOneAttribute());
-            final Event event = projectCreated(Time.getCurrentTime());
-            final Event enriched = event.toBuilder()
+            Event event = projectCreated(Time.getCurrentTime());
+            Event enriched = event.toBuilder()
                                         .setContext(event.getContext()
                                                          .toBuilder()
                                                          .setEventContext(originContext))
                                         .build();
             eventStore.append(enriched);
-            final MemoizingObserver<Event> observer = memoizingObserver();
+            MemoizingObserver<Event> observer = memoizingObserver();
             eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
-            final EventContext loadedOriginContext = observer.responses()
+            EventContext loadedOriginContext = observer.responses()
                                                              .get(0)
                                                              .getContext()
                                                              .getEventContext();

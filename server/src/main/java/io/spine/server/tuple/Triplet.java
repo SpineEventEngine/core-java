@@ -61,7 +61,7 @@ public final class Triplet<A extends Message, B, C>
     public static <A extends Message, B extends Message, C extends Message>
     Triplet<A, B, C> of(A a, B b, C c) {
         checkAllNotNullOrEmpty(Triplet.class, a, b, c);
-        final Triplet<A, B, C> result = new Triplet<>(a, b, c);
+        Triplet<A, B, C> result = new Triplet<>(a, b, c);
         return result;
     }
 
@@ -72,7 +72,7 @@ public final class Triplet<A extends Message, B, C>
     Triplet<A, B, Optional<C>> withNullable(A a, B b, @Nullable C c) {
         checkAllNotNullOrEmpty(Triplet.class, a, b);
         checkNotEmpty(Triplet.class, c);
-        final Triplet<A, B, Optional<C>> result = new Triplet<>(a, b, fromNullable(c));
+        Triplet<A, B, Optional<C>> result = new Triplet<>(a, b, fromNullable(c));
         return result;
     }
 
@@ -83,7 +83,7 @@ public final class Triplet<A extends Message, B, C>
     Triplet<A, Optional<B>, Optional<C>> withNullable2(A a, @Nullable B b, @Nullable C c) {
         checkNotNullOrEmpty(Triplet.class, a);
         checkAllNotEmpty(Triplet.class, b, c);
-        final Triplet<A, Optional<B>, Optional<C>> result =
+        Triplet<A, Optional<B>, Optional<C>> result =
                 new Triplet<>(a, fromNullable(b), fromNullable(c));
         return result;
     }
