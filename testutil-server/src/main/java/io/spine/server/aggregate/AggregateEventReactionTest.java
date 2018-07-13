@@ -17,33 +17,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
-import io.spine.server.CommandHandlerTest;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
+import io.spine.server.EventReactionTest;
 
 import java.util.List;
 
-import static io.spine.core.CommandEnvelope.of;
-import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
+import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchEvent;
 
 /**
- * The implementation base for testing a single command handling in an {@link Aggregate}.
+ * The implementation base for testing a single event reactor in an {@link Aggregate}.
  *
  * @param <I> ID message of the aggregate
- * @param <C> type of the command to test
+ * @param <E> type of the event to test
  * @param <S> the aggregate state type
  * @param <A> the {@link Aggregate} type
- * @author Vladyslav Lubenskyi
+ * @author Dmytro Dashenkov
  */
-public abstract class AggregateCommandTest<I,
-                                           C extends Message,
-                                           S extends Message,
-                                           A extends Aggregate<I, S, ?>>
-        extends CommandHandlerTest<I, C, S, A> {
+public abstract class AggregateEventReactionTest<I,
+                                                 E extends Message,
+                                                 S extends Message,
+                                                 A extends Aggregate<I, S, ?>>
+        extends EventReactionTest<I, E, S, A> {
 
     @Override
-    protected List<? extends Message> dispatchTo(A entity) {
-        return dispatchCommand(entity, of(createCommand(message())));
+    protected List<? extends Message> dispatchTo(A aggregate) {
+        Event event = createEvent(message());
+        EventEnvelope envelope = EventEnvelope.of(event);
+        return dispatchEvent(aggregate, envelope);
     }
 }
