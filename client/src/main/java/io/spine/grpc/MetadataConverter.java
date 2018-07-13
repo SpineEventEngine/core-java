@@ -70,7 +70,7 @@ public class MetadataConverter {
      * Returns the {@link Error} extracted from the {@link Metadata}.
      *
      * @param metadata the metadata to convert
-     * @return the error extracted from the metadata or {@code Optional.absent()}
+     * @return the error extracted from the metadata or {@code Optional.empty()}
      *         if there is no error.
      */
     public static Optional<Error> toError(Metadata metadata) {

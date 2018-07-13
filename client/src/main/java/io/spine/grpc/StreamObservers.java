@@ -141,10 +141,10 @@ public class StreamObservers {
      * <p>The {@code Error} is extracted from the trailer metadata of
      * either {@link StatusRuntimeException} or {@link StatusException} only.
      *
-     * <p>If any other type of {@code Throwable} is passed, {@code Optional.absent()} is returned.
+     * <p>If any other type of {@code Throwable} is passed, {@code Optional.empty()} is returned.
      *
      * @param throwable the {@code Throwable} to extract an {@link Error}
-     * @return the extracted error or {@code Optional.absent()} if the extraction failed
+     * @return the extracted error or {@code Optional.empty()} if the extraction failed
      */
     @SuppressWarnings("ChainOfInstanceofChecks") // Only way to check an exact throwable type.
     public static Optional<Error> fromStreamError(Throwable throwable) {
