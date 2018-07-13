@@ -21,6 +21,7 @@
 package io.spine.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
@@ -292,6 +293,7 @@ public class BlackBoxBoundedContext {
      * @param verifier a verifier that checks the events emitted in this Bounded Context
      * @return current {@link BlackBoxBoundedContext black box} instance
      */
+    @CanIgnoreReturnValue
     public BlackBoxBoundedContext verifiesThat(EmittedEventsVerifier verifier) {
         EmittedEvents events = emittedEvents();
         verifier.verify(events);
@@ -309,6 +311,7 @@ public class BlackBoxBoundedContext {
      * @param verifier a verifier that checks the acknowledgements in this Bounded Context
      * @return current {@link BlackBoxBoundedContext black box} instance
      */
+    @CanIgnoreReturnValue
     public BlackBoxBoundedContext verifiesThat(AcknowledgementsVerifier verifier) {
         Acknowledgements acks = commandAcks();
         verifier.verify(acks);
