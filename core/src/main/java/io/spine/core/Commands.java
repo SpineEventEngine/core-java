@@ -69,7 +69,7 @@ public final class Commands {
      * @return new command ID
      */
     public static CommandId generateId() {
-        final String value = UUID.randomUUID()
+        String value = UUID.randomUUID()
                                  .toString();
         return CommandId.newBuilder()
                         .setUuid(value)
@@ -85,7 +85,7 @@ public final class Commands {
      */
     public static <M extends Message> M getMessage(Command command) {
         checkNotNull(command);
-        final M result = AnyPacker.unpack(command.getMessage());
+        M result = AnyPacker.unpack(command.getMessage());
         return result;
     }
 
@@ -106,7 +106,7 @@ public final class Commands {
      */
     public static TenantId getTenantId(Command command) {
         checkNotNull(command);
-        final TenantId result = getTenantId(command.getContext());
+        TenantId result = getTenantId(command.getContext());
         return result;
     }
 
@@ -126,13 +126,13 @@ public final class Commands {
     /**
      * Creates a predicate for filtering commands created after the passed timestamp.
      */
-    public static Predicate<Command> wereAfter(final Timestamp from) {
+    public static Predicate<Command> wereAfter(Timestamp from) {
         checkNotNull(from);
         return new Predicate<Command>() {
             @Override
             public boolean apply(@Nullable Command request) {
                 checkNotNull(request);
-                final Timestamp timestamp = getTimestamp(request);
+                Timestamp timestamp = getTimestamp(request);
                 return Timestamps2.isLaterThan(timestamp, from);
             }
         };
@@ -141,14 +141,14 @@ public final class Commands {
     /**
      * Creates a predicate for filtering commands created withing given timerange.
      */
-    public static Predicate<Command> wereWithinPeriod(final Timestamp from, final Timestamp to) {
+    public static Predicate<Command> wereWithinPeriod(Timestamp from, Timestamp to) {
         checkNotNull(from);
         checkNotNull(to);
         return new Predicate<Command>() {
             @Override
             public boolean apply(@Nullable Command request) {
                 checkNotNull(request);
-                final Timestamp timestamp = getTimestamp(request);
+                Timestamp timestamp = getTimestamp(request);
                 return Timestamps2.isBetween(timestamp, from, to);
             }
         };
@@ -156,7 +156,7 @@ public final class Commands {
 
     private static Timestamp getTimestamp(Command request) {
         checkNotNull(request);
-        final Timestamp result = request.getContext()
+        Timestamp result = request.getContext()
                                         .getActorContext()
                                         .getTimestamp();
         return result;
@@ -172,8 +172,8 @@ public final class Commands {
         Collections.sort(commands, new Comparator<Command>() {
             @Override
             public int compare(Command o1, Command o2) {
-                final Timestamp timestamp1 = getTimestamp(o1);
-                final Timestamp timestamp2 = getTimestamp(o2);
+                Timestamp timestamp1 = getTimestamp(o1);
+                Timestamp timestamp2 = getTimestamp(o2);
                 return Timestamps2.compare(timestamp1, timestamp2);
             }
         });
@@ -188,9 +188,9 @@ public final class Commands {
      */
     public static boolean isScheduled(Command command) {
         checkNotNull(command);
-        final Schedule schedule = command.getContext()
+        Schedule schedule = command.getContext()
                                          .getSchedule();
-        final Duration delay = schedule.getDelay();
+        Duration delay = schedule.getDelay();
         if (isNotDefault(delay)) {
             checkArgument(delay.getSeconds() > 0,
                           "Command delay seconds must be a positive value.");
@@ -207,8 +207,8 @@ public final class Commands {
     public static boolean sameActorAndTenant(CommandContext c1, CommandContext c2) {
         checkNotNull(c1);
         checkNotNull(c2);
-        final ActorContext a1 = c1.getActorContext();
-        final ActorContext a2 = c2.getActorContext();
+        ActorContext a1 = c1.getActorContext();
+        ActorContext a2 = c2.getActorContext();
         return a1.getActor()
                  .equals(a2.getActor()) &&
                a1.getTenantId()
@@ -230,7 +230,7 @@ public final class Commands {
      */
     public static CommandId checkValid(CommandId id) {
         checkNotNull(id);
-        final String idStr = Identifier.toString(id);
+        String idStr = Identifier.toString(id);
         checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
         return id;
     }
@@ -254,8 +254,8 @@ public final class Commands {
         checkNotNull(command);
         checkNotNull(cause);
 
-        final ThrowableMessage rejectionThrowable = Rejections.getCause(cause);
-        final Rejection rejection = Rejections.toRejection(rejectionThrowable, command);
+        ThrowableMessage rejectionThrowable = Rejections.getCause(cause);
+        Rejection rejection = Rejections.toRejection(rejectionThrowable, command);
         return rejection;
     }
 
@@ -265,13 +265,13 @@ public final class Commands {
     static class CommandIdStringifier extends Stringifier<CommandId> {
         @Override
         protected String toString(CommandId commandId) {
-            final String result = commandId.getUuid();
+            String result = commandId.getUuid();
             return result;
         }
 
         @Override
         protected CommandId fromString(String str) {
-            final CommandId result = CommandId.newBuilder()
+            CommandId result = CommandId.newBuilder()
                                               .setUuid(str)
                                               .build();
             return result;

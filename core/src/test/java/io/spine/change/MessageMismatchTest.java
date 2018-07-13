@@ -70,7 +70,7 @@ class MessageMismatchTest {
         @Test
         @DisplayName("for expected default value")
         void forExpectedDefault() {
-            final ValueMismatch mismatch = expectedDefault(ACTUAL, NEW_VALUE, VERSION);
+            ValueMismatch mismatch = expectedDefault(ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(DEFAULT_VALUE, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));
@@ -81,7 +81,7 @@ class MessageMismatchTest {
         @Test
         @DisplayName("for unexpected default when clearing")
         void forUnexpectedDefaultWhenClearing() {
-            final ValueMismatch mismatch = expectedNotDefault(EXPECTED, VERSION);
+            ValueMismatch mismatch = expectedNotDefault(EXPECTED, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
 
@@ -97,7 +97,7 @@ class MessageMismatchTest {
         @Test
         @DisplayName("for unexpected default when changing")
         void forUnexpectedDefaultWhenChanging() {
-            final ValueMismatch mismatch = expectedNotDefault(EXPECTED, NEW_VALUE, VERSION);
+            ValueMismatch mismatch = expectedNotDefault(EXPECTED, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
 
@@ -112,7 +112,7 @@ class MessageMismatchTest {
         @Test
         @DisplayName("for unexpected value")
         void forUnexpectedValue() {
-            final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+            ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));

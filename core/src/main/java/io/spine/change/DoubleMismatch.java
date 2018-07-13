@@ -86,7 +86,7 @@ public final class DoubleMismatch {
      * for a double attribute.
      */
     public static ValueMismatch of(double expected, double actual, double newValue, int version) {
-        final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
+        ValueMismatch.Builder builder = ValueMismatch.newBuilder()
                                                            .setExpected(toAny(expected))
                                                            .setActual(toAny(actual))
                                                            .setNewValue(toAny(newValue))
@@ -95,7 +95,7 @@ public final class DoubleMismatch {
     }
 
     private static double unpacked(Any any) {
-        final DoubleValue unpacked = unpack(any, DoubleValue.class);
+        DoubleValue unpacked = unpack(any, DoubleValue.class);
         return unpacked.getValue();
     }
 
@@ -106,7 +106,7 @@ public final class DoubleMismatch {
      */
     public static double unpackExpected(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any expected = mismatch.getExpected();
+        Any expected = mismatch.getExpected();
         return unpacked(expected);
     }
 
@@ -117,7 +117,7 @@ public final class DoubleMismatch {
      */
     public static double unpackActual(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any actual = mismatch.getActual();
+        Any actual = mismatch.getActual();
         return unpacked(actual);
     }
 
@@ -128,7 +128,7 @@ public final class DoubleMismatch {
      */
     public static double unpackNewValue(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any newValue = mismatch.getNewValue();
+        Any newValue = mismatch.getNewValue();
         return unpacked(newValue);
     }
 }

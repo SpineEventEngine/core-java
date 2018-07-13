@@ -64,7 +64,7 @@ class VersionsTest {
     @Test
     @DisplayName("increment Version")
     void increment() {
-        final Version v1 = GivenVersion.withNumber(1);
+        Version v1 = GivenVersion.withNumber(1);
         assertEquals(v1.getNumber() + 1, Versions.increment(v1)
                                                  .getNumber());
     }

@@ -49,8 +49,8 @@ public final class Events {
 
     /** Compares two events by their timestamps. */
     private static final Comparator<Event> eventComparator = (o1, o2) -> {
-        final Timestamp timestamp1 = getTimestamp(o1);
-        final Timestamp timestamp2 = getTimestamp(o2);
+        Timestamp timestamp1 = getTimestamp(o1);
+        Timestamp timestamp2 = getTimestamp(o2);
         return Timestamps2.compare(timestamp1, timestamp2);
     };
 
@@ -71,7 +71,7 @@ public final class Events {
      * @return new UUID-based event ID
      */
     public static EventId generateId() {
-        final String value = UUID.randomUUID()
+        String value = UUID.randomUUID()
                                  .toString();
         return EventId.newBuilder()
                       .setValue(value)
@@ -101,7 +101,7 @@ public final class Events {
      */
     public static Timestamp getTimestamp(Event event) {
         checkNotNull(event);
-        final Timestamp result = event.getContext()
+        Timestamp result = event.getContext()
                                       .getTimestamp();
         return result;
     }
@@ -113,8 +113,8 @@ public final class Events {
      */
     public static <M extends Message> M getMessage(Event event) {
         checkNotNull(event);
-        final Any any = event.getMessage();
-        final M result = unpack(any);
+        Any any = event.getMessage();
+        M result = unpack(any);
         return result;
     }
 
@@ -140,7 +140,7 @@ public final class Events {
      */
     public static UserId getActor(EventContext context) {
         checkNotNull(context);
-        final CommandContext commandContext = checkNotNull(context).getCommandContext();
+        CommandContext commandContext = checkNotNull(context).getCommandContext();
         return commandContext.getActorContext()
                              .getActor();
     }
@@ -155,7 +155,7 @@ public final class Events {
      */
     public static <I> I getProducer(EventContext context) {
         checkNotNull(context);
-        final I id = Identifier.unpack(context.getProducerId());
+        I id = Identifier.unpack(context.getProducerId());
         return id;
     }
 
@@ -170,8 +170,8 @@ public final class Events {
      */
     public static CommandId getRootCommandId(Event event) {
         checkNotNull(event);
-        final EventContext context = event.getContext();
-        final CommandId id = context.getRootCommandId();
+        EventContext context = event.getContext();
+        CommandId id = context.getRootCommandId();
         return id;
     }
 
@@ -208,13 +208,13 @@ public final class Events {
     public static TenantId getTenantId(Event event) {
         checkNotNull(event);
 
-        final Optional<CommandContext> commandContext = getOriginCommandContext(event);
+        Optional<CommandContext> commandContext = getOriginCommandContext(event);
 
         if (!commandContext.isPresent()) {
             return TenantId.getDefaultInstance();
         }
 
-        final TenantId result = Commands.getTenantId(commandContext.get());
+        TenantId result = Commands.getTenantId(commandContext.get());
         return result;
     }
 
@@ -305,10 +305,10 @@ public final class Events {
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Internal
     public static Event clearEnrichments(Event event) {
-        final EventContext context = event.getContext();
-        final EventContext.Builder resultContext = context.toBuilder()
+        EventContext context = event.getContext();
+        EventContext.Builder resultContext = context.toBuilder()
                                                           .clearEnrichment();
-        final EventContext.OriginCase originCase = resultContext.getOriginCase();
+        EventContext.OriginCase originCase = resultContext.getOriginCase();
         switch (originCase) {
             case EVENT_CONTEXT:
                 resultContext.setEventContext(context.getEventContext()
@@ -330,7 +330,7 @@ public final class Events {
                 throw newIllegalStateException("Unsupported origin case is encountered: %s",
                                                originCase);
         }
-        final Event result = event.toBuilder()
+        Event result = event.toBuilder()
                                   .setContext(resultContext)
                                   .build();
         return result;
@@ -342,13 +342,13 @@ public final class Events {
     static class EventIdStringifier extends Stringifier<EventId> {
         @Override
         protected String toString(EventId eventId) {
-            final String result = eventId.getValue();
+            String result = eventId.getValue();
             return result;
         }
 
         @Override
         protected EventId fromString(String str) {
-            final EventId result = EventId.newBuilder()
+            EventId result = EventId.newBuilder()
                                           .setValue(str)
                                           .build();
             return result;

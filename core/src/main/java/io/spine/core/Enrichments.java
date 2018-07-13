@@ -48,7 +48,7 @@ public final class Enrichments {
      */
     public static Optional<Enrichment.Container> getEnrichments(EventContext context) {
         checkNotNull(context);
-        final Enrichment enrichment = context.getEnrichment();
+        Enrichment enrichment = context.getEnrichment();
         return getContainer(enrichment);
     }
 
@@ -70,7 +70,7 @@ public final class Enrichments {
     public static <E extends Message> Optional<E> getEnrichment(Class<E> enrichmentClass,
                                                                 EventContext context) {
         checkNotNull(enrichmentClass);
-        final Optional<Enrichment.Container> container = getEnrichments(checkNotNull(context));
+        Optional<Enrichment.Container> container = getEnrichments(checkNotNull(context));
         if (!container.isPresent()) {
             return Optional.absent();
         }
@@ -82,7 +82,7 @@ public final class Enrichments {
      */
     public static Optional<Enrichment.Container> getEnrichments(RejectionContext context) {
         checkNotNull(context);
-        final Enrichment enrichment = context.getEnrichment();
+        Enrichment enrichment = context.getEnrichment();
         return getContainer(enrichment);
     }
 
@@ -97,7 +97,7 @@ public final class Enrichments {
     public static <E extends Message> Optional<E> getEnrichment(Class<E> enrichmentClass,
                                                                 RejectionContext context) {
         checkNotNull(enrichmentClass);
-        final Optional<Enrichment.Container> container = getEnrichments(checkNotNull(context));
+        Optional<Enrichment.Container> container = getEnrichments(checkNotNull(context));
         if (!container.isPresent()) {
             return Optional.absent();
         }
@@ -106,14 +106,14 @@ public final class Enrichments {
 
     private static <E extends Message>
     Optional<E> getFromContainer(Class<E> enrichmentClass, Enrichment.Container enrichments) {
-        final String typeName = TypeName.of(enrichmentClass)
+        String typeName = TypeName.of(enrichmentClass)
                                         .value();
-        final Any any = enrichments.getItemsMap()
+        Any any = enrichments.getItemsMap()
                                    .get(typeName);
         if (any == null) {
             return Optional.absent();
         }
-        final E result = unpack(any);
+        E result = unpack(any);
         return Optional.fromNullable(result);
     }
 
@@ -121,7 +121,7 @@ public final class Enrichments {
      * Creates a new {@link Enrichment} instance from the passed map.
      */
     static Enrichment createEnrichment(Map<String, Any> enrichments) {
-        final Enrichment.Builder enrichment =
+        Enrichment.Builder enrichment =
                 Enrichment.newBuilder()
                           .setContainer(Enrichment.Container.newBuilder()
                                                             .putAllItems(enrichments));

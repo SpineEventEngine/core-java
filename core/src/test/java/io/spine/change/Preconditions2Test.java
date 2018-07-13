@@ -51,14 +51,14 @@ class Preconditions2Test {
     @Test
     @DisplayName("not accept empty ByteString value")
     void failOnEmptyByteString() {
-        final ByteString str = ByteString.EMPTY;
+        ByteString str = ByteString.EMPTY;
         assertThrows(IllegalArgumentException.class, () -> checkNewValueNotEmpty(str));
     }
 
     @Test
     @DisplayName("not accept empty String value")
     void failOnEmptyString() {
-        final String str = "";
+        String str = "";
         assertThrows(IllegalArgumentException.class, () -> checkNewValueNotEmpty(str));
     }
 }

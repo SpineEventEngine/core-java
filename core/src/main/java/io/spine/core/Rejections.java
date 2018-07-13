@@ -57,11 +57,11 @@ public final class Rejections {
      */
     public static boolean isRejection(Class<? extends Message> messageClass) {
         checkNotNull(messageClass);
-        final Class<?> enclosingClass = messageClass.getEnclosingClass();
+        Class<?> enclosingClass = messageClass.getEnclosingClass();
         if (enclosingClass == null) {
             return false; // Rejection messages are generated as inner static classes.
         }
-        final boolean hasCorrectSuffix = enclosingClass.getName()
+        boolean hasCorrectSuffix = enclosingClass.getName()
                                                        .endsWith(OUTER_CLASS_SUFFIX);
         return hasCorrectSuffix;
     }
@@ -87,11 +87,11 @@ public final class Rejections {
         checkNotNull(throwable);
         checkNotNull(command);
 
-        final Message rejectionMessage = throwable.getMessageThrown();
-        final Any packedState = pack(rejectionMessage);
-        final RejectionContext context = createContext(throwable, command);
-        final RejectionId id = generateId(command.getId());
-        final Rejection.Builder builder = Rejection.newBuilder()
+        Message rejectionMessage = throwable.getMessageThrown();
+        Any packedState = pack(rejectionMessage);
+        RejectionContext context = createContext(throwable, command);
+        RejectionId id = generateId(command.getId());
+        Rejection.Builder builder = Rejection.newBuilder()
                                                    .setId(id)
                                                    .setMessage(packedState)
                                                    .setContext(context);
@@ -100,14 +100,14 @@ public final class Rejections {
 
     @SuppressWarnings("CheckReturnValue") // calling builder
     private static RejectionContext createContext(ThrowableMessage message, Command command) {
-        final String stacktrace = Throwables.getStackTraceAsString(message);
-        final RejectionContext.Builder builder =
+        String stacktrace = Throwables.getStackTraceAsString(message);
+        RejectionContext.Builder builder =
                 RejectionContext.newBuilder()
                                 .setTimestamp(message.getTimestamp())
                                 .setStacktrace(stacktrace)
                                 .setCommand(command);
 
-        final Optional<Any> optional = message.producerId();
+        Optional<Any> optional = message.producerId();
         if (optional.isPresent()) {
             builder.setProducerId(optional.get());
         }
@@ -125,11 +125,11 @@ public final class Rejections {
         checkNotNull(messageOrAny);
         checkNotNull(command);
 
-        final Any packedMessage = pack(messageOrAny);
-        final RejectionContext context = RejectionContext.newBuilder()
+        Any packedMessage = pack(messageOrAny);
+        RejectionContext context = RejectionContext.newBuilder()
                                                          .setCommand(command)
                                                          .build();
-        final Rejection result = Rejection.newBuilder()
+        Rejection result = Rejection.newBuilder()
                                           .setMessage(packedMessage)
                                           .setContext(context)
                                           .build();
@@ -145,7 +145,7 @@ public final class Rejections {
      *           rejection
      **/
     public static RejectionId generateId(CommandId id) {
-        final String idValue = format(REJECTION_ID_FORMAT, id.getUuid());
+        String idValue = format(REJECTION_ID_FORMAT, id.getUuid());
         return RejectionId.newBuilder()
                           .setValue(idValue)
                           .build();
@@ -160,7 +160,7 @@ public final class Rejections {
      */
     public static <M extends Message> M getMessage(Rejection rejection) {
         checkNotNull(rejection);
-        final M result = unpack(rejection.getMessage());
+        M result = unpack(rejection.getMessage());
         return result;
     }
 
@@ -174,11 +174,11 @@ public final class Rejections {
      */
     public static <I> Optional<I> getProducer(RejectionContext context) {
         checkNotNull(context);
-        final Any producerId = context.getProducerId();
+        Any producerId = context.getProducerId();
         if (Any.getDefaultInstance().equals(producerId)) {
             return Optional.absent();
         }
-        final I id = Identifier.unpack(producerId);
+        I id = Identifier.unpack(producerId);
         return Optional.of(id);
     }
 
@@ -208,8 +208,8 @@ public final class Rejections {
         // instead of ThrowableMessage when code generation allows customizing a custom
         // rejection types instead of `ThrowableMessage`.
         // See: https://github.com/SpineEventEngine/base/issues/20
-        final Throwable rootCause = Throwables.getRootCause(exception);
-        final boolean result = rootCause instanceof ThrowableMessage;
+        Throwable rootCause = Throwables.getRootCause(exception);
+        boolean result = rootCause instanceof ThrowableMessage;
         return result;
     }
 
@@ -229,7 +229,7 @@ public final class Rejections {
             throws IllegalArgumentException {
         checkNotNull(throwable);
         checkArgument(causedByRejection(throwable));
-        final Throwable cause = Throwables.getRootCause(throwable);
+        Throwable cause = Throwables.getRootCause(throwable);
         return (ThrowableMessage) cause;
     }
 }

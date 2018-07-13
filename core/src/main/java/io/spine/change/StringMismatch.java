@@ -91,7 +91,7 @@ public final class StringMismatch {
      * Creates a new instance of {@code ValueMismatch} with the passed values.
      */
     private static ValueMismatch of(String expected, String actual, String newValue, int version) {
-        final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
+        ValueMismatch.Builder builder = ValueMismatch.newBuilder()
                                                            .setExpected(toAny(expected))
                                                            .setActual(toAny(actual))
                                                            .setNewValue(toAny(newValue))
@@ -100,7 +100,7 @@ public final class StringMismatch {
     }
 
     private static String unpacked(Any any) {
-        final StringValue unpacked = unpack(any, StringValue.class);
+        StringValue unpacked = unpack(any, StringValue.class);
         return unpacked.getValue();
     }
 
@@ -111,7 +111,7 @@ public final class StringMismatch {
      */
     public static String unpackExpected(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any expected = mismatch.getExpected();
+        Any expected = mismatch.getExpected();
         return unpacked(expected);
     }
 
@@ -122,7 +122,7 @@ public final class StringMismatch {
      */
     public static String unpackActual(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any actual = mismatch.getActual();
+        Any actual = mismatch.getActual();
         return unpacked(actual);
     }
 
@@ -133,7 +133,7 @@ public final class StringMismatch {
      */
     public static String unpackNewValue(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any newValue = mismatch.getNewValue();
+        Any newValue = mismatch.getNewValue();
         return unpacked(newValue);
     }
 }

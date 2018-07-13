@@ -66,13 +66,13 @@ public final class EventClass extends MessageClass {
      * @return new instance
      */
     public static EventClass of(Message eventOrMessage) {
-        final Message eventMessage = Events.ensureMessage(eventOrMessage);
+        Message eventMessage = Events.ensureMessage(eventOrMessage);
         return of(eventMessage.getClass());
     }
 
     /** Creates immutable set of {@code EventClass} from the passed set. */
     public static Set<EventClass> setOf(Iterable<Class<? extends Message>> classes) {
-        final ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();
+        ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
             builder.add(of(cls));
         }

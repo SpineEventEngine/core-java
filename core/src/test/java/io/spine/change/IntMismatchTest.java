@@ -68,7 +68,7 @@ class IntMismatchTest {
         @Test
         @DisplayName("from given int values")
         void withInts() {
-            final ValueMismatch mismatch = IntMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+            ValueMismatch mismatch = IntMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));
@@ -79,8 +79,8 @@ class IntMismatchTest {
         @Test
         @DisplayName("for expected zero amount")
         void forExpectedZero() {
-            final int expected = 0;
-            final ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
+            int expected = 0;
+            ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(expected, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));
@@ -91,8 +91,8 @@ class IntMismatchTest {
         @Test
         @DisplayName("for expected non zero amount")
         void forExpectedNonZero() {
-            final int actual = 0;
-            final ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
+            int actual = 0;
+            ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
             assertEquals(actual, unpackActual(mismatch));
@@ -104,7 +104,7 @@ class IntMismatchTest {
         @Test
         @DisplayName("for unexpected int value")
         void forUnexpectedInt() {
-            final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE,
+            ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE,
                                                            VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
@@ -117,7 +117,7 @@ class IntMismatchTest {
     @Test
     @DisplayName("not accept same expected and actual values")
     void notAcceptSameExpectedAndActual() {
-        final int value = 5;
+        int value = 5;
         assertThrows(IllegalArgumentException.class,
                      () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
     }
@@ -129,21 +129,21 @@ class IntMismatchTest {
         @Test
         @DisplayName("expected")
         void expectedWithWrongType() {
-            final ValueMismatch mismatch = expectedTrue(VERSION);
+            ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
         }
 
         @Test
         @DisplayName("actual")
         void actualWithWrongType() {
-            final ValueMismatch mismatch = expectedTrue(VERSION);
+            ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
         }
 
         @Test
         @DisplayName("new value")
         void newValueWithWrongType() {
-            final ValueMismatch mismatch = expectedTrue(VERSION);
+            ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));
         }
     }
