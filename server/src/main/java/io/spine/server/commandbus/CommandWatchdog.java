@@ -20,7 +20,6 @@
 
 package io.spine.server.commandbus;
 
-import com.google.common.base.Optional;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
@@ -28,14 +27,24 @@ import io.spine.server.bus.BusFilter;
 import io.spine.system.server.ReceiveCommand;
 import io.spine.system.server.SystemGateway;
 
+import java.util.Optional;
+
 /**
+ * A {@link CommandBus} filter which watches the commands as they appear in the bus.
+ *
+ * <p>The filter notifies the System bounded context about new commands with
+ * a {@link ReceiveCommand} system command.
+ *
+ * <p>The filter never terminates the command processing, i.e. {@link #accept(CommandEnvelope)}
+ * always returns an empty value.
+ *
  * @author Dmytro Dashenkov
  */
-final class CommandReceivedFilter implements BusFilter<CommandEnvelope> {
+final class CommandWatchdog implements BusFilter<CommandEnvelope> {
 
     private final SystemGateway systemGateway;
 
-    CommandReceivedFilter(SystemGateway gateway) {
+    CommandWatchdog(SystemGateway gateway) {
         systemGateway = gateway;
     }
 
@@ -43,7 +52,7 @@ final class CommandReceivedFilter implements BusFilter<CommandEnvelope> {
     public Optional<Ack> accept(CommandEnvelope envelope) {
         ReceiveCommand systemCommand = systemCommand(envelope.getCommand());
         systemGateway.postCommand(systemCommand);
-        return Optional.absent();
+        return Optional.empty();
     }
 
     private static ReceiveCommand systemCommand(Command domainCommand) {

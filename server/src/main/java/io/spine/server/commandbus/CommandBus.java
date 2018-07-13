@@ -22,6 +22,7 @@ package io.spine.server.commandbus;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
@@ -135,7 +136,8 @@ public class CommandBus extends Bus<Command,
      * Creates a new {@link Builder} for the {@code CommandBus}.
      */
     public static Builder newBuilder() {
-        return new Builder();
+        Builder builder = new Builder();
+        return builder;
     }
 
     @Internal
@@ -182,6 +184,8 @@ public class CommandBus extends Bus<Command,
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a protected factory method
     @Override
     protected Deque<BusFilter<CommandEnvelope>> createFilterChain() {
+        BusFilter<CommandEnvelope> gatewayFilter = new CommandWatchdog(systemGateway);
+        filterChain.push(gatewayFilter);
         filterChain.push(scheduler);
         return filterChain;
     }
@@ -304,6 +308,7 @@ public class CommandBus extends Bus<Command,
     /**
      * The {@code Builder} for {@code CommandBus}.
      */
+    @CanIgnoreReturnValue
     public static class Builder extends AbstractBuilder<CommandEnvelope, Command, Builder> {
 
         /**
@@ -463,6 +468,7 @@ public class CommandBus extends Bus<Command,
          */
         @Override
         @Internal
+        @CheckReturnValue
         public CommandBus build() {
             checkState(
                     commandStore != null,

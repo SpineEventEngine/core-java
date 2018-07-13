@@ -20,9 +20,10 @@
 
 package io.spine.server.bus;
 
-import com.google.common.base.Optional;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.MessageInvalid;
+
+import java.util.Optional;
 
 /**
  * An interface defining the validator for a {@link MessageEnvelope}.
@@ -36,8 +37,8 @@ public interface EnvelopeValidator<E extends MessageEnvelope<?, ?, ?>> {
      * Validates the given {@link MessageEnvelope} by some specific rules.
      *
      * @param envelope the envelope to validate
-     * @return {@link Optional#absent() Optional.absent()} if the envelope passes the validation or
-     *         the cause of the validation error
+     * @return {@link Optional#empty()} if the envelope passes the validation or the cause of
+     *         the validation error
      * @see MessageInvalid for the detailed description of the returned value
      */
     Optional<MessageInvalid> validate(E envelope);

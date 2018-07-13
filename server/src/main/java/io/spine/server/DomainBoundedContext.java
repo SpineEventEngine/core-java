@@ -48,8 +48,10 @@ final class DomainBoundedContext extends BoundedContext {
         this.systemGateway = gateway;
     }
 
-    static DomainBoundedContext newInstance(Builder builder, SystemBoundedContext system) {
-        DomainBoundedContext result = new DomainBoundedContext(builder, system);
+    static DomainBoundedContext newInstance(Builder builder,
+                                            SystemBoundedContext system,
+                                            SystemGateway gateway) {
+        DomainBoundedContext result = new DomainBoundedContext(builder, system, gateway);
         result.init();
         return result;
     }

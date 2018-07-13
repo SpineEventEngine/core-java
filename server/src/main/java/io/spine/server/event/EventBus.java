@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
@@ -246,6 +247,7 @@ public class EventBus
     }
 
     /** The {@code Builder} for {@code EventBus}. */
+    @CanIgnoreReturnValue
     public static class Builder extends AbstractBuilder<EventEnvelope, Event, Builder> {
 
         private static final String MSG_EVENT_STORE_CONFIGURED = "EventStore already configured.";
@@ -431,6 +433,7 @@ public class EventBus
          */
         @Override
         @Internal
+        @CheckReturnValue
         public EventBus build() {
             final String message = "Either storageFactory or eventStore must be " +
                                    "set to build the EventBus instance";

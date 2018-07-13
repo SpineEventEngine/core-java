@@ -22,6 +22,8 @@ package io.spine.server;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Experimental;
@@ -337,6 +339,7 @@ public abstract class BoundedContext
      * them use {@link #setName(String)}. If no ID is given the default ID will be assigned.
      */
     @SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
+    @CanIgnoreReturnValue
     public static class Builder {
 
         private BoundedContextName name = BoundedContextNames.defaultName();
@@ -492,6 +495,7 @@ public abstract class BoundedContext
          *
          * @return new {@code BoundedContext}
          */
+        @CheckReturnValue
         public BoundedContext build() {
             SystemBoundedContext system = buildSystem();
             BoundedContext result = buildDefault(system);

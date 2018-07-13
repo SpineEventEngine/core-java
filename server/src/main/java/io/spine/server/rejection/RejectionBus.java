@@ -20,10 +20,10 @@
 package io.spine.server.rejection;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.core.Ack;
 import io.spine.core.MessageInvalid;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
@@ -40,10 +40,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Deque;
+import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Optional.empty;
 
 /**
  * Dispatches the business rejections that occur during the command processing
@@ -64,8 +65,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     private final Deque<BusFilter<RejectionEnvelope>> filterChain;
 
     /** The enricher for posted rejections or {@code null} if the enrichment is not supported. */
-    @Nullable
-    private final RejectionEnricher enricher;
+    private final @Nullable RejectionEnricher enricher;
 
     /**
      * Creates a new instance according to the pre-configured {@code Builder}.
@@ -159,10 +159,11 @@ public class RejectionBus extends CommandOutputBus<Rejection,
      * @see #post(Message, StreamObserver)
      */
     public final void post(Rejection rejection) {
-        post(rejection, StreamObservers.<Ack>noOpObserver());
+        post(rejection, StreamObservers.noOpObserver());
     }
 
     /** The {@code Builder} for {@code RejectionBus}. */
+    @CanIgnoreReturnValue
     public static class Builder extends AbstractBuilder<RejectionEnvelope, Rejection, Builder> {
 
 
@@ -172,8 +173,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
          * <p>If not set, the enrichments will NOT be supported
          * in the {@code RejectionBus} instance built.
          */
-        @Nullable
-        private RejectionEnricher enricher;
+        private @Nullable RejectionEnricher enricher;
 
         /** Prevents direct instantiation. */
         private Builder() {
@@ -181,7 +181,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
         }
 
         /**
-         * Sets a custom {@link RejectionEnricher} for events posted to
+         * Sets a custom {@link RejectionEnricher} for events posted toEve
          * the {@code RejectionBus} which is being built.
          *
          * <p>If the {@code RejectionEnricher} is not set, the enrichments
@@ -196,10 +196,11 @@ public class RejectionBus extends CommandOutputBus<Rejection,
         }
 
         public Optional<RejectionEnricher> getEnricher() {
-            return Optional.fromNullable(enricher);
+            return Optional.ofNullable(enricher);
         }
 
         @Override
+        @CheckReturnValue
         public RejectionBus build() {
             return new RejectionBus(this);
         }
@@ -233,7 +234,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
         @Override
         public Optional<MessageInvalid> validate(RejectionEnvelope envelope) {
             checkNotNull(envelope);
-            return absent();
+            return empty();
         }
     }
 

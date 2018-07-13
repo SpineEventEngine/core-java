@@ -20,19 +20,20 @@
 
 package io.spine.server.event;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
+import io.spine.core.MessageInvalid;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.validate.ConstraintViolation;
-import io.spine.core.MessageInvalid;
 import io.spine.validate.MessageValidator;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.event.InvalidEventException.onConstraintViolations;
+import static java.util.Optional.ofNullable;
 
 /**
  * The {@link EventEnvelope} validator.
@@ -60,6 +61,6 @@ final class EventValidator implements EnvelopeValidator<EventEnvelope> {
         if (!violations.isEmpty()) {
             result = onConstraintViolations(event, violations);
         }
-        return Optional.fromNullable(result);
+        return ofNullable(result);
     }
 }

@@ -20,7 +20,6 @@
 
 package io.spine.server.event.given;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
@@ -68,9 +67,9 @@ import io.spine.testdata.Sample;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.base.Optional.absent;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -265,7 +264,7 @@ public class EventBusTestEnv {
                     return Optional.of(result);
                 }
             }
-            return absent();
+            return Optional.empty();
         }
 
         private static Error error() {
@@ -278,7 +277,8 @@ public class EventBusTestEnv {
     /**
      * {@link EBProjectCreated} subscriber that does nothing.
      *
-     * <p>Can be used for the event to get pass the {@link io.spine.server.bus.DeadMessageFilter}.
+     * <p>Can be used for the event to get pass
+     * the {@link io.spine.server.bus.DeadMessageFilter DeadMessageFilter}.
      */
     public static class EBProjectCreatedNoOpSubscriber extends EventSubscriber {
 
@@ -324,7 +324,7 @@ public class EventBusTestEnv {
 
     /**
      * {@link EBTaskAdded} subscriber that does nothing. Can be used for the event to get pass the
-     * {@link io.spine.server.bus.DeadMessageFilter}.
+     * the {@link io.spine.server.bus.DeadMessageFilter DeadMessageFilter}.
      */
     public static class EBTaskAddedNoOpSubscriber extends EventSubscriber {
 

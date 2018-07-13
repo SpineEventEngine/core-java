@@ -20,27 +20,31 @@
 
 package io.spine.server.bus;
 
-import com.google.common.base.Function;
-import com.google.common.base.Optional;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.Error;
+import io.spine.base.ThrowableMessage;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Rejection;
+import io.spine.core.Status;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Deque;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.isEmpty;
-import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.validate.Validate.isNotDefault;
 import static java.util.Collections.singleton;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Abstract base for buses.
@@ -57,8 +61,6 @@ public abstract class Bus<T extends Message,
                           E extends MessageEnvelope<?, T, ?>,
                           C extends MessageClass,
                           D extends MessageDispatcher<C, E, ?>> implements AutoCloseable {
-
-    private final Function<T, E> messageConverter = new MessageToEnvelope();
 
     // A queue of envelopes to post.
     private @Nullable DispatchingQueue<E> queue;
@@ -118,17 +120,17 @@ public abstract class Bus<T extends Message,
      * message posted to the bus.
      *
      * <p>In case the message is accepted by the bus, {@link Ack} with the
-     * {@link io.spine.core.Status.StatusCase#OK OK} status is passed to the observer.
+     * {@link Status.StatusCase#OK OK} status is passed to the observer.
      *
      * <p>If the message cannot be sent due to some issues, a corresponding
-     * {@link io.spine.base.Error Error} status is passed in {@code Ack} instance.
+     * {@link Error Error} status is passed in {@code Ack} instance.
      *
      * <p>Depending on the underlying {@link MessageDispatcher}, a message which causes a business
      * {@link Rejection} may result ether a {@link Rejection} status or
-     * an {@link io.spine.core.Status.StatusCase#OK OK} status {@link Ack} instance. Usually,
+     * an {@link Status.StatusCase#OK OK} status {@link Ack} instance. Usually,
      * the {@link Rejection} status may only pop up if the {@link MessageDispatcher}
      * processes the message sequentially and throws the rejection (wrapped in a
-     * the {@linkplain io.spine.base.ThrowableMessage ThrowableMessages}) instead of handling them.
+     * the {@linkplain ThrowableMessage ThrowableMessages}) instead of handling them.
      * Otherwise, the {@code OK} status should be expected.
      *
      * <p>Note that {@linkplain StreamObserver#onError StreamObserver.onError()} is never called
@@ -141,10 +143,12 @@ public abstract class Bus<T extends Message,
         checkNotNull(messages);
         checkNotNull(observer);
 
-        final Iterable<T> filteredMessages = filter(messages, observer);
+        Collection<T> filteredMessages = filter(messages, observer);
         if (!isEmpty(filteredMessages)) {
             store(filteredMessages);
-            final Iterable<E> envelopes = transform(filteredMessages, toEnvelope());
+            Iterable<E> envelopes = filteredMessages.stream()
+                                                    .map(this::toEnvelope)
+                                                    .collect(toList());
             doPost(envelopes, observer);
         }
         observer.onCompleted();
@@ -253,9 +257,9 @@ public abstract class Bus<T extends Message,
      * @param messages the message to filter
      * @param observer the observer to receive the negative outcome of the operation
      * @return the message itself if it passes the filtering or
-     * {@link Optional#absent() Optional.absent()} otherwise
+     * {@link Optional#empty()} otherwise
      */
-    private Iterable<T> filter(Iterable<T> messages, StreamObserver<Ack> observer) {
+    private Collection<T> filter(Iterable<T> messages, StreamObserver<Ack> observer) {
         checkNotNull(messages);
         checkNotNull(observer);
         final Collection<T> result = newLinkedList();
@@ -277,11 +281,11 @@ public abstract class Bus<T extends Message,
      * the returned {@link Optional} contains a value with either status.
      *
      * <p>If the message should be passed to the dispatchers, the result of this method is
-     * {@link Optional#absent() Optional.absent()}.
+     * {@link Optional#empty()}.
      *
      * @param message the {@linkplain MessageEnvelope message envelope} to pre-process
      * @return the result of message processing by this bus if any, or
-     * {@link Optional#absent() Optional.absent()} otherwise
+     * {@link Optional#empty()} otherwise
      */
     private Optional<Ack> filter(E message) {
         final Optional<Ack> filterOutput = filterChain().accept(message);
@@ -329,20 +333,13 @@ public abstract class Bus<T extends Message,
     protected abstract void store(Iterable<T> messages);
 
     /**
-     * @return a {@link Function} converting the messages into the envelopes of the specified
-     * type
-     */
-    private Function<T, E> toEnvelope() {
-        return messageConverter;
-    }
-
-    /**
      * The implementation base for the bus builders.
      *
      * @param <E> the type of {@link MessageEnvelope} posted by the bus
      * @param <T> the type of {@link Message} posted by the bus
      * @param <B> the own type of the builder
      */
+    @CanIgnoreReturnValue
     public abstract static class AbstractBuilder<E extends MessageEnvelope<?, T, ?>,
                                                  T extends Message,
                                                  B extends AbstractBuilder<E, T, B>> {
@@ -398,24 +395,12 @@ public abstract class Bus<T extends Message,
          * <p>It is recommended to specify the exact resulting type of the bus in the return type
          * when overriding this method.
          */
+        @CheckReturnValue
         public abstract Bus<?, E, ?, ?> build();
 
         /**
          * @return {@code this} reference to avoid redundant casts
          */
         protected abstract B self();
-    }
-
-    /**
-     * A function creating the instances of {@link MessageEnvelope} from the given message.
-     */
-    private class MessageToEnvelope implements Function<T, E> {
-
-        @Override
-        public E apply(@Nullable T message) {
-            checkNotNull(message);
-            final E result = toEnvelope(message);
-            return result;
-        }
     }
 }

@@ -274,10 +274,10 @@ public abstract class MessageHandlerTest<I,
     private class MemoizingBusFilter implements BusFilter<CommandEnvelope> {
 
         @Override
-        public Optional<Ack> accept(CommandEnvelope envelope) {
+        public java.util.Optional<Ack> accept(CommandEnvelope envelope) {
             interceptedCommands.add(unpack(envelope.getCommand()
                                                    .getMessage()));
-            return Optional.absent();
+            return java.util.Optional.empty();
         }
 
         @Override

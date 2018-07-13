@@ -20,13 +20,13 @@
 
 package io.spine.server.bus;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Queues;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 
 import java.util.Deque;
 import java.util.Iterator;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -62,7 +62,7 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>, F extends BusFilter<
                 return output;
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**

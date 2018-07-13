@@ -20,7 +20,6 @@
 
 package io.spine.server.bus;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
@@ -30,6 +29,7 @@ import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.bus.Buses.reject;
@@ -67,7 +67,7 @@ final class DeadMessageFilter<T extends Message,
             final Ack result = reject(packedId, error);
             return Optional.of(result);
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 }

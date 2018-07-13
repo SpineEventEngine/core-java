@@ -23,6 +23,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.BoundedContextName;
 import io.spine.protobuf.AnyPacker;
@@ -396,6 +397,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     /**
      * A {@code Builder} for {@code IntegrationBus} instances.
      */
+    @CanIgnoreReturnValue
     public static class Builder
             extends Bus.AbstractBuilder<ExternalMessageEnvelope, ExternalMessage, Builder> {
 
@@ -456,6 +458,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         }
 
         @Override
+        @CheckReturnValue
         public IntegrationBus build() {
 
             checkState(eventBus != null,

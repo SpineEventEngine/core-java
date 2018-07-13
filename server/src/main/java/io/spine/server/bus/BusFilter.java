@@ -20,10 +20,11 @@
 
 package io.spine.server.bus;
 
-import com.google.common.base.Optional;
 import io.spine.annotation.SPI;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
+
+import java.util.Optional;
 
 /**
  * The filter for the messages posted to a bus.
@@ -33,6 +34,7 @@ import io.spine.core.MessageEnvelope;
  * @author Dmytro Dashenkov
  */
 @SPI
+@FunctionalInterface
 public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoCloseable {
 
     /**
@@ -52,4 +54,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      *         {@linkplain Ack posting result} with either status otherwise
      */
     Optional<Ack> accept(E envelope);
+
+    @Override
+    default void close() throws Exception {}
 }
