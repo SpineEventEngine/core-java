@@ -31,6 +31,7 @@ import io.spine.grpc.StreamObservers;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.commandbus.given.MultitenantCommandBusTestEnv.AddTaskDispatcher;
 import io.spine.server.rejection.RejectionBus;
+import io.spine.system.server.NoOpSystemGateway;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
 import org.junit.jupiter.api.DisplayName;
@@ -87,6 +88,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         void setToDefault() {
             final CommandBus bus = CommandBus.newBuilder()
                                              .setCommandStore(commandStore)
+                                             .injectSystemGateway(NoOpSystemGateway.INSTANCE)
                                              .build();
             assertNotNull(bus.rejectionBus());
         }
@@ -97,6 +99,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
             final RejectionBus expectedRejectionBus = mock(RejectionBus.class);
             final CommandBus commandBus = CommandBus.newBuilder()
                                                     .setCommandStore(commandStore)
+                                                    .injectSystemGateway(NoOpSystemGateway.INSTANCE)
                                                     .setRejectionBus(expectedRejectionBus)
                                                     .build();
             assertNotNull(commandBus);

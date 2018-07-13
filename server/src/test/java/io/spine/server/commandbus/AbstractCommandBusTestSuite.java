@@ -44,6 +44,7 @@ import io.spine.server.rejection.RejectionBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.system.server.NoOpSystemGateway;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.event.CmdProjectCreated;
 import org.junit.jupiter.api.AfterEach;
@@ -192,6 +193,7 @@ abstract class AbstractCommandBusTestSuite {
                                .setThreadSpawnAllowed(false)
                                .setLog(log)
                                .setAutoReschedule(false)
+                               .injectSystemGateway(NoOpSystemGateway.INSTANCE)
                                .build();
         eventBus = EventBus.newBuilder()
                            .setStorageFactory(storageFactory)

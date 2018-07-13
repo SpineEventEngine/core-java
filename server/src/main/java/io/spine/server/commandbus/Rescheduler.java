@@ -59,13 +59,7 @@ class Rescheduler {
     }
 
     void rescheduleCommands() {
-        final Runnable reschedulingAction = new Runnable() {
-            @Override
-            public void run() {
-                doRescheduleCommands();
-            }
-        };
-
+        Runnable reschedulingAction = this::doRescheduleCommands;
         if (commandBus.isThreadSpawnAllowed()) {
             final Thread thread = new Thread(reschedulingAction, "CommandBus-rescheduleCommands");
             thread.start();

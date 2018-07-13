@@ -49,6 +49,7 @@ import io.spine.server.procman.given.ProcessManagerTestEnv.TestProcessManager;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.system.server.NoOpSystemGateway;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCreateProject;
@@ -143,6 +144,7 @@ class ProcessManagerTest {
 
         commandBus = spy(CommandBus.newBuilder()
                                    .setCommandStore(commandStore)
+                                   .injectSystemGateway(NoOpSystemGateway.INSTANCE)
                                    .build());
         processManager = Given.processManagerOfClass(TestProcessManager.class)
                               .withId(ID)

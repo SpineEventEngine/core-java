@@ -27,6 +27,8 @@ import io.spine.server.commandstore.CommandStore;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.SystemGateway;
 import io.spine.test.Tests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -50,11 +52,15 @@ import static org.mockito.Mockito.mock;
 class CommandBusBuilderTest
         extends BusBuilderTest<CommandBus.Builder, CommandEnvelope, Command> {
 
+    private static final SystemGateway SYSTEM_GATEWAY = NoOpSystemGateway.INSTANCE;
+
     private CommandStore commandStore;
 
     @Override
     protected CommandBus.Builder builder() {
-        return CommandBus.newBuilder();
+        return CommandBus.newBuilder()
+                         .injectSystemGateway(SYSTEM_GATEWAY)
+                         .setCommandStore(commandStore);
     }
 
     @BeforeEach
@@ -70,8 +76,10 @@ class CommandBusBuilderTest
     @Test
     @DisplayName("create new CommandBus instance")
     void createNewInstance() {
-        final CommandBus commandBus = builder().setCommandStore(commandStore)
-                                               .build();
+        final CommandBus commandBus = CommandBus.newBuilder()
+                                                .setCommandStore(commandStore)
+                                                .injectSystemGateway(SYSTEM_GATEWAY)
+                                                .build();
         assertNotNull(commandBus);
     }
 
@@ -84,8 +92,19 @@ class CommandBusBuilderTest
     @Test
     @DisplayName("not allow to omit setting CommandStore")
     void neverOmitCommandStore() {
-        assertThrows(IllegalStateException.class, () -> CommandBus.newBuilder()
-                                                                  .build());
+        assertThrows(IllegalStateException.class,
+                     () -> CommandBus.newBuilder()
+                                     .injectSystemGateway(SYSTEM_GATEWAY)
+                                     .build());
+    }
+
+    @Test
+    @DisplayName("not allow to omit setting SystemGateway")
+    void neverOmitSystemGateway() {
+        assertThrows(IllegalStateException.class,
+                     () -> CommandBus.newBuilder()
+                                     .setCommandStore(commandStore)
+                                     .build());
     }
 
     @Nested
@@ -97,8 +116,7 @@ class CommandBusBuilderTest
         void commandScheduler() {
             final CommandScheduler expectedScheduler = mock(CommandScheduler.class);
 
-            final CommandBus.Builder builder = builder().setCommandStore(commandStore)
-                                                        .setCommandScheduler(expectedScheduler);
+            final CommandBus.Builder builder = builder().setCommandScheduler(expectedScheduler);
 
             assertTrue(builder.getCommandScheduler()
                               .isPresent());
@@ -117,8 +135,7 @@ class CommandBusBuilderTest
         void rejectionBus() {
             final RejectionBus expectedRejectionBus = mock(RejectionBus.class);
 
-            final CommandBus.Builder builder = builder().setCommandStore(commandStore)
-                                                        .setRejectionBus(expectedRejectionBus);
+            final CommandBus.Builder builder = builder().setRejectionBus(expectedRejectionBus);
             assertTrue(builder.getRejectionBus()
                               .isPresent());
             assertEquals(expectedRejectionBus, builder.getRejectionBus()
@@ -130,10 +147,8 @@ class CommandBusBuilderTest
         void ifThreadSpawnAllowed() {
             assertTrue(builder().setThreadSpawnAllowed(true)
                                 .isThreadSpawnAllowed());
-
-            assertFalse(CommandBus.newBuilder()
-                                  .setThreadSpawnAllowed(false)
-                                  .isThreadSpawnAllowed());
+            assertFalse(builder().setThreadSpawnAllowed(false)
+                                 .isThreadSpawnAllowed());
         }
 
         @Test

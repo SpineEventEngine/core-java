@@ -26,6 +26,7 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
+import io.spine.system.server.NoOpSystemGateway;
 import io.spine.test.Tests;
 import io.spine.time.Durations2;
 import org.junit.jupiter.api.DisplayName;
@@ -144,6 +145,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
             // Create CommandBus specific for this test.
             final CommandBus commandBus = CommandBus.newBuilder()
                                                     .setCommandStore(commandStore)
+                                                    .injectSystemGateway(NoOpSystemGateway.INSTANCE)
                                                     .setCommandScheduler(scheduler)
                                                     .setThreadSpawnAllowed(true)
                                                     .setAutoReschedule(true)
@@ -182,6 +184,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
             // Create CommandBus specific for this test.
             final CommandBus commandBus = CommandBus.newBuilder()
                                                     .setCommandStore(commandStore)
+                                                    .injectSystemGateway(NoOpSystemGateway.INSTANCE)
                                                     .setCommandScheduler(scheduler)
                                                     .setThreadSpawnAllowed(false)
                                                     .setAutoReschedule(true)

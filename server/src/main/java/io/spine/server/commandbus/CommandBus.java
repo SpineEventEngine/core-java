@@ -470,10 +470,8 @@ public class CommandBus extends Bus<Command,
         @Internal
         @CheckReturnValue
         public CommandBus build() {
-            checkState(
-                    commandStore != null,
-                    "CommandStore must be set. Please call CommandBus.Builder.setCommandStore()."
-            );
+            checkSet(commandStore, CommandStore.class, "setCommandStore");
+            checkSet(systemGateway, SystemGateway.class, "injectSystemGateway");
 
             if (commandScheduler == null) {
                 commandScheduler = new ExecutorCommandScheduler();
@@ -497,6 +495,14 @@ public class CommandBus extends Bus<Command,
             }
 
             return commandBus;
+        }
+
+        private static void checkSet(@Nullable Object field,
+                                     Class<?> fieldType,
+                                     String setterName) {
+            checkState(field != null,
+                       "%s must be set. Please call CommandBus.Builder.%s().",
+                       fieldType.getSimpleName(), setterName);
         }
 
         @Override
