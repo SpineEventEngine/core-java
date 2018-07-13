@@ -89,7 +89,8 @@ public final class EntityLifecycleMonitor<I,
     /**
      * {@inheritDoc}
      *
-     * <p>Memoizes the ID of the event applied by the given phase.
+     * <p>Memoizes the ID of the event applied by the given phase. The received event IDs will be
+     * reported to the {@link Repository.Lifecycle} after a successful commit.
      */
     @Override
     public void onAfterPhase(Transaction.Phase<I, E, S, B> phase) {

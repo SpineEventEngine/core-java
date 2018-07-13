@@ -36,6 +36,14 @@ import io.spine.server.command.Assign;
  * <p>All the commands in the system (except the commands in the {@code System} bounded context)
  * have an associated {@code CommandLifecycle}.
  *
+ * <p>When a command is received by the {@link io.spine.server.commandbus.CommandBus CommandBus},
+ * the {@link CommandReceived} event occurs. Then the command passes a number of
+ * {@linkplain io.spine.server.bus.BusFilter filters} and either is acknowledged
+ * ({@link CommandAcknowledged}) or errors ({@link CommandErrored}).
+ * If the command is acknowledged, it is passed to a dispatcher ({@link CommandDispatched}).
+ * After dispatching, the command is handled and either {@link CommandHandled},
+ * or {@link CommandRejected}, or {@link CommandErrored} event occurs.
+ *
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("OverlyCoupledClass") // OK for an aggregate class.
