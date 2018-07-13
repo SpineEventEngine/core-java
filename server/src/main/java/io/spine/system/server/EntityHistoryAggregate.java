@@ -30,6 +30,7 @@ import io.spine.server.entity.LifecycleFlags;
 
 import java.util.function.UnaryOperator;
 
+import static com.google.protobuf.util.Timestamps.compare;
 import static io.spine.base.Time.getCurrentTime;
 
 /**
@@ -39,12 +40,13 @@ import static io.spine.base.Time.getCurrentTime;
  * and {@link io.spine.server.procman.ProcessManager ProcessManager} in the system has
  * a corresponding entity history.
  *
+ * <p>The history of this aggregate has the knowledge about all the messages ever dispatched to
+ * the associated entity.
+ *
  * <p>An {@code EntityHistory} gives the record-based entities (such as {@code Projection}s and
  * {@code ProcessManager}s) traits of an event-sourced entity. For instance, with the help
  * of {@code EntityHistory} the history of a record-based entity can be investigated and
  * manipulated. The major use case for this facility is implementing idempotent message handlers.
- *
- * <p>The aggregate stores IDs of all the messages ever dispatched to the associated entity.
  *
  * <p>This aggregate belongs to the {@code System} bounded context. The aggregate doesn't have
  * an own entity history.
@@ -178,22 +180,26 @@ public final class EntityHistoryAggregate
 
     @Apply
     private void on(EventDispatchedToSubscriber event) {
-        getBuilder().addEvent(event.getPayload());
+        updateLastEventTime(event.getPayload()
+                                 .getWhenDispatched());
     }
 
     @Apply
     private void on(EventDispatchedToReactor event) {
-        getBuilder().addEvent(event.getPayload());
+        updateLastEventTime(event.getPayload()
+                                 .getWhenDispatched());
     }
 
     @Apply
     private void on(EventPassedToApplier event) {
-        getBuilder().addEvent(event.getPayload());
+        updateLastEventTime(event.getPayload()
+                                 .getWhenDispatched());
     }
 
     @Apply
     private void on(CommandDispatchedToHandler event) {
-        getBuilder().addCommand(event.getPayload());
+        updateLastCommandTime(event.getPayload()
+                                   .getWhenDispatched());
     }
 
     @Apply
@@ -247,5 +253,29 @@ public final class EntityHistoryAggregate
         LifecycleHistory newHistory = mutation.apply(builder)
                                               .build();
         getBuilder().setLifecycle(newHistory);
+    }
+
+    private void updateLastEventTime(Timestamp newEvent) {
+        Timestamp lastEvent = getBuilder().getDispatching()
+                                          .getLastEvent();
+        if (compare(newEvent, lastEvent) > 0) {
+            updateDispatchingHistory(builder -> builder.setLastEvent(newEvent));
+        }
+    }
+
+    private void updateLastCommandTime(Timestamp newCommand) {
+        Timestamp lastCommand = getBuilder().getDispatching()
+                                            .getLastCommand();
+        if (compare(newCommand, lastCommand) > 0) {
+            updateDispatchingHistory(builder -> builder.setLastCommand(newCommand));
+        }
+    }
+
+    private void updateDispatchingHistory(UnaryOperator<DispatchingHistory.Builder> mutation) {
+        DispatchingHistory.Builder builder = getBuilder().getDispatching()
+                                                         .toBuilder();
+        DispatchingHistory newHistory = mutation.apply(builder)
+                                                .build();
+        getBuilder().setDispatching(newHistory);
     }
 }

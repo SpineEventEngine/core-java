@@ -65,21 +65,14 @@ message EntityHistory {
     // The kind of the entity.
     EntityOption.Kind kind = 2;
 
-    // All the commands ever dispatched to the entity.
-    repeated DispatchedCommand command = 3;
-
-    // All the events ever dispatched to the entity.
-    //
-    // In case of Aggregates, this includes both the applied events of the aggregate itself and
-    // the events dispatched to the reactor methods.
-    //
-    repeated DispatchedEvent event = 4;
-
     // The history of lifecycle flags changes.
-    LifecycleHistory lifecycle = 5;
+    LifecycleHistory lifecycle = 3;
 
-    // The most recent time when
-    google.protobuf.Timestamp last_state_change = 6;
+    // The most recent time when the entity state has been changed.
+    google.protobuf.Timestamp last_state_change = 4;
+
+    // The history of messages dispatched to the entity.
+    DispatchingHistory dispatching = 5;
 }
 
 // The history of an entity lifecycle.
@@ -121,6 +114,19 @@ message LifecycleHistory {
     // the most recent occurance.
     //
     google.protobuf.Timestamp when_restored = 5;
+}
+
+// The history of dispatching messages to the entity.
+//
+// Contains timespamps of most recent command and event dispatched to the entity.
+//
+message DispatchingHistory {
+
+    // The most recent time when a command was dispatched to the entity.
+    google.protobuf.Timestamp last_command = 1;
+
+    // The most recent time when an event was dispatched to the entity.
+    google.protobuf.Timestamp last_event = 2;
 }
 
 // A record of an event dispatched to a certain entity.
