@@ -31,7 +31,7 @@ import io.spine.test.Tests;
 
 import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.test.TestValues.newUuidValue;
-import static io.spine.test.TimeTests.Past.minutesAgo;
+import static io.spine.time.testing.TimeTests.Past.minutesAgo;
 
 /**
  * @author Alexander Yevsyukov
@@ -42,8 +42,8 @@ public class GivenEvent {
             TestEventFactory.newInstance(toAny(GivenEvent.class.getSimpleName()),
                                          EventsTest.class);
 
+    /** Prevent instantiation of this utility class. */
     private GivenEvent() {
-        // Prevent instantiation of this utility class.
     }
 
     public static EventContext context() {

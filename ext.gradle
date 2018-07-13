@@ -25,7 +25,7 @@
  *  as we want to manage the versions in a single source.
  */
  
-def final SPINE_VERSION = '0.10.46-SNAPSHOT'
+def final SPINE_VERSION = '0.10.47-SNAPSHOT'
 
 ext {
 
@@ -35,7 +35,7 @@ ext {
     // Depend on `base` for the general definitions and a model compiler.
     spineBaseVersion = '0.10.46-SNAPSHOT'
 
-    spineTimeVersion = '0.10.29-SNAPSHOT'
+    spineTimeVersion = '0.10.45-SNAPSHOT'
 
-    gRpcVersion = '1.10.0'
+    gRpcVersion = '1.13.0'
 }
