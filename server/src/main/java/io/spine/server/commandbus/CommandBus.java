@@ -184,7 +184,7 @@ public class CommandBus extends Bus<Command,
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a protected factory method
     @Override
     protected Deque<BusFilter<CommandEnvelope>> createFilterChain() {
-        BusFilter<CommandEnvelope> gatewayFilter = new CommandWatchdog(systemGateway);
+        BusFilter<CommandEnvelope> gatewayFilter = new CommandReceivedTap(systemGateway);
         filterChain.push(gatewayFilter);
         filterChain.push(scheduler);
         return filterChain;

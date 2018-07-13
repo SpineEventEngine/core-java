@@ -40,11 +40,11 @@ import java.util.Optional;
  *
  * @author Dmytro Dashenkov
  */
-final class CommandWatchdog implements BusFilter<CommandEnvelope> {
+final class CommandReceivedTap implements BusFilter<CommandEnvelope> {
 
     private final SystemGateway systemGateway;
 
-    CommandWatchdog(SystemGateway gateway) {
+    CommandReceivedTap(SystemGateway gateway) {
         systemGateway = gateway;
     }
 
@@ -62,10 +62,5 @@ final class CommandWatchdog implements BusFilter<CommandEnvelope> {
                 .setPayload(domainCommand)
                 .build();
         return result;
-    }
-
-    @Override
-    public void close() {
-        // NoOp.
     }
 }
