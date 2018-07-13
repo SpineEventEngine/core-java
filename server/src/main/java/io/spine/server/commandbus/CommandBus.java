@@ -38,6 +38,7 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.rejection.RejectionBus;
+import io.spine.system.server.DispatchCommand;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -200,7 +201,7 @@ public class CommandBus extends Bus<Command,
         final CommandDispatcher<?> dispatcher = getDispatcher(envelope);
         try {
             dispatcher.dispatch(envelope);
-            commandStore.setCommandStatusOk(envelope);
+            onCommandDispatched(envelope);
         } catch (RuntimeException e) {
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(envelope, cause, log);
@@ -213,6 +214,15 @@ public class CommandBus extends Bus<Command,
                 rejectionBus().post(rejection);
             }
         }
+    }
+
+    private void onCommandDispatched(CommandEnvelope command) {
+        DispatchCommand systemCommand = DispatchCommand
+                .newBuilder()
+                .setId(command.getId())
+                .build();
+        systemGateway.postCommand(systemCommand, command.getTenantId());
+        commandStore.setCommandStatusOk(command);
     }
 
     /**

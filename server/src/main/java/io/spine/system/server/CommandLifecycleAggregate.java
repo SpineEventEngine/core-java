@@ -74,7 +74,6 @@ public final class CommandLifecycleAggregate
     CommandDispatched handle(DispatchCommand command) {
         return CommandDispatched.newBuilder()
                                 .setId(command.getId())
-                                .setReceiver(command.getReceiver())
                                 .build();
     }
 
@@ -82,6 +81,7 @@ public final class CommandLifecycleAggregate
     CommandHandled handle(MarkCommandAsHandled command) {
         return CommandHandled.newBuilder()
                              .setId(command.getId())
+                             .setReceiver(command.getReceiver())
                              .build();
     }
 
@@ -90,6 +90,7 @@ public final class CommandLifecycleAggregate
         return CommandErrored.newBuilder()
                              .setId(command.getId())
                              .setError(command.getError())
+                             .setReceiver(command.getReceiver())
                              .build();
     }
 
@@ -98,6 +99,7 @@ public final class CommandLifecycleAggregate
         return CommandRejected.newBuilder()
                               .setId(command.getId())
                               .setRejection(command.getRejection())
+                              .setReceiver(command.getReceiver())
                               .build();
     }
 
@@ -127,13 +129,13 @@ public final class CommandLifecycleAggregate
                                     .toBuilder()
                                     .setWhenDispatched(context.getTimestamp())
                                     .build();
-        getBuilder().setStatus(status)
-                    .setReceiver(event.getReceiver());
+        getBuilder().setStatus(status);
     }
 
     @Apply
     private void on(CommandHandled event, EventContext context) {
         setProcessingStatus(Responses.statusOk(), context.getTimestamp());
+        getBuilder().setReceiver(event.getReceiver());
     }
 
     @Apply
@@ -143,6 +145,7 @@ public final class CommandLifecycleAggregate
                 .setError(event.getError())
                 .build();
         setProcessingStatus(status, context.getTimestamp());
+        getBuilder().setReceiver(event.getReceiver());
     }
 
     @Apply
@@ -152,6 +155,7 @@ public final class CommandLifecycleAggregate
                 .setRejection(event.getRejection())
                 .build();
         setProcessingStatus(status, context.getTimestamp());
+        getBuilder().setReceiver(event.getReceiver());
     }
 
     private void setProcessingStatus(Status status, Timestamp whenProcessed) {

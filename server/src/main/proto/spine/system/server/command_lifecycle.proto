@@ -51,11 +51,24 @@ message CommandLifecycle {
     // The command.
     spine.core.Command command = 2;
 
-    // The ID of the command receiver entity.
-    spine.client.EntityId receiver = 3;
+    // The receiver of the command.
+    CommandReceiver receiver = 3;
 
     // The current status of the command.
     CommandStatus status = 4 [(required) = true];
+}
+
+// A receiver of a command.
+//
+// This type represents an ID of an entity, which handles the command.
+//
+message CommandReceiver {
+
+    // The ID of the entity which the command is dispatched to.
+    spine.client.EntityId entity_id = 1 [(valid) = true];
+
+    // The state type URL of the entity ehich received the command.
+    string type_url = 2 [(required) = true];
 }
 
 // The status of the command processing.
