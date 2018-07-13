@@ -22,7 +22,6 @@ package io.spine.server.aggregate.given.aggregate;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -42,6 +41,7 @@ import io.spine.test.aggregate.command.AggCreateTask;
 import io.spine.test.aggregate.command.AggReassignTask;
 import io.spine.test.aggregate.task.AggTaskId;
 import io.spine.testdata.Sample;
+import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeUrl;
 
 import java.util.List;

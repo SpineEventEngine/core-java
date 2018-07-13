@@ -24,7 +24,6 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.React;
@@ -45,6 +44,7 @@ import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectCancelled;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotStartArchivedProject;
+import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.validate.StringValueVBuilder;
 
 import java.util.List;

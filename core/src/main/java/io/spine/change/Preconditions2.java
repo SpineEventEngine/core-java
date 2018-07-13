@@ -42,8 +42,8 @@ final class Preconditions2 {
     private static final String ERR_CANNOT_BE_EQUAL =
             "`expected` and `actual` cannot be equal in ValueMismatch";
 
+    /** Prevent instantiation of this utility class. */
     private Preconditions2() {
-        // Prevent instantiation of this utility class.
     }
 
     /**

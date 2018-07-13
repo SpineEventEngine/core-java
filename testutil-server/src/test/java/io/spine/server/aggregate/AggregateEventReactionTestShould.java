@@ -20,9 +20,9 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.server.expected.EventHandlerExpected;
 import io.spine.server.aggregate.given.AggregateEventReactionTestShouldEnv.EventReactingAggregate;
 import io.spine.server.aggregate.given.AggregateEventReactionTestShouldEnv.EventReactingAggregateTest;
+import io.spine.server.expected.EventHandlerExpected;
 import io.spine.test.testutil.TUProjectAggregate;
 import io.spine.test.testutil.TUProjectAssigned;
 import org.junit.jupiter.api.BeforeEach;

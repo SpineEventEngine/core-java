@@ -55,7 +55,7 @@ public abstract class CommandAttribute<T>
 
     @Override
     protected final Map<String, Any> getMap(CommandContext context) {
-        return context.getAttributes();
+        return context.getAttributesMap();
     }
 
     @Override

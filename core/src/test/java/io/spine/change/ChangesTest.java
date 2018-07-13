@@ -24,21 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
-import io.spine.test.TimeTests;
-import io.spine.time.Interval;
-import io.spine.time.Intervals;
-import io.spine.time.LocalDate;
-import io.spine.time.LocalDates;
-import io.spine.time.LocalTime;
-import io.spine.time.LocalTimes;
-import io.spine.time.OffsetDate;
-import io.spine.time.OffsetDateTime;
-import io.spine.time.OffsetDateTimes;
-import io.spine.time.OffsetDates;
-import io.spine.time.OffsetTime;
-import io.spine.time.OffsetTimes;
-import io.spine.time.ZoneOffset;
-import io.spine.time.ZoneOffsets;
+import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -46,15 +32,12 @@ import org.junit.jupiter.api.Test;
 import java.util.UUID;
 
 import static com.google.protobuf.ByteString.copyFromUtf8;
-import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.time.Durations2.minutes;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check handling
                                         of preconditions */,
@@ -85,14 +68,6 @@ class ChangesTest {
         new NullPointerTester()
                 .setDefault(ByteString.class, ByteString.EMPTY)
                 .setDefault(Timestamp.class, Time.getCurrentTime())
-                .setDefault(OffsetTime.class, OffsetTimes.now(ZoneOffsets.UTC))
-                .setDefault(OffsetDate.class, OffsetDates.now(ZoneOffsets.UTC))
-                .setDefault(OffsetDateTime.class, OffsetDateTimes.now(ZoneOffsets.UTC))
-                .setDefault(LocalDate.class, LocalDates.now())
-                .setDefault(LocalTime.class, LocalTimes.now())
-                .setDefault(Interval.class,
-                            Intervals.between(subtract(getCurrentTime(), minutes(1)),
-                                              getCurrentTime()))
                 .testAllPublicStaticMethods(Changes.class);
     }
 
@@ -144,8 +119,8 @@ class ChangesTest {
 
             final BooleanChange result = Changes.of(s1, s2);
 
-            assertTrue(Boolean.compare(s1, result.getPreviousValue()) == 0);
-            assertTrue(Boolean.compare(s2, result.getNewValue()) == 0);
+            assertEquals(s1, result.getPreviousValue());
+            assertEquals(s2, result.getNewValue());
         }
 
         @Test
@@ -156,8 +131,8 @@ class ChangesTest {
 
             final DoubleChange result = Changes.of(s1, s2);
 
-            assertTrue(Double.compare(s1, result.getPreviousValue()) == 0);
-            assertTrue(Double.compare(s2, result.getNewValue()) == 0);
+            assertEquals(s1, result.getPreviousValue());
+            assertEquals(s2, result.getNewValue());
         }
 
         @Test
@@ -168,8 +143,8 @@ class ChangesTest {
 
             final Int32Change result = Changes.ofInt32(s1, s2);
 
-            assertTrue(Integer.compare(s1, result.getPreviousValue()) == 0);
-            assertTrue(Integer.compare(s2, result.getNewValue()) == 0);
+            assertEquals(s1, result.getPreviousValue());
+            assertEquals(s2, result.getNewValue());
         }
 
         @Test
@@ -180,8 +155,8 @@ class ChangesTest {
 
             final Int64Change result = Changes.ofInt64(s1, s2);
 
-            assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
-            assertTrue(Long.compare(s2, result.getNewValue()) == 0);
+            assertEquals(s1, result.getPreviousValue());
+            assertEquals(s2, result.getNewValue());
         }
 
         @Test
@@ -192,8 +167,8 @@ class ChangesTest {
 
             final FloatChange result = Changes.of(s1, s2);
 
-            assertTrue(Float.compare(s1, result.getPreviousValue()) == 0);
-            assertTrue(Float.compare(s2, result.getNewValue()) == 0);
+            assertEquals(s1, result.getPreviousValue());
+            assertEquals(s2, result.getNewValue());
         }
 
         @Test
@@ -204,8 +179,8 @@ class ChangesTest {
 
             final UInt32Change result = Changes.ofUInt32(s1, s2);
 
-            assertTrue(Integer.compare(s1, result.getPreviousValue()) == 0);
-            assertTrue(Integer.compare(s2, result.getNewValue()) == 0);
+            assertEquals(s1, result.getPreviousValue());
+            assertEquals(s2, result.getNewValue());
         }
 
         @Test
@@ -216,8 +191,8 @@ class ChangesTest {
 
             final UInt64Change result = Changes.ofUInt64(s1, s2);
 
-            assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
-            assertTrue(Long.compare(s2, result.getNewValue()) == 0);
+            assertEquals(s1, result.getPreviousValue());
+            assertEquals(s2, result.getNewValue());
         }
 
         @Test
@@ -228,8 +203,8 @@ class ChangesTest {
 
             final SInt32Change result = Changes.ofSInt32(s1, s2);
 
-            assertTrue(Integer.compare(s1, result.getPreviousValue()) == 0);
-            assertTrue(Integer.compare(s2, result.getNewValue()) == 0);
+            assertEquals(s1, result.getPreviousValue());
+            assertEquals(s2, result.getNewValue());
         }
 
         @Test
@@ -240,8 +215,8 @@ class ChangesTest {
 
             final SInt64Change result = Changes.ofSInt64(s1, s2);
 
-            assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
-            assertTrue(Long.compare(s2, result.getNewValue()) == 0);
+            assertEquals(s1, result.getPreviousValue());
+            assertEquals(s2, result.getNewValue());
         }
 
         @Test
@@ -252,8 +227,8 @@ class ChangesTest {
 
             final Fixed32Change result = Changes.ofFixed32(s1, s2);
 
-            assertTrue(Integer.compare(s1, result.getPreviousValue()) == 0);
-            assertTrue(Integer.compare(s2, result.getNewValue()) == 0);
+            assertEquals(s1, result.getPreviousValue());
+            assertEquals(s2, result.getNewValue());
         }
 
         @Test
@@ -264,8 +239,8 @@ class ChangesTest {
 
             final Fixed64Change result = Changes.ofFixed64(s1, s2);
 
-            assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
-            assertTrue(Long.compare(s2, result.getNewValue()) == 0);
+            assertEquals(s1, result.getPreviousValue());
+            assertEquals(s2, result.getNewValue());
         }
 
         @Test
@@ -276,8 +251,8 @@ class ChangesTest {
 
             final Sfixed32Change result = Changes.ofSfixed32(s1, s2);
 
-            assertTrue(Integer.compare(s1, result.getPreviousValue()) == 0);
-            assertTrue(Integer.compare(s2, result.getNewValue()) == 0);
+            assertEquals(s1, result.getPreviousValue());
+            assertEquals(s2, result.getNewValue());
         }
 
         @Test
@@ -288,89 +263,8 @@ class ChangesTest {
 
             final Sfixed64Change result = Changes.ofSfixed64(s1, s2);
 
-            assertTrue(Long.compare(s1, result.getPreviousValue()) == 0);
-            assertTrue(Long.compare(s2, result.getNewValue()) == 0);
-        }
-
-        @Test
-        @DisplayName("Interval")
-        void forIntervals() {
-            final Timestamp fiveMinutesAgo = TimeTests.Past.minutesAgo(5);
-            final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
-            final Timestamp now = getCurrentTime();
-            final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
-            final Interval fiveMinutes = Intervals.between(fiveMinutesAgo, now);
-
-            final IntervalChange result = Changes.of(fourMinutes, fiveMinutes);
-
-            assertEquals(fourMinutes, result.getPreviousValue());
-            assertEquals(fiveMinutes, result.getNewValue());
-        }
-
-        @Test
-        @DisplayName("LocalDate")
-        void forLocalDates() {
-            final LocalDate today = LocalDates.now();
-            final LocalDate tomorrow = LocalDates.addDays(today, 1);
-
-            final LocalDateChange result = Changes.of(today, tomorrow);
-
-            assertEquals(today, result.getPreviousValue());
-            assertEquals(tomorrow, result.getNewValue());
-        }
-
-        @Test
-        @DisplayName("LocalTime")
-        void forLocalTimes() {
-            final LocalTime now = LocalTimes.now();
-            final LocalTime inFiveHours = LocalTimes.addHours(now, 5);
-
-            final LocalTimeChange result = Changes.of(now, inFiveHours);
-
-            assertEquals(now, result.getPreviousValue());
-            assertEquals(inFiveHours, result.getNewValue());
-        }
-
-        @Test
-        @DisplayName("OffsetDate")
-        void forOffsetDates() {
-            final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
-            final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
-            final OffsetDate previousDate = OffsetDates.now(inKiev);
-            final OffsetDate newDate = OffsetDates.now(inLuxembourg);
-
-            final OffsetDateChange result = Changes.of(previousDate, newDate);
-
-            assertEquals(previousDate, result.getPreviousValue());
-            assertEquals(newDate, result.getNewValue());
-        }
-
-        @Test
-        @DisplayName("OffsetTime")
-        void forOffsetTimes() {
-            final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
-            final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
-            final OffsetTime previousTime = OffsetTimes.now(inKiev);
-            final OffsetTime newTime = OffsetTimes.now(inLuxembourg);
-
-            final OffsetTimeChange result = Changes.of(previousTime, newTime);
-
-            assertEquals(previousTime, result.getPreviousValue());
-            assertEquals(newTime, result.getNewValue());
-        }
-
-        @Test
-        @DisplayName("OffsetDateTime")
-        void forOffsetDateTimes() {
-            final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
-            final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
-            final OffsetDateTime previousDateTime = OffsetDateTimes.now(inKiev);
-            final OffsetDateTime newDateTime = OffsetDateTimes.now(inLuxembourg);
-
-            final OffsetDateTimeChange result = Changes.of(previousDateTime, newDateTime);
-
-            assertEquals(previousDateTime, result.getPreviousValue());
-            assertEquals(newDateTime, result.getNewValue());
+            assertEquals(s1, result.getPreviousValue());
+            assertEquals(s2, result.getNewValue());
         }
 
         private String randomUuid() {
@@ -494,53 +388,6 @@ class ChangesTest {
             final long value = 1666L;
             assertThrows(IllegalArgumentException.class, () -> Changes.ofSfixed64(value, value));
         }
-
-        @Test
-        @DisplayName("Interval")
-        void intervals() {
-            final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
-            final Timestamp now = getCurrentTime();
-            final Interval interval = Intervals.between(fourMinutesAgo, now);
-            assertThrows(IllegalArgumentException.class, () -> Changes.of(interval, interval));
-        }
-
-        @Test
-        @DisplayName("LocalDate")
-        void localDates() {
-            final LocalDate today = LocalDates.now();
-            assertThrows(IllegalArgumentException.class, () -> Changes.of(today, today));
-        }
-
-        @Test
-        @DisplayName("LocalTime")
-        void localTimes() {
-            final LocalTime now = LocalTimes.now();
-            assertThrows(IllegalArgumentException.class, () -> Changes.of(now, now));
-        }
-
-        @Test
-        @DisplayName("OffsetDate")
-        void offsetDates() {
-            final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
-            final OffsetDate date = OffsetDates.now(inLuxembourg);
-            assertThrows(IllegalArgumentException.class, () -> Changes.of(date, date));
-        }
-
-        @Test
-        @DisplayName("OffsetTime")
-        void offsetTimes() {
-            final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
-            final OffsetTime now = OffsetTimes.now(inLuxembourg);
-            assertThrows(IllegalArgumentException.class, () -> Changes.of(now, now));
-        }
-
-        @Test
-        @DisplayName("OffsetDateTime")
-        void offsetDateTimes() {
-            final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
-            final OffsetDateTime now = OffsetDateTimes.now(inLuxembourg);
-            assertThrows(IllegalArgumentException.class, () -> Changes.of(now, now));
-        }
     }
 
     @Nested
@@ -586,100 +433,6 @@ class ChangesTest {
         @DisplayName("Timestamp newValue")
         void timestampNew() {
             assertThrows(NullPointerException.class, () -> Changes.of(getCurrentTime(), null));
-        }
-
-        @Test
-        @DisplayName("Interval previousValue")
-        void intervalPrevious() {
-            final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
-            final Timestamp now = getCurrentTime();
-            final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
-            assertThrows(NullPointerException.class, () -> Changes.of(null, fourMinutes));
-        }
-
-        @Test
-        @DisplayName("Interval newValue")
-        void intervalNew() {
-            final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
-            final Timestamp now = getCurrentTime();
-            final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
-            assertThrows(NullPointerException.class, () -> Changes.of(fourMinutes, null));
-        }
-
-        @Test
-        @DisplayName("LocalDate previousValue")
-        void localDatePrevious() {
-            final LocalDate today = LocalDates.now();
-            assertThrows(NullPointerException.class, () -> Changes.of(null, today));
-        }
-
-        @Test
-        @DisplayName("LocalDate newValue")
-        void localDateNew() {
-            final LocalDate today = LocalDates.now();
-            assertThrows(NullPointerException.class, () -> Changes.of(today, null));
-        }
-
-        @Test
-        @DisplayName("LocalTime previousValue")
-        void localTimePrevious() {
-            final LocalTime now = LocalTimes.now();
-            assertThrows(NullPointerException.class, () -> Changes.of(null, now));
-        }
-
-        @Test
-        @DisplayName("LocalTime newValue")
-        void localTimeNew() {
-            final LocalTime now = LocalTimes.now();
-            assertThrows(NullPointerException.class, () -> Changes.of(now, null));
-        }
-
-        @Test
-        @DisplayName("OffsetDate previousValue")
-        void offsetDatePrevious() {
-            final ZoneOffset inLassVegas = ZoneOffsets.ofHours(8);
-            final OffsetDate date = OffsetDates.now(inLassVegas);
-            assertThrows(NullPointerException.class, () -> Changes.of(null, date));
-        }
-
-        @Test
-        @DisplayName("OffsetDate newValue")
-        void offsetDateNew() {
-            final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
-            final OffsetDate date = OffsetDates.now(inKiev);
-            assertThrows(NullPointerException.class, () -> Changes.of(date, null));
-        }
-
-        @Test
-        @DisplayName("OffsetTime previousValue")
-        void offsetTimePrevious() {
-            final ZoneOffset inLassVegas = ZoneOffsets.ofHours(8);
-            final OffsetTime now = OffsetTimes.now(inLassVegas);
-            assertThrows(NullPointerException.class, () -> Changes.of(null, now));
-        }
-
-        @Test
-        @DisplayName("OffsetTime newValue")
-        void offsetTimeNew() {
-            final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
-            final OffsetTime now = OffsetTimes.now(inKiev);
-            assertThrows(NullPointerException.class, () -> Changes.of(now, null));
-        }
-
-        @Test
-        @DisplayName("OffsetDateTime previousValue")
-        void offsetDateTimePrevious() {
-            final ZoneOffset inLassVegas = ZoneOffsets.ofHours(8);
-            final OffsetDateTime now = OffsetDateTimes.now(inLassVegas);
-            assertThrows(NullPointerException.class, () -> Changes.of(null, now));
-        }
-
-        @Test
-        @DisplayName("OffsetDateTime newValue")
-        void offsetDateTimeNew() {
-            final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
-            final OffsetDateTime now = OffsetDateTimes.now(inKiev);
-            assertThrows(NullPointerException.class, () -> Changes.of(now, null));
         }
     }
 }

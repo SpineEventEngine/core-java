@@ -67,7 +67,6 @@ import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
-import io.spine.time.ZoneOffsets;
 import io.spine.type.TypeUrl;
 import io.spine.validate.Validate;
 import io.spine.validate.ValidationError;
@@ -166,8 +165,7 @@ class StandTest extends TenantAwareTest {
     protected static ActorRequestFactory createRequestFactory(@Nullable TenantId tenant) {
         ActorRequestFactory.Builder builder = ActorRequestFactory
                 .newBuilder()
-                .setActor(of(newUuid()))
-                .setZoneOffset(ZoneOffsets.UTC);
+                .setActor(of(newUuid()));
         if (tenant != null) {
             builder.setTenantId(tenant);
         }

@@ -23,7 +23,6 @@ package io.spine.server.command.given;
 import com.google.protobuf.Message;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.core.Ack;
 import io.spine.core.Command;
@@ -41,6 +40,7 @@ import io.spine.test.command.Project;
 import io.spine.test.command.ProjectId;
 import io.spine.test.command.ProjectVBuilder;
 import io.spine.test.command.event.DCmdProjectCreated;
+import io.spine.testing.client.TestActorRequestFactory;
 
 import java.io.IOException;
 import java.util.concurrent.CountDownLatch;
