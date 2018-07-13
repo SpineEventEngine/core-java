@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.copyOf;
 import static com.google.common.collect.Lists.newLinkedList;
 
@@ -145,9 +146,9 @@ public final class EntityLifecycleMonitor<I,
         if (entityId == null) {
             entityId = idToCheck;
         } else {
-//            checkState(entityId.equals(idToCheck),
-//                       "Tried to reuse an instance of %s for multiple transactions.",
-//                       EntityLifecycleMonitor.class.getSimpleName());
+            checkState(entityId.equals(idToCheck),
+                       "Tried to reuse an instance of %s for multiple transactions.",
+                       EntityLifecycleMonitor.class.getSimpleName());
         }
     }
 }
