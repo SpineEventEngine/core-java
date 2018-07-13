@@ -26,7 +26,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
@@ -53,6 +52,7 @@ import io.spine.system.server.given.EntityHistoryTestEnv.TestProcman;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestProcmanRepository;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestProjection;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestProjectionRepository;
+import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
@@ -74,9 +74,7 @@ import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Dmytro Dashenkov
