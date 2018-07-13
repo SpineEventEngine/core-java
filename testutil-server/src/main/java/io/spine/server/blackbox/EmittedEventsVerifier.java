@@ -22,7 +22,7 @@ package io.spine.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
-import io.spine.client.blackbox.Count;
+import io.spine.testing.client.blackbox.Count;
 
 import java.util.List;
 

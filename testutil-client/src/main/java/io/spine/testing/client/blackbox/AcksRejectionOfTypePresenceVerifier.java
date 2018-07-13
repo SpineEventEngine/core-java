@@ -18,23 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.testing.client.blackbox;
+
+import com.google.protobuf.Message;
+import io.spine.core.Rejection;
+import io.spine.core.RejectionClass;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
- * This package provides test utilities for implementing black box server testing.
- * Such a tests would provide an ability to test complex systems without setting up 
- * the infrastructure.
- * 
- * <p>One such black box example is for {@link io.spine.server.blackbox.BlackBoxBoundedContext 
- * Bounded Context testing}. It allows sending Commands and Events to the 
- * {@link io.spine.server.BoundedContext Bounded Context} and then verifying their effect 
- * inside of the Bounded Context.
- * 
- * @see io.spine.testing.client.blackbox
- * @see io.spine.server.blackbox.BlackBoxBoundedContext
+ * Verifies that a command or an event was handled responding with a {@link Rejection rejection}
+ * of the provided type.
+ *
+ * @author Mykhailo Drachuk
  */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.blackbox;
+class AcksRejectionOfTypePresenceVerifier extends AcknowledgementsVerifier {
 
-import com.google.errorprone.annotations.CheckReturnValue;
+    private final RejectionClass type;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    /** @param type rejection type in a form of {@link RejectionClass RejectionClass} */
+    AcksRejectionOfTypePresenceVerifier(RejectionClass type) {
+        super();
+        this.type = type;
+    }
+
+    @Override
+    public void verify(Acknowledgements acks) {
+        if (!acks.containRejections(type)) {
+            Class<? extends Message> domainRejection = type.value();
+            fail("Bounded Context did not reject a message of type:" +
+                         domainRejection.getSimpleName());
+        }
+    }
+}

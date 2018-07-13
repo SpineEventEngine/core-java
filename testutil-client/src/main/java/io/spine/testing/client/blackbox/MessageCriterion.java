@@ -18,23 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.testing.client.blackbox;
+
+import com.google.protobuf.Message;
+
 /**
- * This package provides test utilities for implementing black box server testing.
- * Such a tests would provide an ability to test complex systems without setting up 
- * the infrastructure.
- * 
- * <p>One such black box example is for {@link io.spine.server.blackbox.BlackBoxBoundedContext 
- * Bounded Context testing}. It allows sending Commands and Events to the 
- * {@link io.spine.server.BoundedContext Bounded Context} and then verifying their effect 
- * inside of the Bounded Context.
- * 
- * @see io.spine.testing.client.blackbox
- * @see io.spine.server.blackbox.BlackBoxBoundedContext
+ * Specifies the rules a message must match.
+ *
+ * <p>Optionally can contain a criterion description, useful for display by test assertions.
+ *
+ * @param <T> a protobuf message type, that is checked to match criterion
+ * @author Mykhailo Drachuk
  */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.blackbox;
+@FunctionalInterface
+interface MessageCriterion<T extends Message> {
 
-import com.google.errorprone.annotations.CheckReturnValue;
+    /**
+     * Checks if target matches the criterion.
+     *
+     * @param target an object ot check
+     * @return {@code true} if target matches the criterion, {@code false} otherwise
+     */
+    boolean matches(T target);
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    /**
+     * @return a message describing the criterion
+     */
+    default String description() {
+        return "The message must match the criterion.";
+    }
+}

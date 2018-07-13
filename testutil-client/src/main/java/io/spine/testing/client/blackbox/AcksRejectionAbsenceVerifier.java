@@ -18,23 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.testing.client.blackbox;
+
+import io.spine.core.Rejection;
+
+import static org.junit.jupiter.api.Assertions.fail;
+
 /**
- * This package provides test utilities for implementing black box server testing.
- * Such a tests would provide an ability to test complex systems without setting up 
- * the infrastructure.
+ * Verifies that a command handling did not respond with any {@link Rejection rejections}.
  * 
- * <p>One such black box example is for {@link io.spine.server.blackbox.BlackBoxBoundedContext 
- * Bounded Context testing}. It allows sending Commands and Events to the 
- * {@link io.spine.server.BoundedContext Bounded Context} and then verifying their effect 
- * inside of the Bounded Context.
- * 
- * @see io.spine.testing.client.blackbox
- * @see io.spine.server.blackbox.BlackBoxBoundedContext
+ * @author Mykhailo Drachuk
  */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.blackbox;
+class AcksRejectionAbsenceVerifier extends AcknowledgementsVerifier {
 
-import com.google.errorprone.annotations.CheckReturnValue;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+    @Override
+    public void verify(Acknowledgements acks) {
+        if (acks.containRejections()) {
+            fail("Bounded Context unexpectedly rejected a message");
+        }
+    }
+}

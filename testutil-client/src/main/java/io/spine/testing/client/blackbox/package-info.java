@@ -17,23 +17,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 /**
- * This package provides test utilities for implementing black box server testing.
- * Such a tests would provide an ability to test complex systems without setting up 
- * the infrastructure.
- * 
- * <p>One such black box example is for {@link io.spine.server.blackbox.BlackBoxBoundedContext 
- * Bounded Context testing}. It allows sending Commands and Events to the 
- * {@link io.spine.server.BoundedContext Bounded Context} and then verifying their effect 
- * inside of the Bounded Context.
- * 
- * @see io.spine.testing.client.blackbox
- * @see io.spine.server.blackbox.BlackBoxBoundedContext
+ * This package provides test utilities for implementing black box testing.
+ * Black box testing is mostly done by the {@code testutils-server} module, and this package 
+ * serves some of its {@code client}-oriented building blocks like {@link 
+ * io.spine.testing.client.blackbox.AcknowledgementsVerifier ack verifiers} or {@link 
+ * io.spine.testing.client.blackbox.MessageCriterion message criteria}.
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.server.blackbox;
+package io.spine.testing.client.blackbox;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 

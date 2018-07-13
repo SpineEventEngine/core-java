@@ -22,9 +22,9 @@ package io.spine.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
-import io.spine.client.TestActorRequestFactory;
-import io.spine.client.blackbox.Acknowledgements;
-import io.spine.client.blackbox.AcknowledgementsVerifier;
+import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.client.blackbox.Acknowledgements;
+import io.spine.testing.client.blackbox.AcknowledgementsVerifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.Event;

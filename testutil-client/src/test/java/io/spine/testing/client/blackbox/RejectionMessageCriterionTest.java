@@ -18,23 +18,28 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.testing.client.blackbox;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 /**
- * This package provides test utilities for implementing black box server testing.
- * Such a tests would provide an ability to test complex systems without setting up 
- * the infrastructure.
- * 
- * <p>One such black box example is for {@link io.spine.server.blackbox.BlackBoxBoundedContext 
- * Bounded Context testing}. It allows sending Commands and Events to the 
- * {@link io.spine.server.BoundedContext Bounded Context} and then verifying their effect 
- * inside of the Bounded Context.
- * 
- * @see io.spine.testing.client.blackbox
- * @see io.spine.server.blackbox.BlackBoxBoundedContext
+ * @author Mykhailo Drachuk
  */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.blackbox;
+@DisplayName("Rejection Predicate should")
+class RejectionMessageCriterionTest {
 
-import com.google.errorprone.annotations.CheckReturnValue;
+    @Test
+    @DisplayName("contain default error message")
+    void containDefaultErrorMessage() {
+        RejectionCriterion predicate = acceptAll();
+        String message = predicate.description();
+        assertNotNull(message);
+    }
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    private static RejectionCriterion acceptAll() {
+        return target -> true;
+    }
+}

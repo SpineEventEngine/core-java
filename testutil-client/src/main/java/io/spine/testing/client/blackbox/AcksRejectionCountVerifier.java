@@ -18,23 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.testing.client.blackbox;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
- * This package provides test utilities for implementing black box server testing.
- * Such a tests would provide an ability to test complex systems without setting up 
- * the infrastructure.
- * 
- * <p>One such black box example is for {@link io.spine.server.blackbox.BlackBoxBoundedContext 
- * Bounded Context testing}. It allows sending Commands and Events to the 
- * {@link io.spine.server.BoundedContext Bounded Context} and then verifying their effect 
- * inside of the Bounded Context.
- * 
- * @see io.spine.testing.client.blackbox
- * @see io.spine.server.blackbox.BlackBoxBoundedContext
+ * Verifies that a command or an event was handled responding with a rejection specified
+ * amount of times.
+ *
+ * @author Mykhailo Drachuk
  */
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.blackbox;
+class AcksRejectionCountVerifier extends AcknowledgementsVerifier {
 
-import com.google.errorprone.annotations.CheckReturnValue;
+    private final Count expectedCount;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    /** @param expectedCount an amount of rejection that are expected in Bounded Context */
+    AcksRejectionCountVerifier(Count expectedCount) {
+        super();
+        this.expectedCount = expectedCount;
+    }
+
+    @Override
+    public void verify(Acknowledgements acks) {
+        assertEquals(expectedCount.value(), acks.countRejections(),
+                     "Bounded Context did not contain a rejection expected amount of times.");
+    }
+}

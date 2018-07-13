@@ -33,11 +33,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.client.blackbox.AcknowledgementsVerifier.acked;
-import static io.spine.client.blackbox.Count.count;
-import static io.spine.client.blackbox.Count.once;
-import static io.spine.client.blackbox.Count.thrice;
-import static io.spine.client.blackbox.Count.twice;
+import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
+import static io.spine.testing.client.blackbox.Count.count;
+import static io.spine.testing.client.blackbox.Count.once;
+import static io.spine.testing.client.blackbox.Count.thrice;
+import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.server.blackbox.EmittedEventsVerifier.emitted;
 import static io.spine.server.blackbox.given.BlackBoxBoundedContextTestEnv.addTask;
 import static io.spine.server.blackbox.given.BlackBoxBoundedContextTestEnv.createProject;
