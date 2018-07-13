@@ -29,7 +29,7 @@ import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.core.given.GivenTenantId;
 import io.spine.core.given.GivenUserId;
-import io.spine.test.TimeTests;
+import io.spine.time.testing.TimeTests;
 import io.spine.test.commands.RequiredFieldCommand;
 import io.spine.time.Timestamps2;
 import io.spine.time.ZoneOffset;
@@ -49,17 +49,15 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
     @Test
     @DisplayName("create command context for given parameters")
     void createCommandContext() {
-        final TenantId tenantId = GivenTenantId.newUuid();
-        final UserId userId = GivenUserId.newUuid();
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(-3);
-        final int targetVersion = 100500;
+        TenantId tenantId = GivenTenantId.newUuid();
+        UserId userId = GivenUserId.newUuid();
+        ZoneOffset zoneOffset = ZoneOffsets.ofHours(-3);
+        int targetVersion = 100500;
 
-        final CommandContext commandContext = CommandFactory.createContext(tenantId,
-                                                                           userId,
-                                                                           zoneOffset,
-                                                                           targetVersion);
+        CommandContext commandContext =
+                CommandFactory.createContext(tenantId, userId, zoneOffset, targetVersion);
 
-        final ActorContext actorContext = commandContext.getActorContext();
+        ActorContext actorContext = commandContext.getActorContext();
 
         assertEquals(tenantId, actorContext.getTenantId());
         assertEquals(userId, actorContext.getActor());
@@ -77,22 +75,23 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
             // We are creating a range of +/- second between the call to make sure the timestamp
             // would fit into this range. The purpose of this test is to make sure it works with
             // this precision and to add coverage.
-            final Timestamp beforeCall = TimeTests.Past.secondsAgo(1);
-            final Command command = factory().command()
-                                             .create(StringValue.getDefaultInstance());
-            final Timestamp afterCall = TimeTests.Future.secondsFromNow(1);
+            Timestamp beforeCall = TimeTests.Past.secondsAgo(1);
+            Command command = factory().command()
+                                       .create(StringValue.getDefaultInstance());
+            Timestamp afterCall = TimeTests.Future.secondsFromNow(1);
 
             assertTrue(Timestamps2.isBetween(
                     command.getContext()
                            .getActorContext()
-                           .getTimestamp(), beforeCall, afterCall));
+                           .getTimestamp(), beforeCall, afterCall)
+            );
         }
 
         @Test
         @DisplayName("with given entity version")
         void withEntityVersion() {
-            final Command command = factory().command()
-                                             .create(StringValue.getDefaultInstance(), 2);
+            Command command = factory().command()
+                                       .create(StringValue.getDefaultInstance(), 2);
 
             assertEquals(2, command.getContext()
                                    .getTargetVersion());
@@ -100,17 +99,18 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
 
         @Test
         @DisplayName("with own tenant ID")
-        void withOwnTenantID() {
-            final TenantId tenantId = TenantId.newBuilder()
-                                              .setValue(getClass().getSimpleName())
-                                              .build();
-            final ActorRequestFactory mtFactory = ActorRequestFactory.newBuilder()
-                                                                     .setTenantId(tenantId)
-                                                                     .setActor(getActor())
-                                                                     .setZoneOffset(getZoneOffset())
-                                                                     .build();
-            final Command command = mtFactory.command()
-                                             .create(StringValue.getDefaultInstance());
+        void withOwnTenantId() {
+            TenantId tenantId = TenantId
+                    .newBuilder()
+                    .setValue(getClass().getSimpleName())
+                    .build();
+            ActorRequestFactory mtFactory = builder()
+                    .setTenantId(tenantId)
+                    .setActor(actor())
+                    .setZoneOffset(zoneOffset())
+                    .build();
+            Command command = mtFactory.command()
+                                       .create(StringValue.getDefaultInstance());
 
             assertEquals(tenantId, command.getContext()
                                           .getActorContext()
@@ -122,10 +122,12 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
     @DisplayName("throw ValidationException when creating command")
     class NotAccept {
 
+        private final RequiredFieldCommand invalidCommand =
+                RequiredFieldCommand.getDefaultInstance();
+
         @Test
         @DisplayName("from invalid Message")
         void invalidMessage() {
-            final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
             assertThrows(ValidationException.class, () -> factory().command()
                                                                    .create(invalidCommand));
         }
@@ -133,7 +135,6 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("from invalid Message with version")
         void invalidMessageWithVersion() {
-            final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
             assertThrows(ValidationException.class, () -> factory().command()
                                                                    .create(invalidCommand, 42));
         }

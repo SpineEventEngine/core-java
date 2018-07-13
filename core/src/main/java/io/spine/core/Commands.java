@@ -25,6 +25,7 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
@@ -32,10 +33,8 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 import io.spine.time.Timestamps2;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
-import java.util.Collections;
-import java.util.Comparator;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -126,31 +125,25 @@ public final class Commands {
     /**
      * Creates a predicate for filtering commands created after the passed timestamp.
      */
-    public static Predicate<Command> wereAfter(final Timestamp from) {
+    public static Predicate<Command> wereAfter(Timestamp from) {
         checkNotNull(from);
-        return new Predicate<Command>() {
-            @Override
-            public boolean apply(@Nullable Command request) {
-                checkNotNull(request);
-                final Timestamp timestamp = getTimestamp(request);
-                return Timestamps2.isLaterThan(timestamp, from);
-            }
+        return request -> {
+            checkNotNull(request);
+            Timestamp timestamp = getTimestamp(request);
+            return Timestamps2.isLaterThan(timestamp, from);
         };
     }
 
     /**
-     * Creates a predicate for filtering commands created withing given timerange.
+     * Creates a predicate for filtering commands created withing given time range.
      */
-    public static Predicate<Command> wereWithinPeriod(final Timestamp from, final Timestamp to) {
+    public static Predicate<Command> wereWithinPeriod(Timestamp from, Timestamp to) {
         checkNotNull(from);
         checkNotNull(to);
-        return new Predicate<Command>() {
-            @Override
-            public boolean apply(@Nullable Command request) {
-                checkNotNull(request);
-                final Timestamp timestamp = getTimestamp(request);
-                return Timestamps2.isBetween(timestamp, from, to);
-            }
+        return request -> {
+            checkNotNull(request);
+            Timestamp timestamp = getTimestamp(request);
+            return Timestamps2.isBetween(timestamp, from, to);
         };
     }
 
@@ -169,13 +162,10 @@ public final class Commands {
      */
     public static void sort(List<Command> commands) {
         checkNotNull(commands);
-        Collections.sort(commands, new Comparator<Command>() {
-            @Override
-            public int compare(Command o1, Command o2) {
-                final Timestamp timestamp1 = getTimestamp(o1);
-                final Timestamp timestamp2 = getTimestamp(o2);
-                return Timestamps2.compare(timestamp1, timestamp2);
-            }
+        commands.sort((o1, o2) -> {
+            Timestamp timestamp1 = getTimestamp(o1);
+            Timestamp timestamp2 = getTimestamp(o2);
+            return Timestamps.compare(timestamp1, timestamp2);
         });
     }
 
@@ -188,9 +178,9 @@ public final class Commands {
      */
     public static boolean isScheduled(Command command) {
         checkNotNull(command);
-        final Schedule schedule = command.getContext()
-                                         .getSchedule();
-        final Duration delay = schedule.getDelay();
+        Schedule schedule = command.getContext()
+                                   .getSchedule();
+        Duration delay = schedule.getDelay();
         if (isNotDefault(delay)) {
             checkArgument(delay.getSeconds() > 0,
                           "Command delay seconds must be a positive value.");
@@ -207,8 +197,8 @@ public final class Commands {
     public static boolean sameActorAndTenant(CommandContext c1, CommandContext c2) {
         checkNotNull(c1);
         checkNotNull(c2);
-        final ActorContext a1 = c1.getActorContext();
-        final ActorContext a2 = c2.getActorContext();
+        ActorContext a1 = c1.getActorContext();
+        ActorContext a2 = c2.getActorContext();
         return a1.getActor()
                  .equals(a2.getActor()) &&
                a1.getTenantId()
@@ -230,7 +220,7 @@ public final class Commands {
      */
     public static CommandId checkValid(CommandId id) {
         checkNotNull(id);
-        final String idStr = Identifier.toString(id);
+        String idStr = Identifier.toString(id);
         checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
         return id;
     }
@@ -254,8 +244,8 @@ public final class Commands {
         checkNotNull(command);
         checkNotNull(cause);
 
-        final ThrowableMessage rejectionThrowable = Rejections.getCause(cause);
-        final Rejection rejection = Rejections.toRejection(rejectionThrowable, command);
+        ThrowableMessage rejectionThrowable = Rejections.getCause(cause);
+        Rejection rejection = Rejections.toRejection(rejectionThrowable, command);
         return rejection;
     }
 
@@ -265,15 +255,16 @@ public final class Commands {
     static class CommandIdStringifier extends Stringifier<CommandId> {
         @Override
         protected String toString(CommandId commandId) {
-            final String result = commandId.getUuid();
+            String result = commandId.getUuid();
             return result;
         }
 
         @Override
         protected CommandId fromString(String str) {
-            final CommandId result = CommandId.newBuilder()
-                                              .setUuid(str)
-                                              .build();
+            CommandId result = CommandId
+                    .newBuilder()
+                    .setUuid(str)
+                    .build();
             return result;
         }
     }
