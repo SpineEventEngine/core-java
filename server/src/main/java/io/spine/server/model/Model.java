@@ -73,8 +73,13 @@ public class Model {
     private Model() {
     }
 
-    @VisibleForTesting
-    void clear() {
+    /**
+     * Clears the classes already added to the {@code Model}.
+     *
+     * <p>This method can be useful when multiple Spine projects are processed under the same
+     * static context, e.g. in tests.
+     */
+    public void clear() {
         classes.clear();
     }
 
