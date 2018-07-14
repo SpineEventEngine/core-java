@@ -69,7 +69,7 @@ public class Model {
         return Singleton.INSTANCE.value;
     }
 
-    /** Prevent instantiation from outside. */
+    /** Prevents instantiation from outside. */
     private Model() {
     }
 
