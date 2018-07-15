@@ -25,12 +25,12 @@ import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Event;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStoreTest;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
 import io.spine.testdata.Sample;
+import io.spine.testing.server.command.TestEventFactory;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;

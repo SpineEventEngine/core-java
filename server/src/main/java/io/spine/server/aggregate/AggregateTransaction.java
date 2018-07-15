@@ -21,6 +21,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
@@ -36,9 +37,10 @@ import io.spine.validate.ValidatingBuilder;
  * @param <B> the type of a {@code ValidatingBuilder} for the aggregate state
  * @author Alex Tymchenko
  */
-class AggregateTransaction<I,
-                           S extends Message,
-                           B extends ValidatingBuilder<S, ? extends Message.Builder>>
+@Internal
+public class AggregateTransaction<I,
+                                  S extends Message,
+                                  B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends Transaction<I, Aggregate<I, S, B>, S, B> {
 
     @VisibleForTesting
@@ -75,7 +77,7 @@ class AggregateTransaction<I,
      * in this package.
      */
     @Override
-    protected void commit() {
+    public void commit() {
         super.commit();
     }
 
@@ -86,7 +88,8 @@ class AggregateTransaction<I,
      * @return the new transaction instance
      */
     @SuppressWarnings("unchecked")  // to avoid massive generic-related issues.
-    static AggregateTransaction start(Aggregate aggregate) {
+    @Internal
+    public static AggregateTransaction start(Aggregate aggregate) {
         final AggregateTransaction tx = new AggregateTransaction(aggregate);
         return tx;
     }
@@ -105,7 +108,8 @@ class AggregateTransaction<I,
      * @return the new transaction instance
      */
     @SuppressWarnings("unchecked")  // to avoid massive generic-related issues.
-    static AggregateTransaction startWith(Aggregate aggregate, Message state, Version version) {
+    public static AggregateTransaction startWith(Aggregate aggregate, Message state,
+                                                 Version version) {
         final AggregateTransaction tx = new AggregateTransaction(aggregate, state, version);
         return tx;
     }

@@ -21,13 +21,13 @@
 package io.spine.server.aggregate.given;
 
 import com.google.protobuf.Message;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.TenantId;
 import io.spine.server.aggregate.AggregateTest;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggStartProject;
+import io.spine.testing.client.TestActorRequestFactory;
 
 import static io.spine.base.Identifier.newUuid;
 

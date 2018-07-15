@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Time;
 import io.spine.core.given.GivenEvent;
-import io.spine.server.command.TestEventFactory;
+import io.spine.testing.server.command.TestEventFactory;
 import io.spine.type.TypeName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

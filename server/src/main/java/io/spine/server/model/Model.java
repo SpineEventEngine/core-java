@@ -74,7 +74,7 @@ public class Model {
     }
 
     @VisibleForTesting
-    void clear() {
+    public void clear() {
         classes.clear();
     }
 

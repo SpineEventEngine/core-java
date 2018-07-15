@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -37,7 +36,6 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.model.HandlerMethod;
@@ -55,6 +53,8 @@ import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
 import io.spine.test.integration.rejection.IntegrationRejections.ItgCannotStartArchivedProject;
 import io.spine.test.integration.rejection.IntegrationRejections.ItgProjectAlreadyExists;
+import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.command.TestEventFactory;
 import io.spine.validate.Int32ValueVBuilder;
 import io.spine.validate.StringValueVBuilder;
 
@@ -66,7 +66,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.command.TestEventFactory.newInstance;
+import static io.spine.testing.server.command.TestEventFactory.newInstance;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**

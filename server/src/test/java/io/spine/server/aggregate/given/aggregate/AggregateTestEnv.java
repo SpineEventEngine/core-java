@@ -22,7 +22,6 @@ package io.spine.server.aggregate.given.aggregate;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -33,7 +32,6 @@ import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.rejection.StandardRejections.CannotModifyDeletedEntity;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -42,6 +40,8 @@ import io.spine.test.aggregate.command.AggCreateTask;
 import io.spine.test.aggregate.command.AggReassignTask;
 import io.spine.test.aggregate.task.AggTaskId;
 import io.spine.testdata.Sample;
+import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.command.TestEventFactory;
 import io.spine.type.TypeUrl;
 
 import java.util.List;

@@ -385,7 +385,7 @@ public class Stand implements AutoCloseable {
 
     /**
      * Registers a supplier for the objects of a certain {@link TypeUrl} to be able
-     * to read them in response to a {@link io.spine.client.Query Query}.
+     * to read them in response to a {@link Query Query}.
      *
      * <p>In case the supplier is an instance of {@link AggregateRepository}, the {@code Repository}
      * is not registered as type supplier, since the {@code Aggregate} reads are performed

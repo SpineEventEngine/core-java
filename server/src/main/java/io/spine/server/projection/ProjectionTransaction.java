@@ -21,6 +21,7 @@ package io.spine.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.entity.EntityVersioning;
@@ -38,9 +39,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <B> the type of a {@code ValidatingBuilder} for the projection state
  * @author Alex Tymchenko
  */
-class ProjectionTransaction<I,
-                            M extends Message,
-                            B extends ValidatingBuilder<M, ? extends Message.Builder>>
+@Internal
+public class ProjectionTransaction<I,
+                                   M extends Message,
+                                   B extends ValidatingBuilder<M, ? extends Message.Builder>>
         extends Transaction<I, Projection<I, M, B>, M, B> {
 
     @VisibleForTesting
@@ -79,11 +81,11 @@ class ProjectionTransaction<I,
     /**
      * {@inheritDoc}
      *
-     * <p>This method is overridden to expose itself to repositories and state builders
-     * in this package.
+     * <p>This method is overridden to expose itself to repositories, state builders, and test
+     * utilities.
      */
     @Override
-    protected void commit() {
+    public void commit() {
         super.commit();
     }
 
@@ -93,9 +95,9 @@ class ProjectionTransaction<I,
      * @param projection the {@code Projection} instance to start the transaction for.
      * @return the new transaction instance
      */
-    static <I,
-            M extends Message,
-            B extends ValidatingBuilder<M, ? extends Message.Builder>>
+    public static <I,
+                   M extends Message,
+                   B extends ValidatingBuilder<M, ? extends Message.Builder>>
     ProjectionTransaction<I, M, B> start(Projection<I, M, B> projection) {
         checkNotNull(projection);
 
@@ -116,9 +118,9 @@ class ProjectionTransaction<I,
      * @param version the starting version to set
      * @return the new transaction instance
      */
-    static <I,
-            M extends Message,
-            B extends ValidatingBuilder<M, ? extends Message.Builder>>
+    public static <I,
+                   M extends Message,
+                   B extends ValidatingBuilder<M, ? extends Message.Builder>>
     ProjectionTransaction<I, M, B> startWith(Projection<I, M, B> projection,
                                              M state,
                                              Version version) {

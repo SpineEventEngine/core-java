@@ -21,6 +21,7 @@ package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.entity.EntityVersioning;
@@ -36,9 +37,10 @@ import io.spine.validate.ValidatingBuilder;
  * @param <B> the type of a {@code ValidatingBuilder} for the process manager state
  * @author Alex Tymchenko
  */
-class PmTransaction<I,
-                    S extends Message,
-                    B extends ValidatingBuilder<S, ? extends Message.Builder>>
+@Internal
+public class PmTransaction<I,
+                           S extends Message,
+                           B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends Transaction<I, ProcessManager<I, S, B>, S, B> {
 
     @VisibleForTesting
@@ -69,11 +71,11 @@ class PmTransaction<I,
     /**
      * {@inheritDoc}
      *
-     * <p>This method is overridden to expose itself to repositories and state builders
-     * in this package.
+     * <p>This method is overridden to expose itself to repositories, state builders,
+     * and test utilitites.
      */
     @Override
-    protected void commit() {
+    public void commit() {
         super.commit();
     }
 
@@ -83,7 +85,7 @@ class PmTransaction<I,
      * @param  processManager the {@code ProcessManager} instance to start the transaction for
      * @return the new transaction instance
      */
-    static <I,
+    public static <I,
             S extends Message,
             B extends ValidatingBuilder<S, ? extends Message.Builder>>
     PmTransaction<I, S, B> start(ProcessManager<I, S, B> processManager) {
@@ -107,10 +109,10 @@ class PmTransaction<I,
      *         the starting version to set
      * @return the new transaction instance
      */
-    static <I,
-            S extends Message,
-            B extends ValidatingBuilder<S, ? extends Message.Builder>,
-            P extends ProcessManager<I, S, B>>
+    public static <I,
+                   S extends Message,
+                   B extends ValidatingBuilder<S, ? extends Message.Builder>,
+                   P extends ProcessManager<I, S, B>>
     PmTransaction<I, S, B> startWith(P processManager, S state, Version version) {
         final PmTransaction<I, S, B> tx = new PmTransaction<>(processManager, state, version);
         return tx;

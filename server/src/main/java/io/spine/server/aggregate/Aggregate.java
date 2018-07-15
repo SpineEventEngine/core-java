@@ -203,14 +203,15 @@ public abstract class Aggregate<I,
     /**
      * Obtains a method for the passed command and invokes it.
      *
-     * <p>Dispatching the commands results in emitting event messages. All the 
+     * <p>Dispatching the commands results in emitting event messages. All the
      * {@linkplain Empty empty} messages are filtered out from the result.
-     * 
+     *
      * @param  command the envelope with the command to dispatch
      * @return a list of event messages that the aggregate produces by handling the command
      */
     @Override
-    protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
+    @Internal
+    public List<? extends Message> dispatchCommand(CommandEnvelope command) {
         idempotencyGuard.check(command);
         final CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         final List<? extends Message> messages =
@@ -228,7 +229,8 @@ public abstract class Aggregate<I,
      * @return a list of event messages that the aggregate produces in reaction to the event or
      *         an empty list if the aggregate state does not change in reaction to the event
      */
-    List<? extends Message> reactOn(EventEnvelope event) {
+    @Internal
+    public List<? extends Message> reactOn(EventEnvelope event) {
         final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, event.getMessage(), event.getEventContext());
@@ -246,7 +248,8 @@ public abstract class Aggregate<I,
      *         the rejection, or an empty list if the aggregate state does not change in
      *         response to this rejection
      */
-    List<? extends Message> reactOn(RejectionEnvelope rejection) {
+    @Internal
+    public List<? extends Message> reactOn(RejectionEnvelope rejection) {
         final CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
         final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
                                                                      commandClass);
@@ -307,7 +310,8 @@ public abstract class Aggregate<I,
      * @param origin        the envelope of a message which caused the events
      * @see #ensureEventMessage(Message)
      */
-    void apply(Iterable<? extends Message> eventMessages, MessageEnvelope origin) {
+    @Internal
+    public void apply(Iterable<? extends Message> eventMessages, MessageEnvelope origin) {
         final List<? extends Message> messages = newArrayList(eventMessages);
         final EventFactory eventFactory =
                 EventFactory.on(origin, getProducerId());

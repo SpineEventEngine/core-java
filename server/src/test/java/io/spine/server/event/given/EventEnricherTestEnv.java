@@ -31,7 +31,6 @@ import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.core.given.GivenUserId;
 import io.spine.people.PersonName;
-import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventEnricherTest;
 import io.spine.server.outbus.enrich.given.StringToPersonName;
@@ -44,13 +43,14 @@ import io.spine.test.event.ProjectStarted;
 import io.spine.test.event.user.permission.PermissionGrantedEvent;
 import io.spine.test.event.user.permission.PermissionRevokedEvent;
 import io.spine.test.event.user.sharing.SharingRequestApproved;
+import io.spine.testing.server.command.TestEventFactory;
 import io.spine.time.ZoneOffset;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.command.TestEventFactory.newInstance;
+import static io.spine.testing.server.command.TestEventFactory.newInstance;
 
 /**
  * @author Alexander Yevsyukov

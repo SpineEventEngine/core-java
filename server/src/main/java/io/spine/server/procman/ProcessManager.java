@@ -22,6 +22,7 @@ package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -131,8 +132,9 @@ public abstract class ProcessManager<I,
      * @param  cmd the envelope with the command to dispatch
      * @return the list of events generated as the result of handling the command
      */
+    @Internal
     @Override
-    protected List<Event> dispatchCommand(CommandEnvelope cmd) {
+    public List<Event> dispatchCommand(CommandEnvelope cmd) {
         final CommandHandlerMethod method = thisClass().getHandler(cmd.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, cmd.getMessage(), cmd.getCommandContext());
@@ -160,7 +162,8 @@ public abstract class ProcessManager<I,
      * @return a list of produced events or an empty list if the process manager does not
      *         produce new events because of the passed event
      */
-    List<Event> dispatchEvent(EventEnvelope event)  {
+    @Internal
+    public List<Event> dispatchEvent(EventEnvelope event) {
         final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
         final List<? extends Message> eventMessages =
                 method.invoke(this, event.getMessage(), event.getEventContext());
@@ -175,7 +178,8 @@ public abstract class ProcessManager<I,
      * @return a list of produced events or an empty list if the process manager does not
      *         produce new events because of the passed event
      */
-    List<Event> dispatchRejection(RejectionEnvelope rejection) {
+    @Internal
+    public List<Event> dispatchRejection(RejectionEnvelope rejection) {
         final CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
         final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
                                                                      commandClass);

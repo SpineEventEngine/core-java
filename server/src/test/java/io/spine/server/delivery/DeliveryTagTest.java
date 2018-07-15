@@ -22,7 +22,7 @@ package io.spine.server.delivery;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.delivery.given.MessageDeliveryTestEnv.DeliveryEqualityRepository;
-import io.spine.server.model.ModelTests;
+import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
