@@ -29,7 +29,6 @@ import io.spine.core.TenantId;
 import io.spine.core.UserId;
 
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.time.ZoneOffsets.UTC;
 
 /**
  * Factory methods to create {@code CommandContext} instances for test purposes.
@@ -64,7 +63,6 @@ public class GivenCommandContext {
         final ActorContext.Builder actorContext = ActorContext.newBuilder()
                                                               .setActor(actor)
                                                               .setTimestamp(when)
-                                                              .setZoneOffset(UTC)
                                                               .setTenantId(tenantId);
         final CommandContext.Builder builder = CommandContext.newBuilder()
                                                              .setActorContext(actorContext);

@@ -61,7 +61,7 @@ public abstract class CommandHandlerTest<I,
     private final ActorRequestFactory requestFactory;
 
     /**
-     * Creates a new instance with {@link TestActorRequestFactory TestActorRequestFactory's}.
+     * Creates a new instance with {@link TestActorRequestFactory}.
      */
     protected CommandHandlerTest() {
         super();

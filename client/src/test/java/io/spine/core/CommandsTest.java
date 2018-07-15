@@ -54,10 +54,15 @@ import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+<<<<<<< HEAD
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
+=======
+>>>>>>> origin/master
 import static io.spine.time.Durations2.seconds;
+import static io.spine.time.testing.TimeTests.Past.minutesAgo;
+import static io.spine.time.testing.TimeTests.Past.secondsAgo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -100,7 +105,7 @@ class CommandsTest {
                 .setDefault(Duration.class, Durations2.ZERO)
                 .setDefault(Command.class, requestFactory.createCommand(STR_MSG, minutesAgo(1)))
                 .setDefault(CommandContext.class, requestFactory.createCommandContext())
-                .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
+                .setDefault(ZoneOffset.class, ZoneOffsets.utc())
                 .setDefault(UserId.class, GivenUserId.newUuid())
                 .testStaticMethods(Commands.class, NullPointerTester.Visibility.PACKAGE);
     }

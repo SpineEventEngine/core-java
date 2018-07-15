@@ -18,25 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.outbus.enrich.given;
-
-import com.google.common.base.Function;
-import io.spine.time.ZoneOffset;
-import io.spine.time.ZoneOffsets;
-import org.checkerframework.checker.nullness.qual.Nullable;
-
 /**
- * Naïve implementation of string to ZoneOffset conversion for the enrichment tests purposes.
- *
- * <p>Production code should perform validation.
- *
- * @author Alexander Yevsyukov
+ * This package provides utilities for testing client-side code.
  */
-public class StringToZoneOffset implements Function<String, ZoneOffset> {
-    @Override
-    public @Nullable ZoneOffset apply(@Nullable String input) {
-        return input == null
-               ? ZoneOffset.getDefaultInstance()
-               : ZoneOffsets.parse(input);
-    }
-}
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testing.client;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

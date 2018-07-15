@@ -166,8 +166,7 @@ class StandTest extends TenantAwareTest {
     protected static ActorRequestFactory createRequestFactory(@Nullable TenantId tenant) {
         ActorRequestFactory.Builder builder = ActorRequestFactory
                 .newBuilder()
-                .setActor(of(newUuid()))
-                .setZoneOffset(ZoneOffsets.UTC);
+                .setActor(of(newUuid()));
         if (tenant != null) {
             builder.setTenantId(tenant);
         }

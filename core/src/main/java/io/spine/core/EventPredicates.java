@@ -23,12 +23,12 @@ package io.spine.core;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Timestamp;
 import io.spine.time.Timestamps2;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.checkValid;
+import static com.google.protobuf.util.Timestamps.compare;
 
 /**
  * Predicates for working with {@code Event}s.
@@ -83,7 +83,7 @@ public final class EventPredicates {
                 return false;
             }
             final Timestamp ts = Events.getTimestamp(record);
-            final boolean result = Timestamps2.compare(ts, this.timestamp) > 0;
+            final boolean result = compare(ts, this.timestamp) > 0;
             return result;
         }
     }
@@ -104,7 +104,7 @@ public final class EventPredicates {
             }
 
             final Timestamp ts = Events.getTimestamp(record);
-            final boolean result = Timestamps2.compare(ts, this.timestamp) < 0;
+            final boolean result = compare(ts, this.timestamp) < 0;
             return result;
         }
     }
@@ -126,8 +126,7 @@ public final class EventPredicates {
             checkNotNull(finish);
             checkValid(start);
             checkValid(finish);
-            checkArgument(Timestamps2.compare(start, finish) < 0,
-                          "`start` must be before `finish`");
+            checkArgument(compare(start, finish) < 0, "`start` must be before `finish`");
         }
 
         @Override

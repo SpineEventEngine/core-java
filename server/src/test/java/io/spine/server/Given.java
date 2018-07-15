@@ -208,7 +208,7 @@ public class Given {
         static Query readAllProjects() {
             // DO NOT replace the type name with another Project class.
             Query result = requestFactory.query()
-                                               .all(io.spine.test.projection.Project.class);
+                                         .all(io.spine.test.projection.Project.class);
             return result;
         }
     }
