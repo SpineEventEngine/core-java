@@ -39,7 +39,7 @@ public class AggregateRejectionEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateEndpoint<I, A, RejectionEnvelope, Set<I>> {
 
     protected AggregateRejectionEndpoint(AggregateRepository<I, A> repository,
-                                       RejectionEnvelope envelope) {
+                                         RejectionEnvelope envelope) {
         super(repository, envelope);
     }
 

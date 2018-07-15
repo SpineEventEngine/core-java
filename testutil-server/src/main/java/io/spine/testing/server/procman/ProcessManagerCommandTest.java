@@ -32,7 +32,6 @@ import java.util.List;
 import static io.spine.core.CommandEnvelope.of;
 import static io.spine.testing.server.procman.CommandBusInjection.inject;
 import static io.spine.testing.server.procman.ProcessManagerDispatcher.dispatch;
-import static java.util.stream.Collectors.toList;
 
 /**
  * The implementation base for testing a single command handling in a {@link ProcessManager}.
@@ -51,10 +50,8 @@ public abstract class ProcessManagerCommandTest<I,
 
     @Override
     protected List<? extends Message> dispatchTo(P entity) {
-        List<Event> events = dispatch(entity, of(createCommand(message())));
-        return events.stream()
-                     .map(ProcessManagerCommandTest::eventToMessage)
-                     .collect(toList());
+        List<? extends Message> events = dispatch(entity, of(createCommand(message())));
+        return events;
     }
 
     private static Message eventToMessage(Event event) {

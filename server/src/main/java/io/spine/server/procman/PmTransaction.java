@@ -85,7 +85,7 @@ public class PmTransaction<I,
      * @param  processManager the {@code ProcessManager} instance to start the transaction for
      * @return the new transaction instance
      */
-    public static <I,
+    static <I,
             S extends Message,
             B extends ValidatingBuilder<S, ? extends Message.Builder>>
     PmTransaction<I, S, B> start(ProcessManager<I, S, B> processManager) {

@@ -132,9 +132,8 @@ public abstract class ProcessManager<I,
      * @param  command the envelope with the command to dispatch
      * @return the list of events generated as the result of handling the command
      */
-    @Internal
     @Override
-    public List<Event> dispatchCommand(CommandEnvelope command) {
+    protected List<Event> dispatchCommand(CommandEnvelope command) {
         CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         Dispatch<CommandEnvelope> dispatch = Dispatch.of(command).to(this, method);
         DispatchResult dispatchResult = dispatch.perform();
@@ -148,8 +147,7 @@ public abstract class ProcessManager<I,
      * @return a list of produced events or an empty list if the process manager does not
      *         produce new events because of the passed event
      */
-    @Internal
-    public List<Event> dispatchEvent(EventEnvelope event) {
+    List<Event> dispatchEvent(EventEnvelope event) {
         EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
         Dispatch<EventEnvelope> dispatch = Dispatch.of(event).to(this, method);
         DispatchResult dispatchResult = dispatch.perform();
@@ -163,8 +161,7 @@ public abstract class ProcessManager<I,
      * @return a list of produced events or an empty list if the process manager does not
      *         produce new events because of the passed event
      */
-    @Internal
-    public List<Event> dispatchRejection(RejectionEnvelope rejection) {
+    List<Event> dispatchRejection(RejectionEnvelope rejection) {
         CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
         RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
                                                                commandClass);
