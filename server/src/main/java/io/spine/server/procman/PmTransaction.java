@@ -75,7 +75,7 @@ public class PmTransaction<I,
      * and test utilitites.
      */
     @Override
-    protected void commit() {
+    public void commit() {
         super.commit();
     }
 

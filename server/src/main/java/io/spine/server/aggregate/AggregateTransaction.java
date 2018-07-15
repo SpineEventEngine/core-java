@@ -88,7 +88,7 @@ public class AggregateTransaction<I,
      * @return the new transaction instance
      */
     @SuppressWarnings("unchecked")  // to avoid massive generic-related issues.
-    public static AggregateTransaction start(Aggregate aggregate) {
+    static AggregateTransaction start(Aggregate aggregate) {
         final AggregateTransaction tx = new AggregateTransaction(aggregate);
         return tx;
     }
