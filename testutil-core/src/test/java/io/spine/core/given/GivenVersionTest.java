@@ -21,6 +21,7 @@
 package io.spine.core.given;
 
 import io.spine.core.Version;
+import io.spine.testing.core.given.GivenVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core.given;
+package io.spine.testing.core.given;
 
 import io.spine.base.Identifier;
 import io.spine.core.TenantId;

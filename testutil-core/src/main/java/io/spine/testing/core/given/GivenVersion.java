@@ -18,47 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core.given;
+package io.spine.testing.core.given;
 
-import io.spine.base.Identifier;
-import io.spine.core.UserId;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import io.spine.base.Time;
+import io.spine.core.Version;
+import io.spine.core.Versions;
 
 /**
- * Factory methods for creating test values of {@link io.spine.core.UserId UserId}.
+ * Utilities for using {@link Version}s in tests.
  *
  * @author Alexander Yevsyukov
  */
-public class GivenUserId {
+public class GivenVersion {
 
-    /**
-     * The prefix for generated user identifiers.
-     */
-    private static final String USER_PREFIX = "user-";
-
-    private GivenUserId() {
+    private GivenVersion() {
         // Prevent instantiation of this utility class.
     }
 
     /**
-     * Creates a new user ID instance by passed string value.
-     *
-     * @param value new user ID value
-     * @return new instance
+     * Creates {@link Version} with the passed number and current time.
      */
-    public static UserId of(String value) {
-        checkNotNull(value);
-
-        return UserId.newBuilder()
-                .setValue(value)
-                .build();
-    }
-
-    /**
-     * Generates a new UUID-based {@code UserId}.
-     */
-    public static UserId newUuid() {
-        return of(USER_PREFIX + Identifier.newUuid());
+    public static Version withNumber(int number) {
+        return Versions.newVersion(number, Time.getCurrentTime());
     }
 }

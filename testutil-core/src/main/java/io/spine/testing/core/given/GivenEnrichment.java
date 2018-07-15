@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core.given;
+package io.spine.testing.core.given;
 
 import com.google.protobuf.Any;
 import io.spine.core.Enrichment;
@@ -35,7 +35,8 @@ import static io.spine.protobuf.TypeConverter.toMessage;
 public class GivenEnrichment {
 
     /** Prevents instantiation of this utility class. */
-    private GivenEnrichment() {}
+    private GivenEnrichment() {
+    }
 
     /**
      * Creates a new {@link Enrichment} with one {@linkplain Enrichment#getContainer() attribute}.

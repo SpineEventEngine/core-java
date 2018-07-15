@@ -69,7 +69,6 @@ import org.mockito.ArgumentCaptor;
 import java.util.Iterator;
 import java.util.Set;
 
-import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.boundedContext;
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.givenAggregateId;
@@ -79,6 +78,7 @@ import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.reposit
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.requestFactory;
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetBoundedContext;
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetRepository;
+import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

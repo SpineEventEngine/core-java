@@ -26,16 +26,17 @@ import io.spine.core.ActorContext;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
 import io.spine.core.UserId;
+import io.spine.testing.core.given.GivenCommandContext;
 import io.spine.time.Durations2;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.core.given.GivenUserId.newUuid;
 import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.core.given.GivenUserId.newUuid;
 import static io.spine.time.Durations2.fromMinutes;
 import static io.spine.validate.Validate.checkValid;
 import static org.junit.jupiter.api.Assertions.assertEquals;

@@ -28,8 +28,6 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
-import io.spine.core.given.GivenCommandContext;
-import io.spine.core.given.GivenUserId;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.CmdRemoveTask;
@@ -38,6 +36,8 @@ import io.spine.test.command.FirstCmdCreateProject;
 import io.spine.test.command.ProjectId;
 import io.spine.test.command.SecondCmdStartProject;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.core.given.GivenCommandContext;
+import io.spine.testing.core.given.GivenUserId;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;

@@ -22,13 +22,14 @@ package io.spine.core.given;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.UserId;
+import io.spine.testing.core.given.GivenUserId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.core.given.GivenUserId.of;
 import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.core.given.GivenUserId.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 

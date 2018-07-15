@@ -29,13 +29,13 @@ import io.spine.client.Topic;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
-import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.stand.given.StandTestEnv.MemoizeEntityUpdateCallback;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
+import io.spine.testing.core.given.GivenVersion;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,8 +43,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.server.BoundedContext.newName;
+import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;

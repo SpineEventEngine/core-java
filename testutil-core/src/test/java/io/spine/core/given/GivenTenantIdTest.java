@@ -22,6 +22,7 @@ package io.spine.core.given;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.base.Identifier;
+import io.spine.testing.core.given.GivenTenantId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
