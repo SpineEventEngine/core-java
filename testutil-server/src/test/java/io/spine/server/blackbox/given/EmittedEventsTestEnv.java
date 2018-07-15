@@ -23,7 +23,7 @@ package io.spine.server.blackbox.given;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.TenantId;
-import io.spine.server.command.TestEventFactory;
+import io.spine.testing.server.command.TestEventFactory;
 import io.spine.server.blackbox.BlackBoxBoundedContext;
 import io.spine.test.testutil.blackbox.BbProjectCreated;
 import io.spine.test.testutil.blackbox.BbTaskAdded;
@@ -81,14 +81,14 @@ public class EmittedEventsTestEnv {
 
     public static BbProjectCreated projectCreated() {
         return BbProjectCreated.newBuilder()
-                                .setProjectId(newProjectId())
-                                .build();
+                               .setProjectId(newProjectId())
+                               .build();
     }
 
     public static BbTaskAdded taskAdded() {
         return BbTaskAdded.newBuilder()
-                           .setProjectId(newProjectId())
-                           .build();
+                          .setProjectId(newProjectId())
+                          .build();
 
     }
 }

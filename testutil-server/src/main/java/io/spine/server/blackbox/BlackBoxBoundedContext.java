@@ -32,7 +32,7 @@ import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.TestEventFactory;
+import io.spine.testing.server.command.TestEventFactory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;

@@ -84,16 +84,12 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.commandbus.Given.ACommand;
-<<<<<<< HEAD
-=======
 import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.server.blackbox.EmittedEventsVerifier.emitted;
-import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.answerQuestion;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.newAnswer;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.newQuizId;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.startQuiz;
->>>>>>> origin/master
 import static io.spine.test.Verify.assertSize;
 import static io.spine.testing.server.procman.ProcessManagerDispatcher.dispatch;
 import static org.hamcrest.MatcherAssert.assertThat;
