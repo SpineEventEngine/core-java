@@ -27,7 +27,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
-import io.spine.test.TimeTests;
+import io.spine.time.testing.TimeTests;
 import io.spine.test.commands.RequiredFieldCommand;
 import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.core.given.GivenUserId;

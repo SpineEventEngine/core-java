@@ -34,7 +34,7 @@ import io.spine.server.commandbus.given.CommandStoreTestEnv.CommandStoreTestAsse
 import io.spine.server.commandbus.given.CommandStoreTestEnv.TestRejection;
 import io.spine.server.commandbus.given.CommandStoreTestEnv.ThrowingDispatcher;
 import io.spine.server.tenant.TenantAwareFunction;
-import io.spine.test.TimeTests;
+import io.spine.time.testing.TimeTests;
 import io.spine.testing.server.model.ModelTests;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;

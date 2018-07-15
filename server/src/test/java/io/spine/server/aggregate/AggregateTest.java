@@ -49,7 +49,7 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.entity.InvalidEntityStateException;
 import io.spine.server.model.Model;
-import io.spine.test.TimeTests;
+import io.spine.time.testing.TimeTests;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;

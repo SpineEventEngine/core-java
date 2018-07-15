@@ -23,7 +23,7 @@ package io.spine.testing.server.aggregate;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.test.TimeTests;
+import io.spine.time.testing.TimeTests;
 import io.spine.testing.server.aggregate.given.AggregateBuilderTestEnv.TestAggregate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
