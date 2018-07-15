@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.Event;
@@ -49,13 +50,10 @@ abstract class AggregateEndpoint<I,
 
     @Override
     protected void deliverNowTo(I aggregateId) {
-        final A aggregate = repository().loadOrCreate(aggregateId);
+        final A aggregate = instanceFor(aggregateId);
         final LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
 
-        final List<? extends Message> eventMessages = doDispatch(aggregate, envelope());
-        final AggregateTransaction tx = startTransaction(aggregate);
-        aggregate.apply(eventMessages, envelope());
-        tx.commit();
+        dispatchInTx(aggregate);
 
         // Update lifecycle flags only if the message was handled successfully and flags changed.
         final LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();
@@ -64,6 +62,19 @@ abstract class AggregateEndpoint<I,
         }
 
         store(aggregate);
+    }
+
+    @CanIgnoreReturnValue
+    protected List<? extends Message> dispatchInTx(A aggregate) {
+        final List<? extends Message> eventMessages = doDispatch(aggregate, envelope());
+        final AggregateTransaction tx = startTransaction(aggregate);
+        aggregate.apply(eventMessages, envelope());
+        tx.commit();
+        return eventMessages;
+    }
+
+    protected A instanceFor(I aggregateId) {
+        return repository().loadOrCreate(aggregateId);
     }
 
     protected AggregateTransaction startTransaction(A aggregate) {

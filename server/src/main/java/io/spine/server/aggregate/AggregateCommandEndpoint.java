@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.CommandEnvelope;
 
 import java.util.List;
@@ -32,10 +33,11 @@ import java.util.List;
  * @param <A> the type of the aggregates managed by the parent repository
  * @author Alexander Yevsyukov
  */
-class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
+@Internal
+public class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateEndpoint<I, A, CommandEnvelope, I> {
 
-    private AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope command) {
+    protected AggregateCommandEndpoint(AggregateRepository<I, A> repo, CommandEnvelope command) {
         super(repo, command);
     }
 

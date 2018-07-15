@@ -229,8 +229,7 @@ public abstract class Aggregate<I,
      * @return a list of event messages that the aggregate produces in reaction to the event or
      *         an empty list if the aggregate state does not change in reaction to the event
      */
-    @Internal
-    public List<? extends Message> reactOn(EventEnvelope event) {
+    List<? extends Message> reactOn(EventEnvelope event) {
         final EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
         final List<? extends Message> messages =
                 method.invoke(this, event.getMessage(), event.getEventContext());
@@ -248,8 +247,7 @@ public abstract class Aggregate<I,
      *         the rejection, or an empty list if the aggregate state does not change in
      *         response to this rejection
      */
-    @Internal
-    public List<? extends Message> reactOn(RejectionEnvelope rejection) {
+    List<? extends Message> reactOn(RejectionEnvelope rejection) {
         final CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
         final RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
                                                                      commandClass);
@@ -310,8 +308,7 @@ public abstract class Aggregate<I,
      * @param origin        the envelope of a message which caused the events
      * @see #ensureEventMessage(Message)
      */
-    @Internal
-    public void apply(Iterable<? extends Message> eventMessages, MessageEnvelope origin) {
+    void apply(Iterable<? extends Message> eventMessages, MessageEnvelope origin) {
         final List<? extends Message> messages = newArrayList(eventMessages);
         final EventFactory eventFactory =
                 EventFactory.on(origin, getProducerId());
