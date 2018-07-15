@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.expected;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 
 import javax.annotation.Nullable;
@@ -55,6 +56,7 @@ public class CommandHandlerExpected<S extends Message>
     }
 
     @Override
+    @CanIgnoreReturnValue
     public CommandHandlerExpected<S> ignoresMessage() {
         assertNull(rejection, "Message caused a rejection.");
         return super.ignoresMessage();
@@ -66,6 +68,7 @@ public class CommandHandlerExpected<S extends Message>
     }
 
     @Override
+    @CanIgnoreReturnValue
     public <M extends Message> CommandHandlerExpected<S> producesEvent(Class<M> eventClass,
                                                                        Consumer<M> validator) {
         assertNotRejected(eventClass.getName());
@@ -73,6 +76,7 @@ public class CommandHandlerExpected<S extends Message>
     }
 
     @Override
+    @CanIgnoreReturnValue
     public CommandHandlerExpected<S> producesEvents(Class<?>... eventClasses) {
         assertNotRejected(Stream.of(eventClasses)
                                 .map(Class::getSimpleName)
@@ -81,6 +85,7 @@ public class CommandHandlerExpected<S extends Message>
     }
 
     @Override
+    @CanIgnoreReturnValue
     public <M extends Message> CommandHandlerExpected<S> routesCommand(Class<M> commandClass,
                                                                        Consumer<M> validator) {
         assertNotRejected(commandClass.getName());
@@ -88,6 +93,7 @@ public class CommandHandlerExpected<S extends Message>
     }
 
     @Override
+    @CanIgnoreReturnValue
     public CommandHandlerExpected<S> routesCommands(Class<?>... commandClasses) {
         assertNotRejected(Stream.of(commandClasses)
                                 .map(Class::getSimpleName)
@@ -111,6 +117,7 @@ public class CommandHandlerExpected<S extends Message>
      * @param rejectionClass type of the rejection expected to be produced
      */
     @SuppressWarnings("UnusedReturnValue")
+    @CanIgnoreReturnValue
     public CommandHandlerExpected<S> throwsRejection(Class<? extends Message> rejectionClass) {
         assertNotNull(rejection, format("No rejection encountered. Expected %s",
                                         rejectionClass.getSimpleName()));

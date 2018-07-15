@@ -25,16 +25,13 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Error;
 import io.spine.base.Time;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.Rejection;
 import io.spine.core.TenantId;
-import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.Given;
 import io.spine.server.aggregate.given.aggregate.AggregateWithMissingApplier;
@@ -42,12 +39,14 @@ import io.spine.server.aggregate.given.aggregate.AmishAggregate;
 import io.spine.server.aggregate.given.aggregate.FaultyAggregate;
 import io.spine.server.aggregate.given.aggregate.IntAggregate;
 import io.spine.server.aggregate.given.aggregate.TaskAggregate;
+import io.spine.server.aggregate.given.aggregate.TaskAggregateRepository;
 import io.spine.server.aggregate.given.aggregate.TestAggregate;
 import io.spine.server.aggregate.given.aggregate.TestAggregateRepository;
 import io.spine.server.aggregate.given.aggregate.UserAggregate;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.entity.InvalidEntityStateException;
+import io.spine.server.blackbox.BlackBoxBoundedContext;
 import io.spine.server.model.Model;
 import io.spine.time.testing.TimeTests;
 import io.spine.test.aggregate.Project;
@@ -81,12 +80,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.server.blackbox.EmittedEventsVerifier.emitted;
+import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
+import static io.spine.testing.client.blackbox.Count.once;
+import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.core.CommandEnvelope.of;
 import static io.spine.core.Events.getRootCommandId;
-import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
@@ -98,11 +99,8 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.command
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.createTask;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.env;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.event;
-import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.newTaskBoundedContext;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.newTenantId;
-import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.readAllEvents;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.reassignTask;
-import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.typeUrlOf;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.testing.server.TestCommandClasses.assertContains;
 import static io.spine.testing.server.TestEventClasses.assertContains;
@@ -110,11 +108,9 @@ import static io.spine.testing.server.TestEventClasses.getEventClasses;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchRejection;
 import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -164,23 +160,6 @@ public class AggregateTest {
                 .add(event(projectStarted(ID), 4))
                 .build();
         return events;
-    }
-
-    /**
-     * A convenience method for closing the bounded context.
-     *
-     * <p>Instead of a checked {@link java.io.IOException IOException}, wraps any issues
-     * that may occur while closing, into an {@link IllegalStateException}.
-     *
-     * @param boundedContext a bounded context to close
-     */
-    private static void closeContext(BoundedContext boundedContext) {
-        checkNotNull(boundedContext);
-        try {
-            boundedContext.close();
-        } catch (Exception e) {
-            throw illegalStateWithCauseOf(e);
-        }
     }
 
     /**
@@ -817,13 +796,11 @@ public class AggregateTest {
         CommandEnvelope envelope = of(createCommand);
         repository.dispatch(envelope);
 
-        assertThrows(DuplicateCommandException.class, () -> {
-            repository.dispatch(envelope);
-        });
+        assertThrows(DuplicateCommandException.class, () -> repository.dispatch(envelope));
     }
 
     @Nested
-    @DisplayName("create single event for pair of events with empty second value")
+    @DisplayName("create a single event when emitting a pair without second value")
     class CreateSingleEventForPair {
 
         /**
@@ -835,33 +812,14 @@ public class AggregateTest {
          * TaskAggregate#handle(AggAssignTask)}.
          */
         @Test
-        @DisplayName("in case of command dispatch")
+        @DisplayName("when dispatching a command")
         void fromCommandDispatch() {
-            BoundedContext boundedContext = newTaskBoundedContext();
-
-            TenantId tenantId = newTenantId();
-            Command command = command(createTask(), tenantId);
-            MemoizingObserver<Ack> observer = memoizingObserver();
-
-            boundedContext.getCommandBus()
-                          .post(command, observer);
-
-            assertNull(observer.getError());
-
-            List<Ack> responses = observer.responses();
-            assertSize(1, responses);
-
-            Ack response = responses.get(0);
-            io.spine.core.Status status = response.getStatus();
-            Error emptyError = Error.getDefaultInstance();
-            assertEquals(emptyError, status.getError());
-
-            Rejection emptyRejection = Rejection.getDefaultInstance();
-            assertEquals(emptyRejection, status.getRejection());
-
-            List<Event> events = readAllEvents(boundedContext, tenantId);
-            assertSize(1, events);
-            closeContext(boundedContext);
+            BlackBoxBoundedContext
+                    .with(new TaskAggregateRepository())
+                    .receivesCommand(createTask())
+                    .verifiesThat(acked(once()).withoutErrorsOrRejections())
+                    .verifiesThat(emitted(once()))
+                    .close();
         }
 
         /**
@@ -874,42 +832,16 @@ public class AggregateTest {
          * {@link TaskAggregate#on(AggTaskAssigned) TaskAggregate#on(AggTaskAssigned)}.
          */
         @Test
-        @DisplayName("in case of event react")
+        @DisplayName("when reacting on an event")
         void fromEventReact() {
-            BoundedContext boundedContext = newTaskBoundedContext();
-
-            TenantId tenantId = newTenantId();
-            Command command = command(assignTask(), tenantId);
-            MemoizingObserver<Ack> observer = memoizingObserver();
-
-            boundedContext.getCommandBus()
-                          .post(command, observer);
-
-            assertNull(observer.getError());
-
-            List<Ack> responses = observer.responses();
-            assertSize(1, responses);
-
-            Ack response = responses.get(0);
-            io.spine.core.Status status = response.getStatus();
-            Error emptyError = Error.getDefaultInstance();
-            assertEquals(emptyError, status.getError());
-
-            Rejection emptyRejection = Rejection.getDefaultInstance();
-            assertEquals(emptyRejection, status.getRejection());
-
-            List<Event> events = readAllEvents(boundedContext, tenantId);
-            assertSize(2, events);
-
-            Event sourceEvent = events.get(0);
-            TypeUrl taskAssignedType = TypeUrl.from(AggTaskAssigned.getDescriptor());
-            assertEquals(typeUrlOf(sourceEvent), taskAssignedType);
-
-            Event reactionEvent = events.get(1);
-            TypeUrl userNotifiedType = TypeUrl.from(AggUserNotified.getDescriptor());
-            assertEquals(typeUrlOf(reactionEvent), userNotifiedType);
-
-            closeContext(boundedContext);
+            BlackBoxBoundedContext
+                    .with(new TaskAggregateRepository())
+                    .receivesCommand(assignTask())
+                    .verifiesThat(acked(once()).withoutErrorsOrRejections())
+                    .verifiesThat(emitted(twice()))
+                    .verifiesThat(emitted(AggTaskAssigned.class))
+                    .verifiesThat(emitted(AggUserNotified.class))
+                    .close();
         }
 
         /**
@@ -922,38 +854,15 @@ public class AggregateTest {
          * TaskAggregate.on(AggCannotReassignUnassignedTask)}.
          */
         @Test
-        @DisplayName("in case of rejection react")
+        @DisplayName("when reacting on a rejection")
         void fromRejectionReact() {
-            BoundedContext boundedContext = newTaskBoundedContext();
-
-            TenantId tenantId = newTenantId();
-            Command command = command(reassignTask(), tenantId);
-            MemoizingObserver<Ack> observer = memoizingObserver();
-
-            boundedContext.getCommandBus()
-                          .post(command, observer);
-
-            assertNull(observer.getError());
-
-            List<Ack> responses = observer.responses();
-            assertSize(1, responses);
-
-            Ack response = responses.get(0);
-            io.spine.core.Status status = response.getStatus();
-            Error emptyError = Error.getDefaultInstance();
-            assertEquals(emptyError, status.getError());
-
-            Rejection emptyRejection = Rejection.getDefaultInstance();
-            assertEquals(emptyRejection, status.getRejection());
-
-            List<Event> events = readAllEvents(boundedContext, tenantId);
-            assertSize(1, events);
-
-            Event reactionEvent = events.get(0);
-            TypeUrl userNotifiedType = TypeUrl.from(AggUserNotified.getDescriptor());
-            assertEquals(typeUrlOf(reactionEvent), userNotifiedType);
-
-            closeContext(boundedContext);
+            BlackBoxBoundedContext
+                    .with(new TaskAggregateRepository())
+                    .receivesCommand(reassignTask())
+                    .verifiesThat(acked(once()).withoutErrorsOrRejections())
+                    .verifiesThat(emitted(once()))
+                    .verifiesThat(emitted(AggUserNotified.class))
+                    .close();
         }
     }
 }
