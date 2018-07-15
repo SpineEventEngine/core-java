@@ -3,6 +3,7 @@ io.spine.server.aggregate
 io.spine.server.aggregate.storage
 io.spine.server.bus
 io.spine.server.command
+io.spine.server.command.dispatch
 io.spine.server.commandbus
 io.spine.server.commandstore
 io.spine.server.delivery
