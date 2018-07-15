@@ -28,5 +28,5 @@ import io.spine.test.aggregate.task.AggTaskId;
  *
  * @author Alexander Yevsyukkov
  */
-class TaskAggregateRepository extends AggregateRepository<AggTaskId, TaskAggregate> {
+public class TaskAggregateRepository extends AggregateRepository<AggTaskId, TaskAggregate> {
 }
