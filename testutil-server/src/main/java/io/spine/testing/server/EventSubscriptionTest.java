@@ -20,6 +20,7 @@
 
 package io.spine.testing.server;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.server.entity.Entity;
@@ -34,6 +35,7 @@ import io.spine.testing.server.expected.AbstractExpected;
  * @param <E> the type of the event subscriber being tested
  * @author Vladyslav Lubenskyi
  */
+@CheckReturnValue
 public abstract class EventSubscriptionTest<I,
                                             M extends Message,
                                             S extends Message,

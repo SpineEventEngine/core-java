@@ -20,6 +20,7 @@
 
 package io.spine.testing.server;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.base.ThrowableMessage;
 import io.spine.client.ActorRequestFactory;
@@ -52,6 +53,7 @@ import static java.util.Collections.emptyList;
  * @param <E> the type of the {@link CommandHandlingEntity} being tested
  * @author Vladyslav Lubenskyi
  */
+@CheckReturnValue
 public abstract class CommandHandlerTest<I,
                                          C extends Message,
                                          S extends Message,

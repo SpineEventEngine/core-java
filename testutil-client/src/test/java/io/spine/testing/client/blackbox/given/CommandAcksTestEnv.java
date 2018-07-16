@@ -29,12 +29,12 @@ import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.Rejection;
 import io.spine.core.Status;
-import io.spine.test.testutil.blackbox.ProjectId;
-import io.spine.test.testutil.blackbox.Rejections.BbProjectAlreadyStarted;
-import io.spine.test.testutil.blackbox.Rejections.BbTaskCreatedInCompletedProject;
-import io.spine.test.testutil.blackbox.Rejections.BbTaskLimitReached;
-import io.spine.test.testutil.blackbox.Task;
-import io.spine.test.testutil.blackbox.TaskId;
+import io.spine.testing.server.blackbox.ProjectId;
+import io.spine.testing.server.blackbox.Rejections.BbProjectAlreadyStarted;
+import io.spine.testing.server.blackbox.Rejections.BbTaskCreatedInCompletedProject;
+import io.spine.testing.server.blackbox.Rejections.BbTaskLimitReached;
+import io.spine.testing.server.blackbox.Task;
+import io.spine.testing.server.blackbox.TaskId;
 
 import java.util.Collection;
 import java.util.List;

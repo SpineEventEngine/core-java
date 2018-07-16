@@ -20,6 +20,7 @@
 
 package io.spine.testing.server;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -45,6 +46,7 @@ import java.util.List;
  * @param <E> the type of the {@link CommandHandlingEntity} being tested
  * @author Dmytro Dashenkov
  */
+@CheckReturnValue
 public abstract class EventReactionTest<I,
                                         M extends Message,
                                         S extends Message,

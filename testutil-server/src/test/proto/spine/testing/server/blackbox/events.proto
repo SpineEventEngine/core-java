@@ -19,44 +19,39 @@
 //
 syntax = "proto3";
 
-package spine.test.testutil.blackbox;
+package spine.testing.server.blackbox;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.testutil.blackbox";
-option java_outer_classname = "BbProjectProto";
+option java_package = "io.spine.testing.server.blackbox";
+option java_outer_classname = "TestIntEventsProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
-message ProjectId {
-    string id = 1;
+import "spine/testing/server/blackbox/project.proto";
+import "spine/testing/server/blackbox/report.proto";
+
+message BbProjectCreated {
+    ProjectId project_id = 1 [(required) = true];
 }
 
-message Project {
-    ProjectId id = 1;
-
-    string name = 2;
-
-    repeated Task task = 3;
-
-    enum Status {
-        UNDEFINED = 0;
-        CREATED = 1;
-        STARTED = 2;
-        COMPLETED = 3;
-        CANCELLED = 4;
-    }
-
-    Status status = 4;
+message BbTaskAdded {
+    ProjectId project_id = 1 [(required) = true];
+    Task task = 2;
 }
 
-message TaskId {
-    string id = 1;
+message BbProjectStarted {
+    ProjectId project_id = 1 [(required) = true];
 }
 
-message Task {
-    TaskId task_id = 1;
-    string title = 2;
-    string description = 3;
+message BbReportCreated {
+    ReportId report_id = 1 [(required) = true];
+    repeated ProjectId project_id = 2;
+}
+
+message BbTaskAddedToReport {
+    ReportId report_id = 1 [(required) = true];
+    ProjectId project_id = 2;
+    Task task = 3;
 }

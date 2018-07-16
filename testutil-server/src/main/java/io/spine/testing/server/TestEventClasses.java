@@ -21,6 +21,7 @@
 package io.spine.testing.server;
 
 import com.google.common.base.Function;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
@@ -37,6 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author Alexander Yevsyukov
  */
+@CheckReturnValue
 public class TestEventClasses {
 
     /** Prevents instantiation of this utility class. */

@@ -22,6 +22,7 @@ package io.spine.testing.server;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
 import io.spine.core.CommandClass;
@@ -72,6 +73,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @see CommandHandlerTest
  * @see EventReactionTest
  */
+@CheckReturnValue
 public abstract class MessageHandlerTest<I,
                                          M extends Message,
                                          S extends Message,

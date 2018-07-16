@@ -19,39 +19,33 @@
 //
 syntax = "proto3";
 
-package spine.test.testutil.blackbox;
+package spine.testing.server.blackbox;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.test.testutil.blackbox";
-option java_outer_classname = "TestIntEventsProto";
+option java_package = "io.spine.testing.server.blackbox";
+option java_outer_classname = "TestIntCommandsProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
-import "spine/test/testutil/blackbox/project.proto";
-import "spine/test/testutil/blackbox/report.proto";
+import "spine/testing/server/blackbox/project.proto";
+import "spine/testing/server/blackbox/report.proto";
 
-message BbProjectCreated {
-    ProjectId project_id = 1 [(required) = true];
+message BbCreateProject {
+    ProjectId project_id = 1;
 }
 
-message BbTaskAdded {
-    ProjectId project_id = 1 [(required) = true];
+message BbAddTask {
+    ProjectId project_id = 1;
     Task task = 2;
 }
 
-message BbProjectStarted {
-    ProjectId project_id = 1 [(required) = true];
+message BbStartProject {
+    ProjectId project_id = 1;
 }
 
-message BbReportCreated {
-    ReportId report_id = 1 [(required) = true];
+message BbCreateReport {
+    ReportId report_id = 1;
     repeated ProjectId project_id = 2;
-}
-
-message BbTaskAddedToReport {
-    ReportId report_id = 1 [(required) = true];
-    ProjectId project_id = 2;
-    Task task = 3;
 }

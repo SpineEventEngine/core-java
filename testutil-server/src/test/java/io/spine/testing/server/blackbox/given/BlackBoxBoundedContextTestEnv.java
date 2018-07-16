@@ -20,14 +20,13 @@
 
 package io.spine.testing.server.blackbox.given;
 
-
-import io.spine.test.testutil.blackbox.BbAddTask;
-import io.spine.test.testutil.blackbox.BbCreateProject;
-import io.spine.test.testutil.blackbox.BbCreateReport;
-import io.spine.test.testutil.blackbox.BbTaskAdded;
-import io.spine.test.testutil.blackbox.ProjectId;
-import io.spine.test.testutil.blackbox.ReportId;
-import io.spine.test.testutil.blackbox.Task;
+import io.spine.testing.server.blackbox.BbAddTask;
+import io.spine.testing.server.blackbox.BbCreateProject;
+import io.spine.testing.server.blackbox.BbCreateReport;
+import io.spine.testing.server.blackbox.BbTaskAdded;
+import io.spine.testing.server.blackbox.ProjectId;
+import io.spine.testing.server.blackbox.ReportId;
+import io.spine.testing.server.blackbox.Task;
 
 import static io.spine.base.Identifier.newUuid;
 
@@ -43,9 +42,9 @@ public class BlackBoxBoundedContextTestEnv {
 
     public static BbAddTask addTask(ProjectId projectId) {
         return BbAddTask.newBuilder()
-                         .setProjectId(projectId)
-                         .setTask(newTask())
-                         .build();
+                        .setProjectId(projectId)
+                        .setTask(newTask())
+                        .build();
     }
 
     public static BbTaskAdded taskAdded(ProjectId projectId) {
@@ -63,9 +62,9 @@ public class BlackBoxBoundedContextTestEnv {
 
     public static BbCreateReport createReport(ProjectId projectId) {
         return BbCreateReport.newBuilder()
-                              .setReportId(newReportId())
-                              .addProjectId(projectId)
-                              .build();
+                             .setReportId(newReportId())
+                             .addProjectId(projectId)
+                             .build();
     }
 
     private static ReportId newReportId() {

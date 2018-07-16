@@ -21,7 +21,7 @@
 package io.spine.testing.server.blackbox.given;
 
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.test.testutil.blackbox.ProjectId;
+import io.spine.testing.server.blackbox.ProjectId;
 
 /**
  * @author Mykhailo Drachuk

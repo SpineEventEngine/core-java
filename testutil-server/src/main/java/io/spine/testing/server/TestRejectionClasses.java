@@ -20,6 +20,7 @@
 
 package io.spine.testing.server;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.RejectionClass;
 
@@ -32,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  *
  * @author Alexander Yevsyukov
  */
+@CheckReturnValue
 public class TestRejectionClasses {
 
     /** Prevents instantiation of this utility class. */

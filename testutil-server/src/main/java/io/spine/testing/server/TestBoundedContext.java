@@ -20,6 +20,7 @@
 package io.spine.testing.server;
 
 import com.google.common.base.Supplier;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.core.BoundedContextName;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
@@ -34,6 +35,7 @@ import io.spine.server.storage.memory.InMemoryStorageFactory;
  *
  * @author Vladyslav Lubenskyi
  */
+@CheckReturnValue
 public class TestBoundedContext {
 
     private static final boolean MULTITENANT = false;
