@@ -106,7 +106,8 @@ public abstract class EntityMessageEndpoint<I,
     private void dispatchToOne(I entityId) {
         M envelope = envelope();
         Delivery<I, E, M, ?, ?> delivery = getEndpointDelivery();
-        delivery.getSender().send(entityId, envelope);
+        delivery.getSender()
+                .send(entityId, envelope);
     }
 
     /**
@@ -221,7 +222,8 @@ public abstract class EntityMessageEndpoint<I,
      */
     protected void onUnhandledCommand(Entity<R, ?> entity, CommandEnvelope cmd, String format) {
         String entityId = Stringifiers.toString(entity.getId());
-        String entityClass = entity.getClass().getName();
+        String entityClass = entity.getClass()
+                                   .getName();
         String commandId = Stringifiers.toString(cmd.getId());
         CommandClass commandClass = cmd.getMessageClass();
         throw newIllegalStateException(format, entityClass, entityId, commandClass, commandId);

@@ -76,8 +76,8 @@ public final class EntityStateEnvelope<I, S extends Message>
         this(entity.getId(), entity.getState(),
              tenantId,
              entity instanceof VersionableEntity
-                     ? ((VersionableEntity) entity).getVersion()
-                     : null);
+             ? ((VersionableEntity) entity).getVersion()
+             : null);
     }
 
     private EntityStateEnvelope(I entityId, S entityState,

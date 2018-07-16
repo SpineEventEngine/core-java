@@ -54,17 +54,17 @@ abstract class ShardedMessageConverter<I, M extends Message, E extends MessageEn
         M originalMessage = envelope.getOuterObject();
         String stringId = Stringifiers.toString(id);
         ShardedMessageId shardedMessageId = ShardedMessageId.newBuilder()
-                                                                  .setValue(stringId)
-                                                                  .build();
+                                                            .setValue(stringId)
+                                                            .build();
         Any packedOriginalMsg = AnyPacker.pack(originalMessage);
         Message message = TypeConverter.toMessage(targetId);
         Any packedTargetId = AnyPacker.pack(message);
         ShardedMessage result = ShardedMessage.newBuilder()
-                                                    .setId(shardedMessageId)
-                                                    .setTargetId(packedTargetId)
-                                                    .setOriginalMessage(packedOriginalMsg)
-                                                    .setWhenSharded(Time.getCurrentTime())
-                                                    .build();
+                                              .setId(shardedMessageId)
+                                              .setTargetId(packedTargetId)
+                                              .setOriginalMessage(packedOriginalMsg)
+                                              .setWhenSharded(Time.getCurrentTime())
+                                              .build();
         return result;
     }
 

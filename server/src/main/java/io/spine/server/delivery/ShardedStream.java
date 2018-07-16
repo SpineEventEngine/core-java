@@ -290,13 +290,13 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
                                   ClassName className,
                                   ShardIndex shardIndex) {
             String value = on("__").join(Prefix.BOUNDED_CONTEXT, bcName.getValue(),
-                                               Prefix.TARGET_CLASS, className,
-                                               Prefix.SHARD_INDEX,
-                                               Stringifiers.toString(shardIndex),
-                                               Prefix.ENVELOPE_CLASS, envelopeClass);
+                                         Prefix.TARGET_CLASS, className,
+                                         Prefix.SHARD_INDEX,
+                                         Stringifiers.toString(shardIndex),
+                                         Prefix.ENVELOPE_CLASS, envelopeClass);
             StringValue result = StringValue.newBuilder()
-                                                  .setValue(value)
-                                                  .build();
+                                            .setValue(value)
+                                            .build();
             return result;
         }
 
@@ -309,16 +309,16 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
             checkNotNull(envelopeClass);
 
             Class<?> keyClass = key.getEntityClass()
-                                         .value();
+                                   .value();
             ClassName className = ClassName.of(keyClass);
             ShardIndex shardIndex = key.getIndex();
 
             StringValue asMsg = asChannelName(boundedContextName, envelopeClass, className,
-                                                    shardIndex);
+                                              shardIndex);
             Any asAny = AnyPacker.pack(asMsg);
             ChannelId result = ChannelId.newBuilder()
-                                              .setIdentifier(asAny)
-                                              .build();
+                                        .setIdentifier(asAny)
+                                        .build();
             return result;
         }
 

@@ -66,7 +66,7 @@ public class Sender<I, M extends ActorMessageEnvelope<?, ?, ?>> {
      */
     private static Sharding sharding() {
         Sharding result = ServerEnvironment.getInstance()
-                                                 .getSharding();
+                                           .getSharding();
         return result;
     }
 

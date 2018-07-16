@@ -227,7 +227,7 @@ public class EntityColumn implements Serializable {
         checkGetter(getter);
         Method annotatedVersion = retrieveAnnotatedVersion(getter);
         String nameForQuery = nameFromGetter(getter);
-        String nameForStore = nameFromAnnotation(annotatedVersion).or(nameForQuery);
+        String nameForStore = nameFromAnnotation(annotatedVersion).orElse(nameForQuery);
         boolean nullable = mayReturnNull(getter);
         return new EntityColumn(getter, nameForQuery, nameForStore, nullable);
     }
@@ -420,8 +420,8 @@ public class EntityColumn implements Serializable {
             return method;
         } catch (NoSuchMethodException e) {
             String errorMsg = format("Cannot find method %s.%s().",
-                                           entityType.getCanonicalName(),
-                                           getterMethodName);
+                                     entityType.getCanonicalName(),
+                                     getterMethodName);
             throw new IllegalStateException(errorMsg, e);
         }
     }

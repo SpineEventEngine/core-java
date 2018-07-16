@@ -59,11 +59,11 @@ public abstract class Consumer<I,
                                                   ShardingKey key,
                                                   TransportFactory transportFactory) {
         S stream = newShardedStreamBuilder().setBoundedContextName(name)
-                                                  .setKey(key)
-                                                  .setTag(deliveryTag)
-                                                  .setTargetIdClass(repository.getIdClass())
-                                                  .setConsumer(this)
-                                                  .build(transportFactory);
+                                            .setKey(key)
+                                            .setTag(deliveryTag)
+                                            .setTargetIdClass(repository.getIdClass())
+                                            .setConsumer(this)
+                                            .build(transportFactory);
         return stream;
     }
 
@@ -86,7 +86,7 @@ public abstract class Consumer<I,
      */
     protected void deliverNow(I id, M envelopeMessage) {
         TenantId tenantId = envelopeMessage.getActorContext()
-                                                 .getTenantId();
+                                           .getTenantId();
         TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
             @Override
             public void run() {

@@ -96,10 +96,10 @@ public class InvalidCommandException extends CommandException implements Message
      */
     public static Error unknownTenantError(Message commandMessage, String errorText) {
         Error.Builder error = Error.newBuilder()
-                .setType(InvalidCommandException.class.getCanonicalName())
-                .setCode(CommandValidationError.TENANT_UNKNOWN.getNumber())
-                .setMessage(errorText)
-                .putAllAttributes(commandTypeAttribute(commandMessage));
+                                   .setType(InvalidCommandException.class.getCanonicalName())
+                                   .setCode(CommandValidationError.TENANT_UNKNOWN.getNumber())
+                                   .setMessage(errorText)
+                                   .putAllAttributes(commandTypeAttribute(commandMessage));
         return error.build();
     }
 
@@ -108,7 +108,7 @@ public class InvalidCommandException extends CommandException implements Message
         TypeName typeName = TypeName.of(cmd.getMessage());
         String errMsg = format(
                 "The command (class: %s, type: %s, id: %s) was posted to single-tenant " +
-                "CommandBus, but has tenant_id: %s attribute set in the command context.",
+                        "CommandBus, but has tenant_id: %s attribute set in the command context.",
                 cmd.getMessageClass(),
                 typeName,
                 cmd.getId(),

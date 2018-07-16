@@ -107,12 +107,12 @@ public class InProcessSharding implements Sharding {
 
     private Set<ShardingKey> obtainKeys(Shardable shardable) {
         Set<ShardIndex> allIndexes = shardable.getShardingStrategy()
-                                                    .allIndexes();
+                                              .allIndexes();
 
         ImmutableSet.Builder<ShardingKey> keySetBuilder = ImmutableSet.builder();
         for (ShardIndex shardIndex : allIndexes) {
             ShardingKey key = new ShardingKey(shardable.getShardedModelClass(),
-                                                    shardIndex);
+                                              shardIndex);
             keySetBuilder.add(key);
         }
         Set<ShardingKey> allKeys = keySetBuilder.build();
@@ -126,10 +126,10 @@ public class InProcessSharding implements Sharding {
                 BoundedContextName bcName,
                 ShardingKey shardingKey) {
         TransportBindFn fn = new TransportBindFn(bcName, shardingKey,
-                                                       transportFactory);
+                                                 transportFactory);
         ImmutableSet<ShardedStream<?, ?, ?>> result = FluentIterable.from(consumers)
-                                                                          .transform(fn)
-                                                                          .toSet();
+                                                                    .transform(fn)
+                                                                    .toSet();
         return result;
     }
 
@@ -157,8 +157,8 @@ public class InProcessSharding implements Sharding {
             checkNotNull(
                     consumer);
             ShardedStream<?, ?, ?> result = consumer.bindToTransport(bcName,
-                                                                           shardingKey,
-                                                                           transportFactory);
+                                                                     shardingKey,
+                                                                     transportFactory);
             return result;
         }
     }

@@ -303,7 +303,7 @@ public abstract class Transaction<I,
         S currentState = currentBuilderState();
         TransactionListener<I, E, S, B> listener = getListener();
         listener.onTransactionFailed(cause, getEntity(), currentState,
-                                          getVersion(), getLifecycleFlags());
+                                     getVersion(), getLifecycleFlags());
         this.active = false;
         entity.releaseTransaction();
     }
@@ -439,11 +439,15 @@ public abstract class Transaction<I,
     }
 
     public void setArchived(boolean archived) {
-        lifecycleFlags = lifecycleFlags.toBuilder().setArchived(archived).build();
+        lifecycleFlags = lifecycleFlags.toBuilder()
+                                       .setArchived(archived)
+                                       .build();
     }
 
     public void setDeleted(boolean deleted) {
-        lifecycleFlags = lifecycleFlags.toBuilder().setDeleted(deleted).build();
+        lifecycleFlags = lifecycleFlags.toBuilder()
+                                       .setDeleted(deleted)
+                                       .build();
     }
 
     /**
@@ -501,7 +505,7 @@ public abstract class Transaction<I,
 
         private void advanceVersion() {
             Version version = underlyingTransaction.versioningStrategy()
-                                                         .nextVersion(this);
+                                                   .nextVersion(this);
             checkIsIncrement(underlyingTransaction.getVersion(), version);
             underlyingTransaction.setVersion(version);
         }

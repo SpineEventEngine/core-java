@@ -63,7 +63,8 @@ public class ExecutorCommandScheduler extends CommandScheduler {
     }
 
     private static long getDelayMilliseconds(Command command) {
-        Schedule schedule = command.getContext().getSchedule();
+        Schedule schedule = command.getContext()
+                                   .getSchedule();
         Duration delay = schedule.getDelay();
         long delaySec = delay.getSeconds();
         long delayMillisFraction = delay.getNanos() / NANOS_IN_MILLISECOND;

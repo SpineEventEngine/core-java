@@ -151,10 +151,10 @@ public final class InvalidEntityStateException extends RuntimeException {
         @Override
         protected Map<String, Value> getMessageTypeAttribute(Message entityState) {
             String entityStateType = TypeName.of(entityState)
-                                                   .value();
+                                             .value();
             Value value = Value.newBuilder()
-                                     .setStringValue(entityStateType)
-                                     .build();
+                               .setStringValue(entityStateType)
+                               .build();
             return ImmutableMap.of(ATTR_ENTITY_STATE_TYPE_NAME, value);
         }
 

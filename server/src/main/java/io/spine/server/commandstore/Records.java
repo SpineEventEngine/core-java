@@ -77,12 +77,12 @@ class Records {
                                                   CommandStatus status,
                                                   @Nullable CommandId generatedCommandId) {
         CommandId commandId = generatedCommandId != null
-                ? generatedCommandId
-                : command.getId();
+                              ? generatedCommandId
+                              : command.getId();
 
         String commandType = CommandEnvelope.of(command)
-                                                  .getTypeName()
-                                                  .getSimpleName();
+                                            .getTypeName()
+                                            .getSimpleName();
 
         CommandRecord.Builder builder =
                 CommandRecord.newBuilder()

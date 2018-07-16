@@ -45,7 +45,8 @@ public enum EntityVersioning {
     FROM_EVENT {
         @Override
         Version nextVersion(Transaction.Phase<?, ?, ?, ?> phase) {
-            Version fromEvent = phase.getContext().getVersion();
+            Version fromEvent = phase.getContext()
+                                     .getVersion();
             return fromEvent;
         }
     },
@@ -62,7 +63,8 @@ public enum EntityVersioning {
     AUTO_INCREMENT {
         @Override
         Version nextVersion(Transaction.Phase<?, ?, ?, ?> phase) {
-            Version current = phase.getUnderlyingTransaction().getVersion();
+            Version current = phase.getUnderlyingTransaction()
+                                   .getVersion();
             Version newVersion = Versions.increment(current);
             return newVersion;
         }

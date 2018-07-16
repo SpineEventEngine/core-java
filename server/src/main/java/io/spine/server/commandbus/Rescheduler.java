@@ -89,7 +89,7 @@ class Rescheduler {
     @VisibleForTesting
     private void doRescheduleCommands() {
         Set<TenantId> tenants = commandStore().getTenantIndex()
-                                                    .getAll();
+                                              .getAll();
         for (TenantId tenantId : tenants) {
             rescheduleForTenant(tenantId);
         }
@@ -133,9 +133,9 @@ class Rescheduler {
 
     private static Timestamp getTimeToPost(Command command) {
         CommandContext.Schedule schedule = command.getContext()
-                                                        .getSchedule();
+                                                  .getSchedule();
         Timestamp timeToPost = add(command.getSystemProperties()
-                                                .getSchedulingTime(), schedule.getDelay());
+                                          .getSchedulingTime(), schedule.getDelay());
         return timeToPost;
     }
 

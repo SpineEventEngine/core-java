@@ -99,7 +99,7 @@ class ColumnValueConverters {
             return ORDINAL;
         }
         EnumType type = getter.getAnnotation(Enumerated.class)
-                                    .value();
+                              .value();
         return type;
     }
 }

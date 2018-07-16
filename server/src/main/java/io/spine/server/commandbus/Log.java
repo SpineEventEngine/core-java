@@ -95,7 +95,7 @@ public class Log {
         checkNotEmptyOrBlank(format, "format string");
 
         String cmdType = TypeName.of(commandMessage)
-                                       .value();
+                                 .value();
         String id = Identifier.toString(commandId);
         String result = format(format, cmdType, id);
         return result;

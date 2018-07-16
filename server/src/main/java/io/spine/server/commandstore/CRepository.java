@@ -186,8 +186,8 @@ class CRepository extends DefaultRecordBasedRepository<CommandId, CEntity, Comma
                 return false;
             }
             boolean result = input.getState()
-                                        .getStatus()
-                                        .getCode() == commandStatus;
+                                  .getStatus()
+                                  .getCode() == commandStatus;
             return result;
         }
     }

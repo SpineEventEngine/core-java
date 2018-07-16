@@ -240,14 +240,14 @@ public class CommandStore implements AutoCloseable {
     public Iterator<Command> iterator(CommandStatus status) {
         Func<CommandStatus, Iterator<Command>> func =
                 new Func<CommandStatus, Iterator<Command>>(this) {
-            @Override
-            public Iterator<Command> apply(@Nullable CommandStatus input) {
-                checkNotNull(input);
-                Iterator<CommandRecord> recordIterator = repository.iterator(status);
-                Iterator<Command> commands = Records.toCommandIterator(recordIterator);
-                return commands;
-            }
-        };
+                    @Override
+                    public Iterator<Command> apply(@Nullable CommandStatus input) {
+                        checkNotNull(input);
+                        Iterator<CommandRecord> recordIterator = repository.iterator(status);
+                        Iterator<Command> commands = Records.toCommandIterator(recordIterator);
+                        return commands;
+                    }
+                };
         return func.execute(status);
     }
 

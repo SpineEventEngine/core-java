@@ -89,8 +89,8 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
         Any entityId = Identifier.pack(entity.getId());
         Any stateAny = pack(entity.getState());
         EntityRecord.Builder builder = EntityRecord.newBuilder()
-                                                         .setEntityId(entityId)
-                                                         .setState(stateAny);
+                                                   .setEntityId(entityId)
+                                                   .setState(stateAny);
         updateBuilder(builder, entity);
         return builder.build();
     }

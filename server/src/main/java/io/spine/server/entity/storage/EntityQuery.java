@@ -26,7 +26,6 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
-import io.spine.server.entity.Entity;
 import io.spine.server.storage.RecordStorage;
 
 import java.io.Serializable;
@@ -154,9 +153,9 @@ public final class EntityQuery<I> implements Serializable {
                 ALL
         );
         QueryParameters parameters = QueryParameters.newBuilder()
-                                                          .addAll(getParameters())
-                                                          .add(lifecycleParameter)
-                                                          .build();
+                                                    .addAll(getParameters())
+                                                    .add(lifecycleParameter)
+                                                    .build();
         EntityQuery<I> result = new EntityQuery<>(ids, parameters);
         return result;
     }

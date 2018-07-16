@@ -222,8 +222,8 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     @Override
     public LifecycleFlags getLifecycleFlags() {
         LifecycleFlags result = this.lifecycleFlags == null
-                ? LifecycleFlags.getDefaultInstance()
-                : this.lifecycleFlags;
+                                ? LifecycleFlags.getDefaultInstance()
+                                : this.lifecycleFlags;
         return result;
     }
 

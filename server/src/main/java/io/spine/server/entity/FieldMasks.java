@@ -195,7 +195,7 @@ public class FieldMasks {
         B builder = builderConstructor.newInstance();
 
         List<Descriptors.FieldDescriptor> fields = wholeMessage.getDescriptorForType()
-                                                                     .getFields();
+                                                               .getFields();
         for (Descriptors.FieldDescriptor field : fields) {
             if (filter.contains(field.getFullName())) {
                 builder.setField(field, wholeMessage.getField(field));
