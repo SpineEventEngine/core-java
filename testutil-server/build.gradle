@@ -22,3 +22,5 @@ dependencies {
 
     api project(path: ':testutil-client')
 }
+
+apply from: testArtifactsScript
