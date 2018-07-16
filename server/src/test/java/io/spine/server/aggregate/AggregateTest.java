@@ -46,9 +46,7 @@ import io.spine.server.aggregate.given.aggregate.UserAggregate;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.entity.InvalidEntityStateException;
-import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.server.model.Model;
-import io.spine.time.testing.TimeTests;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;
@@ -67,11 +65,9 @@ import io.spine.test.aggregate.event.AggTaskAssigned;
 import io.spine.test.aggregate.event.AggUserNotified;
 import io.spine.test.aggregate.rejection.Rejections;
 import io.spine.test.aggregate.user.User;
-<<<<<<< HEAD
+import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
-=======
 import io.spine.time.testing.TimeTests;
->>>>>>> origin/master
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -85,13 +81,6 @@ import java.util.Set;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
-<<<<<<< HEAD
-import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
-import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
-import static io.spine.testing.client.blackbox.Count.once;
-import static io.spine.testing.client.blackbox.Count.twice;
-=======
->>>>>>> origin/master
 import static io.spine.core.CommandEnvelope.of;
 import static io.spine.core.Events.getRootCommandId;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -107,22 +96,17 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.env;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.event;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.newTenantId;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.reassignTask;
-<<<<<<< HEAD
 import static io.spine.test.Verify.assertSize;
+import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
+import static io.spine.testing.client.blackbox.Count.once;
+import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.server.TestCommandClasses.assertContains;
 import static io.spine.testing.server.TestEventClasses.assertContains;
 import static io.spine.testing.server.TestEventClasses.getEventClasses;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchRejection;
+import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
 import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
-=======
-import static io.spine.server.blackbox.EmittedEventsVerifier.emitted;
-import static io.spine.server.entity.given.Given.aggregateOfClass;
-import static io.spine.test.Verify.assertSize;
-import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
-import static io.spine.testing.client.blackbox.Count.once;
-import static io.spine.testing.client.blackbox.Count.twice;
->>>>>>> origin/master
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
