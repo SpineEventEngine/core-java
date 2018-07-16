@@ -50,6 +50,7 @@ import io.spine.server.model.Model;
 import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
