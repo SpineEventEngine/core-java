@@ -81,7 +81,6 @@ public class ProjectionEventDispatcher {
             super(null, event);
         }
 
-        @CanIgnoreReturnValue
         private static <I, P extends Projection<I, ?, ?>> void
         dispatch(P projection, EventEnvelope envelope) {
             TestProjectionEndpoint<I, P> endpoint = new TestProjectionEndpoint<>(envelope);

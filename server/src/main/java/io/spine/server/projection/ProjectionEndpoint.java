@@ -77,6 +77,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         store(projection);
     }
 
+    @CanIgnoreReturnValue
     protected List<? extends Message> dispatchInTx(P projection) {
         ProjectionTransaction<I, ?, ?> tx =
                 ProjectionTransaction.start((Projection<I, ?, ?>) projection);
