@@ -107,8 +107,8 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
 
     void store(Iterable<Event> events) {
         Iterable<EEntity> entities = StreamSupport.stream(events.spliterator(), false)
-                                                        .map(EventToEEntity.instance())
-                                                        .collect(Collectors.toList());
+                                                  .map(EventToEEntity.instance())
+                                                  .collect(Collectors.toList());
         store(newArrayList(entities));
     }
 
@@ -151,7 +151,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
     @SuppressWarnings("CheckReturnValue") // calling builder
     private static Optional<CompositeColumnFilter> timeFilter(EventStreamQuery query) {
         CompositeColumnFilter.Builder timeFilter = CompositeColumnFilter.newBuilder()
-                                                                              .setOperator(ALL);
+                                                                        .setOperator(ALL);
         if (query.hasAfter()) {
             Timestamp timestamp = query.getAfter();
             ColumnFilter filter = gt(CREATED_TIME_COLUMN, timestamp);
@@ -193,7 +193,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
     private static Optional<CompositeColumnFilter> buildFilter(
             CompositeColumnFilter.Builder builder) {
         boolean filterIsEmpty = builder.getFilterList()
-                                             .isEmpty();
+                                       .isEmpty();
         return filterIsEmpty
                ? Optional.empty()
                : Optional.of(builder.build());

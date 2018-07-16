@@ -433,7 +433,7 @@ public class EventBus
         @Internal
         public EventBus build() {
             String message = "Either storageFactory or eventStore must be " +
-                                   "set to build the EventBus instance";
+                             "set to build the EventBus instance";
             checkState(storageFactory != null || eventStore != null, message);
 
             if (eventStoreStreamExecutor == null) {
@@ -464,10 +464,10 @@ public class EventBus
     }
 
     /**
-     * Handles a dead event by saving it to the {@link EventStore} and producing an 
+     * Handles a dead event by saving it to the {@link EventStore} and producing an
      * {@link UnsupportedEventException}.
      *
-     * <p> We must store dead events, as they are still emitted by some entity and therefore are 
+     * <p> We must store dead events, as they are still emitted by some entity and therefore are
      * a part of the history for the current bounded context.
      */
     private class DeadEventTap implements DeadMessageHandler<EventEnvelope> {

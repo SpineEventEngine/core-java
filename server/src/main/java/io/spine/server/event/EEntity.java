@@ -77,7 +77,7 @@ public class EEntity extends AbstractEntity<EventId, Event> {
             Event event1 = e1.getState();
             Event event2 = e2.getState();
             int result = Events.eventComparator()
-                                     .compare(event1, event2);
+                               .compare(event1, event2);
             return result;
         }
     };

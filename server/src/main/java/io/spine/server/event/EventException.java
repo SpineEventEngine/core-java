@@ -82,10 +82,10 @@ public abstract class EventException extends RuntimeException implements Message
      */
     public static Map<String, Value> eventTypeAttribute(Message eventMessage) {
         String type = TypeName.of(eventMessage)
-                                    .value();
+                              .value();
         Value value = Value.newBuilder()
-                                 .setStringValue(type)
-                                 .build();
+                           .setStringValue(type)
+                           .build();
         Map<String, Value> result = ImmutableMap.of(ATTR_EVENT_TYPE_NAME, value);
         return result;
     }

@@ -106,8 +106,8 @@ public class EventFactory {
     private static void validate(Message messageOrAny) throws ValidationException {
         Message toValidate;
         toValidate = messageOrAny instanceof Any
-                ? AnyPacker.unpack((Any) messageOrAny)
-                : messageOrAny;
+                     ? AnyPacker.unpack((Any) messageOrAny)
+                     : messageOrAny;
         checkValid(toValidate);
     }
 
@@ -124,10 +124,10 @@ public class EventFactory {
         checkNotNull(context);
         Any packed = pack(messageOrAny);
         Event result = Event.newBuilder()
-                                  .setId(id)
-                                  .setMessage(packed)
-                                  .setContext(context)
-                                  .build();
+                            .setId(id)
+                            .setMessage(packed)
+                            .setContext(context)
+                            .build();
         return result;
     }
 
@@ -138,8 +138,8 @@ public class EventFactory {
         IntegrationEventContext sourceContext = integrationEvent.getContext();
         EventContext context = toEventContext(sourceContext);
         Event result = createEvent(sourceContext.getEventId(),
-                                         integrationEvent.getMessage(),
-                                         context);
+                                   integrationEvent.getMessage(),
+                                   context);
         return result;
     }
 
