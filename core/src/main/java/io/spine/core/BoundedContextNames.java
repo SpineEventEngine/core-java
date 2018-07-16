@@ -22,7 +22,6 @@ package io.spine.core;
 
 import io.spine.annotation.Internal;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.String.format;
 
@@ -64,8 +63,15 @@ public final class BoundedContextNames {
         return result;
     }
 
-    public static void checkValid(BoundedContextName name) {
-        checkNotNull(name);
+    /**
+     * Validates the given {@link BoundedContextName}.
+     *
+     * <p>The name must not be empty or blank in order to pass the validation.
+     *
+     * @throws IllegalArgumentException if the name is not valid
+     */
+    @Internal
+    public static void checkValid(BoundedContextName name) throws IllegalArgumentException {
         checkNotEmptyOrBlank(name.getValue(), "name");
     }
 
