@@ -62,7 +62,7 @@ public abstract class EventSubscriber implements EventDispatcher<String> {
      * as the identify of the subscriber, or empty set if dispatching failed
      */
     @Override
-    public Set<String> dispatch(final EventEnvelope envelope) {
+    public Set<String> dispatch(EventEnvelope envelope) {
         final EventOperation op = new EventOperation(envelope.getOuterObject()) {
             @Override
             public void run() {
