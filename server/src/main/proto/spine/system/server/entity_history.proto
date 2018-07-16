@@ -118,7 +118,7 @@ message LifecycleHistory {
 
 // The history of dispatching messages to the entity.
 //
-// Contains timespamps of most recent command and event dispatched to the entity.
+// Contains timestamps of most recent command and event dispatched to the entity.
 //
 message DispatchingHistory {
 
