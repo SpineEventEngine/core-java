@@ -82,6 +82,9 @@ message DispatchEventToReactor {
 //
 // This command is not posted if applying the event to the Aggregate fails.
 //
+// This command is posted at most once, i.e. NOT posted each time an Aggregate is loaded from
+// its history.
+//
 message PassEventToApplier {
 
     // The ID of the entity, which the event is dispatched to.

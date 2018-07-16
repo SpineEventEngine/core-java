@@ -36,7 +36,7 @@ import "spine/core/command.proto";
 import "spine/core/rejection.proto";
 import "spine/client/entities.proto";
 
-// An event emmited when a new command is received.
+// An event emitted when a new command is received.
 //
 message CommandReceived {
 
@@ -47,7 +47,7 @@ message CommandReceived {
     spine.core.Command payload = 2;
 }
 
-// An event emmited when the command is acknowledged by the `CommandBus`.
+// An event emitted when the command is acknowledged by the `CommandBus`.
 //
 message CommandAcknowledged {
 
@@ -55,7 +55,7 @@ message CommandAcknowledged {
     spine.core.CommandId id = 1;
 }
 
-// An event emmited when a command is dispatched to a handler
+// An event emitted when a command is dispatched to a handler
 //
 message CommandDispatched {
 
@@ -66,7 +66,7 @@ message CommandDispatched {
     spine.client.EntityId receiver = 2;
 }
 
-// An event emmited when a command is successfully handled.
+// An event emitted when a command is successfully handled.
 //
 message CommandHandled {
 
@@ -74,7 +74,7 @@ message CommandHandled {
     spine.core.CommandId id = 1;
 }
 
-// An event emmited if the handler fails to process the command.
+// An event emitted if the handler fails to process the command.
 //
 message CommandErrored {
 
@@ -85,7 +85,7 @@ message CommandErrored {
     spine.base.Error error = 2;
 }
 
-// An event emmited if the handler rejects the command.
+// An event emitted if the handler rejects the command.
 //
 message CommandRejected {
 
