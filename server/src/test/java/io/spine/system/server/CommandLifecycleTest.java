@@ -20,20 +20,40 @@
 
 package io.spine.system.server;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
+import io.spine.base.Error;
+import io.spine.base.Identifier;
+import io.spine.base.Time;
+import io.spine.core.ActorContext;
 import io.spine.core.BoundedContextName;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
+import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
+import io.spine.server.commandbus.CommandBus;
+import io.spine.system.server.given.CommandLifecycleTestEnv.CommandLifecycleWatcher;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.base.Identifier.newUuid;
+import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.SystemBoundedContexts.systemOf;
 import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
+import static io.spine.validate.Validate.isNotDefault;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings("InnerClassMayBeStatic")
 @DisplayName("CommandLifecycle should")
 class CommandLifecycleTest {
 
@@ -58,12 +78,119 @@ class CommandLifecycleTest {
     }
 
     @DisplayName("produce system events when")
+    @Nested
     class ProduceEvents {
 
-        @Test
-        @DisplayName("command is received")
-        void received() {
+        private CommandLifecycleWatcher eventWatcher;
+        private CompanyId id;
 
+        @BeforeEach
+        void setUp() {
+            this.eventWatcher = new CommandLifecycleWatcher();
+            system.getEventBus().register(eventWatcher);
+            id = CompanyId.newBuilder()
+                          .setUuid(newUuid())
+                          .build();
         }
+
+        @Test
+        @DisplayName("command is processed successfully")
+        void successful() {
+            EstablishCompany successfulCommand =
+                    EstablishCompany.newBuilder()
+                                    .setId(id)
+                                    .setFinalName("Good company name")
+                                    .build();
+            postCommand(successfulCommand);
+            CommandReceived received = checkReceived(successfulCommand);
+            CommandId commandId = received.getId();
+            checkAcknowledged(commandId);
+            checkDispatched(commandId);
+            checkHandled(commandId);
+        }
+
+        @Test
+        @DisplayName("command is filtered out")
+        void invalid() {
+            Command invalidCommand = buildInvalidCommand();
+            postBuiltCommand(invalidCommand);
+
+            CommandReceived received = checkReceived(unpack(invalidCommand.getMessage()));
+            CommandId actualId = received.getId();
+            CommandId expectedId = invalidCommand.getId();
+            assertEquals(expectedId, actualId);
+
+            Error error = checkErrored(actualId);
+            assertTrue(isNotDefault(error.getValidationError()));
+        }
+
+        private Command buildInvalidCommand() {
+            EstablishCompany invalidCommand = EstablishCompany.getDefaultInstance();
+            CommandId commandId = CommandId
+                    .newBuilder()
+                    .setUuid(newUuid())
+                    .build();
+            UserId actor = UserId.newBuilder()
+                                 .setValue(newUuid())
+                                 .build();
+            Timestamp now = Time.getCurrentTime();
+            ActorContext actorContext = ActorContext.newBuilder()
+                                                    .setTimestamp(now)
+                                                    .setActor(actor)
+                                                    .build();
+            CommandContext context = CommandContext.newBuilder()
+                                                   .setActorContext(actorContext)
+                                                   .build();
+            Command command = Command
+                    .newBuilder()
+                    .setId(commandId)
+                    .setMessage(pack(invalidCommand))
+                    .setContext(context)
+                    .build();
+            return command;
+        }
+
+        @CanIgnoreReturnValue
+        private CommandReceived checkReceived(Message expectedCommand) {
+            CommandReceived received = eventWatcher.nextEvent(CommandReceived.class);
+            Message actualCommand = unpack(received.getPayload().getMessage());
+            assertEquals(expectedCommand, actualCommand);
+            return received;
+        }
+
+        private void checkAcknowledged(CommandId commandId) {
+            CommandAcknowledged acknowledged = eventWatcher.nextEvent(CommandAcknowledged.class);
+            assertEquals(commandId, acknowledged.getId());
+        }
+
+        private void checkDispatched(CommandId commandId) {
+            CommandDispatched dispatched = eventWatcher.nextEvent(CommandDispatched.class);
+            assertEquals(commandId, dispatched.getId());
+        }
+
+        private void checkHandled(CommandId commandId) {
+            CommandHandled handled = eventWatcher.nextEvent(CommandHandled.class);
+            assertEquals(commandId, handled.getId());
+            CompanyId actualReceiver = Identifier.unpack(handled.getReceiver()
+                                                                .getEntityId()
+                                                                .getId());
+            assertEquals(id, actualReceiver);
+        }
+
+        private Error checkErrored(CommandId commandId) {
+            CommandErrored errored = eventWatcher.nextEvent(CommandErrored.class);
+            assertEquals(commandId, errored.getId());
+            return errored.getError();
+        }
+    }
+
+    private void postCommand(Message commandMessage) {
+        Command command = requestFactory.createCommand(commandMessage);
+        postBuiltCommand(command);
+    }
+
+    private void postBuiltCommand(Command command) {
+        CommandBus commandBus = context.getCommandBus();
+        commandBus.post(command, noOpObserver());
     }
 }
