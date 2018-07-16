@@ -19,21 +19,11 @@
  */
 
 /**
- * This package provides test utilities for implementing black box server testing.
- * Such a tests would provide an ability to test complex systems without setting up 
- * the infrastructure.
- * 
- * <p>One such black box example is for {@link io.spine.server.blackbox.BlackBoxBoundedContext 
- * Bounded Context testing}. It allows sending Commands and Events to the 
- * {@link io.spine.server.BoundedContext Bounded Context} and then verifying their effect 
- * inside of the Bounded Context.
- * 
- * @see io.spine.testing.client.blackbox
- * @see io.spine.server.blackbox.BlackBoxBoundedContext
+ * This package contains utilities for building test instances of the entities.
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.server.blackbox;
+package io.spine.testing.server.entity;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 

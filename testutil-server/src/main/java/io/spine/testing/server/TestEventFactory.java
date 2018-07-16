@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.command;
+package io.spine.testing.server;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;

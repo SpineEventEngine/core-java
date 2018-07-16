@@ -54,7 +54,7 @@ import io.spine.test.integration.event.ItgProjectStarted;
 import io.spine.test.integration.rejection.IntegrationRejections.ItgCannotStartArchivedProject;
 import io.spine.test.integration.rejection.IntegrationRejections.ItgProjectAlreadyExists;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.command.TestEventFactory;
+import io.spine.testing.server.TestEventFactory;
 import io.spine.validate.Int32ValueVBuilder;
 import io.spine.validate.StringValueVBuilder;
 
@@ -66,7 +66,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.testing.server.command.TestEventFactory.newInstance;
+import static io.spine.testing.server.TestEventFactory.newInstance;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**

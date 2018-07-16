@@ -64,7 +64,7 @@ import io.spine.test.event.command.EBArchiveProject;
 import io.spine.test.event.command.EBCreateProject;
 import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.command.TestEventFactory;
+import io.spine.testing.server.TestEventFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;

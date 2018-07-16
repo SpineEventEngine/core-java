@@ -19,11 +19,12 @@
  */
 
 /**
- * Message handling assertions for command and event handling.
+ * This package contains base classes for assertion mechanism called
+ * {@linkplain io.spine.testing.server.expected.AbstractExpected expected}.
  */
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.server.expected;
+package io.spine.testing.server.expected;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 

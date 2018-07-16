@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.blackbox;
+package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -32,7 +32,7 @@ import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
-import io.spine.testing.server.command.TestEventFactory;
+import io.spine.testing.server.TestEventFactory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;

@@ -25,7 +25,6 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.CommandHandlingEntity;
-import io.spine.testing.server.command.TestEventFactory;
 import io.spine.testing.server.expected.EventHandlerExpected;
 
 import java.util.List;

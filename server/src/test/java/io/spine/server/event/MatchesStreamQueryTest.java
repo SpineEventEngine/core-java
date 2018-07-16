@@ -27,13 +27,13 @@ import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
-import io.spine.testing.server.command.TestEventFactory;
+import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.server.command.TestEventFactory.newInstance;
+import static io.spine.testing.server.TestEventFactory.newInstance;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

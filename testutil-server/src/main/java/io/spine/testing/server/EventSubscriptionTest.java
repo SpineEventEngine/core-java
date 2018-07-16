@@ -23,7 +23,6 @@ package io.spine.testing.server;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.server.entity.Entity;
-import io.spine.testing.server.command.TestEventFactory;
 import io.spine.testing.server.expected.AbstractExpected;
 
 /**

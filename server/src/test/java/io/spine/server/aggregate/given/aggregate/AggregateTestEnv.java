@@ -36,7 +36,7 @@ import io.spine.test.aggregate.command.AggReassignTask;
 import io.spine.test.aggregate.task.AggTaskId;
 import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.command.TestEventFactory;
+import io.spine.testing.server.TestEventFactory;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.core.given.GivenVersion.withNumber;

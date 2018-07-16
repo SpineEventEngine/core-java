@@ -23,7 +23,7 @@ package io.spine.server.event;
 import com.google.protobuf.BoolValue;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.given.EventSubscriberTestEnv.FailingSubscriber;
-import io.spine.testing.server.command.TestEventFactory;
+import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -43,14 +43,14 @@ import io.spine.test.event.user.permission.PermissionGrantedEvent;
 import io.spine.test.event.user.permission.PermissionRevokedEvent;
 import io.spine.test.event.user.sharing.SharingRequestApproved;
 import io.spine.testing.core.given.GivenUserId;
-import io.spine.testing.server.command.TestEventFactory;
+import io.spine.testing.server.TestEventFactory;
 import io.spine.time.ZoneOffset;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.testing.server.command.TestEventFactory.newInstance;
+import static io.spine.testing.server.TestEventFactory.newInstance;
 
 /**
  * @author Alexander Yevsyukov

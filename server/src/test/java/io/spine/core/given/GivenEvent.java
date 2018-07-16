@@ -27,7 +27,7 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventsTest;
 import io.spine.test.Tests;
-import io.spine.testing.server.command.TestEventFactory;
+import io.spine.testing.server.TestEventFactory;
 
 import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.test.TestValues.newUuidValue;

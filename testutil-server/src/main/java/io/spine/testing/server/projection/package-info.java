@@ -18,13 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.blackbox.given;
-
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.test.testutil.blackbox.ProjectId;
-
 /**
- * @author Mykhailo Drachuk
+ * This package provides test utilities and base classes for the unit tests of
+ * {@linkplain io.spine.server.projection.Projection projections}.
+
+ * @see io.spine.testing.server.procman.ProcessManagerCommandTest
+ * @see io.spine.testing.server.procman.ProcessManagerEventReactionTest
  */
-public class BbProjectRepository extends AggregateRepository<ProjectId, BbProjectAggregate> {
-}
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testing.server.projection;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

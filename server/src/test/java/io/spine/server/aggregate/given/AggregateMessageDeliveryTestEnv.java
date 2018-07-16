@@ -44,7 +44,7 @@ import io.spine.test.aggregate.event.AggProjectCancelled;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.rejection.Rejections.AggCannotStartArchivedProject;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.command.TestEventFactory;
+import io.spine.testing.server.TestEventFactory;
 import io.spine.validate.StringValueVBuilder;
 
 import java.util.List;

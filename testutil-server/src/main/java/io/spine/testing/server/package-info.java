@@ -18,22 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.blackbox.given;
-
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.test.testutil.blackbox.ProjectId;
-
 /**
- * @author Mykhailo Drachuk
- */
-public abstract class RepositoryThrowingExceptionOnClose
-        extends AggregateRepository<ProjectId, BbProjectAggregate> {
+ * This package provides test utilities and base classes for the unit tests of
+ * Spine entities (aggregates, aggregate parts, process manager, projections, event subscribers).
 
-    @Override
-    public void close() {
-        super.close();
-        throwException();
-    }
-    
-    protected abstract void throwException();
-}
+ * @see io.spine.testing.server.aggregate.AggregateCommandTest
+ * @see io.spine.testing.server.aggregate.AggregateEventReactionTest
+ * @see io.spine.testing.server.aggregate.AggregatePartCommandTest
+ * @see io.spine.testing.server.procman.ProcessManagerCommandTest
+ * @see io.spine.testing.server.procman.ProcessManagerEventReactionTest
+ * @see io.spine.testing.server.projection.ProjectionTest
+ * @see io.spine.testing.server.EventSubscriptionTest
+ */
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testing.server;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

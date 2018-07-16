@@ -30,7 +30,7 @@ import io.spine.server.event.EventStoreTest;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
 import io.spine.testdata.Sample;
-import io.spine.testing.server.command.TestEventFactory;
+import io.spine.testing.server.TestEventFactory;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;

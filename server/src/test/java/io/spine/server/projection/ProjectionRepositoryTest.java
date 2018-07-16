@@ -54,7 +54,7 @@ import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventClasses;
-import io.spine.testing.server.command.TestEventFactory;
+import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

@@ -26,7 +26,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.entity.Transaction.Phase;
 import io.spine.server.event.EventFactory;
-import io.spine.testing.server.command.TestEventFactory;
+import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ValidatingBuilder;

@@ -29,7 +29,7 @@ import io.spine.core.EventValidationError;
 import io.spine.core.MessageInvalid;
 import io.spine.test.event.ProjectCreated;
 import io.spine.testdata.Sample;
-import io.spine.testing.server.command.TestEventFactory;
+import io.spine.testing.server.TestEventFactory;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
 import org.junit.jupiter.api.DisplayName;

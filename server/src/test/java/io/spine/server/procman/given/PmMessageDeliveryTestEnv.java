@@ -44,7 +44,7 @@ import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.rejection.Rejections.PmCannotStartArchivedProject;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.command.TestEventFactory;
+import io.spine.testing.server.TestEventFactory;
 import io.spine.validate.StringValueVBuilder;
 
 import java.util.List;
