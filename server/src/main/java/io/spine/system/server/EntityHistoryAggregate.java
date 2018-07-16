@@ -97,19 +97,6 @@ public final class EntityHistoryAggregate
     }
 
     @Assign
-    EventPassedToApplier handle(PassEventToApplier command) {
-        DispatchedEvent dispatchedEvent = DispatchedEvent
-                .newBuilder()
-                .setEvent(command.getEventId())
-                .setWhenDispatched(getCurrentTime())
-                .build();
-        return EventPassedToApplier.newBuilder()
-                                   .setReceiver(command.getReceiver())
-                                   .setPayload(dispatchedEvent)
-                                   .build();
-    }
-
-    @Assign
     CommandDispatchedToHandler handle(DispatchCommandToHandler command) {
         DispatchedCommand dispatchedCommand = DispatchedCommand
                 .newBuilder()
@@ -186,12 +173,6 @@ public final class EntityHistoryAggregate
 
     @Apply
     private void on(EventDispatchedToReactor event) {
-        updateLastEventTime(event.getPayload()
-                                 .getWhenDispatched());
-    }
-
-    @Apply
-    private void on(EventPassedToApplier event) {
         updateLastEventTime(event.getPayload()
                                  .getWhenDispatched());
     }

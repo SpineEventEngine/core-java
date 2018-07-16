@@ -53,7 +53,6 @@ import io.spine.system.server.DispatchEventToSubscriber;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.ExtractEntityFromArchive;
-import io.spine.system.server.PassEventToApplier;
 import io.spine.system.server.RestoreEntity;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
@@ -521,18 +520,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                     .newBuilder()
                     .setReceiver(id)
                     .setCommandId(command.getId())
-                    .build();
-            postSystem(systemCommand);
-        }
-
-        /**
-         * Posts the {@link PassEventToApplier} system command.
-         */
-        public void onPassEventToApplier(Event event) {
-            PassEventToApplier systemCommand = PassEventToApplier
-                    .newBuilder()
-                    .setReceiver(id)
-                    .setEventId(event.getId())
                     .build();
             postSystem(systemCommand);
         }
