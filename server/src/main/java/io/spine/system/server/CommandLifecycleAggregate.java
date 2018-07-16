@@ -36,14 +36,21 @@ import io.spine.server.command.Assign;
  * <p>All the commands in the system (except the commands in the {@code System} bounded context)
  * have an associated {@code CommandLifecycle}.
  *
- * <p>When a command is received by the {@link io.spine.server.commandbus.CommandBus CommandBus},
- * the {@link CommandReceived} event occurs. Then the command passes a number of
- * {@linkplain io.spine.server.bus.BusFilter filters} and either is acknowledged
- * ({@link CommandAcknowledged}) or causes an error ({@link CommandErrored}).
- * If the command is acknowledged, it is passed to a dispatcher ({@link CommandDispatched}).
- * After dispatching, the command is handled and either {@link CommandHandled},
- * or {@link CommandRejected}, or {@link CommandErrored} event occurs.
- *
+ * <p>Emits events:
+ * <ul>
+ *     <li>{@link CommandReceived} - when a command is received by the
+ *         {@link io.spine.server.commandbus.CommandBus CommandBus};
+ *     <li>{@link CommandAcknowledged} - when the command passes
+ *         the {@linkplain io.spine.server.bus.BusFilter bus filters} successfully;
+ *     <li>{@link CommandErrored} - when the command causes an error in
+ *         the {@linkplain io.spine.server.bus.BusFilter bus filters};
+ *     <li>{@link CommandDispatched} - when the command is passed to a dispatcher after
+ *         being acknowledged;
+ *     <li>{@link CommandHandled} - after a successful command handling;
+ *     <li>{@link CommandErrored} - if the command caused a runtime error during handling;
+ *     <li>{@link CommandRejected} - if the command handler rejected the command.
+ * </ul>
+
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("OverlyCoupledClass") // OK for an aggregate class.
