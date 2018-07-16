@@ -320,8 +320,8 @@ public final class QueryBuilder {
             return null;
         }
         FieldMask mask = FieldMask.newBuilder()
-                                        .addAllPaths(fieldMask)
-                                        .build();
+                                  .addAllPaths(fieldMask)
+                                  .build();
         return mask;
     }
 

@@ -203,19 +203,19 @@ public final class ColumnFilters {
     private static ColumnFilter createFilter(String columnName, Object value, Operator operator) {
         Any wrappedValue = toAny(value);
         ColumnFilter filter = ColumnFilter.newBuilder()
-                                                .setColumnName(columnName)
-                                                .setValue(wrappedValue)
-                                                .setOperator(operator)
-                                                .build();
+                                          .setColumnName(columnName)
+                                          .setValue(wrappedValue)
+                                          .setOperator(operator)
+                                          .build();
         return filter;
     }
 
     private static CompositeColumnFilter composeFilters(Collection<ColumnFilter> filters,
                                                         CompositeOperator operator) {
         CompositeColumnFilter result = CompositeColumnFilter.newBuilder()
-                                                                  .addAllFilter(filters)
-                                                                  .setOperator(operator)
-                                                                  .build();
+                                                            .addAllFilter(filters)
+                                                            .setOperator(operator)
+                                                            .build();
         return result;
     }
 

@@ -55,9 +55,9 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         int targetVersion = 100500;
 
         CommandContext commandContext = CommandFactory.createContext(tenantId,
-                                                                           userId,
-                                                                           zoneOffset,
-                                                                           targetVersion);
+                                                                     userId,
+                                                                     zoneOffset,
+                                                                     targetVersion);
 
         ActorContext actorContext = commandContext.getActorContext();
 
@@ -79,7 +79,7 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
             // this precision and to add coverage.
             Timestamp beforeCall = TimeTests.Past.secondsAgo(1);
             Command command = factory().command()
-                                             .create(StringValue.getDefaultInstance());
+                                       .create(StringValue.getDefaultInstance());
             Timestamp afterCall = TimeTests.Future.secondsFromNow(1);
 
             assertTrue(Timestamps2.isBetween(
@@ -92,7 +92,7 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         @DisplayName("with given entity version")
         void withEntityVersion() {
             Command command = factory().command()
-                                             .create(StringValue.getDefaultInstance(), 2);
+                                       .create(StringValue.getDefaultInstance(), 2);
 
             assertEquals(2, command.getContext()
                                    .getTargetVersion());
@@ -102,15 +102,15 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         @DisplayName("with own tenant ID")
         void withOwnTenantID() {
             TenantId tenantId = TenantId.newBuilder()
-                                              .setValue(getClass().getSimpleName())
-                                              .build();
+                                        .setValue(getClass().getSimpleName())
+                                        .build();
             ActorRequestFactory mtFactory = ActorRequestFactory.newBuilder()
-                                                                     .setTenantId(tenantId)
-                                                                     .setActor(getActor())
-                                                                     .setZoneOffset(getZoneOffset())
-                                                                     .build();
+                                                               .setTenantId(tenantId)
+                                                               .setActor(getActor())
+                                                               .setZoneOffset(getZoneOffset())
+                                                               .build();
             Command command = mtFactory.command()
-                                             .create(StringValue.getDefaultInstance());
+                                       .create(StringValue.getDefaultInstance());
 
             assertEquals(tenantId, command.getContext()
                                           .getActorContext()

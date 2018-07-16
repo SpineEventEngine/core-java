@@ -107,8 +107,8 @@ public final class QueryFactory {
         checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
 
         FieldMask fieldMask = FieldMask.newBuilder()
-                                             .addAllPaths(Arrays.asList(maskPaths))
-                                             .build();
+                                       .addAllPaths(Arrays.asList(maskPaths))
+                                       .build();
         Query result = composeQuery(entityClass, ids, null, fieldMask);
         return result;
     }
@@ -154,8 +154,8 @@ public final class QueryFactory {
      */
     public Query allWithMask(Class<? extends Message> entityClass, String... maskPaths) {
         FieldMask fieldMask = FieldMask.newBuilder()
-                                             .addAllPaths(Arrays.asList(maskPaths))
-                                             .build();
+                                       .addAllPaths(Arrays.asList(maskPaths))
+                                       .build();
         Query result = composeQuery(entityClass, null, null, fieldMask);
         return result;
     }

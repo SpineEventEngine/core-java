@@ -91,8 +91,8 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         void byType() {
             Class<? extends Message> testEntityClass = TestEntity.class;
             Query query = factory().query()
-                                         .select(testEntityClass)
-                                         .build();
+                                   .select(testEntityClass)
+                                   .build();
             assertNotNull(query);
             assertFalse(query.hasFieldMask());
 
@@ -109,9 +109,9 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             int id1 = 314;
             int id2 = 271;
             Query query = factory().query()
-                                         .select(TestEntity.class)
-                                         .byId(id1, id2)
-                                         .build();
+                                   .select(TestEntity.class)
+                                   .byId(id1, id2)
+                                   .build();
             assertNotNull(query);
             assertFalse(query.hasFieldMask());
 
@@ -133,9 +133,9 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         void byFieldMask() {
             String fieldName = "TestEntity.firstField";
             Query query = factory().query()
-                                         .select(TestEntity.class)
-                                         .withMask(fieldName)
-                                         .build();
+                                   .select(TestEntity.class)
+                                   .withMask(fieldName)
+                                   .build();
             assertNotNull(query);
             assertTrue(query.hasFieldMask());
 
@@ -152,9 +152,9 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             Object columnValue = 42;
 
             Query query = factory().query()
-                                         .select(TestEntity.class)
-                                         .where(eq(columnName, columnValue))
-                                         .build();
+                                   .select(TestEntity.class)
+                                   .where(eq(columnName, columnValue))
+                                   .build();
             assertNotNull(query);
             Target target = query.getTarget();
             assertFalse(target.getIncludeAll());
@@ -182,10 +182,10 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             Object columnValue2 = newMessageId();
 
             Query query = factory().query()
-                                         .select(TestEntity.class)
-                                         .where(eq(columnName1, columnValue1),
-                                                eq(columnName2, columnValue2))
-                                         .build();
+                                   .select(TestEntity.class)
+                                   .where(eq(columnName1, columnValue1),
+                                          eq(columnName2, columnValue2))
+                                   .build();
             assertNotNull(query);
             Target target = query.getTarget();
             assertFalse(target.getIncludeAll());
@@ -195,7 +195,7 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
                     entityFilters.getFilterList();
             assertSize(1, aggregatingColumnFilters);
             Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
-                                                                                   .getFilterList();
+                                                                             .getFilterList();
             Any actualValue1 = findByName(columnFilters, columnName1).getValue();
             assertNotNull(actualValue1);
             int actualGenericValue1 = toObject(actualValue1, int.class);
@@ -220,15 +220,15 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             Timestamp twoDaysAgo = subtract(getCurrentTime(), fromHours(-48));
 
             Query query = factory().query()
-                                         .select(TestEntity.class)
-                                         .where(all(ge(companySizeColumn, 50),
-                                                    le(companySizeColumn, 1000)),
-                                                either(gt(establishedTimeColumn, twoDaysAgo),
-                                                       eq(countryColumn, countryName)))
-                                         .build();
+                                   .select(TestEntity.class)
+                                   .where(all(ge(companySizeColumn, 50),
+                                              le(companySizeColumn, 1000)),
+                                          either(gt(establishedTimeColumn, twoDaysAgo),
+                                                 eq(countryColumn, countryName)))
+                                   .build();
             Target target = query.getTarget();
             List<CompositeColumnFilter> filters = target.getFilters()
-                                                              .getFilterList();
+                                                        .getFilterList();
             assertSize(2, filters);
 
             CompositeColumnFilter firstFilter = filters.get(0);
@@ -288,12 +288,12 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             Object columnValue2 = newMessageId();
             String fieldName = "TestEntity.secondField";
             Query query = factory().query()
-                                         .select(testEntityClass)
-                                         .withMask(fieldName)
-                                         .byId(id1, id2)
-                                         .where(eq(columnName1, columnValue1),
-                                                eq(columnName2, columnValue2))
-                                         .build();
+                                   .select(testEntityClass)
+                                   .withMask(fieldName)
+                                   .byId(id1, id2)
+                                   .where(eq(columnName1, columnValue1),
+                                          eq(columnName2, columnValue2))
+                                   .build();
             assertNotNull(query);
 
             // Check FieldMask
@@ -320,7 +320,7 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
                     entityFilters.getFilterList();
             assertSize(1, aggregatingColumnFilters);
             Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
-                                                                                   .getFilterList();
+                                                                             .getFilterList();
             assertSize(2, columnFilters);
 
             Any actualValue1 = findByName(columnFilters, columnName1).getValue();
@@ -355,8 +355,8 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         @DisplayName("IDs clause")
         void lastIds() {
             Iterable<?> genericIds = asList(newUuid(),
-                                                  -1,
-                                                  newMessageId());
+                                            -1,
+                                            newMessageId());
             Long[] longIds = {1L, 2L, 3L};
             Message[] messageIds = {
                     newMessageId(),
@@ -371,19 +371,19 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             Integer[] intIds = {4, 5, 6};
 
             Query query = factory().query()
-                                         .select(TestEntity.class)
-                                         .byId(genericIds)
-                                         .byId(longIds)
-                                         .byId(stringIds)
-                                         .byId(intIds)
-                                         .byId(messageIds)
-                                         .build();
+                                   .select(TestEntity.class)
+                                   .byId(genericIds)
+                                   .byId(longIds)
+                                   .byId(stringIds)
+                                   .byId(intIds)
+                                   .byId(messageIds)
+                                   .build();
             assertNotNull(query);
 
             Target target = query.getTarget();
             EntityFilters filters = target.getFilters();
             Collection<EntityId> entityIds = filters.getIdFilter()
-                                                          .getIdsList();
+                                                    .getIdsList();
             assertSize(messageIds.length, entityIds);
             Function<EntityId, ProjectId> transformer =
                     new EntityIdUnpacker<>(ProjectId.class);
@@ -398,10 +398,10 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             String[] arrayFields = {"TestEntity.secondField"};
 
             Query query = factory().query()
-                                         .select(TestEntity.class)
-                                         .withMask(iterableFields)
-                                         .withMask(arrayFields)
-                                         .build();
+                                   .select(TestEntity.class)
+                                   .withMask(iterableFields)
+                                   .withMask(arrayFields)
+                                   .build();
             assertNotNull(query);
             FieldMask mask = query.getFieldMask();
 
@@ -423,11 +423,11 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         Message columnValue2 = newMessageId();
         String fieldName = "TestEntity.secondField";
         QueryBuilder builder = factory().query()
-                                              .select(testEntityClass)
-                                              .withMask(fieldName)
-                                              .byId(id1, id2)
-                                              .where(eq(columnName1, columnValue1),
-                                                     eq(columnName2, columnValue2));
+                                        .select(testEntityClass)
+                                        .withMask(fieldName)
+                                        .byId(id1, id2)
+                                        .where(eq(columnName1, columnValue1),
+                                               eq(columnName2, columnValue2));
         String stringRepr = builder.toString();
 
         assertThat(stringRepr, containsString(testEntityClass.getSimpleName()));

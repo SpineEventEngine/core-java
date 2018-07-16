@@ -128,7 +128,7 @@ abstract class ActorRequestFactoryTest {
         @DisplayName("given user")
         void givenUser() {
             int currentOffset = ZoneOffsets.getDefault()
-                                                 .getAmountSeconds();
+                                           .getAmountSeconds();
             ActorRequestFactory aFactory = builder()
                     .setActor(actor)
                     .build();

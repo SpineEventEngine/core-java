@@ -90,20 +90,20 @@ public final class Targets {
             for (Message rawId : entityIds) {
                 Any packedId = AnyPacker.pack(rawId);
                 EntityId entityId = EntityId.newBuilder()
-                                                  .setId(packedId)
-                                                  .build();
+                                            .setId(packedId)
+                                            .build();
                 idFilterBuilder.addIds(entityId);
             }
         }
         EntityIdFilter idFilter = idFilterBuilder.build();
         EntityFilters filters = EntityFilters.newBuilder()
-                                                   .setIdFilter(idFilter)
-                                                   .addAllFilter(entityColumnValues)
-                                                   .build();
+                                             .setIdFilter(idFilter)
+                                             .addAllFilter(entityColumnValues)
+                                             .build();
         String typeUrl = TypeUrl.of(entityClass)
-                                      .value();
+                                .value();
         Target.Builder builder = Target.newBuilder()
-                                             .setType(typeUrl);
+                                       .setType(typeUrl);
         if (includeAll) {
             builder.setIncludeAll(true);
         } else {

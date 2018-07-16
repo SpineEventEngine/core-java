@@ -57,7 +57,7 @@ class TopicFactoryTest
         @DisplayName("for all entities of kind")
         void forAllOfKind() {
             Topic topic = factory().topic()
-                                         .allOf(TARGET_ENTITY_CLASS);
+                                   .allOf(TARGET_ENTITY_CLASS);
 
             verifyTargetAndContext(topic);
 
@@ -73,14 +73,14 @@ class TopicFactoryTest
 
             Set<TestEntityId> ids = newHashSet(entityId(1), entityId(2), entityId(3));
             Topic topic = factory().topic()
-                                         .someOf(TARGET_ENTITY_CLASS, ids);
+                                   .someOf(TARGET_ENTITY_CLASS, ids);
 
             verifyTargetAndContext(topic);
 
             List<EntityId> actualIds = topic.getTarget()
-                                                  .getFilters()
-                                                  .getIdFilter()
-                                                  .getIdsList();
+                                            .getFilters()
+                                            .getIdFilter()
+                                            .getIdsList();
             assertEquals(ids.size(), actualIds.size());
             for (EntityId actualId : actualIds) {
                 Any rawId = actualId.getId();
@@ -94,7 +94,7 @@ class TopicFactoryTest
         void forTarget() {
             Target givenTarget = Targets.allOf(TARGET_ENTITY_CLASS);
             Topic topic = factory().topic()
-                                         .forTarget(givenTarget);
+                                   .forTarget(givenTarget);
 
             verifyTargetAndContext(topic);
         }

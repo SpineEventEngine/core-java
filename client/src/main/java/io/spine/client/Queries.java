@@ -76,7 +76,8 @@ public final class Queries {
         Target target = query.getTarget();
         String type = target.getType();
         TypeUrl typeUrl = TypeUrl.parse(type);
-        checkState(KnownTypes.instance().contains(typeUrl),
+        checkState(KnownTypes.instance()
+                             .contains(typeUrl),
                    "Unknown type URL: `%s`.", type);
         return typeUrl;
     }
@@ -90,7 +91,7 @@ public final class Queries {
 
         Target target = composeTarget(entityClass, ids, columnFilters);
         Query.Builder queryBuilder = Query.newBuilder()
-                                                .setTarget(target);
+                                          .setTarget(target);
         if (fieldMask != null) {
             queryBuilder.setFieldMask(fieldMask);
         }
