@@ -19,23 +19,39 @@
 //
 syntax = "proto3";
 
-package spine.client;
+package spine.server.procman;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-// We put gRPC-based classes into `grpc` sub-package, which is annotated as `@Internal`
-// to hide implementation details from the public API of the framework.
-option java_package = "io.spine.client.grpc";
+option java_package = "io.spine.server.procman";
 option java_multiple_files = true;
-option java_outer_classname = "CommandServiceProto";
+option java_outer_classname = "RoutingProto";
+
+import "google/protobuf/any.proto";
 
 import "spine/core/command.proto";
-import "spine/core/ack.proto";
+import "spine/core/event.proto";
+import "spine/core/rejection.proto";
 
-// A service for sending commands from clients.
-service CommandService {
+// This event is generated when a routing process manager generates a new message in reponse
+// to an incoming one.
+message MessageRouted {
 
-    // Request to handle a command.
-    rpc Post(core.Command) returns (core.Ack);
+    oneof source {
+        core.Command command = 1;
+        core.Event event = 2;
+        core.Rejection rejection = 3;
+    }
+
+    // One or more messages to be posted in response to the source.
+    repeated RoutingItem produced = 4;
+}
+
+message RoutingItem {
+
+    oneof kind {
+        core.Command command = 4;
+        core.Event event = 5;
+    }
 }

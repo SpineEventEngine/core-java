@@ -27,7 +27,6 @@ option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.testutil";
 option java_outer_classname = "EntitiesProto";
 option java_multiple_files = true;
-option java_generate_equals_and_hash = true;
 
 import "google/protobuf/timestamp.proto";
 import "spine/core/user_id.proto";
