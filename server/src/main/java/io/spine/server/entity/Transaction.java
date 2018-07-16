@@ -331,8 +331,10 @@ public abstract class Transaction<I,
      * Creates an {@link EntityRecord} for the entity under transaction.
      *
      * <p>Since an entity transaction delegates its {@link EntityWithLifecycle#getLifecycleFlags()}
-     * method invocations to the transaction, an instance of {@link LifecycleFlags} should be
-     * passed as an argument.
+     * method invocations to the transaction, both that method and the field {@link #lifecycleFlags}
+     * evaluate into the same object, namely, the current {@link LifecycleFlags}, possibly changed
+     * by this transaction. Thus, the value of {@link LifecycleFlags} should be manually set,
+     * depending on the desired result.
      *
      * @param lifecycleFlags flags to include into the record
      * @return new {@link EntityRecord}
