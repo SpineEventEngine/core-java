@@ -22,10 +22,10 @@ package io.spine.server.blackbox.given;
 
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.AbstractEntity;
+import io.spine.server.route.EventRoute;
 import io.spine.test.testutil.blackbox.BbTaskAdded;
 import io.spine.test.testutil.blackbox.ProjectId;
 import io.spine.test.testutil.blackbox.ReportId;
-import io.spine.server.route.EventRoute;
 
 import java.util.List;
 import java.util.Set;

@@ -20,7 +20,6 @@
 
 package io.spine.server.model;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
