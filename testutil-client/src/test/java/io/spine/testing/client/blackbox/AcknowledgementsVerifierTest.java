@@ -29,6 +29,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.test.testutil.blackbox.Rejections.BbProjectAlreadyStarted;
+import static io.spine.test.testutil.blackbox.Rejections.BbTaskCreatedInCompletedProject;
+import static io.spine.test.testutil.blackbox.Rejections.BbTaskLimitReached;
 import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.ackedWithErrors;
 import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.ackedWithRejections;

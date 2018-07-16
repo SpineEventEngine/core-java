@@ -82,6 +82,19 @@ public class ActorRequestFactory {
     }
 
     /**
+     * Creates an instance by the passed {@code ActorContext}.
+     */
+    public static ActorRequestFactory fromContext(ActorContext actorContext) {
+        checkNotNull(actorContext);
+        Builder builder = newBuilder()
+                .setActor(actorContext.getActor())
+                .setTenantId(actorContext.getTenantId())
+                .setZoneOffset(actorContext.getZoneOffset())
+                .setZoneId(actorContext.getZoneId());
+        return builder.build();
+    }
+
+    /**
      * Obtains the ID of the user on behalf of whom the requests are created.
      */
     public UserId getActor() {

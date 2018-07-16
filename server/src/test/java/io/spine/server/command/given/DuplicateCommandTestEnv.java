@@ -149,7 +149,7 @@ public class DuplicateCommandTestEnv {
 
         public TestClient(String host, int port) {
             channel = ManagedChannelBuilder.forAddress(host, port)
-                                           .usePlaintext(true)
+                                           .usePlaintext()
                                            .build();
             blockingClient = CommandServiceGrpc.newBlockingStub(channel);
         }

@@ -21,12 +21,12 @@
 package io.spine.testing.client.blackbox;
 
 import com.google.common.collect.ImmutableList;
-import io.spine.testing.client.blackbox.given.CommandAcksTestEnv;
 import io.spine.core.Ack;
 import io.spine.core.RejectionClass;
 import io.spine.testing.server.blackbox.Rejections.BbProjectAlreadyStarted;
 import io.spine.testing.server.blackbox.Rejections.BbTaskCreatedInCompletedProject;
 import io.spine.testing.server.blackbox.Rejections.BbTaskLimitReached;
+import io.spine.testing.client.blackbox.given.CommandAcksTestEnv;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
