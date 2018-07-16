@@ -85,6 +85,7 @@ public class ActorRequestFactory {
      * Creates an instance by the passed {@code ActorContext}.
      */
     public static ActorRequestFactory fromContext(ActorContext actorContext) {
+        checkNotNull(actorContext);
         Builder builder = newBuilder()
                 .setActor(actorContext.getActor())
                 .setTenantId(actorContext.getTenantId())
