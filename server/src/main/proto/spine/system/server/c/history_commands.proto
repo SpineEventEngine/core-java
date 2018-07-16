@@ -44,7 +44,7 @@ import "spine/system/server/entity_history.proto";
 message CreateEntity {
 
     // The ID of the entity.
-    EntityHistoryId id = 1 [(required) = true];
+    EntityHistoryId id = 1;
 
     // The kind of the entity.
     EntityOption.Kind kind = 2 [(required) = true];
@@ -57,7 +57,7 @@ message CreateEntity {
 message DispatchEventToSubscriber {
 
     // The ID of the entity, which the event is dispatched to.
-    EntityHistoryId receiver = 1 [(required) = true];
+    EntityHistoryId receiver = 1;
 
     // The ID of the event to dispatch.
     spine.core.EventId event_id = 2 [(required) = true, (valid) = true];
@@ -70,7 +70,7 @@ message DispatchEventToSubscriber {
 message DispatchEventToReactor {
 
     // The ID of the entity, which the event is dispatched to.
-    EntityHistoryId receiver = 1 [(required) = true];
+    EntityHistoryId receiver = 1;
 
     // The ID of the event to dispatch.
     spine.core.EventId event_id = 2 [(required) = true, (valid) = true];
@@ -88,7 +88,7 @@ message DispatchEventToReactor {
 message PassEventToApplier {
 
     // The ID of the entity, which the event is dispatched to.
-    EntityHistoryId receiver = 1 [(required) = true];
+    EntityHistoryId receiver = 1;
 
     // The ID of the event to dispatch.
     spine.core.EventId event_id = 2 [(required) = true, (valid) = true];
@@ -101,7 +101,7 @@ message PassEventToApplier {
 message DispatchCommandToHandler {
 
     // The ID of the entity, which the command is dispatched to.
-    EntityHistoryId receiver = 1 [(required) = true];
+    EntityHistoryId receiver = 1;
 
     // The ID of the command to dispatch.
     spine.core.CommandId command_id = 2 [(required) = true, (valid) = true];
@@ -115,7 +115,7 @@ message DispatchCommandToHandler {
 message ChangeEntityState {
 
     // The ID of the entity.
-    EntityHistoryId id = 1 [(required) = true];
+    EntityHistoryId id = 1;
 
     // The new state of the entity.
     google.protobuf.Any new_state = 2 [(required) = true];
@@ -140,7 +140,7 @@ message ArchiveEntity {
     // impossible to determine, which exactly message has caused the mutatuion. In other cases,
     // this list will contain a single entry.
     //
-    EntityHistoryId id = 1 [(required) = true];
+    EntityHistoryId id = 1;
 
     // The IDs of the messages which caused the mutation.
     repeated DispatchedMessageId message_id = 2;
@@ -151,7 +151,7 @@ message ArchiveEntity {
 message DeleteEntity {
 
     // The ID of the entity.
-    EntityHistoryId id = 1 [(required) = true];
+    EntityHistoryId id = 1;
 
     // The IDs of the messages which caused the mutation.
     //
@@ -167,7 +167,7 @@ message DeleteEntity {
 message ExtractEntityFromArchive {
 
     // The ID of the entity.
-    EntityHistoryId id = 1 [(required) = true];
+    EntityHistoryId id = 1;
 
     // The IDs of the messages which caused the mutation.
     //
@@ -183,7 +183,7 @@ message ExtractEntityFromArchive {
 message RestoreEntity {
 
     // The ID of the entity.
-    EntityHistoryId id = 1 [(required) = true];
+    EntityHistoryId id = 1;
 
     // The IDs of the messages which caused the mutation.
     //
