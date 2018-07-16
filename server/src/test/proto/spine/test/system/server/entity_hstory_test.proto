@@ -36,21 +36,30 @@ message PersonId {
     string uuid = 1;
 }
 
+// A state type of an aggregate.
+//
 message Person {
+    option (entity).kind = AGGREGATE;
 
     PersonId id = 1;
 
     spine.people.PersonName name = 2;
 }
 
+// A state type of a process manager.
+//
 message PersonCreation {
+    option (entity).kind = PROCESS_MANAGER;
 
     PersonId id = 1;
 
     bool created = 2;
 }
 
+// A state type of an aggregate part.
+//
 message PersonFirstName {
+    option (entity).kind = AGGREGATE;
 
     PersonId id = 1;
 
