@@ -27,13 +27,13 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.core.MessageEnvelope;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingEntity;
+import io.spine.server.command.dispatch.Dispatch;
+import io.spine.server.command.dispatch.DispatchResult;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventReactorMethod;
-import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.Model;
 import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
@@ -128,59 +128,55 @@ public abstract class ProcessManager<I,
      * Dispatches the command to the handler method and transforms the output
      * into a list of events.
      *
-     * @param cmd the envelope with the command to dispatch
+     * @param  command the envelope with the command to dispatch
      * @return the list of events generated as the result of handling the command
      */
     @Override
-    protected List<Event> dispatchCommand(CommandEnvelope cmd) {
-        CommandHandlerMethod method = thisClass().getHandler(cmd.getMessageClass());
-        List<? extends Message> messages =
-                method.invoke(this, cmd.getMessage(), cmd.getCommandContext());
-        List<Event> result = toEvents(messages, cmd);
-        return result;
-    }
-
-    /**
-     * Transforms the passed list of event messages into the list of events.
-     *
-     * @param eventMessages event messages for which generate events
-     * @param origin        the envelope with the origin of events
-     * @return list of events
-     */
-    private List<Event> toEvents(List<? extends Message> eventMessages, MessageEnvelope origin) {
-        return HandlerMethod.toEvents(getProducerId(), getVersion(), eventMessages, origin);
+    protected List<Event> dispatchCommand(CommandEnvelope command) {
+        CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
+        Dispatch<CommandEnvelope> dispatch = Dispatch.of(command).to(this, method);
+        DispatchResult dispatchResult = dispatch.perform();
+        return toEvents(dispatchResult);
     }
 
     /**
      * Dispatches an event to the event reactor method of the process manager.
      *
-     * @param event the envelope with the event
+     * @param  event the envelope with the event
      * @return a list of produced events or an empty list if the process manager does not
-     * produce new events because of the passed event
+     *         produce new events because of the passed event
      */
     List<Event> dispatchEvent(EventEnvelope event) {
         EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
-        List<? extends Message> eventMessages =
-                method.invoke(this, event.getMessage(), event.getEventContext());
-        List<Event> events = toEvents(eventMessages, event);
-        return events;
+        Dispatch<EventEnvelope> dispatch = Dispatch.of(event).to(this, method);
+        DispatchResult dispatchResult = dispatch.perform();
+        return toEvents(dispatchResult);
     }
 
     /**
      * Dispatches a rejection to the reacting method of the process manager.
      *
-     * @param rejection the envelope with the rejection
+     * @param  rejection the envelope with the rejection
      * @return a list of produced events or an empty list if the process manager does not
-     * produce new events because of the passed event
+     *         produce new events because of the passed event
      */
     List<Event> dispatchRejection(RejectionEnvelope rejection) {
         CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
         RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
                                                                commandClass);
-        List<? extends Message> eventMessages =
-                method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
-        List<Event> events = toEvents(eventMessages, rejection);
-        return events;
+        Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection).to(this, method);
+        DispatchResult dispatchResult = dispatch.perform();
+        return toEvents(dispatchResult);
+    }
+
+    /**
+     * Transforms the provided {@link DispatchResult dispatch result} into a list of events.
+     *
+     * @param  dispatchResult a result of handling a message by the process manager
+     * @return list of events
+     */
+    private List<Event> toEvents(DispatchResult dispatchResult) {
+        return dispatchResult.asEvents(getProducerId(), getVersion());
     }
 
     /**

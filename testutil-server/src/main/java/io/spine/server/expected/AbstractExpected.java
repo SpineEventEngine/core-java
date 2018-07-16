@@ -20,6 +20,7 @@
 
 package io.spine.server.expected;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 
 import java.util.function.Consumer;
@@ -51,6 +52,7 @@ public abstract class AbstractExpected<S extends Message, E extends AbstractExpe
      * @param validator a {@link Consumer} that performs all required assertions for the state
      */
     @SuppressWarnings("UnusedReturnValue")
+    @CanIgnoreReturnValue
     public E hasState(Consumer<S> validator) {
         validator.accept(state);
         return self();
@@ -60,6 +62,7 @@ public abstract class AbstractExpected<S extends Message, E extends AbstractExpe
      * Asserts that the message was ignored by the entity.
      */
     @SuppressWarnings("UnusedReturnValue")
+    @CanIgnoreReturnValue
     public E ignoresMessage() {
         assertEquals(initialState, state);
         return self();

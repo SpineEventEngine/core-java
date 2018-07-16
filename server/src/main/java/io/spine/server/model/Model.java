@@ -69,12 +69,17 @@ public class Model {
         return Singleton.INSTANCE.value;
     }
 
-    /** Prevent instantiation from outside. */
+    /** Prevents instantiation from outside. */
     private Model() {
     }
 
-    @VisibleForTesting
-    void clear() {
+    /**
+     * Clears the classes already added to the {@code Model}.
+     *
+     * <p>This method can be useful when multiple Spine projects are processed under the same
+     * static context, e.g. in tests.
+     */
+    public void clear() {
         classes.clear();
     }
 
