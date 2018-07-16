@@ -127,6 +127,7 @@ message ChangeEntityState {
     // this list contains a single entry.
     //
     // TODO:2018-07-09:dmytro.dashenkov: Make required as soon as Procman is completely transactional.
+    // todo https://github.com/SpineEventEngine/core-java/issues/755
     repeated DispatchedMessageId message_id = 3;
 }
 
