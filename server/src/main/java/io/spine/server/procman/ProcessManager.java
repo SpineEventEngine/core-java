@@ -115,8 +115,8 @@ public abstract class ProcessManager<I,
      * <p>In {@code ProcessManager}, this method must be called from an event reactor, a rejection
      * reactor, or a command handler.
      *
-     * @throws IllegalStateException
-     *         if the method is called from outside an event/rejection reactor or a command handler
+     * @throws IllegalStateException if the method is called from outside an event/rejection reactor
+     *         or a command handler
      */
     @Override
     @VisibleForTesting
@@ -202,15 +202,15 @@ public abstract class ProcessManager<I,
      * That is, the {@code actor} and {@code zoneOffset} fields of created {@code CommandContext}
      * instances will be the same as in the incoming command.
      *
-     * @param  commandMessage the source command message
-     * @param  commandContext the context of the source command
+     * @param commandMessage the source command message
+     * @param commandContext the context of the source command
      * @return new {@code CommandRouter}
      */
     protected CommandRouter newRouterFor(Message commandMessage, CommandContext commandContext) {
         checkNotNull(commandMessage);
         checkNotNull(commandContext);
-        final CommandBus commandBus = ensureCommandBus();
-        final CommandRouter router = new CommandRouter(commandBus, commandMessage, commandContext);
+        CommandBus commandBus = ensureCommandBus();
+        CommandRouter router = new CommandRouter(commandBus, commandMessage, commandContext);
         return router;
     }
 
@@ -220,7 +220,7 @@ public abstract class ProcessManager<I,
      * <p>An {@code IteratingCommandRouter} allows to create several commands
      * in response to a command received by the {@code ProcessManager} and post these commands
      * one by one.
-     * 
+     *
      * <p>A typical usage looks like this:
      * <pre>
      *     {@literal @}Assign
@@ -241,8 +241,8 @@ public abstract class ProcessManager<I,
      *     }
      * </pre>
      *
-     * @param  commandMessage the source command message
-     * @param  commandContext the context of the source command
+     * @param commandMessage the source command message
+     * @param commandContext the context of the source command
      * @return new {@code IteratingCommandRouter}
      * @see IteratingCommandRouter#routeFirst()
      * @see IteratingCommandRouter#routeNext()
@@ -251,14 +251,14 @@ public abstract class ProcessManager<I,
                                                            CommandContext commandContext) {
         checkNotNull(commandMessage);
         checkNotNull(commandContext);
-        final CommandBus commandBus = ensureCommandBus();
-        final IteratingCommandRouter router =
+        CommandBus commandBus = ensureCommandBus();
+        IteratingCommandRouter router =
                 new IteratingCommandRouter(commandBus, commandMessage, commandContext);
         return router;
     }
 
     private CommandBus ensureCommandBus() {
-        final CommandBus commandBus = getCommandBus();
+        CommandBus commandBus = getCommandBus();
         checkState(commandBus != null, "CommandBus must be initialized");
         return commandBus;
     }

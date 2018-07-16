@@ -21,15 +21,18 @@
 package io.spine.testing.client.blackbox;
 
 import com.google.common.collect.ImmutableList;
-import io.spine.testing.client.blackbox.given.CommandAcksTestEnv;
 import io.spine.core.Ack;
 import io.spine.core.RejectionClass;
+import io.spine.testing.client.blackbox.given.CommandAcksTestEnv;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.test.testutil.blackbox.Rejections.BbProjectAlreadyStarted;
+import static io.spine.test.testutil.blackbox.Rejections.BbTaskCreatedInCompletedProject;
+import static io.spine.test.testutil.blackbox.Rejections.BbTaskLimitReached;
 import static io.spine.testing.client.blackbox.ErrorCriterion.withType;
 import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.DUPLICATE_ERROR_TYPE;
 import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.DUPLICATE_TASK_TITLE;
@@ -48,9 +51,6 @@ import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.newTask;
 import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.projectAlreadyStarted;
 import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.taskCreatedInCompletedProject;
 import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.taskLimitReached;
-import static io.spine.test.testutil.blackbox.Rejections.BbProjectAlreadyStarted;
-import static io.spine.test.testutil.blackbox.Rejections.BbTaskCreatedInCompletedProject;
-import static io.spine.test.testutil.blackbox.Rejections.BbTaskLimitReached;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
