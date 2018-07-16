@@ -57,7 +57,25 @@ public class ProjectionBuilder<P extends Projection<I, S, B>,
 
     @Override
     protected void setState(P result, S state, Version version) {
-        ProjectionTransaction.startWith(result, state, version)
-                             .commit();
+        TestProjectionTransaction transaction = new TestProjectionTransaction(result, state,
+                                                                              version);
+        transaction.commit();
+    }
+
+    /**
+     * A test-only implementation of an {@link ProjectionTransaction} that sets the given
+     * {@code state} and {@code version} as a starting point for the transaction.
+     */
+    private final class TestProjectionTransaction extends ProjectionTransaction<I, S, B> {
+
+        private TestProjectionTransaction(Projection<I, S, B> projection, S state,
+                                          Version version) {
+            super(projection, state, version);
+        }
+
+        @Override
+        protected void commit() {
+            super.commit();
+        }
     }
 }

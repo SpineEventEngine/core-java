@@ -27,6 +27,7 @@ import io.spine.core.Version;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateTransaction;
 import io.spine.testing.server.entity.EntityBuilder;
+import io.spine.validate.ValidatingBuilder;
 
 /**
  * Utility class for building aggregates for tests.
@@ -56,9 +57,30 @@ public class AggregateBuilder<A extends Aggregate<I, S, ?>,
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected void setState(A result, S state, Version version) {
-        AggregateTransaction.startWith(result, state, version)
-                            .commit();
+        TestAggregateTransaction tx = new TestAggregateTransaction(result, state, version);
+        tx.commit();
+    }
+
+    /**
+     * A test-only implementation of an {@link AggregateTransaction} that sets the given
+     * {@code state} and {@code version} as a starting point for the transaction.
+     *
+     * @param <B> <B> the type of a {@code ValidatingBuilder} for the aggregate state
+     */
+    private final class
+    TestAggregateTransaction<B extends ValidatingBuilder<S, ? extends Message.Builder>>
+            extends AggregateTransaction<I, S, B> {
+
+        private TestAggregateTransaction(Aggregate<I, S, B> aggregate, S state, Version version) {
+            super(aggregate, state, version);
+        }
+
+        @Override
+        protected void commit() {
+            super.commit();
+        }
     }
 }

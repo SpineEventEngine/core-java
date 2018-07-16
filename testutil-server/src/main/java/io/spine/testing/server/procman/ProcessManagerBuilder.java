@@ -59,7 +59,24 @@ public class ProcessManagerBuilder<P extends ProcessManager<I, S, B>,
 
     @Override
     protected void setState(P result, S state, Version version) {
-        PmTransaction.startWith(result, state, version)
-                     .commit();
+        TestPmTransaction transaction = new TestPmTransaction(result, state, version);
+        transaction.commit();
+    }
+
+    /**
+     * A test-only implementation of an {@link PmTransaction} that sets the given
+     * {@code state} and {@code version} as a starting point for the transaction.
+     */
+    private final class TestPmTransaction extends PmTransaction<I, S, B> {
+
+        private TestPmTransaction(ProcessManager<I, S, B> processManager, S state,
+                                  Version version) {
+            super(processManager, state, version);
+        }
+
+        @Override
+        protected void commit() {
+            super.commit();
+        }
     }
 }

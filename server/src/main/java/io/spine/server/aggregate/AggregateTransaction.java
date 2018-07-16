@@ -55,7 +55,7 @@ public class AggregateTransaction<I,
     }
 
     @VisibleForTesting
-    AggregateTransaction(Aggregate<I, S, B> aggregate, S state, Version version) {
+    protected AggregateTransaction(Aggregate<I, S, B> aggregate, S state, Version version) {
         super(aggregate, state, version);
     }
 
@@ -73,11 +73,11 @@ public class AggregateTransaction<I,
     /**
      * {@inheritDoc}
      *
-     * <p>This method is overridden to expose itself to repositories and state builders
-     * in this package.
+     * <p>This method is overridden to expose itself to repositories, state builders,
+     * and test utilities.
      */
     @Override
-    public void commit() {
+    protected void commit() {
         super.commit();
     }
 
@@ -90,26 +90,6 @@ public class AggregateTransaction<I,
     @SuppressWarnings("unchecked")  // to avoid massive generic-related issues.
     static AggregateTransaction start(Aggregate aggregate) {
         final AggregateTransaction tx = new AggregateTransaction(aggregate);
-        return tx;
-    }
-
-    /**
-     * Creates a new transaction for a given {@code aggregate} and sets the given {@code state}
-     * and {@code version} as a starting point for the transaction.
-     *
-     * <p>Please note that the state and version specified are not applied to the given aggregate
-     * directly and require a {@linkplain Transaction#commit() transaction commit} in order
-     * to be applied.
-     *
-     * @param aggregate  the {@code Aggregate} instance to start the transaction for.
-     * @param state   the starting state to set
-     * @param version the starting version to set
-     * @return the new transaction instance
-     */
-    @SuppressWarnings("unchecked")  // to avoid massive generic-related issues.
-    public static AggregateTransaction startWith(Aggregate aggregate, Message state,
-                                                 Version version) {
-        final AggregateTransaction tx = new AggregateTransaction(aggregate, state, version);
         return tx;
     }
 }

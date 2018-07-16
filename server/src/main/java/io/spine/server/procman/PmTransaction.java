@@ -56,7 +56,7 @@ public class PmTransaction<I,
 
 
     @VisibleForTesting
-    PmTransaction(ProcessManager<I, S, B> processManager, S state, Version version) {
+    protected PmTransaction(ProcessManager<I, S, B> processManager, S state, Version version) {
         super(processManager, state, version);
     }
 
@@ -72,10 +72,10 @@ public class PmTransaction<I,
      * {@inheritDoc}
      *
      * <p>This method is overridden to expose itself to repositories, state builders,
-     * and test utilitites.
+     * and test utilities.
      */
     @Override
-    public void commit() {
+    protected void commit() {
         super.commit();
     }
 
@@ -90,31 +90,6 @@ public class PmTransaction<I,
             B extends ValidatingBuilder<S, ? extends Message.Builder>>
     PmTransaction<I, S, B> start(ProcessManager<I, S, B> processManager) {
         final PmTransaction<I, S, B> tx = new PmTransaction<>(processManager);
-        return tx;
-    }
-
-    /**
-     * Creates a new transaction for a given {@code processManager} and sets the given {@code state}
-     * and {@code version} as a starting point for the transaction.
-     *
-     * <p>Please note that the state and version specified are not applied to the given process
-     * manager directly and require a {@linkplain Transaction#commit() transaction commit} in order
-     * to be applied.
-     *
-     * @param  processManager
-     *         the {@code ProcessManager} instance to start the transaction for
-     * @param  state
-     *         the starting state to set
-     * @param  version
-     *         the starting version to set
-     * @return the new transaction instance
-     */
-    public static <I,
-                   S extends Message,
-                   B extends ValidatingBuilder<S, ? extends Message.Builder>,
-                   P extends ProcessManager<I, S, B>>
-    PmTransaction<I, S, B> startWith(P processManager, S state, Version version) {
-        final PmTransaction<I, S, B> tx = new PmTransaction<>(processManager, state, version);
         return tx;
     }
 
