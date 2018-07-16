@@ -70,7 +70,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     protected I getTargets() {
         CommandEnvelope envelope = envelope();
         I id = repository().getCommandRouting()
-                                 .apply(envelope.getMessage(), envelope.getCommandContext());
+                           .apply(envelope.getMessage(), envelope.getCommandContext());
         return id;
     }
 

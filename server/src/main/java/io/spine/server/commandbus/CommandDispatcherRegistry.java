@@ -57,7 +57,8 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
     @Override
     protected void register(CommandDispatcher<?> dispatcher) {
         if (dispatcher instanceof DelegatingCommandDispatcher
-            && dispatcher.getMessageClasses().isEmpty()) {
+            && dispatcher.getMessageClasses()
+                         .isEmpty()) {
             return;
         }
         super.register(dispatcher);
@@ -89,7 +90,7 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
         // Since there can be only one dispatcher per command the returned set
         // contains only one element.
         CommandDispatcher<?> result = FluentIterable.from(dispatchers)
-                                                          .get(0);
+                                                    .get(0);
         return Optional.of(result);
     }
 

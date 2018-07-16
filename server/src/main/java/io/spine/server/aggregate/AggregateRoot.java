@@ -142,8 +142,8 @@ public class AggregateRoot<I> {
         @SuppressWarnings("unchecked") // The type is ensured by getId() result.
         Class<I> idClass = (Class<I>) getId().getClass();
         AggregatePartRepositoryLookup<I, S> lookup = createLookup(getBoundedContext(),
-                                                                        idClass,
-                                                                        stateClass);
+                                                                  idClass,
+                                                                  stateClass);
         AggregatePartRepository<I, A, ?> result = lookup.find();
         return result;
     }

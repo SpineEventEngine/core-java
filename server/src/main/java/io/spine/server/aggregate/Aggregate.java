@@ -203,9 +203,9 @@ public abstract class Aggregate<I,
     /**
      * Obtains a method for the passed command and invokes it.
      *
-     * <p>Dispatching the commands results in emitting event messages. All the 
+     * <p>Dispatching the commands results in emitting event messages. All the
      * {@linkplain Empty empty} messages are filtered out from the result.
-     * 
+     *
      * @param  command the envelope with the command to dispatch
      * @return a list of event messages that the aggregate produces by handling the command
      */
@@ -221,7 +221,7 @@ public abstract class Aggregate<I,
     /**
      * Dispatches the event on which the aggregate reacts.
      *
-     * <p>Reacting on a event may result in emitting event messages. All the {@linkplain Empty empty} 
+     * <p>Reacting on a event may result in emitting event messages. All the {@linkplain Empty empty}
      * messages are filtered out from the result.
      *
      * @param  event the envelope with the event to dispatch
@@ -237,8 +237,8 @@ public abstract class Aggregate<I,
 
     /**
      * Dispatches the rejection to which the aggregate reacts.
-     * 
-     * <p>Reacting on a rejection may result in emitting event messages. All the 
+     *
+     * <p>Reacting on a rejection may result in emitting event messages. All the
      * {@linkplain Empty empty} messages are filtered out from the result.
      *
      * @param  rejection the envelope with the rejection
@@ -249,7 +249,7 @@ public abstract class Aggregate<I,
     List<? extends Message> reactOn(RejectionEnvelope rejection) {
         CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
         RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
-                                                                     commandClass);
+                                                               commandClass);
         List<? extends Message> messages =
                 method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
         return nonEmpty(messages);
@@ -350,14 +350,14 @@ public abstract class Aggregate<I,
      */
     private static Event importEvent(Event event, CommandContext commandContext, Version version) {
         EventContext eventContext = event.getContext()
-                                               .toBuilder()
-                                               .setCommandContext(commandContext)
-                                               .setTimestamp(getCurrentTime())
-                                               .setVersion(version)
-                                               .build();
+                                         .toBuilder()
+                                         .setCommandContext(commandContext)
+                                         .setTimestamp(getCurrentTime())
+                                         .setVersion(version)
+                                         .build();
         Event result = event.toBuilder()
-                                  .setContext(eventContext)
-                                  .build();
+                            .setContext(eventContext)
+                            .build();
         return result;
     }
 
@@ -449,9 +449,9 @@ public abstract class Aggregate<I,
     Snapshot toShapshot() {
         Any state = AnyPacker.pack(getState());
         Snapshot.Builder builder = Snapshot.newBuilder()
-                .setState(state)
-                .setVersion(getVersion())
-                .setTimestamp(getCurrentTime());
+                                           .setState(state)
+                                           .setVersion(getVersion())
+                                           .setTimestamp(getCurrentTime());
         Snapshot snapshot = builder.build();
         return snapshot;
     }
@@ -503,7 +503,7 @@ public abstract class Aggregate<I,
          * Checks that message is not {@linkplain Empty empty}.
          *
          * @param  message the message being checked
-         * @return {@code true} if the message is not empty, {@code false} otherwise 
+         * @return {@code true} if the message is not empty, {@code false} otherwise
          */
         @Override
         public boolean test(Message message) {

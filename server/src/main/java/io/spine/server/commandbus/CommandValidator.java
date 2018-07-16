@@ -36,13 +36,13 @@ import io.spine.validate.MessageValidator;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static io.spine.base.Identifier.EMPTY_ID;
 import static io.spine.server.commandbus.InvalidCommandException.onConstraintViolations;
 import static io.spine.server.commandbus.InvalidCommandException.onInapplicableTenantId;
 import static io.spine.server.commandbus.InvalidCommandException.onMissingTenantId;
 import static io.spine.validate.Validate.isDefault;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 
 /**
  * Validates a command.
@@ -102,7 +102,8 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         InvalidCommandException exception = null;
         if (!violations.isEmpty()) {
             exception = onConstraintViolations(command, violations);
-            commandBus.commandStore().storeWithError(command, exception);
+            commandBus.commandStore()
+                      .storeWithError(command, exception);
 
         }
         return Optional.ofNullable(exception);
@@ -123,13 +124,15 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
 
     private InvalidCommandException missingTenantId(Command command) {
         InvalidCommandException noTenantDefined = onMissingTenantId(command);
-        commandBus.commandStore().storeWithError(command, noTenantDefined);
+        commandBus.commandStore()
+                  .storeWithError(command, noTenantDefined);
         return noTenantDefined;
     }
 
     private InvalidCommandException tenantIdInapplicable(Command command) {
         InvalidCommandException tenantIdInapplicable = onInapplicableTenantId(command);
-        commandBus.commandStore().storeWithError(command, tenantIdInapplicable);
+        commandBus.commandStore()
+                  .storeWithError(command, tenantIdInapplicable);
         return tenantIdInapplicable;
     }
 
@@ -166,7 +169,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
                 addViolation("Non-default command message must be set.");
             }
             List<ConstraintViolation> messageViolations = MessageValidator.newInstance()
-                                                                                .validate(message);
+                                                                          .validate(message);
             result.addAll(messageViolations);
         }
 

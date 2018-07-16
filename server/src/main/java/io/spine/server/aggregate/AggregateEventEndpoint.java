@@ -86,7 +86,7 @@ class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
     protected Set<I> getTargets() {
         EventEnvelope envelope = envelope();
         Set<I> ids = repository().getEventRouting()
-                                       .apply(envelope.getMessage(), envelope.getEventContext());
+                                 .apply(envelope.getMessage(), envelope.getEventContext());
         return ids;
     }
 }

@@ -75,10 +75,10 @@ public abstract class CommandException extends RuntimeException implements Messa
      */
     public static Map<String, Value> commandTypeAttribute(Message commandMessage) {
         String commandType = TypeName.of(commandMessage)
-                                           .value();
+                                     .value();
         Value value = Value.newBuilder()
-                                 .setStringValue(commandType)
-                                 .build();
+                           .setStringValue(commandType)
+                           .build();
         return ImmutableMap.of(ATTR_COMMAND_TYPE_NAME, value);
     }
 
@@ -86,13 +86,13 @@ public abstract class CommandException extends RuntimeException implements Messa
                                        Command command,
                                        CommandValidationError errorCode) {
         Message commandMessage = CommandEnvelope.of(command)
-                                                      .getMessage();
+                                                .getMessage();
 
         String commandType = commandMessage.getDescriptorForType()
-                                                 .getFullName();
+                                           .getFullName();
         String errMsg = format(format, commandType);
         String descriptorName = CommandValidationError.getDescriptor()
-                                                            .getFullName();
+                                                      .getFullName();
         Error.Builder error =
                 Error.newBuilder()
                      .setType(descriptorName)
@@ -127,7 +127,7 @@ public abstract class CommandException extends RuntimeException implements Messa
     protected static String messageFormat(String format, Command command) {
         CommandEnvelope envelope = CommandEnvelope.of(command);
         Class<? extends Message> commandClass = envelope.getMessageClass()
-                                                              .value();
+                                                        .value();
         ClassName commandClassName = ClassName.of(commandClass);
         TypeName typeName = envelope.getTypeName();
         String result = format(format, commandClassName, typeName);

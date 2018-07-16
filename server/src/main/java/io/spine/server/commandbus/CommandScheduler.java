@@ -33,8 +33,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Optional;
 import java.util.Set;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
@@ -43,6 +41,8 @@ import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.Commands.isScheduled;
 import static io.spine.server.bus.Buses.acknowledge;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 
 /**
  * Schedules commands delivering them to the target according to the scheduling options.
@@ -184,8 +184,8 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         checkNotNull(schedulingTime);
 
         Duration delay = command.getContext()
-                                      .getSchedule()
-                                      .getDelay();
+                                .getSchedule()
+                                .getDelay();
         Command result = setSchedule(command, delay, schedulingTime);
         return result;
     }
@@ -206,21 +206,21 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
         CommandContext context = command.getContext();
         CommandContext.Schedule scheduleUpdated = context.getSchedule()
-                                                               .toBuilder()
-                                                               .setDelay(delay)
-                                                               .build();
+                                                         .toBuilder()
+                                                         .setDelay(delay)
+                                                         .build();
         CommandContext contextUpdated = context.toBuilder()
-                                                     .setSchedule(scheduleUpdated)
-                                                     .build();
+                                               .setSchedule(scheduleUpdated)
+                                               .build();
 
         Command.SystemProperties sysProps = command.getSystemProperties()
-                                                         .toBuilder()
-                                                         .setSchedulingTime(schedulingTime)
-                                                         .build();
+                                                   .toBuilder()
+                                                   .setSchedulingTime(schedulingTime)
+                                                   .build();
         Command result = command.toBuilder()
-                                      .setContext(contextUpdated)
-                                      .setSystemProperties(sysProps)
-                                      .build();
+                                .setContext(contextUpdated)
+                                .setSystemProperties(sysProps)
+                                .build();
         return result;
     }
 }

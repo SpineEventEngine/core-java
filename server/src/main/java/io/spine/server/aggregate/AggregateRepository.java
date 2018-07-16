@@ -261,8 +261,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @param aggregate an instance to store
      */
-    @SuppressWarnings("CheckReturnValue") 
-        // ignore result of `commitEvents()` because we obtain them in the block before the call. 
+    @SuppressWarnings("CheckReturnValue")
+        // ignore result of `commitEvents()` because we obtain them in the block before the call.
     @Override
     protected void store(A aggregate) {
         I id = aggregate.getId();
@@ -505,7 +505,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @param id the ID of the {@code Aggregate} to fetch
      * @return the {@link AggregateStateRecord} for the {@code Aggregate} or
-     *         {@code Optional.absent()} if there is no record with the ID
+     *         {@code Optional.empty()} if there is no record with the ID
      */
     protected Optional<AggregateStateRecord> fetchHistory(I id) {
         AggregateReadRequest<I> request = new AggregateReadRequest<>(id, snapshotTrigger);

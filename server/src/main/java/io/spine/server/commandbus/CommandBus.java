@@ -108,8 +108,8 @@ public class CommandBus extends Bus<Command,
     private CommandBus(Builder builder) {
         super();
         this.multitenant = builder.multitenant != null
-                ? builder.multitenant
-                : false;
+                           ? builder.multitenant
+                           : false;
         this.commandStore = builder.commandStore;
         this.scheduler = builder.commandScheduler;
         this.log = builder.log;
@@ -200,8 +200,9 @@ public class CommandBus extends Bus<Command,
                 ThrowableMessage throwableMessage = (ThrowableMessage) cause;
                 Rejection rejection = toRejection(throwableMessage, envelope.getCommand());
                 Class<?> rejectionClass = AnyPacker.unpack(rejection.getMessage())
-                                                         .getClass();
-                Log.log().trace("Posting rejection {} to RejectionBus.", rejectionClass.getName());
+                                                   .getClass();
+                Log.log()
+                   .trace("Posting rejection {} to RejectionBus.", rejectionClass.getName());
                 rejectionBus().post(rejection);
             }
         }
@@ -246,9 +247,9 @@ public class CommandBus extends Bus<Command,
     private static IllegalStateException noDispatcherFound(CommandEnvelope commandEnvelope) {
         String idStr = Identifier.toString(commandEnvelope.getId());
         String msg = format("No dispatcher found for the command (class: %s id: %s).",
-                                  commandEnvelope.getMessageClass()
-                                                 .toString(),
-                                  idStr);
+                            commandEnvelope.getMessageClass()
+                                           .toString(),
+                            idStr);
         throw new IllegalStateException(msg);
     }
 

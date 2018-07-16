@@ -199,7 +199,7 @@ public abstract class Bus<T extends Message,
         if (filterChain == null) {
             Deque<BusFilter<E>> filters = createFilterChain();
             BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(),
-                                                                       registry());
+                                                                 registry());
             BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
             filters.push(deadMsgFilter);
             filters.push(validatingFilter);

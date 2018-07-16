@@ -66,8 +66,8 @@ public class Buses {
         checkNotNull(cause);
         checkArgument(isNotDefault(cause));
         Status status = Status.newBuilder()
-                                    .setError(cause)
-                                    .build();
+                              .setError(cause)
+                              .build();
         return setStatus(id, status);
     }
 
@@ -82,8 +82,8 @@ public class Buses {
         checkNotNull(cause);
         checkArgument(isNotDefault(cause));
         Status status = Status.newBuilder()
-                                    .setRejection(cause)
-                                    .build();
+                              .setRejection(cause)
+                              .build();
         return setStatus(id, status);
     }
 
@@ -92,9 +92,9 @@ public class Buses {
 
         Any packedId = pack(id);
         Ack result = Ack.newBuilder()
-                              .setMessageId(packedId)
-                              .setStatus(status)
-                              .build();
+                        .setMessageId(packedId)
+                        .setStatus(status)
+                        .build();
         return result;
     }
 }

@@ -54,7 +54,8 @@ final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Messa
         checkNotNull(envelope);
         Optional<MessageInvalid> violation = validator.validate(envelope);
         if (violation.isPresent()) {
-            Error error = violation.get().asError();
+            Error error = violation.get()
+                                   .asError();
             Any packedId = Identifier.pack(envelope.getId());
             Ack result = reject(packedId, error);
             return Optional.of(result);

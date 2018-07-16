@@ -20,10 +20,11 @@
 
 package io.spine.server.aggregate;
 
-import java.util.Optional;
 import com.google.protobuf.Message;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.Repository;
+
+import java.util.Optional;
 
 import static java.lang.String.format;
 
@@ -70,7 +71,7 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
         Optional<Repository> optional = boundedContext.findRepository(stateClass);
         if (!optional.isPresent()) {
             String errMsg = format("Unable to find repository for the state class: %s",
-                                         stateClass);
+                                   stateClass);
             throw new IllegalStateException(errMsg);
         }
         Repository repo = optional.get();
@@ -91,8 +92,8 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
     private static void checkIsAggregatePartRepository(Repository repo) {
         if (!(repo instanceof AggregatePartRepository)) {
             String errMsg = format("The repository `%s` is not an instance of `%s`",
-                                         repo,
-                                         AggregatePartRepository.class);
+                                   repo,
+                                   AggregatePartRepository.class);
             throw new IllegalStateException(errMsg);
         }
     }
@@ -105,9 +106,9 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
         Class<?> repoIdClass = repo.getIdClass();
         if (!idClass.equals(repoIdClass)) {
             String errMsg = format("The ID class of the aggregate part repository (%s) " +
-                                         "does not match the ID class of the AggregateRoot (%s)",
-                                         repoIdClass,
-                                         idClass);
+                                   "does not match the ID class of the AggregateRoot (%s)",
+                                   repoIdClass,
+                                   idClass);
             throw new IllegalStateException(errMsg);
         }
 
