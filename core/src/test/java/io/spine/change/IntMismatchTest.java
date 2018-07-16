@@ -105,7 +105,7 @@ class IntMismatchTest {
         @DisplayName("for unexpected int value")
         void forUnexpectedInt() {
             ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE,
-                                                           VERSION);
+                                                     VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));

@@ -70,7 +70,7 @@ public final class Commands {
      */
     public static CommandId generateId() {
         String value = UUID.randomUUID()
-                                 .toString();
+                           .toString();
         return CommandId.newBuilder()
                         .setUuid(value)
                         .build();
@@ -113,7 +113,7 @@ public final class Commands {
     /**
      * Obtains a {@link TenantId} from the {@link CommandContext}.
      *
-     * <p>The {@link CommandContext} is accessible from the {@link Event} if the {@code Event} was 
+     * <p>The {@link CommandContext} is accessible from the {@link Event} if the {@code Event} was
      * created as a result of some command or its rejection. This makes the {@code CommandContext}
      * a valid {@code TenantId} source inside of the {@code Event}.
      */
@@ -157,8 +157,8 @@ public final class Commands {
     private static Timestamp getTimestamp(Command request) {
         checkNotNull(request);
         Timestamp result = request.getContext()
-                                        .getActorContext()
-                                        .getTimestamp();
+                                  .getActorContext()
+                                  .getTimestamp();
         return result;
     }
 
@@ -189,7 +189,7 @@ public final class Commands {
     public static boolean isScheduled(Command command) {
         checkNotNull(command);
         Schedule schedule = command.getContext()
-                                         .getSchedule();
+                                   .getSchedule();
         Duration delay = schedule.getDelay();
         if (isNotDefault(delay)) {
             checkArgument(delay.getSeconds() > 0,
@@ -272,8 +272,8 @@ public final class Commands {
         @Override
         protected CommandId fromString(String str) {
             CommandId result = CommandId.newBuilder()
-                                              .setUuid(str)
-                                              .build();
+                                        .setUuid(str)
+                                        .build();
             return result;
         }
     }

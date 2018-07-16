@@ -92,10 +92,10 @@ public final class StringMismatch {
      */
     private static ValueMismatch of(String expected, String actual, String newValue, int version) {
         ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(toAny(expected))
-                                                           .setActual(toAny(actual))
-                                                           .setNewValue(toAny(newValue))
-                                                           .setVersion(version);
+                                                     .setExpected(toAny(expected))
+                                                     .setActual(toAny(actual))
+                                                     .setNewValue(toAny(newValue))
+                                                     .setVersion(version);
         return builder.build();
     }
 

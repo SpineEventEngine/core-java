@@ -86,10 +86,10 @@ public final class LongMismatch {
      */
     public static ValueMismatch of(long expected, long actual, long newValue, int version) {
         ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(toAny(expected))
-                                                           .setActual(toAny(actual))
-                                                           .setNewValue(toAny(newValue))
-                                                           .setVersion(version);
+                                                     .setExpected(toAny(expected))
+                                                     .setActual(toAny(actual))
+                                                     .setNewValue(toAny(newValue))
+                                                     .setVersion(version);
         return builder.build();
     }
 

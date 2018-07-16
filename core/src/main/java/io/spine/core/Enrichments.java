@@ -107,9 +107,9 @@ public final class Enrichments {
     private static <E extends Message>
     Optional<E> getFromContainer(Class<E> enrichmentClass, Enrichment.Container enrichments) {
         String typeName = TypeName.of(enrichmentClass)
-                                        .value();
+                                  .value();
         Any any = enrichments.getItemsMap()
-                                   .get(typeName);
+                             .get(typeName);
         if (any == null) {
             return Optional.empty();
         }

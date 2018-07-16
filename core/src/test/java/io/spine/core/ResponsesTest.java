@@ -55,11 +55,11 @@ class ResponsesTest {
     @DisplayName("recognize not OK response")
     void recognizeNotOkResponse() {
         Status status = Status.newBuilder()
-                                    .setError(Error.getDefaultInstance())
-                                    .build();
+                              .setError(Error.getDefaultInstance())
+                              .build();
         Response error = Response.newBuilder()
-                                       .setStatus(status)
-                                       .build();
+                                 .setStatus(status)
+                                 .build();
         assertFalse(Responses.isOk(error));
     }
 }

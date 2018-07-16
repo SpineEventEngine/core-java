@@ -72,7 +72,7 @@ public final class Events {
      */
     public static EventId generateId() {
         String value = UUID.randomUUID()
-                                 .toString();
+                           .toString();
         return EventId.newBuilder()
                       .setValue(value)
                       .build();
@@ -102,7 +102,7 @@ public final class Events {
     public static Timestamp getTimestamp(Event event) {
         checkNotNull(event);
         Timestamp result = event.getContext()
-                                      .getTimestamp();
+                                .getTimestamp();
         return result;
     }
 
@@ -161,8 +161,8 @@ public final class Events {
 
     /**
      * Obtains the ID of the root command, which lead to this event.
-     * 
-     * <p> In case the passed {@code Event} instance is a reaction to another {@code Event}, 
+     *
+     * <p> In case the passed {@code Event} instance is a reaction to another {@code Event},
      * the identifier of the very first command in this chain is returned.
      *
      * @param event the event to get the root command ID for
@@ -198,8 +198,8 @@ public final class Events {
      * Obtains a {@link TenantId} from the given {@link Event}.
      *
      * <p>The {@code TenantId} is retrieved by traversing the passed {@code Event}s context. It is
-     * stored in the initial {@link CommandContext} and can be retrieved from the events origin 
-     * command or rejection context. 
+     * stored in the initial {@link CommandContext} and can be retrieved from the events origin
+     * command or rejection context.
      *
      * @return a tenant ID available by traversing event context back to original command
      *         context or a default empty tenant ID if no tenant ID is found this way
@@ -221,11 +221,11 @@ public final class Events {
     /**
      * Obtains a context of the command, which lead to this event.
      *
-     * <p> The context is obtained by traversing the events origin for a valid context source. 
+     * <p> The context is obtained by traversing the events origin for a valid context source.
      * There can be two sources for the command context:
      * <ol>
      *     <li>The command context set as the event origin.</li>
-     *     <li>The command set as a field of a rejection context if an event was generated in a 
+     *     <li>The command set as a field of a rejection context if an event was generated in a
      *     response to a rejection.</li>
      * </ol>
      *
@@ -307,7 +307,7 @@ public final class Events {
     public static Event clearEnrichments(Event event) {
         EventContext context = event.getContext();
         EventContext.Builder resultContext = context.toBuilder()
-                                                          .clearEnrichment();
+                                                    .clearEnrichment();
         EventContext.OriginCase originCase = resultContext.getOriginCase();
         switch (originCase) {
             case EVENT_CONTEXT:
@@ -331,8 +331,8 @@ public final class Events {
                                                originCase);
         }
         Event result = event.toBuilder()
-                                  .setContext(resultContext)
-                                  .build();
+                            .setContext(resultContext)
+                            .build();
         return result;
     }
 
@@ -349,8 +349,8 @@ public final class Events {
         @Override
         protected EventId fromString(String str) {
             EventId result = EventId.newBuilder()
-                                          .setValue(str)
-                                          .build();
+                                    .setValue(str)
+                                    .build();
             return result;
         }
     }

@@ -87,10 +87,10 @@ public final class IntMismatch {
      */
     public static ValueMismatch of(int expected, int actual, int newValue, int version) {
         ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(toAny(expected))
-                                                           .setActual(toAny(actual))
-                                                           .setNewValue(toAny(newValue))
-                                                           .setVersion(version);
+                                                     .setExpected(toAny(expected))
+                                                     .setActual(toAny(actual))
+                                                     .setNewValue(toAny(newValue))
+                                                     .setVersion(version);
         return builder.build();
     }
 

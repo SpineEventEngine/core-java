@@ -60,7 +60,8 @@ public final class Responses {
      * {@code false} otherwise
      */
     public static boolean isOk(Response response) {
-        boolean result = response.getStatus().getStatusCase() == Status.StatusCase.OK;
+        boolean result = response.getStatus()
+                                 .getStatusCase() == Status.StatusCase.OK;
         return result;
     }
 }

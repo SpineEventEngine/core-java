@@ -86,10 +86,10 @@ public final class FloatMismatch {
      */
     public static ValueMismatch of(float expected, float actual, float newValue, int version) {
         ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(toAny(expected))
-                                                           .setActual(toAny(actual))
-                                                           .setNewValue(toAny(newValue))
-                                                           .setVersion(version);
+                                                     .setExpected(toAny(expected))
+                                                     .setActual(toAny(actual))
+                                                     .setNewValue(toAny(newValue))
+                                                     .setVersion(version);
         return builder.build();
     }
 

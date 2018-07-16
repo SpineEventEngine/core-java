@@ -113,10 +113,10 @@ public final class MessageMismatch {
     private static ValueMismatch of(Message expected, Message actual,
                                     Message newValue, int version) {
         ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(pack(expected))
-                                                           .setActual(pack(actual))
-                                                           .setNewValue(pack(newValue))
-                                                           .setVersion(version);
+                                                     .setExpected(pack(expected))
+                                                     .setActual(pack(actual))
+                                                     .setNewValue(pack(newValue))
+                                                     .setVersion(version);
         return builder.build();
     }
 

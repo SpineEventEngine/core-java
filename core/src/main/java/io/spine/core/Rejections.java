@@ -63,7 +63,7 @@ public final class Rejections {
             return false; // Rejection messages are generated as inner static classes.
         }
         boolean hasCorrectSuffix = enclosingClass.getName()
-                                                       .endsWith(OUTER_CLASS_SUFFIX);
+                                                 .endsWith(OUTER_CLASS_SUFFIX);
         return hasCorrectSuffix;
     }
 
@@ -93,9 +93,9 @@ public final class Rejections {
         RejectionContext context = createContext(throwable, command);
         RejectionId id = generateId(command.getId());
         Rejection.Builder builder = Rejection.newBuilder()
-                                                   .setId(id)
-                                                   .setMessage(packedState)
-                                                   .setContext(context);
+                                             .setId(id)
+                                             .setMessage(packedState)
+                                             .setContext(context);
         return builder.build();
     }
 
@@ -128,12 +128,12 @@ public final class Rejections {
 
         Any packedMessage = pack(messageOrAny);
         RejectionContext context = RejectionContext.newBuilder()
-                                                         .setCommand(command)
-                                                         .build();
+                                                   .setCommand(command)
+                                                   .build();
         Rejection result = Rejection.newBuilder()
-                                          .setMessage(packedMessage)
-                                          .setContext(context)
-                                          .build();
+                                    .setMessage(packedMessage)
+                                    .setContext(context)
+                                    .build();
         return result;
     }
 
@@ -176,7 +176,8 @@ public final class Rejections {
     public static <I> Optional<I> getProducer(RejectionContext context) {
         checkNotNull(context);
         Any producerId = context.getProducerId();
-        if (Any.getDefaultInstance().equals(producerId)) {
+        if (Any.getDefaultInstance()
+               .equals(producerId)) {
             return Optional.empty();
         }
         I id = Identifier.unpack(producerId);
