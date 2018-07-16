@@ -42,7 +42,7 @@ import io.spine.server.delivery.Sharding;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
-import io.spine.system.server.given.EntityHistoryTestEnv.HistoryEventSubscriber;
+import io.spine.system.server.given.EntityHistoryTestEnv.HistoryEventWatcher;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregate;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregatePart;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregatePartRepository;
@@ -121,12 +121,12 @@ class EntityHistoryTest {
     @DisplayName("produce system events when")
     class ProduceEvents {
 
-        private HistoryEventSubscriber eventWatcher;
+        private HistoryEventWatcher eventWatcher;
         private PersonId id;
 
         @BeforeEach
         void setUp() {
-            eventWatcher = new HistoryEventSubscriber();
+            eventWatcher = new HistoryEventWatcher();
             system.getEventBus()
                   .register(eventWatcher);
             id = PersonId.newBuilder()
@@ -177,7 +177,7 @@ class EntityHistoryTest {
         @DisplayName("entity is extracted from archive or restored after deletion")
         void unArchivedAndUnDeleted() {
             hidePerson();
-            eventWatcher.clearEvents();
+            eventWatcher.forgetEvents();
 
             ExposePerson command = ExposePerson
                     .newBuilder()
@@ -201,7 +201,7 @@ class EntityHistoryTest {
         @DisplayName("command is dispatched to handler in aggregate")
         void commandToAggregate() {
             createPerson();
-            eventWatcher.clearEvents();
+            eventWatcher.forgetEvents();
 
             Message domainCommand = hidePerson();
             assertCommandDispatched(domainCommand);
@@ -233,7 +233,7 @@ class EntityHistoryTest {
             assertId(stateChanged.getId());
             PersonCreation startedState = unpack(stateChanged.getNewState());
             assertFalse(startedState.getCreated());
-            eventWatcher.clearEvents();
+            eventWatcher.forgetEvents();
 
             Message domainCommand = CompletePersonCreation
                     .newBuilder()
@@ -278,7 +278,7 @@ class EntityHistoryTest {
         void eventToReactorInAggregate() {
             createPerson();
             createPersonName();
-            eventWatcher.clearEvents();
+            eventWatcher.forgetEvents();
 
             RenamePerson domainCommand = RenamePerson
                     .newBuilder()

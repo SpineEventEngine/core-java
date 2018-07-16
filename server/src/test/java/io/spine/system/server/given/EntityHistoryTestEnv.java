@@ -20,7 +20,7 @@
 
 package io.spine.system.server.given;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.React;
@@ -34,7 +34,6 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateRoot;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.event.EventSubscriber;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.projection.Projection;
@@ -71,19 +70,8 @@ import io.spine.system.server.PersonVBuilder;
 import io.spine.system.server.RenamePerson;
 import io.spine.system.server.StartPersonCreation;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Iterator;
-import java.util.List;
-
-import static com.google.common.collect.ImmutableList.copyOf;
-import static com.google.common.collect.Lists.newLinkedList;
-import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.Collection;
 
 /**
  * @author Dmytro Dashenkov
@@ -95,90 +83,21 @@ public final class EntityHistoryTestEnv {
      */
     private EntityHistoryTestEnv() {
     }
-    
-    public static class HistoryEventSubscriber extends EventSubscriber {
 
-        private final List<Message> events = newLinkedList();
+    public static class HistoryEventWatcher extends AbstractEventWatcher {
 
-        private @Nullable Iterator<? extends Message> eventIterator;
-
-        public void assertEventCount(int expectedCount) {
-            assertEquals(expectedCount, events.size(), errorMessage());
-        }
-
-        public void clearEvents() {
-            events.clear();
-            eventIterator = null;
-        }
-
-        @CanIgnoreReturnValue
-        public <E extends Message> E nextEvent(Class<E> eventType) {
-            if (eventIterator == null) {
-                eventIterator = copyOf(events).iterator();
-            }
-            assertTrue(eventIterator.hasNext(), errorMessage());
-            Message next = eventIterator.next();
-            assertThat(next, instanceOf(eventType));
-            @SuppressWarnings("unchecked")
-            E result = (E) next;
-            return result;
-        }
-
-        @Subscribe
-        public void on(EntityCreated event) {
-            events.add(event);
-        }
-
-        @Subscribe
-        public void on(EventDispatchedToSubscriber event) {
-            events.add(event);
-        }
-
-        @Subscribe
-        public void on(EventDispatchedToReactor event) {
-            events.add(event);
-        }
-
-        @Subscribe
-        public void on(EventPassedToApplier event) {
-            events.add(event);
-        }
-
-        @Subscribe
-        public void on(CommandDispatchedToHandler event) {
-            events.add(event);
-        }
-
-        @Subscribe
-        public void on(EntityStateChanged event) {
-            events.add(event);
-        }
-
-        @Subscribe
-        public void on(EntityArchived event) {
-            events.add(event);
-        }
-
-        @Subscribe
-        public void on(EntityDeleted event) {
-            events.add(event);
-        }
-
-        @Subscribe
-        public void on(EntityExtractedFromArchive event) {
-            events.add(event);
-        }
-
-        @Subscribe
-        public void on(EntityRestored event) {
-            events.add(event);
-        }
-
-        private String errorMessage() {
-            return format("Actual events are: %s", events.stream()
-                                                         .map(Object::getClass)
-                                                         .map(Class::getSimpleName)
-                                                         .collect(joining(" -> ")));
+        @Override
+        public Collection<Class<? extends Message>> getEventClasses() {
+            return ImmutableSet.of(EntityCreated.class,
+                                   EventDispatchedToSubscriber.class,
+                                   EventDispatchedToReactor.class,
+                                   EventPassedToApplier.class,
+                                   CommandDispatchedToHandler.class,
+                                   EntityStateChanged.class,
+                                   EntityArchived.class,
+                                   EntityDeleted.class,
+                                   EntityExtractedFromArchive.class,
+                                   EntityRestored.class);
         }
     }
 
@@ -208,8 +127,8 @@ public final class EntityHistoryTestEnv {
         @Assign
         PersonExposed handle(ExposePerson command) {
             return PersonExposed.newBuilder()
-                                 .setId(command.getId())
-                                 .build();
+                                .setId(command.getId())
+                                .build();
         }
 
         @Assign
@@ -315,7 +234,7 @@ public final class EntityHistoryTestEnv {
                                                                 TestAggregateRoot> {
 
         public static final TypeUrl TYPE = TypeUrl.of(PersonFirstName.class);
-        
+
         private TestAggregatePart(TestAggregateRoot root) {
             super(root);
         }
@@ -353,6 +272,6 @@ public final class EntityHistoryTestEnv {
     }
 
     public static class TestProcmanRepository
-            extends ProcessManagerRepository<PersonId, TestProcman, PersonCreation>  {
+            extends ProcessManagerRepository<PersonId, TestProcman, PersonCreation> {
     }
 }
