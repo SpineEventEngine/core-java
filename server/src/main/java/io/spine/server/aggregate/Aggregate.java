@@ -209,8 +209,7 @@ public abstract class Aggregate<I,
      * @return a list of event messages that the aggregate produces by handling the command
      */
     @Override
-    @Internal
-    public List<? extends Message> dispatchCommand(CommandEnvelope command) {
+    protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
         idempotencyGuard.check(command);
         CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         Dispatch<CommandEnvelope> dispatch = Dispatch.of(command).to(this, method);

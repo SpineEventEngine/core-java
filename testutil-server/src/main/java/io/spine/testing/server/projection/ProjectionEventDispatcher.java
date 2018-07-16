@@ -20,14 +20,17 @@
 package io.spine.testing.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.protobuf.AnyPacker;
+import io.spine.core.EventEnvelope;
+import io.spine.core.Events;
 import io.spine.server.projection.Projection;
-import io.spine.server.projection.ProjectionTransaction;
+import io.spine.server.projection.ProjectionEndpoint;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.Any.pack;
 
 /**
  * A test utility for dispatching events to a {@code Projection} in test purposes.
@@ -48,9 +51,8 @@ public class ProjectionEventDispatcher {
                                 Event event) {
         checkNotNull(projection);
         checkNotNull(event);
-
-        final Message unpackedMessage = AnyPacker.unpack(event.getMessage());
-        dispatch(projection, unpackedMessage, event.getContext());
+        EventEnvelope envelope = EventEnvelope.of(event);
+        TestProjectionEndpoint.dispatch(projection, envelope);
     }
 
     /**
@@ -64,8 +66,27 @@ public class ProjectionEventDispatcher {
         checkNotNull(eventMessage);
         checkNotNull(eventContext);
 
-        final ProjectionTransaction<?, ?, ?> tx = ProjectionTransaction.start(projection);
-        projection.apply(eventMessage, eventContext);
-        tx.commit();
+        Event event = Event.newBuilder()
+                           .setId(Events.generateId())
+                           .setMessage(pack(eventMessage))
+                           .setContext(eventContext)
+                           .build();
+        TestProjectionEndpoint.dispatch(projection, EventEnvelope.of(event));
     }
+
+    private static class TestProjectionEndpoint<I, P extends Projection<I, ?, ?>>
+            extends ProjectionEndpoint<I, P> {
+
+        private TestProjectionEndpoint(EventEnvelope event) {
+            super(null, event);
+        }
+
+        @CanIgnoreReturnValue
+        private static <I, P extends Projection<I, ?, ?>> void
+        dispatch(P projection, EventEnvelope envelope) {
+            TestProjectionEndpoint<I, P> endpoint = new TestProjectionEndpoint<>(envelope);
+            endpoint.dispatchInTx(projection);
+        }
+    }
+
 }

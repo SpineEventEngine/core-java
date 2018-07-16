@@ -95,9 +95,9 @@ public class ProjectionTransaction<I,
      * @param projection the {@code Projection} instance to start the transaction for.
      * @return the new transaction instance
      */
-    public static <I,
-                   M extends Message,
-                   B extends ValidatingBuilder<M, ? extends Message.Builder>>
+    protected static <I,
+                      M extends Message,
+                      B extends ValidatingBuilder<M, ? extends Message.Builder>>
     ProjectionTransaction<I, M, B> start(Projection<I, M, B> projection) {
         checkNotNull(projection);
 
