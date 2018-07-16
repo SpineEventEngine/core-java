@@ -41,13 +41,13 @@ final class DomainBoundedContext extends BoundedContext {
     private final SystemBoundedContext system;
     private final SystemGateway systemGateway;
 
-    private DomainBoundedContext(Builder builder, SystemBoundedContext system) {
+    private DomainBoundedContext(BoundedContextBuilder builder, SystemBoundedContext system) {
         super(builder);
         this.system = system;
         this.systemGateway = new DefaultSystemGateway(system);
     }
 
-    static DomainBoundedContext newInstance(Builder builder, SystemBoundedContext system) {
+    static DomainBoundedContext newInstance(BoundedContextBuilder builder, SystemBoundedContext system) {
         DomainBoundedContext result = new DomainBoundedContext(builder, system);
         result.init();
         return result;
