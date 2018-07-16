@@ -30,44 +30,45 @@ option java_outer_classname = "CommandsProto";
 option java_multiple_files = true;
 
 import "spine/people/person_name.proto";
+import "spine/test/system/server/entity_hstory_test.proto";
 
 message CreatePerson {
 
-    string id = 1;
+    PersonId id = 1;
 
     spine.people.PersonName name = 2;
 }
 
 message CreatePersonName {
 
-    string id = 1;
+    PersonId id = 1;
 
     string first_name = 2;
 }
 
 message RenamePerson {
 
-    string id = 1;
+    PersonId id = 1;
 
     string new_first_name = 2;
 }
 
 message HidePerson {
 
-    string id = 1;
+    PersonId id = 1;
 }
 
-message UnHidePerson {
+message ExposePerson {
 
-    string id = 1;
+    PersonId id = 1;
 }
 
 message CompletePersonCreation {
 
-    string id = 1;
+    PersonId id = 1;
 }
 
 message StartPersonCreation {
 
-    string id = 1;
+    PersonId id = 1;
 }

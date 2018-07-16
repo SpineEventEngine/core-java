@@ -52,7 +52,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Dmytro Dashenkov
  */
 @DisplayName("Projection should")
-class ProjectionTest {
+class ProjectionEventsTest {
 
     private TestProjection projection;
 

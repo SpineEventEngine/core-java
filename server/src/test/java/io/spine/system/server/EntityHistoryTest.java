@@ -24,7 +24,6 @@ import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
@@ -63,6 +62,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
@@ -122,14 +122,16 @@ class EntityHistoryTest {
     class ProduceEvents {
 
         private HistoryEventSubscriber eventWatcher;
-        private String id;
+        private PersonId id;
 
         @BeforeEach
         void setUp() {
             eventWatcher = new HistoryEventSubscriber();
             system.getEventBus()
                   .register(eventWatcher);
-            id = Identifier.newUuid();
+            id = PersonId.newBuilder()
+                         .setUuid(newUuid())
+                         .build();
         }
 
         @Test
@@ -147,10 +149,10 @@ class EntityHistoryTest {
                                           .build());
             checkEntityCreated(PROJECTION, TestProjection.TYPE);
             checkEventDispatchedToSubscriber();
-            checkEntityStateChanged(PersonView.newBuilder()
-                                              .setId(id)
-                                              .setName(PersonName.getDefaultInstance())
-                                              .build());
+            checkEntityStateChanged(PersonDetails.newBuilder()
+                                                 .setId(id)
+                                                 .setName(PersonName.getDefaultInstance())
+                                                 .build());
         }
 
         @Test
@@ -177,7 +179,7 @@ class EntityHistoryTest {
             hidePerson();
             eventWatcher.clearEvents();
 
-            UnHidePerson command = UnHidePerson
+            ExposePerson command = ExposePerson
                     .newBuilder()
                     .setId(id)
                     .build();
@@ -335,10 +337,7 @@ class EntityHistoryTest {
         private void checkEntityCreated(EntityOption.Kind entityKind,
                                         TypeUrl entityType) {
             EntityCreated entityCreatedEvent = eventWatcher.nextEvent(EntityCreated.class);
-            StringValue actualIdValue = unpack(entityCreatedEvent.getId()
-                                                                 .getEntityId()
-                                                                 .getId());
-            assertEquals(id, actualIdValue.getValue());
+            assertId(entityCreatedEvent.getId());
             assertEquals(entityType.value(), entityCreatedEvent.getId()
                                                                .getTypeUrl());
             assertEquals(entityKind, entityCreatedEvent.getKind());
@@ -348,19 +347,16 @@ class EntityHistoryTest {
             EventDispatchedToSubscriber eventDispatchedEvent =
                     eventWatcher.nextEvent(EventDispatchedToSubscriber.class);
             EntityHistoryId receiver = eventDispatchedEvent.getReceiver();
-            StringValue actualIdValue = unpack(receiver.getEntityId().getId());
+            PersonId actualIdValue = unpack(receiver.getEntityId().getId());
             PersonCreated payload = findEvent(eventDispatchedEvent.getPayload());
-            assertEquals(id, actualIdValue.getValue());
+            assertEquals(id, actualIdValue);
             assertEquals(TestProjection.TYPE.value(), receiver.getTypeUrl());
             assertEquals(id, payload.getId());
         }
 
         private void checkEntityStateChanged(Message state) {
             EntityStateChanged event = eventWatcher.nextEvent(EntityStateChanged.class);
-            String actualId = Identifier.unpack(event.getId()
-                                                     .getEntityId()
-                                                     .getId());
-            assertEquals(id, actualId);
+            assertId(event.getId());
             assertEquals(state, unpack(event.getNewState()));
             assertFalse(event.getMessageIdList().isEmpty());
         }
@@ -369,9 +365,9 @@ class EntityHistoryTest {
             EventPassedToApplier eventDispatchedEvent =
                     eventWatcher.nextEvent(EventPassedToApplier.class);
             EntityHistoryId receiver = eventDispatchedEvent.getReceiver();
-            StringValue actualIdValue = unpack(receiver.getEntityId().getId());
+            PersonId actualIdValue = unpack(receiver.getEntityId().getId());
             PersonCreated payload = findEvent(eventDispatchedEvent.getPayload());
-            assertEquals(id, actualIdValue.getValue());
+            assertEquals(id, actualIdValue);
             assertEquals(TestAggregate.TYPE.value(), receiver.getTypeUrl());
             assertEquals(id, payload.getId());
         }
@@ -380,9 +376,9 @@ class EntityHistoryTest {
             CommandDispatchedToHandler commandDispatchedEvent =
                     eventWatcher.nextEvent(CommandDispatchedToHandler.class);
             EntityHistoryId receiver = commandDispatchedEvent.getReceiver();
-            StringValue actualIdValue = unpack(receiver.getEntityId().getId());
+            PersonId actualIdValue = unpack(receiver.getEntityId().getId());
             CreatePerson payload = findCommand(commandDispatchedEvent.getPayload());
-            assertEquals(id, actualIdValue.getValue());
+            assertEquals(id, actualIdValue);
             assertEquals(TestAggregate.TYPE.value(), receiver.getTypeUrl());
             assertEquals(id, payload.getId());
         }
@@ -392,21 +388,16 @@ class EntityHistoryTest {
 
             assertEquals(TestAggregate.TYPE.value(),
                          archivedEvent.getId().getTypeUrl());
-            String actualId = Identifier.unpack(archivedEvent.getId()
-                                                             .getEntityId()
-                                                             .getId());
-            assertEquals(id, actualId);
+            assertId(archivedEvent.getId());
         }
 
         private void checkEntityDeleted() {
             EntityDeleted deletedEvent = eventWatcher.nextEvent(EntityDeleted.class);
 
             assertEquals(TestProjection.TYPE.value(),
-                         deletedEvent.getId().getTypeUrl());
-            String actualId = Identifier.unpack(deletedEvent.getId()
-                                                            .getEntityId()
-                                                            .getId());
-            assertEquals(id, actualId);
+                         deletedEvent.getId()
+                                     .getTypeUrl());
+            assertId(deletedEvent.getId());
         }
 
         private void checkEntityExtracted() {
@@ -414,10 +405,11 @@ class EntityHistoryTest {
                     eventWatcher.nextEvent(EntityExtractedFromArchive.class);
 
             assertEquals(TestAggregate.TYPE.value(),
-                         extractedEvent.getId().getTypeUrl());
-            String actualId = Identifier.unpack(extractedEvent.getId()
-                                                              .getEntityId()
-                                                              .getId());
+                         extractedEvent.getId()
+                                       .getTypeUrl());
+            PersonId actualId = Identifier.unpack(extractedEvent.getId()
+                                                                .getEntityId()
+                                                                .getId());
             assertEquals(id, actualId);
         }
 
@@ -425,15 +417,13 @@ class EntityHistoryTest {
             EntityRestored restoredEvent = eventWatcher.nextEvent(EntityRestored.class);
 
             assertEquals(TestProjection.TYPE.value(),
-                         restoredEvent.getId().getTypeUrl());
-            String actualId = Identifier.unpack(restoredEvent.getId()
-                                                             .getEntityId()
-                                                             .getId());
-            assertEquals(id, actualId);
+                         restoredEvent.getId()
+                                      .getTypeUrl());
+            assertId(restoredEvent.getId());
         }
 
         private void assertId(EntityHistoryId actual) {
-            String actualId = Identifier.unpack(actual.getEntityId().getId());
+            PersonId actualId = Identifier.unpack(actual.getEntityId().getId());
             assertEquals(id, actualId);
         }
     }
