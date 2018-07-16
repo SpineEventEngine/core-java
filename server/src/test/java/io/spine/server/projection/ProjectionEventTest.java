@@ -51,8 +51,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
+// TODO:2018-07-16:dmytro.dashenkov: Rename to `ProjectionTest`.
+// todo                              https://github.com/SpineEventEngine/core-java/issues/753
 @DisplayName("Projection should")
-class ProjectionEventsTest {
+class ProjectionEventTest {
 
     private TestProjection projection;
 
