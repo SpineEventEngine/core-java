@@ -26,6 +26,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.test.testutil.blackbox.Rejections.BbProjectAlreadyStarted;
+import static io.spine.test.testutil.blackbox.Rejections.BbTaskCreatedInCompletedProject;
+import static io.spine.test.testutil.blackbox.Rejections.BbTaskLimitReached;
 import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.ackedWithErrors;
 import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.ackedWithRejections;
@@ -48,9 +51,6 @@ import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.newTask;
 import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.projectAlreadyStarted;
 import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.taskCreatedInCompletedProject;
 import static io.spine.testing.client.blackbox.given.CommandAcksTestEnv.taskLimitReached;
-import static io.spine.test.testutil.blackbox.Rejections.BbProjectAlreadyStarted;
-import static io.spine.test.testutil.blackbox.Rejections.BbTaskCreatedInCompletedProject;
-import static io.spine.test.testutil.blackbox.Rejections.BbTaskLimitReached;
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
