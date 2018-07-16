@@ -22,6 +22,8 @@ package io.spine.server;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.server.commandbus.CommandBus;
@@ -35,11 +37,14 @@ import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
+import io.spine.system.server.DefaultSystemGateway;
+import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -55,6 +60,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
+@CanIgnoreReturnValue
 public final class BoundedContextBuilder {
 
     private BoundedContextName name = BoundedContextNames.defaultName();
@@ -239,6 +245,7 @@ public final class BoundedContextBuilder {
      *
      * @return new {@code BoundedContext}
      */
+    @CheckReturnValue
     public BoundedContext build() {
         SystemBoundedContext system = buildSystem();
         BoundedContext result = buildDefault(system);
@@ -247,8 +254,12 @@ public final class BoundedContextBuilder {
     }
 
     private BoundedContext buildDefault(SystemBoundedContext system) {
-        BoundedContext result =
-                buildPartial(builder -> DomainBoundedContext.newInstance(builder, system));
+        BiFunction<BoundedContextBuilder, SystemGateway, DomainBoundedContext> instanceFactory =
+                (builder, systemGateway) -> DomainBoundedContext.newInstance(builder,
+                                                                             system,
+                                                                             systemGateway);
+        SystemGateway systemGateway = new DefaultSystemGateway(system);
+        BoundedContext result = buildPartial(instanceFactory, systemGateway);
         return result;
     }
 
@@ -267,23 +278,27 @@ public final class BoundedContextBuilder {
         if (tenantIndex.isPresent()) {
             system.setTenantIndex(tenantIndex.get());
         }
-        SystemBoundedContext result = system.buildPartial(SystemBoundedContext::newInstance);
+        BiFunction<BoundedContextBuilder, SystemGateway, SystemBoundedContext> instanceFactory =
+                (builder, systemGateway) -> SystemBoundedContext.newInstance(builder);
+        NoOpSystemGateway systemGateway = NoOpSystemGateway.INSTANCE;
+        SystemBoundedContext result = system.buildPartial(instanceFactory, systemGateway);
         return result;
     }
 
     private <B extends BoundedContext> B
-    buildPartial(Function<BoundedContextBuilder, B> instanceFactory) {
+    buildPartial(BiFunction<BoundedContextBuilder, SystemGateway, B> instanceFactory,
+                 SystemGateway systemGateway) {
         StorageFactory storageFactory = getStorageFactory();
 
         TransportFactory transportFactory = getTransportFactory();
 
         initTenantIndex(storageFactory);
-        initCommandBus(storageFactory);
+        initCommandBus(storageFactory, systemGateway);
         initEventBus(storageFactory);
         initStand(storageFactory);
         initIntegrationBus(transportFactory);
 
-        B result = instanceFactory.apply(this);
+        B result = instanceFactory.apply(this, systemGateway);
         return result;
     }
 
@@ -319,7 +334,7 @@ public final class BoundedContextBuilder {
         }
     }
 
-    private void initCommandBus(StorageFactory factory) {
+    private void initCommandBus(StorageFactory factory, SystemGateway systemGateway) {
         if (commandBus == null) {
             final CommandStore commandStore = createCommandStore(factory, tenantIndex);
             commandBus = CommandBus.newBuilder()
@@ -340,6 +355,7 @@ public final class BoundedContextBuilder {
                 commandBus.setCommandStore(commandStore);
             }
         }
+        commandBus.injectSystemGateway(systemGateway);
     }
 
     private void initEventBus(StorageFactory storageFactory) {
