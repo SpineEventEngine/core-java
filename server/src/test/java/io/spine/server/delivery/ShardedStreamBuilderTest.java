@@ -20,7 +20,7 @@
 package io.spine.server.delivery;
 
 import io.spine.core.BoundedContextName;
-import io.spine.server.BoundedContext;
+import io.spine.core.BoundedContextNames;
 import io.spine.server.delivery.given.ShardedStreamTestEnv.TaskAggregateRepository;
 import io.spine.server.model.ModelTests;
 import io.spine.test.Tests;
@@ -101,7 +101,7 @@ class ShardedStreamBuilderTest {
         @Test
         @DisplayName("BoundedContext name")
         void boundedContextName() {
-            BoundedContextName value = BoundedContext.newName("ShardedStreams");
+            BoundedContextName value = BoundedContextNames.newName("ShardedStreams");
             assertEquals(value, builder().setBoundedContextName(value)
                                          .getBoundedContextName());
         }

@@ -194,7 +194,6 @@ public abstract class Aggregate<I,
      * @throws IllegalStateException if the method is called from outside an event applier
      */
     @Override
-    @VisibleForTesting
     protected B getBuilder() {
         return super.getBuilder();
     }

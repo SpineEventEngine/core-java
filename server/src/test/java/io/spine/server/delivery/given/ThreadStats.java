@@ -24,6 +24,8 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.protobuf.Message;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 /**
  * The statistics of threads, in which the entity has been processed.
  *
@@ -35,7 +37,7 @@ import com.google.protobuf.Message;
 public class ThreadStats<I extends Message> {
 
     private final Multimap<Long, I> threadToId =
-            Multimaps.synchronizedMultimap(HashMultimap.<Long, I>create());
+            Multimaps.synchronizedMultimap(HashMultimap.create());
 
     public void recordCallingThread(I id) {
         final long currentThreadId = Thread.currentThread()
@@ -43,8 +45,15 @@ public class ThreadStats<I extends Message> {
         threadToId.put(currentThreadId, id);
     }
 
-    public Multimap<Long, I> getThreadToId() {
-        return Multimaps.unmodifiableMultimap(threadToId);
+    public void assertIdCount(int expectedSize) {
+        int actualSize = threadToId.size();
+        assertEquals(expectedSize, actualSize);
+    }
+
+    public void assertThreadCount(int expectedCount) {
+        int actualCount = threadToId.keySet()
+                                    .size();
+        assertEquals(expectedCount, actualCount);
     }
 
     public void clear() {

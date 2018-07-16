@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.EventPlayers;
 import io.spine.server.entity.TransactionalEntity;
@@ -70,10 +69,6 @@ public abstract class Projection<I,
     protected ProjectionClass<?> getModelClass() {
         return Model.getInstance()
                     .asProjectionClass(getClass());
-    }
-
-    protected void handle(EventEnvelope event) {
-        apply(event.getMessage(), event.getEventContext());
     }
 
     /**

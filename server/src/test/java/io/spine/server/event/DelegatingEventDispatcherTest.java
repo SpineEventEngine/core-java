@@ -22,9 +22,9 @@ package io.spine.server.event;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
+import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.given.DelegatingEventDispatcherTestEnv.EmptyEventDispatcherDelegate;
 import io.spine.server.integration.ExternalMessage;
@@ -87,7 +87,7 @@ class DelegatingEventDispatcherTest {
         final StringValue eventMsg = newUuidValue();
         final Event event = factory.createEvent(eventMsg);
         final ExternalMessage externalMessage =
-                ExternalMessages.of(event, BoundedContext.newName(getClass().getName()));
+                ExternalMessages.of(event, BoundedContextNames.newName(getClass().getName()));
 
         final ExternalMessageEnvelope externalMessageEnvelope =
                 ExternalMessageEnvelope.of(externalMessage, eventMsg);

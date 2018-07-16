@@ -23,8 +23,10 @@ package io.spine.server.aggregate;
 import com.google.protobuf.Message;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.Event;
+import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.TransactionListener;
 
 import java.util.List;
 
@@ -66,8 +68,12 @@ abstract class AggregateEndpoint<I,
         store(aggregate);
     }
 
+    @SuppressWarnings("unchecked") // to avoid massive generic-related issues.
     protected AggregateTransaction startTransaction(A aggregate) {
-        return AggregateTransaction.start(aggregate);
+        AggregateTransaction tx = AggregateTransaction.start(aggregate);
+        TransactionListener listener = EntityLifecycleMonitor.newInstance(repository());
+        tx.setListener(listener);
+        return tx;
     }
 
     @Override

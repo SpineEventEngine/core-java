@@ -25,7 +25,6 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.entity.EntityVersioning;
 import io.spine.server.entity.Transaction;
-import io.spine.server.entity.TransactionListener;
 import io.spine.validate.ValidatingBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -46,12 +45,6 @@ class ProjectionTransaction<I,
     @VisibleForTesting
     ProjectionTransaction(Projection<I, M, B> projection) {
         super(projection);
-    }
-
-    @VisibleForTesting
-    ProjectionTransaction(Projection<I, M, B> projection,
-                          TransactionListener<I, Projection<I, M, B>, M, B> listener) {
-        super(projection, listener);
     }
 
     @VisibleForTesting
