@@ -20,7 +20,6 @@
 package io.spine.testing.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
