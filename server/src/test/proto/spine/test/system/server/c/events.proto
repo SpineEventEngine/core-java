@@ -30,34 +30,35 @@ option java_outer_classname = "EventsProto";
 option java_multiple_files = true;
 
 import "spine/people/person_name.proto";
+import "spine/test/system/server/entity_hstory_test.proto";
 
 message PersonCreated {
 
-    string id = 1;
+    PersonId id = 1;
 
     spine.people.PersonName name = 2;
 }
 
 message PersonNameCreated {
 
-    string id = 1;
+    PersonId id = 1;
 
     string first_name = 2;
 }
 
 message PersonRenamed {
 
-    string id = 1;
+    PersonId id = 1;
 
     string new_first_name = 2;
 }
 
 message PersonHidden {
 
-    string id = 1;
+    PersonId id = 1;
 }
 
-message PersonUnHidden {
+message PersonExposed {
 
-    string id = 1;
+    PersonId id = 1;
 }

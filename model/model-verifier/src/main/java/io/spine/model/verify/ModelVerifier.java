@@ -76,6 +76,7 @@ final class ModelVerifier {
      */
     void verify(CommandHandlers spineModel) {
         Logger log = log();
+        model.clear();
         for (String commandHandlingClass : spineModel.getCommandHandlingTypesList()) {
             final Class<?> cls;
             try {

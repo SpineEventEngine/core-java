@@ -21,6 +21,7 @@
 package io.spine.server.expected;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 
@@ -59,6 +60,7 @@ public abstract class MessageProducingExpected<S extends Message,
     }
 
     @Override
+    @CanIgnoreReturnValue
     public X ignoresMessage() {
         assertTrue(commands.isEmpty(), format("Message produced commands: %s", commands));
         if (!events.isEmpty()) {
@@ -78,6 +80,7 @@ public abstract class MessageProducingExpected<S extends Message,
      * @param <M>        class of the event's Protobuf message
      */
     @SuppressWarnings({"unchecked", "UnusedReturnValue"})
+    @CanIgnoreReturnValue
     public <M extends Message> X producesEvent(Class<M> eventClass, Consumer<M> validator) {
         assertNotNull(validator);
         assertEquals(1, events.size());
@@ -91,6 +94,7 @@ public abstract class MessageProducingExpected<S extends Message,
      * @param eventClasses types of the expected events
      */
     @SuppressWarnings("UnusedReturnValue")
+    @CanIgnoreReturnValue
     public X producesEvents(Class<?>... eventClasses) {
         assertEquals(eventClasses.length, events.size(), () -> format(
                 "Unexpected number of events: %s (%s). Expected %s",
@@ -119,6 +123,7 @@ public abstract class MessageProducingExpected<S extends Message,
      * @param <M>          class of the command's Protobuf message
      */
     @SuppressWarnings({"unchecked", "UnusedReturnValue"})
+    @CanIgnoreReturnValue
     public <M extends Message> X routesCommand(Class<M> commandClass, Consumer<M> validator) {
         assertNotNull(validator);
         assertEquals(1, commands.size());
@@ -134,6 +139,7 @@ public abstract class MessageProducingExpected<S extends Message,
      * @param commandClasses types of the expected commands
      */
     @SuppressWarnings("UnusedReturnValue")
+    @CanIgnoreReturnValue
     public X routesCommands(Class<?>... commandClasses) {
         assertEquals(commandClasses.length, commands.size(), () -> format(
                 "Unexpected number of commands: %s (%s). Expected %s",

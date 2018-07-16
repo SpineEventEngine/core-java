@@ -120,11 +120,6 @@ public final class EntityLifecycleMonitor<I,
         lifecycle.onStateChanged(change, messageIds);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Logs the occurred {@link Throwable}.
-     */
     @Override
     public void onTransactionFailed(Throwable t, E entity, S state, Version version,
                                     LifecycleFlags lifecycleFlags) {

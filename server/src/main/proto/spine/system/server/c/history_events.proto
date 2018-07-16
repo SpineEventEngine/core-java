@@ -38,7 +38,7 @@ import "spine/core/event.proto";
 import "spine/core/command.proto";
 import "spine/system/server/entity_history.proto";
 
-// An event emmited when an entity is created.
+// An event emitted when an entity is created.
 //
 message EntityCreated {
 
@@ -49,7 +49,7 @@ message EntityCreated {
     EntityOption.Kind kind = 2 [(required) = true];
 }
 
-// An event emmited when an event is dispatched to a subscriber.
+// An event emitted when an event is dispatched to a subscriber.
 //
 // This event is relevant only to histories of Projections.
 //
@@ -62,7 +62,7 @@ message EventDispatchedToSubscriber {
     DispatchedEvent payload = 2 [(required) = true, (valid) = true];
 }
 
-// An event emmited when an event is dispatched to a reactor.
+// An event emitted when an event is dispatched to a reactor.
 //
 // This event is relevant to histories of Aggregates and ProcessManagers.
 //
@@ -75,11 +75,14 @@ message EventDispatchedToReactor {
     DispatchedEvent payload = 2 [(required) = true, (valid) = true];
 }
 
-// An event emmited when an event is passed to an applier.
+// An event emitted when an event is passed to an applier.
 //
 // This event is relevant only to histories of Aggregates.
 //
-// This event is not emmited if applying the event to the Aggregate fails.
+// This event is not emitted if applying the event to the Aggregate fails.
+//
+// This event is emitted at most once, i.e. NOT emitted each time an Aggregate is loaded from
+// its history.
 //
 message EventPassedToApplier {
 
@@ -90,7 +93,7 @@ message EventPassedToApplier {
     DispatchedEvent payload = 2 [(required) = true, (valid) = true];
 }
 
-// An event emmited when a command is dispatched to a command handler.
+// An event emitted when a command is dispatched to a command handler.
 //
 // This event is relevant only to histories of Aggregates and ProcessManagers.
 //
@@ -103,7 +106,7 @@ message CommandDispatchedToHandler {
     DispatchedCommand payload = 2 [(required) = true, (valid) = true];
 }
 
-// An event emmited when an entity state is changed.
+// An event emitted when an entity state is changed.
 //
 // The event contains the new state of the entity.
 //
@@ -122,7 +125,7 @@ message EntityStateChanged {
     google.protobuf.Timestamp when = 4;
 }
 
-// An event emmited when an entity is marked as archived.
+// An event emitted when an entity is marked as archived.
 //
 message EntityArchived {
 
@@ -136,7 +139,7 @@ message EntityArchived {
     google.protobuf.Timestamp when = 3;
 }
 
-// An event emmited when an entity is marked as deleted.
+// An event emitted when an entity is marked as deleted.
 //
 message EntityDeleted {
 
@@ -150,7 +153,7 @@ message EntityDeleted {
     google.protobuf.Timestamp when = 3;
 }
 
-// An event emmited when an entity is marked as NOT archived.
+// An event emitted when an entity is marked as NOT archived.
 //
 message EntityExtractedFromArchive {
 
@@ -164,7 +167,7 @@ message EntityExtractedFromArchive {
     google.protobuf.Timestamp when = 3;
 }
 
-// An event emmited when an entity is marked as NOT deleted.
+// An event emitted when an entity is marked as NOT deleted.
 //
 message EntityRestored {
 

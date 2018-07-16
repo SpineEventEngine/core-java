@@ -52,23 +52,24 @@ import io.spine.system.server.EntityStateChanged;
 import io.spine.system.server.EventDispatchedToReactor;
 import io.spine.system.server.EventDispatchedToSubscriber;
 import io.spine.system.server.EventPassedToApplier;
+import io.spine.system.server.ExposePerson;
 import io.spine.system.server.HidePerson;
 import io.spine.system.server.Person;
 import io.spine.system.server.PersonCreated;
 import io.spine.system.server.PersonCreation;
 import io.spine.system.server.PersonCreationVBuilder;
+import io.spine.system.server.PersonDetails;
+import io.spine.system.server.PersonDetailsVBuilder;
+import io.spine.system.server.PersonExposed;
 import io.spine.system.server.PersonFirstName;
 import io.spine.system.server.PersonFirstNameVBuilder;
 import io.spine.system.server.PersonHidden;
+import io.spine.system.server.PersonId;
 import io.spine.system.server.PersonNameCreated;
 import io.spine.system.server.PersonRenamed;
-import io.spine.system.server.PersonUnHidden;
 import io.spine.system.server.PersonVBuilder;
-import io.spine.system.server.PersonView;
-import io.spine.system.server.PersonViewVBuilder;
 import io.spine.system.server.RenamePerson;
 import io.spine.system.server.StartPersonCreation;
-import io.spine.system.server.UnHidePerson;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -181,11 +182,11 @@ public final class EntityHistoryTestEnv {
         }
     }
 
-    public static class TestAggregate extends Aggregate<String, Person, PersonVBuilder> {
+    public static class TestAggregate extends Aggregate<PersonId, Person, PersonVBuilder> {
 
         public static final TypeUrl TYPE = TypeUrl.of(Person.class);
 
-        protected TestAggregate(String id) {
+        protected TestAggregate(PersonId id) {
             super(id);
         }
 
@@ -205,8 +206,8 @@ public final class EntityHistoryTestEnv {
         }
 
         @Assign
-        PersonUnHidden handle(UnHidePerson command) {
-            return PersonUnHidden.newBuilder()
+        PersonExposed handle(ExposePerson command) {
+            return PersonExposed.newBuilder()
                                  .setId(command.getId())
                                  .build();
         }
@@ -231,7 +232,7 @@ public final class EntityHistoryTestEnv {
         }
 
         @Apply
-        private void on(PersonUnHidden event) {
+        private void on(PersonExposed event) {
             setArchived(false);
         }
 
@@ -245,11 +246,12 @@ public final class EntityHistoryTestEnv {
         }
     }
 
-    public static class TestProjection extends Projection<String, PersonView, PersonViewVBuilder> {
+    public static class TestProjection
+            extends Projection<PersonId, PersonDetails, PersonDetailsVBuilder> {
 
-        public static final TypeUrl TYPE = TypeUrl.of(PersonView.class);
+        public static final TypeUrl TYPE = TypeUrl.of(PersonDetails.class);
 
-        protected TestProjection(String id) {
+        protected TestProjection(PersonId id) {
             super(id);
         }
 
@@ -265,18 +267,17 @@ public final class EntityHistoryTestEnv {
         }
 
         @Subscribe
-        public void on(PersonUnHidden event) {
+        public void on(PersonExposed event) {
             setDeleted(false);
         }
     }
 
-    public static class TestProcman extends ProcessManager<String,
-                                                           PersonCreation,
-                                                           PersonCreationVBuilder> {
+    public static class TestProcman
+            extends ProcessManager<PersonId, PersonCreation, PersonCreationVBuilder> {
 
         public static final TypeUrl TYPE = TypeUrl.of(PersonCreation.class);
 
-        protected TestProcman(String id) {
+        protected TestProcman(PersonId id) {
             super(id);
         }
 
@@ -301,14 +302,14 @@ public final class EntityHistoryTestEnv {
         }
     }
 
-    public static class TestAggregateRoot extends AggregateRoot<String> {
+    public static class TestAggregateRoot extends AggregateRoot<PersonId> {
 
-        protected TestAggregateRoot(BoundedContext boundedContext, String id) {
+        protected TestAggregateRoot(BoundedContext boundedContext, PersonId id) {
             super(boundedContext, id);
         }
     }
 
-    public static class TestAggregatePart extends AggregatePart<String,
+    public static class TestAggregatePart extends AggregatePart<PersonId,
                                                                 PersonFirstName,
                                                                 PersonFirstNameVBuilder,
                                                                 TestAggregateRoot> {
@@ -339,19 +340,19 @@ public final class EntityHistoryTestEnv {
         }
     }
 
-    public static class TestAggregateRepository extends AggregateRepository<String, TestAggregate> {
+    public static class TestAggregateRepository
+            extends AggregateRepository<PersonId, TestAggregate> {
     }
 
-    public static class TestProjectionRepository extends ProjectionRepository<String,
-                                                                              TestProjection,
-                                                                              PersonView> {
+    public static class TestProjectionRepository
+            extends ProjectionRepository<PersonId, TestProjection, PersonDetails> {
     }
 
     public static class TestAggregatePartRepository
-            extends AggregatePartRepository<String, TestAggregatePart, TestAggregateRoot> {
+            extends AggregatePartRepository<PersonId, TestAggregatePart, TestAggregateRoot> {
     }
 
     public static class TestProcmanRepository
-            extends ProcessManagerRepository<String, TestProcman, PersonCreation>  {
+            extends ProcessManagerRepository<PersonId, TestProcman, PersonCreation>  {
     }
 }

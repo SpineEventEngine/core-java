@@ -53,18 +53,18 @@ import java.util.stream.Stream;
  */
 final class SystemBoundedContext extends BoundedContext {
 
-    private SystemBoundedContext(Builder builder) {
+    private SystemBoundedContext(BoundedContextBuilder builder) {
         super(builder);
     }
 
     /**
      * Creates a new instance of {@code SystemBoundedContext} from the given
-     * {@link BoundedContext.Builder}.
+     * {@link BoundedContextBuilder}.
      *
      * @param builder the configuration of the instance to create
      * @return new {@code SystemBoundedContext}
      */
-    static SystemBoundedContext newInstance(Builder builder) {
+    static SystemBoundedContext newInstance(BoundedContextBuilder builder) {
         SystemBoundedContext result = new SystemBoundedContext(builder);
         result.init();
         return result;

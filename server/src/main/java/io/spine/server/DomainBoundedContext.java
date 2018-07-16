@@ -21,13 +21,20 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.system.server.DefaultSystemGateway;
 import io.spine.system.server.SystemGateway;
 
 /**
- * The default implementation of a {@link BoundedContext}.
+ * A bounded context representing a user-specific domain model.
  *
- * <p>All the user interactions with the system (such as repository registration, command posting,
- * query processing, etc.) happen through an instance of this class.
+ * <p>The {@link BoundedContext} instances typically seen to the users
+ * (i.e. built with a {@link BoundedContextBuilder}) are instances of this class.
+ *
+ * <p>All the user interactions with the system (such as
+ * {@linkplain BoundedContext#register(io.spine.server.entity.Repository) repository registration},
+ * {@linkplain BoundedContext#getCommandBus() command posting},
+ * {@linkplain BoundedContext#findRepository(Class) query processing}, etc.) happen through
+ * an instance of this class.
  *
  * <p>Each {@code DomainBoundedContext} has an associated {@link SystemBoundedContext}, which
  * manages the meta information about this bounded context entities.
@@ -40,7 +47,7 @@ final class DomainBoundedContext extends BoundedContext {
     private final SystemBoundedContext system;
     private final SystemGateway systemGateway;
 
-    private DomainBoundedContext(Builder builder,
+    private DomainBoundedContext(BoundedContextBuilder builder,
                                  SystemBoundedContext system,
                                  SystemGateway gateway) {
         super(builder);
@@ -48,7 +55,7 @@ final class DomainBoundedContext extends BoundedContext {
         this.systemGateway = gateway;
     }
 
-    static DomainBoundedContext newInstance(Builder builder,
+    static DomainBoundedContext newInstance(BoundedContextBuilder builder,
                                             SystemBoundedContext system,
                                             SystemGateway gateway) {
         DomainBoundedContext result = new DomainBoundedContext(builder, system, gateway);

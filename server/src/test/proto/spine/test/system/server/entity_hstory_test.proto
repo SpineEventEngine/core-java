@@ -31,23 +31,28 @@ option java_multiple_files = true;
 
 import "spine/people/person_name.proto";
 
+message PersonId {
+
+    string uuid = 1;
+}
+
 message Person {
 
-    string id = 1;
+    PersonId id = 1;
 
     spine.people.PersonName name = 2;
 }
 
 message PersonCreation {
 
-    string id = 1;
+    PersonId id = 1;
 
     bool created = 2;
 }
 
 message PersonFirstName {
 
-    string id = 1;
+    PersonId id = 1;
 
     string first_name = 2;
 }
