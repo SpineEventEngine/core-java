@@ -31,7 +31,9 @@ import io.spine.testing.server.expected.EventHandlerExpected;
 
 import java.util.List;
 
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.testing.server.procman.CommandBusInjection.inject;
+import static java.util.stream.Collectors.toList;
 
 /**
  * The implementation base for testing a single event reactor in a {@link ProcessManager}.
@@ -59,8 +61,15 @@ public abstract class ProcessManagerEventReactionTest<I,
                                          .setContext(context)
                                          .build();
         EventEnvelope envelope = EventEnvelope.of(enrichedEvent);
-        List<? extends Message> events = ProcessManagerDispatcher.dispatch(entity, envelope);
-        return events;
+        List<Event> events = ProcessManagerDispatcher.dispatch(entity, envelope);
+
+        return events.stream()
+                     .map(ProcessManagerEventReactionTest::eventToMessage)
+                     .collect(toList());
+    }
+
+    private static Message eventToMessage(Event event) {
+        return unpack(event.getMessage());
     }
 
     @Override
