@@ -26,39 +26,20 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.system.server";
-option java_outer_classname = "EHEventsProto";
-option java_multiple_files = true;
+option java_outer_classname = "Rejections";
 
-import "spine/people/person_name.proto";
-import "spine/test/system/server/entity_history_test.proto";
+import "spine/test/system/server/command_lifecycle_test.proto";
 
-message PersonCreated {
+message CompanyNameAlreadyTaken {
 
-    PersonId id = 1;
+    CompanyId id = 1;
 
-    spine.people.PersonName name = 2;
+    string taken_name = 2;
 }
 
-message PersonNameCreated {
+message CompanyNameNotProposed {
 
-    PersonId id = 1;
+    CompanyId id = 1;
 
-    string first_name = 2;
-}
-
-message PersonRenamed {
-
-    PersonId id = 1;
-
-    string new_first_name = 2;
-}
-
-message PersonHidden {
-
-    PersonId id = 1;
-}
-
-message PersonExposed {
-
-    PersonId id = 1;
+    uint32 invalid_index = 2;
 }

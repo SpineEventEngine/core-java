@@ -26,39 +26,30 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.system.server";
-option java_outer_classname = "EHEventsProto";
+option java_outer_classname = "CommandLifecycleTestProto";
 option java_multiple_files = true;
 
-import "spine/people/person_name.proto";
-import "spine/test/system/server/entity_history_test.proto";
+import "spine/time/time.proto";
 
-message PersonCreated {
+message CompanyId {
 
-    PersonId id = 1;
-
-    spine.people.PersonName name = 2;
+    string uuid = 1;
 }
 
-message PersonNameCreated {
+message Company {
+    option (entity).kind = AGGREGATE;
 
-    PersonId id = 1;
+    CompanyId id = 1;
 
-    string first_name = 2;
+    string name = 2;
+
+    spine.time.LocalDate when_established = 3;
 }
 
-message PersonRenamed {
+message CompanyEstablishing {
+    option (entity).kind = PROCESS_MANAGER;
 
-    PersonId id = 1;
+    CompanyId id = 1;
 
-    string new_first_name = 2;
-}
-
-message PersonHidden {
-
-    PersonId id = 1;
-}
-
-message PersonExposed {
-
-    PersonId id = 1;
+    repeated string proposed_name = 2;
 }
