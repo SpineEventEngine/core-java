@@ -217,7 +217,8 @@ subprojects {
         // Exclude generated sources from being analyzed by Error Prone.
         options.compilerArgs += [
                 // Turn Error Prone off for generated code.
-                '-XepExcludedPaths:.*/generated/.* ' +
+                '-XepExcludedPaths:.*/generated/.*',
+                
                 // Turn the check off until Error Prone can handle `@Nested` JUnit classes.
                 // See issue: https://github.com/google/error-prone/issues/956
                 '-Xep:ClassCanBeStatic:OFF'
