@@ -257,17 +257,17 @@ public final class EntityHistoryAggregate
 
     private void updateLastEventTime(Timestamp newEvent) {
         Timestamp lastEvent = getBuilder().getDispatching()
-                                          .getLastEvent();
+                                          .getWhenEvent();
         if (compare(newEvent, lastEvent) > 0) {
-            updateDispatchingHistory(builder -> builder.setLastEvent(newEvent));
+            updateDispatchingHistory(builder -> builder.setWhenEvent(newEvent));
         }
     }
 
     private void updateLastCommandTime(Timestamp newCommand) {
         Timestamp lastCommand = getBuilder().getDispatching()
-                                            .getLastCommand();
+                                            .getWhenCommand();
         if (compare(newCommand, lastCommand) > 0) {
-            updateDispatchingHistory(builder -> builder.setLastCommand(newCommand));
+            updateDispatchingHistory(builder -> builder.setWhenCommand(newCommand));
         }
     }
 

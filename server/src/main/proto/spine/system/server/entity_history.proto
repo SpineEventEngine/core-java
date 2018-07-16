@@ -123,10 +123,10 @@ message LifecycleHistory {
 message DispatchingHistory {
 
     // The most recent time when a command was dispatched to the entity.
-    google.protobuf.Timestamp last_command = 1;
+    google.protobuf.Timestamp when_command = 1;
 
     // The most recent time when an event was dispatched to the entity.
-    google.protobuf.Timestamp last_event = 2;
+    google.protobuf.Timestamp when_event = 2;
 }
 
 // A record of an event dispatched to a certain entity.
@@ -138,7 +138,8 @@ message DispatchedEvent {
 
     // The time when the event was dispatched.
     //
-    // This timestamp may differ from the one in the context of the event.
+    // This timestamp may differ from the one in the context of the event, since the time of
+    // dispatching may not be the same as the time of creation.
     //
     google.protobuf.Timestamp when_dispatched = 2 [(required) = true];
 }
@@ -152,7 +153,8 @@ message DispatchedCommand {
 
     // The time when the command was dispatched.
     //
-    // This timestamp may differ from the one in the context of the event.
+    // This timestamp may differ from the one in the context of the event, since the time of
+    // dispatching may not be the same as the time of creation.
     //
     google.protobuf.Timestamp when_dispatched = 2 [(required) = true];
 }
