@@ -21,7 +21,6 @@
 package io.spine.server.projection;
 
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
