@@ -21,14 +21,21 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
+import io.spine.server.entity.Repository;
 import io.spine.system.server.DefaultSystemGateway;
 import io.spine.system.server.SystemGateway;
 
 /**
- * The default implementation of a {@link BoundedContext}.
+ * A bounded context representing a user-specific domain model.
  *
- * <p>All the user interactions with the system (such as repository registration, command posting,
- * query processing, etc.) happen through an instance of this class.
+ * <p>The {@link BoundedContext} instances typically seen to the users
+ * (i.e. built with a {@link BoundedContextBuilder}) are instances of this class.
+ *
+ * <p>All the user interactions with the system (such as
+ * {@linkplain BoundedContext#register(Repository) repository registration},
+ * {@linkplain BoundedContext#getCommandBus() command posting},
+ * {@linkplain BoundedContext#findRepository(Class) query processing}, etc.) happen through
+ * an instance of this class.
  *
  * <p>Each {@code DomainBoundedContext} has an associated {@link SystemBoundedContext}, which
  * manages the meta information about this bounded context entities.
