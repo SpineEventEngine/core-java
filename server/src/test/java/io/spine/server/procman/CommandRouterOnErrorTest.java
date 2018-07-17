@@ -40,7 +40,7 @@ import static io.spine.protobuf.TypeConverter.toMessage;
  * @author Alexaneder Yevsyukov
  */
 @DisplayName("CommandRouter `onError` should")
-class CommandRouterOnErrorTest extends AbstractCommandRouterTest<CommandRouter> {
+class CommandRouterOnErrorTest extends AbstractCommandRouterTest {
 
     /**
      * Creates a router with mocked {@code CommandBus} which always calls
