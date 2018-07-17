@@ -23,6 +23,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.ActorContext;
 import io.spine.core.CommandContext;
+import io.spine.core.EventContext;
+import io.spine.core.Events;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.time.ZoneId;
@@ -92,6 +94,17 @@ public class ActorRequestFactory {
                 .setZoneOffset(actorContext.getZoneOffset())
                 .setZoneId(actorContext.getZoneId());
         return builder.build();
+    }
+
+    /**
+     * Creates an instance by the passed {@code EventContext}, setting attributes from
+     * an {@code ActorContext} found in the origin chain of the event.
+     */
+    public static ActorRequestFactory fromContext(EventContext eventContext) {
+        checkNotNull(eventContext);
+        ActorContext actorContext = Events.findActorContext(eventContext);
+        ActorRequestFactory result = fromContext(actorContext);
+        return result;
     }
 
     /**

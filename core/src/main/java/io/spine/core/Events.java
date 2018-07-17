@@ -19,7 +19,6 @@
  */
 package io.spine.core;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -27,14 +26,17 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
+import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
@@ -127,7 +129,7 @@ public final class Events {
         if (eventOrMessage instanceof Event) {
             return getMessage((Event) eventOrMessage);
         }
-        return io.spine.protobuf.Messages.ensureMessage(eventOrMessage);
+        return Messages.ensureMessage(eventOrMessage);
     }
 
     /**
@@ -208,7 +210,7 @@ public final class Events {
     public static TenantId getTenantId(Event event) {
         checkNotNull(event);
 
-        Optional<CommandContext> commandContext = getOriginCommandContext(event);
+        Optional<CommandContext> commandContext = findOriginCommandContext(event.getContext());
 
         if (!commandContext.isPresent()) {
             return TenantId.getDefaultInstance();
@@ -229,35 +231,48 @@ public final class Events {
      *     response to a rejection.</li>
      * </ol>
      *
-     * <p>If at some point the event origin is not set the {@link Optional#absent()} is returned.
+     * <p>If at some point the event origin is not set the {@link Optional#empty()} is returned.
      */
-    private static Optional<CommandContext> getOriginCommandContext(Event event) {
+    private static Optional<CommandContext> findOriginCommandContext(EventContext eventContext) {
         CommandContext commandContext = null;
-        EventContext eventContext = event.getContext();
+        EventContext ctx = eventContext;
 
         while (commandContext == null) {
-            switch (eventContext.getOriginCase()) {
+            switch (ctx.getOriginCase()) {
                 case EVENT_CONTEXT:
-                    eventContext = eventContext.getEventContext();
+                    ctx = ctx.getEventContext();
                     break;
 
                 case COMMAND_CONTEXT:
-                    commandContext = eventContext.getCommandContext();
+                    commandContext = ctx.getCommandContext();
                     break;
 
                 case REJECTION_CONTEXT:
-                    commandContext = eventContext.getRejectionContext()
+                    commandContext = ctx.getRejectionContext()
                                                  .getCommand()
                                                  .getContext();
                     break;
 
                 case ORIGIN_NOT_SET:
                 default:
-                    return Optional.absent();
+                    return java.util.Optional.empty();
             }
         }
 
-        return Optional.of(commandContext);
+        return java.util.Optional.of(commandContext);
+    }
+
+    /**
+     * Obtains an {@code ActorContext} from the passed {@code EventContext}.
+     *
+     * <p>Traverses the origin chain stored in the {@code EventContext}.
+     */
+    public static ActorContext findActorContext(EventContext eventContext) {
+        Optional<CommandContext> optional = findOriginCommandContext(eventContext);
+        checkState(optional.isPresent(), "Unable to find origin CommandContext");
+        ActorContext result = optional.get()
+                                      .getActorContext();
+        return result;
     }
 
     /**
