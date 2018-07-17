@@ -131,9 +131,9 @@ public class EventsTest {
         @Test
         @DisplayName("producer")
         void producer() {
-            final StringValue msg = unpack(context.getProducerId());
+            StringValue msg = unpack(context.getProducerId());
 
-            final String id = getProducer(context);
+            String id = (String)getProducer(context);
 
             assertEquals(msg.getValue(), id);
         }
