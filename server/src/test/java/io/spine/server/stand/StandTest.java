@@ -24,6 +24,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
@@ -81,7 +82,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -739,7 +739,7 @@ class StandTest extends TenantAwareTest {
                                              .addAllPaths(Arrays.asList(paths))
                                              .build();
 
-        final List<Customer> customers = new LinkedList<>();
+        final List<Customer> customers = Lists.newLinkedList();
         final int count = 10;
 
         for (int i = 0; i < count; i++) {
