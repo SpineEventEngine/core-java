@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.protobuf.Any;
 import io.grpc.stub.StreamObserver;
 import io.spine.client.Query;
+import io.spine.client.Record;
 
 /**
  * Processes a query and returns the result.
@@ -37,5 +38,5 @@ interface QueryProcessor {
      * @param query an instance of {@code Query} to process
      * @return the query result
      */
-    ImmutableCollection<Any> process(Query query);
+    ImmutableCollection<Record> process(Query query);
 }

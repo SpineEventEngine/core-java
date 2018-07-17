@@ -23,6 +23,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import io.spine.client.Query;
+import io.spine.client.Record;
 
 /**
  * An {@link QueryProcessor} implementation that always returns empty result.
@@ -34,7 +35,7 @@ import io.spine.client.Query;
  */
 class NoopQueryProcessor implements QueryProcessor {
     @Override
-    public ImmutableCollection<Any> process(Query query) {
+    public ImmutableCollection<Record> process(Query query) {
         return ImmutableList.of();
     }
 }

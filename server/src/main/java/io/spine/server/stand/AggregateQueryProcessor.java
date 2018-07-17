@@ -32,7 +32,9 @@ import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
 import io.spine.client.Query;
+import io.spine.client.Record;
 import io.spine.client.Target;
+import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.RecordReadRequest;
@@ -76,9 +78,9 @@ class AggregateQueryProcessor implements QueryProcessor {
             };
 
     @Override
-    public ImmutableCollection<Any> process(Query query) {
+    public ImmutableCollection<Record> process(Query query) {
 
-        final ImmutableList.Builder<Any> resultBuilder = ImmutableList.builder();
+        final ImmutableList.Builder<Record> resultBuilder = ImmutableList.builder();
 
         Iterator<EntityRecord> stateRecords;
         final Target target = query.getTarget();
@@ -94,12 +96,17 @@ class AggregateQueryProcessor implements QueryProcessor {
         }
 
         while (stateRecords.hasNext()) {
-            final EntityRecord record = stateRecords.next();
-            final Any state = record.getState();
-            resultBuilder.add(state);
+            final EntityRecord entityRecord = stateRecords.next();
+            final Any state = entityRecord.getState();
+            final Version version = entityRecord.getVersion();
+            final Record record = Record.newBuilder()
+                                        .setState(state)
+                                        .setVersion(version)
+                                        .build();
+            resultBuilder.add(record);
         }
 
-        final ImmutableList<Any> result = resultBuilder.build();
+        final ImmutableList<Record> result = resultBuilder.build();
         return result;
     }
 

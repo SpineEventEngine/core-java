@@ -26,9 +26,12 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.EntityFilters;
 import io.spine.client.Query;
+import io.spine.client.Record;
 import io.spine.client.Target;
+import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.Entity;
+import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.RecordBasedRepository;
 
 import java.util.Iterator;
@@ -47,27 +50,31 @@ class EntityQueryProcessor implements QueryProcessor {
     }
 
     @Override
-    public ImmutableCollection<Any> process(Query query) {
-        final ImmutableList.Builder<Any> resultBuilder = ImmutableList.builder();
+    public ImmutableCollection<Record> process(Query query) {
+        final ImmutableList.Builder<Record> resultBuilder = ImmutableList.builder();
 
         final Target target = query.getTarget();
         final FieldMask fieldMask = query.getFieldMask();
 
-        final Iterator<? extends Entity> entities;
+        final Iterator<EntityRecord> entities;
         if (target.getIncludeAll() && fieldMask.getPathsList()
                                                .isEmpty()) {
-            entities = repository.loadAll();
+            entities = repository.loadAllRecords();
         } else {
             final EntityFilters filters = target.getFilters();
-            entities = repository.find(filters, fieldMask);
+            entities = repository.findRecords(filters, fieldMask);
         }
         while (entities.hasNext()) {
-            final Entity entity = entities.next();
-            final Message state = entity.getState();
-            final Any packedState = AnyPacker.pack(state);
-            resultBuilder.add(packedState);
+            final EntityRecord entityRecord = entities.next();
+            final Any state = entityRecord.getState();
+            final Version version = entityRecord.getVersion();
+            final Record record = Record.newBuilder()
+                                        .setState(state)
+                                        .setVersion(version)
+                                        .build();
+            resultBuilder.add(record);
         }
-        final ImmutableList<Any> result = resultBuilder.build();
+        final ImmutableList<Record> result = resultBuilder.build();
         return result;
     }
 }

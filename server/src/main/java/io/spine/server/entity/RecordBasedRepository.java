@@ -310,6 +310,16 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
+     * todo doc
+     */
+    @Internal
+    public Iterator<EntityRecord> loadAllRecords() {
+        RecordStorage<I> storage = recordStorage();
+        Iterator<EntityRecord> records = storage.readAll();
+        return records;
+    }
+
+    /**
      * Obtains iterator over {@link EntityRecord} for entities matching the passed filters.
      *
      * @param filters   the filters for filtering entities
