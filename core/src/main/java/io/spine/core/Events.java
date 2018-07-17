@@ -113,10 +113,10 @@ public final class Events {
      *
      * @param event an event to get message from
      */
-    public static <M extends Message> M getMessage(Event event) {
+    public static Message getMessage(Event event) {
         checkNotNull(event);
         Any any = event.getMessage();
-        M result = unpack(any);
+        Message result = unpack(any);
         return result;
     }
 
