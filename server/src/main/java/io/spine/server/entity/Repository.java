@@ -45,6 +45,7 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.string.Stringifiers;
 import io.spine.system.server.ArchiveEntity;
 import io.spine.system.server.ChangeEntityState;
+import io.spine.system.server.CommandReceiver;
 import io.spine.system.server.CreateEntity;
 import io.spine.system.server.DeleteEntity;
 import io.spine.system.server.DispatchCommandToHandler;
@@ -53,6 +54,7 @@ import io.spine.system.server.DispatchEventToSubscriber;
 import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.ExtractEntityFromArchive;
+import io.spine.system.server.MarkCommandAsHandled;
 import io.spine.system.server.PassEventToApplier;
 import io.spine.system.server.RestoreEntity;
 import io.spine.type.MessageClass;
@@ -521,6 +523,23 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                     .newBuilder()
                     .setReceiver(id)
                     .setCommandId(command.getId())
+                    .build();
+            postSystem(systemCommand);
+        }
+
+        /**
+         * Posts the {@link MarkCommandAsHandled} system command.
+         */
+        public void onCommandHandled(Command command) {
+            CommandReceiver receiver = CommandReceiver
+                    .newBuilder()
+                    .setEntityId(id.getEntityId())
+                    .setTypeUrl(id.getTypeUrl())
+                    .build();
+            MarkCommandAsHandled systemCommand = MarkCommandAsHandled
+                    .newBuilder()
+                    .setId(command.getId())
+                    .setReceiver(receiver)
                     .build();
             postSystem(systemCommand);
         }

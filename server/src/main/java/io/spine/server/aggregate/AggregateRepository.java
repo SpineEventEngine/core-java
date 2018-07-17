@@ -635,6 +635,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         lifecycleOf(id).onDispatchCommand(command);
     }
 
+    void onCommandHandled(I id, Command command) {
+        lifecycleOf(id).onCommandHandled(command);
+    }
+
     void onDispatchEvent(I id, Event event) {
         lifecycleOf(id).onDispatchEventToReactor(event);
     }

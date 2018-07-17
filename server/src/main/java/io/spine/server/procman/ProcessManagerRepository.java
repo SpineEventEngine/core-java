@@ -365,11 +365,15 @@ public abstract class ProcessManagerRepository<I,
         }
     }
 
-    void onCommandDispatched(I id, Command command) {
+    void onDispatchCommand(I id, Command command) {
         lifecycleOf(id).onDispatchCommand(command);
     }
 
-    void onEventDispatched(I id, Event event) {
+    void onCommandHandled(I id, Command command) {
+        lifecycleOf(id).onCommandHandled(command);
+    }
+
+    void onDispatchEvent(I id, Event event) {
         lifecycleOf(id).onDispatchEventToReactor(event);
     }
 

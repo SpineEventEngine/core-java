@@ -228,8 +228,8 @@ public class CommandBus extends Bus<Command,
     protected void dispatch(CommandEnvelope envelope) {
         final CommandDispatcher<?> dispatcher = getDispatcher(envelope);
         try {
+            onDispatchCommand(envelope);
             dispatcher.dispatch(envelope);
-            onCommandDispatched(envelope);
         } catch (RuntimeException e) {
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(envelope, cause, log);
@@ -244,7 +244,7 @@ public class CommandBus extends Bus<Command,
         }
     }
 
-    private void onCommandDispatched(CommandEnvelope command) {
+    private void onDispatchCommand(CommandEnvelope command) {
         DispatchCommand systemCommand = DispatchCommand
                 .newBuilder()
                 .setId(command.getId())
