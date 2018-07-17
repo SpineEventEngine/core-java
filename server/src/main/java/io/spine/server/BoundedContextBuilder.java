@@ -27,7 +27,6 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandstore.CommandStore;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.stand.Stand;
@@ -293,7 +292,7 @@ public final class BoundedContextBuilder {
         TransportFactory transportFactory = getTransportFactory();
 
         initTenantIndex(storageFactory);
-        initCommandBus(storageFactory, systemGateway);
+        initCommandBus(systemGateway);
         initEventBus(storageFactory);
         initStand(storageFactory);
         initIntegrationBus(transportFactory);
@@ -334,25 +333,18 @@ public final class BoundedContextBuilder {
         }
     }
 
-    private void initCommandBus(StorageFactory factory, SystemGateway systemGateway) {
+    private void initCommandBus(SystemGateway systemGateway) {
         if (commandBus == null) {
-            final CommandStore commandStore = createCommandStore(factory, tenantIndex);
             commandBus = CommandBus.newBuilder()
-                                   .setMultitenant(this.multitenant)
-                                   .setCommandStore(commandStore);
+                                   .setMultitenant(this.multitenant);
         } else {
-            final Boolean commandBusMultitenancy = commandBus.isMultitenant();
+            Boolean commandBusMultitenancy = commandBus.isMultitenant();
             if (commandBusMultitenancy != null) {
                 checkSameValue("CommandBus must match multitenancy of BoundedContext. " +
                                         "Status in BoundedContext.Builder: %s CommandBus: %s",
                                commandBusMultitenancy);
             } else {
                 commandBus.setMultitenant(this.multitenant);
-            }
-
-            if (commandBus.getCommandStore() == null) {
-                final CommandStore commandStore = createCommandStore(factory, tenantIndex);
-                commandBus.setCommandStore(commandStore);
             }
         }
         commandBus.injectSystemGateway(systemGateway);
@@ -409,11 +401,6 @@ public final class BoundedContextBuilder {
                    errMsgFmt,
                    String.valueOf(this.multitenant),
                    String.valueOf(partMultitenancy));
-    }
-
-    private static CommandStore createCommandStore(StorageFactory factory, TenantIndex index) {
-        final CommandStore result = new CommandStore(factory, index);
-        return result;
     }
 
     private Stand.Builder createStand(StorageFactory factory) {

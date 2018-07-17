@@ -404,13 +404,6 @@ public class CommandBus extends Bus<Command,
         }
 
         @CanIgnoreReturnValue
-        public Builder setCommandStore(CommandStore commandStore) {
-            checkNotNull(commandStore);
-            this.commandStore = commandStore;
-            return this;
-        }
-
-        @CanIgnoreReturnValue
         public Builder setCommandScheduler(CommandScheduler commandScheduler) {
             checkNotNull(commandScheduler);
             this.commandScheduler = commandScheduler;
@@ -491,7 +484,6 @@ public class CommandBus extends Bus<Command,
         @Internal
         @CheckReturnValue
         public CommandBus build() {
-            checkSet(commandStore, CommandStore.class, "setCommandStore");
             checkSet(systemGateway, SystemGateway.class, "injectSystemGateway");
 
             if (commandScheduler == null) {
