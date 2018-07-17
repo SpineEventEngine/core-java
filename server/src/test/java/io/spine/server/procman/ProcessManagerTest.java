@@ -305,7 +305,7 @@ class ProcessManagerTest {
         CommandRouted commandRouted = (CommandRouted) message;
 
         // The source of the command is StartProject.
-        assertThat(getMessage(commandRouted.getSource()), instanceOf(PmStartProject.class));
+        assertThat(getMessage(commandRouted.getOrigin()), instanceOf(PmStartProject.class));
         List<CommandEnvelope> dispatchedCommands = dispatcher.getCommands();
         assertSize(1, dispatchedCommands);
         CommandEnvelope dispatchedCommand = dispatcher.getCommands()
@@ -355,8 +355,8 @@ class ProcessManagerTest {
             CommandRouter router = processManager.newRouterFor(commandMessage, commandContext);
             assertNotNull(router);
 
-            assertEquals(commandMessage, getMessage(router.getSource()));
-            assertEquals(commandContext, router.getSource()
+            assertEquals(commandMessage, router.getOriginMessage());
+            assertEquals(commandContext, router.getOrigin()
                                                .getContext());
         }
     }

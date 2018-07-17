@@ -23,7 +23,6 @@ package io.spine.server.procman;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
-import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -36,12 +35,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 /**
  * @author Alexaneder Yevsyukov
@@ -92,7 +85,9 @@ class CommandRouterOnErrorTest extends AbstractCommandRouterTest<CommandRouter> 
         CommandContext sourceContext = getRequestFactory().createCommandContext();
 
         CommandRouter router = createRouter(commandBus, sourceMessage, sourceContext);
-        router.addAll(getMessages());
+        for (Message message : getMessages()) {
+            router.add(message);
+        }
         router.routeAll();
     }
 }

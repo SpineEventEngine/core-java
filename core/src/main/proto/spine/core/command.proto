@@ -178,3 +178,13 @@ enum CommandStatus {
     // A command was rejected during processing. No events were generated.
     REJECTED = 5;
 }
+
+// Data from a `Command` which is accessible in a command handling method.
+message DispatchedCommand {
+
+    // The message of the command.
+    google.protobuf.Any message = 2 [(required) = true];
+
+    // Service information about the environment in which the command was created.
+    CommandContext context = 3 [(required) = true];
+}

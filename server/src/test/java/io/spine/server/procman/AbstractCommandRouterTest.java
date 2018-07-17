@@ -28,7 +28,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.Commands;
+import io.spine.core.DispatchedCommand;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Alexander Yevsyukov
  */
-abstract class AbstractCommandRouterTest<T extends AbstractCommandRouter> {
+abstract class AbstractCommandRouterTest<T extends CommandRouter> {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
@@ -121,7 +121,9 @@ abstract class AbstractCommandRouterTest<T extends AbstractCommandRouter> {
         sourceContext = requestFactory.createCommandContext();
 
         router = createRouter(commandBus, sourceMessage, sourceContext);
-        router.addAll(messages);
+        for (Message message : messages) {
+            router.add(message);
+        }
     }
 
     /**
@@ -129,8 +131,8 @@ abstract class AbstractCommandRouterTest<T extends AbstractCommandRouter> {
      */
     protected void assertSource(CommandRouted commandRouted) {
         // Check that the source command is stored.
-        final Command source = commandRouted.getSource();
-        assertEquals(sourceMessage, Commands.getMessage(source));
+        DispatchedCommand source = commandRouted.getOrigin();
+        assertEquals(sourceMessage, AnyPacker.unpack(source.getMessage()));
         assertEquals(sourceContext, source.getContext());
     }
 

@@ -22,6 +22,7 @@ package io.spine.core;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
+import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -33,7 +34,6 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 import io.spine.time.Timestamps2;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -79,12 +79,26 @@ public final class Commands {
      * Extracts the message from the passed {@code Command} instance.
      *
      * @param command a command to extract a message from
-     * @param <M>     a type of the command message
      * @return an unpacked message
      */
-    public static <M extends Message> M getMessage(Command command) {
+    public static Message getMessage(Command command) {
         checkNotNull(command);
-        final M result = AnyPacker.unpack(command.getMessage());
+        return getMessage(command.getMessage());
+    }
+
+    /**
+     * Extracts the message from the passed {@code Command} instance.
+     *
+     * @param command a command to extract a message from
+     * @return an unpacked message
+     */
+    public static Message getMessage(DispatchedCommand command) {
+        checkNotNull(command);
+        return getMessage(command.getMessage());
+    }
+
+    private static Message getMessage(Any message) {
+        Message result = AnyPacker.unpack(message);
         return result;
     }
 

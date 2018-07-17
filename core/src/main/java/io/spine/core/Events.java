@@ -249,8 +249,8 @@ public final class Events {
 
                 case REJECTION_CONTEXT:
                     commandContext = ctx.getRejectionContext()
-                                                 .getCommand()
-                                                 .getContext();
+                                        .getCommand()
+                                        .getContext();
                     break;
 
                 case ORIGIN_NOT_SET:
