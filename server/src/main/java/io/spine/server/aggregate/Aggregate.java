@@ -34,6 +34,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
+import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -221,8 +222,8 @@ public abstract class Aggregate<I,
     /**
      * Dispatches the event on which the aggregate reacts.
      *
-     * <p>Reacting on a event may result in emitting event messages. All the {@linkplain Empty empty} 
-     * messages are filtered out from the result.
+     * <p>Reacting on a event may result in emitting event messages. All the
+     * {@linkplain Empty empty} messages are filtered out from the result.
      *
      * @param  event the envelope with the event to dispatch
      * @return a list of event messages that the aggregate produces in reaction to the event or
@@ -248,7 +249,8 @@ public abstract class Aggregate<I,
      */
     List<? extends Message> reactOn(RejectionEnvelope rejection) {
         CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
-        RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(), commandClass);
+        RejectionClass rejectionClass = rejection.getMessageClass();
+        RejectionReactorMethod method = thisClass().getReactor(rejectionClass, commandClass);
         Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection).to(this, method);
         DispatchResult dispatchResult = dispatch.perform();
         return dispatchResult.asMessages();
