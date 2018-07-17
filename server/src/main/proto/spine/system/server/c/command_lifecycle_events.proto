@@ -31,6 +31,8 @@ option java_package = "io.spine.system.server";
 option java_outer_classname = "CommandLifecycleEventsProto";
 option java_multiple_files = true;
 
+import "google/protobuf/timestamp.proto";
+
 import "spine/base/error.proto";
 import "spine/core/command.proto";
 import "spine/core/rejection.proto";
@@ -45,7 +47,10 @@ message CommandReceived {
     spine.core.CommandId id = 1;
 
     // The command.
-    spine.core.Command payload = 2;
+    spine.core.Command payload = 2 [(required) = true];
+
+    // The time when the event occuered.
+    google.protobuf.Timestamp when = 3 [(required) = true];
 }
 
 // An event emitted when the command is acknowledged by the `CommandBus`.
@@ -54,6 +59,9 @@ message CommandAcknowledged {
 
     // The ID of the command.
     spine.core.CommandId id = 1;
+
+    // The time when the event occuered.
+    google.protobuf.Timestamp when = 2 [(required) = true];
 }
 
 // An event emitted when a command is dispatched to a handler
@@ -62,6 +70,9 @@ message CommandDispatched {
 
     // The ID of the command.
     spine.core.CommandId id = 1;
+
+    // The time when the event occuered.
+    google.protobuf.Timestamp when = 2 [(required) = true];
 }
 
 // An event emitted when a command is successfully handled.
@@ -73,6 +84,9 @@ message CommandHandled {
 
     // The receiver of the command.
     CommandReceiver receiver = 2 [(valid) = true];
+
+    // The time when the event occuered.
+    google.protobuf.Timestamp when = 3 [(required) = true];
 }
 
 // An event emitted if the handler fails to process the command.
@@ -87,6 +101,9 @@ message CommandErrored {
 
     // The receiver of the command.
     CommandReceiver receiver = 3;
+
+    // The time when the event occuered.
+    google.protobuf.Timestamp when = 4 [(required) = true];
 }
 
 // An event emitted if the handler rejects the command.
@@ -101,4 +118,7 @@ message CommandRejected {
 
     // The receiver of the command.
     CommandReceiver receiver = 3 [(valid) = true];
+
+    // The time when the event occuered.
+    google.protobuf.Timestamp when = 4 [(required) = true];
 }
