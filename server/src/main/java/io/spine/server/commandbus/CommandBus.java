@@ -21,15 +21,19 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
+import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Rejection;
+import io.spine.core.TenantId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
@@ -195,6 +199,29 @@ public class CommandBus extends Bus<Command,
     @Override
     protected CommandEnvelope toEnvelope(Command message) {
         return CommandEnvelope.of(message);
+    }
+
+    @Override
+    protected StreamObserver<Ack> wrappedObserver(Iterable<Command> commands,
+                                                  StreamObserver<Ack> source) {
+        StreamObserver<Ack> wrappedSource = super.wrappedObserver(commands, source);
+        TenantId tenant = tenantOf(commands);
+        StreamObserver<Ack> result = CommandAcknowledgementMonitor
+                .newBuilder()
+                .setDelegate(wrappedSource)
+                .setTenantId(tenant)
+                .setSystemGateway(systemGateway)
+                .build();
+        return result;
+    }
+
+    private static TenantId tenantOf(Iterable<Command> commands) {
+        return Streams.stream(commands)
+                      .map(command -> command.getContext()
+                                             .getActorContext()
+                                             .getTenantId())
+                      .findAny()
+                      .orElse(TenantId.getDefaultInstance());
     }
 
     @Override

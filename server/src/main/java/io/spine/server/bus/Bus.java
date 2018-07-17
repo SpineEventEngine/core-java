@@ -143,6 +143,11 @@ public abstract class Bus<T extends Message,
         checkNotNull(messages);
         checkNotNull(observer);
 
+        StreamObserver<Ack> wrappedObserver = wrappedObserver(messages, observer);
+        filterAndPost(messages, wrappedObserver);
+    }
+
+    private void filterAndPost(Iterable<T> messages, StreamObserver<Ack> observer) {
         Collection<T> filteredMessages = filter(messages, observer);
         if (!isEmpty(filteredMessages)) {
             store(filteredMessages);
@@ -152,6 +157,21 @@ public abstract class Bus<T extends Message,
             doPost(envelopes, observer);
         }
         observer.onCompleted();
+    }
+
+    /**
+     * Transforms the given {@link StreamObserver}.
+     *
+     * <p>By default, returns the given {@code observer}. Override this method in order to change
+     * the behaviour.
+     *
+     * @param messages the messages to create an observer for
+     * @param source   the source {@link StreamObserver} to be transformed
+     * @return a transformed observer of {@link Ack} streams
+     */
+    protected StreamObserver<Ack> wrappedObserver(Iterable<T> messages,
+                                                  StreamObserver<Ack> source) {
+        return source;
     }
 
     /**
