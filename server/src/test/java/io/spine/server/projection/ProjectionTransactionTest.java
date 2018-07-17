@@ -89,7 +89,10 @@ class ProjectionTransactionTest
                                              Projection<ProjectId, Project, PatchedProjectBuilder>,
                                              Project,
                                              PatchedProjectBuilder> listener) {
-        return new ProjectionTransaction<>(entity, listener);
+        ProjectionTransaction<ProjectId, Project, PatchedProjectBuilder> transaction =
+                new ProjectionTransaction<>(entity);
+        transaction.setListener(listener);
+        return transaction;
     }
 
     @Override

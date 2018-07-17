@@ -26,7 +26,6 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.entity.EntityVersioning;
 import io.spine.server.entity.Transaction;
-import io.spine.server.entity.TransactionListener;
 import io.spine.validate.ValidatingBuilder;
 
 /**
@@ -47,13 +46,6 @@ public class PmTransaction<I,
     PmTransaction(ProcessManager<I, S, B> processManager) {
         super(processManager);
     }
-
-    @VisibleForTesting
-    PmTransaction(ProcessManager<I, S, B> processManager,
-                  TransactionListener<I, ProcessManager<I, S, B>, S, B> listener) {
-        super(processManager, listener);
-    }
-
 
     @VisibleForTesting
     protected PmTransaction(ProcessManager<I, S, B> processManager, S state, Version version) {

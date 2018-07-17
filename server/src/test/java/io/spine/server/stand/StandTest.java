@@ -296,7 +296,7 @@ class StandTest extends TenantAwareTest {
 
         final CustomerAggregateRepository customerAggregateRepo =
                 new CustomerAggregateRepository();
-        stand.registerTypeSupplier(customerAggregateRepo);
+        boundedContext.register(customerAggregateRepo);
 
         final int numericIdValue = 17;
         final CustomerId customerId = customerIdFor(numericIdValue);

@@ -57,6 +57,7 @@ public class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     protected List<? extends Message> doDispatch(A aggregate, CommandEnvelope envelope) {
+        repository().onDispatchCommand(aggregate.getId(), envelope.getCommand());
         return aggregate.dispatchCommand(envelope);
     }
 

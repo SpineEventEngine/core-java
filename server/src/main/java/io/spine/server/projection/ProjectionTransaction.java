@@ -51,12 +51,6 @@ public class ProjectionTransaction<I,
     }
 
     @VisibleForTesting
-    ProjectionTransaction(Projection<I, M, B> projection,
-                          TransactionListener<I, Projection<I, M, B>, M, B> listener) {
-        super(projection, listener);
-    }
-
-    @VisibleForTesting
     protected ProjectionTransaction(Projection<I, M, B> projection, M state, Version version) {
         super(projection, state, version);
     }

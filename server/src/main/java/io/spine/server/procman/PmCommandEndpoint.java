@@ -69,6 +69,7 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
 
     @Override
     protected List<Event> doDispatch(P processManager, CommandEnvelope command) {
+        repository().onCommandDispatched(processManager.getId(), command.getCommand());
         return processManager.dispatchCommand(command);
     }
 

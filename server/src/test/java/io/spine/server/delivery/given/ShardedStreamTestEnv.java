@@ -50,7 +50,7 @@ import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.validate.StringValueVBuilder;
 
-import static io.spine.server.BoundedContext.newName;
+import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**

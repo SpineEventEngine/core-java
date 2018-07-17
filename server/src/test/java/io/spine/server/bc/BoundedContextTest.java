@@ -43,7 +43,6 @@ import io.spine.server.event.EventStore;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
-import io.spine.test.Spy;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.SecretProject;
 import io.spine.test.bc.event.BcProjectCreated;
@@ -61,13 +60,14 @@ import static com.google.common.collect.Maps.newConcurrentMap;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -243,14 +243,11 @@ class BoundedContextTest {
     void propagateRepositoriesToStand() {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .build();
-        Stand stand = Spy.ofClass(Stand.class)
-                         .on(boundedContext);
-
-        verify(stand, never()).registerTypeSupplier(any());
-
+        Stand stand = boundedContext.getStand();
+        assertTrue(stand.getExposedTypes().isEmpty());
         ProjectAggregateRepository repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
-        verify(stand).registerTypeSupplier(eq(repository));
+        assertThat(stand.getExposedTypes(), contains(repository.getEntityStateType()));
     }
 
     @Test

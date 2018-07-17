@@ -49,12 +49,6 @@ public class AggregateTransaction<I,
     }
 
     @VisibleForTesting
-    AggregateTransaction(Aggregate<I, S, B> aggregate,
-                         TransactionListener<I, Aggregate<I, S, B>, S, B> listener) {
-        super(aggregate, listener);
-    }
-
-    @VisibleForTesting
     protected AggregateTransaction(Aggregate<I, S, B> aggregate, S state, Version version) {
         super(aggregate, state, version);
     }

@@ -28,8 +28,10 @@ import io.spine.annotation.Internal;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.delivery.Delivery;
+import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.Repository;
+import io.spine.server.entity.TransactionListener;
 
 import java.util.List;
 import java.util.Set;
@@ -72,18 +74,20 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
 
     @Override
     protected void deliverNowTo(I entityId) {
-        P projection = repository().findOrCreate(entityId);
+        ProjectionRepository<I, P, ?> repository = repository();
+        P projection = repository.findOrCreate(entityId);
         dispatchInTx(projection);
+        repository.onEventDispatched(entityId, envelope().getOuterObject());
         store(projection);
     }
 
-    @CanIgnoreReturnValue
-    protected List<? extends Message> dispatchInTx(P projection) {
+    protected void dispatchInTx(P projection) {
         ProjectionTransaction<I, ?, ?> tx =
                 ProjectionTransaction.start((Projection<I, ?, ?>) projection);
-        List<? extends Message> result = doDispatch(projection, envelope());
+        TransactionListener listener = EntityLifecycleMonitor.newInstance(repository());
+        tx.setListener(listener);
+        doDispatch(projection, envelope());
         tx.commit();
-        return result;
     }
 
     @Override
@@ -94,7 +98,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     @CanIgnoreReturnValue
     @Override
     protected List<? extends Message> doDispatch(P projection, EventEnvelope event) {
-        projection.handle(event);
+        projection.play(event.getOuterObject());
         return ImmutableList.of();
     }
 
