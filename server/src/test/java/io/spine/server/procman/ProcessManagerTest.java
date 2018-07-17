@@ -362,9 +362,9 @@ class ProcessManagerTest {
     }
 
     @Test
-    @DisplayName("require command bus when creating router")
+    @DisplayName("require CommandBus when creating router")
     void requireCommandBusForRouter() {
-        assertThrows(IllegalStateException.class,
+        assertThrows(NullPointerException.class,
                      () -> processManager.newRouterFor(StringValue.getDefaultInstance(),
                                                        CommandContext.getDefaultInstance()));
     }
