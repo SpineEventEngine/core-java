@@ -31,11 +31,16 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
+import io.spine.core.Rejection;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.system.server.given.CommandLifecycleTestEnv.CommandLifecycleWatcher;
+import io.spine.system.server.given.CommandLifecycleTestEnv.TestAggregate;
+import io.spine.system.server.given.CommandLifecycleTestEnv.TestAggregateRepository;
+import io.spine.system.server.given.CommandLifecycleTestEnv.TestProcmanRepository;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -75,9 +80,12 @@ class CommandLifecycleTest {
                 .setStorageFactorySupplier(() -> newInstance(contextName, false))
                 .build();
         system = systemOf(context);
+
+        context.register(new TestAggregateRepository());
+        context.register(new TestProcmanRepository());
     }
 
-    @DisplayName("produce system events when")
+    @DisplayName("produce system events when command is")
     @Nested
     class ProduceEvents {
 
@@ -94,13 +102,13 @@ class CommandLifecycleTest {
         }
 
         @Test
-        @DisplayName("command is processed successfully")
+        @DisplayName("processed successfully")
         void successful() {
-            EstablishCompany successfulCommand =
-                    EstablishCompany.newBuilder()
-                                    .setId(id)
-                                    .setFinalName("Good company name")
-                                    .build();
+            EstablishCompany successfulCommand = EstablishCompany
+                    .newBuilder()
+                    .setId(id)
+                    .setFinalName("Good company name")
+                    .build();
             postCommand(successfulCommand);
             CommandReceived received = checkReceived(successfulCommand);
             CommandId commandId = received.getId();
@@ -110,7 +118,7 @@ class CommandLifecycleTest {
         }
 
         @Test
-        @DisplayName("command is filtered out")
+        @DisplayName("filtered out")
         void invalid() {
             Command invalidCommand = buildInvalidCommand();
             postBuiltCommand(invalidCommand);
@@ -124,23 +132,45 @@ class CommandLifecycleTest {
             assertTrue(isNotDefault(error.getValidationError()));
         }
 
+        @Test
+        @DisplayName("rejected by handler")
+        void rejected() {
+            EstablishCompany rejectedCommand = EstablishCompany
+                    .newBuilder()
+                    .setId(id)
+                    .setFinalName(TestAggregate.TAKEN_NAME)
+                    .build();
+            postCommand(rejectedCommand);
+
+            CommandReceived received = checkReceived(rejectedCommand);
+            CommandId commandId = received.getId();
+
+            eventWatcher.nextEvent(CommandAcknowledged.class);
+            eventWatcher.nextEvent(CommandDispatched.class);
+
+            checkRejected(commandId, Rejections.CompanyNameAlreadyTaken.class);
+        }
+
         private Command buildInvalidCommand() {
             EstablishCompany invalidCommand = EstablishCompany.getDefaultInstance();
             CommandId commandId = CommandId
                     .newBuilder()
                     .setUuid(newUuid())
                     .build();
-            UserId actor = UserId.newBuilder()
-                                 .setValue(newUuid())
-                                 .build();
+            UserId actor = UserId
+                    .newBuilder()
+                    .setValue(newUuid())
+                    .build();
             Timestamp now = Time.getCurrentTime();
-            ActorContext actorContext = ActorContext.newBuilder()
-                                                    .setTimestamp(now)
-                                                    .setActor(actor)
-                                                    .build();
-            CommandContext context = CommandContext.newBuilder()
-                                                   .setActorContext(actorContext)
-                                                   .build();
+            ActorContext actorContext = ActorContext
+                    .newBuilder()
+                    .setTimestamp(now)
+                    .setActor(actor)
+                    .build();
+            CommandContext context = CommandContext
+                    .newBuilder()
+                    .setActorContext(actorContext)
+                    .build();
             Command command = Command
                     .newBuilder()
                     .setId(commandId)
@@ -181,6 +211,20 @@ class CommandLifecycleTest {
             CommandErrored errored = eventWatcher.nextEvent(CommandErrored.class);
             assertEquals(commandId, errored.getId());
             return errored.getError();
+        }
+
+        private void checkRejected(CommandId commandId,
+                                   Class<? extends Message> expectedRejectionClass) {
+            CommandRejected rejected = eventWatcher.nextEvent(CommandRejected.class);
+            assertEquals(commandId, rejected.getId());
+            CompanyId receiver = Identifier.unpack(rejected.getReceiver()
+                                                           .getEntityId()
+                                                           .getId());
+            assertEquals(id, receiver);
+            Rejection rejection = rejected.getRejection();
+            TypeUrl rejectionType = TypeUrl.ofEnclosed(rejection.getMessage());
+            TypeUrl expectedType = TypeUrl.of(expectedRejectionClass);
+            assertEquals(expectedType, rejectionType);
         }
     }
 
