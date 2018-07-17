@@ -26,7 +26,6 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
-import io.spine.server.entity.Entity;
 import io.spine.server.storage.RecordStorage;
 
 import java.io.Serializable;

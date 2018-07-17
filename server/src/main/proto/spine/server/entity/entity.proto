@@ -34,6 +34,7 @@ import "google/protobuf/any.proto";
 import "spine/core/version.proto";
 
 // The record for passing information about an entity.
+//
 message EntityRecord {
     option (SPI_type) = true;
 
@@ -51,6 +52,7 @@ message EntityRecord {
 }
 
 // The lifecycle flags of an entity.
+//
 message LifecycleFlags {
 
     // Marks the entity as `archived`.
@@ -70,6 +72,17 @@ message LifecycleFlags {
     // marked with this flag.
     //
     bool deleted = 2;
+}
+
+// The change in the state of an entity.
+//
+message EntityRecordChange {
+
+    // The value of fields that are changing.
+    EntityRecord previous_value = 1;
+
+    // The new value of fields.
+    EntityRecord new_value = 2;
 }
 
 // Enumeration of possible entity state validation errors.

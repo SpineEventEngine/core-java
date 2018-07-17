@@ -31,13 +31,14 @@ import io.spine.server.aggregate.given.AggregatePartTestEnv.TaskDescriptionRepos
 import io.spine.server.aggregate.given.AggregatePartTestEnv.TaskPart;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.TaskRepository;
 import io.spine.server.entity.InvalidEntityStateException;
-import io.spine.server.model.ModelTests;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.user.User;
 import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
+import io.spine.testing.server.model.ModelTests;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,9 +48,9 @@ import java.lang.reflect.Constructor;
 import java.util.List;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.server.entity.given.Given.aggregatePartOfClass;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Verify.assertSize;
+import static io.spine.testing.server.entity.given.Given.aggregatePartOfClass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 

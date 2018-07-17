@@ -43,7 +43,6 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.bus.AbstractBusFilter;
 import io.spine.server.command.Assign;
-import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventBusTest;
 import io.spine.server.event.EventDispatcher;
@@ -65,6 +64,7 @@ import io.spine.test.event.command.EBArchiveProject;
 import io.spine.test.event.command.EBCreateProject;
 import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.TestEventFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;

@@ -26,9 +26,7 @@ import io.spine.core.Responses;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.Given.ProjectDetailsRepository;
-import io.spine.server.model.ModelTests;
-import io.spine.server.stand.Stand;
-import io.spine.testing.Spy;
+import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -43,9 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
@@ -73,11 +69,6 @@ class QueryServiceTest {
         projectsContext = BoundedContext.newBuilder()
                                         .setName(PROJECTS_CONTEXT_NAME)
                                         .build();
-
-        // Inject spy, which will be obtained later via getStand().
-        Spy.ofClass(Stand.class)
-           .on(projectsContext);
-
         Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository();
         projectsContext.register(projectRepo);
         projectDetailsRepository = spy(new ProjectDetailsRepository());
@@ -89,11 +80,6 @@ class QueryServiceTest {
         customersContext = BoundedContext.newBuilder()
                                          .setName("Customers")
                                          .build();
-
-        // Inject spy, which will be obtained later via getStand().
-        Spy.ofClass(Stand.class)
-           .on(customersContext);
-
         Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository();
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
@@ -126,13 +112,9 @@ class QueryServiceTest {
     @DisplayName("dispatch queries to proper bounded context")
     void dispatchQueriesToBc() {
         Query query = Given.AQuery.readAllProjects();
-        Stand stand = projectsContext.getStand();
         service.read(query, responseObserver);
 
         checkOkResponse(responseObserver);
-        verify(stand).execute(query, responseObserver);
-
-        verify(customersContext.getStand(), never()).execute(query, responseObserver);
     }
 
     @Test

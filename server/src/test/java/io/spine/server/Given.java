@@ -27,13 +27,13 @@ import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Query;
 import io.spine.core.BoundedContextName;
+import io.spine.core.BoundedContextNames;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
-import io.spine.core.given.GivenUserId;
 import io.spine.people.PersonName;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
@@ -58,6 +58,7 @@ import io.spine.test.commandservice.customer.CustomerVBuilder;
 import io.spine.test.commandservice.customer.command.CreateCustomer;
 import io.spine.test.commandservice.customer.event.CustomerCreated;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.LocalDate;
 import io.spine.time.LocalDates;
 
@@ -67,7 +68,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.core.given.GivenUserId.of;
+import static io.spine.testing.core.given.GivenUserId.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -321,7 +322,7 @@ public class Given {
          */
         @Override
         public BoundedContextName getBoundedContextName() {
-            return BoundedContext.newName(PROJECTS_CONTEXT_NAME);
+            return BoundedContextNames.newName(PROJECTS_CONTEXT_NAME);
         }
     }
 

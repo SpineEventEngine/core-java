@@ -57,9 +57,9 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.BoundedContext.newName;
 import static io.spine.server.event.given.EventBusTestEnv.TaskCreatedFilter;
 import static io.spine.server.event.given.EventBusTestEnv.addTasks;
 import static io.spine.server.event.given.EventBusTestEnv.command;

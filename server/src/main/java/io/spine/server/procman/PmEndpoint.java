@@ -48,7 +48,7 @@ abstract class PmEndpoint<I,
 
     @Override
     protected boolean isModified(P processManager) {
-        final boolean result = processManager.isChanged();
+        boolean result = processManager.isChanged();
         return result;
     }
 
@@ -64,14 +64,18 @@ abstract class PmEndpoint<I,
 
     @Override
     protected void deliverNowTo(I id) {
-        final ProcessManagerRepository<I, P, ?> repository = repository();
-        final P manager = repository.findOrCreate(id);
-
-        final PmTransaction<?, ?, ?> tx = repository.beginTransactionFor(manager);
-        @SuppressWarnings("unchecked") // all PM handlers return events.
-        final List<Event> events = (List<Event>) doDispatch(manager, envelope());
-        tx.commit();
+        ProcessManagerRepository<I, P, ?> repository = repository();
+        P manager = repository.findOrCreate(id);
+        List<Event> events = dispatchInTx(manager);
         store(manager);
         repository.postEvents(events);
+    }
+
+    protected List<Event> dispatchInTx(P processManager) {
+        PmTransaction<?, ?, ?> tx = repository().beginTransactionFor(processManager);
+        @SuppressWarnings("unchecked") // all PM handlers return events.
+        List<Event> events = (List<Event>) doDispatch(processManager, envelope());
+        tx.commit();
+        return events;
     }
 }

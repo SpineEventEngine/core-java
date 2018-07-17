@@ -26,7 +26,6 @@ import io.spine.server.integration.ChannelId;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Multimaps.synchronizedMultimap;
@@ -45,7 +44,7 @@ public class InMemoryTransportFactory implements TransportFactory {
      * An in-memory storage of subscribers per message class.
      */
     private final Multimap<ChannelId, Subscriber> subscribers =
-            synchronizedMultimap(HashMultimap.<ChannelId, Subscriber>create());
+            synchronizedMultimap(HashMultimap.create());
 
     /** Prevent direct instantiation from outside of the inheritance tree. */
     protected InMemoryTransportFactory() {}
@@ -94,13 +93,10 @@ public class InMemoryTransportFactory implements TransportFactory {
      * @return a provider function allowing to fetch subscribers by the channel ID.
      */
     private static Function<ChannelId, Iterable<Subscriber>>
-    providerOf(final Multimap<ChannelId, Subscriber> subscribers) {
-        return new Function<ChannelId, Iterable<Subscriber>>() {
-            @Override
-            public Iterable<Subscriber> apply(@Nullable ChannelId channelId) {
-                checkNotNull(channelId);
-                return subscribers.get(channelId);
-            }
+    providerOf(Multimap<ChannelId, Subscriber> subscribers) {
+        return channelId -> {
+            checkNotNull(channelId);
+            return subscribers.get(channelId);
         };
     }
 }

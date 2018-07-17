@@ -23,6 +23,7 @@ import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
+import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.grpc.MemoizingObserver;
@@ -410,7 +411,7 @@ class IntegrationBusTest {
         final BoundedContext boundedContext = contextWithTransport(transportFactory);
 
         final Event event = projectCreated();
-        final BoundedContextName boundedContextName = BoundedContext.newName("External context ID");
+        final BoundedContextName boundedContextName = BoundedContextNames.newName("External context ID");
         final ExternalMessage externalMessage = ExternalMessages.of(event,
                                                                     boundedContextName);
         final MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();

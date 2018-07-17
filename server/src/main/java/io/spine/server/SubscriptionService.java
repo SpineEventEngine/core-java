@@ -199,5 +199,4 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(SubscriptionService.class);
     }
-
 }

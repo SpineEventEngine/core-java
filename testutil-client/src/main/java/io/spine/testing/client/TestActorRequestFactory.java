@@ -38,7 +38,7 @@ import io.spine.time.ZoneIds;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 
-import static io.spine.core.given.GivenUserId.of;
+import static io.spine.testing.core.given.GivenUserId.of;
 
 /**
  * An {@code ActorRequestFactory} for running tests.
