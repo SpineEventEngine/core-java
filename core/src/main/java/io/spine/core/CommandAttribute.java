@@ -59,7 +59,7 @@ public abstract class CommandAttribute<T>
     }
 
     @Override
-    protected final Map<String, Any> getMutableMap(CommandContext.Builder builder) {
-        return builder.getMutableAttributes();
+    protected MapModifier<CommandContext.Builder> getMapModifier(CommandContext.Builder builder) {
+        return builder::putAttributes;
     }
 }
