@@ -42,5 +42,9 @@ message CommandRouted {
     repeated core.Command produced = 2 [(required) = true];
 
     // Messages of commands that are expected to be posted some time in the future.
-    repeated google.protobuf.Any message_to_follow = 3;
+    //
+    // Deprecated because of unclear semantics and deprecation of general purpose interating
+    // command routers. Use Process Managers that clearly define why a new command is posted.
+    //
+    repeated google.protobuf.Any message_to_follow = 3 [deprecated = true];
 }
