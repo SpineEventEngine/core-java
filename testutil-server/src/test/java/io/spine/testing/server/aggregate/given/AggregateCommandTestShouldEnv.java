@@ -195,5 +195,4 @@ public class AggregateCommandTestShouldEnv {
             return message();
         }
     }
-
 }

@@ -38,5 +38,4 @@ class TestBoundedContextShould {
         BoundedContext context = TestBoundedContext.create();
         assertNotNull(context);
     }
-
 }
