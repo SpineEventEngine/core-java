@@ -18,16 +18,16 @@
 //
 syntax = "proto3";
 
-package spine.testing.server.blackbox;
+package spine.testing.client.blackbox;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.testing.server.blackbox";
+option java_package = "io.spine.testing.client.blackbox";
 option java_multiple_files = false;
 option java_generate_equals_and_hash = true;
 
-import "spine/testing/server/blackbox/project.proto";
+import "spine/testing/client/blackbox/project.proto";
 
 message BbProjectAlreadyStarted {
     ProjectId project_id = 1;

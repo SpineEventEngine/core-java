@@ -29,6 +29,7 @@ option java_outer_classname = "EntitiesProto";
 option java_multiple_files = true;
 option java_generate_equals_and_hash = true;
 
+import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 import "spine/core/user_id.proto";
 
@@ -55,4 +56,11 @@ message TUTaskCreationPm {
     TUProjectId id = 1;
 
     google.protobuf.Timestamp timestamp = 2;
+}
+
+message TUEventLoggingProjection {
+
+    TUProjectId id = 1;
+
+    repeated google.protobuf.Any event = 2;
 }

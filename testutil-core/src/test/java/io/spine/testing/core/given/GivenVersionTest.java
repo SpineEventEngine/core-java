@@ -18,37 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.testing.core.given;
 
-import io.spine.server.bus.given.MulticastDispatcherIdentityTestEnv.IdentityDispatcher;
-import io.spine.testing.Tests;
+import io.spine.core.Version;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Set;
-
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.TestValues.random;
+import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-@DisplayName("MulticastDispatcher.Identity utility should")
-class MulticastDispatcherIdentityTest {
+@DisplayName("GivenVersion should")
+class GivenVersionTest {
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
-        Tests.assertHasPrivateParameterlessCtor(MulticastDispatcher.Identity.class);
+        assertHasPrivateParameterlessCtor(GivenVersion.class);
     }
 
     @Test
-    @DisplayName("return dispatcher identity")
-    void returnDispatcherIdentity() throws Exception {
-        final Set<String> set = MulticastDispatcher.Identity.of(new IdentityDispatcher());
+    @DisplayName("generate version by number")
+    void generateByNumber() {
+        int number = random(100);
 
-        assertTrue(set.contains(IdentityDispatcher.ID));
-        assertEquals(1, set.size());
+        Version version = GivenVersion.withNumber(number);
+
+        assertEquals(number, version.getNumber());
     }
 }

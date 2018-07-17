@@ -44,8 +44,8 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static io.spine.core.Versions.newVersion;
-import static io.spine.test.Verify.assertInstanceOf;
-import static io.spine.test.Verify.assertSize;
+import static io.spine.testing.Verify.assertInstanceOf;
+import static io.spine.testing.Verify.assertSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

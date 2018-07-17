@@ -29,7 +29,7 @@ import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityClass;
-import io.spine.test.ReflectiveBuilder;
+import io.spine.testing.ReflectiveBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Constructor;

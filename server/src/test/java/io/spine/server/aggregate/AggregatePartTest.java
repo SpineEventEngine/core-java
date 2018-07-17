@@ -48,8 +48,8 @@ import java.lang.reflect.Constructor;
 import java.util.List;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.test.Verify.assertSize;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.Verify.assertSize;
 import static io.spine.testing.server.entity.given.Given.aggregatePartOfClass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;

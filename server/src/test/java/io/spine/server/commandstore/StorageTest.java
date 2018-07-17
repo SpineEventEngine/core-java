@@ -32,7 +32,7 @@ import io.spine.core.Rejection;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.Given;
 import io.spine.server.storage.StorageFactorySwitch;
-import io.spine.test.Tests;
+import io.spine.testing.Tests;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.tenant.TenantAwareTest;
 import org.junit.jupiter.api.AfterEach;
