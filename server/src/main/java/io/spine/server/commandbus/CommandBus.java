@@ -234,12 +234,8 @@ public class CommandBus extends Bus<Command,
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(envelope, cause, log);
             if (causedByRejection(e)) {
-                final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
-                final Rejection rejection = toRejection(throwableMessage, envelope.getCommand());
-                final Class<?> rejectionClass = AnyPacker.unpack(rejection.getMessage())
-                                                         .getClass();
-                Log.log().trace("Posting rejection {} to RejectionBus.", rejectionClass.getName());
-                rejectionBus().post(rejection);
+                ThrowableMessage throwableMessage = (ThrowableMessage) cause;
+                onRejection(envelope, throwableMessage);
             }
         }
     }
@@ -251,6 +247,15 @@ public class CommandBus extends Bus<Command,
                 .build();
         systemGateway.postCommand(systemCommand, command.getTenantId());
         commandStore.setCommandStatusOk(command);
+    }
+
+    private void onRejection(CommandEnvelope envelope, ThrowableMessage throwableMessage) {
+        Command command = envelope.getCommand();
+        Rejection rejection = toRejection(throwableMessage, command);
+        Class<?> rejectionClass = AnyPacker.unpack(rejection.getMessage())
+                                           .getClass();
+        Log.log().trace("Posting rejection {} to RejectionBus.", rejectionClass.getName());
+        rejectionBus().post(rejection);
     }
 
     /**

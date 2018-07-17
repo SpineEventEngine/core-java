@@ -75,15 +75,23 @@ public final class CommandErrorHandler {
         checkNotNull(envelope);
         checkNotNull(exception);
         if (causedByRejection(exception)) {
-            final Rejection rejection = rejectWithCause(envelope.getCommand(), exception);
-            rejectionBus.post(rejection);
+            handleRejection(envelope, exception);
         } else {
-            log().error(format("Error dispatching command (class: %s id: %s).",
-                               envelope.getMessage().getClass(),
-                               Stringifiers.toString(envelope.getId())),
-                        exception);
-            throw exception;
+            handleRuntime(envelope, exception);
         }
+    }
+
+    private void handleRejection(CommandEnvelope envelope, RuntimeException exception) {
+        final Rejection rejection = rejectWithCause(envelope.getCommand(), exception);
+        rejectionBus.post(rejection);
+    }
+
+    private static void handleRuntime(CommandEnvelope envelope, RuntimeException exception) {
+        log().error(format("Error dispatching command (class: %s id: %s).",
+                           envelope.getMessage().getClass(),
+                           Stringifiers.toString(envelope.getId())),
+                    exception);
+        throw exception;
     }
 
     private static Logger log() {
