@@ -43,8 +43,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static io.spine.core.BoundedContextNames.newName;
+import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;

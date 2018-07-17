@@ -253,7 +253,7 @@ public final class Events {
 
                 case ORIGIN_NOT_SET:
                 default:
-                    return java.util.Optional.empty();
+                    return Optional.empty();
             }
         }
 

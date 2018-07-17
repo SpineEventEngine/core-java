@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static io.spine.testing.server.aggregate.given.AggregateMessageDispatcherTestEnv.*;
+import static io.spine.testing.server.aggregate.given.AggregateMessageDispatcherTestEnv.MessageLog;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
