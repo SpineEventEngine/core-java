@@ -53,13 +53,9 @@ public class ExecutorCommandScheduler extends CommandScheduler {
 
     @Override
     protected void doSchedule(final Command command) {
-        final long delaySec = getDelayMilliseconds(command);
-        executorService.schedule(new Runnable() {
-            @Override
-            public void run() {
-                post(command);
-            }
-        }, delaySec, MILLISECONDS);
+        final long delayMillis = getDelayMilliseconds(command);
+        executorService.schedule(() -> post(command),
+                                 delayMillis, MILLISECONDS);
     }
 
     private static long getDelayMilliseconds(Command command) {
