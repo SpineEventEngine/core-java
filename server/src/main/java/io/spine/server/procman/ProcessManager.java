@@ -37,11 +37,11 @@ import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.Model;
 import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine
@@ -76,7 +76,7 @@ public abstract class ProcessManager<I,
         extends CommandHandlingEntity<I, S, B> {
 
     /** The Command Bus to post routed commands. */
-    private volatile CommandBus commandBus;
+    private volatile @MonotonicNonNull CommandBus commandBus;
 
     /**
      * Creates a new instance.
@@ -104,8 +104,11 @@ public abstract class ProcessManager<I,
         this.commandBus = checkNotNull(commandBus);
     }
 
-    /** Returns the {@code CommandBus} to which post commands produced by this process manager. */
+    /**
+     * Returns the {@code CommandBus} to which post commands produced by this process manager.
+     */
     protected CommandBus getCommandBus() {
+        checkNotNull(commandBus, "CommandBus is not set in ProcessManager %s", this);
         return commandBus;
     }
 
@@ -209,15 +212,9 @@ public abstract class ProcessManager<I,
     protected CommandRouter newRouterFor(Message commandMessage, CommandContext commandContext) {
         checkNotNull(commandMessage);
         checkNotNull(commandContext);
-        CommandBus commandBus = ensureCommandBus();
+        CommandBus commandBus = getCommandBus();
         CommandRouter router = new CommandRouter(commandBus, commandMessage, commandContext);
         return router;
-    }
-
-    private CommandBus ensureCommandBus() {
-        CommandBus commandBus = getCommandBus();
-        checkState(commandBus != null, "CommandBus must be initialized");
-        return commandBus;
     }
 
     @Override
