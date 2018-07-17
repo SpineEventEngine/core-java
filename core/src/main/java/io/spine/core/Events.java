@@ -257,7 +257,7 @@ public final class Events {
             }
         }
 
-        return java.util.Optional.of(commandContext);
+        return Optional.of(commandContext);
     }
 
     /**
