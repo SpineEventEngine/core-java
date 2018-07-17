@@ -50,9 +50,9 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.test.Tests.assertMatchesMask;
-import static io.spine.test.Verify.assertContains;
-import static io.spine.test.Verify.assertSize;
+import static io.spine.testing.Tests.assertMatchesMask;
+import static io.spine.testing.Verify.assertContains;
+import static io.spine.testing.Verify.assertSize;
 import static java.lang.String.format;
 
 /**

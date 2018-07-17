@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 
 import static io.spine.server.model.MethodExceptionChecker.forMethod;
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**

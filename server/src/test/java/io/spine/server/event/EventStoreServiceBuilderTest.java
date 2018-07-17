@@ -23,7 +23,7 @@ package io.spine.server.event;
 import com.google.common.util.concurrent.MoreExecutors;
 import io.spine.server.BoundedContext;
 import io.spine.server.storage.StorageFactory;
-import io.spine.test.Tests;
+import io.spine.testing.Tests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

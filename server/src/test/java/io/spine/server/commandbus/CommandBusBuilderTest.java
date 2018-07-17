@@ -27,7 +27,7 @@ import io.spine.server.commandstore.CommandStore;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.test.Tests;
+import io.spine.testing.Tests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

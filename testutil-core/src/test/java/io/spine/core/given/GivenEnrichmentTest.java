@@ -28,9 +28,9 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 
 import static io.spine.core.given.GivenEnrichment.withOneAttribute;
-import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Verify.assertSize;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.Verify.assertSize;
 
 /**
  * @author Dmytro Grankin

@@ -60,7 +60,7 @@ import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWit
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithTransport;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectCreated;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectStarted;
-import static io.spine.test.Verify.assertContains;
+import static io.spine.testing.Verify.assertContains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

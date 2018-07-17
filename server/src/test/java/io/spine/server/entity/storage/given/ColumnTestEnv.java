@@ -34,7 +34,7 @@ import java.lang.reflect.Method;
 
 import static io.spine.server.entity.storage.EnumType.STRING;
 import static io.spine.server.entity.storage.given.ColumnTestEnv.TaskStatus.SUCCESS;
-import static io.spine.test.Tests.nullRef;
+import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**

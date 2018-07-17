@@ -27,10 +27,10 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventsTest;
 import io.spine.server.command.TestEventFactory;
-import io.spine.test.Tests;
+import io.spine.testing.Tests;
 
 import static io.spine.protobuf.TypeConverter.toAny;
-import static io.spine.test.TestValues.newUuidValue;
+import static io.spine.testing.TestValues.newUuidValue;
 import static io.spine.time.testing.TimeTests.Past.minutesAgo;
 
 /**

@@ -86,7 +86,7 @@ import static io.spine.server.procman.given.ProcessManagerTestEnv.answerQuestion
 import static io.spine.server.procman.given.ProcessManagerTestEnv.newAnswer;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.newQuizId;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.startQuiz;
-import static io.spine.test.Verify.assertSize;
+import static io.spine.testing.Verify.assertSize;
 import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.testing.client.blackbox.Count.none;
 import static io.spine.testing.client.blackbox.Count.once;
@@ -305,7 +305,7 @@ class ProcessManagerTest {
         CommandRouted commandRouted = (CommandRouted) message;
 
         // The source of the command is StartProject.
-        assertThat(getMessage(commandRouted.getOrigin()), instanceOf(PmStartProject.class));
+        assertThat(getMessage(commandRouted.getCommand()), instanceOf(PmStartProject.class));
         List<CommandEnvelope> dispatchedCommands = dispatcher.getCommands();
         assertSize(1, dispatchedCommands);
         CommandEnvelope dispatchedCommand = dispatcher.getCommands()

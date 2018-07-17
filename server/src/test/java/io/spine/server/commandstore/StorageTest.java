@@ -33,7 +33,7 @@ import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.Given;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantAwareTest;
-import io.spine.test.Tests;
+import io.spine.testing.Tests;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

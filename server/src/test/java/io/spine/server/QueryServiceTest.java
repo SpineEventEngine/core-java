@@ -28,7 +28,7 @@ import io.spine.grpc.StreamObservers;
 import io.spine.server.Given.ProjectDetailsRepository;
 import io.spine.server.model.ModelTests;
 import io.spine.server.stand.Stand;
-import io.spine.test.Spy;
+import io.spine.testing.Spy;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

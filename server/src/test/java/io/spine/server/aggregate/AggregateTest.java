@@ -103,7 +103,7 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.newTena
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.reassignTask;
 import static io.spine.server.blackbox.EmittedEventsVerifier.emitted;
 import static io.spine.server.entity.given.Given.aggregateOfClass;
-import static io.spine.test.Verify.assertSize;
+import static io.spine.testing.Verify.assertSize;
 import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
