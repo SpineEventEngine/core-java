@@ -83,7 +83,7 @@ public final class CommandRouter {
         this.rootCommandContext = commandContext;
         this.eventBuilder = CommandRouted
                 .newBuilder()
-                .setCommand(
+                .setOrigin(
                         DispatchedCommand
                                 .newBuilder()
                                 .setMessage(pack(commandMessage))
@@ -106,7 +106,7 @@ public final class CommandRouter {
 
     @VisibleForTesting
     Message getOriginContext() {
-        return eventBuilder.getCommand()
+        return eventBuilder.getOrigin()
                            .getContext();
     }
 
