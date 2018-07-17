@@ -135,3 +135,13 @@ enum EventValidationError {
     // The event message is invalid according to custom Protobuf options set.
     INVALID_EVENT = 2;
 }
+
+// Data from an `Event` which is accessible from the code to which the event was dispatched.
+message DispatchedEvent {
+
+    // The event message.
+    google.protobuf.Any message = 1 [(required) = true];
+
+    // The context of the event.
+    EventContext context = 2 [(required) = true];
+}

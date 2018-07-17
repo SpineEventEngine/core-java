@@ -20,6 +20,7 @@
 
 package io.spine.server.procman;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Queues;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -52,15 +53,17 @@ import static io.spine.protobuf.AnyPacker.unpack;
  */
 public final class CommandRouter {
 
-    /**
-     * The command that we route.
-     */
-    private final DispatchedCommand origin;
+    private final CommandRouted.Builder eventBuilder;
 
     /**
      * The message of the original command.
      */
     private final Message originMessage;
+
+    /**
+     * The context of the root command of the message we route.
+     */
+    private final CommandContext rootCommandContext;
 
     /**
      * The {@code CommandBus} to which we post commands.
@@ -76,27 +79,33 @@ public final class CommandRouter {
         this.commandBus = checkNotNull(commandBus);
         checkNotNull(commandMessage);
         checkNotNull(commandContext);
-        this.originMessage = commandMessage;
-        this.origin = DispatchedCommand
+        this.rootCommandContext = commandContext;
+        this.eventBuilder = CommandRouted
                 .newBuilder()
-                .setMessage(pack(commandMessage))
-                .setContext(commandContext)
-                .build();
-        this.queue = Queues.newConcurrentLinkedQueue();
-    }
+                .setOrigin(
+                        DispatchedCommand
+                                .newBuilder()
+                                .setMessage(pack(commandMessage))
+                                .setContext(commandContext)
+                                .build()
+                );
 
-    /**
-     * Obtains the origin command to be routed.
-     */
-    DispatchedCommand getOrigin() {
-        return origin;
+        this.originMessage = commandMessage;
+        this.queue = Queues.newConcurrentLinkedQueue();
     }
 
     /**
      * Obtains the origin command message.
      */
+    @VisibleForTesting
     Message getOriginMessage() {
         return originMessage;
+    }
+
+    @VisibleForTesting
+    Message getOriginContext() {
+        return eventBuilder.getOrigin()
+                           .getContext();
     }
 
     /**
@@ -144,9 +153,8 @@ public final class CommandRouter {
     }
 
     private Command produceCommand(Message commandMessage) {
-        CommandContext sourceContext = origin.getContext();
-        CommandFactory commandFactory = commandFactory(sourceContext);
-        Command result = commandFactory.createBasedOnContext(commandMessage, sourceContext);
+        CommandFactory commandFactory = commandFactory(rootCommandContext);
+        Command result = commandFactory.createBasedOnContext(commandMessage, rootCommandContext);
         return result;
     }
 
@@ -216,15 +224,12 @@ public final class CommandRouter {
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
     public CommandRouted routeAll() {
-        CommandRouted.Builder result = CommandRouted.newBuilder();
-        result.setOrigin(this.origin);
-
         while (hasNext()) {
             Message message = next();
             Command command = route(message);
-            result.addProduced(command);
+            eventBuilder.addProduced(command);
         }
 
-        return result.build();
+        return eventBuilder.build();
     }
 }

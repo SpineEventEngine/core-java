@@ -356,8 +356,7 @@ class ProcessManagerTest {
             assertNotNull(router);
 
             assertEquals(commandMessage, router.getOriginMessage());
-            assertEquals(commandContext, router.getOrigin()
-                                               .getContext());
+            assertEquals(commandContext, router.getOriginContext());
         }
     }
 

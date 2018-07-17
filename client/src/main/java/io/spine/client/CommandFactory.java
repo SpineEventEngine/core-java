@@ -138,7 +138,6 @@ public final class CommandFactory {
         checkValid(message);
 
         CommandContext newContext = contextBasedOn(context);
-
         Command result = createCommand(message, newContext);
         return result;
     }
