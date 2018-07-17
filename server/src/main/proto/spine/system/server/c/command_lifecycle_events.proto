@@ -71,21 +71,8 @@ message CommandScheduled {
     // The ID of the command.
     spine.core.CommandId id = 1;
 
+    // The schedule to execute the command.
     spine.core.CommandContext.Schedule schedule = 2 [(valid) = true];
-
-    // The time when the event occuered.
-    google.protobuf.Timestamp when = 3 [(required) = true];
-}
-
-// An event emitted when the command is rescheduled.
-//
-message CommandRescheduled {
-
-    // The ID of the command.
-    spine.core.CommandId id = 1;
-
-    // New coomand schedule.
-    spine.core.CommandContext.Schedule new_schedule = 2 [(valid) = true];
 
     // The time when the event occuered.
     google.protobuf.Timestamp when = 3 [(required) = true];

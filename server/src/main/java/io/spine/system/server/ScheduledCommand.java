@@ -44,12 +44,6 @@ public final class ScheduledCommand
     }
 
     @Subscribe
-    public void on(CommandRescheduled event) {
-        getBuilder().setShedule(event.getNewSchedule())
-                    .setSchedulingTime(event.getWhen());
-    }
-
-    @Subscribe
     public void on(CommandDispatched event) {
         setDeleted(true);
     }

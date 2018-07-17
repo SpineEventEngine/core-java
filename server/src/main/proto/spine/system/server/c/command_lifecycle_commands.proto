@@ -64,6 +64,9 @@ message ScheduleCommand {
 
     // The ID of the command.
     spine.core.CommandId id = 1;
+
+    // The schedule to execute the command.
+    spine.core.CommandContext.Schedule schedule = 2 [(valid) = true];
 }
 
 // A command to reschedule a command.

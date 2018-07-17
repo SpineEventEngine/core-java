@@ -24,6 +24,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
@@ -44,6 +45,7 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.system.server.DispatchCommand;
+import io.spine.system.server.ScheduleCommand;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -245,7 +247,7 @@ public class CommandBus extends Bus<Command,
                 .newBuilder()
                 .setId(command.getId())
                 .build();
-        systemGateway.postCommand(systemCommand, command.getTenantId());
+        postSystem(systemCommand, command.getTenantId());
         commandStore.setCommandStatusOk(command);
     }
 
@@ -256,6 +258,14 @@ public class CommandBus extends Bus<Command,
                                            .getClass();
         Log.log().trace("Posting rejection {} to RejectionBus.", rejectionClass.getName());
         rejectionBus().post(rejection);
+    }
+
+    void onScheduled(CommandEnvelope envelope) {
+        ScheduleCommand systemCommand = ScheduleCommand
+                .newBuilder()
+                .setId(envelope.getId())
+                .build();
+        postSystem(systemCommand, envelope.getTenantId());
     }
 
     /**
@@ -305,9 +315,7 @@ public class CommandBus extends Bus<Command,
 
     @Override
     protected void store(Iterable<Command> commands) {
-        for (Command command : commands) {
-            commandStore().store(command);
-        }
+        // NoOp.
     }
 
     private CommandDispatcher<?> getDispatcher(CommandEnvelope commandEnvelope) {
@@ -317,6 +325,10 @@ public class CommandBus extends Bus<Command,
             throw noDispatcherFound(commandEnvelope);
         }
         return dispatcher.get();
+    }
+
+    private void postSystem(Message systemCommand, TenantId tenantId) {
+        systemGateway.postCommand(systemCommand, tenantId);
     }
 
     /**

@@ -22,6 +22,9 @@ package io.spine.system.server;
 
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandContext.Schedule;
 import io.spine.core.CommandId;
 import io.spine.core.Responses;
 import io.spine.core.Status;
@@ -83,6 +86,16 @@ public final class CommandLifecycleAggregate
     }
 
     @Assign
+    CommandScheduled handle(ScheduleCommand command) {
+        Timestamp when = getCurrentTime();
+        return CommandScheduled.newBuilder()
+                               .setId(command.getId())
+                               .setSchedule(command.getSchedule())
+                               .setWhen(when)
+                               .build();
+    }
+
+    @Assign
     CommandDispatched handle(DispatchCommand command) {
         Timestamp when = getCurrentTime();
         return CommandDispatched.newBuilder()
@@ -136,19 +149,33 @@ public final class CommandLifecycleAggregate
 
     @Apply
     private void on(CommandAcknowledged event) {
-        CommandStatus status = getBuilder().getStatus()
-                                    .toBuilder()
-                                    .setWhenAcknowledged(event.getWhen())
-                                    .build();
+        CommandStatus status = getBuilder()
+                .getStatus()
+                .toBuilder()
+                .setWhenAcknowledged(event.getWhen())
+                .build();
         getBuilder().setStatus(status);
     }
 
     @Apply
+    private void on(CommandScheduled event) {
+        Command updatedCommand = updateSchedule(event.getSchedule());
+        CommandStatus status = getBuilder()
+                .getStatus()
+                .toBuilder()
+                .setWhenScheduled(event.getWhen())
+                .build();
+        getBuilder().setCommand(updatedCommand)
+                    .setStatus(status);
+    }
+
+    @Apply
     private void on(CommandDispatched event) {
-        CommandStatus status = getBuilder().getStatus()
-                                    .toBuilder()
-                                    .setWhenDispatched(event.getWhen())
-                                    .build();
+        CommandStatus status = getBuilder()
+                .getStatus()
+                .toBuilder()
+                .setWhenDispatched(event.getWhen())
+                .build();
         getBuilder().setStatus(status);
     }
 
@@ -176,6 +203,19 @@ public final class CommandLifecycleAggregate
                 .build();
         setProcessingStatus(status, event.getWhen());
         getBuilder().setReceiver(event.getReceiver());
+    }
+
+    private Command updateSchedule(Schedule schedule) {
+        CommandContext updatedContext = getBuilder().getCommand()
+                                                    .getContext()
+                                                    .toBuilder()
+                                                    .setSchedule(schedule)
+                                                    .build();
+        Command updatedCommand = getBuilder().getCommand()
+                                             .toBuilder()
+                                             .setContext(updatedContext)
+                                             .build();
+        return updatedCommand;
     }
 
     private void setProcessingStatus(Status status, Timestamp whenProcessed) {

@@ -84,15 +84,18 @@ message CommandStatus {
     // The instant when the command is acknowledged by the `CommandBus`.
     google.protobuf.Timestamp when_acknowledged = 2;
 
+    // The instant when the command is scheduled for the last time.
+    google.protobuf.Timestamp when_scheduled = 3;
+
     // The instant when the command is sent to a dispatcher.
-    google.protobuf.Timestamp when_dispatched = 3;
+    google.protobuf.Timestamp when_dispatched = 4;
 
     // The instant when the command processing is completed, successfully or otherwise.
-    google.protobuf.Timestamp when_processed = 4 [(goes).with = "processing_status"];
+    google.protobuf.Timestamp when_processed = 5 [(goes).with = "processing_status"];
 
     // The status of the command after processing.
     //
     // An empty field notifies a non-processed command.
     //
-    spine.core.Status processing_status = 5 [(goes).with = "when_processed"];
+    spine.core.Status processing_status = 6 [(goes).with = "when_processed"];
 }

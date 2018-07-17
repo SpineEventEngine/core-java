@@ -38,7 +38,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.protobuf.util.Timestamps.checkValid;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.Commands.isScheduled;
 import static io.spine.server.bus.Buses.acknowledge;
 
@@ -79,17 +78,10 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
     public Optional<Ack> accept(CommandEnvelope envelope) {
         final Command command = envelope.getCommand();
         if (isScheduled(command)) {
-            scheduleAndStore(envelope);
+            schedule(envelope.getCommand());
             return Optional.of(acknowledge(envelope.getId()));
         }
         return Optional.empty();
-    }
-
-    private void scheduleAndStore(CommandEnvelope commandEnvelope) {
-        final Command command = commandEnvelope.getCommand();
-        schedule(command);
-        commandBus().commandStore()
-                    .store(command, SCHEDULED);
     }
 
     @Override
@@ -110,9 +102,12 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         if (isScheduledAlready(command)) {
             return;
         }
-        final Command commandUpdated = setSchedulingTime(command, getCurrentTime());
+        Command commandUpdated = setSchedulingTime(command, getCurrentTime());
         doSchedule(commandUpdated);
         rememberAsScheduled(commandUpdated);
+
+        CommandEnvelope updatedCommandEnvelope = CommandEnvelope.of(commandUpdated);
+        commandBus().onScheduled(updatedCommandEnvelope);
     }
 
     /**
