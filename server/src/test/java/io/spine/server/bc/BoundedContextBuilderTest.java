@@ -22,6 +22,7 @@ package io.spine.server.bc;
 
 import com.google.common.base.Supplier;
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.event.EventBus;
@@ -46,7 +47,7 @@ import static org.mockito.Mockito.mock;
 @DisplayName("BoundedContext Builder should")
 class BoundedContextBuilderTest {
 
-    private BoundedContext.Builder builder;
+    private BoundedContextBuilder builder;
 
     @BeforeEach
     void setUp() {
@@ -117,7 +118,8 @@ class BoundedContextBuilderTest {
             final String nameString = getClass().getName();
             assertEquals(nameString, BoundedContext.newBuilder()
                                                    .setName(nameString)
-                                                   .getName());
+                                                   .getName()
+                                                   .getValue());
         }
 
         @Test
