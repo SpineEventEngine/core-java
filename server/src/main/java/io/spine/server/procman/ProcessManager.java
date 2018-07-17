@@ -214,49 +214,6 @@ public abstract class ProcessManager<I,
         return router;
     }
 
-    /**
-     * Creates a new {@code IteratingCommandRouter}.
-     *
-     * <p>An {@code IteratingCommandRouter} allows to create several commands
-     * in response to a command received by the {@code ProcessManager} and post these commands
-     * one by one.
-     *
-     * <p>A typical usage looks like this:
-     * <pre>
-     *     {@literal @}Assign
-     *     CommandRouted on(MyCommand message, CommandContext context) {
-     *         // Create new command messages here.
-     *         router = newIteratingRouterFor(message, context);
-     *         return router.add(messageOne)
-     *                      .add(messageTwo)
-     *                      .add(messageThree)
-     *                      .routeFirst();
-     *     }
-     *
-     *     {@literal @}Subscribe
-     *     void on(EventOne message, EventContext context) {
-     *         if (router.hasNext()) {
-     *             router.routeNext();
-     *         }
-     *     }
-     * </pre>
-     *
-     * @param commandMessage the source command message
-     * @param commandContext the context of the source command
-     * @return new {@code IteratingCommandRouter}
-     * @see IteratingCommandRouter#routeFirst()
-     * @see IteratingCommandRouter#routeNext()
-     */
-    protected IteratingCommandRouter newIteratingRouterFor(Message commandMessage,
-                                                           CommandContext commandContext) {
-        checkNotNull(commandMessage);
-        checkNotNull(commandContext);
-        CommandBus commandBus = ensureCommandBus();
-        IteratingCommandRouter router =
-                new IteratingCommandRouter(commandBus, commandMessage, commandContext);
-        return router;
-    }
-
     private CommandBus ensureCommandBus() {
         CommandBus commandBus = getCommandBus();
         checkState(commandBus != null, "CommandBus must be initialized");

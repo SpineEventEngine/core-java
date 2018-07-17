@@ -359,24 +359,6 @@ class ProcessManagerTest {
             assertEquals(commandContext, router.getSource()
                                                .getContext());
         }
-
-        @Test
-        @DisplayName("IteratingCommandRouter")
-        void iteratingCommandRouter() {
-            StringValue commandMessage = toMessage("create_iterating_router");
-            CommandContext commandContext = requestFactory.createCommandContext();
-
-            processManager.injectCommandBus(mock(CommandBus.class));
-
-            IteratingCommandRouter router
-                    = processManager.newIteratingRouterFor(commandMessage,
-                                                           commandContext);
-            assertNotNull(router);
-
-            assertEquals(commandMessage, getMessage(router.getSource()));
-            assertEquals(commandContext, router.getSource()
-                                               .getContext());
-        }
     }
 
     @Test
