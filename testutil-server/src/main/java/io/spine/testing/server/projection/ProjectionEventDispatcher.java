@@ -25,11 +25,16 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
+import io.spine.server.entity.Repository;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionEndpoint;
+import io.spine.server.projection.ProjectionRepository;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.Any.pack;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * A test utility for dispatching events to a {@code Projection} in test purposes.
@@ -73,17 +78,48 @@ public class ProjectionEventDispatcher {
         TestProjectionEndpoint.dispatch(projection, EventEnvelope.of(event));
     }
 
-    private static class TestProjectionEndpoint<I, P extends Projection<I, ?, ?>>
+    private static class TestProjectionEndpoint<I, P extends Projection<I, S, ?>, S extends Message>
             extends ProjectionEndpoint<I, P> {
 
         private TestProjectionEndpoint(EventEnvelope event) {
-            super(null, event);
+            super(mockRepository(), event);
         }
 
-        private static <I, P extends Projection<I, ?, ?>> void
+        private static <I, P extends Projection<I, S, ?>, S extends Message> void
         dispatch(P projection, EventEnvelope envelope) {
-            TestProjectionEndpoint<I, P> endpoint = new TestProjectionEndpoint<>(envelope);
+            TestProjectionEndpoint<I, P, S> endpoint = new TestProjectionEndpoint<>(envelope);
             endpoint.dispatchInTx(projection);
+        }
+    }
+
+    @SuppressWarnings("unchecked") // It is OK when mocking
+    private static <I, P extends Projection<I, S, ?>, S extends Message>
+    ProjectionRepository<I, P, S> mockRepository() {
+        TestProjectionRepository mockedRepo = mock(TestProjectionRepository.class);
+        TestProjectionRepository.TestLifecycle mockedLifecycle =
+                mock(TestProjectionRepository.TestLifecycle.class);
+        when(mockedRepo.lifecycleOf(any())).thenReturn(mockedLifecycle);
+        return mockedRepo;
+    }
+
+    /**
+     * Test-only projection repository that exposes {@code Repository.Lifecycle} class.
+     */
+    private static class TestProjectionRepository<I,
+                                                  P extends Projection<I, S, ?>,
+                                                  S extends Message>
+            extends ProjectionRepository<I, P, S> {
+
+        @Override
+        protected Lifecycle lifecycleOf(I id) {
+            return super.lifecycleOf(id);
+        }
+
+        private class TestLifecycle extends Repository.Lifecycle {
+
+            protected TestLifecycle(I id) {
+                super(id);
+            }
         }
     }
 

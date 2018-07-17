@@ -29,10 +29,14 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateCommandEndpoint;
 import io.spine.server.aggregate.AggregateEventEndpoint;
 import io.spine.server.aggregate.AggregateRejectionEndpoint;
+import io.spine.server.aggregate.AggregateRepository;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * A test utility to dispatch commands to an {@code Aggregate} in test purposes.
@@ -108,7 +112,7 @@ public class AggregateMessageDispatcher {
                                                         since in the workflow of this test endpoint
                                                         the repository is not used. */
         private TestAggregateRejectionEndpoint(RejectionEnvelope envelope) {
-            super(null, envelope);
+            super(mockRepository(), envelope);
         }
 
         private static <I, A extends Aggregate<I, ?, ?>>
@@ -135,7 +139,7 @@ public class AggregateMessageDispatcher {
                                                         since in the workflow of this test endpoint
                                                         the repository is not used. */
         private TestAggregateEventEndpoint(EventEnvelope envelope) {
-            super(null, envelope);
+            super(mockRepository(), envelope);
         }
 
         private static <I, A extends Aggregate<I, ?, ?>>
@@ -161,7 +165,7 @@ public class AggregateMessageDispatcher {
                                                         since in the workflow of this test endpoint
                                                         the repository is not used. */
         private TestAggregateCommandEndpoint(CommandEnvelope envelope) {
-            super(null, envelope);
+            super(mockRepository(), envelope);
         }
 
         private static <I, A extends Aggregate<I, ?, ?>>
@@ -170,6 +174,34 @@ public class AggregateMessageDispatcher {
                     new TestAggregateCommandEndpoint<>(envelope);
             List<? extends Message> result = endpoint.dispatchInTx(aggregate);
             return result;
+        }
+    }
+
+    @SuppressWarnings("unchecked") // It is OK when mocking
+    private static <I, A extends Aggregate<I, ?, ?>> AggregateRepository<I, A> mockRepository() {
+        TestAggregateRepository mockedRepo = mock(TestAggregateRepository.class);
+        TestAggregateRepository.TestLifecycle mockedLifecycle =
+                mock(TestAggregateRepository.TestLifecycle.class);
+        when(mockedRepo.lifecycleOf(any())).thenReturn(mockedLifecycle);
+        return mockedRepo;
+    }
+
+    /**
+     * Test-only aggregate repository that exposes {@code Repository.Lifecycle} class.
+     */
+    private static class TestAggregateRepository<I, A extends Aggregate<I, ?, ?>>
+            extends AggregateRepository<I, A> {
+
+        @Override
+        protected Lifecycle lifecycleOf(I id) {
+            return super.lifecycleOf(id);
+        }
+
+        private class TestLifecycle extends Lifecycle {
+
+            protected TestLifecycle(I id) {
+                super(id);
+            }
         }
     }
 }

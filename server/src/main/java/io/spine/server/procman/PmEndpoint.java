@@ -72,7 +72,7 @@ abstract class PmEndpoint<I,
     }
 
     protected List<Event> dispatchInTx(P processManager) {
-        PmTransaction<?, ?, ?> tx = PmTransaction.start((ProcessManager<?, ?, ?>) processManager);
+        PmTransaction<?, ?, ?> tx = repository().beginTransactionFor(processManager);
         @SuppressWarnings("unchecked") // all PM handlers return events.
         List<Event> events = (List<Event>) doDispatch(processManager, envelope());
         tx.commit();

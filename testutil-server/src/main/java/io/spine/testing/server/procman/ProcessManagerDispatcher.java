@@ -20,18 +20,24 @@
 package io.spine.testing.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.RejectionEnvelope;
+import io.spine.server.entity.Repository;
 import io.spine.server.procman.PmCommandEndpoint;
 import io.spine.server.procman.PmEventEndpoint;
 import io.spine.server.procman.PmRejectionEndpoint;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.procman.ProcessManagerRepository;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * A test utility for dispatching commands and events to a {@code ProcessManager} in test purposes.
@@ -86,18 +92,21 @@ public class ProcessManagerDispatcher {
      * commands to an instance of {@code ProcessManager} and returns the list of events.
      *
      * @param <I> the type of {@code ProcessManager} identifier
-     * @param <A> the type of {@code ProcessManager}
+     * @param <P> the type of {@code ProcessManager}
+     * @param <S> the type of {@code ProcessManager} state object
      */
-    private static class TestPmCommandEndpoint<I, A extends ProcessManager<I, ?, ?>>
-            extends PmCommandEndpoint<I, A> {
+    private static class TestPmCommandEndpoint<I,
+                                               P extends ProcessManager<I, S, ?>,
+                                               S extends Message>
+            extends PmCommandEndpoint<I, P> {
 
         private TestPmCommandEndpoint(CommandEnvelope envelope) {
-            super(null, envelope);
+            super(mockRepository(), envelope);
         }
 
-        private static <I, P extends ProcessManager<I, ?, ?>>
+        private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
         List<Event> dispatch(P manager, CommandEnvelope envelope) {
-            TestPmCommandEndpoint<I, P> endpoint = new TestPmCommandEndpoint<>(envelope);
+            TestPmCommandEndpoint<I, P, S> endpoint = new TestPmCommandEndpoint<>(envelope);
             List<Event> events = endpoint.dispatchInTx(manager);
             return events;
         }
@@ -108,18 +117,21 @@ public class ProcessManagerDispatcher {
      * events to an instance of {@code ProcessManager} and returns the list of events.
      *
      * @param <I> the type of {@code ProcessManager} identifier
-     * @param <A> the type of {@code ProcessManager}
+     * @param <P> the type of {@code ProcessManager}
+     * @param <S> the type of {@code ProcessManager} state object
      */
-    private static class TestPmEventEndpoint<I, A extends ProcessManager<I, ?, ?>>
-            extends PmEventEndpoint<I, A> {
+    private static class TestPmEventEndpoint<I,
+                                             P extends ProcessManager<I, S, ?>,
+                                             S extends Message>
+            extends PmEventEndpoint<I, P> {
 
         private TestPmEventEndpoint(EventEnvelope envelope) {
-            super(null, envelope);
+            super(mockRepository(), envelope);
         }
 
-        private static <I, P extends ProcessManager<I, ?, ?>>
+        private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
         List<Event> dispatch(P manager, EventEnvelope envelope) {
-            TestPmEventEndpoint<I, P> endpoint = new TestPmEventEndpoint<>(envelope);
+            TestPmEventEndpoint<I, P, S> endpoint = new TestPmEventEndpoint<>(envelope);
             List<Event> events = endpoint.dispatchInTx(manager);
             return events;
         }
@@ -130,20 +142,52 @@ public class ProcessManagerDispatcher {
      * rejection to an instance of {@code ProcessManager} and returns the list of events.
      *
      * @param <I> the type of {@code ProcessManager} identifier
-     * @param <A> the type of {@code ProcessManager}
+     * @param <P> the type of {@code ProcessManager}
+     * @param <S> the type of {@code ProcessManager} state object
      */
-    private static class TestPmRejectionEndpoint<I, A extends ProcessManager<I, ?, ?>>
-            extends PmRejectionEndpoint<I, A> {
+    private static class TestPmRejectionEndpoint<I,
+                                                 P extends ProcessManager<I, S, ?>,
+                                                 S extends Message>
+            extends PmRejectionEndpoint<I, P> {
 
         private TestPmRejectionEndpoint(RejectionEnvelope envelope) {
-            super(null, envelope);
+            super(mockRepository(), envelope);
         }
 
-        private static <I, P extends ProcessManager<I, ?, ?>>
+        private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
         List<Event> dispatch(P manager, RejectionEnvelope envelope) {
-            TestPmRejectionEndpoint<I, P> endpoint = new TestPmRejectionEndpoint<>(envelope);
+            TestPmRejectionEndpoint<I, P, S> endpoint = new TestPmRejectionEndpoint<>(envelope);
             List<Event> messages = endpoint.dispatchInTx(manager);
             return messages;
+        }
+    }
+
+    @SuppressWarnings("unchecked") // It is OK when mocking
+    private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
+    ProcessManagerRepository<I, P, S> mockRepository() {
+        TestPmRepository mockedRepo = mock(TestPmRepository.class);
+        TestPmRepository.TestLifecycle mockedLifecycle =
+                mock(TestPmRepository.TestLifecycle.class);
+        when(mockedRepo.lifecycleOf(any())).thenReturn(mockedLifecycle);
+        return mockedRepo;
+    }
+
+    /**
+     * Test-only process manager repository that exposes {@code Repository.Lifecycle} class.
+     */
+    private static class TestPmRepository<I, P extends ProcessManager<I, S, ?>, S extends Message>
+            extends ProcessManagerRepository<I, P, S> {
+
+        @Override
+        protected Lifecycle lifecycleOf(I id) {
+            return super.lifecycleOf(id);
+        }
+
+        private class TestLifecycle extends Repository.Lifecycle {
+
+            protected TestLifecycle(I id) {
+                super(id);
+            }
         }
     }
 }
