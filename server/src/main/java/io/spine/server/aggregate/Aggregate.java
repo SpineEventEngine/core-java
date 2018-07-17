@@ -201,9 +201,9 @@ public abstract class Aggregate<I,
     /**
      * Obtains a method for the passed command and invokes it.
      *
-     * <p>Dispatching the commands results in emitting event messages. All the 
+     * <p>Dispatching the commands results in emitting event messages. All the
      * {@linkplain Empty empty} messages are filtered out from the result.
-     * 
+     *
      * @param  command the envelope with the command to dispatch
      * @return a list of event messages that the aggregate produces by handling the command
      */

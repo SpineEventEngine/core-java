@@ -26,7 +26,7 @@ import io.spine.core.Responses;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.Given.ProjectDetailsRepository;
-import io.spine.server.model.ModelTests;
+import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

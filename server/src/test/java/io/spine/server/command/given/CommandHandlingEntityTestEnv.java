@@ -29,7 +29,7 @@ import io.spine.validate.StringValueVBuilder;
 
 import java.util.List;
 
-import static io.spine.test.TestValues.newUuidValue;
+import static io.spine.testing.TestValues.newUuidValue;
 
 public class CommandHandlingEntityTestEnv {
 

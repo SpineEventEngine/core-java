@@ -68,7 +68,7 @@ import static io.spine.server.event.given.EventBusTestEnv.eventBusBuilder;
 import static io.spine.server.event.given.EventBusTestEnv.invalidArchiveProject;
 import static io.spine.server.event.given.EventBusTestEnv.newTask;
 import static io.spine.server.event.given.EventBusTestEnv.readEvents;
-import static io.spine.test.Verify.assertSize;
+import static io.spine.testing.Verify.assertSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

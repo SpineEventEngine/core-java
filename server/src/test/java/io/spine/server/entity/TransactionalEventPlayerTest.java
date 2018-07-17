@@ -23,13 +23,13 @@ package io.spine.server.entity;
 import com.google.protobuf.StringValue;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.server.command.TestEventFactory;
+import io.spine.testing.server.TestEventFactory;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.test.TestValues.newUuidValue;
+import static io.spine.testing.TestValues.newUuidValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;

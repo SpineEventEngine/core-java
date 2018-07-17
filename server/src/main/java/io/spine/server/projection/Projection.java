@@ -102,7 +102,7 @@ public abstract class Projection<I,
         return projection.isChanged();
     }
 
-    void apply(Message eventMessage, EventContext eventContext)  {
+    void apply(Message eventMessage, EventContext eventContext) {
         final EventSubscriberMethod method = thisClass().getSubscriber(EventClass.of(eventMessage));
         method.invoke(this, eventMessage, eventContext);
     }

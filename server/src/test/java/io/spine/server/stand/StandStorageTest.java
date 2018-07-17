@@ -28,7 +28,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
-import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
@@ -37,6 +36,7 @@ import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
 import io.spine.test.storage.TaskId;
+import io.spine.testing.core.given.GivenVersion;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
@@ -50,9 +50,9 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.test.Tests.assertMatchesMask;
-import static io.spine.test.Verify.assertContains;
-import static io.spine.test.Verify.assertSize;
+import static io.spine.testing.Tests.assertMatchesMask;
+import static io.spine.testing.Verify.assertContains;
+import static io.spine.testing.Verify.assertSize;
 import static java.lang.String.format;
 
 /**
