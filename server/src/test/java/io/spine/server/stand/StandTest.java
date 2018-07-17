@@ -67,7 +67,6 @@ import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.testing.core.given.GivenVersion;
 import io.spine.testing.server.tenant.TenantAwareTest;
-import io.spine.time.ZoneOffsets;
 import io.spine.type.TypeUrl;
 import io.spine.validate.Validate;
 import io.spine.validate.ValidationError;
