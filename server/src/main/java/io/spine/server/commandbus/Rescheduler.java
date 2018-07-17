@@ -25,15 +25,14 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Error;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.TenantId;
-import io.spine.server.commandstore.CommandStore;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.server.tenant.TenantIndex;
 import io.spine.time.Durations2;
 import io.spine.time.Timestamps2;
 
@@ -42,7 +41,6 @@ import java.util.Set;
 
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.time.Timestamps2.isLaterThan;
 
 /**
@@ -53,9 +51,11 @@ import static io.spine.time.Timestamps2.isLaterThan;
 class Rescheduler {
 
     private final CommandBus commandBus;
+    private final TenantIndex tenantIndex;
 
-    Rescheduler(CommandBus commandBus) {
+    Rescheduler(CommandBus commandBus, TenantIndex tenantIndex) {
         this.commandBus = commandBus;
+        this.tenantIndex = tenantIndex;
     }
 
     void rescheduleCommands() {
@@ -69,10 +69,6 @@ class Rescheduler {
         }
     }
 
-    private CommandStore commandStore() {
-        return commandBus.commandStore();
-    }
-
     private CommandScheduler scheduler() {
         return commandBus.scheduler();
     }
@@ -83,8 +79,7 @@ class Rescheduler {
 
     @VisibleForTesting
     private void doRescheduleCommands() {
-        Set<TenantId> tenants = commandStore().getTenantIndex()
-                                              .getAll();
+        Set<TenantId> tenants = tenantIndex.getAll();
         for (TenantId tenantId : tenants) {
             rescheduleForTenant(tenantId);
         }
@@ -95,7 +90,9 @@ class Rescheduler {
                 new TenantAwareFunction0<Iterator<Command>>(tenantId) {
                     @Override
                     public Iterator<Command> apply() {
-                        return commandStore().iterator(SCHEDULED);
+//                        return commandStore().iterator(SCHEDULED);
+                        // TODO:2018-07-17:dmytro.dashenkov: replace command store.
+                        return null;
                     }
                 };
 
@@ -150,8 +147,7 @@ class Rescheduler {
         Message msg = commandEnvelope.getMessage();
         CommandId id = commandEnvelope.getId();
 
-        Error error = CommandExpiredException.commandExpired(command);
-        commandStore().setToError(commandEnvelope, error);
+        // TODO:2018-07-17:dmytro.dashenkov: Post MarkCommandAsErrored.
         log().errorExpiredCommand(msg, id);
     }
 }

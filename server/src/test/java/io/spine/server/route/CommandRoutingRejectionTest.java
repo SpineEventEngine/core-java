@@ -30,7 +30,6 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.ProcessingStatus;
-import io.spine.server.commandstore.CommandStore;
 import io.spine.server.rout.given.switchman.LogState;
 import io.spine.server.rout.given.switchman.SwitchId;
 import io.spine.server.rout.given.switchman.SwitchPosition;
@@ -64,7 +63,6 @@ class CommandRoutingRejectionTest {
 
     private BoundedContext boundedContext;
     private CommandBus commandBus;
-    private CommandStore commandStore;
     private Log.Repository logRepository;
 
     @BeforeEach
@@ -77,7 +75,6 @@ class CommandRoutingRejectionTest {
         logRepository = new Log.Repository();
         boundedContext.register(logRepository);
         commandBus = boundedContext.getCommandBus();
-        commandStore = commandBus.commandStore();
     }
 
     @AfterEach

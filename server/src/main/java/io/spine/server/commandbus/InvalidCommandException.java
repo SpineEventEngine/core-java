@@ -75,7 +75,7 @@ public class InvalidCommandException extends CommandException implements Message
      * Creates an exception for a command with missing {@code tenant_id} attribute in
      * the {@code CommandContext}, which is required in a multitenant application.
      */
-    public static InvalidCommandException onMissingTenantId(Command command) {
+    public static InvalidCommandException missingTenantId(Command command) {
         final CommandEnvelope envelope = CommandEnvelope.of(command);
         final Message commandMessage = envelope.getMessage();
         final String errMsg = format(
@@ -103,7 +103,7 @@ public class InvalidCommandException extends CommandException implements Message
         return error.build();
     }
 
-    public static InvalidCommandException onInapplicableTenantId(Command command) {
+    public static InvalidCommandException inapplicableTenantId(Command command) {
         final CommandEnvelope cmd = CommandEnvelope.of(command);
         final TypeName typeName = TypeName.of(cmd.getMessage());
         final String errMsg = format(

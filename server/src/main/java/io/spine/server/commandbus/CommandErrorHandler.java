@@ -91,7 +91,6 @@ public final class CommandErrorHandler {
                            envelope.getMessage().getClass(),
                            Stringifiers.toString(envelope.getId())),
                     exception);
-        throw exception;
     }
 
     private static Logger log() {

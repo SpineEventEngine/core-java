@@ -28,14 +28,11 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
-import io.spine.base.ThrowableMessage;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.Rejection;
 import io.spine.core.TenantId;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.Bus;
@@ -54,9 +51,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.core.Rejections.causedByRejection;
-import static io.spine.core.Rejections.toRejection;
 import static java.lang.String.format;
 
 /**
@@ -72,8 +66,6 @@ public class CommandBus extends Bus<Command,
                                     CommandEnvelope,
                                     CommandClass,
                                     CommandDispatcher<?>> {
-
-    private final CommandStore commandStore;
 
     private final Deque<BusFilter<CommandEnvelope>> filterChain;
 
@@ -122,7 +114,6 @@ public class CommandBus extends Bus<Command,
         this.multitenant = builder.multitenant != null
                 ? builder.multitenant
                 : false;
-        this.commandStore = builder.commandStore;
         this.scheduler = builder.commandScheduler;
         this.log = builder.log;
         this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
@@ -156,11 +147,6 @@ public class CommandBus extends Bus<Command,
 
     boolean isThreadSpawnAllowed() {
         return isThreadSpawnAllowed;
-    }
-
-    @VisibleForTesting
-    public CommandStore commandStore() {
-        return commandStore;
     }
 
     Log problemLog() {
@@ -229,17 +215,8 @@ public class CommandBus extends Bus<Command,
     @Override
     protected void dispatch(CommandEnvelope envelope) {
         final CommandDispatcher<?> dispatcher = getDispatcher(envelope);
-        try {
-            onDispatchCommand(envelope);
-            dispatcher.dispatch(envelope);
-        } catch (RuntimeException e) {
-            final Throwable cause = getRootCause(e);
-            commandStore.updateCommandStatus(envelope, cause, log);
-            if (causedByRejection(e)) {
-                ThrowableMessage throwableMessage = (ThrowableMessage) cause;
-                onRejection(envelope, throwableMessage);
-            }
-        }
+        onDispatchCommand(envelope);
+        dispatcher.dispatch(envelope);
     }
 
     private void onDispatchCommand(CommandEnvelope command) {
@@ -248,16 +225,6 @@ public class CommandBus extends Bus<Command,
                 .setId(command.getId())
                 .build();
         postSystem(systemCommand, command.getTenantId());
-        commandStore.setCommandStatusOk(command);
-    }
-
-    private void onRejection(CommandEnvelope envelope, ThrowableMessage throwableMessage) {
-        Command command = envelope.getCommand();
-        Rejection rejection = toRejection(throwableMessage, command);
-        Class<?> rejectionClass = AnyPacker.unpack(rejection.getMessage())
-                                           .getClass();
-        Log.log().trace("Posting rejection {} to RejectionBus.", rejectionClass.getName());
-        rejectionBus().post(rejection);
     }
 
     void onScheduled(CommandEnvelope envelope) {
@@ -346,7 +313,6 @@ public class CommandBus extends Bus<Command,
     @Override
     public void close() throws Exception {
         super.close();
-        commandStore.close();
         rejectionBus.close();
     }
 
@@ -578,13 +544,12 @@ public class CommandBus extends Bus<Command,
     /**
      * Produces an {@link UnsupportedCommandException} upon a dead command.
      */
-    private class DeadCommandHandler implements DeadMessageHandler<CommandEnvelope> {
+    private static class DeadCommandHandler implements DeadMessageHandler<CommandEnvelope> {
 
         @Override
         public UnsupportedCommandException handle(CommandEnvelope message) {
             Command command = message.getCommand();
             UnsupportedCommandException exception = new UnsupportedCommandException(command);
-            commandStore().storeWithError(command, exception);
             return exception;
         }
     }
