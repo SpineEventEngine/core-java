@@ -64,6 +64,33 @@ message CommandAcknowledged {
     google.protobuf.Timestamp when = 2 [(required) = true];
 }
 
+// An event emitted when the command is scheduled.
+//
+message CommandScheduled {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    spine.core.CommandContext.Schedule schedule = 2 [(valid) = true];
+
+    // The time when the event occuered.
+    google.protobuf.Timestamp when = 3 [(required) = true];
+}
+
+// An event emitted when the command is rescheduled.
+//
+message CommandRescheduled {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // New coomand schedule.
+    spine.core.CommandContext.Schedule new_schedule = 2 [(valid) = true];
+
+    // The time when the event occuered.
+    google.protobuf.Timestamp when = 3 [(required) = true];
+}
+
 // An event emitted when a command is dispatched to a handler
 //
 message CommandDispatched {

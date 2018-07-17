@@ -56,6 +56,27 @@ message AcknowledgeCommand {
     spine.core.CommandId id = 1;
 }
 
+// A command to schedule a command.
+//
+// The command schedule configuration schould be obtained from the command directly.
+//
+message ScheduleCommand {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+}
+
+// A command to reschedule a command.
+//
+message RescheduleCommand {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // New coomand schedule.
+    spine.core.CommandContext.Schedule new_schedule = 2 [(valid) = true];
+}
+
 // A comand to dispatch a command to a handler.
 //
 message DispatchCommand {

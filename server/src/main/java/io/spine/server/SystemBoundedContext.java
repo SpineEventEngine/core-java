@@ -24,6 +24,7 @@ import io.spine.server.entity.Repository;
 import io.spine.system.server.CommandLifecycleRepository;
 import io.spine.system.server.EntityHistoryRepository;
 import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.ScheduledCommandRepository;
 import io.spine.system.server.SystemGateway;
 
 import java.util.stream.Stream;
@@ -73,7 +74,8 @@ final class SystemBoundedContext extends BoundedContext {
     private void init() {
         Stream.<Repository<?, ?>>of(
                 new EntityHistoryRepository(),
-                new CommandLifecycleRepository()
+                new CommandLifecycleRepository(),
+                new ScheduledCommandRepository()
         ).forEach(this::register);
     }
 
