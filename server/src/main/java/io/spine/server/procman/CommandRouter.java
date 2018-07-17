@@ -54,6 +54,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 public final class CommandRouter {
 
     private final CommandRouted.Builder eventBuilder;
+    private final CommandFactory commandFactory;
 
     /**
      * The message of the original command.
@@ -92,6 +93,7 @@ public final class CommandRouter {
 
         this.originMessage = commandMessage;
         this.queue = Queues.newConcurrentLinkedQueue();
+        this.commandFactory = commandFactory(commandContext.getActorContext());
     }
 
     /**
@@ -153,7 +155,6 @@ public final class CommandRouter {
     }
 
     private Command produceCommand(Message commandMessage) {
-        CommandFactory commandFactory = commandFactory(rootCommandContext);
         Command result = commandFactory.createBasedOnContext(commandMessage, rootCommandContext);
         return result;
     }
@@ -190,12 +191,9 @@ public final class CommandRouter {
     }
 
     /**
-     * Creates a {@code CommandFactory} using the {@linkplain io.spine.core.UserId actor},
-     * {@linkplain io.spine.core.TenantId tenant ID} and {@linkplain io.spine.time.ZoneOffset
-     * zone offset} from the given command context.
+     * Creates a {@code CommandFactory} with the settings from the passed {@code ActorContext}
      */
-    private static CommandFactory commandFactory(CommandContext sourceContext) {
-        ActorContext actorContext = sourceContext.getActorContext();
+    private static CommandFactory commandFactory(ActorContext actorContext) {
         ActorRequestFactory factory = ActorRequestFactory.fromContext(actorContext);
         return factory.command();
     }

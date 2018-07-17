@@ -208,7 +208,7 @@ public final class Events {
     public static TenantId getTenantId(Event event) {
         checkNotNull(event);
 
-        Optional<CommandContext> commandContext = findOriginCommandContext(event.getContext());
+        Optional<CommandContext> commandContext = findCommandContext(event.getContext());
 
         if (!commandContext.isPresent()) {
             return TenantId.getDefaultInstance();
@@ -231,7 +231,7 @@ public final class Events {
      *
      * <p>If at some point the event origin is not set the {@link Optional#empty()} is returned.
      */
-    private static Optional<CommandContext> findOriginCommandContext(EventContext eventContext) {
+    private static Optional<CommandContext> findCommandContext(EventContext eventContext) {
         CommandContext commandContext = null;
         EventContext ctx = eventContext;
 
@@ -264,9 +264,13 @@ public final class Events {
      * Obtains an {@code ActorContext} from the passed {@code EventContext}.
      *
      * <p>Traverses the origin chain stored in the {@code EventContext}.
+     *
+     * @throws IllegalStateException if the actor context could not be found in the origin chain
+     *  of the passed event context
      */
-    public static ActorContext findActorContext(EventContext eventContext) {
-        Optional<CommandContext> optional = findOriginCommandContext(eventContext);
+    @Internal
+    public static ActorContext getActorContextOrThrow(EventContext eventContext) {
+        Optional<CommandContext> optional = findCommandContext(eventContext);
         checkState(optional.isPresent(), "Unable to find origin CommandContext");
         ActorContext result = optional.get()
                                       .getActorContext();

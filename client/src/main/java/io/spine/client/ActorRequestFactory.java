@@ -24,7 +24,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.ActorContext;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
-import io.spine.core.Events;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.time.ZoneId;
@@ -35,6 +34,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.core.Events.getActorContextOrThrow;
 
 /**
  * A factory for the various requests fired from the client-side by an actor.
@@ -102,7 +102,7 @@ public class ActorRequestFactory {
      */
     public static ActorRequestFactory fromContext(EventContext eventContext) {
         checkNotNull(eventContext);
-        ActorContext actorContext = Events.findActorContext(eventContext);
+        ActorContext actorContext = getActorContextOrThrow(eventContext);
         ActorRequestFactory result = fromContext(actorContext);
         return result;
     }
