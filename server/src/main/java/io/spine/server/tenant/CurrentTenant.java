@@ -20,9 +20,10 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.base.Optional;
 import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -59,12 +60,12 @@ public class CurrentTenant {
     /**
      * Obtains the ID of a tenant served in the current thread.
      *
-     * @return ID of the tenant or {@linkplain Optional#absent() empty Optional} if
+     * @return ID of the tenant or {@linkplain Optional#empty() empty Optional} if
      *         the current thread works not in a multi-tenant context
      */
     public static Optional<TenantId> get() {
         TenantId result = threadLocal.get();
-        return Optional.fromNullable(result);
+        return Optional.ofNullable(result);
     }
 
     /**

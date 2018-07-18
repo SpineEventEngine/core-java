@@ -19,7 +19,6 @@
  */
 package io.spine.server.stand;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolMessageEnum;
 import io.grpc.StatusRuntimeException;
@@ -32,6 +31,7 @@ import io.spine.validate.ValidationError;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -67,7 +67,7 @@ abstract class RequestValidator<M extends Message> {
      * @param request the request to test
        @return a {@linkplain RequestNotSupported value object} holding
                the details of support absence,
-               or {@code Optional.absent()} if the request is supported
+       or {@code Optional.empty()} if the request is supported
      */
     protected abstract Optional<RequestNotSupported<M>> isSupported(M request);
 
@@ -89,8 +89,8 @@ abstract class RequestValidator<M extends Message> {
      * @throws IllegalArgumentException if the passed request is not valid
      */
     void validate(M request, StreamObserver<?> responseObserver) throws IllegalArgumentException {
-        handleValidationResult(validateMessage(request).orNull(), responseObserver);
-        handleValidationResult(checkSupported(request).orNull(), responseObserver);
+        handleValidationResult(validateMessage(request).orElse(null), responseObserver);
+        handleValidationResult(checkSupported(request).orElse(null), responseObserver);
     }
 
     /**
@@ -113,12 +113,12 @@ abstract class RequestValidator<M extends Message> {
      * and packs it into an exception.
      *
      * @param request the request to check for support
-     * @return an instance of exception or {@code Optional.absent()} if the request is supported.
+     * @return an instance of exception or {@code Optional.empty()} if the request is supported.
      */
     private Optional<InvalidRequestException> checkSupported(M request) {
         Optional<RequestNotSupported<M>> supported = isSupported(request);
         if (!supported.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         RequestNotSupported<M> result = supported.get();
@@ -144,13 +144,13 @@ abstract class RequestValidator<M extends Message> {
      *
      * @param request the request message to validate.
      * @return an instance of exception,
-     *         or {@code Optional.absent()} if the request message is valid.
+     *         or {@code Optional.empty()} if the request message is valid.
      */
     private Optional<InvalidRequestException> validateMessage(M request) {
         List<ConstraintViolation> violations = MessageValidator.newInstance()
                                                                .validate(request);
         if (violations.isEmpty()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         ValidationError validationError =
