@@ -20,7 +20,6 @@
 package io.spine.server.projection;
 
 import io.spine.core.Event;
-import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.delivery.AbstractMessageDeliveryTest;
 import io.spine.server.delivery.given.ParallelDispatcher;

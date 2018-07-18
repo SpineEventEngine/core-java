@@ -1,0 +1,103 @@
+//
+// Copyright 2018, TeamDev. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+
+syntax = "proto3";
+
+package spine.system.server;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option (internal_all) = true;
+
+option java_package = "io.spine.system.server";
+option java_outer_classname = "CommandLifecycleCommandsProto";
+option java_multiple_files = true;
+
+import "spine/base/error.proto";
+import "spine/core/command.proto";
+import "spine/core/rejection.proto";
+import "spine/client/entities.proto";
+
+// A comand to receive a new command.
+//
+message ReceiveCommand {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // The command.
+    spine.core.Command payload = 2;
+}
+
+// A comand to acknowledge a command.
+//
+message AcknowledgeCommand {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+}
+
+// A comand to dispatch a command to a handler.
+//
+message DispatchCommand {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // The ID of the entity which the command is dispatched to.
+    spine.client.EntityId receiver = 2;
+}
+
+// A comand to mark a command as handled.
+//
+// Posted only after a successful command handling.
+//
+message MarkCommandAsHandled {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+}
+
+// A comand to mark a command as handled.
+//
+// Posted if the command handler has failed with a runtime error.
+//
+message MarkCommandAsErrored {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // The runtime error.
+    spine.base.Error error = 2;
+}
+
+// A comand to mark a command as rejected.
+//
+// Posted if the command handler has rejected the command.
+//
+message MarkCommandAsRejected {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // The command rejection.
+    spine.core.Rejection rejection = 2;
+}

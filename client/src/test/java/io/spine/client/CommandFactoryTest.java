@@ -27,10 +27,10 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
-import io.spine.core.given.GivenTenantId;
-import io.spine.core.given.GivenUserId;
-import io.spine.test.TimeTests;
+import io.spine.time.testing.TimeTests;
 import io.spine.test.commands.RequiredFieldCommand;
+import io.spine.testing.core.given.GivenTenantId;
+import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.Timestamps2;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
@@ -54,10 +54,8 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         ZoneOffset zoneOffset = ZoneOffsets.ofHours(-3);
         int targetVersion = 100500;
 
-        CommandContext commandContext = CommandFactory.createContext(tenantId,
-                                                                     userId,
-                                                                     zoneOffset,
-                                                                     targetVersion);
+        CommandContext commandContext =
+                CommandFactory.createContext(tenantId, userId, zoneOffset, targetVersion);
 
         ActorContext actorContext = commandContext.getActorContext();
 
@@ -85,7 +83,8 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
             assertTrue(Timestamps2.isBetween(
                     command.getContext()
                            .getActorContext()
-                           .getTimestamp(), beforeCall, afterCall));
+                           .getTimestamp(), beforeCall, afterCall)
+            );
         }
 
         @Test
@@ -100,15 +99,16 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
 
         @Test
         @DisplayName("with own tenant ID")
-        void withOwnTenantID() {
-            TenantId tenantId = TenantId.newBuilder()
-                                        .setValue(getClass().getSimpleName())
-                                        .build();
-            ActorRequestFactory mtFactory = ActorRequestFactory.newBuilder()
-                                                               .setTenantId(tenantId)
-                                                               .setActor(getActor())
-                                                               .setZoneOffset(getZoneOffset())
-                                                               .build();
+        void withOwnTenantId() {
+            TenantId tenantId = TenantId
+                    .newBuilder()
+                    .setValue(getClass().getSimpleName())
+                    .build();
+            ActorRequestFactory mtFactory = builder()
+                    .setTenantId(tenantId)
+                    .setActor(actor())
+                    .setZoneOffset(zoneOffset())
+                    .build();
             Command command = mtFactory.command()
                                        .create(StringValue.getDefaultInstance());
 
@@ -121,6 +121,9 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
     @Nested
     @DisplayName("throw ValidationException when creating command")
     class NotAccept {
+
+        private final RequiredFieldCommand invalidCommand =
+                RequiredFieldCommand.getDefaultInstance();
 
         @Test
         @DisplayName("from invalid Message")

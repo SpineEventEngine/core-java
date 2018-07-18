@@ -35,7 +35,7 @@ import static io.spine.server.tuple.given.QuintetTestEnv.QuintetFactory.NUM_1;
 import static io.spine.server.tuple.given.QuintetTestEnv.QuintetFactory.NUM_2;
 import static io.spine.server.tuple.given.QuintetTestEnv.QuintetFactory.newCelloQuintet;
 import static io.spine.server.tuple.given.QuintetTestEnv.QuintetFactory.newViolaQuintet;
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**

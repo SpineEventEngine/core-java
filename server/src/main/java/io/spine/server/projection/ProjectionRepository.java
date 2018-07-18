@@ -28,6 +28,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
+import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
@@ -58,6 +59,7 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
+import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -112,6 +114,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     protected final ProjectionClass<P> getModelClass(Class<P> cls) {
         return (ProjectionClass<P>) Model.getInstance()
                                          .asProjectionClass(cls);
+    }
+
+    @Override
+    public P create(I id) {
+        P projection = super.create(id);
+        lifecycleOf(id).onEntityCreated(PROJECTION);
+        return projection;
     }
 
     @Override
@@ -245,7 +254,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     @Override
     public Set<I> dispatch(EventEnvelope envelope) {
-        return ProjectionEndpoint.handle(this, envelope);
+        Set<I> ids = ProjectionEndpoint.handle(this, envelope);
+        return ids;
+    }
+
+    void onEventDispatched(I id, Event event) {
+        lifecycleOf(id).onDispatchEventToSubscriber(event);
     }
 
     @Internal

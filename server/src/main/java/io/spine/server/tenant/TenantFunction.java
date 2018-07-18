@@ -50,8 +50,7 @@ public abstract class TenantFunction<T> extends TenantAware implements Function<
      *
      * @return the result of the function
      */
-    @Nullable
-    public T execute() {
+    public @Nullable T execute() {
         final TenantId currentTenant = tenantId();
         final T result = apply(currentTenant);
         return result;

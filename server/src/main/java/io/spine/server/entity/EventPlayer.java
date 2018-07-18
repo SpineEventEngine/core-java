@@ -23,6 +23,10 @@ package io.spine.server.entity;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 
+import java.util.Collection;
+
+import static java.util.Collections.singleton;
+
 /**
  * Plays events upon a certain entity.
  *
@@ -39,4 +43,16 @@ public interface EventPlayer {
      * @param events the event stream to play
      */
     void play(Iterable<Event> events);
+
+    /**
+     * Plays the given event.
+     *
+     * <p>This is a convenience method. See {@link #play(Iterable)} for more info.
+     *
+     * @param event the event to play
+     */
+    default void play(Event event) {
+        Collection<Event> events = singleton(event);
+        play(events);
+    }
 }

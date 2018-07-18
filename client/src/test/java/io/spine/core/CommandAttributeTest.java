@@ -23,7 +23,7 @@ package io.spine.core;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.spine.base.Time;
-import io.spine.client.TestActorRequestFactory;
+import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
