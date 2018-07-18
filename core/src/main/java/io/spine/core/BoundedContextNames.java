@@ -56,9 +56,9 @@ public final class BoundedContextNames {
      * @return a newly created name
      */
     public static BoundedContextName newName(String name) {
-        final BoundedContextName result = BoundedContextName.newBuilder()
-                                                            .setValue(name)
-                                                            .build();
+        BoundedContextName result = BoundedContextName.newBuilder()
+                                                      .setValue(name)
+                                                      .build();
         checkValid(result);
         return result;
     }
