@@ -37,8 +37,9 @@ import java.util.Set;
 @Internal
 public class EventProducers {
 
-    /** Prevent instantiation of this utility class. */
-    private EventProducers() {}
+    /** Prevents instantiation of this utility class. */
+    private EventProducers() {
+    }
 
     /**
      * Creates an event route that obtains event producer ID from an {@code EventContext} and
@@ -71,7 +72,8 @@ public class EventProducers {
 
         @Override
         public Set<I> apply(Message message, EventContext context) {
-            I id = Events.getProducer(context);
+            @SuppressWarnings("unchecked") // The route creator is responsible for the type check.
+            I id = (I)Events.getProducer(context);
             return ImmutableSet.of(id);
         }
 

@@ -28,7 +28,6 @@ option (SPI_all) = true;
 option java_package = "io.spine.server.aggregate";
 option java_outer_classname = "AggregateProto";
 option java_multiple_files = true;
-option java_generate_equals_and_hash = true;
 
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";

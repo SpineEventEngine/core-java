@@ -25,7 +25,6 @@ import "spine/options.proto";
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.testing.server.blackbox";
 option java_multiple_files = false;
-option java_generate_equals_and_hash = true;
 
 import "spine/testing/server/blackbox/project.proto";
 
