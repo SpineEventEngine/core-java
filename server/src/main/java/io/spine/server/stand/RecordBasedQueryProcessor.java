@@ -33,8 +33,8 @@ import io.spine.server.entity.EntityRecord;
 import java.util.Iterator;
 
 /**
- * A common implementation for {@linkplain QueryProcessor query processors} targeting objects that
- * are stored in record-based repositories and storages.
+ * A common base for {@linkplain QueryProcessor query processors} targeting objects that are stored
+ * in record-based repositories and storages.
  *
  * @author Alex Tymchenko
  * @author Dmytro Kuzmin
