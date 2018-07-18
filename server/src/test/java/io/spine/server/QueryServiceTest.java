@@ -150,7 +150,7 @@ class QueryServiceTest {
     @Test
     @DisplayName("throw ISE if Query target type is not found in any registered repository")
     void throwOnTargetNotFound() {
-        // There is no registered repository for `ProjectTaskNames` projections.
+        // There is no registered repository for `ProjectTaskNames` projection.
         Query query = Given.AQuery.readAllProjectTaskNames();
         assertThrows(IllegalStateException.class, () -> service.read(query, responseObserver));
     }
