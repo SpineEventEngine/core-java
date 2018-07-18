@@ -217,8 +217,7 @@ public final class CommandFactory {
                                         ZoneOffset zoneOffset,
                                         int targetVersion) {
         CommandContext.Builder result =
-                newContextBuilder(tenantId, userId, zoneOffset)
-                        .setTargetVersion(targetVersion);
+                newContextBuilder(tenantId, userId, zoneOffset).setTargetVersion(targetVersion);
         return result.build();
     }
 

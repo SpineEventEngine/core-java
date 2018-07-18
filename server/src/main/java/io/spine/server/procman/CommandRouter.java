@@ -170,8 +170,7 @@ public final class CommandRouter {
         return result;
     }
 
-    private static StreamObserver<Ack> newAckingObserver(
-            SettableFuture<Ack> finishFuture) {
+    private static StreamObserver<Ack> newAckingObserver(SettableFuture<Ack> finishFuture) {
         return new StreamObserver<Ack>() {
             @Override
             public void onNext(Ack value) {

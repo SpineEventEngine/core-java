@@ -184,8 +184,8 @@ enum CommandStatus {
 message DispatchedCommand {
 
     // The message of the command.
-    google.protobuf.Any message = 2 [(required) = true];
+    google.protobuf.Any message = 1 [(required) = true];
 
     // Service information about the environment in which the command was created.
-    CommandContext context = 3 [(required) = true];
+    CommandContext context = 2 [(required) = true];
 }
