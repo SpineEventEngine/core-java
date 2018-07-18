@@ -39,7 +39,6 @@ import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
-import io.spine.server.commandstore.CommandStore;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.DispatchCommand;
@@ -345,8 +344,6 @@ public class CommandBus extends Bus<Command,
          */
         private @Nullable Boolean multitenant;
 
-        private CommandStore commandStore;
-
         private Log log;
 
         /**
@@ -391,10 +388,6 @@ public class CommandBus extends Bus<Command,
 
         public boolean isThreadSpawnAllowed() {
             return threadSpawnAllowed;
-        }
-
-        public CommandStore getCommandStore() {
-            return commandStore;
         }
 
         public Optional<CommandScheduler> getCommandScheduler() {
@@ -460,7 +453,7 @@ public class CommandBus extends Bus<Command,
          */
         @Internal
         public Builder injectTenantIndex(TenantIndex index) {
-            this.tenantIndex = index;
+            this.tenantIndex = checkNotNull(index);
             return this;
         }
 
