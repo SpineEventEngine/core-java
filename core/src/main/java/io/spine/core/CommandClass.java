@@ -66,13 +66,13 @@ public final class CommandClass extends MessageClass {
      * @return new instance
      */
     public static CommandClass of(Message commandOrMessage) {
-        final Message commandMessage = Commands.ensureMessage(commandOrMessage);
+        Message commandMessage = Commands.ensureMessage(commandOrMessage);
         return of(commandMessage.getClass());
     }
 
     /** Creates immutable set of {@code CommandClass} from the passed set. */
     public static Set<CommandClass> setOf(Iterable<Class<? extends Message>> classes) {
-        final ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();
+        ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
             builder.add(of(cls));
         }
