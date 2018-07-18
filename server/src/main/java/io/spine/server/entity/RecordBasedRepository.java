@@ -310,7 +310,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * Obtains iterator over {@link EntityRecord} for the all entities present in the repository.
+     * Obtains iterator over {@link EntityRecord} for all entities present in the repository.
      *
      * @return an iterator over all records
      */
