@@ -198,7 +198,7 @@ public abstract class ProcessManager<I,
      *         return newRouterFor(message, context)
      *                  .add(messageOne)
      *                  .add(messageTwo)
-     *                  .routeAll();
+     *                  .postAll();
      *     }
      * </pre>
      *

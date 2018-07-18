@@ -88,6 +88,6 @@ class CommandRouterOnErrorTest extends AbstractCommandRouterTest {
         for (Message message : getMessages()) {
             router.add(message);
         }
-        router.routeAll();
+        router.postAll();
     }
 }

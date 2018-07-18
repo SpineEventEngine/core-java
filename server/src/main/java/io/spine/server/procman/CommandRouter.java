@@ -138,7 +138,7 @@ public final class CommandRouter {
      * @param message the command message for the new command
      * @return the created and posted {@code Command}
      */
-    private Command route(Message message) {
+    private Command post(Message message) {
         Command command = produceCommand(message);
         SettableFuture<Ack> finishFuture = SettableFuture.create();
         StreamObserver<Ack> observer = newAckingObserver(finishFuture);
@@ -220,10 +220,10 @@ public final class CommandRouter {
      * @return the event with the origin and produced commands
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
-    public CommandRouted routeAll() {
+    public CommandRouted postAll() {
         while (hasNext()) {
             Message message = next();
-            Command command = route(message);
+            Command command = post(message);
             eventBuilder.addProduced(command);
         }
 

@@ -85,7 +85,7 @@ public class ProcessManagerEventReactionTestShouldEnv {
         @SuppressWarnings("CheckReturnValue")
         TUTaskAssigned on(TUTaskCreated event, EventContext context) {
             newRouterFor(event, context.getCommandContext()).add(NESTED_COMMAND)
-                                                            .routeAll();
+                                                            .postAll();
             return RESULT_EVENT;
         }
     }

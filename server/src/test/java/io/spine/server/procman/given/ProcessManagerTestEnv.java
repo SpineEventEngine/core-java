@@ -162,7 +162,7 @@ public class ProcessManagerTestEnv {
                     .build();
             final CommandRouted route = newRouterFor(command, context)
                     .add(addTask)
-                    .routeAll();
+                    .postAll();
             return route;
         }
 

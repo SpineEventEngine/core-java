@@ -164,7 +164,7 @@ public class ProcessManagerRepositoryTestEnv {
                           .build();
             return newRouterFor(command, context)
                     .add(addTask)
-                    .routeAll();
+                    .postAll();
         }
 
         @Assign
