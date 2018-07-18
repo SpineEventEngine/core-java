@@ -1319,7 +1319,7 @@ class StandTest extends TenantAwareTest {
             StandTestProjectionRepository projectionRepository) {
 
         final Set<ProjectId> projectIds = sampleProjects.keySet();
-        final ImmutableCollection<EntityRecord> allRecords = toRecordCollection(projectIds);
+        final ImmutableCollection<EntityRecord> allRecords = toProjectionRecords(projectIds);
 
         for (ProjectId projectId : projectIds) {
             when(projectionRepository.find(eq(projectId)))
@@ -1360,9 +1360,9 @@ class StandTest extends TenantAwareTest {
     }
 
     private static ImmutableCollection<EntityRecord>
-    toRecordCollection(Collection<ProjectId> values) {
+    toProjectionRecords(Collection<ProjectId> projectionIds) {
         final Collection<EntityRecord> transformed = Collections2.transform(
-                values,
+                projectionIds,
                 input -> {
                     checkNotNull(input);
                     final StandTestProjection projection = new StandTestProjection(input);
