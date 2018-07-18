@@ -29,7 +29,6 @@ import io.spine.base.ThrowableMessage;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Rejection;
-import io.spine.core.Status;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -120,14 +119,14 @@ public abstract class Bus<T extends Message,
      * message posted to the bus.
      *
      * <p>In case the message is accepted by the bus, {@link Ack} with the
-     * {@link Status.StatusCase#OK OK} status is passed to the observer.
+     * {@link io.spine.core.Status.StatusCase#OK OK} status is passed to the observer.
      *
      * <p>If the message cannot be sent due to some issues, a corresponding
      * {@link Error Error} status is passed in {@code Ack} instance.
      *
      * <p>Depending on the underlying {@link MessageDispatcher}, a message which causes a business
      * {@link Rejection} may result ether a {@link Rejection} status or
-     * an {@link Status.StatusCase#OK OK} status {@link Ack} instance. Usually,
+     * an {@link io.spine.core.Status.StatusCase#OK OK} status {@link Ack} instance. Usually,
      * the {@link Rejection} status may only pop up if the {@link MessageDispatcher}
      * processes the message sequentially and throws the rejection (wrapped in a
      * the {@linkplain ThrowableMessage ThrowableMessages}) instead of handling them.
