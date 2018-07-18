@@ -34,7 +34,7 @@ import java.util.Iterator;
  *
  * @author Alex Tymchenko
  */
-class EntityQueryProcessor extends RecordBasedQueryProcessor {
+class EntityQueryProcessor extends RecordQueryProcessor {
 
     private final RecordBasedRepository<?, ? extends Entity, ? extends Message> repository;
 

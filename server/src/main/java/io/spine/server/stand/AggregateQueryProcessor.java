@@ -49,7 +49,7 @@ import static com.google.common.base.Predicates.notNull;
  *
  * @author Alex Tymchenko
  */
-class AggregateQueryProcessor extends RecordBasedQueryProcessor {
+class AggregateQueryProcessor extends RecordQueryProcessor {
 
     private final StandStorage standStorage;
     private final TypeUrl type;

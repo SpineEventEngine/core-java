@@ -39,7 +39,7 @@ import java.util.Iterator;
  * @author Alex Tymchenko
  * @author Dmytro Kuzmin
  */
-abstract class RecordBasedQueryProcessor implements QueryProcessor {
+abstract class RecordQueryProcessor implements QueryProcessor {
 
     @Override
     public ImmutableCollection<EntityStateWithVersion> process(Query query) {
