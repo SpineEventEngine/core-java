@@ -24,7 +24,6 @@ import com.google.common.base.Supplier;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandstore.CommandStore;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.storage.StorageFactory;
@@ -213,8 +212,7 @@ class BoundedContextBuilderTest {
     @DisplayName("not accept CommandBus with different multitenancy state")
     void matchCommandBusMultitenancy() {
         final CommandBus.Builder commandBus = CommandBus.newBuilder()
-                                                        .setMultitenant(true)
-                                                        .setCommandStore(mock(CommandStore.class));
+                                                        .setMultitenant(true);
         assertThrows(IllegalStateException.class, () -> BoundedContext.newBuilder()
                                                                       .setMultitenant(false)
                                                                       .setCommandBus(commandBus)

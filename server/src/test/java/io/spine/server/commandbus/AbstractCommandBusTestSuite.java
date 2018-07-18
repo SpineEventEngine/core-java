@@ -36,7 +36,6 @@ import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
-import io.spine.server.commandstore.CommandStore;
 import io.spine.server.event.EventBus;
 import io.spine.server.model.ModelTests;
 import io.spine.server.rejection.RejectionBus;
@@ -57,7 +56,6 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.BoundedContextNames.newName;
-import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
@@ -88,13 +86,13 @@ abstract class AbstractCommandBusTestSuite {
     protected ActorRequestFactory requestFactory;
 
     protected CommandBus commandBus;
-    protected CommandStore commandStore;
     protected Log log;
     protected EventBus eventBus;
     protected RejectionBus rejectionBus;
     protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
     protected MemoizingObserver<Ack> observer;
+    protected TenantIndex tenantIndex;
 
     /**
      * A public constructor for derived test cases.
@@ -127,12 +125,12 @@ abstract class AbstractCommandBusTestSuite {
                                   CommandValidationError validationError,
                                   String errorType,
                                   Command cmd) {
-        final Status status = sendingResult.getStatus();
+        Status status = sendingResult.getStatus();
         assertEquals(status.getStatusCase(), Status.StatusCase.ERROR);
-        final CommandId commandId = cmd.getId();
+        CommandId commandId = cmd.getId();
         assertEquals(commandId, unpack(sendingResult.getMessageId()));
 
-        final Error error = status.getError();
+        Error error = status.getError();
         assertEquals(errorType,
                      error.getType());
         assertEquals(validationError.getNumber(), error.getCode());
@@ -175,41 +173,36 @@ abstract class AbstractCommandBusTestSuite {
     void setUp() {
         ModelTests.clearModel();
 
-        final InMemoryStorageFactory storageFactory =
+        InMemoryStorageFactory storageFactory =
                 InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
                                                    this.multitenant);
-        final TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(this.multitenant,
-                                                                          storageFactory);
-        commandStore = spy(new CommandStore(storageFactory, tenantIndex));
+        tenantIndex = TenantAwareTest.createTenantIndex(this.multitenant, storageFactory);
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
         rejectionBus = spy(RejectionBus.newBuilder()
                                        .build());
         commandBus = CommandBus.newBuilder()
                                .setMultitenant(this.multitenant)
-                               .setCommandStore(commandStore)
                                .setCommandScheduler(scheduler)
                                .setRejectionBus(rejectionBus)
                                .setThreadSpawnAllowed(false)
                                .setLog(log)
                                .setAutoReschedule(false)
                                .injectSystemGateway(NoOpSystemGateway.INSTANCE)
+                               .injectTenantIndex(tenantIndex)
                                .build();
         eventBus = EventBus.newBuilder()
                            .setStorageFactory(storageFactory)
                            .build();
         requestFactory = this.multitenant
-                            ? TestActorRequestFactory.newInstance(getClass(), newUuid())
-                            : TestActorRequestFactory.newInstance(getClass());
+                         ? TestActorRequestFactory.newInstance(getClass(), newUuid())
+                         : TestActorRequestFactory.newInstance(getClass());
         createProjectHandler = new CreateProjectHandler();
         observer = memoizingObserver();
     }
 
     @AfterEach
     void tearDown() throws Exception {
-        if (commandStore.isOpen()) { // then CommandBus is opened, too
-            commandBus.close();
-        }
         eventBus.close();
     }
 
@@ -261,7 +254,8 @@ abstract class AbstractCommandBusTestSuite {
                           Timestamp schedulingTime) {
         for (Command cmd : commands) {
             final Command cmdWithSchedule = setSchedule(cmd, delay, schedulingTime);
-            commandStore.store(cmdWithSchedule, SCHEDULED);
+//            commandStore.store(cmdWithSchedule, SCHEDULED);
+            // TODO:2018-07-18:dmytro.dashenkov: Create projections.
         }
     }
 

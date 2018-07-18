@@ -20,18 +20,14 @@
 
 package io.spine.system.server;
 
-import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
-import io.spine.core.CommandId;
-import io.spine.core.CommandStatus;
 import io.spine.core.Event;
 import io.spine.core.EventId;
-import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.option.EntityOption;
 import io.spine.people.PersonName;
@@ -40,7 +36,6 @@ import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.InProcessSharding;
 import io.spine.server.delivery.Sharding;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.system.server.given.EntityHistoryTestEnv.HistoryEventWatcher;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregate;
@@ -53,14 +48,11 @@ import io.spine.system.server.given.EntityHistoryTestEnv.TestProjection;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestProjectionRepository;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import java.util.Iterator;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
@@ -75,7 +67,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -434,27 +425,29 @@ class EntityHistoryTest {
     }
 
     private <M extends Message> M findCommand(DispatchedCommand dispatchedCommand) {
-        TenantAwareFunction0<M> function = new TenantAwareFunction0<M>(TenantId.getDefaultInstance()) {
-            @Override
-            @CanIgnoreReturnValue
-            public @Nullable M apply() {
-                Iterator<Command> commands = context.getCommandBus()
-                                                    .commandStore()
-                                                    .iterator(CommandStatus.OK);
-                CommandId expected = dispatchedCommand.getCommand();
-                String errorMessage = format("Command with ID %s not found.", expected.getUuid());
-                Any result = Streams.stream(commands)
-                                    .filter(command -> command.getId()
-                                                              .equals(expected))
-                                    .findAny()
-                                    .map(Command::getMessage)
-                                    .orElseThrow(() -> newIllegalStateException(errorMessage));
-                return unpack(result);
-            }
-        };
-        M result = function.execute();
-        assertNotNull(result);
-        return result;
+//        TenantAwareFunction0<M> function = new TenantAwareFunction0<M>(TenantId.getDefaultInstance()) {
+//            @Override
+//            @CanIgnoreReturnValue
+//            public @Nullable M apply() {
+//                Iterator<Command> commands = context.getCommandBus()
+//                                                    .commandStore()
+//                                                    .iterator(CommandStatus.OK);
+//                CommandId expected = dispatchedCommand.getCommand();
+//                String errorMessage = format("Command with ID %s not found.", expected.getUuid());
+//                Any result = Streams.stream(commands)
+//                                    .filter(command -> command.getId()
+//                                                              .equals(expected))
+//                                    .findAny()
+//                                    .map(Command::getMessage)
+//                                    .orElseThrow(() -> newIllegalStateException(errorMessage));
+//                return unpack(result);
+//            }
+//        };
+//        M result = function.execute();
+//        assertNotNull(result);
+//        return result;
+        // TODO:2018-07-18:dmytro.dashenkov: Inject BusFilter to check if command is seen.
+        return null;
     }
 
     private <M extends Message> M findEvent(DispatchedEvent dispatchedEvent) {

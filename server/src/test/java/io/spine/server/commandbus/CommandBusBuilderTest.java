@@ -23,7 +23,6 @@ package io.spine.server.commandbus;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.bus.BusBuilderTest;
-import io.spine.server.commandstore.CommandStore;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
@@ -54,13 +53,13 @@ class CommandBusBuilderTest
 
     private static final SystemGateway SYSTEM_GATEWAY = NoOpSystemGateway.INSTANCE;
 
-    private CommandStore commandStore;
+    private TenantIndex tenantIndex;
 
     @Override
     protected CommandBus.Builder builder() {
         return CommandBus.newBuilder()
                          .injectSystemGateway(SYSTEM_GATEWAY)
-                         .setCommandStore(commandStore);
+                         .injectTenantIndex(tenantIndex);
     }
 
     @BeforeEach
@@ -69,15 +68,14 @@ class CommandBusBuilderTest
         InMemoryStorageFactory storageFactory =
                 InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
                                                    multitenant);
-        TenantIndex tenantIndex = createTenantIndex(multitenant, storageFactory);
-        commandStore = new CommandStore(storageFactory, tenantIndex);
+        tenantIndex = createTenantIndex(multitenant, storageFactory);
     }
 
     @Test
     @DisplayName("create new CommandBus instance")
     void createNewInstance() {
         final CommandBus commandBus = CommandBus.newBuilder()
-                                                .setCommandStore(commandStore)
+                                                .injectTenantIndex(tenantIndex)
                                                 .injectSystemGateway(SYSTEM_GATEWAY)
                                                 .build();
         assertNotNull(commandBus);
@@ -86,7 +84,8 @@ class CommandBusBuilderTest
     @Test
     @DisplayName("not accept null CommandStore")
     void notAcceptNullCommandStore() {
-        assertThrows(NullPointerException.class, () -> builder().setCommandStore(Tests.nullRef()));
+        assertThrows(NullPointerException.class,
+                     () -> builder().injectTenantIndex(Tests.nullRef()));
     }
 
     @Test
@@ -103,7 +102,7 @@ class CommandBusBuilderTest
     void neverOmitSystemGateway() {
         assertThrows(IllegalStateException.class,
                      () -> CommandBus.newBuilder()
-                                     .setCommandStore(commandStore)
+                                     .injectTenantIndex(tenantIndex)
                                      .build());
     }
 
@@ -158,15 +157,6 @@ class CommandBusBuilderTest
                                 .isMultitenant());
             assertFalse(builder().setMultitenant(false)
                                  .isMultitenant());
-        }
-
-        @Test
-        @DisplayName("CommandStore")
-        void commandStore() {
-            final CommandStore commandStore = mock(CommandStore.class);
-
-            assertEquals(commandStore, builder().setCommandStore(commandStore)
-                                                .getCommandStore());
         }
     }
 }

@@ -40,7 +40,6 @@ import java.util.concurrent.CountDownLatch;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
 import static io.spine.server.commandbus.Given.ACommand.addTask;
@@ -77,7 +76,6 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
 
         commandBus.post(cmd, observer);
 
-        verify(commandStore).store(cmd, SCHEDULED);
         checkResult(cmd);
     }
 
@@ -144,7 +142,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
 
             // Create CommandBus specific for this test.
             final CommandBus commandBus = CommandBus.newBuilder()
-                                                    .setCommandStore(commandStore)
+                                                    .injectTenantIndex(tenantIndex)
                                                     .injectSystemGateway(NoOpSystemGateway.INSTANCE)
                                                     .setCommandScheduler(scheduler)
                                                     .setThreadSpawnAllowed(true)
@@ -183,7 +181,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
 
             // Create CommandBus specific for this test.
             final CommandBus commandBus = CommandBus.newBuilder()
-                                                    .setCommandStore(commandStore)
+                                                    .injectTenantIndex(tenantIndex)
                                                     .injectSystemGateway(NoOpSystemGateway.INSTANCE)
                                                     .setCommandScheduler(scheduler)
                                                     .setThreadSpawnAllowed(false)
@@ -272,7 +270,8 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
      */
     private Command storeSingleCommandForRescheduling() {
         final Command cmdWithSchedule = createScheduledCommand();
-        commandStore.store(cmdWithSchedule, SCHEDULED);
+        //commandStore.store(cmdWithSchedule, SCHEDULED);
+        // TODO:2018-07-18:dmytro.dashenkov: Create a projection.
         return cmdWithSchedule;
     }
 

@@ -38,12 +38,11 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
+import io.spine.server.blackbox.BlackBoxBoundedContext;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandstore.CommandStore;
 import io.spine.server.entity.given.Given;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
-import io.spine.server.blackbox.BlackBoxBoundedContext;
 import io.spine.server.model.ModelTests;
 import io.spine.server.procman.given.DirectQuizProcmanRepository;
 import io.spine.server.procman.given.ProcessManagerTestEnv.AddTaskDispatcher;
@@ -76,23 +75,22 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.testing.client.blackbox.Count.count;
-import static io.spine.testing.client.blackbox.Count.none;
-import static io.spine.testing.client.blackbox.Count.once;
-import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.core.Commands.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.server.commandbus.Given.ACommand;
-import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.server.blackbox.EmittedEventsVerifier.emitted;
+import static io.spine.server.commandbus.Given.ACommand;
 import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.answerQuestion;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.newAnswer;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.newQuizId;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.startQuiz;
 import static io.spine.test.Verify.assertSize;
+import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
+import static io.spine.testing.client.blackbox.Count.none;
+import static io.spine.testing.client.blackbox.Count.once;
+import static io.spine.testing.client.blackbox.Count.twice;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -160,12 +158,9 @@ class ProcessManagerTest {
                                           .build();
         StorageFactory storageFactory = bc.getStorageFactory();
         TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false, storageFactory);
-        CommandStore commandStore = spy(
-                new CommandStore(storageFactory, tenantIndex)
-        );
 
         commandBus = spy(CommandBus.newBuilder()
-                                   .setCommandStore(commandStore)
+                                   .injectTenantIndex(tenantIndex)
                                    .injectSystemGateway(NoOpSystemGateway.INSTANCE)
                                    .build());
         processManager = Given.processManagerOfClass(TestProcessManager.class)
