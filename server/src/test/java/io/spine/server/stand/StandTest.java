@@ -1447,9 +1447,9 @@ class StandTest extends TenantAwareTest {
         assertEquals(Responses.ok(), response.getResponse(), "Query response is not OK");
         assertNotNull(response, "Query response must not be null");
 
-        final List<EntityStateWithVersion> recordsList = response.getMessagesList();
-        assertNotNull(recordsList, "Query response has null message list");
-        return recordsList;
+        final List<EntityStateWithVersion> messages = response.getMessagesList();
+        assertNotNull(messages, "Query response has null message list");
+        return messages;
     }
 
     protected Stand prepareStandWithAggregateRepo(StandStorage standStorage) {
