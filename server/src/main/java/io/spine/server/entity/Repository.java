@@ -56,7 +56,6 @@ import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.ExtractEntityFromArchive;
 import io.spine.system.server.MarkCommandAsHandled;
-import io.spine.system.server.PassEventToApplier;
 import io.spine.system.server.RestoreEntity;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;

@@ -90,7 +90,6 @@ public final class EntityHistoryTestEnv {
             return ImmutableSet.of(EntityCreated.class,
                                    EventDispatchedToSubscriber.class,
                                    EventDispatchedToReactor.class,
-                                   EventPassedToApplier.class,
                                    CommandDispatchedToHandler.class,
                                    EntityStateChanged.class,
                                    EntityArchived.class,
