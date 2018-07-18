@@ -50,8 +50,8 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
 
     static <I, P extends ProcessManager<I, ?, ?>>
     Set<I> handle(ProcessManagerRepository<I, P, ?> repository, EventEnvelope event) {
-        final PmEventEndpoint<I, P> endpoint = of(repository, event);
-        final Set<I> result = endpoint.handle();
+        PmEventEndpoint<I, P> endpoint = of(repository, event);
+        Set<I> result = endpoint.handle();
         return result;
     }
 
@@ -62,8 +62,8 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
 
     @Override
     protected Set<I> getTargets() {
-        final EventEnvelope event = envelope();
-        final Set<I> ids = repository().eventRouting()
+        EventEnvelope event = envelope();
+        Set<I> ids = repository().eventRouting()
                                        .apply(event.getMessage(), event.getEventContext());
         return ids;
     }

@@ -193,7 +193,7 @@ public abstract class BoundedContext
      * Obtains a set of entity type names by their visibility.
      */
     public Set<TypeName> getEntityTypes(Visibility visibility) {
-        final Set<TypeName> result = guard.getEntityTypes(visibility);
+        Set<TypeName> result = guard.getEntityTypes(visibility);
         return result;
     }
 
@@ -207,7 +207,7 @@ public abstract class BoundedContext
             throw newIllegalStateException("No repository found for the the entity state class %s",
                                            entityStateClass.getName());
         }
-        final Optional<Repository> repository = guard.getRepository(entityStateClass);
+        Optional<Repository> repository = guard.getRepository(entityStateClass);
         return repository;
     }
 

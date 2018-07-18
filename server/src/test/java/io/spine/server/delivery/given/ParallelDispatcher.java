@@ -106,7 +106,7 @@ public abstract class ParallelDispatcher<I extends Message, M extends Message> {
             });
         }
 
-        final List<Callable<Object>> commandPostingJobs = builder.build();
+        List<Callable<Object>> commandPostingJobs = builder.build();
         executorService.invokeAll(commandPostingJobs);
 
         Thread.sleep(dispatchWaitTime);

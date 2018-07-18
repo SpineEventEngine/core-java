@@ -293,7 +293,7 @@ public final class BoundedContextBuilder {
                     StorageFactorySwitch.newInstance(name, multitenant);
         }
 
-        final StorageFactory storageFactory = storageFactorySupplier.get();
+        StorageFactory storageFactory = storageFactorySupplier.get();
 
         if (storageFactory == null) {
             throw newIllegalStateException(
@@ -321,12 +321,12 @@ public final class BoundedContextBuilder {
 
     private void initCommandBus(StorageFactory factory) {
         if (commandBus == null) {
-            final CommandStore commandStore = createCommandStore(factory, tenantIndex);
+            CommandStore commandStore = createCommandStore(factory, tenantIndex);
             commandBus = CommandBus.newBuilder()
                                    .setMultitenant(this.multitenant)
                                    .setCommandStore(commandStore);
         } else {
-            final Boolean commandBusMultitenancy = commandBus.isMultitenant();
+            Boolean commandBusMultitenancy = commandBus.isMultitenant();
             if (commandBusMultitenancy != null) {
                 checkSameValue("CommandBus must match multitenancy of BoundedContext. " +
                                         "Status in BoundedContext.Builder: %s CommandBus: %s",
@@ -336,7 +336,7 @@ public final class BoundedContextBuilder {
             }
 
             if (commandBus.getCommandStore() == null) {
-                final CommandStore commandStore = createCommandStore(factory, tenantIndex);
+                CommandStore commandStore = createCommandStore(factory, tenantIndex);
                 commandBus.setCommandStore(commandStore);
             }
         }
@@ -347,8 +347,8 @@ public final class BoundedContextBuilder {
             eventBus = EventBus.newBuilder()
                                .setStorageFactory(storageFactory);
         } else {
-            final boolean eventStoreConfigured = eventBus.getEventStore()
-                                                         .isPresent();
+            boolean eventStoreConfigured = eventBus.getEventStore()
+                                                   .isPresent();
             if (!eventStoreConfigured) {
                 eventBus.setStorageFactory(storageFactory);
             }
@@ -359,7 +359,7 @@ public final class BoundedContextBuilder {
         if (stand == null) {
             stand = createStand(factory);
         } else {
-            final Boolean standMultitenant = stand.isMultitenant();
+            Boolean standMultitenant = stand.isMultitenant();
             // Check that both either multi-tenant or single-tenant.
             if (standMultitenant == null) {
                 stand.setMultitenant(multitenant);
@@ -396,13 +396,13 @@ public final class BoundedContextBuilder {
     }
 
     private static CommandStore createCommandStore(StorageFactory factory, TenantIndex index) {
-        final CommandStore result = new CommandStore(factory, index);
+        CommandStore result = new CommandStore(factory, index);
         return result;
     }
 
     private Stand.Builder createStand(StorageFactory factory) {
-        final StandStorage standStorage = factory.createStandStorage();
-        final Stand.Builder result = Stand.newBuilder()
+        StandStorage standStorage = factory.createStandStorage();
+        Stand.Builder result = Stand.newBuilder()
                                           .setMultitenant(multitenant)
                                           .setStorage(standStorage);
         return result;

@@ -60,14 +60,14 @@ public class InMemoryTransportFactory implements TransportFactory {
 
     @Override
     public final synchronized Publisher createPublisher(ChannelId channelId) {
-        final InMemoryPublisher result = new InMemoryPublisher(channelId,
-                                                               providerOf(subscribers));
+        InMemoryPublisher result = new InMemoryPublisher(channelId,
+                                                         providerOf(subscribers));
         return result;
     }
 
     @Override
     public final synchronized Subscriber createSubscriber(ChannelId channelId) {
-        final Subscriber subscriber = newSubscriber(channelId);
+        Subscriber subscriber = newSubscriber(channelId);
         subscribers.put(channelId, subscriber);
         return subscriber;
     }

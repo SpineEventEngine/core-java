@@ -232,7 +232,7 @@ public abstract class Transaction<I,
      * @throws IllegalStateException       in case of a generic error
      */
     protected void commit() throws InvalidEntityStateException, IllegalStateException {
-        final B builder = getBuilder();
+        B builder = getBuilder();
 
         if (builder.isDirty()) {
             commitChangedState(builder);
@@ -262,7 +262,7 @@ public abstract class Transaction<I,
         } catch (ValidationException exception) {  /* Could only happen if the state
                                                       has been injected not using
                                                       the builder setters. */
-            final InvalidEntityStateException invalidStateException = of(exception);
+            InvalidEntityStateException invalidStateException = of(exception);
             rollback(invalidStateException);
 
             throw invalidStateException;
@@ -315,8 +315,8 @@ public abstract class Transaction<I,
      * @param cause the reason of the rollback
      */
     void rollback(Throwable cause) {
-        final S currentState = currentBuilderState();
-        final TransactionListener<I, E, S, B> listener = getListener();
+        S currentState = currentBuilderState();
+        TransactionListener<I, E, S, B> listener = getListener();
         listener.onTransactionFailed(cause, getEntity(), currentState,
                                      getVersion(), getLifecycleFlags());
         this.active = false;
@@ -356,7 +356,7 @@ public abstract class Transaction<I,
     @CanIgnoreReturnValue
     @SuppressWarnings("OverlyBroadCatchBlock")  /* to `rollback(..)` in case of any exception. */
     Transaction<I, E, S, B> apply(EventEnvelope event) {
-        final Phase<I, E, S, B> phase = new Phase<>(this, event);
+        Phase<I, E, S, B> phase = new Phase<>(this, event);
 
         Phase<I, E, S, B> appliedPhase = null;
         try {
@@ -365,7 +365,7 @@ public abstract class Transaction<I,
             rollback(t);
             throw illegalStateWithCauseOf(t);
         } finally {
-            final Phase<I, E, S, B> phaseToAdd = appliedPhase == null ? phase : appliedPhase;
+            Phase<I, E, S, B> phaseToAdd = appliedPhase == null ? phase : appliedPhase;
             phases.add(phaseToAdd);
 
             getListener().onAfterPhase(phaseToAdd);
@@ -375,13 +375,13 @@ public abstract class Transaction<I,
     }
 
     private InvalidEntityStateException of(ValidationException exception) {
-        final Message invalidState = currentBuilderState();
+        Message invalidState = currentBuilderState();
         return onConstraintViolations(invalidState, exception.getConstraintViolations());
     }
 
     private S currentBuilderState() {
         @SuppressWarnings("unchecked")  // OK, as `AbstractValidatingBuilder` is the only subclass.
-        final AbstractValidatingBuilder<S, ?> abstractBuilder =
+                AbstractValidatingBuilder<S, ?> abstractBuilder =
                 (AbstractValidatingBuilder<S, ?>) builder;
         return abstractBuilder.internalBuild();
     }
@@ -427,7 +427,7 @@ public abstract class Transaction<I,
     private void injectTo(E entity) {
         // assigning `this` to a variable to explicitly specify
         // the generic bounds for Java compiler.
-        final Transaction<I, E, S, B> tx = this;
+        Transaction<I, E, S, B> tx = this;
         entity.injectTransaction(tx);
     }
 
@@ -450,9 +450,9 @@ public abstract class Transaction<I,
     private void initVersion(Version version) {
         checkNotNull(version);
 
-        final int versionNumber = this.version.getNumber();
+        int versionNumber = this.version.getNumber();
         if (versionNumber > 0) {
-            final String errMsg = format(
+            String errMsg = format(
                     "initVersion() called on an entity with non-zero version number (%d).",
                     versionNumber
             );
@@ -548,8 +548,8 @@ public abstract class Transaction<I,
         }
 
         private void advanceVersion() {
-            final Version version = underlyingTransaction.versioningStrategy()
-                                                         .nextVersion(this);
+            Version version = underlyingTransaction.versioningStrategy()
+                                                   .nextVersion(this);
             checkIsIncrement(underlyingTransaction.getVersion(), version);
             underlyingTransaction.setVersion(version);
         }
