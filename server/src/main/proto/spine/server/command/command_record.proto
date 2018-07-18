@@ -28,7 +28,6 @@ option (SPI_all) = true;
 option java_package = "io.spine.server.commandbus";
 option java_multiple_files = true;
 option java_outer_classname = "CommandRecordProto";
-option java_generate_equals_and_hash = true;
 
 import "google/protobuf/timestamp.proto";
 

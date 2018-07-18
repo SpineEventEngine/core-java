@@ -27,7 +27,6 @@ option (type_url_prefix) = "type.spine.io";
 option (SPI_all) = true;
 option java_package = "io.spine.test.rejection";
 // Keep all the rejections under the same outer class called `OperationRejections`.
-option java_generate_equals_and_hash = true;
 
 
 // To be used in `RejectionEnvelopesShould`.
