@@ -272,8 +272,8 @@ public final class Events {
     public static ActorContext getActorContextOrThrow(EventContext eventContext) {
         Optional<CommandContext> optional = findCommandContext(eventContext);
         checkState(optional.isPresent(), "Unable to find origin CommandContext");
-        ActorContext result = optional.get()
-                                      .getActorContext();
+        CommandContext commandContext = optional.get();
+        ActorContext result = commandContext.getActorContext();
         return result;
     }
 
