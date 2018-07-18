@@ -1319,8 +1319,6 @@ class StandTest extends TenantAwareTest {
             StandTestProjectionRepository projectionRepository) {
 
         final Set<ProjectId> projectIds = sampleProjects.keySet();
-        final ImmutableCollection<StandTestProjection> allResults =
-                toProjectionCollection(projectIds);
         final ImmutableCollection<EntityRecord> allRecords = toRecordCollection(projectIds);
 
         for (ProjectId projectId : projectIds) {
@@ -1328,12 +1326,6 @@ class StandTest extends TenantAwareTest {
                     .thenReturn(Optional.of(new StandTestProjection(projectId)));
         }
 
-        final Iterable<ProjectId> matchingIds = argThat(projectionIdsIterableMatcher(projectIds));
-
-        when(projectionRepository.loadAll(matchingIds, any(FieldMask.class)))
-                .thenReturn(allResults.iterator());
-        when(projectionRepository.loadAll())
-                .thenReturn(allResults.iterator());
         when(projectionRepository.loadAllRecords())
                 .thenReturn(allRecords.iterator());
 
@@ -1367,18 +1359,6 @@ class StandTest extends TenantAwareTest {
         };
     }
 
-    private static ImmutableCollection<StandTestProjection>
-    toProjectionCollection(Collection<ProjectId> values) {
-        final Collection<StandTestProjection> transformed = Collections2.transform(
-                values,
-                input -> {
-                    checkNotNull(input);
-                    return new StandTestProjection(input);
-                });
-        final ImmutableList<StandTestProjection> result = ImmutableList.copyOf(transformed);
-        return result;
-    }
-
     private static ImmutableCollection<EntityRecord>
     toRecordCollection(Collection<ProjectId> values) {
         final Collection<EntityRecord> transformed = Collections2.transform(
@@ -1396,17 +1376,6 @@ class StandTest extends TenantAwareTest {
                 });
         final ImmutableList<EntityRecord> result = ImmutableList.copyOf(transformed);
         return result;
-    }
-
-    private static ArgumentMatcher<Iterable<ProjectId>> projectionIdsIterableMatcher(
-            final Set<ProjectId> projectIds) {
-        return argument -> {
-            boolean everyElementPresent = true;
-            for (ProjectId projectId : argument) {
-                everyElementPresent = everyElementPresent && projectIds.contains(projectId);
-            }
-            return everyElementPresent;
-        };
     }
 
     private void triggerMultipleUpdates(Map<CustomerId, Customer> sampleCustomers, Stand stand) {
