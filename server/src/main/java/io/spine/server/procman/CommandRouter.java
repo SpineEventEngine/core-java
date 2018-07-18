@@ -32,9 +32,8 @@ import io.spine.core.Ack;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.CommandId;
+import io.spine.core.Commands;
 import io.spine.core.DispatchedCommand;
-import io.spine.core.Status;
 import io.spine.server.commandbus.CommandBus;
 
 import java.util.NoSuchElementException;
@@ -42,9 +41,9 @@ import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.commandbus.CommandSequence.checkSent;
+import static io.spine.server.commandbus.CommandSequence.newAckObserver;
 
 /**
  * Routes one or more commands in response to a command or an event.
@@ -141,7 +140,7 @@ public final class CommandRouter {
     private Command post(Message message) {
         Command command = produceCommand(message);
         SettableFuture<Ack> finishFuture = SettableFuture.create();
-        StreamObserver<Ack> observer = newAckingObserver(finishFuture);
+        StreamObserver<Ack> observer = newAckObserver(finishFuture);
         commandBus.post(command, observer);
         Ack ack;
         // Wait till the call is completed.
@@ -170,44 +169,12 @@ public final class CommandRouter {
         return result;
     }
 
-    private static StreamObserver<Ack> newAckingObserver(SettableFuture<Ack> finishFuture) {
-        return new StreamObserver<Ack>() {
-            @Override
-            public void onNext(Ack value) {
-                finishFuture.set(value);
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                finishFuture.setException(t);
-            }
-
-            @Override
-            public void onCompleted() {
-                // Do nothing. It's just a confirmation of successful post to Command Bus.
-            }
-        };
-    }
-
     /**
      * Creates a {@code CommandFactory} with the settings from the passed {@code ActorContext}
      */
     private static CommandFactory commandFactory(ActorContext actorContext) {
         ActorRequestFactory factory = ActorRequestFactory.fromContext(actorContext);
         return factory.command();
-    }
-
-    private static void checkSent(Command command, Ack ack) {
-        Status status = ack.getStatus();
-        CommandId routedCommandId = unpack(ack.getMessageId());
-        CommandId commandId = command.getId();
-        checkState(commandId.equals(routedCommandId),
-                   "Unexpected command posted. Intending (%s) but was (%s).",
-                   commandId,
-                   routedCommandId);
-        checkState(status.getStatusCase() == Status.StatusCase.OK,
-                   "Command posting failed with status: %s.",
-                   status);
     }
 
     /**
@@ -224,7 +191,7 @@ public final class CommandRouter {
         while (hasNext()) {
             Message message = next();
             Command command = post(message);
-            eventBuilder.addProduced(command);
+            eventBuilder.addGenerated(Commands.toDispatched(command));
         }
 
         return eventBuilder.build();

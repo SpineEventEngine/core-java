@@ -103,6 +103,19 @@ public final class Commands {
     }
 
     /**
+     * Creates a {@code DispatchedCommand} using the message and context
+     * from the passed {@code Command}.
+     */
+    public static DispatchedCommand toDispatched(Command command) {
+        checkNotNull(command);
+        DispatchedCommand.Builder result = DispatchedCommand
+                .newBuilder()
+                .setMessage(command.getMessage())
+                .setContext(command.getContext());
+        return result.build();
+    }
+
+    /**
      * Extracts a command message if the passed instance is a {@link Command} object or
      * {@link com.google.protobuf.Any Any}, otherwise returns the passed message.
      */

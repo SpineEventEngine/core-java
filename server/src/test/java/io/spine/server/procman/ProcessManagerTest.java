@@ -30,6 +30,7 @@ import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.DispatchedCommand;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
@@ -310,7 +311,11 @@ class ProcessManagerTest {
         assertSize(1, dispatchedCommands);
         CommandEnvelope dispatchedCommand = dispatcher.getCommands()
                                                       .get(0);
-        assertEquals(commandRouted.getProduced(0), dispatchedCommand.getCommand());
+        DispatchedCommand generated = commandRouted.getGenerated(0);
+        assertEquals(generated.getMessage(), dispatchedCommand.getCommand()
+                                                              .getMessage());
+        assertEquals(generated.getContext(), dispatchedCommand.getCommand()
+                                                              .getContext());
     }
 
     @Nested
