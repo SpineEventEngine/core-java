@@ -66,9 +66,8 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
         final TypeUrl type = Queries.typeOf(query);
         final BoundedContext boundedContext = typeToContextMap.get(type);
 
-        checkState(boundedContext != null,
-                   "Query targets the type %s which cannot be found in any registered repository",
-                   type);
+        checkState(boundedContext != null, "Repository storing the Query target type %s cannot " +
+                "be found among registered repositories", type);
 
         final Stand stand = boundedContext.getStand();
         try {
