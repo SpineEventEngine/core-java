@@ -310,7 +310,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * todo doc
+     * Obtains iterator over {@link EntityRecord} for the all entities present in the repository.
+     *
+     * @return an iterator over all records
      */
     @Internal
     public Iterator<EntityRecord> loadAllRecords() {
