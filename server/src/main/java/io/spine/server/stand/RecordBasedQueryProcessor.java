@@ -43,7 +43,6 @@ abstract class RecordBasedQueryProcessor implements QueryProcessor {
 
     @Override
     public ImmutableCollection<EntityStateWithVersion> process(Query query) {
-
         final Target target = query.getTarget();
         final FieldMask fieldMask = query.getFieldMask();
 
