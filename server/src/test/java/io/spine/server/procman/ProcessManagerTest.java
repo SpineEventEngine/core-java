@@ -305,7 +305,7 @@ class ProcessManagerTest {
         CommandRouted commandRouted = (CommandRouted) message;
 
         // The source of the command is StartProject.
-        assertThat(getMessage(commandRouted.getSource()), instanceOf(PmStartProject.class));
+        assertThat(getMessage(commandRouted.getOrigin()), instanceOf(PmStartProject.class));
         List<CommandEnvelope> dispatchedCommands = dispatcher.getCommands();
         assertSize(1, dispatchedCommands);
         CommandEnvelope dispatchedCommand = dispatcher.getCommands()
@@ -355,34 +355,15 @@ class ProcessManagerTest {
             CommandRouter router = processManager.newRouterFor(commandMessage, commandContext);
             assertNotNull(router);
 
-            assertEquals(commandMessage, getMessage(router.getSource()));
-            assertEquals(commandContext, router.getSource()
-                                               .getContext());
-        }
-
-        @Test
-        @DisplayName("IteratingCommandRouter")
-        void iteratingCommandRouter() {
-            StringValue commandMessage = toMessage("create_iterating_router");
-            CommandContext commandContext = requestFactory.createCommandContext();
-
-            processManager.injectCommandBus(mock(CommandBus.class));
-
-            IteratingCommandRouter router
-                    = processManager.newIteratingRouterFor(commandMessage,
-                                                           commandContext);
-            assertNotNull(router);
-
-            assertEquals(commandMessage, getMessage(router.getSource()));
-            assertEquals(commandContext, router.getSource()
-                                               .getContext());
+            assertEquals(commandMessage, router.getOriginMessage());
+            assertEquals(commandContext, router.getOriginContext());
         }
     }
 
     @Test
-    @DisplayName("require command bus when creating router")
+    @DisplayName("require CommandBus when creating router")
     void requireCommandBusForRouter() {
-        assertThrows(IllegalStateException.class,
+        assertThrows(NullPointerException.class,
                      () -> processManager.newRouterFor(StringValue.getDefaultInstance(),
                                                        CommandContext.getDefaultInstance()));
     }

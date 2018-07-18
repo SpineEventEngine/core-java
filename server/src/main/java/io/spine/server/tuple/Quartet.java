@@ -94,10 +94,8 @@ public final class Quartet<A extends Message, B, C, D>
      * Creates a quartet with three optional values.
      */
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
-    Quartet<A, Optional<B>, Optional<C>, Optional<D>> withNullable3(A a,
-                                                                    @Nullable B b,
-                                                                    @Nullable C c,
-                                                                    @Nullable D d) {
+    Quartet<A, Optional<B>, Optional<C>, Optional<D>>
+    withNullable3(A a, @Nullable B b, @Nullable C c, @Nullable D d) {
         checkNotNullOrEmpty(Quartet.class, a);
         checkAllNotEmpty(Quartet.class, b, c, d);
         final Quartet<A, Optional<B>, Optional<C>, Optional<D>> result =

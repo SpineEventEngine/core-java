@@ -27,7 +27,6 @@ option (type_url_prefix) = "type.spine.io";
 option (SPI_all) = true;
 option java_package = "io.spine.server.entity.rejection";
 // Keep all the rejections under the same outer class called `StandardRejections`.
-option java_generate_equals_and_hash = true;
 
 import "google/protobuf/any.proto";
 
