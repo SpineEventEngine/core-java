@@ -24,8 +24,8 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
 import io.spine.server.aggregate.AggregateEventRecord;
-import io.spine.server.command.TestEventFactory;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.testing.server.TestEventFactory;
 
 import java.util.List;
 
@@ -34,7 +34,7 @@ import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
-import static io.spine.server.command.TestEventFactory.newInstance;
+import static io.spine.testing.server.TestEventFactory.newInstance;
 import static io.spine.time.Durations2.seconds;
 
 /**

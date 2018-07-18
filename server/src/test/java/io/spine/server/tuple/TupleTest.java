@@ -28,7 +28,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
-import io.spine.test.TestValues;
+import io.spine.testing.TestValues;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

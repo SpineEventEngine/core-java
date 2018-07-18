@@ -53,7 +53,7 @@ import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.test.Tests.nullRef;
+import static io.spine.testing.Tests.nullRef;
 
 /**
  * @author Dmytro Dashenkov

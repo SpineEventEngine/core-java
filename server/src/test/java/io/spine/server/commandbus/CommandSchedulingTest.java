@@ -25,7 +25,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import io.spine.test.Tests;
+import io.spine.testing.Tests;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.time.Durations2;
 import org.junit.jupiter.api.DisplayName;

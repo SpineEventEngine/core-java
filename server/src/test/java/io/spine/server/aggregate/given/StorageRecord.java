@@ -24,11 +24,11 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
 import io.spine.server.aggregate.AggregateEventRecord;
-import io.spine.server.command.TestEventFactory;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.testdata.Sample;
+import io.spine.testing.server.TestEventFactory;
 
-import static io.spine.server.command.TestEventFactory.newInstance;
+import static io.spine.testing.server.TestEventFactory.newInstance;
 
 /**
  * Utilities for creating test instances of {@link AggregateEventRecord}.

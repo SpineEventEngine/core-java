@@ -20,6 +20,7 @@
 
 package io.spine.server.procman;
 
+import io.spine.annotation.Internal;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 
@@ -32,10 +33,11 @@ import java.util.List;
  * @param <P> the type of process managers
  * @author Alexander Yevsyukov
  */
-class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
+@Internal
+public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
         extends PmEndpoint<I, P, CommandEnvelope, I> {
 
-    private PmCommandEndpoint(ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
+    protected PmCommandEndpoint(ProcessManagerRepository<I, P, ?> repository, CommandEnvelope cmd) {
         super(repository, cmd);
     }
 

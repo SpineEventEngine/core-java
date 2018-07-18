@@ -24,7 +24,7 @@ import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
-import io.spine.test.TestValues;
+import io.spine.testing.TestValues;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

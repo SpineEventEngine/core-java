@@ -21,8 +21,8 @@
 package io.spine.server.model;
 
 import io.spine.server.entity.TestEntity;
-import io.spine.server.entity.given.Given;
 import io.spine.server.model.given.DefaultStateRegistryTestEnv.TimerSnapshot;
+import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

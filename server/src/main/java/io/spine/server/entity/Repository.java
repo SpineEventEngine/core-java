@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
@@ -477,11 +478,12 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     @Internal
     @SuppressWarnings("OverlyCoupledClass") // Posts system events.
-    protected final class Lifecycle {
+    protected class Lifecycle {
 
         private final EntityHistoryId id;
 
-        private Lifecycle(I id) {
+        @VisibleForTesting
+        protected Lifecycle(I id) {
             this.id = historyId(id);
         }
 

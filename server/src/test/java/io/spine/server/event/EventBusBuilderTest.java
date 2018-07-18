@@ -27,7 +27,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
-import io.spine.test.Tests;
+import io.spine.testing.Tests;
 import io.spine.validate.MessageValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

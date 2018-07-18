@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Command;
 import io.spine.core.UserId;
-import io.spine.core.given.GivenUserId;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCancelProject;
@@ -38,6 +37,7 @@ import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.core.given.GivenUserId;
 
 import static io.spine.base.Time.getCurrentTime;
 
