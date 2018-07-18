@@ -375,7 +375,7 @@ class StandTest extends TenantAwareTest {
             verifyObserver(responseObserver);
 
             final List<EntityStateWithVersion> messages = checkAndGetMessageList(responseObserver);
-            assertTrue(messages.isEmpty(), "Query returned a non-empty response record list " +
+            assertTrue(messages.isEmpty(), "Query returned a non-empty response message list " +
                     "though the filter was not set");
         }
     }
@@ -1177,7 +1177,7 @@ class StandTest extends TenantAwareTest {
 
         final List<EntityStateWithVersion> messages = checkAndGetMessageList(responseObserver);
         assertTrue(messages.isEmpty(),
-                   "Query returned a non-empty response record list though the target had been " +
+                   "Query returned a non-empty response message list though the target had been " +
                            "empty");
     }
 
