@@ -94,7 +94,7 @@ class AggregateQueryProcessor implements QueryProcessor {
         } else {
             stateRecords = doFetchWithFilters(target, fieldMask);
         }
-
+        // todo address duplication
         while (stateRecords.hasNext()) {
             final EntityRecord entityRecord = stateRecords.next();
             final Any state = entityRecord.getState();
