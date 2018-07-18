@@ -21,9 +21,8 @@ package io.spine.server.stand;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Any;
 import io.spine.client.Query;
-import io.spine.client.Record;
+import io.spine.client.EntityStateWithVersion;
 
 /**
  * An {@link QueryProcessor} implementation that always returns empty result.
@@ -35,7 +34,7 @@ import io.spine.client.Record;
  */
 class NoopQueryProcessor implements QueryProcessor {
     @Override
-    public ImmutableCollection<Record> process(Query query) {
+    public ImmutableCollection<EntityStateWithVersion> process(Query query) {
         return ImmutableList.of();
     }
 }

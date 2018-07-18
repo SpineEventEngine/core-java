@@ -31,8 +31,6 @@ option java_package = "io.spine.client";
 
 import "google/protobuf/any.proto";
 
-import "spine/core/version.proto";
-
 // Represents an ID of an entity.
 //
 // Acts as an read-side API identifier for Projection state, Aggregate state and other entities.
@@ -40,16 +38,6 @@ message EntityId {
 
     // An ID of an entity.
     google.protobuf.Any id = 1;
-}
-
-// Represents the entity in the form prepared for reading on the client side.
-message Record {
-
-    // The state of the entity packed as `Any`.
-    google.protobuf.Any state = 1;
-
-    // The version of the entity.
-    core.Version version = 2;
 }
 
 // Defines the entity type and filters.

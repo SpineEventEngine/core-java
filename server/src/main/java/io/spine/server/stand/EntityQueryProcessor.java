@@ -25,11 +25,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.EntityFilters;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
-import io.spine.client.Record;
 import io.spine.client.Target;
 import io.spine.core.Version;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.RecordBasedRepository;
@@ -50,8 +49,8 @@ class EntityQueryProcessor implements QueryProcessor {
     }
 
     @Override
-    public ImmutableCollection<Record> process(Query query) {
-        final ImmutableList.Builder<Record> resultBuilder = ImmutableList.builder();
+    public ImmutableCollection<EntityStateWithVersion> process(Query query) {
+        final ImmutableList.Builder<EntityStateWithVersion> resultBuilder = ImmutableList.builder();
 
         final Target target = query.getTarget();
         final FieldMask fieldMask = query.getFieldMask();
@@ -68,13 +67,13 @@ class EntityQueryProcessor implements QueryProcessor {
             final EntityRecord entityRecord = records.next();
             final Any state = entityRecord.getState();
             final Version version = entityRecord.getVersion();
-            final Record record = Record.newBuilder()
-                                        .setState(state)
-                                        .setVersion(version)
-                                        .build();
-            resultBuilder.add(record);
+            final EntityStateWithVersion message = EntityStateWithVersion.newBuilder()
+                                                                         .setState(state)
+                                                                         .setVersion(version)
+                                                                         .build();
+            resultBuilder.add(message);
         }
-        final ImmutableList<Record> result = resultBuilder.build();
+        final ImmutableList<EntityStateWithVersion> result = resultBuilder.build();
         return result;
     }
 }

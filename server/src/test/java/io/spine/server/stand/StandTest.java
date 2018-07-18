@@ -35,9 +35,9 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityStateUpdate;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
-import io.spine.client.Record;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionValidationError;
 import io.spine.client.Subscriptions;
@@ -374,8 +374,8 @@ class StandTest extends TenantAwareTest {
 
             verifyObserver(responseObserver);
 
-            final List<Record> recordList = checkAndGetRecordList(responseObserver);
-            assertTrue(recordList.isEmpty(), "Query returned a non-empty response record list " +
+            final List<EntityStateWithVersion> messages = checkAndGetMessageList(responseObserver);
+            assertTrue(messages.isEmpty(), "Query returned a non-empty response record list " +
                     "though the filter was not set");
         }
     }
@@ -629,11 +629,11 @@ class StandTest extends TenantAwareTest {
             @Override
             public void onNext(QueryResponse value) {
                 super.onNext(value);
-                final List<Record> records = value.getRecordsList();
-                assertFalse(records.isEmpty());
+                final List<EntityStateWithVersion> messages = value.getMessagesList();
+                assertFalse(messages.isEmpty());
 
-                final Record record = records.get(0);
-                final Customer customer = unpack(record.getState());
+                final EntityStateWithVersion message = messages.get(0);
+                final Customer customer = unpack(message.getState());
                 for (Descriptors.FieldDescriptor field : customer.getDescriptorForType()
                                                                  .getFields()) {
                     assertTrue(customer.getField(field)
@@ -655,12 +655,12 @@ class StandTest extends TenantAwareTest {
             public void onNext(QueryResponse value) {
                 super.onNext(value);
 
-                final List<Record> records = value.getRecordsList();
-                assertFalse(records.isEmpty());
+                final List<EntityStateWithVersion> messages = value.getMessagesList();
+                assertFalse(messages.isEmpty());
 
                 final Customer sampleCustomer = getSampleCustomer();
-                final Record record = records.get(0);
-                final Customer customer = unpack(record.getState());
+                final EntityStateWithVersion message = messages.get(0);
+                final Customer customer = unpack(message.getState());
                 assertTrue(customer.getName()
                                    .equals(sampleCustomer.getName()));
                 assertFalse(customer.hasId());
@@ -680,12 +680,12 @@ class StandTest extends TenantAwareTest {
                     public void onNext(QueryResponse value) {
                         super.onNext(value);
 
-                        final List<Record> records = value.getRecordsList();
-                        assertFalse(records.isEmpty());
+                        final List<EntityStateWithVersion> messages = value.getMessagesList();
+                        assertFalse(messages.isEmpty());
 
                         final Customer sampleCustomer = getSampleCustomer();
-                        final Record record = records.get(0);
-                        final Customer customer = unpack(record.getState());
+                        final EntityStateWithVersion message = messages.get(0);
+                        final Customer customer = unpack(message.getState());
                         assertEquals(customer.getNicknamesList(),
                                      sampleCustomer.getNicknamesList());
 
@@ -707,12 +707,12 @@ class StandTest extends TenantAwareTest {
                     public void onNext(QueryResponse value) {
                         super.onNext(value);
 
-                        final List<Record> records = value.getRecordsList();
-                        assertFalse(records.isEmpty());
+                        final List<EntityStateWithVersion> messages = value.getMessagesList();
+                        assertFalse(messages.isEmpty());
 
                         final Customer sampleCustomer = getSampleCustomer();
-                        final Record record = records.get(0);
-                        final Customer customer = unpack(record.getState());
+                        final EntityStateWithVersion message = messages.get(0);
+                        final Customer customer = unpack(message.getState());
                         assertEquals(customer.getNicknamesList(),
                                      sampleCustomer.getNicknamesList());
 
@@ -762,11 +762,11 @@ class StandTest extends TenantAwareTest {
         final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver();
         stand.execute(customerQuery, observer);
 
-        final List<Record> read = observer.responseHandled().getRecordsList();
-        Verify.assertSize(1, read);
+        final List<EntityStateWithVersion> messages = observer.responseHandled().getMessagesList();
+        Verify.assertSize(1, messages);
 
-        final Record record = read.get(0);
-        final Customer customer = unpack(record.getState());
+        final EntityStateWithVersion message = messages.get(0);
+        final Customer customer = unpack(message.getState());
         assertMatches(customer, fieldMask);
         assertTrue(ids.contains(customer.getId()));
 
@@ -794,12 +794,12 @@ class StandTest extends TenantAwareTest {
             @Override
             public void onNext(QueryResponse value) {
                 super.onNext(value);
-                final List<Record> records = value.getRecordsList();
-                assertFalse(records.isEmpty());
+                final List<EntityStateWithVersion> messages = value.getMessagesList();
+                assertFalse(messages.isEmpty());
 
                 // todo extract method unpackCustomer or something
-                final Record record = records.get(0);
-                final Customer customer = unpack(record.getState());
+                final EntityStateWithVersion message = messages.get(0);
+                final Customer customer = unpack(message.getState());
 
                 assertNotEquals(customer, null);
 
@@ -1109,11 +1109,11 @@ class StandTest extends TenantAwareTest {
             public void onNext(QueryResponse value) {
                 super.onNext(value);
 
-                final List<Record> records = value.getRecordsList();
-                assertFalse(records.isEmpty());
+                final List<EntityStateWithVersion> messages = value.getMessagesList();
+                assertFalse(messages.isEmpty());
 
-                final Record record = records.get(0);
-                final Customer customer = unpack(record.getState());
+                final EntityStateWithVersion message = messages.get(0);
+                final Customer customer = unpack(message.getState());
                 final Customer sampleCustomer = getSampleCustomer();
 
                 assertEquals(sampleCustomer.getName(), customer.getName());
@@ -1177,8 +1177,8 @@ class StandTest extends TenantAwareTest {
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readCustomersQuery, responseObserver);
 
-        final List<Record> recordList = checkAndGetRecordList(responseObserver);
-        assertTrue(recordList.isEmpty(),
+        final List<EntityStateWithVersion> messages = checkAndGetMessageList(responseObserver);
+        assertTrue(messages.isEmpty(),
                    "Query returned a non-empty response record list though the target had been " +
                            "empty");
     }
@@ -1202,11 +1202,11 @@ class StandTest extends TenantAwareTest {
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readMultipleProjects, responseObserver);
 
-        final List<Record> recordList = checkAndGetRecordList(responseObserver);
-        assertEquals(sampleProjects.size(), recordList.size());
+        final List<EntityStateWithVersion> messages = checkAndGetMessageList(responseObserver);
+        assertEquals(sampleProjects.size(), messages.size());
         final Collection<Project> allCustomers = sampleProjects.values();
-        for (Record singleRecord : recordList) {
-            final Project unpackedSingleResult = unpack(singleRecord.getState());
+        for (EntityStateWithVersion singleMessage : messages) {
+            final Project unpackedSingleResult = unpack(singleMessage.getState());
             assertTrue(allCustomers.contains(unpackedSingleResult));
         }
     }
@@ -1240,11 +1240,11 @@ class StandTest extends TenantAwareTest {
             @Override
             public void onNext(QueryResponse value) {
                 super.onNext(value);
-                final List<Record> records = value.getRecordsList();
-                Verify.assertSize(ids.size(), records);
+                final List<EntityStateWithVersion> messages = value.getMessagesList();
+                Verify.assertSize(ids.size(), messages);
 
-                for (Record record : records) {
-                    final Customer customer = unpack(record.getState());
+                for (EntityStateWithVersion singleMessage : messages) {
+                    final Customer customer = unpack(singleMessage.getState());
 
                     assertNotEquals(customer, null);
 
@@ -1277,11 +1277,11 @@ class StandTest extends TenantAwareTest {
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readMultipleCustomers, responseObserver);
 
-        final List<Record> recordList = checkAndGetRecordList(responseObserver);
-        assertEquals(sampleCustomers.size(), recordList.size());
+        final List<EntityStateWithVersion> messages = checkAndGetMessageList(responseObserver);
+        assertEquals(sampleCustomers.size(), messages.size());
         final Collection<Customer> allCustomers = sampleCustomers.values();
-        for (Record singleRecord : recordList) {
-            final Customer unpackedSingleResult = unpack(singleRecord.getState());
+        for (EntityStateWithVersion singleMessage : messages) {
+            final Customer unpackedSingleResult = unpack(singleMessage.getState());
             assertTrue(allCustomers.contains(unpackedSingleResult));
         }
         return stand;
@@ -1440,7 +1440,8 @@ class StandTest extends TenantAwareTest {
         }
     }
 
-    private static List<Record> checkAndGetRecordList(MemoizeQueryResponseObserver responseObserver) {
+    private static List<EntityStateWithVersion>
+    checkAndGetMessageList(MemoizeQueryResponseObserver responseObserver) {
         assertTrue(responseObserver.isCompleted(), "Query has not completed successfully");
         assertNull(responseObserver.throwable(), "Throwable has been caught upon query execution");
 
@@ -1448,7 +1449,7 @@ class StandTest extends TenantAwareTest {
         assertEquals(Responses.ok(), response.getResponse(), "Query response is not OK");
         assertNotNull(response, "Query response must not be null");
 
-        final List<Record> recordsList = response.getRecordsList();
+        final List<EntityStateWithVersion> recordsList = response.getMessagesList();
         assertNotNull(recordsList, "Query response has null message list");
         return recordsList;
     }

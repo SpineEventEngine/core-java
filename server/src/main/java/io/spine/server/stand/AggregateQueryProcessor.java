@@ -31,8 +31,8 @@ import com.google.protobuf.Message;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
+import io.spine.client.EntityStateWithVersion;
 import io.spine.client.Query;
-import io.spine.client.Record;
 import io.spine.client.Target;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
@@ -78,9 +78,9 @@ class AggregateQueryProcessor implements QueryProcessor {
             };
 
     @Override
-    public ImmutableCollection<Record> process(Query query) {
+    public ImmutableCollection<EntityStateWithVersion> process(Query query) {
 
-        final ImmutableList.Builder<Record> resultBuilder = ImmutableList.builder();
+        final ImmutableList.Builder<EntityStateWithVersion> resultBuilder = ImmutableList.builder();
 
         Iterator<EntityRecord> stateRecords;
         final Target target = query.getTarget();
@@ -99,14 +99,14 @@ class AggregateQueryProcessor implements QueryProcessor {
             final EntityRecord entityRecord = stateRecords.next();
             final Any state = entityRecord.getState();
             final Version version = entityRecord.getVersion();
-            final Record record = Record.newBuilder()
-                                        .setState(state)
-                                        .setVersion(version)
-                                        .build();
-            resultBuilder.add(record);
+            final EntityStateWithVersion message = EntityStateWithVersion.newBuilder()
+                                                                         .setState(state)
+                                                                         .setVersion(version)
+                                                                         .build();
+            resultBuilder.add(message);
         }
 
-        final ImmutableList<Record> result = resultBuilder.build();
+        final ImmutableList<EntityStateWithVersion> result = resultBuilder.build();
         return result;
     }
 

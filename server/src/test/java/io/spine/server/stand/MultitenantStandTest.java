@@ -86,7 +86,7 @@ class MultitenantStandTest extends StandTest {
         stand.execute(readAllCustomers, responseObserver);
         QueryResponse response = responseObserver.responseHandled();
         assertTrue(Responses.isOk(response.getResponse()));
-        assertEquals(0, response.getRecordsCount());
+        assertEquals(0, response.getMessagesCount());
     }
 
     @Test
