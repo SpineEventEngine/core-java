@@ -74,17 +74,14 @@ class AggregateQueryProcessor extends RecordBasedQueryProcessor {
 
     @Override
     protected Iterator<EntityRecord> queryForRecords(Target target, FieldMask fieldMask) {
-        Iterator<EntityRecord> stateRecords;
-        final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
-                                                       .isEmpty();
         if (target.getIncludeAll()) {
-            stateRecords = shouldApplyFieldMask
-                           ? standStorage.readAllByType(type, fieldMask)
-                           : standStorage.readAllByType(type);
-        } else {
-            stateRecords = doFetchWithFilters(target, fieldMask);
+            final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
+                                                           .isEmpty();
+            return shouldApplyFieldMask
+                   ? standStorage.readAllByType(type, fieldMask)
+                   : standStorage.readAllByType(type);
         }
-        return stateRecords;
+        return doFetchWithFilters(target, fieldMask);
     }
 
     private Iterator<EntityRecord> doFetchWithFilters(Target target, FieldMask fieldMask) {
@@ -101,9 +98,9 @@ class AggregateQueryProcessor extends RecordBasedQueryProcessor {
                                                                              stateIdTransformer);
 
         final Iterator<EntityRecord> result = stateIds.size() == 1
-                ? readOne(stateIds.iterator()
-                                  .next(), fieldMask)
-                : readMany(stateIds, fieldMask);
+                                              ? readOne(stateIds.iterator()
+                                                                .next(), fieldMask)
+                                              : readMany(stateIds, fieldMask);
 
         return result;
     }
@@ -130,8 +127,9 @@ class AggregateQueryProcessor extends RecordBasedQueryProcessor {
         final boolean applyFieldMask = !fieldMask.getPathsList()
                                                  .isEmpty();
         final Iterator<EntityRecord> bulkReadResults = applyFieldMask
-                ? standStorage.readMultiple(stateIds, fieldMask)
-                : standStorage.readMultiple(stateIds);
+                                                       ? standStorage.readMultiple(stateIds,
+                                                                                   fieldMask)
+                                                       : standStorage.readMultiple(stateIds);
         final Iterator<EntityRecord> result = Iterators.filter(bulkReadResults, notNull());
         return result;
     }
