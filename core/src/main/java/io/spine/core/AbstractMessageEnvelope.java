@@ -63,7 +63,7 @@ public abstract class AbstractMessageEnvelope<I extends Message, T, C extends Me
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final AbstractMessageEnvelope other = (AbstractMessageEnvelope) obj;
+        AbstractMessageEnvelope other = (AbstractMessageEnvelope) obj;
         return Objects.equals(this.object, other.object);
     }
 }

@@ -46,11 +46,9 @@ import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.ReactingReposi
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectingRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingRepository;
-import io.spine.server.command.TestEventFactory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.Model;
-import io.spine.server.model.ModelTests;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProjectWithChildren;
@@ -58,6 +56,8 @@ import io.spine.test.aggregate.command.AggStartProjectWithChildren;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.testdata.Sample;
+import io.spine.testing.server.TestEventFactory;
+import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -69,7 +69,6 @@ import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
 
-import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.server.aggregate.AggregateRepository.DEFAULT_SNAPSHOT_TRIGGER;
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.boundedContext;
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.givenAggregateId;
@@ -79,6 +78,7 @@ import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.reposit
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.requestFactory;
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetBoundedContext;
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetRepository;
+import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

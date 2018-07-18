@@ -85,16 +85,16 @@ public final class FloatMismatch {
      * Creates a new instance of {@code ValueMismatch} with the passed values for a float attribute.
      */
     public static ValueMismatch of(float expected, float actual, float newValue, int version) {
-        final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(toAny(expected))
-                                                           .setActual(toAny(actual))
-                                                           .setNewValue(toAny(newValue))
-                                                           .setVersion(version);
+        ValueMismatch.Builder builder = ValueMismatch.newBuilder()
+                                                     .setExpected(toAny(expected))
+                                                     .setActual(toAny(actual))
+                                                     .setNewValue(toAny(newValue))
+                                                     .setVersion(version);
         return builder.build();
     }
 
     private static float unpacked(Any any) {
-        final FloatValue unpacked = unpack(any, FloatValue.class);
+        FloatValue unpacked = unpack(any, FloatValue.class);
         return unpacked.getValue();
     }
 
@@ -105,7 +105,7 @@ public final class FloatMismatch {
      */
     public static float unpackExpected(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any expected = mismatch.getExpected();
+        Any expected = mismatch.getExpected();
         return unpacked(expected);
     }
 
@@ -116,7 +116,7 @@ public final class FloatMismatch {
      */
     public static float unpackActual(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any actual = mismatch.getActual();
+        Any actual = mismatch.getActual();
         return unpacked(actual);
     }
 
@@ -127,7 +127,7 @@ public final class FloatMismatch {
      */
     public static float unpackNewValue(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any newValue = mismatch.getNewValue();
+        Any newValue = mismatch.getNewValue();
         return unpacked(newValue);
     }
 }

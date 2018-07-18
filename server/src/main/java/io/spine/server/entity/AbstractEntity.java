@@ -87,7 +87,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     /**
-     * Obtains model class for this aggregate.
+     * Obtains model class for this entity.
      */
     protected EntityClass<?> thisClass() {
         if (thisClass == null) {

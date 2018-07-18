@@ -22,7 +22,6 @@ package io.spine.server.event.given;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
@@ -64,6 +63,7 @@ import io.spine.test.event.command.EvAddTasks;
 import io.spine.test.event.command.EvAddTeamMember;
 import io.spine.test.event.command.EvInviteTeamMembers;
 import io.spine.testdata.Sample;
+import io.spine.testing.client.TestActorRequestFactory;
 
 import java.util.List;
 import java.util.Set;

@@ -19,6 +19,7 @@
  */
 package io.spine.server.delivery.given;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.protobuf.StringValue;
 import io.spine.core.BoundedContextName;
@@ -46,9 +47,7 @@ import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.rejection.AggCannotReassignUnassignedTask;
 import io.spine.validate.StringValueVBuilder;
 
-import java.util.Optional;
-
-import static io.spine.server.BoundedContext.newName;
+import static io.spine.core.BoundedContextNames.newName;
 
 /**
  * An abstract base for environments, which are created to ease the message delivery testing.
@@ -59,20 +58,20 @@ public class MessageDeliveryTestEnv {
 
     /**
      * The time to wait until all the messages dispatched to entities
-     * are processed in several threads.
+     * are processed in several threads, in milliseconds.
      *
      * <p>"Sleeping" down the main thread is a simpler choice to ensure the messages were delivered.
      * The alternatives would imply injecting multiple mocks that would send reports
      * down the dispatching route. Which seems to be much more complex.
      */
-    private static final int DISPATCH_WAIT_TIME = 3000;
+    private static final int DISPATCH_WAIT_TIME = 3_000;
 
     /** Prevents instantiation of this test environment class. */
     private MessageDeliveryTestEnv() {
     }
 
     public static void setShardingTransport(InMemoryTransportFactory transport) {
-        Sharding inProcessSharding = new InProcessSharding(transport);
+        final Sharding inProcessSharding = new InProcessSharding(transport);
         ServerEnvironment.getInstance()
                          .replaceSharding(inProcessSharding);
     }
@@ -109,12 +108,12 @@ public class MessageDeliveryTestEnv {
 
         @React
         public Optional<AggProjectCancelled> on(AggProjectCancelled event) {
-            return Optional.empty();
+            return Optional.absent();
         }
 
         @React
         public Optional<AggProjectPaused> on(AggCannotReassignUnassignedTask rejection) {
-            return Optional.empty();
+            return Optional.absent();
         }
     }
 
@@ -155,8 +154,8 @@ public class MessageDeliveryTestEnv {
 
         @Override
         public EntityClass getShardedModelClass() {
-            Class<DeliveryEqualityProject> someAggregate = DeliveryEqualityProject.class;
-            AggregateClass<?> result = Model.getInstance()
+            final Class<DeliveryEqualityProject> someAggregate = DeliveryEqualityProject.class;
+            final AggregateClass<?> result = Model.getInstance()
                                                   .asAggregateClass(someAggregate);
             return result;
         }

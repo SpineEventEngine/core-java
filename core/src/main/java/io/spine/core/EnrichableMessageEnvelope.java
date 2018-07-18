@@ -50,7 +50,7 @@ public abstract class EnrichableMessageEnvelope<I extends Message, T, C extends 
      * @see Enrichment.Builder#setDoNotEnrich(boolean)
      */
     public final boolean isEnrichmentEnabled() {
-        final boolean result = getEnrichment().getModeCase() != Enrichment.ModeCase.DO_NOT_ENRICH;
+        boolean result = getEnrichment().getModeCase() != Enrichment.ModeCase.DO_NOT_ENRICH;
         return result;
     }
 
@@ -72,8 +72,8 @@ public abstract class EnrichableMessageEnvelope<I extends Message, T, C extends 
      */
     public EnrichableMessageEnvelope<I, T, C> toEnriched(Map<String, Any> enrichments) {
         checkNotNull(enrichments);
-        final Enrichment enrichment = createEnrichment(enrichments);
-        final EnrichableMessageEnvelope<I, T, C> result = enrich(enrichment);
+        Enrichment enrichment = createEnrichment(enrichments);
+        EnrichableMessageEnvelope<I, T, C> result = enrich(enrichment);
         return result;
     }
 }

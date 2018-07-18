@@ -198,12 +198,7 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
      */
     private static CommandFactory commandFactory(CommandContext sourceContext) {
         ActorContext actorContext = sourceContext.getActorContext();
-        ActorRequestFactory factory =
-                ActorRequestFactory.newBuilder()
-                                   .setActor(actorContext.getActor())
-                                   .setTenantId(actorContext.getTenantId())
-                                   .setZoneOffset(actorContext.getZoneOffset())
-                                   .build();
+        ActorRequestFactory factory = ActorRequestFactory.fromContext(actorContext);
         return factory.command();
     }
 

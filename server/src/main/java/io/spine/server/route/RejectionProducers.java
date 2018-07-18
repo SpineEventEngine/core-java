@@ -70,11 +70,8 @@ public class RejectionProducers {
 
         @Override
         public Set<I> apply(Message message, RejectionContext context) {
-            Optional<I> id = Rejections.getProducer(context);
-            if (!id.isPresent()) {
-                return ImmutableSet.of();
-            }
-            return ImmutableSet.of(id.get());
+            final Optional<I> id = Rejections.getProducer(context);
+            return id.<Set<I>>map(ImmutableSet::of).orElseGet(ImmutableSet::of);
         }
 
         @Override
@@ -93,7 +90,7 @@ public class RejectionProducers {
         private final FromRejectionMessage<I> func = FromRejectionMessage.fieldAt(0);
         @Override
         public Set<I> apply(Message message, RejectionContext context) {
-            I id = func.apply(message, context);
+            final I id = func.apply(message, context);
             return ImmutableSet.of(id);
         }
     }

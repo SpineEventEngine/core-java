@@ -85,16 +85,16 @@ public final class LongMismatch {
      * Creates a new instance of {@code ValueMismatch} with the passed values for a long attribute.
      */
     public static ValueMismatch of(long expected, long actual, long newValue, int version) {
-        final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(toAny(expected))
-                                                           .setActual(toAny(actual))
-                                                           .setNewValue(toAny(newValue))
-                                                           .setVersion(version);
+        ValueMismatch.Builder builder = ValueMismatch.newBuilder()
+                                                     .setExpected(toAny(expected))
+                                                     .setActual(toAny(actual))
+                                                     .setNewValue(toAny(newValue))
+                                                     .setVersion(version);
         return builder.build();
     }
 
     private static long unpacked(Any any) {
-        final Int64Value unpacked = unpack(any, Int64Value.class);
+        Int64Value unpacked = unpack(any, Int64Value.class);
         return unpacked.getValue();
     }
 
@@ -105,7 +105,7 @@ public final class LongMismatch {
      */
     public static long unpackExpected(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any expected = mismatch.getExpected();
+        Any expected = mismatch.getExpected();
         return unpacked(expected);
     }
 
@@ -116,7 +116,7 @@ public final class LongMismatch {
      */
     public static long unpackActual(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any actual = mismatch.getActual();
+        Any actual = mismatch.getActual();
         return unpacked(actual);
     }
 
@@ -127,7 +127,7 @@ public final class LongMismatch {
      */
     public static long unpackNewValue(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any newValue = mismatch.getNewValue();
+        Any newValue = mismatch.getNewValue();
         return unpacked(newValue);
     }
 }

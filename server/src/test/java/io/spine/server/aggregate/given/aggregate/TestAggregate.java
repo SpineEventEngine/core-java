@@ -29,7 +29,6 @@ import io.spine.core.Commands;
 import io.spine.core.Event;
 import io.spine.core.React;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateMessageDispatcher;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.rejection.StandardRejections;
@@ -44,6 +43,7 @@ import io.spine.test.aggregate.command.ImportEvents;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
+import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 
 import java.util.List;
 

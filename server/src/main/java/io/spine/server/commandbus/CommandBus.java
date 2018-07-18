@@ -29,6 +29,7 @@ import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Rejection;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
@@ -307,7 +308,7 @@ public class CommandBus extends Bus<Command,
          * The multi-tenancy flag for the {@code CommandBus} to build.
          *
          * <p>The value of this field should be equal to that of corresponding
-         * {@linkplain io.spine.server.BoundedContext.Builder BoundedContext.Builder} and is not
+         * {@linkplain BoundedContextBuilder BoundedContext.Builder} and is not
          * supposed to be {@linkplain #setMultitenant(Boolean) set directly}.
          *
          * <p>If set directly, the value would be matched to the multi-tenancy flag of

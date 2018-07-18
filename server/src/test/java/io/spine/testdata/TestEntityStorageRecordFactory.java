@@ -20,8 +20,8 @@
 
 package io.spine.testdata;
 
-import io.spine.core.given.GivenVersion;
 import io.spine.server.entity.EntityRecord;
+import io.spine.testing.core.given.GivenVersion;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.TypeConverter.toAny;

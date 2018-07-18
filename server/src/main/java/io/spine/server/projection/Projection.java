@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.EventPlayers;
 import io.spine.server.entity.TransactionalEntity;
@@ -72,10 +71,6 @@ public abstract class Projection<I,
                     .asProjectionClass(getClass());
     }
 
-    protected void handle(EventEnvelope event) {
-        apply(event.getMessage(), event.getEventContext());
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -101,20 +96,20 @@ public abstract class Projection<I,
      * @return {@code true} if the projection state was changed as the result of playing the events
      */
     static boolean play(Projection projection, Iterable<Event> events) {
-        ProjectionTransaction tx = ProjectionTransaction.start(projection);
+        final ProjectionTransaction tx = ProjectionTransaction.start(projection);
         projection.play(events);
         tx.commit();
         return projection.isChanged();
     }
 
-    void apply(Message eventMessage, EventContext eventContext)  {
-        EventSubscriberMethod method = thisClass().getSubscriber(EventClass.of(eventMessage));
+    void apply(Message eventMessage, EventContext eventContext) {
+        final EventSubscriberMethod method = thisClass().getSubscriber(EventClass.of(eventMessage));
         method.invoke(this, eventMessage, eventContext);
     }
 
     @Override
     public void play(Iterable<Event> events) {
-        EventPlayer eventPlayer = EventPlayers.forTransactionOf(this);
+        final EventPlayer eventPlayer = EventPlayers.forTransactionOf(this);
         eventPlayer.play(events);
     }
 }

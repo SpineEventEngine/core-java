@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -118,7 +119,8 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      *                version of the entity
      * @see #validate(Message)
      */
-    void updateState(S state, Version version) {
+    @Internal
+    public void updateState(S state, Version version) {
         updateState(state);
         updateVersion(version);
     }

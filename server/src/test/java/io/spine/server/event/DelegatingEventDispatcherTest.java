@@ -22,21 +22,21 @@ package io.spine.server.event;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
+import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.server.BoundedContext;
-import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.given.DelegatingEventDispatcherTestEnv.EmptyEventDispatcherDelegate;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.integration.ExternalMessages;
+import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.test.TestValues.newUuidValue;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.TestValues.newUuidValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -67,10 +67,10 @@ class DelegatingEventDispatcherTest {
     @Test
     @DisplayName("delegate `onError`")
     void delegateOnError() {
-        TestEventFactory factory = TestEventFactory.newInstance(getClass());
-        EventEnvelope envelope = EventEnvelope.of(factory.createEvent(newUuidValue()));
+        final TestEventFactory factory = TestEventFactory.newInstance(getClass());
+        final EventEnvelope envelope = EventEnvelope.of(factory.createEvent(newUuidValue()));
 
-        RuntimeException exception = new RuntimeException("test delegating onError");
+        final RuntimeException exception = new RuntimeException("test delegating onError");
         delegatingDispatcher.onError(envelope, exception);
 
         assertTrue(delegate.onErrorCalled());
@@ -80,19 +80,19 @@ class DelegatingEventDispatcherTest {
     @Test
     @DisplayName("expose external dispatcher that delegates `onError`")
     void exposeExternalDispatcher() {
-        ExternalMessageDispatcher<String> extMessageDispatcher =
+        final ExternalMessageDispatcher<String> extMessageDispatcher =
                 delegatingDispatcher.getExternalDispatcher();
 
-        TestEventFactory factory = TestEventFactory.newInstance(getClass());
-        StringValue eventMsg = newUuidValue();
-        Event event = factory.createEvent(eventMsg);
-        ExternalMessage externalMessage =
-                ExternalMessages.of(event, BoundedContext.newName(getClass().getName()));
+        final TestEventFactory factory = TestEventFactory.newInstance(getClass());
+        final StringValue eventMsg = newUuidValue();
+        final Event event = factory.createEvent(eventMsg);
+        final ExternalMessage externalMessage =
+                ExternalMessages.of(event, BoundedContextNames.newName(getClass().getName()));
 
-        ExternalMessageEnvelope externalMessageEnvelope =
+        final ExternalMessageEnvelope externalMessageEnvelope =
                 ExternalMessageEnvelope.of(externalMessage, eventMsg);
 
-        RuntimeException exception =
+        final RuntimeException exception =
                 new RuntimeException("test external dispatcher delegating onError");
         extMessageDispatcher.onError(externalMessageEnvelope, exception);
 

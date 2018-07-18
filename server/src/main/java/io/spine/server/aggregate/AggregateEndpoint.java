@@ -20,11 +20,14 @@
 
 package io.spine.server.aggregate;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.Event;
+import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.TransactionListener;
 
 import java.util.List;
 
@@ -49,13 +52,10 @@ abstract class AggregateEndpoint<I,
 
     @Override
     protected void deliverNowTo(I aggregateId) {
-        A aggregate = repository().loadOrCreate(aggregateId);
+        A aggregate = instanceFor(aggregateId);
         LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
 
-        List<? extends Message> eventMessages = doDispatch(aggregate, envelope());
-        AggregateTransaction tx = startTransaction(aggregate);
-        aggregate.apply(eventMessages, envelope());
-        tx.commit();
+        dispatchInTx(aggregate);
 
         // Update lifecycle flags only if the message was handled successfully and flags changed.
         LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();
@@ -66,8 +66,25 @@ abstract class AggregateEndpoint<I,
         store(aggregate);
     }
 
+    @CanIgnoreReturnValue
+    protected List<? extends Message> dispatchInTx(A aggregate) {
+        List<? extends Message> eventMessages = doDispatch(aggregate, envelope());
+        AggregateTransaction tx = startTransaction(aggregate);
+        aggregate.apply(eventMessages, envelope());
+        tx.commit();
+        return eventMessages;
+    }
+
+    protected A instanceFor(I aggregateId) {
+        return repository().loadOrCreate(aggregateId);
+    }
+
+    @SuppressWarnings("unchecked") // to avoid massive generic-related issues.
     protected AggregateTransaction startTransaction(A aggregate) {
-        return AggregateTransaction.start(aggregate);
+        AggregateTransaction tx = AggregateTransaction.start(aggregate);
+        TransactionListener listener = EntityLifecycleMonitor.newInstance(repository());
+        tx.setListener(listener);
+        return tx;
     }
 
     @Override

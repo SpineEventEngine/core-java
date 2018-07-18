@@ -44,8 +44,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
     private static final long serialVersionUID = 0L;
 
     /** The model class of the aggregate root to which the aggregate part belongs. */
-    @Nullable
-    private volatile Class<? extends AggregateRoot> rootClass;
+    private volatile @Nullable Class<? extends AggregateRoot> rootClass;
 
     /** Creates new instance. */
     public AggregatePartClass(Class<? extends A> cls) {
@@ -117,7 +116,8 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
         R result;
         try {
             Constructor<R> ctor =
-                    rootClass.getDeclaredConstructor(bc.getClass(), aggregateId.getClass());
+                    rootClass.getDeclaredConstructor(BoundedContext.class,
+                                                     aggregateId.getClass());
             ctor.setAccessible(true);
             result = ctor.newInstance(bc, aggregateId);
         } catch (NoSuchMethodException | InvocationTargetException |

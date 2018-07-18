@@ -21,13 +21,13 @@
 package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.core.given.GivenVersion;
+import io.spine.testing.core.given.GivenVersion;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -64,7 +64,7 @@ class VersionsTest {
     @Test
     @DisplayName("increment Version")
     void increment() {
-        final Version v1 = GivenVersion.withNumber(1);
+        Version v1 = GivenVersion.withNumber(1);
         assertEquals(v1.getNumber() + 1, Versions.increment(v1)
                                                  .getNumber());
     }

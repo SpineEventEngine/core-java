@@ -23,6 +23,7 @@ import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
+import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -65,6 +66,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
+import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -236,7 +238,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public A create(I id) {
-        return aggregateClass().createEntity(id);
+        A aggregate = aggregateClass().createEntity(id);
+        return aggregate;
     }
 
     /** Obtains class information of aggregates managed by this repository. */
@@ -261,8 +264,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @param aggregate an instance to store
      */
-    @SuppressWarnings("CheckReturnValue")
-        // ignore result of `commitEvents()` because we obtain them in the block before the call.
+    @SuppressWarnings("CheckReturnValue") 
+        // ignore result of `commitEvents()` because we obtain them in the block before the call. 
     @Override
     protected void store(A aggregate) {
         I id = aggregate.getId();
@@ -492,8 +495,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         if (eventsFromStorage.isPresent()) {
             A result = play(id, eventsFromStorage.get());
             return Optional.of(result);
+        } else {
+            lifecycleOf(id).onEntityCreated(AGGREGATE);
+            return Optional.empty();
         }
-        return Optional.empty();
     }
 
     /**
@@ -620,6 +625,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getCommandEndpointDelivery() {
         return commandDeliverySupplier.get();
+    }
+
+    void onDispatchCommand(I id, Command command) {
+        lifecycleOf(id).onDispatchCommand(command);
+    }
+
+    void onDispatchEvent(I id, Event event) {
+        lifecycleOf(id).onDispatchEventToReactor(event);
     }
 
     @Override

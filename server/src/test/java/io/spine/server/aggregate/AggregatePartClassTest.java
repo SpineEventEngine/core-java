@@ -25,7 +25,7 @@ import io.spine.server.aggregate.given.AggregatePartTestEnv.AnAggregatePart;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.AnAggregateRoot;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.WrongAggregatePart;
 import io.spine.server.model.ModelError;
-import io.spine.server.model.ModelTests;
+import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

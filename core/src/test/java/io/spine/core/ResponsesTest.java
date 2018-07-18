@@ -25,8 +25,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -54,12 +54,12 @@ class ResponsesTest {
     @Test
     @DisplayName("recognize not OK response")
     void recognizeNotOkResponse() {
-        final Status status = Status.newBuilder()
-                                    .setError(Error.getDefaultInstance())
-                                    .build();
-        final Response error = Response.newBuilder()
-                                       .setStatus(status)
-                                       .build();
+        Status status = Status.newBuilder()
+                              .setError(Error.getDefaultInstance())
+                              .build();
+        Response error = Response.newBuilder()
+                                 .setStatus(status)
+                                 .build();
         assertFalse(Responses.isOk(error));
     }
 }

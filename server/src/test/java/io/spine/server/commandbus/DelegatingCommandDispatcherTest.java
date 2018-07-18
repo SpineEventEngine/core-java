@@ -20,9 +20,9 @@
 
 package io.spine.server.commandbus;
 
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.commandbus.given.DelegatingCommandDispatcherTestEnv.EmptyCommandDispatcherDelegate;
+import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

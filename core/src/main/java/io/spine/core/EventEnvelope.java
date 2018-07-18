@@ -57,7 +57,7 @@ public final class EventEnvelope extends EnrichableMessageEnvelope<EventId, Even
      */
     @Override
     public EventId getId() {
-        final EventId result = getOuterObject().getId();
+        EventId result = getOuterObject().getId();
         return result;
     }
 
@@ -112,7 +112,7 @@ public final class EventEnvelope extends EnrichableMessageEnvelope<EventId, Even
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     public void setOriginFields(EventContext.Builder builder) {
-        final EventContext context = getEventContext();
+        EventContext context = getEventContext();
         builder.setEventContext(context);
         builder.setRootCommandId(context.getRootCommandId());
     }
@@ -128,7 +128,7 @@ public final class EventEnvelope extends EnrichableMessageEnvelope<EventId, Even
      * Obtains the type of the event message.
      */
     public TypeName getTypeName() {
-        final TypeName result = TypeName.of(eventMessage);
+        TypeName result = TypeName.of(eventMessage);
         return result;
     }
 
@@ -139,7 +139,7 @@ public final class EventEnvelope extends EnrichableMessageEnvelope<EventId, Even
 
     @Override
     protected EventEnvelope enrich(Enrichment enrichment) {
-        final Event.Builder enrichedCopy =
+        Event.Builder enrichedCopy =
                 getOuterObject().toBuilder()
                                 .setContext(getMessageContext().toBuilder()
                                                                .setEnrichment(enrichment));

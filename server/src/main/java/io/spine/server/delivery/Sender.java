@@ -69,5 +69,4 @@ public class Sender<I, M extends ActorMessageEnvelope<?, ?, ?>> {
                                            .getSharding();
         return result;
     }
-
 }

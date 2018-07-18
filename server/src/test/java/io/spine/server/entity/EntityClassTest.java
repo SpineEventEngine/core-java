@@ -20,18 +20,19 @@
 
 package io.spine.server.entity;
 
+import com.google.common.collect.Range;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.server.model.ModelError;
-import io.spine.test.TimeTests;
-import io.spine.time.Interval;
-import io.spine.time.Intervals;
+import io.spine.time.testing.TimeTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
+import java.time.Instant;
 
+import static io.spine.time.Timestamps2.toInstant;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -45,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EntityClassTest {
 
     private final EntityClass<NanoEntity> entityClass =
-            new EntityClass<>((Class<? extends NanoEntity>) NanoEntity.class);
+            new EntityClass<>(NanoEntity.class);
 
     @Test
     @DisplayName("return ID class")
@@ -75,12 +76,12 @@ class EntityClassTest {
         Timestamp after = Time.getCurrentTime();
 
         // The interval with a much earlier start to allow non-zero interval on faster computers.
-        Interval whileWeCreate = Intervals.between(before, after);
+        Range<Instant> whileWeCreate = Range.closed(toInstant(before), toInstant(after));
 
         assertEquals(id, entity.getId());
         assertEquals(0, entity.getVersion()
                               .getNumber());
-        assertTrue(Intervals.contains(whileWeCreate, entity.whenModified()));
+        assertTrue(whileWeCreate.contains(toInstant(entity.whenModified())));
         assertEquals(StringValue.getDefaultInstance(), entity.getState());
         assertFalse(entity.isArchived());
         assertFalse(entity.isDeleted());

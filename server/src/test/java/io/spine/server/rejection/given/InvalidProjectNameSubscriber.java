@@ -21,7 +21,6 @@
 package io.spine.server.rejection.given;
 
 import io.spine.client.CommandFactory;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Rejection;
@@ -30,6 +29,7 @@ import io.spine.core.Subscribe;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.test.rejection.ProjectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.RjUpdateProjectName;
+import io.spine.testing.client.TestActorRequestFactory;
 
 /**
  * @author Alexander Yevsyukov

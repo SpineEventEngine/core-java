@@ -26,11 +26,11 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.CommandContext;
 import io.spine.core.EventId;
 import io.spine.core.UserId;
-import io.spine.core.given.GivenUserId;
 import io.spine.people.PersonName;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.outbus.enrich.Enricher;
 import io.spine.test.event.ProjectId;
+import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneOffset;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

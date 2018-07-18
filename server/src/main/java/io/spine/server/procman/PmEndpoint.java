@@ -66,12 +66,16 @@ abstract class PmEndpoint<I,
     protected void deliverNowTo(I id) {
         ProcessManagerRepository<I, P, ?> repository = repository();
         P manager = repository.findOrCreate(id);
-
-        PmTransaction<?, ?, ?> tx = repository.beginTransactionFor(manager);
-        @SuppressWarnings("unchecked") // all PM handlers return events.
-        List<Event> events = (List<Event>) doDispatch(manager, envelope());
-        tx.commit();
+        List<Event> events = dispatchInTx(manager);
         store(manager);
         repository.postEvents(events);
+    }
+
+    protected List<Event> dispatchInTx(P processManager) {
+        PmTransaction<?, ?, ?> tx = repository().beginTransactionFor(processManager);
+        @SuppressWarnings("unchecked") // all PM handlers return events.
+        List<Event> events = (List<Event>) doDispatch(processManager, envelope());
+        tx.commit();
+        return events;
     }
 }

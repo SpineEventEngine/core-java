@@ -32,9 +32,9 @@ import static io.spine.change.FloatMismatch.unexpectedValue;
 import static io.spine.change.FloatMismatch.unpackActual;
 import static io.spine.change.FloatMismatch.unpackExpected;
 import static io.spine.change.FloatMismatch.unpackNewValue;
-import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -69,7 +69,7 @@ class FloatMismatchTest {
         @Test
         @DisplayName("from given float values")
         void withFloats() {
-            final ValueMismatch mismatch = FloatMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+            ValueMismatch mismatch = FloatMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch), DELTA);
             assertEquals(ACTUAL, unpackActual(mismatch), DELTA);
@@ -80,8 +80,8 @@ class FloatMismatchTest {
         @Test
         @DisplayName("for expected zero amount")
         void forExpectedZero() {
-            final double expected = 0.0f;
-            final ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
+            double expected = 0.0f;
+            ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(expected, unpackExpected(mismatch), DELTA);
             assertEquals(ACTUAL, unpackActual(mismatch), DELTA);
@@ -92,8 +92,8 @@ class FloatMismatchTest {
         @Test
         @DisplayName("for expected non zero amount")
         void forExpectedNonZero() {
-            final float actual = 0.0f;
-            final ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
+            float actual = 0.0f;
+            ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch), DELTA);
             assertEquals(actual, unpackActual(mismatch), DELTA);
@@ -105,7 +105,7 @@ class FloatMismatchTest {
         @Test
         @DisplayName("for unexpected float value")
         void forUnexpectedFloat() {
-            final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+            ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch), DELTA);
             assertEquals(ACTUAL, unpackActual(mismatch), DELTA);
@@ -117,7 +117,7 @@ class FloatMismatchTest {
     @Test
     @DisplayName("not accept same expected and actual values")
     void notAcceptSameExpectedAndActual() {
-        final float value = 19.19f;
+        float value = 19.19f;
         assertThrows(IllegalArgumentException.class,
                      () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
     }
@@ -129,21 +129,21 @@ class FloatMismatchTest {
         @Test
         @DisplayName("expected")
         void expectedWithWrongType() {
-            final ValueMismatch mismatch = expectedTrue(VERSION);
+            ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
         }
 
         @Test
         @DisplayName("actual")
         void actualWithWrongType() {
-            final ValueMismatch mismatch = expectedTrue(VERSION);
+            ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
         }
 
         @Test
         @DisplayName("new value")
         void newValueWithWrongType() {
-            final ValueMismatch mismatch = expectedTrue(VERSION);
+            ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));
         }
     }

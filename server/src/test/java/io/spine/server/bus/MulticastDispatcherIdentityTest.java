@@ -21,13 +21,13 @@
 package io.spine.server.bus;
 
 import io.spine.server.bus.given.MulticastDispatcherIdentityTestEnv.IdentityDispatcher;
-import io.spine.test.Tests;
+import io.spine.testing.Tests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
 
-import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

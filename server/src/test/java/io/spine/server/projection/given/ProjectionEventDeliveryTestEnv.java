@@ -22,7 +22,6 @@ package io.spine.server.projection.given;
 import io.spine.base.Identifier;
 import io.spine.core.Event;
 import io.spine.core.Subscribe;
-import io.spine.server.command.TestEventFactory;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.delivery.given.ThreadStats;
@@ -32,6 +31,7 @@ import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectVBuilder;
 import io.spine.test.projection.event.PrjProjectCreated;
+import io.spine.testing.server.TestEventFactory;
 
 import static io.spine.protobuf.AnyPacker.pack;
 

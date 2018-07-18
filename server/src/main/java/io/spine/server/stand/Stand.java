@@ -100,8 +100,7 @@ public class Stand implements AutoCloseable {
      * <p>The storage is {@code null} if it was not passed to the builder and this instance is not
      * yet added to a {@code BoundedContext}.
      */
-    @Nullable
-    private StandStorage storage;
+    private @Nullable StandStorage storage;
 
     /**
      * Manages the subscriptions for this instance of {@code Stand}.
@@ -385,7 +384,7 @@ public class Stand implements AutoCloseable {
 
     /**
      * Registers a supplier for the objects of a certain {@link TypeUrl} to be able
-     * to read them in response to a {@link io.spine.client.Query Query}.
+     * to read them in response to a {@link Query Query}.
      *
      * <p>In case the supplier is an instance of {@link AggregateRepository}, the {@code Repository}
      * is not registered as type supplier, since the {@code Aggregate} reads are performed
@@ -504,7 +503,7 @@ public class Stand implements AutoCloseable {
          * The multi-tenancy flag for the {@code Stand} to build.
          *
          * <p>The value of this field should be equal to that of corresponding
-         * {@linkplain io.spine.server.BoundedContext.Builder BoundedContext.Builder} and is not
+         * {@linkplain io.spine.server.BoundedContextBuilder BoundedContextBuilder} and is not
          * supposed to be {@linkplain #setMultitenant(Boolean) set directly}.
          *
          * <p>If set directly, the value would be matched to the multi-tenancy flag of aggregating

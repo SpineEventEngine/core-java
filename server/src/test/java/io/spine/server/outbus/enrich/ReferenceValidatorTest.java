@@ -40,8 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static io.spine.test.Verify.assertEmpty;
-import static io.spine.test.Verify.assertSize;
+import static io.spine.testing.Verify.assertEmpty;
+import static io.spine.testing.Verify.assertSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

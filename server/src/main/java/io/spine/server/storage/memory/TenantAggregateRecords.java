@@ -23,11 +23,11 @@ package io.spine.server.storage.memory;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
+import com.google.protobuf.util.Timestamps;
 import io.spine.core.Event;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.aggregate.AggregateReadRequest;
 import io.spine.server.entity.LifecycleFlags;
-import io.spine.time.Timestamps2;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.io.Serializable;
@@ -50,7 +50,7 @@ import static io.spine.validate.Validate.isDefault;
 class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord> {
 
     private final Multimap<I, AggregateEventRecord> records = TreeMultimap.create(
-            new AggregateStorageKeyComparator<I>(), // key comparator
+            new AggregateStorageKeyComparator<>(), // key comparator
             new AggregateStorageRecordReverseComparator() // value comparator
     );
 
@@ -71,9 +71,8 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
      * of events, not a single record. That's why this method does not
      * conform in full to {@link TenantStorage} interface, and always throws.
      */
-    @Nullable
     @Override
-    public Optional<AggregateEventRecord> get(I id) {
+    public @Nullable Optional<AggregateEventRecord> get(I id) {
         throw unsupported("Returning single record by aggregate ID is not supported");
     }
 
@@ -222,7 +221,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
 
         private static int compareTimestamps(AggregateEventRecord first,
                                              AggregateEventRecord second) {
-            return Timestamps2.compare(second.getTimestamp(), first.getTimestamp());
+            return Timestamps.compare(second.getTimestamp(), first.getTimestamp());
         }
 
         private static int versionNumberOf(AggregateEventRecord record) {

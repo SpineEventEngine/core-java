@@ -31,7 +31,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.server.BoundedContext.newName;
+import static io.spine.core.BoundedContextNames.newName;
 import static java.lang.String.format;
 import static java.lang.System.nanoTime;
 import static org.junit.jupiter.api.Assertions.assertEquals;

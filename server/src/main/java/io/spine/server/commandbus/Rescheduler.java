@@ -34,8 +34,8 @@ import io.spine.core.TenantId;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
-import io.spine.time.Interval;
-import io.spine.time.Intervals;
+import io.spine.time.Durations2;
+import io.spine.time.Timestamps2;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -59,12 +59,7 @@ class Rescheduler {
     }
 
     void rescheduleCommands() {
-        Runnable reschedulingAction = new Runnable() {
-            @Override
-            public void run() {
-                doRescheduleCommands();
-            }
-        };
+        Runnable reschedulingAction = this::doRescheduleCommands;
 
         if (commandBus.isThreadSpawnAllowed()) {
             Thread thread = new Thread(reschedulingAction, "CommandBus-rescheduleCommands");
@@ -110,7 +105,7 @@ class Rescheduler {
             @Override
             public void run() {
                 while (commands.hasNext()) {
-                    Command command = commands.next();
+                    final Command command = commands.next();
                     reschedule(command);
                 }
             }
@@ -124,8 +119,10 @@ class Rescheduler {
         if (isLaterThan(now, /*than*/ timeToPost)) {
             onScheduledCommandExpired(command);
         } else {
-            Interval interval = Intervals.between(now, timeToPost);
-            Duration newDelay = Intervals.toDuration(interval);
+            Duration newDelay = Durations2.of(java.time.Duration.between(
+                    Timestamps2.toInstant(now),
+                    Timestamps2.toInstant(timeToPost))
+            );
             Command updatedCommand = CommandScheduler.setSchedule(command, newDelay, now);
             scheduler().schedule(updatedCommand);
         }

@@ -21,11 +21,11 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.entity.Transaction;
-import io.spine.server.entity.TransactionListener;
 import io.spine.validate.ValidatingBuilder;
 
 /**
@@ -36,9 +36,10 @@ import io.spine.validate.ValidatingBuilder;
  * @param <B> the type of a {@code ValidatingBuilder} for the aggregate state
  * @author Alex Tymchenko
  */
-class AggregateTransaction<I,
-                           S extends Message,
-                           B extends ValidatingBuilder<S, ? extends Message.Builder>>
+@Internal
+public class AggregateTransaction<I,
+                                  S extends Message,
+                                  B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends Transaction<I, Aggregate<I, S, B>, S, B> {
 
     @VisibleForTesting
@@ -47,13 +48,7 @@ class AggregateTransaction<I,
     }
 
     @VisibleForTesting
-    AggregateTransaction(Aggregate<I, S, B> aggregate,
-                         TransactionListener<I, Aggregate<I, S, B>, S, B> listener) {
-        super(aggregate, listener);
-    }
-
-    @VisibleForTesting
-    AggregateTransaction(Aggregate<I, S, B> aggregate, S state, Version version) {
+    protected AggregateTransaction(Aggregate<I, S, B> aggregate, S state, Version version) {
         super(aggregate, state, version);
     }
 
@@ -71,8 +66,8 @@ class AggregateTransaction<I,
     /**
      * {@inheritDoc}
      *
-     * <p>This method is overridden to expose itself to repositories and state builders
-     * in this package.
+     * <p>This method is overridden to expose itself to repositories, state builders,
+     * and test utilities.
      */
     @Override
     protected void commit() {
@@ -88,25 +83,6 @@ class AggregateTransaction<I,
     @SuppressWarnings("unchecked")  // to avoid massive generic-related issues.
     static AggregateTransaction start(Aggregate aggregate) {
         AggregateTransaction tx = new AggregateTransaction(aggregate);
-        return tx;
-    }
-
-    /**
-     * Creates a new transaction for a given {@code aggregate} and sets the given {@code state}
-     * and {@code version} as a starting point for the transaction.
-     *
-     * <p>Please note that the state and version specified are not applied to the given aggregate
-     * directly and require a {@linkplain Transaction#commit() transaction commit} in order
-     * to be applied.
-     *
-     * @param aggregate  the {@code Aggregate} instance to start the transaction for.
-     * @param state   the starting state to set
-     * @param version the starting version to set
-     * @return the new transaction instance
-     */
-    @SuppressWarnings("unchecked")  // to avoid massive generic-related issues.
-    static AggregateTransaction startWith(Aggregate aggregate, Message state, Version version) {
-        AggregateTransaction tx = new AggregateTransaction(aggregate, state, version);
         return tx;
     }
 }

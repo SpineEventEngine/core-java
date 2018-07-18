@@ -27,7 +27,7 @@ import io.spine.test.storage.ProjectId;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 
-import static io.spine.server.BoundedContext.newName;
+import static io.spine.core.BoundedContextNames.newName;
 
 /**
  * @author Alexander Litus

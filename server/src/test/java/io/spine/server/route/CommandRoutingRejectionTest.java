@@ -22,7 +22,6 @@ package io.spine.server.route;
 
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandStatus;
@@ -39,6 +38,7 @@ import io.spine.server.route.given.switchman.Switchman;
 import io.spine.server.route.given.switchman.SwitchmanBureau;
 import io.spine.server.route.given.switchman.command.SetSwitch;
 import io.spine.server.route.given.switchman.rejection.Rejections;
+import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

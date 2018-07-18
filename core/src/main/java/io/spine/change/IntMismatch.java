@@ -86,16 +86,16 @@ public final class IntMismatch {
      * for an integer attribute.
      */
     public static ValueMismatch of(int expected, int actual, int newValue, int version) {
-        final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(toAny(expected))
-                                                           .setActual(toAny(actual))
-                                                           .setNewValue(toAny(newValue))
-                                                           .setVersion(version);
+        ValueMismatch.Builder builder = ValueMismatch.newBuilder()
+                                                     .setExpected(toAny(expected))
+                                                     .setActual(toAny(actual))
+                                                     .setNewValue(toAny(newValue))
+                                                     .setVersion(version);
         return builder.build();
     }
 
     private static int unpacked(Any any) {
-        final Int32Value unpacked = unpack(any, Int32Value.class);
+        Int32Value unpacked = unpack(any, Int32Value.class);
         return unpacked.getValue();
     }
 
@@ -106,7 +106,7 @@ public final class IntMismatch {
      */
     public static int unpackExpected(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any expected = mismatch.getExpected();
+        Any expected = mismatch.getExpected();
         return unpacked(expected);
     }
 
@@ -117,7 +117,7 @@ public final class IntMismatch {
      */
     public static int unpackActual(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any actual = mismatch.getActual();
+        Any actual = mismatch.getActual();
         return unpacked(actual);
     }
 
@@ -128,7 +128,7 @@ public final class IntMismatch {
      */
     public static int unpackNewValue(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any newValue = mismatch.getNewValue();
+        Any newValue = mismatch.getNewValue();
         return unpacked(newValue);
     }
 }

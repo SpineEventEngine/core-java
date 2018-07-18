@@ -42,6 +42,11 @@ import io.spine.test.procman.event.PmNotificationSent;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
+import io.spine.test.procman.quiz.PmAnswer;
+import io.spine.test.procman.quiz.PmQuestionId;
+import io.spine.test.procman.quiz.PmQuizId;
+import io.spine.test.procman.quiz.command.PmAnswerQuestion;
+import io.spine.test.procman.quiz.command.PmStartQuiz;
 import io.spine.testdata.Sample;
 import io.spine.validate.AnyVBuilder;
 
@@ -51,6 +56,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
@@ -61,6 +67,44 @@ public class ProcessManagerTestEnv {
 
     /** Prevents instantiation of this utility class. */
     private ProcessManagerTestEnv() {
+        // Do nothing.
+    }
+
+    public static PmQuizId newQuizId() {
+        return PmQuizId.newBuilder()
+                       .setId(newUuid())
+                       .build();
+    }
+
+    public static PmStartQuiz startQuiz(PmQuizId id, Iterable<? extends PmQuestionId> problems) {
+        return PmStartQuiz.newBuilder()
+                          .setQuizId(id)
+                          .addAllQuestion(problems)
+                          .build();
+    }
+
+    public static PmAnswerQuestion answerQuestion(PmQuizId id, PmAnswer answer) {
+        return PmAnswerQuestion.newBuilder()
+                               .setQuizId(id)
+                               .setAnswer(answer)
+                               .build();
+    }
+
+    public static PmAnswer newAnswer() {
+        return newAnswer(newQuestionId(), true);
+    }
+
+    private static PmQuestionId newQuestionId() {
+        return PmQuestionId.newBuilder()
+                           .setId(newUuid())
+                           .build();
+    }
+
+    public static PmAnswer newAnswer(PmQuestionId id, boolean correct) {
+        return PmAnswer.newBuilder()
+                       .setQuestionId(id)
+                       .setCorrect(correct)
+                       .build();
     }
 
     /**

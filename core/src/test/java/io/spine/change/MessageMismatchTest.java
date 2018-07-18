@@ -33,9 +33,9 @@ import static io.spine.change.MessageMismatch.unpackActual;
 import static io.spine.change.MessageMismatch.unpackExpected;
 import static io.spine.change.MessageMismatch.unpackNewValue;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("MessageMismatch should")
@@ -70,7 +70,7 @@ class MessageMismatchTest {
         @Test
         @DisplayName("for expected default value")
         void forExpectedDefault() {
-            final ValueMismatch mismatch = expectedDefault(ACTUAL, NEW_VALUE, VERSION);
+            ValueMismatch mismatch = expectedDefault(ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(DEFAULT_VALUE, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));
@@ -81,7 +81,7 @@ class MessageMismatchTest {
         @Test
         @DisplayName("for unexpected default when clearing")
         void forUnexpectedDefaultWhenClearing() {
-            final ValueMismatch mismatch = expectedNotDefault(EXPECTED, VERSION);
+            ValueMismatch mismatch = expectedNotDefault(EXPECTED, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
 
@@ -97,7 +97,7 @@ class MessageMismatchTest {
         @Test
         @DisplayName("for unexpected default when changing")
         void forUnexpectedDefaultWhenChanging() {
-            final ValueMismatch mismatch = expectedNotDefault(EXPECTED, NEW_VALUE, VERSION);
+            ValueMismatch mismatch = expectedNotDefault(EXPECTED, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
 
@@ -112,7 +112,7 @@ class MessageMismatchTest {
         @Test
         @DisplayName("for unexpected value")
         void forUnexpectedValue() {
-            final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+            ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));

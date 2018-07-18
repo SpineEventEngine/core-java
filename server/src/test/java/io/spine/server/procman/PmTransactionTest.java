@@ -78,11 +78,15 @@ class PmTransactionTest
             Project, PatchedProjectBuilder>
     createTxWithListener(ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
                          TransactionListener<ProjectId,
-                                 ProcessManager<ProjectId,
-                                         Project,
-                                         PatchedProjectBuilder>,
-                                 Project, PatchedProjectBuilder> listener) {
-        return new PmTransaction<>(entity, listener);
+                                             ProcessManager<ProjectId,
+                                                            Project,
+                                                            PatchedProjectBuilder>,
+                                             Project,
+                                             PatchedProjectBuilder> listener) {
+        PmTransaction<ProjectId, Project, PatchedProjectBuilder> transaction =
+                new PmTransaction<>(entity);
+        transaction.setListener(listener);
+        return transaction;
     }
 
     @Override

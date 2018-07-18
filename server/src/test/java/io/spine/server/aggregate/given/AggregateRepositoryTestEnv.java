@@ -34,7 +34,6 @@ import com.google.protobuf.UInt64Value;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.Identifier;
 import io.spine.base.Time;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventContext;
@@ -48,7 +47,6 @@ import io.spine.server.aggregate.AggregateRepositoryTest;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.entity.given.Given;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.server.route.CommandRoute;
 import io.spine.server.route.EventRoute;
@@ -72,6 +70,8 @@ import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.test.aggregate.rejection.AggCannotStartArchivedProject;
 import io.spine.test.aggregate.rejection.Rejections;
 import io.spine.testdata.Sample;
+import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.entity.given.Given;
 import io.spine.validate.BoolValueVBuilder;
 import io.spine.validate.StringValueVBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -81,7 +81,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static io.spine.core.Events.nothing;
-import static io.spine.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
+import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static java.util.Collections.emptyList;
 
 /**

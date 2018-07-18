@@ -33,8 +33,8 @@ import io.spine.test.bc.event.BcTaskAdded;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.BoundedContext.newName;
 
 public class Given {
 

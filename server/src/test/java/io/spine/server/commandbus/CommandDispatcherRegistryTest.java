@@ -32,11 +32,11 @@ import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.EmptyCo
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.EmptyDispatcher;
 import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.NoCommandsDispatcherRepo;
 import io.spine.server.event.EventBus;
-import io.spine.server.model.ModelTests;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.CmdStartProject;
+import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

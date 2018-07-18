@@ -21,7 +21,6 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
@@ -35,6 +34,7 @@ import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.MemoizingR
 import io.spine.test.command.FirstCmdCreateProject;
 import io.spine.test.command.SecondCmdStartProject;
 import io.spine.test.reflect.InvalidProjectName;
+import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -49,8 +49,8 @@ import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.server.commandbus.Given.ACommand.addTask;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.commandbus.Given.ACommand.firstCreateProject;
-import static io.spine.server.commandbus.Given.ACommand.secondStartProject;
 import static io.spine.server.commandbus.Given.ACommand.removeTask;
+import static io.spine.server.commandbus.Given.ACommand.secondStartProject;
 import static io.spine.server.tenant.TenantAwareOperation.isTenantSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

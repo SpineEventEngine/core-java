@@ -23,7 +23,6 @@ package io.spine.server.rejection.given;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.change.StringChange;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.Rejection;
 import io.spine.core.Rejections;
@@ -37,6 +36,7 @@ import io.spine.test.rejection.command.RjRemoveOwner;
 import io.spine.test.rejection.command.RjUpdateProjectName;
 import io.spine.test.rejection.command.RjUpdateProjectNameVBuilder;
 import io.spine.testdata.Sample;
+import io.spine.testing.client.TestActorRequestFactory;
 
 import static io.spine.base.Identifier.newUuid;
 

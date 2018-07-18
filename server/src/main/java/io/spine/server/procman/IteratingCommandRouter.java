@@ -27,7 +27,6 @@ import io.spine.core.CommandContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.commandbus.CommandBus;
 
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
@@ -37,10 +36,8 @@ import java.util.NoSuchElementException;
  */
 public class IteratingCommandRouter extends AbstractCommandRouter<IteratingCommandRouter> {
 
-    IteratingCommandRouter(CommandBus commandBus,
-                           Message commandMessage,
-                           CommandContext commandContext) {
-        super(commandBus, commandMessage, commandContext);
+    IteratingCommandRouter(CommandBus commandBus, Message commandMessage, CommandContext context) {
+        super(commandBus, commandMessage, context);
     }
 
     @Override
@@ -71,12 +68,7 @@ public class IteratingCommandRouter extends AbstractCommandRouter<IteratingComma
         Command command = route(message);
         result.addProduced(command);
 
-        Iterable<Any> iterable = new Iterable<Any>() {
-            @Override
-            public Iterator<Any> iterator() {
-                return AnyPacker.pack(commandMessages());
-            }
-        };
+        Iterable<Any> iterable = () -> AnyPacker.pack(commandMessages());
         result.addAllMessageToFollow(iterable);
 
         return result.build();

@@ -25,7 +25,7 @@ import com.google.protobuf.StringValue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
 /**
  * @author Alexander Yevsyukov

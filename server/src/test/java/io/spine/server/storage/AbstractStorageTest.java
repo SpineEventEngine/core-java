@@ -36,8 +36,8 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static io.spine.test.Tests.nullRef;
-import static io.spine.test.Verify.assertContainsAll;
+import static io.spine.testing.Tests.nullRef;
+import static io.spine.testing.Verify.assertContainsAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

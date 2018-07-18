@@ -32,8 +32,8 @@ import io.spine.server.commandbus.CommandBus;
  */
 public class CommandRouter extends AbstractCommandRouter<CommandRouter> {
 
-    CommandRouter(CommandBus commandBus, Message commandMessage, CommandContext commandContext) {
-        super(commandBus, commandMessage, commandContext);
+    CommandRouter(CommandBus commandBus, Message commandMessage, CommandContext context) {
+        super(commandBus, commandMessage, context);
     }
 
     @Override

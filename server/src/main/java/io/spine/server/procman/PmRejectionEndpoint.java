@@ -20,6 +20,7 @@
 
 package io.spine.server.procman;
 
+import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.RejectionEnvelope;
 
@@ -31,11 +32,12 @@ import java.util.Set;
  *
  * @author Alexander Yevsyukov
  */
-class PmRejectionEndpoint<I, P extends ProcessManager<I, ?, ?>>
+@Internal
+public class PmRejectionEndpoint<I, P extends ProcessManager<I, ?, ?>>
     extends PmEndpoint<I, P, RejectionEnvelope, Set<I>> {
 
-    private PmRejectionEndpoint(ProcessManagerRepository<I, P, ?> repository,
-                                RejectionEnvelope envelope) {
+    protected PmRejectionEndpoint(ProcessManagerRepository<I, P, ?> repository,
+                                  RejectionEnvelope envelope) {
         super(repository, envelope);
     }
 

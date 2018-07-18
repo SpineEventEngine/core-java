@@ -39,6 +39,8 @@ import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingEntity;
+import io.spine.server.command.dispatch.Dispatch;
+import io.spine.server.command.dispatch.DispatchResult;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.EventPlayers;
 import io.spine.server.event.EventFactory;
@@ -47,10 +49,8 @@ import io.spine.server.model.Model;
 import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Predicate;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
@@ -58,7 +58,6 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.validate.Validate.isNotDefault;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Abstract base for aggregates.
@@ -195,7 +194,6 @@ public abstract class Aggregate<I,
      * @throws IllegalStateException if the method is called from outside an event applier
      */
     @Override
-    @VisibleForTesting
     protected B getBuilder() {
         return super.getBuilder();
     }
@@ -213,15 +211,15 @@ public abstract class Aggregate<I,
     protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
         idempotencyGuard.check(command);
         CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
-        List<? extends Message> messages =
-                method.invoke(this, command.getMessage(), command.getCommandContext());
-        return nonEmpty(messages);
+        Dispatch<CommandEnvelope> dispatch = Dispatch.of(command).to(this, method);
+        DispatchResult dispatchResult = dispatch.perform();
+        return dispatchResult.asMessages();
     }
 
     /**
      * Dispatches the event on which the aggregate reacts.
      *
-     * <p>Reacting on a event may result in emitting event messages. All the {@linkplain Empty empty}
+     * <p>Reacting on a event may result in emitting event messages. All the {@linkplain Empty empty} 
      * messages are filtered out from the result.
      *
      * @param  event the envelope with the event to dispatch
@@ -230,15 +228,15 @@ public abstract class Aggregate<I,
      */
     List<? extends Message> reactOn(EventEnvelope event) {
         EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
-        List<? extends Message> messages =
-                method.invoke(this, event.getMessage(), event.getEventContext());
-        return nonEmpty(messages);
+        Dispatch<EventEnvelope> dispatch = Dispatch.of(event).to(this, method);
+        DispatchResult dispatchResult = dispatch.perform();
+        return dispatchResult.asMessages();
     }
 
     /**
      * Dispatches the rejection to which the aggregate reacts.
-     *
-     * <p>Reacting on a rejection may result in emitting event messages. All the
+     * 
+     * <p>Reacting on a rejection may result in emitting event messages. All the 
      * {@linkplain Empty empty} messages are filtered out from the result.
      *
      * @param  rejection the envelope with the rejection
@@ -248,17 +246,10 @@ public abstract class Aggregate<I,
      */
     List<? extends Message> reactOn(RejectionEnvelope rejection) {
         CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
-        RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
-                                                               commandClass);
-        List<? extends Message> messages =
-                method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
-        return nonEmpty(messages);
-    }
-
-    private static List<? extends Message> nonEmpty(Collection<? extends Message> messages) {
-        return messages.stream()
-                       .filter(NonEmpty.PREDICATE)
-                       .collect(toList());
+        RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(), commandClass);
+        Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection).to(this, method);
+        DispatchResult dispatchResult = dispatch.perform();
+        return dispatchResult.asMessages();
     }
 
     /**
@@ -488,26 +479,5 @@ public abstract class Aggregate<I,
     @VisibleForTesting
     protected int versionNumber() {
         return super.versionNumber();
-    }
-
-    /**
-     * A predicate checking that message is not {@linkplain Empty empty}.
-     */
-    private enum NonEmpty implements Predicate<Message> {
-
-        PREDICATE;
-
-        private static final Empty EMPTY = Empty.getDefaultInstance();
-
-        /**
-         * Checks that message is not {@linkplain Empty empty}.
-         *
-         * @param  message the message being checked
-         * @return {@code true} if the message is not empty, {@code false} otherwise
-         */
-        @Override
-        public boolean test(Message message) {
-            return !message.equals(EMPTY);
-        }
     }
 }

@@ -25,17 +25,11 @@ import io.spine.server.BoundedContext;
 import io.spine.server.delivery.Shardable;
 import io.spine.server.entity.Repository;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
-import static com.google.common.collect.Sets.newHashSet;
 import static java.util.concurrent.Executors.newFixedThreadPool;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The helper class used to dispatch numerous messages of a certain kind to the entities,
@@ -94,31 +88,29 @@ public abstract class ParallelDispatcher<I extends Message, M extends Message> {
      */
     public void dispatchMessagesTo(Repository<I, ?> repository) throws Exception {
         BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .build();
+                                                      .build();
         boundedContext.register(repository);
 
         int numberOfShards = ((Shardable) repository).getShardingStrategy()
-                                                           .getNumberOfShards();
-
-        assertTrue(getStats().getThreadToId()
-                             .isEmpty());
+                                                     .getNumberOfShards();
+        getStats().assertIdCount(0);
 
         ExecutorService executorService = newFixedThreadPool(threadCount);
         ImmutableList.Builder<Callable<Object>> builder = ImmutableList.builder();
 
         for (int i = 0; i < messageCount; i++) {
             M message = newMessage();
-
             builder.add(() -> {
                 postToBus(boundedContext, message);
                 return 0;
             });
         }
 
-        List<Callable<Object>> commandPostingJobs = builder.build();
+        final List<Callable<Object>> commandPostingJobs = builder.build();
         executorService.invokeAll(commandPostingJobs);
 
         Thread.sleep(dispatchWaitTime);
+        executorService.shutdown();
 
         verifyStats(messageCount, numberOfShards);
 
@@ -127,13 +119,8 @@ public abstract class ParallelDispatcher<I extends Message, M extends Message> {
     }
 
     private void verifyStats(int totalMessages, int numberOfShards) {
-        Map<Long, Collection<I>> whoProcessedWhat = getStats().getThreadToId()
-                                                                    .asMap();
-        Collection<I> actualIds = newHashSet(getStats().getThreadToId()
-                                                             .values());
-        Set<Long> actualThreads = whoProcessedWhat.keySet();
-
-        assertEquals(numberOfShards, actualThreads.size());
-        assertEquals(totalMessages, actualIds.size());
+        ThreadStats<I> stats = getStats();
+        stats.assertThreadCount(numberOfShards);
+        stats.assertIdCount(totalMessages);
     }
 }
