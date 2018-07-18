@@ -33,6 +33,7 @@ import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
 import io.spine.server.entity.storage.EntityColumnCache;
+import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
 import io.spine.testing.Tests;
 import io.spine.testing.server.entity.given.Given;
@@ -137,6 +138,10 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
 
     private Iterator<E> loadAll() {
         return repository.loadAll();
+    }
+
+    private Iterator<EntityRecord> loadAllRecords() {
+        return repository.loadAllRecords();
     }
 
     private E loadOrCreate(I id) {
@@ -298,6 +303,19 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         void noEntitiesIfEmpty() {
             Collection<E> found = newArrayList(loadAll());
             assertSize(0, found);
+        }
+
+        @Test
+        @DisplayName("all entity records")
+        void allEntityRecords() {
+            List<E> entities = createAndStoreEntities(repository, 150);
+            Collection<EntityRecord> found = newArrayList(loadAllRecords());
+            assertSize(entities.size(), found);
+
+            for (E entity : entities) {
+                final EntityRecordWithColumns record = repository.toRecord(entity);
+                assertContains(record.getRecord(), found);
+            }
         }
     }
 
