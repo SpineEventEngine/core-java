@@ -328,10 +328,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Logs the passed exception in the log associated with the class of the repository.
+     * Handles the given error.
      *
-     * <p>The exception is logged only if the root cause of it is not a
-     * {@linkplain io.spine.base.ThrowableMessage rejection} thrown by a command handling method.
+     * <p>If the given error is a rejection, posts it into
+     * the {@link io.spine.server.rejection.RejectionBus RejectionBus}. Otherwise, logs the error.
      *
      * @param envelope  the command which caused the error
      * @param exception the error occurred during processing of the command

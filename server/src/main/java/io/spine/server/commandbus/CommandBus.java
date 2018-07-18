@@ -214,9 +214,14 @@ public class CommandBus extends Bus<Command,
 
     @Override
     protected void dispatch(CommandEnvelope envelope) {
-        final CommandDispatcher<?> dispatcher = getDispatcher(envelope);
+        CommandDispatcher<?> dispatcher = getDispatcher(envelope);
         onDispatchCommand(envelope);
-        dispatcher.dispatch(envelope);
+        try {
+            dispatcher.dispatch(envelope);
+        } catch (RuntimeException e) {
+            String errorMessage = format("Error dispatching command %s", envelope.getTypeName());
+            Log.log().error(errorMessage, e);
+        }
     }
 
     private void onDispatchCommand(CommandEnvelope command) {

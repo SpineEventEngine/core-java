@@ -24,8 +24,10 @@ import com.google.common.base.Optional;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.Command;
+import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.event.EventSubscriber;
 import io.spine.server.rout.given.switchman.LogState;
 import io.spine.server.rout.given.switchman.SwitchId;
 import io.spine.server.rout.given.switchman.SwitchPosition;
@@ -33,14 +35,19 @@ import io.spine.server.route.given.switchman.Log;
 import io.spine.server.route.given.switchman.Switchman;
 import io.spine.server.route.given.switchman.SwitchmanBureau;
 import io.spine.server.route.given.switchman.command.SetSwitch;
+import io.spine.server.route.given.switchman.event.SwitchPositionConfirmed;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
+import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
@@ -58,6 +65,7 @@ class CommandRoutingRejectionTest {
     private BoundedContext boundedContext;
     private CommandBus commandBus;
     private Log.Repository logRepository;
+    private SwitchmanObserver switchmanObserver;
 
     @BeforeEach
     void setUp() {
@@ -66,6 +74,9 @@ class CommandRoutingRejectionTest {
                                        .setMultitenant(false)
                                        .build();
         boundedContext.register(new SwitchmanBureau());
+        switchmanObserver = new SwitchmanObserver();
+        boundedContext.getEventBus()
+                      .register(switchmanObserver);
         logRepository = new Log.Repository();
         boundedContext.register(logRepository);
         commandBus = boundedContext.getCommandBus();
@@ -97,8 +108,9 @@ class CommandRoutingRejectionTest {
                          .setPosition(SwitchPosition.RIGHT)
                          .build()
         );
+        assertEquals(0, switchmanObserver.events.size());
         commandBus.post(command, observer);
-        // TODO:2018-07-18:dmytro.dashenkov: Check command consequences.
+        assertEquals(1, switchmanObserver.events.size());
 
         // Post a command with the argument which causes rejection in routing.
         final Command commandToReject = requestFactory.createCommand(
@@ -123,5 +135,15 @@ class CommandRoutingRejectionTest {
         return SwitchId.newBuilder()
                        .setId(newUuid())
                        .build();
+    }
+
+    private static class SwitchmanObserver extends EventSubscriber {
+
+        private final List<SwitchPositionConfirmed> events = newLinkedList();
+
+        @Subscribe
+        public void to(SwitchPositionConfirmed event) {
+            events.add(event);
+        }
     }
 }

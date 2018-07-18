@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.ActorMessageEnvelope;
@@ -34,6 +35,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -47,7 +49,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <I> the type of entity IDs
  * @param <E> the type of entities
  * @param <M> the type of message envelopes
- * @param <R> the type of the dispatch result, which is {@code <I>} for unicast dispatching, and
+ * @param <T> the type of the dispatch result, which is {@code <I>} for unicast dispatching, and
  *            {@code Set<I>} for multicast
  * @author Alexander Yevsyukov
  */
@@ -55,7 +57,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public abstract class EntityMessageEndpoint<I,
                                             E extends Entity<I, ?>,
                                             M extends ActorMessageEnvelope<?, ?, ?>,
-                                            R> {
+                                            T> {
 
     /** The repository which created this endpoint. */
     private final @Nullable Repository<I, E> repository;
@@ -73,10 +75,10 @@ public abstract class EntityMessageEndpoint<I,
      *
      * @return the result of the message processing
      */
-    public final R handle() {
+    public final T handle() {
         final TenantId tenantId = envelope().getTenantId();
-        final TenantAwareFunction0<R> operation = new Operation(tenantId);
-        final R result = operation.execute();
+        final TenantAwareFunction0<T> operation = new Operation(tenantId);
+        final T result = operation.execute();
         return result;
     }
 
@@ -85,18 +87,35 @@ public abstract class EntityMessageEndpoint<I,
      * {@linkplain #dispatchToOne(I) dispatches} the message to them.
      */
     @SuppressWarnings("unchecked")
-    private R dispatch() {
-        final R targets = getTargets();
+    private T dispatch() {
+        T targets = reportErrors(this::getTargets);
         if (targets instanceof Set) {
-            final Set<I> handlingAggregates = (Set<I>) targets;
-            return (R)(dispatchToMany(handlingAggregates));
+            Set<I> handlingEntities = (Set<I>) targets;
+            return (T) (dispatchToMany(handlingEntities));
         }
+        reportErrors(() -> {
+            I id = (I) targets;
+            dispatchToOne(id);
+        });
+        return targets;
+    }
+
+    @CanIgnoreReturnValue
+    private <R> R reportErrors(Supplier<R> operation) {
         try {
-            dispatchToOne((I)targets);
+            return operation.get();
         } catch (RuntimeException exception) {
             onError(envelope(), exception);
+            throw exception;
         }
-        return targets;
+    }
+
+    @SuppressWarnings("ReturnOfNull") // Value is never used.
+    private void reportErrors(Runnable operation) {
+        reportErrors(() -> {
+           operation.run();
+           return null;
+        });
     }
 
     /**
@@ -113,7 +132,7 @@ public abstract class EntityMessageEndpoint<I,
     /**
      * Obtains IDs of aggregates to which the endpoint delivers the message.
      */
-    protected abstract R getTargets();
+    protected abstract T getTargets();
 
     /**
      * Dispatches the message to the entity with the passed ID, providing transactional work
@@ -220,7 +239,7 @@ public abstract class EntityMessageEndpoint<I,
      *                </ol>
      * @throws IllegalStateException always
      */
-    protected void onUnhandledCommand(Entity<R, ?> entity, CommandEnvelope cmd, String format) {
+    protected void onUnhandledCommand(Entity<T, ?> entity, CommandEnvelope cmd, String format) {
         final String entityId = Stringifiers.toString(entity.getId());
         final String entityClass = entity.getClass().getName();
         final String commandId = Stringifiers.toString(cmd.getId());
@@ -231,14 +250,14 @@ public abstract class EntityMessageEndpoint<I,
     /**
      * The operation executed under the tenant context in which the message was created.
      */
-    private class Operation extends TenantAwareFunction0<R> {
+    private class Operation extends TenantAwareFunction0<T> {
 
         private Operation(TenantId tenantId) {
             super(tenantId);
         }
 
         @Override
-        public R apply() {
+        public T apply() {
             return dispatch();
         }
     }
