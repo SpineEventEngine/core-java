@@ -22,7 +22,6 @@ package io.spine.server.stand;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Any;
@@ -31,10 +30,7 @@ import com.google.protobuf.Message;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
-import io.spine.client.EntityStateWithVersion;
-import io.spine.client.Query;
 import io.spine.client.Target;
-import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.RecordReadRequest;
@@ -53,7 +49,7 @@ import static com.google.common.base.Predicates.notNull;
  *
  * @author Alex Tymchenko
  */
-class AggregateQueryProcessor implements QueryProcessor {
+class AggregateQueryProcessor extends RecordBasedQueryProcessor {
 
     private final StandStorage standStorage;
     private final TypeUrl type;
@@ -78,13 +74,8 @@ class AggregateQueryProcessor implements QueryProcessor {
             };
 
     @Override
-    public ImmutableCollection<EntityStateWithVersion> process(Query query) {
-
-        final ImmutableList.Builder<EntityStateWithVersion> resultBuilder = ImmutableList.builder();
-
+    protected Iterator<EntityRecord> queryForRecords(Target target, FieldMask fieldMask) {
         Iterator<EntityRecord> stateRecords;
-        final Target target = query.getTarget();
-        final FieldMask fieldMask = query.getFieldMask();
         final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
                                                        .isEmpty();
         if (target.getIncludeAll()) {
@@ -94,20 +85,7 @@ class AggregateQueryProcessor implements QueryProcessor {
         } else {
             stateRecords = doFetchWithFilters(target, fieldMask);
         }
-        // todo address duplication
-        while (stateRecords.hasNext()) {
-            final EntityRecord entityRecord = stateRecords.next();
-            final Any state = entityRecord.getState();
-            final Version version = entityRecord.getVersion();
-            final EntityStateWithVersion message = EntityStateWithVersion.newBuilder()
-                                                                         .setState(state)
-                                                                         .setVersion(version)
-                                                                         .build();
-            resultBuilder.add(message);
-        }
-
-        final ImmutableList<EntityStateWithVersion> result = resultBuilder.build();
-        return result;
+        return stateRecords;
     }
 
     private Iterator<EntityRecord> doFetchWithFilters(Target target, FieldMask fieldMask) {

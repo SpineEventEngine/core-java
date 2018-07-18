@@ -19,16 +19,10 @@
  */
 package io.spine.server.stand;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.EntityFilters;
-import io.spine.client.EntityStateWithVersion;
-import io.spine.client.Query;
 import io.spine.client.Target;
-import io.spine.core.Version;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.RecordBasedRepository;
@@ -40,7 +34,7 @@ import java.util.Iterator;
  *
  * @author Alex Tymchenko
  */
-class EntityQueryProcessor implements QueryProcessor {
+class EntityQueryProcessor extends RecordBasedQueryProcessor {
 
     private final RecordBasedRepository<?, ? extends Entity, ? extends Message> repository;
 
@@ -49,13 +43,8 @@ class EntityQueryProcessor implements QueryProcessor {
     }
 
     @Override
-    public ImmutableCollection<EntityStateWithVersion> process(Query query) {
-        final ImmutableList.Builder<EntityStateWithVersion> resultBuilder = ImmutableList.builder();
-
-        final Target target = query.getTarget();
-        final FieldMask fieldMask = query.getFieldMask();
-
-        final Iterator<EntityRecord> records;
+    protected Iterator<EntityRecord> queryForRecords(Target target, FieldMask fieldMask) {
+        Iterator<EntityRecord> records;
         if (target.getIncludeAll() && fieldMask.getPathsList()
                                                .isEmpty()) {
             records = repository.loadAllRecords();
@@ -63,17 +52,6 @@ class EntityQueryProcessor implements QueryProcessor {
             final EntityFilters filters = target.getFilters();
             records = repository.findRecords(filters, fieldMask);
         }
-        while (records.hasNext()) {
-            final EntityRecord entityRecord = records.next();
-            final Any state = entityRecord.getState();
-            final Version version = entityRecord.getVersion();
-            final EntityStateWithVersion message = EntityStateWithVersion.newBuilder()
-                                                                         .setState(state)
-                                                                         .setVersion(version)
-                                                                         .build();
-            resultBuilder.add(message);
-        }
-        final ImmutableList<EntityStateWithVersion> result = resultBuilder.build();
-        return result;
+        return records;
     }
 }
