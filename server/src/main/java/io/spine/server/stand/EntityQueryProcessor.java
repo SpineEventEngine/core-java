@@ -44,11 +44,15 @@ class EntityQueryProcessor extends RecordQueryProcessor {
 
     @Override
     protected Iterator<EntityRecord> queryForRecords(Target target, FieldMask fieldMask) {
+        Iterator<EntityRecord> result;
         if (target.getIncludeAll() && fieldMask.getPathsList()
                                                .isEmpty()) {
-            return repository.loadAllRecords();
+            result = repository.loadAllRecords();
+        } else {
+
+            final EntityFilters filters = target.getFilters();
+            result = repository.findRecords(filters, fieldMask);
         }
-        final EntityFilters filters = target.getFilters();
-        return repository.findRecords(filters, fieldMask);
+        return result;
     }
 }

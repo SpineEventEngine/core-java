@@ -74,14 +74,17 @@ class AggregateQueryProcessor extends RecordQueryProcessor {
 
     @Override
     protected Iterator<EntityRecord> queryForRecords(Target target, FieldMask fieldMask) {
+        Iterator<EntityRecord> result;
         if (target.getIncludeAll()) {
             final boolean shouldApplyFieldMask = !fieldMask.getPathsList()
                                                            .isEmpty();
-            return shouldApplyFieldMask
-                   ? standStorage.readAllByType(type, fieldMask)
-                   : standStorage.readAllByType(type);
+            result = shouldApplyFieldMask
+                     ? standStorage.readAllByType(type, fieldMask)
+                     : standStorage.readAllByType(type);
+        } else {
+            result = doFetchWithFilters(target, fieldMask);
         }
-        return doFetchWithFilters(target, fieldMask);
+        return result;
     }
 
     private Iterator<EntityRecord> doFetchWithFilters(Target target, FieldMask fieldMask) {

@@ -63,7 +63,8 @@ abstract class RecordQueryProcessor implements QueryProcessor {
                                                                          .build();
             resultBuilder.add(message);
         }
-        return resultBuilder.build();
+        final ImmutableList<EntityStateWithVersion> result = resultBuilder.build();
+        return result;
     }
 
     protected abstract Iterator<EntityRecord> queryForRecords(Target target, FieldMask fieldMask);
