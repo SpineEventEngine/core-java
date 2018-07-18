@@ -92,7 +92,10 @@ message QueryResponse {
     repeated EntityStateWithVersion messages = 5;
 }
 
-// Represents the entity state and the entity version returned as a result of Query execution.
+// Represents the entity state combined with entity version.
+//
+// This message is a part of Query response.
+//
 message EntityStateWithVersion {
 
     // The state of the entity packed as `Any`.
