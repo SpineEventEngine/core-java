@@ -40,6 +40,7 @@ import static io.spine.time.Durations2.milliseconds;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
@@ -69,6 +70,8 @@ class ExecutorCommandSchedulerTest {
     void setUp() {
         scheduler = spy(ExecutorCommandScheduler.class);
         context = GivenCommandContext.withScheduledDelayOf(DELAY);
+
+        scheduler.setCommandBus(mock(CommandBus.class));
     }
 
     @AfterEach
