@@ -64,9 +64,16 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      * Assigns the {@code CommandBus} to the scheduler during {@code CommandBus}
      * {@linkplain CommandBus.Builder#build() construction}.
      */
-    protected void setCommandBus(CommandBus commandBus) {
+    void setCommandBus(CommandBus commandBus) {
         this.commandBus = commandBus;
-        this.rescheduler = new Rescheduler(commandBus);
+    }
+
+    /**
+     * Assigns the {@code Recscheduler} to the scheduler during {@code CommandBus}
+     * {@linkplain CommandBus.Builder#build() construction}.
+     */
+    void setRescheduler(Rescheduler rescheduler) {
+        this.rescheduler = rescheduler;
     }
 
     private Rescheduler rescheduler() {
@@ -182,7 +189,6 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         final Command result = setSchedule(command, delay, schedulingTime);
         return result;
     }
-
     /**
      * Updates {@linkplain CommandContext.Schedule command schedule}.
      *

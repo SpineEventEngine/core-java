@@ -20,31 +20,23 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.TenantId;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import io.spine.core.Command;
+
+import java.util.Iterator;
 
 /**
- * A gateway for sending messages into a system bounded context.
+ * An index of all commands in a bounded context.
  *
  * @author Dmytro Dashenkov
  */
 @Internal
-public interface SystemGateway {
+public interface CommandIndex {
 
     /**
-     * Posts a system command.
+     * Returns an {@code Iterator} over all the scheduled commands in the bounded context.
      *
-     * <p>In a multitenant environment, the command is posted for the current tenant.
-     *
-     * @param systemCommand command message
+     * @return all scheduled commands
      */
-    default void postCommand(Message systemCommand) {
-        postCommand(systemCommand, null);
-    }
-
-    void postCommand(Message systemCommand, @Nullable TenantId tenantId);
-
-    CommandIndex commandIndex();
+    Iterator<Command> scheduledCommands();
 }

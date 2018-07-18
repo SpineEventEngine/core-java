@@ -21,6 +21,8 @@
 package io.spine.server;
 
 import io.spine.server.entity.Repository;
+import io.spine.server.event.EventBus;
+import io.spine.server.event.EventEnricher;
 import io.spine.system.server.CommandLifecycleRepository;
 import io.spine.system.server.EntityHistoryRepository;
 import io.spine.system.server.NoOpSystemGateway;
@@ -66,17 +68,34 @@ final class SystemBoundedContext extends BoundedContext {
      * @return new {@code SystemBoundedContext}
      */
     static SystemBoundedContext newInstance(BoundedContextBuilder builder) {
-        SystemBoundedContext result = new SystemBoundedContext(builder);
-        result.init();
+        CommandLifecycleRepository repository = new CommandLifecycleRepository();
+        BoundedContextBuilder preparedBuilder = prepareEnricher(builder, repository);
+        SystemBoundedContext result = new SystemBoundedContext(preparedBuilder);
+        result.init(repository);
         return result;
     }
 
-    private void init() {
-        Stream.<Repository<?, ?>>of(
-                new EntityHistoryRepository(),
-                new CommandLifecycleRepository(),
-                new ScheduledCommandRepository()
-        ).forEach(this::register);
+    private static BoundedContextBuilder prepareEnricher(BoundedContextBuilder builder,
+                                                         CommandLifecycleRepository repository) {
+        EventBus.Builder busBuilder = builder.getEventBus()
+                                             .toJavaUtil()
+                                             .orElseGet(EventBus::newBuilder);
+        EventEnricher enricher = SystemEnricher.create(repository);
+        EventBus.Builder builderWithEnricher = busBuilder.setEnricher(enricher);
+        return builder.setEventBus(builderWithEnricher);
+    }
+
+    private void init(CommandLifecycleRepository commandLifecycle) {
+        EntityHistoryRepository entityHistory = new EntityHistoryRepository();
+        ScheduledCommandRepository scheduledCommand = new ScheduledCommandRepository();
+        registerAll(entityHistory,
+                    commandLifecycle,
+                    scheduledCommand);
+    }
+
+    private void registerAll(Repository<?, ?>... repositories) {
+        Stream.of(repositories)
+              .forEach(this::register);
     }
 
     /**

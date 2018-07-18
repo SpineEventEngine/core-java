@@ -347,7 +347,8 @@ public final class BoundedContextBuilder {
                 commandBus.setMultitenant(this.multitenant);
             }
         }
-        commandBus.injectSystemGateway(systemGateway);
+        commandBus.injectSystemGateway(systemGateway)
+                  .injectTenantIndex(tenantIndex);
     }
 
     private void initEventBus(StorageFactory storageFactory) {

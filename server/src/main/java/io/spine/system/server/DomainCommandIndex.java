@@ -20,31 +20,36 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
-import io.spine.core.TenantId;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import com.google.common.collect.Streams;
+import io.spine.core.Command;
+import io.spine.server.entity.Entity;
+
+import java.util.Iterator;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A gateway for sending messages into a system bounded context.
- *
  * @author Dmytro Dashenkov
  */
-@Internal
-public interface SystemGateway {
+final class DomainCommandIndex implements CommandIndex {
 
-    /**
-     * Posts a system command.
-     *
-     * <p>In a multitenant environment, the command is posted for the current tenant.
-     *
-     * @param systemCommand command message
-     */
-    default void postCommand(Message systemCommand) {
-        postCommand(systemCommand, null);
+    private final ScheduledCommandRepository repository;
+
+    private DomainCommandIndex(ScheduledCommandRepository repository) {
+        this.repository = repository;
     }
 
-    void postCommand(Message systemCommand, @Nullable TenantId tenantId);
+    static CommandIndex atopOf(ScheduledCommandRepository repository) {
+        checkNotNull(repository);
+        return new DomainCommandIndex(repository);
+    }
 
-    CommandIndex commandIndex();
+    @Override
+    public Iterator<Command> scheduledCommands() {
+        Iterator<Command> result = Streams.stream(repository.loadAll())
+                                          .map(Entity::getState)
+                                          .map(ScheduledCommandRecord::getCommand)
+                                          .iterator();
+        return result;
+    }
 }

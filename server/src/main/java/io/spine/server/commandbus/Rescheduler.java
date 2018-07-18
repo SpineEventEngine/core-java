@@ -22,7 +22,6 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Duration;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Command;
@@ -30,13 +29,12 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.TenantId;
-import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.system.server.CommandIndex;
 import io.spine.time.Durations2;
 import io.spine.time.Timestamps2;
 
-import java.util.Iterator;
 import java.util.Set;
 
 import static com.google.protobuf.util.Timestamps.add;
@@ -50,18 +48,20 @@ import static io.spine.time.Timestamps2.isLaterThan;
  */
 class Rescheduler {
 
-    private final CommandBus commandBus;
+    private final CommandBus bus;
     private final TenantIndex tenantIndex;
+    private final CommandIndex commandIndex;
 
-    Rescheduler(CommandBus commandBus, TenantIndex tenantIndex) {
-        this.commandBus = commandBus;
-        this.tenantIndex = tenantIndex;
+    private Rescheduler(Builder builder) {
+        this.bus = builder.bus;
+        this.tenantIndex = builder.tenantIndex;
+        this.commandIndex = builder.commandIndex;
     }
 
     void rescheduleCommands() {
         Runnable reschedulingAction = this::doRescheduleCommands;
 
-        if (commandBus.isThreadSpawnAllowed()) {
+        if (bus.isThreadSpawnAllowed()) {
             Thread thread = new Thread(reschedulingAction, "CommandBus-rescheduleCommands");
             thread.start();
         } else {
@@ -70,11 +70,11 @@ class Rescheduler {
     }
 
     private CommandScheduler scheduler() {
-        return commandBus.scheduler();
+        return bus.scheduler();
     }
 
     private Log log() {
-        return commandBus.problemLog();
+        return bus.problemLog();
     }
 
     @VisibleForTesting
@@ -86,28 +86,18 @@ class Rescheduler {
     }
 
     private void rescheduleForTenant(TenantId tenantId) {
-        TenantAwareFunction0<Iterator<Command>> func =
-                new TenantAwareFunction0<Iterator<Command>>(tenantId) {
-                    @Override
-                    public Iterator<Command> apply() {
-//                        return commandStore().iterator(SCHEDULED);
-                        // TODO:2018-07-17:dmytro.dashenkov: replace command store.
-                        return null;
-                    }
-                };
-
-        Iterator<Command> commands = func.execute(Empty.getDefaultInstance());
-
-        TenantAwareOperation op = new TenantAwareOperation(tenantId) {
+        TenantAwareOperation operation = new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
-                while (commands.hasNext()) {
-                    final Command command = commands.next();
-                    reschedule(command);
-                }
+                doReschedule();
             }
         };
-        op.execute();
+        operation.execute();
+    }
+
+    private void doReschedule() {
+        commandIndex.scheduledCommands()
+                    .forEachRemaining(this::reschedule);
     }
 
     private void reschedule(Command command) {
@@ -150,4 +140,54 @@ class Rescheduler {
         // TODO:2018-07-17:dmytro.dashenkov: Post MarkCommandAsErrored.
         log().errorExpiredCommand(msg, id);
     }
+
+    /**
+     * Creates a new instance of {@code Builder} for {@code Rescheduler} instances.
+     *
+     * @return new instance of {@code Builder}
+     */
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    /**
+     * A builder for the {@code Rescheduler} instances.
+     */
+    static final class Builder {
+
+        private CommandBus bus;
+        private TenantIndex tenantIndex;
+        private CommandIndex commandIndex;
+
+        /**
+         * Prevents direct instantiation.
+         */
+        private Builder() {
+        }
+
+        Builder setBus(CommandBus bus) {
+            this.bus = bus;
+            return this;
+        }
+
+        Builder setTenantIndex(TenantIndex tenantIndex) {
+            this.tenantIndex = tenantIndex;
+            return this;
+        }
+
+        Builder setCommandIndex(CommandIndex commandIndex) {
+            this.commandIndex = commandIndex;
+            return this;
+        }
+
+        /**
+         * Creates a new instance of {@code Rescheduler}.
+         *
+         * @return new instance of {@code Rescheduler}
+         */
+        Rescheduler build() {
+            return new Rescheduler(this);
+        }
+    }
+
 }

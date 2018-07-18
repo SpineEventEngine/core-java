@@ -41,6 +41,7 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.rejection.RejectionBus;
+import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.DispatchCommand;
 import io.spine.system.server.ScheduleCommand;
 import io.spine.system.server.SystemGateway;
@@ -364,6 +365,7 @@ public class CommandBus extends Bus<Command,
         private RejectionBus rejectionBus;
 
         private SystemGateway systemGateway;
+        private TenantIndex tenantIndex;
 
         /**
          * Checks whether the manual {@link Thread} spawning is allowed within
@@ -450,6 +452,19 @@ public class CommandBus extends Bus<Command,
         }
 
         /**
+         * Inject the {@link TenantIndex} of the bounded context to which the built bus belongs.
+         *
+         * <p>This method is {@link Internal} to the framework. The name of the method starts with
+         * {@code inject} prefix so that this method does not appear in an autocomplete hint for
+         * {@code set} prefix.
+         */
+        @Internal
+        public Builder injectTenantIndex(TenantIndex index) {
+            this.tenantIndex = index;
+            return this;
+        }
+
+        /**
          * Sets the log for logging errors.
          */
         @VisibleForTesting
@@ -485,28 +500,26 @@ public class CommandBus extends Bus<Command,
         @CheckReturnValue
         public CommandBus build() {
             checkSet(systemGateway, SystemGateway.class, "injectSystemGateway");
+            checkSet(tenantIndex, SystemGateway.class, "injectTenantIndex");
 
             if (commandScheduler == null) {
                 commandScheduler = new ExecutorCommandScheduler();
             }
-
             if (log == null) {
                 log = new Log();
             }
-
             if (rejectionBus == null) {
                 rejectionBus = RejectionBus.newBuilder()
                                            .build();
             }
-
-            final CommandBus commandBus = createCommandBus();
+            CommandBus commandBus = createCommandBus();
 
             commandScheduler.setCommandBus(commandBus);
-
+            Rescheduler rescheduler = createRescheduler(commandBus);
+            commandScheduler.setRescheduler(rescheduler);
             if (autoReschedule) {
                 commandBus.rescheduleCommands();
             }
-
             return commandBus;
         }
 
@@ -530,6 +543,14 @@ public class CommandBus extends Bus<Command,
             CommandBus commandBus = new CommandBus(this);
             commandBus.registry();
             return commandBus;
+        }
+
+        private Rescheduler createRescheduler(CommandBus bus) {
+            return Rescheduler.newBuilder()
+                              .setBus(bus)
+                              .setTenantIndex(tenantIndex)
+                              .setCommandIndex(systemGateway.commandIndex())
+                              .build();
         }
     }
 

@@ -67,6 +67,7 @@ message CommandAcknowledged {
 // An event emitted when the command is scheduled.
 //
 message CommandScheduled {
+    option (enrichment) = "spine.system.server.CommandEnrichment";
 
     // The ID of the command.
     spine.core.CommandId id = 1;
