@@ -61,9 +61,8 @@ class AggregateQueryProcessor extends RecordBasedQueryProcessor {
 
     private final Function<EntityId, AggregateStateId> stateIdTransformer =
             new Function<EntityId, AggregateStateId>() {
-                @Nullable
                 @Override
-                public AggregateStateId apply(@Nullable EntityId input) {
+                public @Nullable AggregateStateId apply(@Nullable EntityId input) {
                     checkNotNull(input);
 
                     final Any rawId = input.getId();
