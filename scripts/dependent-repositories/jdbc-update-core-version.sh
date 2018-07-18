@@ -8,11 +8,11 @@ readonly SOURCE_VERSION_VARIABLE='SPINE_VERSION'
 
 readonly TARGET_REPOSITORY=https://api.github.com/repos/SpineEventEngine/jdbc-storage
 readonly TARGET_FILE_WITH_VERSION='ext.gradle'
-readonly TARGET_VERSION_VARIABLE='coreVersion'
+readonly TARGET_VERSION_VARIABLE='spineCoreVersion'
 readonly TARGET_COMMIT_MESSAGE="Update the dependency to \`core-java\` *version*."
 
 readonly OWN_FILE_WITH_VERSION='ext.gradle'
-readonly OWN_VERSION_VARIABLE='JDBC_VERSION'
+readonly OWN_VERSION_VARIABLE='SPINE_VERSION'
 readonly OWN_COMMIT_MESSAGE="Update the library version to *version*."
 
 readonly NEW_BRANCH_NAME='update-to-core-java-*version*'

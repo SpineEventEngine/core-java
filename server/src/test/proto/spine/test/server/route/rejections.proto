@@ -25,7 +25,6 @@ import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.server.route.given.switchman.rejection";
-option java_generate_equals_and_hash = true;
 
 import "spine/test/aggregate/project.proto";
 
