@@ -50,7 +50,6 @@ import io.spine.system.server.EntityRestored;
 import io.spine.system.server.EntityStateChanged;
 import io.spine.system.server.EventDispatchedToReactor;
 import io.spine.system.server.EventDispatchedToSubscriber;
-import io.spine.system.server.EventPassedToApplier;
 import io.spine.system.server.ExposePerson;
 import io.spine.system.server.HidePerson;
 import io.spine.system.server.Person;

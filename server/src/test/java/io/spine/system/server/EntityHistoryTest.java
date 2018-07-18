@@ -129,11 +129,10 @@ class EntityHistoryTest {
         @DisplayName("entity is created")
         void entityCreated() {
             createPerson();
-            eventWatcher.assertEventCount(7);
+            eventWatcher.assertEventCount(6);
 
             checkEntityCreated(AGGREGATE, TestAggregate.TYPE);
             checkCommandDispatchedToAggregateHandler();
-            checkEventPassedToApplier();
             checkEntityStateChanged(Person.newBuilder()
                                           .setId(id)
                                           .setName(PersonName.getDefaultInstance())
@@ -150,11 +149,10 @@ class EntityHistoryTest {
         @DisplayName("entity is archived or deleted")
         void archivedAndDeleted() {
             hidePerson();
-            eventWatcher.assertEventCount(7);
+            eventWatcher.assertEventCount(6);
 
             eventWatcher.nextEvent(EntityCreated.class);
             eventWatcher.nextEvent(CommandDispatchedToHandler.class);
-            eventWatcher.nextEvent(EventPassedToApplier.class);
 
             checkEntityArchived();
 
@@ -176,10 +174,9 @@ class EntityHistoryTest {
                     .build();
             postCommand(command);
 
-            eventWatcher.assertEventCount(5);
+            eventWatcher.assertEventCount(4);
 
             eventWatcher.nextEvent(CommandDispatchedToHandler.class);
-            eventWatcher.nextEvent(EventPassedToApplier.class);
 
             checkEntityExtracted();
 
@@ -196,8 +193,6 @@ class EntityHistoryTest {
 
             Message domainCommand = hidePerson();
             assertCommandDispatched(domainCommand);
-
-            eventWatcher.nextEvent(EventPassedToApplier.class);
         }
 
         @Test
@@ -206,7 +201,6 @@ class EntityHistoryTest {
             Message domainCommand = createPersonName();
             checkEntityCreated(AGGREGATE, TestAggregatePart.TYPE);
             assertCommandDispatched(domainCommand);
-            eventWatcher.nextEvent(EventPassedToApplier.class);
         }
 
         @Test
@@ -246,7 +240,6 @@ class EntityHistoryTest {
 
             eventWatcher.nextEvent(EntityCreated.class);
             eventWatcher.nextEvent(CommandDispatchedToHandler.class);
-            eventWatcher.nextEvent(EventPassedToApplier.class);
             eventWatcher.nextEvent(EntityStateChanged.class);
 
             checkEntityCreated(PROCESS_MANAGER, TestProcman.TYPE);
@@ -279,7 +272,6 @@ class EntityHistoryTest {
             postCommand(domainCommand);
 
             eventWatcher.nextEvent(CommandDispatchedToHandler.class);
-            eventWatcher.nextEvent(EventPassedToApplier.class);
             eventWatcher.nextEvent(EntityStateChanged.class);
 
             EventDispatchedToReactor dispatched =
@@ -350,17 +342,6 @@ class EntityHistoryTest {
             assertId(event.getId());
             assertEquals(state, unpack(event.getNewState()));
             assertFalse(event.getMessageIdList().isEmpty());
-        }
-
-        private void checkEventPassedToApplier() {
-            EventPassedToApplier eventDispatchedEvent =
-                    eventWatcher.nextEvent(EventPassedToApplier.class);
-            EntityHistoryId receiver = eventDispatchedEvent.getReceiver();
-            PersonId actualIdValue = unpack(receiver.getEntityId().getId());
-            PersonCreated payload = findEvent(eventDispatchedEvent.getPayload());
-            assertEquals(id, actualIdValue);
-            assertEquals(TestAggregate.TYPE.value(), receiver.getTypeUrl());
-            assertEquals(id, payload.getId());
         }
 
         private void checkCommandDispatchedToAggregateHandler() {

@@ -27,7 +27,6 @@ import io.spine.core.CommandContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.commandbus.CommandBus;
 
-import java.util.Iterator;
 import java.util.NoSuchElementException;
 
 /**
@@ -37,10 +36,8 @@ import java.util.NoSuchElementException;
  */
 public class IteratingCommandRouter extends AbstractCommandRouter<IteratingCommandRouter> {
 
-    IteratingCommandRouter(CommandBus commandBus,
-                           Message commandMessage,
-                           CommandContext commandContext) {
-        super(commandBus, commandMessage, commandContext);
+    IteratingCommandRouter(CommandBus commandBus, Message commandMessage, CommandContext context) {
+        super(commandBus, commandMessage, context);
     }
 
     @Override
@@ -64,19 +61,14 @@ public class IteratingCommandRouter extends AbstractCommandRouter<IteratingComma
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
     protected CommandRouted routeFirst() {
-        final CommandRouted.Builder result = CommandRouted.newBuilder();
+        CommandRouted.Builder result = CommandRouted.newBuilder();
         result.setSource(getSource());
 
-        final Message message = next();
-        final Command command = route(message);
+        Message message = next();
+        Command command = route(message);
         result.addProduced(command);
 
-        final Iterable<Any> iterable = new Iterable<Any>() {
-            @Override
-            public Iterator<Any> iterator() {
-                return AnyPacker.pack(commandMessages());
-            }
-        };
+        Iterable<Any> iterable = () -> AnyPacker.pack(commandMessages());
         result.addAllMessageToFollow(iterable);
 
         return result.build();
@@ -92,8 +84,8 @@ public class IteratingCommandRouter extends AbstractCommandRouter<IteratingComma
      * @see #hasNext()
      */
     protected Command routeNext() {
-        final Message message = next();
-        final Command command = route(message);
+        Message message = next();
+        Command command = route(message);
         return command;
     }
 }

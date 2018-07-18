@@ -26,16 +26,16 @@ import io.spine.server.command.Assign;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.EitherOfThree;
 import io.spine.test.procman.quiz.PmAnswer;
+import io.spine.test.procman.quiz.PmQuestionId;
 import io.spine.test.procman.quiz.PmQuiz;
 import io.spine.test.procman.quiz.PmQuizId;
 import io.spine.test.procman.quiz.PmQuizVBuilder;
-import io.spine.test.procman.quiz.PmQuestionId;
 import io.spine.test.procman.quiz.command.PmAnswerQuestion;
 import io.spine.test.procman.quiz.command.PmStartQuiz;
 import io.spine.test.procman.quiz.event.PmQuestionAnswered;
+import io.spine.test.procman.quiz.event.PmQuestionFailed;
 import io.spine.test.procman.quiz.event.PmQuestionSolved;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
-import io.spine.test.procman.quiz.event.PmQuestionFailed;
 
 import java.util.List;
 

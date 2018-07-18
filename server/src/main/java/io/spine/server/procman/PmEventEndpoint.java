@@ -20,6 +20,7 @@
 
 package io.spine.server.procman;
 
+import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 
@@ -33,10 +34,12 @@ import java.util.Set;
  * @param <P> the type of process managers
  * @author Alexander Yevsyukov
  */
-class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
+@Internal
+public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
         extends PmEndpoint<I, P, EventEnvelope, Set<I>> {
 
-    private PmEventEndpoint(ProcessManagerRepository<I, P, ?> repository, EventEnvelope envelope) {
+    protected PmEventEndpoint(ProcessManagerRepository<I, P, ?> repository,
+                              EventEnvelope envelope) {
         super(repository, envelope);
     }
 

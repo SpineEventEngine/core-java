@@ -95,12 +95,10 @@ public abstract class Transaction<I,
     private final B builder;
 
     /**
-     * The {@link LifecycleFlags} which the entity has had before the transaction start.
-     *
-     * <p>This value is used in order to check if lifecycle flags had been changed in current
-     * transaction.
+     * The {@link EntityRecord} containing the entity data and meta-info before the transaction
+     * start.
      */
-    private final LifecycleFlags initialLifecycleFlags;
+    private final EntityRecord entityBeforeTransaction;
 
     /**
      * The version of the entity, modified within this transaction.
@@ -163,12 +161,12 @@ public abstract class Transaction<I,
         this.builder = entity.builderFromState();
         this.version = entity.getVersion();
         this.lifecycleFlags = entity.getLifecycleFlags();
-        this.initialLifecycleFlags = entity.getLifecycleFlags();
         this.active = true;
 
         this.transactionListener = new SilentWitness<>();
 
         injectTo(entity);
+        this.entityBeforeTransaction = createRecord();
     }
 
     /**
@@ -253,15 +251,14 @@ public abstract class Transaction<I,
      */
     private void commitChangedState(B builder) {
         try {
-            EntityRecord previousRecord = createRecordWith(initialLifecycleFlags);
             S newState = builder.build();
             markStateChanged();
             Version pendingVersion = getVersion();
             beforeCommit(newState, pendingVersion);
             entity.updateState(newState, pendingVersion);
             commitAttributeChanges();
-            EntityRecord newRecord = createRecordWith(lifecycleFlags);
-            afterCommit(previousRecord, newRecord);
+            EntityRecord newRecord = createRecord();
+            afterCommit(entityBeforeTransaction, newRecord);
         } catch (ValidationException exception) {  /* Could only happen if the state
                                                       has been injected not using
                                                       the builder setters. */
@@ -284,7 +281,6 @@ public abstract class Transaction<I,
      * <p>This method is called when none of the transaction phases has changed the entity state.
      */
     private void commitUnchangedState() {
-        EntityRecord previousRecord = createRecordWith(initialLifecycleFlags);
         S unchanged = getEntity().getState();
         Version pendingVersion = getVersion();
         beforeCommit(unchanged, pendingVersion);
@@ -293,8 +289,8 @@ public abstract class Transaction<I,
         }
         commitAttributeChanges();
         releaseTx();
-        EntityRecord newRecord = createRecordWith(lifecycleFlags);
-        afterCommit(previousRecord, newRecord);
+        EntityRecord newRecord = createRecord();
+        afterCommit(entityBeforeTransaction, newRecord);
     }
 
     private void beforeCommit(S newState, Version newVersion) {
@@ -330,22 +326,14 @@ public abstract class Transaction<I,
     /**
      * Creates an {@link EntityRecord} for the entity under transaction.
      *
-     * <p>Since an entity transaction delegates its {@link EntityWithLifecycle#getLifecycleFlags()}
-     * method invocations to the transaction, both that method and the field {@link #lifecycleFlags}
-     * evaluate into the same object, namely, the current {@link LifecycleFlags}, possibly changed
-     * by this transaction. Thus, the value of {@link LifecycleFlags} should be manually set,
-     * depending on the desired result.
-     *
-     * @param lifecycleFlags flags to include into the record
      * @return new {@link EntityRecord}
-     * @see #lifecycleFlags
-     * @see #initialLifecycleFlags
      */
-    private EntityRecord createRecordWith(LifecycleFlags lifecycleFlags) {
+    private EntityRecord createRecord() {
         E entity = getEntity();
         Any entityId = Identifier.pack(entity.getId());
         Version version = entity.getVersion();
         Any state = pack(entity.getState());
+        LifecycleFlags lifecycleFlags = entity.getLifecycleFlags();
         return EntityRecord.newBuilder()
                            .setEntityId(entityId)
                            .setVersion(version)

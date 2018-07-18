@@ -76,24 +76,6 @@ message DispatchEventToReactor {
     spine.core.EventId event_id = 2 [(required) = true, (valid) = true];
 }
 
-// A command to pass an event to an applier.
-//
-// This command is relevant only to histories of Aggregates.
-//
-// This command is not posted if applying the event to the Aggregate fails.
-//
-// This command is posted at most once, i.e. NOT posted each time an Aggregate is loaded from
-// its history.
-//
-message PassEventToApplier {
-
-    // The ID of the entity, which the event is dispatched to.
-    EntityHistoryId receiver = 1;
-
-    // The ID of the event to dispatch.
-    spine.core.EventId event_id = 2 [(required) = true, (valid) = true];
-}
-
 // A command to dispatch a command to a command handler.
 //
 // This command is relevant to histories of Aggregates and ProcessManagers.
@@ -127,6 +109,7 @@ message ChangeEntityState {
     // this list contains a single entry.
     //
     // TODO:2018-07-09:dmytro.dashenkov: Make required as soon as Procman is completely transactional.
+    // todo https://github.com/SpineEventEngine/core-java/issues/755
     repeated DispatchedMessageId message_id = 3;
 }
 

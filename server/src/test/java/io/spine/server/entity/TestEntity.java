@@ -20,9 +20,9 @@
 
 package io.spine.server.entity;
 
-import io.spine.server.entity.given.Given;
 import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
+import io.spine.testing.server.entity.given.Given;
 
 import static io.spine.base.Identifier.newUuid;
 

@@ -78,5 +78,4 @@ public interface Sharding {
      */
     <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
     find(DeliveryTag<E> tag, I targetId);
-
 }

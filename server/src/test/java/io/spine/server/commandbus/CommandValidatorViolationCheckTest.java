@@ -36,9 +36,9 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static io.spine.core.Commands.generateId;
-import static io.spine.core.given.GivenCommandContext.withRandomActor;
 import static io.spine.server.commandbus.CommandValidator.inspect;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
+import static io.spine.testing.core.given.GivenCommandContext.withRandomActor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**

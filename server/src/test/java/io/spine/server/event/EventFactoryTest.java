@@ -22,8 +22,8 @@ package io.spine.server.event;
 
 import com.google.protobuf.Any;
 import io.spine.core.CommandEnvelope;
-import io.spine.test.Tests;
 import io.spine.test.command.event.MandatoryFieldEvent;
+import io.spine.testing.Tests;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.validate.ValidationException;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +31,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.pack;
-import static io.spine.test.TestValues.newUuidValue;
+import static io.spine.testing.TestValues.newUuidValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**

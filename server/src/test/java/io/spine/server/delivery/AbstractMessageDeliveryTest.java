@@ -27,7 +27,7 @@ import io.spine.server.transport.memory.SingleThreadInMemTransportFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-import static io.spine.server.model.ModelTests.clearModel;
+import static io.spine.testing.server.model.ModelTests.clearModel;
 
 /**
  * An abstract base for message delivery tests.

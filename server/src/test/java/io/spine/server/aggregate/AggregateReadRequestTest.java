@@ -21,7 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.testing.EqualsTester;
-import io.spine.test.Tests;
+import io.spine.testing.Tests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

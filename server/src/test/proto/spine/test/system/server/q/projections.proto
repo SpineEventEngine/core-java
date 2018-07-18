@@ -33,6 +33,7 @@ import "spine/people/person_name.proto";
 import "spine/test/system/server/entity_history_test.proto";
 
 message PersonDetails {
+    option (entity).kind = PROJECTION;
 
     PersonId id = 1;
 

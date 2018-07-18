@@ -416,10 +416,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return rejectionRouting;
     }
 
-    void onEventApplied(I id, Event event) {
-        lifecycleOf(id).onPassEventToApplier(event);
-    }
-
     /**
      * Posts passed events to {@link EventBus}.
      */

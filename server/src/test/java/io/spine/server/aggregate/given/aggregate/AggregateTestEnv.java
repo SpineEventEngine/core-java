@@ -29,7 +29,6 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
-import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.rejection.StandardRejections.CannotModifyDeletedEntity;
 import io.spine.test.aggregate.command.AggAssignTask;
 import io.spine.test.aggregate.command.AggCreateTask;
@@ -37,12 +36,10 @@ import io.spine.test.aggregate.command.AggReassignTask;
 import io.spine.test.aggregate.task.AggTaskId;
 import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.type.TypeUrl;
-
-import java.util.List;
+import io.spine.testing.server.TestEventFactory;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.core.given.GivenVersion.withNumber;
+import static io.spine.testing.core.given.GivenVersion.withNumber;
 
 /**
  * @author Alexander Yevsyukov

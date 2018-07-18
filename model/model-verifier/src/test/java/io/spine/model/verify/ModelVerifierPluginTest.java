@@ -20,8 +20,8 @@
 
 package io.spine.model.verify;
 
-import io.spine.test.TempDirectory;
-import io.spine.test.TempDirectory.TempDir;
+import io.spine.testing.TempDirectory;
+import io.spine.testing.TempDirectory.TempDir;
 import io.spine.tools.gradle.GradleProject;
 import io.spine.tools.gradle.TaskName;
 import org.gradle.testkit.runner.BuildResult;
