@@ -20,7 +20,6 @@
 
 package io.spine.testing.server;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
@@ -44,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.ImmutableList.copyOf;
@@ -207,7 +207,7 @@ public abstract class MessageHandlerTest<I,
             CommandClass commandClass = CommandClass.of(messageType);
             return Optional.of(commandClass);
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
@@ -279,7 +279,7 @@ public abstract class MessageHandlerTest<I,
         public Optional<Ack> accept(CommandEnvelope envelope) {
             interceptedCommands.add(unpack(envelope.getCommand()
                                                    .getMessage()));
-            return Optional.absent();
+            return Optional.empty();
         }
 
         @Override

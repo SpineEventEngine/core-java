@@ -21,13 +21,14 @@
 package io.spine.testing.server.tenant;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import io.spine.annotation.Internal;
 import io.spine.base.Environment;
 import io.spine.core.TenantId;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.CurrentTenant;
 import io.spine.server.tenant.TenantIndex;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
