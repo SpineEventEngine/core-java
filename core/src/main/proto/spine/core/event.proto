@@ -27,7 +27,6 @@ option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.core";
 option java_multiple_files = true;
 option java_outer_classname = "EventProto";
-option java_generate_equals_and_hash = true;
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
@@ -135,4 +134,15 @@ enum EventValidationError {
 
     // The event message is invalid according to custom Protobuf options set.
     INVALID_EVENT = 2;
+}
+
+// Data from an `Event` which is accessible from the end user code to which
+// the event was dispatched.
+message DispatchedEvent {
+
+    // The event message.
+    google.protobuf.Any message = 1 [(required) = true];
+
+    // The context of the event.
+    EventContext context = 2 [(required) = true];
 }

@@ -20,6 +20,7 @@
 
 package io.spine.server.procman.given;
 
+import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -52,7 +53,6 @@ import io.spine.validate.AnyVBuilder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -212,7 +212,7 @@ public class ProcessManagerTestEnv {
      */
     public static class AddTaskDispatcher implements CommandDispatcher<Message> {
 
-        private final List<CommandEnvelope> commands = new LinkedList<>();
+        private final List<CommandEnvelope> commands = Lists.newLinkedList();
 
         @Override
         public Set<CommandClass> getMessageClasses() {

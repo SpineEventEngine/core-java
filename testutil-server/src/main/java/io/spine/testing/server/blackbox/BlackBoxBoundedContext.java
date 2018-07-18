@@ -29,7 +29,6 @@ import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
-import io.spine.testing.server.TestEventFactory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
@@ -39,6 +38,7 @@ import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
 import io.spine.testing.client.blackbox.AcknowledgementsVerifier;
+import io.spine.testing.server.TestEventFactory;
 import io.spine.util.Exceptions;
 
 import java.util.Collection;
