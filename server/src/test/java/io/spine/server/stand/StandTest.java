@@ -632,8 +632,7 @@ class StandTest extends TenantAwareTest {
                 final List<EntityStateWithVersion> messages = value.getMessagesList();
                 assertFalse(messages.isEmpty());
 
-                final EntityStateWithVersion message = messages.get(0);
-                final Customer customer = unpack(message.getState());
+                final Customer customer = unpackCustomer(messages.get(0));
                 for (Descriptors.FieldDescriptor field : customer.getDescriptorForType()
                                                                  .getFields()) {
                     assertTrue(customer.getField(field)
@@ -659,8 +658,7 @@ class StandTest extends TenantAwareTest {
                 assertFalse(messages.isEmpty());
 
                 final Customer sampleCustomer = getSampleCustomer();
-                final EntityStateWithVersion message = messages.get(0);
-                final Customer customer = unpack(message.getState());
+                final Customer customer = unpackCustomer(messages.get(0));
                 assertTrue(customer.getName()
                                    .equals(sampleCustomer.getName()));
                 assertFalse(customer.hasId());
@@ -684,8 +682,7 @@ class StandTest extends TenantAwareTest {
                         assertFalse(messages.isEmpty());
 
                         final Customer sampleCustomer = getSampleCustomer();
-                        final EntityStateWithVersion message = messages.get(0);
-                        final Customer customer = unpack(message.getState());
+                        final Customer customer = unpackCustomer(messages.get(0));
                         assertEquals(customer.getNicknamesList(),
                                      sampleCustomer.getNicknamesList());
 
@@ -711,8 +708,7 @@ class StandTest extends TenantAwareTest {
                         assertFalse(messages.isEmpty());
 
                         final Customer sampleCustomer = getSampleCustomer();
-                        final EntityStateWithVersion message = messages.get(0);
-                        final Customer customer = unpack(message.getState());
+                        final Customer customer = unpackCustomer(messages.get(0));
                         assertEquals(customer.getNicknamesList(),
                                      sampleCustomer.getNicknamesList());
 
@@ -765,8 +761,7 @@ class StandTest extends TenantAwareTest {
         final List<EntityStateWithVersion> messages = observer.responseHandled().getMessagesList();
         Verify.assertSize(1, messages);
 
-        final EntityStateWithVersion message = messages.get(0);
-        final Customer customer = unpack(message.getState());
+        final Customer customer = unpackCustomer(messages.get(0));
         assertMatches(customer, fieldMask);
         assertTrue(ids.contains(customer.getId()));
 
@@ -797,9 +792,7 @@ class StandTest extends TenantAwareTest {
                 final List<EntityStateWithVersion> messages = value.getMessagesList();
                 assertFalse(messages.isEmpty());
 
-                // todo extract method unpackCustomer or something
-                final EntityStateWithVersion message = messages.get(0);
-                final Customer customer = unpack(message.getState());
+                final Customer customer = unpackCustomer(messages.get(0));
 
                 assertNotEquals(customer, null);
 
@@ -1097,6 +1090,12 @@ class StandTest extends TenantAwareTest {
                  .createStandStorage();
     }
 
+    private static Customer unpackCustomer(EntityStateWithVersion message) {
+        final Any state = message.getState();
+        final Customer customer = unpack(state);
+        return customer;
+    }
+
     private static void verifyObserver(MemoizeQueryResponseObserver observer) {
         assertNotNull(observer.responseHandled());
         assertTrue(observer.isCompleted());
@@ -1112,8 +1111,7 @@ class StandTest extends TenantAwareTest {
                 final List<EntityStateWithVersion> messages = value.getMessagesList();
                 assertFalse(messages.isEmpty());
 
-                final EntityStateWithVersion message = messages.get(0);
-                final Customer customer = unpack(message.getState());
+                final Customer customer = unpackCustomer(messages.get(0));
                 final Customer sampleCustomer = getSampleCustomer();
 
                 assertEquals(sampleCustomer.getName(), customer.getName());
@@ -1244,7 +1242,7 @@ class StandTest extends TenantAwareTest {
                 Verify.assertSize(ids.size(), messages);
 
                 for (EntityStateWithVersion singleMessage : messages) {
-                    final Customer customer = unpack(singleMessage.getState());
+                    final Customer customer = unpackCustomer(singleMessage);
 
                     assertNotEquals(customer, null);
 
@@ -1281,7 +1279,7 @@ class StandTest extends TenantAwareTest {
         assertEquals(sampleCustomers.size(), messages.size());
         final Collection<Customer> allCustomers = sampleCustomers.values();
         for (EntityStateWithVersion singleMessage : messages) {
-            final Customer unpackedSingleResult = unpack(singleMessage.getState());
+            final Customer unpackedSingleResult = unpackCustomer(singleMessage);
             assertTrue(allCustomers.contains(unpackedSingleResult));
         }
         return stand;
