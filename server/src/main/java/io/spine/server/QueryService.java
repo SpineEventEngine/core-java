@@ -35,6 +35,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkState;
+
 /**
  * The {@code QueryService} provides a synchronous way to fetch read-side state from the server.
  *
@@ -63,6 +65,11 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
 
         final TypeUrl type = Queries.typeOf(query);
         final BoundedContext boundedContext = typeToContextMap.get(type);
+
+        checkState(boundedContext != null,
+                   "Query targets the type %s which cannot be found in any registered repository",
+                   type);
+
         final Stand stand = boundedContext.getStand();
         try {
             stand.execute(query, responseObserver);
