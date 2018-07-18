@@ -21,11 +21,11 @@ package io.spine.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.entity.EntityVersioning;
 import io.spine.server.entity.Transaction;
-import io.spine.server.entity.TransactionListener;
 import io.spine.validate.ValidatingBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -38,9 +38,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <B> the type of a {@code ValidatingBuilder} for the projection state
  * @author Alex Tymchenko
  */
-class ProjectionTransaction<I,
-                            M extends Message,
-                            B extends ValidatingBuilder<M, ? extends Message.Builder>>
+@Internal
+public class ProjectionTransaction<I,
+                                   M extends Message,
+                                   B extends ValidatingBuilder<M, ? extends Message.Builder>>
         extends Transaction<I, Projection<I, M, B>, M, B> {
 
     @VisibleForTesting
@@ -49,13 +50,7 @@ class ProjectionTransaction<I,
     }
 
     @VisibleForTesting
-    ProjectionTransaction(Projection<I, M, B> projection,
-                          TransactionListener<I, Projection<I, M, B>, M, B> listener) {
-        super(projection, listener);
-    }
-
-    @VisibleForTesting
-    ProjectionTransaction(Projection<I, M, B> projection, M state, Version version) {
+    protected ProjectionTransaction(Projection<I, M, B> projection, M state, Version version) {
         super(projection, state, version);
     }
 
@@ -79,8 +74,8 @@ class ProjectionTransaction<I,
     /**
      * {@inheritDoc}
      *
-     * <p>This method is overridden to expose itself to repositories and state builders
-     * in this package.
+     * <p>This method is overridden to expose itself to repositories, state builders, and test
+     * utilities.
      */
     @Override
     protected void commit() {
@@ -93,41 +88,13 @@ class ProjectionTransaction<I,
      * @param projection the {@code Projection} instance to start the transaction for.
      * @return the new transaction instance
      */
-    static <I,
-            M extends Message,
-            B extends ValidatingBuilder<M, ? extends Message.Builder>>
+    protected static <I,
+                      M extends Message,
+                      B extends ValidatingBuilder<M, ? extends Message.Builder>>
     ProjectionTransaction<I, M, B> start(Projection<I, M, B> projection) {
         checkNotNull(projection);
 
         final ProjectionTransaction<I, M, B> tx = new ProjectionTransaction<>(projection);
-        return tx;
-    }
-
-    /**
-     * Creates a new transaction for a given {@code projection} and sets the given {@code state}
-     * and {@code version} as a starting point for the transaction.
-     *
-     * <p>Please note that the state and version specified are not applied to the given projection
-     * directly and require a {@linkplain Transaction#commit() transaction commit} in order
-     * to be applied.
-     *
-     * @param projection  the {@code Projection} instance to start the transaction for.
-     * @param state   the starting state to set
-     * @param version the starting version to set
-     * @return the new transaction instance
-     */
-    static <I,
-            M extends Message,
-            B extends ValidatingBuilder<M, ? extends Message.Builder>>
-    ProjectionTransaction<I, M, B> startWith(Projection<I, M, B> projection,
-                                             M state,
-                                             Version version) {
-        checkNotNull(projection);
-        checkNotNull(state);
-        checkNotNull(version);
-
-        final ProjectionTransaction<I, M, B> tx =
-                new ProjectionTransaction<>(projection, state, version);
         return tx;
     }
 }

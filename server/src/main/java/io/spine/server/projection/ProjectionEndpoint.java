@@ -24,11 +24,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.delivery.Delivery;
+import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EntityMessageEndpoint;
 import io.spine.server.entity.Repository;
+import io.spine.server.entity.TransactionListener;
 
 import java.util.List;
 import java.util.Set;
@@ -36,10 +39,11 @@ import java.util.Set;
 /**
  * Dispatches an event to projections.
  */
-class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
+@Internal
+public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
         extends EntityMessageEndpoint<I, P, EventEnvelope, Set<I>> {
 
-    private ProjectionEndpoint(Repository<I, P> repository, EventEnvelope event) {
+    protected ProjectionEndpoint(Repository<I, P> repository, EventEnvelope event) {
         super(repository, event);
     }
 
@@ -70,12 +74,20 @@ class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
 
     @Override
     protected void deliverNowTo(I entityId) {
-        P projection = repository().findOrCreate(entityId);
+        ProjectionRepository<I, P, ?> repository = repository();
+        P projection = repository.findOrCreate(entityId);
+        dispatchInTx(projection);
+        store(projection);
+    }
+
+    protected void dispatchInTx(P projection) {
         ProjectionTransaction<I, ?, ?> tx =
                 ProjectionTransaction.start((Projection<I, ?, ?>) projection);
+        TransactionListener listener = EntityLifecycleMonitor.newInstance(repository());
+        tx.setListener(listener);
         doDispatch(projection, envelope());
+        repository().onEventDispatched(projection.getId(), envelope().getOuterObject());
         tx.commit();
-        store(projection);
     }
 
     @Override
@@ -86,7 +98,7 @@ class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
     @CanIgnoreReturnValue
     @Override
     protected List<? extends Message> doDispatch(P projection, EventEnvelope event) {
-        projection.handle(event);
+        projection.play(event.getOuterObject());
         return ImmutableList.of();
     }
 

@@ -21,11 +21,11 @@
 package io.spine.server.route;
 
 import com.google.protobuf.Message;
-import io.spine.test.Tests;
+import io.spine.testing.Tests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 

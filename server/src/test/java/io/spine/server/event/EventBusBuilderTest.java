@@ -27,7 +27,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
-import io.spine.test.Tests;
+import io.spine.testing.Tests;
 import io.spine.validate.MessageValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,7 +38,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
-import static io.spine.server.BoundedContext.newName;
+import static io.spine.core.BoundedContextNames.newName;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;

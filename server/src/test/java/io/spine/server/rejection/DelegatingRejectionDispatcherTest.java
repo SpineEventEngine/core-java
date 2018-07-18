@@ -23,18 +23,18 @@ package io.spine.server.rejection;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
 import io.spine.server.rejection.given.DelegatingRejectionDispatcherTestEnv.EmptyRejectionDispatcherDelegate;
+import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

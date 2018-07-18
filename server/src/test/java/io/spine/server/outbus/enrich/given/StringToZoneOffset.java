@@ -21,8 +21,8 @@
 package io.spine.server.outbus.enrich.given;
 
 import com.google.common.base.Function;
-import io.spine.time.ZoneId;
 import io.spine.time.ZoneOffset;
+import io.spine.time.ZoneOffsets;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -37,9 +37,6 @@ public class StringToZoneOffset implements Function<String, ZoneOffset> {
     public @Nullable ZoneOffset apply(@Nullable String input) {
         return input == null
                ? ZoneOffset.getDefaultInstance()
-               : ZoneOffset.newBuilder()
-                           .setId(ZoneId.newBuilder()
-                                        .setValue(input))
-                           .build();
+               : ZoneOffsets.parse(input);
     }
 }

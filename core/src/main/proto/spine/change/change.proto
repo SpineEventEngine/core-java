@@ -24,14 +24,11 @@ package spine.change;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "ChangeProto";
 option java_package = "io.spine.change";
 
 import "google/protobuf/timestamp.proto";
-
-import "spine/time/time.proto";
 
 //
 // This file provides messages that define changes of fields in other messages.
@@ -209,68 +206,3 @@ message BytesChange {
     // The new value of the field.
     bytes new_value = 2 [(required) = true];
 }
-
-//
-// Changes of date/time values.
-//--------------------------------
-
-// Definition of an interval change.
-message IntervalChange {
-
-    // The value of the field that's changing.
-    time.Interval previous_value = 1;
-
-    // The new value of the field.
-    time.Interval new_value = 2;
-}
-
-// Definition of a change of `LocalDate` fields.
-message LocalDateChange {
-
-    // The value of fields that are changing.
-    time.LocalDate previous_value = 1;
-
-    // The new value of fields.
-    time.LocalDate new_value = 2;
-}
-
-// Definition of a change of `LocalTime` fields.
-message LocalTimeChange {
-
-    // The value of fields that are changing.
-    time.LocalTime previous_value = 1;
-
-    // The new value of fields.
-    time.LocalTime new_value = 2;
-}
-
-// Definition of a change of `OffsetTime` fields.
-message OffsetTimeChange {
-
-    // The value of fields that are changing.
-    time.OffsetTime previous_value = 1;
-
-    // The new value of fields.
-    time.OffsetTime new_value = 2;
-}
-
-// Definition of a change of `OffsetDate` fields.
-message OffsetDateChange {
-
-    // The value of fields that are changing.
-    time.OffsetDate previous_value = 1;
-
-    // The new value of fields.
-    time.OffsetDate new_value = 2;
-}
-
-// Definition of a change of `OffsetDateTime` fields.
-message OffsetDateTimeChange {
-
-    // The value of fields that are changing.
-    time.OffsetDateTime previous_value = 1;
-
-    // The new value of fields.
-    time.OffsetDateTime new_value = 2;
-}
-

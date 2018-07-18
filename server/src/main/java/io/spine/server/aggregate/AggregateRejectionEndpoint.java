@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.RejectionEnvelope;
 
 import java.util.List;
@@ -33,11 +34,12 @@ import java.util.Set;
  * @param <A> the type of aggregates
  * @author Alexander Yevsyukov
  */
-class AggregateRejectionEndpoint<I, A extends Aggregate<I, ?, ?>>
+@Internal
+public class AggregateRejectionEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateEndpoint<I, A, RejectionEnvelope, Set<I>> {
 
-    private AggregateRejectionEndpoint(AggregateRepository<I, A> repository,
-                                       RejectionEnvelope envelope) {
+    protected AggregateRejectionEndpoint(AggregateRepository<I, A> repository,
+                                         RejectionEnvelope envelope) {
         super(repository, envelope);
     }
 

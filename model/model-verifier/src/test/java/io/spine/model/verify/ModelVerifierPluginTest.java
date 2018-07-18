@@ -20,8 +20,8 @@
 
 package io.spine.model.verify;
 
-import io.spine.test.TempDirectory;
-import io.spine.test.TempDirectory.TempDir;
+import io.spine.testing.TempDirectory;
+import io.spine.testing.TempDirectory.TempDir;
 import io.spine.tools.gradle.GradleProject;
 import io.spine.tools.gradle.TaskName;
 import org.gradle.testkit.runner.BuildResult;
@@ -67,9 +67,7 @@ class ModelVerifierPluginTest {
                 .executeTask(VERIFY_MODEL);
     }
 
-    // See https://github.com/SpineEventEngine/core-java/issues/737 as to why it's disabled.
     @Test
-    @Disabled("the test is failing other tests in the suite")
     @DisplayName("halt build on duplicate command handling methods")
     void rejectDuplicateHandlingMethods() {
         BuildResult result = newProjectWithJava(

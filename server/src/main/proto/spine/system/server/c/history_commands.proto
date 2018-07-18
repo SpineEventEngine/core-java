@@ -1,0 +1,178 @@
+//
+// Copyright 2018, TeamDev. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+
+syntax = "proto3";
+
+package spine.system.server;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option (internal_all) = true;
+
+option java_package = "io.spine.system.server";
+option java_outer_classname = "HistoryCommandsProto";
+option java_multiple_files = true;
+
+import "google/protobuf/any.proto";
+
+import "spine/core/event.proto";
+import "spine/core/command.proto";
+import "spine/system/server/entity_history.proto";
+
+// A command to create a new entity.
+//
+// This command is sent when the first messag is dispatched to the entity.
+//
+message CreateEntity {
+
+    // The ID of the entity.
+    EntityHistoryId id = 1;
+
+    // The kind of the entity.
+    EntityOption.Kind kind = 2 [(required) = true];
+}
+
+// A command to dispatch an event to a subscriber.
+//
+// This command is relevant only to histories of Projections.
+//
+message DispatchEventToSubscriber {
+
+    // The ID of the entity, which the event is dispatched to.
+    EntityHistoryId receiver = 1;
+
+    // The ID of the event to dispatch.
+    spine.core.EventId event_id = 2 [(required) = true, (valid) = true];
+}
+
+// A command to dispatch an event to a reactor.
+//
+// This command is relevant to histories of Aggregates and ProcessManagers.
+//
+message DispatchEventToReactor {
+
+    // The ID of the entity, which the event is dispatched to.
+    EntityHistoryId receiver = 1;
+
+    // The ID of the event to dispatch.
+    spine.core.EventId event_id = 2 [(required) = true, (valid) = true];
+}
+
+// A command to dispatch a command to a command handler.
+//
+// This command is relevant to histories of Aggregates and ProcessManagers.
+//
+message DispatchCommandToHandler {
+
+    // The ID of the entity, which the command is dispatched to.
+    EntityHistoryId receiver = 1;
+
+    // The ID of the command to dispatch.
+    spine.core.CommandId command_id = 2 [(required) = true, (valid) = true];
+}
+
+// A command to change the state of the entity.
+//
+// This command is posted only when an actual state change occures. If a message handler does NOT
+// change the state of the entity, this command is NOT posted.
+//
+message ChangeEntityState {
+
+    // The ID of the entity.
+    EntityHistoryId id = 1;
+
+    // The new state of the entity.
+    google.protobuf.Any new_state = 2 [(required) = true];
+
+    // The IDs of the messages which caused the mutation.
+    //
+    // In some cases, the messages are dispatched to an entity in a bulk. In those cases it is
+    // impossible to determine, which exactly message has caused the mutatuion. In other cases,
+    // this list contains a single entry.
+    //
+    // TODO:2018-07-09:dmytro.dashenkov: Make required as soon as Procman is completely transactional.
+    // todo https://github.com/SpineEventEngine/core-java/issues/755
+    repeated DispatchedMessageId message_id = 3;
+}
+
+// A command to mark the entity as archived.
+//
+message ArchiveEntity {
+
+    // The ID of the entity.
+    //
+    // In some cases, the messages are dispatched to an entity in a bulk. In those cases it is
+    // impossible to determine, which exactly message has caused the mutatuion. In other cases,
+    // this list will contain a single entry.
+    //
+    EntityHistoryId id = 1;
+
+    // The IDs of the messages which caused the mutation.
+    repeated DispatchedMessageId message_id = 2;
+}
+
+// A command to mark the entity as deleted.
+//
+message DeleteEntity {
+
+    // The ID of the entity.
+    EntityHistoryId id = 1;
+
+    // The IDs of the messages which caused the mutation.
+    //
+    // In some cases, the messages are dispatched to an entity in a bulk. In those cases it is
+    // impossible to determine, which exactly message has caused the mutatuion. In other cases,
+    // this list contains a single entry.
+    //
+    repeated DispatchedMessageId message_id = 2;
+}
+
+// A command to mark the entity as NOT archived.
+//
+message ExtractEntityFromArchive {
+
+    // The ID of the entity.
+    EntityHistoryId id = 1;
+
+    // The IDs of the messages which caused the mutation.
+    //
+    // In some cases, the messages are dispatched to an entity in a bulk. In those cases it is
+    // impossible to determine, which exactly message has caused the mutatuion. In other cases,
+    // this list contains a single entry.
+    //
+    repeated DispatchedMessageId message_id = 2;
+}
+
+// A command to mark the entity as NOT deleted.
+//
+message RestoreEntity {
+
+    // The ID of the entity.
+    EntityHistoryId id = 1;
+
+    // The IDs of the messages which caused the mutation.
+    //
+    // In some cases, the messages are dispatched to an entity in a bulk. In those cases it is
+    // impossible to determine, which exactly message has caused the mutatuion. In other cases,
+    // this list contains a single entry.
+    //
+    repeated DispatchedMessageId message_id = 2;
+}

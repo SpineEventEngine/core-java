@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
+import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -45,7 +46,9 @@ import io.spine.server.delivery.Shardable;
 import io.spine.server.delivery.ShardedStreamConsumer;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
+import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
+import io.spine.server.entity.TransactionListener;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
@@ -63,6 +66,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
+import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -88,36 +92,27 @@ public abstract class ProcessManagerRepository<I,
 
     /** The rejection routing schema used by this repository. */
     private final RejectionRouting<I> rejectionRouting =
-            RejectionRouting.withDefault(RejectionProducers.<I>fromContext());
+            RejectionRouting.withDefault(RejectionProducers.fromContext());
 
     private final Supplier<PmCommandDelivery<I, P>> commandDeliverySupplier =
-            memoize(new Supplier<PmCommandDelivery<I, P>>() {
-                @Override
-                public PmCommandDelivery<I, P> get() {
-                    final PmCommandDelivery<I, P> result =
-                            new PmCommandDelivery<>(ProcessManagerRepository.this);
-                    return result;
-                }
+            memoize(() -> {
+                final PmCommandDelivery<I, P> result =
+                        new PmCommandDelivery<>(this);
+                return result;
             });
 
     private final Supplier<PmEventDelivery<I, P>> eventDeliverySupplier =
-            memoize(new Supplier<PmEventDelivery<I, P>>() {
-                @Override
-                public PmEventDelivery<I, P> get() {
-                    final PmEventDelivery<I, P> result =
-                            new PmEventDelivery<>(ProcessManagerRepository.this);
-                    return result;
-                }
+            memoize(() -> {
+                final PmEventDelivery<I, P> result =
+                        new PmEventDelivery<>(this);
+                return result;
             });
 
     private final Supplier<PmRejectionDelivery<I, P>> rejectionDeliverySupplier =
-            memoize(new Supplier<PmRejectionDelivery<I, P>>() {
-                @Override
-                public PmRejectionDelivery<I, P> get() {
-                    final PmRejectionDelivery<I, P> result =
-                            new PmRejectionDelivery<>(ProcessManagerRepository.this);
-                    return result;
-                }
+            memoize(() -> {
+                final PmRejectionDelivery<I, P> result =
+                        new PmRejectionDelivery<>(this);
+                return result;
             });
 
 
@@ -352,8 +347,12 @@ public abstract class ProcessManagerRepository<I,
         logError("Rejection dispatching caused error (class: %s, id: %s", envelope, exception);
     }
 
+    @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.
     PmTransaction<?, ?, ?> beginTransactionFor(P manager) {
-        return PmTransaction.start((ProcessManager<?, ?, ?>) manager);
+        PmTransaction<I, S, ?> tx = PmTransaction.start((ProcessManager<I, S, ?>) manager);
+        TransactionListener listener = EntityLifecycleMonitor.newInstance(this);
+        tx.setListener(listener);
+        return tx;
     }
 
     /**
@@ -364,6 +363,14 @@ public abstract class ProcessManagerRepository<I,
         for (Event event : events) {
             eventBus.post(event);
         }
+    }
+
+    void onCommandDispatched(I id, Command command) {
+        lifecycleOf(id).onDispatchCommand(command);
+    }
+
+    void onEventDispatched(I id, Event event) {
+        lifecycleOf(id).onDispatchEventToReactor(event);
     }
 
     /**
@@ -383,6 +390,13 @@ public abstract class ProcessManagerRepository<I,
         final CommandBus commandBus = getBoundedContext().getCommandBus();
         result.setCommandBus(commandBus);
         return result;
+    }
+
+    @Override
+    public P create(I id) {
+        P procman = super.create(id);
+        lifecycleOf(id).onEntityCreated(PROCESS_MANAGER);
+        return procman;
     }
 
     /** Open access to the event routing to the package. */

@@ -171,12 +171,12 @@ abstract class RequestValidator<M extends Message> {
                                                 .setValidationError(validationError)
                                                 .setMessage(errorText);
         final Error error = errorBuilder.build();
-        return Optional.of(onInvalidMessage(formatExceptionMessage(request), request, error));
+        return Optional.of(onInvalidMessage(formatExceptionMessage(request, error), request, error));
     }
 
-    private String formatExceptionMessage(M request) {
-        return format("%s. See Error.getValidationError() for details.",
-                      getErrorText(request));
+    private String formatExceptionMessage(M request, Error error) {
+        return format("%s. Validation error: %s.",
+                      getErrorText(request), error.getValidationError());
     }
 
     protected String getErrorText(M request) {
