@@ -20,7 +20,6 @@
 
 package io.spine.server.stand;
 
-import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import io.spine.string.Stringifier;
@@ -29,6 +28,7 @@ import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**

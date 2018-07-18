@@ -20,7 +20,6 @@
 
 package io.spine.server.tuple;
 
-import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.BoolValue;
@@ -34,6 +33,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
@@ -132,7 +132,7 @@ class PairTest {
         @DisplayName("absent")
         void absent() {
             StringValue a = TestValues.newUuidValue();
-            Optional<BoolValue> b = Optional.absent();
+            Optional<BoolValue> b = Optional.empty();
 
             Pair<StringValue, Optional<BoolValue>> pair = Pair.withNullable(a, null);
 

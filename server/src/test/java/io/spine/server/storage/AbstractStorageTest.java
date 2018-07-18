@@ -20,7 +20,6 @@
 
 package io.spine.server.storage;
 
-import com.google.common.base.Optional;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
@@ -33,6 +32,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;

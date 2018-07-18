@@ -184,7 +184,7 @@ class StandPostTest {
                     boolean entityIdMatches = argument.getEntityId()
                                                       .equals(entityId);
                     boolean versionMatches = version.equals(argument.getEntityVersion()
-                                                                    .orNull());
+                                                                    .orElse(null));
                     boolean stateMatches = argument.getMessage()
                                                    .equals(state);
                     return entityIdMatches

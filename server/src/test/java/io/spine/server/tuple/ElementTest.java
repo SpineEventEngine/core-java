@@ -20,13 +20,14 @@
 
 package io.spine.server.tuple;
 
-import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.test.TestValues;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -44,7 +45,7 @@ class ElementTest {
         Timestamp time = Time.getCurrentTime();
         new EqualsTester().addEqualityGroup(new Element(time), new Element(time))
                           .addEqualityGroup(new Element(TestValues.newUuidValue()))
-                          .addEqualityGroup(new Element(Optional.absent()))
+                          .addEqualityGroup(new Element(Optional.empty()))
                           .testEquals();
     }
 
@@ -53,7 +54,7 @@ class ElementTest {
     void serialize() {
         reserializeAndAssert(new Element(Time.getCurrentTime()));
         reserializeAndAssert(new Element(Optional.of(Time.getCurrentTime())));
-        reserializeAndAssert(new Element(Optional.absent()));
+        reserializeAndAssert(new Element(Optional.empty()));
     }
 
     @Test

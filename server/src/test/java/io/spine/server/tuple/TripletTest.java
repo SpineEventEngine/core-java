@@ -20,7 +20,6 @@
 
 package io.spine.server.tuple;
 
-import com.google.common.base.Optional;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.BoolValue;
@@ -36,6 +35,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
@@ -145,8 +145,8 @@ class TripletTest {
                     Triplet.withNullable2(a, null, null);
 
             assertEquals(a, optTriplet.getA());
-            assertEquals(Optional.absent(), optTriplet.getB());
-            assertEquals(Optional.absent(), optTriplet.getC());
+            assertEquals(Optional.empty(), optTriplet.getB());
+            assertEquals(Optional.empty(), optTriplet.getC());
         }
     }
 

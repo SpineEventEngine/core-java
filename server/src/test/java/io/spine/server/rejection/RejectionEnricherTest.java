@@ -20,7 +20,6 @@
 
 package io.spine.server.rejection;
 
-import com.google.common.base.Optional;
 import io.spine.core.Enrichment;
 import io.spine.core.Enrichments;
 import io.spine.core.Rejection;
@@ -31,6 +30,8 @@ import io.spine.test.rejection.ProjectRejections;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static io.spine.server.rejection.given.Given.invalidProjectNameRejection;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;

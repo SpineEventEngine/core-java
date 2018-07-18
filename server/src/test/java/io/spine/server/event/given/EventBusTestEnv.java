@@ -20,7 +20,6 @@
 
 package io.spine.server.event.given;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
@@ -68,13 +67,14 @@ import io.spine.testdata.Sample;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.base.Optional.absent;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.bus.Buses.reject;
+import static java.util.Optional.empty;
 
 /**
  * Test environment classes for the {@code server.event} package.
@@ -265,7 +265,7 @@ public class EventBusTestEnv {
                     return Optional.of(result);
                 }
             }
-            return absent();
+            return empty();
         }
 
         private static Error error() {

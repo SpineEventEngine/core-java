@@ -94,7 +94,7 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
     void acceptNullEnricher() {
         assertNull(builder().setEnricher(Tests.nullRef())
                             .getEnricher()
-                            .orNull());
+                            .orElse(null));
     }
 
     @Nested

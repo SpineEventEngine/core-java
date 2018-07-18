@@ -20,10 +20,11 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.base.Optional;
 import io.spine.core.TenantId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static io.spine.core.given.GivenTenantId.nameOf;
 import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
