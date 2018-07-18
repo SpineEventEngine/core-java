@@ -285,7 +285,6 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             }
         }
 
-        @SuppressWarnings("MethodWithMultipleLoops")
         @Test
         @DisplayName("all entities")
         void allEntities() {
