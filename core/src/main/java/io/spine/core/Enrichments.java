@@ -20,12 +20,12 @@
 
 package io.spine.core;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.type.TypeName;
 
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -56,7 +56,7 @@ public final class Enrichments {
         if (enrichment.getModeCase() == Enrichment.ModeCase.CONTAINER) {
             return Optional.of(enrichment.getContainer());
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -72,7 +72,7 @@ public final class Enrichments {
         checkNotNull(enrichmentClass);
         final Optional<Enrichment.Container> container = getEnrichments(checkNotNull(context));
         if (!container.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return getFromContainer(enrichmentClass, container.get());
     }
@@ -99,7 +99,7 @@ public final class Enrichments {
         checkNotNull(enrichmentClass);
         final Optional<Enrichment.Container> container = getEnrichments(checkNotNull(context));
         if (!container.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         return getFromContainer(enrichmentClass, container.get());
     }
@@ -111,10 +111,10 @@ public final class Enrichments {
         final Any any = enrichments.getItemsMap()
                                    .get(typeName);
         if (any == null) {
-            return Optional.absent();
+            return Optional.empty();
         }
         final E result = unpack(any);
-        return Optional.fromNullable(result);
+        return Optional.ofNullable(result);
     }
 
     /**

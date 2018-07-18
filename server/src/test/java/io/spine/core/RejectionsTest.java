@@ -20,7 +20,6 @@
 
 package io.spine.core;
 
-import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Timestamp;
@@ -33,6 +32,8 @@ import io.spine.protobuf.AnyPacker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static io.spine.core.Rejections.causedByRejection;
 import static io.spine.core.Rejections.getProducer;

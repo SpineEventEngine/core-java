@@ -20,12 +20,12 @@
 
 package io.spine.server.route;
 
-import com.google.common.base.Optional;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionContext;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -129,7 +129,7 @@ public final class RejectionRouting<I>
             RejectionRoute<I, M> route = (RejectionRoute<I, M>) optional.get();
             return Optional.of(route);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

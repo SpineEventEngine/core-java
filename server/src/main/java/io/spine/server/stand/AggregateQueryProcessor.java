@@ -20,7 +20,6 @@
 package io.spine.server.stand;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -42,6 +41,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Predicates.notNull;
@@ -132,12 +132,9 @@ class AggregateQueryProcessor implements QueryProcessor {
                                                     ? standStorage.read(request, fieldMask)
                                                     : standStorage.read(request);
         Iterator<EntityRecord> result;
-        if (!singleResult.isPresent()) {
-            result = Collections.emptyIterator();
-        } else {
-            result = Collections.singleton(singleResult.get())
-                                .iterator();
-        }
+        result = singleResult.map(record -> Collections.singleton(record)
+                                                       .iterator())
+                             .orElseGet(Collections::emptyIterator);
         return result;
     }
 

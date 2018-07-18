@@ -20,11 +20,12 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
-import com.google.common.base.Optional;
 import io.spine.core.TenantId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.tenant.TenantAwareFunction;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.fail;
 

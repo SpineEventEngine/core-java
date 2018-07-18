@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
-import com.google.common.base.Optional;
 import io.spine.core.React;
 import io.spine.core.UserId;
 import io.spine.server.aggregate.Aggregate;
@@ -39,6 +38,8 @@ import io.spine.test.aggregate.task.AggTask;
 import io.spine.test.aggregate.task.AggTaskId;
 import io.spine.test.aggregate.task.AggTaskVBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Optional;
 
 /**
  * An aggregate that fires a {@linkplain Pair pair} with an optional upon handling a command,

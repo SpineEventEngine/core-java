@@ -20,7 +20,6 @@
 
 package io.spine.server.tuple;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
@@ -29,8 +28,10 @@ import io.spine.server.tuple.Element.DValue;
 import io.spine.server.tuple.Element.EValue;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static com.google.common.base.Optional.fromNullable;
+import java.util.Optional;
+
 import static io.spine.server.tuple.Element.value;
+import static java.util.Optional.ofNullable;
 
 /**
  * A tuple of five elements.
@@ -38,7 +39,7 @@ import static io.spine.server.tuple.Element.value;
  * <p>The first element must be a non-default {@link Message}
  * (and not {@link com.google.protobuf.Empty Empty}).
  *
- * <p>Other four can be {@code Message}, {@link com.google.common.base.Optional Optional} or
+ * <p>Other four can be {@code Message}, {@link java.util.Optional Optional} or
  * {@link Either}.
  *
  * @param <A> the type of the first element
@@ -79,7 +80,7 @@ public final class Quintet<A extends Message, B, C, D, E>
     withNullable(A a, B b, C c, D d, @Nullable E e) {
         checkAllNotNullOrEmpty(Quintet.class, a, b, c, d);
         checkNotEmpty(Quintet.class, e);
-        Quintet<A, B, C, D, Optional<E>> result = new Quintet<>(a, b, c, d, fromNullable(e));
+        Quintet<A, B, C, D, Optional<E>> result = new Quintet<>(a, b, c, d, ofNullable(e));
         return result;
     }
 
@@ -93,7 +94,7 @@ public final class Quintet<A extends Message, B, C, D, E>
         checkAllNotNullOrEmpty(Quintet.class, a, b, c);
         checkAllNotEmpty(Quintet.class, e, d);
         Quintet<A, B, C, Optional<D>, Optional<E>> result =
-                new Quintet<>(a, b, c, fromNullable(d), fromNullable(e));
+                new Quintet<>(a, b, c, ofNullable(d), ofNullable(e));
         return result;
     }
 
@@ -107,7 +108,7 @@ public final class Quintet<A extends Message, B, C, D, E>
         checkAllNotNullOrEmpty(Quintet.class, a, b);
         checkAllNotEmpty(Quintet.class, c, d, e);
         Quintet<A, B, Optional<C>, Optional<D>, Optional<E>> result =
-                new Quintet<>(a, b, fromNullable(c), fromNullable(d), fromNullable(e));
+                new Quintet<>(a, b, ofNullable(c), ofNullable(d), ofNullable(e));
         return result;
     }
 
@@ -121,7 +122,7 @@ public final class Quintet<A extends Message, B, C, D, E>
         checkNotNullOrEmpty(Quintet.class, a);
         checkAllNotEmpty(Quintet.class, b, c, d, e);
         Quintet<A, Optional<B>, Optional<C>, Optional<D>, Optional<E>> result =
-                new Quintet<>(a, fromNullable(b), fromNullable(c), fromNullable(d), fromNullable(e));
+                new Quintet<>(a, ofNullable(b), ofNullable(c), ofNullable(d), ofNullable(e));
         return result;
     }
 

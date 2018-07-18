@@ -20,12 +20,12 @@
 
 package io.spine.server.route;
 
-import com.google.common.base.Optional;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -133,7 +133,7 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
             EventRoute<I, M> route = (EventRoute<I, M>) optional.get();
             return Optional.of(route);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**

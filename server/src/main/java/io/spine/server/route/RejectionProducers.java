@@ -20,12 +20,12 @@
 
 package io.spine.server.route;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.core.RejectionContext;
 import io.spine.core.Rejections;
 
+import java.util.Optional;
 import java.util.Set;
 
 /**

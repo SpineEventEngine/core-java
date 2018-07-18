@@ -19,7 +19,6 @@
  */
 package io.spine.server.storage.memory;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
 import io.spine.core.BoundedContextName;
 import io.spine.server.entity.AbstractVersionableEntity;
@@ -35,6 +34,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;

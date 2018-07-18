@@ -20,7 +20,6 @@
 
 package io.spine.server.event;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -35,6 +34,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import static io.spine.protobuf.AnyPacker.unpackFunc;
 import static java.util.stream.Collectors.toList;

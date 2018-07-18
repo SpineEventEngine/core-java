@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
@@ -67,6 +66,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 
 import static io.spine.core.given.GivenTenantId.newUuid;

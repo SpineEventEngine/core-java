@@ -22,8 +22,6 @@ package io.spine.server.outbus.enrich;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
@@ -36,6 +34,7 @@ import io.spine.core.EnrichableMessageEnvelope;
 import io.spine.type.TypeName;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -176,9 +175,10 @@ public abstract class Enricher<M extends EnrichableMessageEnvelope<?, ?, C>, C e
     Optional<EnrichmentFunction<?, ?, ?>> functionFor(Class<?> fieldClass,
                                                    Class<?> enrichmentFieldClass) {
         Optional<EnrichmentFunction<?, ?, ?>> result =
-                FluentIterable.from(functions.values())
-                              .firstMatch(SupportsFieldConversion.of(fieldClass,
-                                                                     enrichmentFieldClass));
+                functions.values()
+                         .stream()
+                         .filter(SupportsFieldConversion.of(fieldClass, enrichmentFieldClass))
+                         .findFirst();
         return result;
     }
 

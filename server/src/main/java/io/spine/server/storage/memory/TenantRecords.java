@@ -21,7 +21,6 @@
 package io.spine.server.storage.memory;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -34,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.filterValues;
@@ -72,7 +72,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
     @Override
     public Optional<EntityRecordWithColumns> get(I id) {
         EntityRecordWithColumns record = records.get(id);
-        return Optional.fromNullable(record);
+        return Optional.ofNullable(record);
     }
 
     boolean delete(I id) {

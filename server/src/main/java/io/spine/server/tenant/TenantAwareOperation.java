@@ -20,9 +20,10 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.base.Optional;
 import io.spine.annotation.SPI;
 import io.spine.core.TenantId;
+
+import java.util.Optional;
 
 /**
  * An abstract base for operations on a tenant data.

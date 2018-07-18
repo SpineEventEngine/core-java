@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
@@ -37,6 +36,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.TypeConverter.toObject;
@@ -160,7 +160,7 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
         String storedName = column.getStoredName();
         if (!record.getColumnNames()
                    .contains(storedName)) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         MemoizedValue value = record.getColumnValue(storedName);

@@ -19,7 +19,6 @@
  */
 package io.spine.server.stand;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
@@ -29,11 +28,12 @@ import io.spine.server.entity.Repository;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.type.TypeUrl;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import static com.google.common.base.Optional.fromNullable;
+import static java.util.Optional.ofNullable;
 
 /**
  * The in-memory concurrency-friendly implementation of {
@@ -82,7 +82,7 @@ class InMemoryTypeRegistry implements TypeRegistry {
     @Override
     public Optional<? extends RecordBasedRepository<?, ?, ?>> getRecordRepository(TypeUrl type) {
         RecordBasedRepository<?, ?, ? > repo = typeToRepositoryMap.get(type);
-        Optional<? extends RecordBasedRepository<?, ?, ?>> result = fromNullable(repo);
+        Optional<? extends RecordBasedRepository<?, ?, ?>> result = ofNullable(repo);
         return result;
     }
 

@@ -20,12 +20,12 @@
 
 package io.spine.server.route;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -130,7 +130,7 @@ abstract class MessageRouting<C extends Message, K extends MessageClass, R>
         checkNotNull(msgCls);
         K cls = toMessageClass(msgCls);
         Route<Message, C, R> route = routes.get(cls);
-        return Optional.fromNullable(route);
+        return Optional.ofNullable(route);
     }
 
     /**

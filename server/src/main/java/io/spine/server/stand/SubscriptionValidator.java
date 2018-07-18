@@ -19,13 +19,14 @@
  */
 package io.spine.server.stand;
 
-import com.google.common.base.Optional;
 import io.spine.base.Error;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionValidationError;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantAwareFunction;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -65,7 +66,7 @@ class SubscriptionValidator extends RequestValidator<Subscription> {
         boolean includedInRegistry = checkInRegistry(request);
 
         if (includedInRegistry) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         return Optional.of(missingInRegistry());

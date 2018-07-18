@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.common.base.Optional;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.aggregate.AggregateReadRequest;
 import io.spine.server.aggregate.AggregateStorage;
@@ -28,6 +27,7 @@ import io.spine.server.entity.LifecycleFlags;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

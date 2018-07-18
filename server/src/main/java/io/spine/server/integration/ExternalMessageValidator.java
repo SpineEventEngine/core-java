@@ -19,9 +19,10 @@
  */
 package io.spine.server.integration;
 
-import com.google.common.base.Optional;
 import io.spine.core.MessageInvalid;
 import io.spine.server.bus.EnvelopeValidator;
+
+import java.util.Optional;
 
 /**
  * A validator of the incoming external messages to use in {@code IntegrationBus}.
@@ -33,6 +34,6 @@ enum ExternalMessageValidator implements EnvelopeValidator<ExternalMessageEnvelo
 
     @Override
     public Optional<MessageInvalid> validate(ExternalMessageEnvelope envelope) {
-        return Optional.absent();
+        return Optional.empty();
     }
 }

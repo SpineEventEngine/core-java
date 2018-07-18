@@ -20,7 +20,6 @@
 
 package io.spine.server.tuple;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Empty;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
@@ -28,6 +27,7 @@ import io.spine.validate.Validate;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -152,7 +152,7 @@ class Element implements Serializable {
 
     /**
      * A marker interface for a tuple element which value can be
-     * {@link com.google.common.base.Optional Optional}.
+     * {@link java.util.Optional Optional}.
      */
     interface OptionalValue {
     }

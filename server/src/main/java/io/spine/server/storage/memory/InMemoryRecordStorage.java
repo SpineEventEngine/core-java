@@ -20,12 +20,10 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.protobuf.FieldMask;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
@@ -33,8 +31,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Memory-based implementation of {@link RecordStorage}.
@@ -129,7 +127,7 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected Optional<EntityRecord> readRecord(I id) {
         return getStorage().get(id)
-                           .transform(EntityRecordUnpacker.INSTANCE);
+                           .map(EntityRecordUnpacker.INSTANCE);
     }
 
     @Override

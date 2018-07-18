@@ -20,8 +20,6 @@
 package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicates;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.TextFormat;
@@ -40,8 +38,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -144,7 +145,9 @@ public class EventStore implements AutoCloseable {
      */
     public void appendAll(Iterable<Event> events) {
         checkNotNull(events);
-        Optional<Event> tenantDefiningEvent = tryFind(events, Predicates.notNull());
+        Optional<Event> tenantDefiningEvent = StreamSupport.stream(events.spliterator(), false)
+                                                           .filter(Objects::nonNull)
+                                                           .findFirst();
         if (!tenantDefiningEvent.isPresent()) {
             return;
         }

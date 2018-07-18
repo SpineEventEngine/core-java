@@ -20,15 +20,16 @@
 
 package io.spine.server.tuple;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
 import io.spine.server.tuple.Element.CValue;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static com.google.common.base.Optional.fromNullable;
+import java.util.Optional;
+
 import static io.spine.server.tuple.Element.value;
+import static java.util.Optional.ofNullable;
 
 /**
  * A tuple with three elements.
@@ -36,7 +37,7 @@ import static io.spine.server.tuple.Element.value;
  * <p>The first element must be a non-default {@link Message}
  * (and not {@link com.google.protobuf.Empty Empty}).
  *
- * <p>Other two can be {@code Message}, {@link com.google.common.base.Optional Optional} or
+ * <p>Other two can be {@code Message}, {@link java.util.Optional Optional} or
  * {@link Either}.
  *
  * @param <A> the type of the first element
@@ -72,7 +73,7 @@ public final class Triplet<A extends Message, B, C>
     Triplet<A, B, Optional<C>> withNullable(A a, B b, @Nullable C c) {
         checkAllNotNullOrEmpty(Triplet.class, a, b);
         checkNotEmpty(Triplet.class, c);
-        Triplet<A, B, Optional<C>> result = new Triplet<>(a, b, fromNullable(c));
+        Triplet<A, B, Optional<C>> result = new Triplet<>(a, b, ofNullable(c));
         return result;
     }
 
@@ -84,7 +85,7 @@ public final class Triplet<A extends Message, B, C>
         checkNotNullOrEmpty(Triplet.class, a);
         checkAllNotEmpty(Triplet.class, b, c);
         Triplet<A, Optional<B>, Optional<C>> result =
-                new Triplet<>(a, fromNullable(b), fromNullable(c));
+                new Triplet<>(a, ofNullable(b), ofNullable(c));
         return result;
     }
 

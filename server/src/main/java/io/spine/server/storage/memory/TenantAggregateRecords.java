@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
@@ -36,6 +35,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.util.Exceptions.unsupported;
@@ -110,7 +110,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
      */
     Optional<LifecycleFlags> getStatus(I id) {
         LifecycleFlags entityStatus = statuses.get(id);
-        return Optional.fromNullable(entityStatus);
+        return Optional.ofNullable(entityStatus);
     }
 
     @Override

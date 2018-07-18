@@ -20,7 +20,6 @@
 
 package io.spine.server.projection;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.SPI;
@@ -34,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * The storage used by projection repositories for keeping {@link Projection}s

@@ -112,7 +112,7 @@ public abstract class RecordStorage<I>
      * @param  request   the request to read the record
      * @param  fieldMask fields to read.
      * @return the item with the given ID and with the {@code FieldMask} applied
-     *         or {@code Optional.absent()} if there is no record matching this request
+     *         or {@code Optional.empty()} if there is no record matching this request
      * @see    #read(RecordReadRequest)
      */
     @SuppressWarnings("CheckReturnValue") // calling builder method

@@ -20,7 +20,6 @@
 package io.spine.server.integration;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
@@ -44,6 +43,7 @@ import io.spine.validate.Validate;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Deque;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -413,7 +413,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         private TransportFactory transportFactory;
 
         public Optional<EventBus> getEventBus() {
-            return Optional.fromNullable(eventBus);
+            return Optional.ofNullable(eventBus);
         }
 
         @CanIgnoreReturnValue
@@ -423,14 +423,14 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         }
 
         public Optional<RejectionBus> getRejectionBus() {
-            return Optional.fromNullable(rejectionBus);
+            return Optional.ofNullable(rejectionBus);
         }
 
         public Optional<BoundedContextName> getBoundedContextName() {
             BoundedContextName value = Validate.isDefault(this.boundedContextName)
                                              ? null
                                              : this.boundedContextName;
-            return Optional.fromNullable(value);
+            return Optional.ofNullable(value);
         }
 
         @CanIgnoreReturnValue
@@ -452,7 +452,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         }
 
         public Optional<TransportFactory> getTransportFactory() {
-            return Optional.fromNullable(transportFactory);
+            return Optional.ofNullable(transportFactory);
         }
 
         @Override

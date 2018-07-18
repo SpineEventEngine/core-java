@@ -20,7 +20,6 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
@@ -31,6 +30,7 @@ import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
 
 /**

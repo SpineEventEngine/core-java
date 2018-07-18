@@ -20,15 +20,16 @@
 
 package io.spine.server.tuple;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static com.google.common.base.Optional.fromNullable;
+import java.util.Optional;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.tuple.Element.value;
+import static java.util.Optional.ofNullable;
 
 /**
  * A tuple with two elements.
@@ -36,7 +37,7 @@ import static io.spine.server.tuple.Element.value;
  * <p>The first element must be a non-default {@link Message}
  * (and not {@link com.google.protobuf.Empty Empty}).
  *
- * <p>The second element can be {@code Message}, {@link com.google.common.base.Optional Optional} or
+ * <p>The second element can be {@code Message}, {@link java.util.Optional Optional} or
  * {@link Either}.
  *
  * @param <A> the type of the first element
@@ -70,7 +71,7 @@ public final class Pair<A extends Message, B>
     Pair<A, Optional<B>> withNullable(A a, @Nullable B b) {
         checkNotNullOrEmpty(Pair.class, a);
         checkNotEmpty(Pair.class, b);
-        Pair<A, Optional<B>> result = new Pair<>(a, fromNullable(b));
+        Pair<A, Optional<B>> result = new Pair<>(a, ofNullable(b));
         return result;
     }
 

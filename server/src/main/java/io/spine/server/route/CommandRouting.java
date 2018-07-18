@@ -20,12 +20,11 @@
 
 package io.spine.server.route;
 
-import com.google.common.base.Optional;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-
+import java.util.Optional;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -119,7 +118,7 @@ public final class CommandRouting<I> extends MessageRouting<CommandContext, Comm
             CommandRoute<I, M> route = (CommandRoute<I, M>) optional.get();
             return Optional.of(route);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

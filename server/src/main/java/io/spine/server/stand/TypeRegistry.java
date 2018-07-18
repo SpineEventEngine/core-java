@@ -19,12 +19,13 @@
  */
 package io.spine.server.stand;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.type.TypeUrl;
+
+import java.util.Optional;
 
 /**
  * The registry of all {@linkplain TypeUrl types} managed by an instance of {@linkplain Stand}.
@@ -56,7 +57,7 @@ interface TypeRegistry extends AutoCloseable {
      *
      * @param type the type of {@code Entity} to obtain a repository for
      * @return {@code RecordBasedRepository} managing the objects of the given {@code type},
-     *         or {@code Optional.absent()} if no such repository has been registered
+     *         or {@code Optional.empty()} if no such repository has been registered
      */
     Optional<? extends RecordBasedRepository<?, ?, ?>> getRecordRepository(TypeUrl type);
 

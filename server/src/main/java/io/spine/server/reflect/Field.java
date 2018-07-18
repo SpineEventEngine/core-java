@@ -21,7 +21,6 @@
 package io.spine.server.reflect;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.FieldDescriptor;
@@ -32,6 +31,7 @@ import io.spine.type.TypeUrl;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
@@ -76,7 +76,7 @@ public final class Field {
         try {
             getter = getterForFieldOf(name, messageClass);
         } catch (NoSuchMethodException ignored) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         Field field = new Field(name, getter);
@@ -89,7 +89,7 @@ public final class Field {
      * @param messageClass the class of messages containing the field
      * @param filter       the field filter
      * @return an {@code Field} wrapped into {@code Optional} or
-     * {@code Optional.absent()} if there is no such field in the passed message class
+     * {@code Optional.empty()} if there is no such field in the passed message class
      */
     public static Optional<Field> forFilter(Class<? extends Message> messageClass,
                                             FieldFilter filter) {
@@ -186,7 +186,7 @@ public final class Field {
      * <p>If the corresponding field is of type {@code Any} it will be unpacked.
      *
      * @return field value or unpacked field value, or
-     *         {@code Optional.absent()} if the field is a default {@code Any}
+     *         {@code Optional.empty()} if the field is a default {@code Any}
      * @throws IllegalStateException if getting the field value caused an exception.
      *                               The root cause will be available from the thrown instance.
      */
@@ -198,7 +198,7 @@ public final class Field {
             if (fieldValue instanceof Any) {
                 Any any = (Any)fieldValue;
                 if (isDefault(any)) {
-                    return Optional.absent();
+                    return Optional.empty();
                 }
                 result = AnyPacker.unpack(any);
             } else {
@@ -208,6 +208,6 @@ public final class Field {
             throw illegalStateWithCauseOf(e);
         }
 
-        return Optional.fromNullable(result);
+        return Optional.ofNullable(result);
     }
 }

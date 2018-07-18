@@ -19,12 +19,13 @@
  */
 package io.spine.server.stand;
 
-import com.google.common.base.Optional;
 import io.spine.base.Error;
 import io.spine.client.Query;
 import io.spine.client.QueryValidationError;
 import io.spine.client.Target;
 import io.spine.type.TypeUrl;
+
+import java.util.Optional;
 
 import static io.spine.client.QueryValidationError.INVALID_QUERY;
 import static io.spine.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;
@@ -58,7 +59,7 @@ class QueryValidator extends AbstractTargetValidator<Query> {
         boolean targetSupported = checkTargetSupported(target);
 
         if (targetSupported) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         return Optional.of(missingInRegistry(getTypeOf(target)));

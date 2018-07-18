@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.base.Optional;
 import io.spine.base.Identifier;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.test.aggregate.Project;
@@ -29,6 +28,8 @@ import io.spine.test.aggregate.ProjectVBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

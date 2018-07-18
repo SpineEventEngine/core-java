@@ -20,7 +20,6 @@
 
 package io.spine.server.commandstore;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.spine.base.Error;
@@ -32,6 +31,7 @@ import io.spine.core.CommandStatus;
 import io.spine.core.Rejection;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.Given;
+import io.spine.server.entity.AbstractEntity;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.test.Tests;
@@ -43,6 +43,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.CommandStatus.ERROR;
@@ -84,11 +85,7 @@ class StorageTest extends TenantAwareTest {
 
     private Optional<CommandRecord> readRecord(CommandId commandId) {
         Optional<CEntity> entity = repository.find(commandId);
-        if (entity.isPresent()) {
-            return Optional.of(entity.get()
-                                     .getState());
-        }
-        return Optional.absent();
+        return entity.map(AbstractEntity::getState);
     }
 
     @BeforeEach

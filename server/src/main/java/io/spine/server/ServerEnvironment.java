@@ -21,12 +21,13 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import io.spine.annotation.Internal;
 import io.spine.server.delivery.InProcessSharding;
 import io.spine.server.delivery.Sharding;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -74,7 +75,7 @@ public class ServerEnvironment {
      * or {@code null} if the program is running not on the AppEngine.
      */
     public Optional<String> appEngineVersion() {
-        return Optional.fromNullable(appEngineRuntimeVersion);
+        return Optional.ofNullable(appEngineRuntimeVersion);
     }
 
     public Sharding getSharding() {
