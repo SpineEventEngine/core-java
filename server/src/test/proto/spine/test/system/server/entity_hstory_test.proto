@@ -1,0 +1,67 @@
+//
+// Copyright 2018, TeamDev. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+
+syntax = "proto3";
+
+package spine.test.system.server;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.system.server";
+option java_outer_classname = "EntityHstoryTestProto";
+option java_multiple_files = true;
+
+import "spine/people/person_name.proto";
+
+message PersonId {
+
+    string uuid = 1;
+}
+
+// A state type of an aggregate.
+//
+message Person {
+    option (entity).kind = AGGREGATE;
+
+    PersonId id = 1;
+
+    spine.people.PersonName name = 2;
+}
+
+// A state type of a process manager.
+//
+message PersonCreation {
+    option (entity).kind = PROCESS_MANAGER;
+
+    PersonId id = 1;
+
+    bool created = 2;
+}
+
+// A state type of an aggregate part.
+//
+message PersonFirstName {
+    option (entity).kind = AGGREGATE;
+
+    PersonId id = 1;
+
+    string first_name = 2;
+}

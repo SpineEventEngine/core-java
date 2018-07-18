@@ -30,9 +30,9 @@ import static io.spine.change.BooleanMismatch.expectedTrue;
 import static io.spine.change.BooleanMismatch.unpackActual;
 import static io.spine.change.BooleanMismatch.unpackExpected;
 import static io.spine.change.BooleanMismatch.unpackNewValue;
-import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

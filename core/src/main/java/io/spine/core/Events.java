@@ -19,19 +19,19 @@
  */
 package io.spine.core;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
-import io.spine.time.Timestamps2;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -51,7 +51,7 @@ public final class Events {
     private static final Comparator<Event> eventComparator = (o1, o2) -> {
         Timestamp timestamp1 = getTimestamp(o1);
         Timestamp timestamp2 = getTimestamp(o2);
-        return Timestamps2.compare(timestamp1, timestamp2);
+        return Timestamps.compare(timestamp1, timestamp2);
     };
 
     /** The stringifier for event IDs. */
@@ -71,8 +71,8 @@ public final class Events {
      * @return new UUID-based event ID
      */
     public static EventId generateId() {
-        String value = UUID.randomUUID()
-                           .toString();
+        final String value = UUID.randomUUID()
+                                 .toString();
         return EventId.newBuilder()
                       .setValue(value)
                       .build();
@@ -161,8 +161,8 @@ public final class Events {
 
     /**
      * Obtains the ID of the root command, which lead to this event.
-     *
-     * <p> In case the passed {@code Event} instance is a reaction to another {@code Event},
+     * 
+     * <p> In case the passed {@code Event} instance is a reaction to another {@code Event}, 
      * the identifier of the very first command in this chain is returned.
      *
      * @param event the event to get the root command ID for
@@ -198,8 +198,8 @@ public final class Events {
      * Obtains a {@link TenantId} from the given {@link Event}.
      *
      * <p>The {@code TenantId} is retrieved by traversing the passed {@code Event}s context. It is
-     * stored in the initial {@link CommandContext} and can be retrieved from the events origin
-     * command or rejection context.
+     * stored in the initial {@link CommandContext} and can be retrieved from the events origin 
+     * command or rejection context. 
      *
      * @return a tenant ID available by traversing event context back to original command
      *         context or a default empty tenant ID if no tenant ID is found this way
@@ -214,22 +214,22 @@ public final class Events {
             return TenantId.getDefaultInstance();
         }
 
-        TenantId result = Commands.getTenantId(commandContext.get());
+        final TenantId result = Commands.getTenantId(commandContext.get());
         return result;
     }
 
     /**
      * Obtains a context of the command, which lead to this event.
      *
-     * <p> The context is obtained by traversing the events origin for a valid context source.
+     * <p> The context is obtained by traversing the events origin for a valid context source. 
      * There can be two sources for the command context:
      * <ol>
      *     <li>The command context set as the event origin.</li>
-     *     <li>The command set as a field of a rejection context if an event was generated in a
+     *     <li>The command set as a field of a rejection context if an event was generated in a 
      *     response to a rejection.</li>
      * </ol>
      *
-     * <p>If at some point the event origin is not set the {@link Optional#empty()} is returned.
+     * <p>If at some point the event origin is not set the {@link Optional#absent()} is returned.
      */
     private static Optional<CommandContext> getOriginCommandContext(Event event) {
         CommandContext commandContext = null;
@@ -253,7 +253,7 @@ public final class Events {
 
                 case ORIGIN_NOT_SET:
                 default:
-                    return Optional.empty();
+                    return Optional.absent();
             }
         }
 
@@ -305,10 +305,10 @@ public final class Events {
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Internal
     public static Event clearEnrichments(Event event) {
-        EventContext context = event.getContext();
-        EventContext.Builder resultContext = context.toBuilder()
-                                                    .clearEnrichment();
-        EventContext.OriginCase originCase = resultContext.getOriginCase();
+        final EventContext context = event.getContext();
+        final EventContext.Builder resultContext = context.toBuilder()
+                                                          .clearEnrichment();
+        final EventContext.OriginCase originCase = resultContext.getOriginCase();
         switch (originCase) {
             case EVENT_CONTEXT:
                 resultContext.setEventContext(context.getEventContext()
@@ -330,9 +330,9 @@ public final class Events {
                 throw newIllegalStateException("Unsupported origin case is encountered: %s",
                                                originCase);
         }
-        Event result = event.toBuilder()
-                            .setContext(resultContext)
-                            .build();
+        final Event result = event.toBuilder()
+                                  .setContext(resultContext)
+                                  .build();
         return result;
     }
 
@@ -342,15 +342,15 @@ public final class Events {
     static class EventIdStringifier extends Stringifier<EventId> {
         @Override
         protected String toString(EventId eventId) {
-            String result = eventId.getValue();
+            final String result = eventId.getValue();
             return result;
         }
 
         @Override
         protected EventId fromString(String str) {
-            EventId result = EventId.newBuilder()
-                                    .setValue(str)
-                                    .build();
+            final EventId result = EventId.newBuilder()
+                                          .setValue(str)
+                                          .build();
             return result;
         }
     }

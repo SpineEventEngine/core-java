@@ -22,13 +22,6 @@ package io.spine.change;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
-import io.spine.annotation.Experimental;
-import io.spine.time.Interval;
-import io.spine.time.LocalDate;
-import io.spine.time.LocalTime;
-import io.spine.time.OffsetDate;
-import io.spine.time.OffsetDateTime;
-import io.spine.time.OffsetTime;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.change.Preconditions2.checkNewValueNotEmpty;
@@ -44,8 +37,8 @@ import static io.spine.change.Preconditions2.checkNotEqual;
     /* ... because we want one utility class for all the Changes classes. */
 public final class Changes {
 
+    /** Prevent instantiation of this utility class. */
     private Changes() {
-        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -59,10 +52,10 @@ public final class Changes {
         checkNewValueNotEmpty(newValue);
         checkNotEqual(previousValue, newValue);
 
-        StringChange result = StringChange.newBuilder()
-                                          .setPreviousValue(previousValue)
-                                          .setNewValue(newValue)
-                                          .build();
+        final StringChange result = StringChange.newBuilder()
+                                                .setPreviousValue(previousValue)
+                                                .setNewValue(newValue)
+                                                .build();
         return result;
     }
 
@@ -76,10 +69,10 @@ public final class Changes {
         checkNotNull(newValue);
         checkNotEqual(previousValue, newValue);
 
-        TimestampChange result = TimestampChange.newBuilder()
-                                                .setPreviousValue(previousValue)
-                                                .setNewValue(newValue)
-                                                .build();
+        final TimestampChange result = TimestampChange.newBuilder()
+                                                      .setPreviousValue(previousValue)
+                                                      .setNewValue(newValue)
+                                                      .build();
         return result;
     }
 
@@ -91,10 +84,10 @@ public final class Changes {
     public static DoubleChange of(double previousValue, double newValue) {
         checkNotEqual(previousValue, newValue);
 
-        DoubleChange result = DoubleChange.newBuilder()
-                                          .setPreviousValue(previousValue)
-                                          .setNewValue(newValue)
-                                          .build();
+        final DoubleChange result = DoubleChange.newBuilder()
+                                                .setPreviousValue(previousValue)
+                                                .setNewValue(newValue)
+                                                .build();
         return result;
     }
 
@@ -106,10 +99,10 @@ public final class Changes {
     public static FloatChange of(float previousValue, float newValue) {
         checkNotEqual(previousValue, newValue);
 
-        FloatChange result = FloatChange.newBuilder()
-                                        .setPreviousValue(previousValue)
-                                        .setNewValue(newValue)
-                                        .build();
+        final FloatChange result = FloatChange.newBuilder()
+                                              .setPreviousValue(previousValue)
+                                              .setNewValue(newValue)
+                                              .build();
         return result;
     }
 
@@ -121,10 +114,10 @@ public final class Changes {
     public static Int32Change ofInt32(int previousValue, int newValue) {
         checkNotEqual(previousValue, newValue);
 
-        Int32Change result = Int32Change.newBuilder()
-                                        .setPreviousValue(previousValue)
-                                        .setNewValue(newValue)
-                                        .build();
+        final Int32Change result = Int32Change.newBuilder()
+                                              .setPreviousValue(previousValue)
+                                              .setNewValue(newValue)
+                                              .build();
         return result;
     }
 
@@ -136,10 +129,10 @@ public final class Changes {
     public static Int64Change ofInt64(long previousValue, long newValue) {
         checkNotEqual(previousValue, newValue);
 
-        Int64Change result = Int64Change.newBuilder()
-                                        .setPreviousValue(previousValue)
-                                        .setNewValue(newValue)
-                                        .build();
+        final Int64Change result = Int64Change.newBuilder()
+                                              .setPreviousValue(previousValue)
+                                              .setNewValue(newValue)
+                                              .build();
         return result;
     }
 
@@ -151,10 +144,10 @@ public final class Changes {
     public static UInt32Change ofUInt32(int previousValue, int newValue) {
         checkNotEqual(previousValue, newValue);
 
-        UInt32Change result = UInt32Change.newBuilder()
-                                          .setPreviousValue(previousValue)
-                                          .setNewValue(newValue)
-                                          .build();
+        final UInt32Change result = UInt32Change.newBuilder()
+                                                .setPreviousValue(previousValue)
+                                                .setNewValue(newValue)
+                                                .build();
         return result;
     }
 
@@ -166,10 +159,10 @@ public final class Changes {
     public static UInt64Change ofUInt64(long previousValue, long newValue) {
         checkNotEqual(previousValue, newValue);
 
-        UInt64Change result = UInt64Change.newBuilder()
-                                          .setPreviousValue(previousValue)
-                                          .setNewValue(newValue)
-                                          .build();
+        final UInt64Change result = UInt64Change.newBuilder()
+                                                .setPreviousValue(previousValue)
+                                                .setNewValue(newValue)
+                                                .build();
         return result;
     }
 
@@ -181,10 +174,10 @@ public final class Changes {
     public static SInt32Change ofSInt32(int previousValue, int newValue) {
         checkNotEqual(previousValue, newValue);
 
-        SInt32Change result = SInt32Change.newBuilder()
-                                          .setPreviousValue(previousValue)
-                                          .setNewValue(newValue)
-                                          .build();
+        final SInt32Change result = SInt32Change.newBuilder()
+                                                .setPreviousValue(previousValue)
+                                                .setNewValue(newValue)
+                                                .build();
         return result;
     }
 
@@ -196,10 +189,10 @@ public final class Changes {
     public static SInt64Change ofSInt64(long previousValue, long newValue) {
         checkNotEqual(previousValue, newValue);
 
-        SInt64Change result = SInt64Change.newBuilder()
-                                          .setPreviousValue(previousValue)
-                                          .setNewValue(newValue)
-                                          .build();
+        final SInt64Change result = SInt64Change.newBuilder()
+                                                .setPreviousValue(previousValue)
+                                                .setNewValue(newValue)
+                                                .build();
         return result;
     }
 
@@ -211,10 +204,10 @@ public final class Changes {
     public static Fixed32Change ofFixed32(int previousValue, int newValue) {
         checkNotEqual(previousValue, newValue);
 
-        Fixed32Change result = Fixed32Change.newBuilder()
-                                            .setPreviousValue(previousValue)
-                                            .setNewValue(newValue)
-                                            .build();
+        final Fixed32Change result = Fixed32Change.newBuilder()
+                                                  .setPreviousValue(previousValue)
+                                                  .setNewValue(newValue)
+                                                  .build();
         return result;
     }
 
@@ -226,10 +219,10 @@ public final class Changes {
     public static Fixed64Change ofFixed64(long previousValue, long newValue) {
         checkNotEqual(previousValue, newValue);
 
-        Fixed64Change result = Fixed64Change.newBuilder()
-                                            .setPreviousValue(previousValue)
-                                            .setNewValue(newValue)
-                                            .build();
+        final Fixed64Change result = Fixed64Change.newBuilder()
+                                                  .setPreviousValue(previousValue)
+                                                  .setNewValue(newValue)
+                                                  .build();
         return result;
     }
 
@@ -241,10 +234,10 @@ public final class Changes {
     public static Sfixed32Change ofSfixed32(int previousValue, int newValue) {
         checkNotEqual(previousValue, newValue);
 
-        Sfixed32Change result = Sfixed32Change.newBuilder()
-                                              .setPreviousValue(previousValue)
-                                              .setNewValue(newValue)
-                                              .build();
+        final Sfixed32Change result = Sfixed32Change.newBuilder()
+                                                    .setPreviousValue(previousValue)
+                                                    .setNewValue(newValue)
+                                                    .build();
         return result;
     }
 
@@ -256,10 +249,10 @@ public final class Changes {
     public static Sfixed64Change ofSfixed64(long previousValue, long newValue) {
         checkNotEqual(previousValue, newValue);
 
-        Sfixed64Change result = Sfixed64Change.newBuilder()
-                                              .setPreviousValue(previousValue)
-                                              .setNewValue(newValue)
-                                              .build();
+        final Sfixed64Change result = Sfixed64Change.newBuilder()
+                                                    .setPreviousValue(previousValue)
+                                                    .setNewValue(newValue)
+                                                    .build();
         return result;
     }
 
@@ -274,10 +267,10 @@ public final class Changes {
         checkNewValueNotEmpty(newValue);
         checkNotEqual(previousValue, newValue);
 
-        BytesChange result = BytesChange.newBuilder()
-                                        .setPreviousValue(previousValue)
-                                        .setNewValue(newValue)
-                                        .build();
+        final BytesChange result = BytesChange.newBuilder()
+                                              .setPreviousValue(previousValue)
+                                              .setNewValue(newValue)
+                                              .build();
         return result;
     }
 
@@ -289,119 +282,10 @@ public final class Changes {
     public static BooleanChange of(boolean previousValue, boolean newValue) {
         checkNotEqual(previousValue, newValue);
 
-        BooleanChange result = BooleanChange.newBuilder()
-                                            .setPreviousValue(previousValue)
-                                            .setNewValue(newValue)
-                                            .build();
-        return result;
-    }
-
-    /**
-     * Creates {@link IntervalChange} object for the passed previous and new field values of
-     * time interval.
-     *
-     * <p>Passed values cannot be equal.
-     */
-    @Experimental
-    public static IntervalChange of(Interval previousValue, Interval newValue) {
-        checkNotNull(previousValue);
-        checkNotNull(newValue);
-        checkNotEqual(previousValue, newValue);
-
-        IntervalChange result = IntervalChange.newBuilder()
-                                              .setPreviousValue(previousValue)
-                                              .setNewValue(newValue)
-                                              .build();
-        return result;
-    }
-
-    /**
-     * Creates {@link LocalDateChange} object for the passed previous and new field values of
-     * local date.
-     *
-     * <p>Passed values cannot be equal.
-     */
-    public static LocalDateChange of(LocalDate previousValue, LocalDate newValue) {
-        checkNotNull(previousValue);
-        checkNotNull(newValue);
-        checkNotEqual(previousValue, newValue);
-
-        LocalDateChange result = LocalDateChange.newBuilder()
-                                                .setPreviousValue(previousValue)
-                                                .setNewValue(newValue)
-                                                .build();
-        return result;
-    }
-
-    /**
-     * Creates {@link LocalTimeChange} object for the passed previous and new field values of
-     * local time.
-     *
-     * <p>Passed values cannot be equal.
-     */
-    public static LocalTimeChange of(LocalTime previousValue, LocalTime newValue) {
-        checkNotNull(previousValue);
-        checkNotNull(newValue);
-        checkNotEqual(previousValue, newValue);
-
-        LocalTimeChange result = LocalTimeChange.newBuilder()
-                                                .setPreviousValue(previousValue)
-                                                .setNewValue(newValue)
-                                                .build();
-        return result;
-    }
-
-    /**
-     * Creates {@link OffsetTimeChange} object for the passed previous and new field values of
-     * offset time.
-     *
-     * <p>Passed values cannot be equal.
-     */
-    public static OffsetTimeChange of(OffsetTime previousValue, OffsetTime newValue) {
-        checkNotNull(previousValue);
-        checkNotNull(newValue);
-        checkNotEqual(previousValue, newValue);
-
-        OffsetTimeChange result = OffsetTimeChange.newBuilder()
+        final BooleanChange result = BooleanChange.newBuilder()
                                                   .setPreviousValue(previousValue)
                                                   .setNewValue(newValue)
                                                   .build();
-        return result;
-    }
-
-    /**
-     * Creates {@link OffsetDateChange} object for the passed previous and new field values of
-     * offset time.
-     *
-     * <p>Passed values cannot be equal.
-     */
-    public static OffsetDateChange of(OffsetDate previousValue, OffsetDate newValue) {
-        checkNotNull(previousValue);
-        checkNotNull(newValue);
-        checkNotEqual(previousValue, newValue);
-
-        OffsetDateChange result = OffsetDateChange.newBuilder()
-                                                  .setPreviousValue(previousValue)
-                                                  .setNewValue(newValue)
-                                                  .build();
-        return result;
-    }
-
-    /**
-     * Creates {@link OffsetDateTimeChange} object for the passed previous and new field values of
-     * offset time.
-     *
-     * <p>Passed values cannot be equal.
-     */
-    public static OffsetDateTimeChange of(OffsetDateTime previousValue, OffsetDateTime newValue) {
-        checkNotNull(previousValue);
-        checkNotNull(newValue);
-        checkNotEqual(previousValue, newValue);
-
-        OffsetDateTimeChange result = OffsetDateTimeChange.newBuilder()
-                                                          .setPreviousValue(previousValue)
-                                                          .setNewValue(newValue)
-                                                          .build();
         return result;
     }
 }

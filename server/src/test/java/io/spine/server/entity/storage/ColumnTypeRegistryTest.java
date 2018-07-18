@@ -27,7 +27,7 @@ import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.AbstractMe
 import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.AnyType;
 import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.GeneratedMessageType;
 import io.spine.server.entity.storage.given.ColumnTypeRegistryTestEnv.IntegerType;
-import io.spine.test.Verify;
+import io.spine.testing.Verify;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +35,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
-import static io.spine.test.Verify.assertEmpty;
+import static io.spine.testing.Verify.assertEmpty;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;

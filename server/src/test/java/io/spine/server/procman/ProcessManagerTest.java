@@ -22,11 +22,11 @@ package io.spine.server.procman;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -38,16 +38,14 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.TestEventFactory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandstore.CommandStore;
-import io.spine.server.entity.given.Given;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
-import io.spine.server.model.ModelTests;
+import io.spine.server.procman.given.DirectQuizProcmanRepository;
 import io.spine.server.procman.given.ProcessManagerTestEnv.AddTaskDispatcher;
 import io.spine.server.procman.given.ProcessManagerTestEnv.TestProcessManager;
+import io.spine.server.procman.given.QuizProcmanRepository;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmAddTask;
@@ -56,7 +54,19 @@ import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
+import io.spine.test.procman.quiz.PmQuestionId;
+import io.spine.test.procman.quiz.PmQuizId;
+import io.spine.test.procman.quiz.command.PmAnswerQuestion;
+import io.spine.test.procman.quiz.command.PmStartQuiz;
+import io.spine.test.procman.quiz.event.PmQuestionAnswered;
+import io.spine.test.procman.quiz.event.PmQuizStarted;
 import io.spine.testdata.Sample;
+import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.TestEventFactory;
+import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.entity.given.Given;
+import io.spine.testing.server.model.ModelTests;
+import io.spine.testing.server.tenant.TenantAwareTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -64,13 +74,23 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.Commands.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.commandbus.Given.ACommand;
-import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
-import static io.spine.test.Verify.assertSize;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.answerQuestion;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.newAnswer;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.newQuizId;
+import static io.spine.server.procman.given.ProcessManagerTestEnv.startQuiz;
+import static io.spine.testing.Verify.assertSize;
+import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
+import static io.spine.testing.client.blackbox.Count.none;
+import static io.spine.testing.client.blackbox.Count.once;
+import static io.spine.testing.client.blackbox.Count.twice;
+import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
+import static io.spine.testing.server.procman.ProcessManagerDispatcher.dispatch;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -86,6 +106,7 @@ import static org.mockito.Mockito.spy;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings({"OverlyCoupledClass",
+        "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("ProcessManager should")
 class ProcessManagerTest {
@@ -364,5 +385,87 @@ class ProcessManagerTest {
         assertThrows(IllegalStateException.class,
                      () -> processManager.newRouterFor(StringValue.getDefaultInstance(),
                                                        CommandContext.getDefaultInstance()));
+    }
+
+    @Nested
+    @DisplayName("not create an empty event")
+    class NoEmpty {
+
+        /**
+         * This test executes two commands, thus checks for 2 Acks:
+         * <ol>
+         * <li>{@link PmStartQuiz Start Quiz} — to start the process;
+         * <li>{@link PmAnswerQuestion Answer Question } — a target
+         * command that produces either of 3 events.
+         * </ol>
+         *
+         * <p>First command emits a {@link PmQuizStarted Quiz Started}
+         * event.
+         *
+         * <p>Second command emits a {@link PmQuestionAnswered Question Answered}
+         * event.
+         *
+         * <p>As a reaction to {@link PmQuestionAnswered Quiestion Answered}
+         * the process manager emits an {@link io.spine.server.tuple.EitherOfThree Either Of Three}
+         * containing {@link com.google.protobuf.Empty Empty}. This is done because the answered
+         * question is not part of a quiz.
+         *
+         * @see io.spine.server.procman.given.QuizProcman
+         */
+        @Test
+        @DisplayName("for an either of three event reaction")
+        void afterEmittingEitherOfThreeOnEventReaction() {
+            PmQuizId quizId = newQuizId();
+            Iterable<PmQuestionId> questions = newArrayList();
+            PmStartQuiz startQuiz = startQuiz(quizId, questions);
+            PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
+
+            BlackBoxBoundedContext
+                    .with(new QuizProcmanRepository())
+                    .receivesCommands(startQuiz, answerQuestion)
+                    .verifiesThat(acked(twice()).withoutErrorsOrRejections())
+                    .verifiesThat(emitted(twice()))
+                    .verifiesThat(emitted(PmQuizStarted.class))
+                    .verifiesThat(emitted(PmQuestionAnswered.class))
+                    .verifiesThat(emitted(Empty.class, none()))
+                    .close();
+        }
+
+        /**
+         * This test executes two commands, thus checks for 2 Acks:
+         * <ol>
+         * <li>{@link PmStartQuiz Start Quiz} — to initialize the process;
+         * <li>{@link PmAnswerQuestion Answer Question } — a target
+         * command that produces either of 3 events.
+         * </ol>
+         *
+         * <p>First command emits a {@link PmQuizStarted Quiz Started}
+         * event.
+         *
+         * <p>Because the quiz is started without any questions to solve,
+         * an {@link PmAnswerQuestion answer question command} can not
+         * match any questions. This results in emitting
+         * {@link io.spine.server.tuple.EitherOfThree Either Of Three}
+         * containing {@link com.google.protobuf.Empty Empty}.
+         *
+         * @see io.spine.server.procman.given.DirectQuizProcman
+         */
+        @Test
+        @DisplayName("for an either of three emitted upon handling a command")
+        void afterEmittingEitherOfThreeOnCommandDispatch() {
+            PmQuizId quizId = newQuizId();
+            Iterable<PmQuestionId> questions = newArrayList();
+            PmStartQuiz startQuiz = startQuiz(quizId, questions);
+            PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
+
+            BlackBoxBoundedContext
+                    .with(new DirectQuizProcmanRepository())
+                    .receivesCommands(startQuiz, answerQuestion)
+                    .verifiesThat(acked(twice()).withoutErrorsOrRejections())
+                    .verifiesThat(emitted(once()))
+                    .verifiesThat(emitted(PmQuizStarted.class))
+                    .verifiesThat(emitted(Empty.class, none()))
+                    .close();
+        }
     }
 }

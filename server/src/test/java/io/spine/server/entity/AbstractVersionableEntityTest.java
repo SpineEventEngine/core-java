@@ -23,6 +23,7 @@ package io.spine.server.entity;
 import com.google.common.reflect.Invokable;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.StringValue;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -51,6 +52,7 @@ class AbstractVersionableEntityTest {
     }
 
     @Test
+    @Disabled // The `updateState` method was made public to be accessible from `testutil-server`
     @DisplayName("have `updateState` method visible to package only")
     void haveUpdateStatePackagePrivate() throws NoSuchMethodException {
         boolean methodFound = false;

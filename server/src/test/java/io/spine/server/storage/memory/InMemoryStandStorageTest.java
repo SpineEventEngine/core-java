@@ -25,7 +25,7 @@ import io.spine.server.stand.StandStorage;
 import io.spine.server.stand.StandStorageTest;
 import org.junit.jupiter.api.DisplayName;
 
-import static io.spine.server.BoundedContext.newName;
+import static io.spine.core.BoundedContextNames.newName;
 
 /**
  * @author Dmytro Dashenkov

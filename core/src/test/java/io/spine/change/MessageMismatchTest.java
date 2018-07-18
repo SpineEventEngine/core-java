@@ -33,9 +33,9 @@ import static io.spine.change.MessageMismatch.unpackActual;
 import static io.spine.change.MessageMismatch.unpackExpected;
 import static io.spine.change.MessageMismatch.unpackNewValue;
 import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("MessageMismatch should")

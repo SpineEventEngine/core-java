@@ -25,6 +25,7 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
@@ -33,9 +34,6 @@ import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 import io.spine.time.Timestamps2;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -69,8 +67,8 @@ public final class Commands {
      * @return new command ID
      */
     public static CommandId generateId() {
-        String value = UUID.randomUUID()
-                           .toString();
+        final String value = UUID.randomUUID()
+                                 .toString();
         return CommandId.newBuilder()
                         .setUuid(value)
                         .build();
@@ -85,7 +83,7 @@ public final class Commands {
      */
     public static <M extends Message> M getMessage(Command command) {
         checkNotNull(command);
-        M result = AnyPacker.unpack(command.getMessage());
+        final M result = AnyPacker.unpack(command.getMessage());
         return result;
     }
 
@@ -106,14 +104,14 @@ public final class Commands {
      */
     public static TenantId getTenantId(Command command) {
         checkNotNull(command);
-        TenantId result = getTenantId(command.getContext());
+        final TenantId result = getTenantId(command.getContext());
         return result;
     }
 
     /**
      * Obtains a {@link TenantId} from the {@link CommandContext}.
      *
-     * <p>The {@link CommandContext} is accessible from the {@link Event} if the {@code Event} was
+     * <p>The {@link CommandContext} is accessible from the {@link Event} if the {@code Event} was 
      * created as a result of some command or its rejection. This makes the {@code CommandContext}
      * a valid {@code TenantId} source inside of the {@code Event}.
      */
@@ -128,37 +126,31 @@ public final class Commands {
      */
     public static Predicate<Command> wereAfter(Timestamp from) {
         checkNotNull(from);
-        return new Predicate<Command>() {
-            @Override
-            public boolean apply(@Nullable Command request) {
-                checkNotNull(request);
-                Timestamp timestamp = getTimestamp(request);
-                return Timestamps2.isLaterThan(timestamp, from);
-            }
+        return request -> {
+            checkNotNull(request);
+            Timestamp timestamp = getTimestamp(request);
+            return Timestamps2.isLaterThan(timestamp, from);
         };
     }
 
     /**
-     * Creates a predicate for filtering commands created withing given timerange.
+     * Creates a predicate for filtering commands created withing given time range.
      */
     public static Predicate<Command> wereWithinPeriod(Timestamp from, Timestamp to) {
         checkNotNull(from);
         checkNotNull(to);
-        return new Predicate<Command>() {
-            @Override
-            public boolean apply(@Nullable Command request) {
-                checkNotNull(request);
-                Timestamp timestamp = getTimestamp(request);
-                return Timestamps2.isBetween(timestamp, from, to);
-            }
+        return request -> {
+            checkNotNull(request);
+            Timestamp timestamp = getTimestamp(request);
+            return Timestamps2.isBetween(timestamp, from, to);
         };
     }
 
     private static Timestamp getTimestamp(Command request) {
         checkNotNull(request);
-        Timestamp result = request.getContext()
-                                  .getActorContext()
-                                  .getTimestamp();
+        final Timestamp result = request.getContext()
+                                        .getActorContext()
+                                        .getTimestamp();
         return result;
     }
 
@@ -169,13 +161,10 @@ public final class Commands {
      */
     public static void sort(List<Command> commands) {
         checkNotNull(commands);
-        Collections.sort(commands, new Comparator<Command>() {
-            @Override
-            public int compare(Command o1, Command o2) {
-                Timestamp timestamp1 = getTimestamp(o1);
-                Timestamp timestamp2 = getTimestamp(o2);
-                return Timestamps2.compare(timestamp1, timestamp2);
-            }
+        commands.sort((o1, o2) -> {
+            Timestamp timestamp1 = getTimestamp(o1);
+            Timestamp timestamp2 = getTimestamp(o2);
+            return Timestamps.compare(timestamp1, timestamp2);
         });
     }
 
@@ -271,9 +260,10 @@ public final class Commands {
 
         @Override
         protected CommandId fromString(String str) {
-            CommandId result = CommandId.newBuilder()
-                                        .setUuid(str)
-                                        .build();
+            CommandId result = CommandId
+                    .newBuilder()
+                    .setUuid(str)
+                    .build();
             return result;
         }
     }

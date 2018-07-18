@@ -39,11 +39,11 @@ import static io.spine.server.entity.storage.ColumnReader.forClass;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.test.Verify.assertFalse;
-import static io.spine.test.Verify.assertNotNull;
-import static io.spine.test.Verify.assertSize;
-import static io.spine.test.Verify.assertTrue;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.Verify.assertFalse;
+import static io.spine.testing.Verify.assertNotNull;
+import static io.spine.testing.Verify.assertSize;
+import static io.spine.testing.Verify.assertTrue;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 

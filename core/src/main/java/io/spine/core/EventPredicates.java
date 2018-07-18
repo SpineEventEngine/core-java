@@ -23,12 +23,12 @@ package io.spine.core;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Timestamp;
 import io.spine.time.Timestamps2;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.checkValid;
+import static com.google.protobuf.util.Timestamps.compare;
 
 /**
  * Predicates for working with {@code Event}s.
@@ -46,7 +46,7 @@ public final class EventPredicates {
      */
     public static Predicate<Event> isAfter(Timestamp timestamp) {
         checkValid(timestamp);
-        Predicate<Event> result = new IsAfter(timestamp);
+        final Predicate<Event> result = new IsAfter(timestamp);
         return result;
     }
 
@@ -55,7 +55,7 @@ public final class EventPredicates {
      */
     public static Predicate<Event> isBefore(Timestamp timestamp) {
         checkValid(timestamp);
-        Predicate<Event> result = new IsBefore(timestamp);
+        final Predicate<Event> result = new IsBefore(timestamp);
         return result;
     }
 
@@ -64,7 +64,7 @@ public final class EventPredicates {
      */
     public static Predicate<Event> isBetween(Timestamp start, Timestamp finish) {
         IsBetween.checkArguments(start, finish);
-        Predicate<Event> result = new IsBetween(start, finish);
+        final Predicate<Event> result = new IsBetween(start, finish);
         return result;
     }
 
@@ -82,8 +82,8 @@ public final class EventPredicates {
             if (record == null) {
                 return false;
             }
-            Timestamp ts = Events.getTimestamp(record);
-            boolean result = Timestamps2.compare(ts, this.timestamp) > 0;
+            final Timestamp ts = Events.getTimestamp(record);
+            final boolean result = compare(ts, this.timestamp) > 0;
             return result;
         }
     }
@@ -103,8 +103,8 @@ public final class EventPredicates {
                 return false;
             }
 
-            Timestamp ts = Events.getTimestamp(record);
-            boolean result = Timestamps2.compare(ts, this.timestamp) < 0;
+            final Timestamp ts = Events.getTimestamp(record);
+            final boolean result = compare(ts, this.timestamp) < 0;
             return result;
         }
     }
@@ -126,8 +126,7 @@ public final class EventPredicates {
             checkNotNull(finish);
             checkValid(start);
             checkValid(finish);
-            checkArgument(Timestamps2.compare(start, finish) < 0,
-                          "`start` must be before `finish`");
+            checkArgument(compare(start, finish) < 0, "`start` must be before `finish`");
         }
 
         @Override
@@ -136,8 +135,8 @@ public final class EventPredicates {
                 return false;
             }
 
-            Timestamp ts = Events.getTimestamp(event);
-            boolean result = Timestamps2.isBetween(ts, start, finish);
+            final Timestamp ts = Events.getTimestamp(event);
+            final boolean result = Timestamps2.isBetween(ts, start, finish);
             return result;
         }
     }

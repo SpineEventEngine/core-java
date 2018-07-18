@@ -32,9 +32,9 @@ import java.util.Collection;
 import java.util.List;
 
 import static io.spine.server.entity.storage.Columns.getAllColumns;
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.test.Verify.assertFalse;
-import static io.spine.test.Verify.assertTrue;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.Verify.assertFalse;
+import static io.spine.testing.Verify.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;

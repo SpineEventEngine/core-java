@@ -34,7 +34,7 @@ import io.spine.test.entity.HiddenAggregateVBuilder;
 import io.spine.test.entity.SubscribableAggregate;
 import io.spine.test.entity.SubscribableAggregateVBuilder;
 
-import static io.spine.server.BoundedContext.newName;
+import static io.spine.core.BoundedContextNames.newName;
 
 /**
  * @author Dmytro Grankin

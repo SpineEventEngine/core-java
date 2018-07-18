@@ -21,14 +21,13 @@
 package io.spine.core;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
-
-import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -51,7 +50,8 @@ public final class Rejections {
     static final String REJECTION_ID_FORMAT = "%s-reject";
 
     /** Prevents instantiation of this utility class. */
-    private Rejections() {}
+    private Rejections() {
+    }
 
     /**
      * Tells whether the passed message class represents a rejection message.
@@ -108,10 +108,8 @@ public final class Rejections {
                                 .setStacktrace(stacktrace)
                                 .setCommand(command);
 
-        Optional<Any> optional = message.producerId();
-        if (optional.isPresent()) {
-            builder.setProducerId(optional.get());
-        }
+        java.util.Optional<Any> optional = message.producerId();
+        optional.ifPresent(builder::setProducerId);
         return builder.build();
     }
 
@@ -127,13 +125,15 @@ public final class Rejections {
         checkNotNull(command);
 
         Any packedMessage = pack(messageOrAny);
-        RejectionContext context = RejectionContext.newBuilder()
-                                                   .setCommand(command)
-                                                   .build();
-        Rejection result = Rejection.newBuilder()
-                                    .setMessage(packedMessage)
-                                    .setContext(context)
-                                    .build();
+        RejectionContext context = RejectionContext
+                .newBuilder()
+                .setCommand(command)
+                .build();
+        Rejection result = Rejection
+                .newBuilder()
+                .setMessage(packedMessage)
+                .setContext(context)
+                .build();
         return result;
     }
 
@@ -178,7 +178,7 @@ public final class Rejections {
         Any producerId = context.getProducerId();
         if (Any.getDefaultInstance()
                .equals(producerId)) {
-            return Optional.empty();
+            return Optional.absent();
         }
         I id = Identifier.unpack(producerId);
         return Optional.of(id);
@@ -203,7 +203,7 @@ public final class Rejections {
      *
      * @param exception the exception to analyze
      * @return {@code true} if the exception was created because of a command rejection thrown,
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     public static boolean causedByRejection(Throwable exception) {
         //TODO:2017-07-26:alexander.yevsyukov: Check against CommandRejection
@@ -227,8 +227,7 @@ public final class Rejections {
      * @throws IllegalArgumentException upon an invalid {@link Throwable}
      *                                  {@linkplain Throwables#getRootCause root cause}
      */
-    static ThrowableMessage getCause(Throwable throwable)
-            throws IllegalArgumentException {
+    static ThrowableMessage getCause(Throwable throwable) throws IllegalArgumentException {
         checkNotNull(throwable);
         checkArgument(causedByRejection(throwable));
         Throwable cause = Throwables.getRootCause(throwable);

@@ -22,11 +22,11 @@ package io.spine.server.delivery;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.delivery.given.MessageDeliveryTestEnv.DeliveryEqualityRepository;
-import io.spine.server.model.ModelTests;
+import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 
 /**
  * @author Alex Tymchenko

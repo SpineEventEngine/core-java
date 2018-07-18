@@ -24,6 +24,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
@@ -46,7 +47,6 @@ import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
-import io.spine.core.given.GivenVersion;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.people.PersonName;
 import io.spine.protobuf.AnyPacker;
@@ -61,13 +61,13 @@ import io.spine.server.stand.given.Given;
 import io.spine.server.stand.given.Given.StandTestProjectionRepository;
 import io.spine.server.stand.given.StandTestEnv.MemoizeEntityUpdateCallback;
 import io.spine.server.stand.given.StandTestEnv.MemoizeQueryResponseObserver;
-import io.spine.server.tenant.TenantAwareTest;
-import io.spine.test.Verify;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
-import io.spine.time.ZoneOffsets;
+import io.spine.testing.Verify;
+import io.spine.testing.core.given.GivenVersion;
+import io.spine.testing.server.tenant.TenantAwareTest;
 import io.spine.type.TypeUrl;
 import io.spine.validate.Validate;
 import io.spine.validate.ValidationError;
@@ -82,7 +82,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -99,11 +98,11 @@ import static io.spine.client.QueryValidationError.INVALID_QUERY;
 import static io.spine.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;
 import static io.spine.client.TopicValidationError.INVALID_TOPIC;
 import static io.spine.client.TopicValidationError.UNSUPPORTED_TOPIC_TARGET;
-import static io.spine.core.given.GivenUserId.of;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.stand.given.Given.StandTestProjection;
+import static io.spine.testing.core.given.GivenUserId.of;
 import static java.util.Collections.emptyIterator;
 import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -166,8 +165,7 @@ class StandTest extends TenantAwareTest {
     protected static ActorRequestFactory createRequestFactory(@Nullable TenantId tenant) {
         ActorRequestFactory.Builder builder = ActorRequestFactory
                 .newBuilder()
-                .setActor(of(newUuid()))
-                .setZoneOffset(ZoneOffsets.UTC);
+                .setActor(of(newUuid()));
         if (tenant != null) {
             builder.setTenantId(tenant);
         }
@@ -297,7 +295,7 @@ class StandTest extends TenantAwareTest {
 
         final CustomerAggregateRepository customerAggregateRepo =
                 new CustomerAggregateRepository();
-        stand.registerTypeSupplier(customerAggregateRepo);
+        boundedContext.register(customerAggregateRepo);
 
         final int numericIdValue = 17;
         final CustomerId customerId = customerIdFor(numericIdValue);
@@ -741,7 +739,7 @@ class StandTest extends TenantAwareTest {
                                              .addAllPaths(Arrays.asList(paths))
                                              .build();
 
-        final List<Customer> customers = new LinkedList<>();
+        final List<Customer> customers = Lists.newLinkedList();
         final int count = 10;
 
         for (int i = 0; i < count; i++) {

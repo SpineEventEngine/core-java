@@ -57,8 +57,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 
 import static io.spine.server.outbus.enrich.EnrichmentsMap.getEventTypes;
-import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;

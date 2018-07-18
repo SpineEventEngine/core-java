@@ -23,6 +23,7 @@ import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
+import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
 import io.spine.core.Rejection;
 import io.spine.grpc.MemoizingObserver;
@@ -60,7 +61,7 @@ import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWit
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithTransport;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectCreated;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectStarted;
-import static io.spine.test.Verify.assertContains;
+import static io.spine.testing.Verify.assertContains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -410,7 +411,7 @@ class IntegrationBusTest {
         final BoundedContext boundedContext = contextWithTransport(transportFactory);
 
         final Event event = projectCreated();
-        final BoundedContextName boundedContextName = BoundedContext.newName("External context ID");
+        final BoundedContextName boundedContextName = BoundedContextNames.newName("External context ID");
         final ExternalMessage externalMessage = ExternalMessages.of(event,
                                                                     boundedContextName);
         final MemoizingObserver<Ack> observer = StreamObservers.memoizingObserver();
