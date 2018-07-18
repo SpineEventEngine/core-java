@@ -1339,10 +1339,6 @@ class StandTest extends TenantAwareTest {
 
         final ArgumentMatcher<EntityFilters> matcher = entityFilterMatcher(projectIds);
         final EntityFilters matchingFilter = argThat(matcher);
-        when(projectionRepository.find(matchingFilter, any(FieldMask.class)))
-                .thenReturn(allResults.iterator());
-        // Re-initialize matcher for usage.
-        argThat(matcher);
         when(projectionRepository.findRecords(matchingFilter, any(FieldMask.class)))
                 .thenReturn(allRecords.iterator());
     }
