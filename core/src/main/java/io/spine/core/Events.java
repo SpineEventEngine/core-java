@@ -19,7 +19,6 @@
  */
 package io.spine.core;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -32,6 +31,7 @@ import io.spine.string.StringifierRegistry;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -71,8 +71,8 @@ public final class Events {
      * @return new UUID-based event ID
      */
     public static EventId generateId() {
-        final String value = UUID.randomUUID()
-                                 .toString();
+        String value = UUID.randomUUID()
+                           .toString();
         return EventId.newBuilder()
                       .setValue(value)
                       .build();
@@ -214,7 +214,7 @@ public final class Events {
             return TenantId.getDefaultInstance();
         }
 
-        final TenantId result = Commands.getTenantId(commandContext.get());
+        TenantId result = Commands.getTenantId(commandContext.get());
         return result;
     }
 
@@ -229,7 +229,7 @@ public final class Events {
      *     response to a rejection.</li>
      * </ol>
      *
-     * <p>If at some point the event origin is not set the {@link Optional#absent()} is returned.
+     * <p>If at some point the event origin is not set the {@link Optional#empty()} is returned.
      */
     private static Optional<CommandContext> getOriginCommandContext(Event event) {
         CommandContext commandContext = null;
@@ -253,7 +253,7 @@ public final class Events {
 
                 case ORIGIN_NOT_SET:
                 default:
-                    return Optional.absent();
+                    return Optional.empty();
             }
         }
 
@@ -305,10 +305,10 @@ public final class Events {
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Internal
     public static Event clearEnrichments(Event event) {
-        final EventContext context = event.getContext();
-        final EventContext.Builder resultContext = context.toBuilder()
+        EventContext context = event.getContext();
+        EventContext.Builder resultContext = context.toBuilder()
                                                           .clearEnrichment();
-        final EventContext.OriginCase originCase = resultContext.getOriginCase();
+        EventContext.OriginCase originCase = resultContext.getOriginCase();
         switch (originCase) {
             case EVENT_CONTEXT:
                 resultContext.setEventContext(context.getEventContext()
@@ -330,9 +330,9 @@ public final class Events {
                 throw newIllegalStateException("Unsupported origin case is encountered: %s",
                                                originCase);
         }
-        final Event result = event.toBuilder()
-                                  .setContext(resultContext)
-                                  .build();
+        Event result = event.toBuilder()
+                            .setContext(resultContext)
+                            .build();
         return result;
     }
 
@@ -342,15 +342,15 @@ public final class Events {
     static class EventIdStringifier extends Stringifier<EventId> {
         @Override
         protected String toString(EventId eventId) {
-            final String result = eventId.getValue();
+            String result = eventId.getValue();
             return result;
         }
 
         @Override
         protected EventId fromString(String str) {
-            final EventId result = EventId.newBuilder()
-                                          .setValue(str)
-                                          .build();
+            EventId result = EventId.newBuilder()
+                                    .setValue(str)
+                                    .build();
             return result;
         }
     }
