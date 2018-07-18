@@ -62,14 +62,14 @@ public class RejectionClass extends MessageClass {
      * @return new instance
      */
     public static RejectionClass of(Message rejectionOrMessage) {
-        final Message message = Rejections.ensureMessage(rejectionOrMessage);
-        final RejectionClass result = of(message.getClass());
+        Message message = Rejections.ensureMessage(rejectionOrMessage);
+        RejectionClass result = of(message.getClass());
         return result;
     }
 
     /** Creates an immutable set of {@code RejectionClass} from the passed classes. */
     public static Set<RejectionClass> setOf(Iterable<Class<? extends Message>> classes) {
-        final ImmutableSet.Builder<RejectionClass> builder = ImmutableSet.builder();
+        ImmutableSet.Builder<RejectionClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
             builder.add(of(cls));
         }

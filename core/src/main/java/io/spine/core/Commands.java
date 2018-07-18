@@ -68,8 +68,8 @@ public final class Commands {
      * @return new command ID
      */
     public static CommandId generateId() {
-        final String value = UUID.randomUUID()
-                                 .toString();
+        String value = UUID.randomUUID()
+                           .toString();
         return CommandId.newBuilder()
                         .setUuid(value)
                         .build();
@@ -119,7 +119,7 @@ public final class Commands {
      */
     public static TenantId getTenantId(Command command) {
         checkNotNull(command);
-        final TenantId result = getTenantId(command.getContext());
+        TenantId result = getTenantId(command.getContext());
         return result;
     }
 
@@ -163,9 +163,9 @@ public final class Commands {
 
     private static Timestamp getTimestamp(Command request) {
         checkNotNull(request);
-        final Timestamp result = request.getContext()
-                                        .getActorContext()
-                                        .getTimestamp();
+        Timestamp result = request.getContext()
+                                  .getActorContext()
+                                  .getTimestamp();
         return result;
     }
 

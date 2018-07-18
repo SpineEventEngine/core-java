@@ -50,11 +50,11 @@ public abstract class MessageEnvelopeTest<O extends Message,
     @Test
     @DisplayName("not accept nulls on construction")
     void notAcceptNullsOnConstruction() {
-        final O obj = outerObject();
+        O obj = outerObject();
         @SuppressWarnings("unchecked") // Due to generics.
-        final Class<O> objectClass = (Class<O>) obj.getClass();
+        Class<O> objectClass = (Class<O>) obj.getClass();
         @SuppressWarnings("unchecked") // Due to generics.
-        final Class<E> envelopeClass = (Class<E>) toEnvelope(obj).getClass();
+        Class<E> envelopeClass = (Class<E>) toEnvelope(obj).getClass();
         new NullPointerTester()
                 .setDefault(objectClass, obj)
                 .testAllPublicStaticMethods(envelopeClass);
@@ -63,16 +63,16 @@ public abstract class MessageEnvelopeTest<O extends Message,
     @Test
     @DisplayName("obtain outer object")
     void getOuterObject() {
-        final O obj = outerObject();
-        final E envelope = toEnvelope(obj);
+        O obj = outerObject();
+        E envelope = toEnvelope(obj);
         assertEquals(obj, envelope.getOuterObject());
     }
 
     @Test
     @DisplayName("extract message")
     void extractMessage() {
-        final E envelope = toEnvelope(outerObject());
-        final Message commandMessage = envelope.getMessage();
+        E envelope = toEnvelope(outerObject());
+        Message commandMessage = envelope.getMessage();
         assertNotNull(commandMessage);
         assertFalse(isDefault(commandMessage));
     }
@@ -80,19 +80,19 @@ public abstract class MessageEnvelopeTest<O extends Message,
     @Test
     @DisplayName("obtain message class")
     void getMessageClass() {
-        final O obj = outerObject();
-        final E envelope = toEnvelope(obj);
+        O obj = outerObject();
+        E envelope = toEnvelope(obj);
         assertEquals(getMessageClass(obj), envelope.getMessageClass());
     }
 
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        final O oneMessage = outerObject();
-        final O anotherMessage = outerObject();
+        O oneMessage = outerObject();
+        O anotherMessage = outerObject();
 
-        final E oneEnvelope = toEnvelope(oneMessage);
-        final E anotherEnvelope = toEnvelope(anotherMessage);
+        E oneEnvelope = toEnvelope(oneMessage);
+        E anotherEnvelope = toEnvelope(anotherMessage);
 
         new EqualsTester().addEqualityGroup(oneEnvelope)
                           .addEqualityGroup(anotherEnvelope)

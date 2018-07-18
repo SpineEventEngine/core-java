@@ -36,21 +36,21 @@ class EventEnvelopeTest extends MessageEnvelopeTest<Event, EventEnvelope, EventC
 
     @Override
     protected Event outerObject() {
-        final ProjectId projectId = ProjectId.newBuilder()
-                                             .setId(newUuid())
+        ProjectId projectId = ProjectId.newBuilder()
+                                       .setId(newUuid())
+                                       .build();
+
+        Message eventMessage = ProjectCreated.newBuilder()
+                                             .setProjectId(projectId)
                                              .build();
 
-        final Message eventMessage = ProjectCreated.newBuilder()
-                                                   .setProjectId(projectId)
-                                                   .build();
-
-        final EventId.Builder eventIdBuilder = EventId.newBuilder()
-                                                      .setValue(newUuid());
-        final Event event = Event.newBuilder()
-                                 .setId(eventIdBuilder)
-                                 .setMessage(AnyPacker.pack(eventMessage))
-                                 .setContext(EventContext.getDefaultInstance())
-                                 .build();
+        EventId.Builder eventIdBuilder = EventId.newBuilder()
+                                                .setValue(newUuid());
+        Event event = Event.newBuilder()
+                           .setId(eventIdBuilder)
+                           .setMessage(AnyPacker.pack(eventMessage))
+                           .setContext(EventContext.getDefaultInstance())
+                           .build();
         return event;
     }
 
