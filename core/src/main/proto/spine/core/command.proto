@@ -180,7 +180,8 @@ enum CommandStatus {
     REJECTED = 5;
 }
 
-// Data from a `Command` which is accessible from the code to which the command was dispatched.
+// Data from a `Command` which is accessible from the end user code to which
+// the command was dispatched.
 message DispatchedCommand {
 
     // The message of the command.

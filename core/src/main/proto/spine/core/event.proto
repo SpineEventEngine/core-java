@@ -136,7 +136,8 @@ enum EventValidationError {
     INVALID_EVENT = 2;
 }
 
-// Data from an `Event` which is accessible from the code to which the event was dispatched.
+// Data from an `Event` which is accessible from the end user code to which
+// the event was dispatched.
 message DispatchedEvent {
 
     // The event message.
