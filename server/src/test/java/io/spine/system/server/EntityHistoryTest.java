@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
+import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.grpc.MemoizingObserver;
@@ -33,6 +34,7 @@ import io.spine.option.EntityOption;
 import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
+import io.spine.server.commandbus.CommandBus;
 import io.spine.server.delivery.InProcessSharding;
 import io.spine.server.delivery.Sharding;
 import io.spine.server.event.EventStreamQuery;
@@ -53,6 +55,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
@@ -82,15 +86,21 @@ class EntityHistoryTest {
     private BoundedContext context;
     private BoundedContext system;
 
+    private CommandWatcher commandWatcher;
+
     @BeforeEach
     void setUp() {
         BoundedContextName contextName = BoundedContextName
                 .newBuilder()
                 .setValue(EntityHistoryTest.class.getSimpleName())
                 .build();
+        commandWatcher = new CommandWatcher();
+        CommandBus.Builder commandBus = CommandBus.newBuilder()
+                .appendFilter(commandWatcher);
         context = BoundedContext
                 .newBuilder()
                 .setName(contextName)
+                .setCommandBus(commandBus)
                 .setStorageFactorySupplier(() -> newInstance(contextName, false))
                 .build();
         system = systemOf(context);
@@ -406,29 +416,10 @@ class EntityHistoryTest {
     }
 
     private <M extends Message> M findCommand(DispatchedCommand dispatchedCommand) {
-//        TenantAwareFunction0<M> function = new TenantAwareFunction0<M>(TenantId.getDefaultInstance()) {
-//            @Override
-//            @CanIgnoreReturnValue
-//            public @Nullable M apply() {
-//                Iterator<Command> commands = context.getCommandBus()
-//                                                    .commandStore()
-//                                                    .iterator(CommandStatus.OK);
-//                CommandId expected = dispatchedCommand.getCommand();
-//                String errorMessage = format("Command with ID %s not found.", expected.getUuid());
-//                Any result = Streams.stream(commands)
-//                                    .filter(command -> command.getId()
-//                                                              .equals(expected))
-//                                    .findAny()
-//                                    .map(Command::getMessage)
-//                                    .orElseThrow(() -> newIllegalStateException(errorMessage));
-//                return unpack(result);
-//            }
-//        };
-//        M result = function.execute();
-//        assertNotNull(result);
-//        return result;
-        // TODO:2018-07-18:dmytro.dashenkov: Inject BusFilter to check if command is seen.
-        return null;
+        CommandId commandId = dispatchedCommand.getCommand();
+        Optional<M> found = commandWatcher.find(commandId);
+        assertTrue(found.isPresent());
+        return found.get();
     }
 
     private <M extends Message> M findEvent(DispatchedEvent dispatchedEvent) {
