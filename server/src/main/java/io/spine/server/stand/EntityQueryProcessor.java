@@ -56,16 +56,16 @@ class EntityQueryProcessor implements QueryProcessor {
         final Target target = query.getTarget();
         final FieldMask fieldMask = query.getFieldMask();
 
-        final Iterator<EntityRecord> entities;
+        final Iterator<EntityRecord> records;
         if (target.getIncludeAll() && fieldMask.getPathsList()
                                                .isEmpty()) {
-            entities = repository.loadAllRecords();
+            records = repository.loadAllRecords();
         } else {
             final EntityFilters filters = target.getFilters();
-            entities = repository.findRecords(filters, fieldMask);
+            records = repository.findRecords(filters, fieldMask);
         }
-        while (entities.hasNext()) {
-            final EntityRecord entityRecord = entities.next();
+        while (records.hasNext()) {
+            final EntityRecord entityRecord = records.next();
             final Any state = entityRecord.getState();
             final Version version = entityRecord.getVersion();
             final Record record = Record.newBuilder()
