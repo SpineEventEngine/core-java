@@ -133,7 +133,7 @@ public class EventsTest {
         void producer() {
             StringValue msg = unpack(context.getProducerId());
 
-            String id = (String)getProducer(context);
+            String id = (String) getProducer(context);
 
             assertEquals(msg.getValue(), id);
         }

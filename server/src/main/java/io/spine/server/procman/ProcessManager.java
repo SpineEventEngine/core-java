@@ -105,7 +105,8 @@ public abstract class ProcessManager<I,
     }
 
     /**
-     * Returns the {@code CommandBus} to which post commands produced by this process manager.
+     * Returns the {@code CommandBus} to which the commands produced by this process manager
+     * are to be posted.
      */
     protected CommandBus getCommandBus() {
         checkNotNull(commandBus, "CommandBus is not set in ProcessManager %s", this);

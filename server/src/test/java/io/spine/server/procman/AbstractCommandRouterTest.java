@@ -95,7 +95,7 @@ abstract class AbstractCommandRouterTest {
         // The context of the command that we route.
         CommandContext sourceContext = requestFactory.createCommandContext();
 
-        // The object we test. */
+        // The object we test.
         CommandRouter router = createRouter(commandBus, sourceMessage, sourceContext);
         for (Message message : messages) {
             router.add(message);
