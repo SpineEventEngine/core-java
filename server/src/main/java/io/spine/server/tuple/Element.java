@@ -25,6 +25,9 @@ import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import io.spine.validate.Validate;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,8 +49,8 @@ class Element implements Serializable {
     private static final long serialVersionUID = 0L;
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass") // possible values are serializable
-    private final Object value;
-    private final Type type;
+    private Object value;
+    private Type type;
 
     /**
      * Creates a tuple element with a value which can be {@link GeneratedMessageV3},
@@ -117,6 +120,27 @@ class Element implements Serializable {
 
     private IllegalStateException uncoveredType() {
         throw newIllegalStateException("Unsupported element type encountered %s", this.type);
+    }
+
+    private void writeObject(ObjectOutputStream o) throws IOException {
+        o.writeObject(type);
+        if (type == Type.OPTIONAL) {
+            Optional optionalValue = (Optional) value;
+            o.writeObject(optionalValue.orElse(null));
+        }
+        if (type != Type.OPTIONAL) {
+            o.writeObject(value);
+        }
+    }
+
+    private void readObject(ObjectInputStream o) throws IOException, ClassNotFoundException {
+        type = (Type) o.readObject();
+        if (type == Type.OPTIONAL) {
+            value = Optional.ofNullable(o.readObject());
+        }
+        if (type != Type.OPTIONAL) {
+            value = o.readObject();
+        }
     }
 
     @Override
