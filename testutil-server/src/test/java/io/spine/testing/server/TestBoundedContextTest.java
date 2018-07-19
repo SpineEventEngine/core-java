@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @author Vladyslav Lubenskyi
  */
 @DisplayName("TestBoundedContext should")
-class TestBoundedContextShould {
+class TestBoundedContextTest {
 
     @Test
     @DisplayName("create instance")

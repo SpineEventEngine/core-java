@@ -42,7 +42,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  */
 @SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("CommandHandlerExpected should")
-class CommandHandlerExpectedShould {
+class CommandHandlerExpectedTest {
 
     @Test
     @DisplayName("validate the rejection")

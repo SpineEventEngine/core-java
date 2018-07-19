@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  */
 @SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("EventHandlerExpected should")
-class EventHandlerExpectedShould {
+class EventHandlerExpectedTest {
 
     @Test
     @DisplayName("validate state")
