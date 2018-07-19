@@ -33,7 +33,7 @@ import static io.spine.testing.server.expected.given.CommandExpectedTestEnv.comm
 import static io.spine.testing.server.expected.given.CommandExpectedTestEnv.commandExpectedWithEvent;
 import static io.spine.testing.server.expected.given.CommandExpectedTestEnv.commandExpectedWithRejection;
 import static io.spine.testing.server.expected.given.CommandExpectedTestEnv.emptyExpected;
-import static io.spine.testing.server.expected.given.CommandExpectedTestEnv.rejection;
+import static io.spine.testing.server.expected.given.CommandExpectedTestEnv.rejectionMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -45,10 +45,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class CommandHandlerExpectedTest {
 
     @Test
-    @DisplayName("validate the rejection")
+    @DisplayName("validate the rejectionMessage")
     void trackRejection() {
         CommandHandlerExpected<UInt64Value> expected =
-                commandExpectedWithRejection(rejection());
+                commandExpectedWithRejection(rejectionMessage());
         expected.throwsRejection(TUFailedToAssignProject.class);
     }
 
@@ -70,7 +70,7 @@ class CommandHandlerExpectedTest {
     @DisplayName("not ignore message if it was rejected")
     void notIgnoreRejectedCommand() {
         CommandHandlerExpected<UInt64Value> expected =
-                commandExpectedWithRejection(rejection());
+                commandExpectedWithRejection(rejectionMessage());
         assertThrows(AssertionFailedError.class, expected::ignoresMessage);
     }
 
@@ -78,7 +78,7 @@ class CommandHandlerExpectedTest {
     @DisplayName("not track events if rejected")
     void notTrackEventsIfRejected() {
         CommandHandlerExpected<UInt64Value> expected =
-                commandExpectedWithRejection(rejection());
+                commandExpectedWithRejection(rejectionMessage());
         assertThrows(AssertionFailedError.class, () -> expected.producesEvents(StringValue.class));
     }
 

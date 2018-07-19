@@ -51,23 +51,17 @@ public class CommandExpectedTestEnv {
     private CommandExpectedTestEnv() {
     }
 
-    public static Rejection rejection() {
-        RejectionId id = RejectionId.newBuilder()
-                                    .setValue("test rejection")
-                                    .build();
+    public static Message rejectionMessage() {
         TUProjectId entityId = TUProjectId.newBuilder()
                                           .setValue("entity ID")
                                           .build();
         TUFailedToAssignProject rejectionMessage = TUFailedToAssignProject.newBuilder()
                                                                           .setId(entityId)
                                                                           .build();
-        return Rejection.newBuilder()
-                        .setId(id)
-                        .setMessage(pack(rejectionMessage))
-                        .build();
+        return rejectionMessage;
     }
 
-    public static List<Message> interceptedCommands() {
+    private static List<Message> interceptedCommands() {
         StringValue firstCommand = StringValue.newBuilder()
                                               .setValue("command 1")
                                               .build();
@@ -78,14 +72,24 @@ public class CommandExpectedTestEnv {
     }
 
     public static CommandHandlerExpected<UInt64Value>
-    commandExpectedWithRejection(Rejection rejection) {
+    commandExpectedWithRejection(Message rejectionMessage) {
         CommandHandlerExpected<UInt64Value> expected =
                 new CommandHandlerExpected<>(events(),
-                                             rejection,
+                                             rejection(rejectionMessage),
                                              oldState(),
                                              newState(),
                                              interceptedCommands());
         return expected;
+    }
+
+    private static Rejection rejection(Message rejectionMessage) {
+        RejectionId id = RejectionId.newBuilder()
+                                         .setValue("test rejectionMessage")
+                                         .build();
+        return Rejection.newBuilder()
+                        .setId(id)
+                        .setMessage(pack(rejectionMessage))
+                        .build();
     }
 
     public static CommandHandlerExpected<UInt64Value> commandExpectedWithEvent(Message event) {
