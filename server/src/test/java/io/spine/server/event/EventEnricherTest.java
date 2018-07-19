@@ -202,12 +202,12 @@ public class EventEnricherTest {
         void withDisabledEnrichment() {
             Event event = createEvent(toMessage(newUuid()));
             Enrichment.Builder enrichment = event.getContext()
-                                                       .getEnrichment()
-                                                       .toBuilder()
-                                                       .setDoNotEnrich(true);
+                                                 .getEnrichment()
+                                                 .toBuilder()
+                                                 .setDoNotEnrich(true);
             EventContext.Builder context = event.getContext()
-                                                      .toBuilder()
-                                                      .setEnrichment(enrichment);
+                                                .toBuilder()
+                                                .setEnrichment(enrichment);
             EventEnvelope notEnrichableEvent = EventEnvelope.of(
                     event.toBuilder()
                          .setContext(context)

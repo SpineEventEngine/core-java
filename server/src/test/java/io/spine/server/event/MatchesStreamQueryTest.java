@@ -63,11 +63,11 @@ class MatchesStreamQueryTest {
     @DisplayName("match proper records")
     void matchProperRecords() {
         ProjectId properField = ProjectId.newBuilder()
-                                               .setId(newUuid())
-                                               .build();
+                                         .setId(newUuid())
+                                         .build();
         ProjectCreated eventMsg = ProjectCreated.newBuilder()
-                                                      .setProjectId(properField)
-                                                      .build();
+                                                .setProjectId(properField)
+                                                .build();
         Event event = eventFactory.createEvent(eventMsg);
         MatchesStreamQuery predicate = eventWith(FIELD_NAME, properField);
         assertTrue(predicate.apply(event));
@@ -77,12 +77,12 @@ class MatchesStreamQueryTest {
     @DisplayName("not match improper records")
     void notMatchImproperRecords() {
         ProjectId properField = ProjectId.newBuilder()
-                                               .setId(newUuid())
-                                               .build();
+                                         .setId(newUuid())
+                                         .build();
         ProjectId improperField = ProjectId.getDefaultInstance();
         ProjectCreated eventMsg = ProjectCreated.newBuilder()
-                                                      .setProjectId(improperField)
-                                                      .build();
+                                                .setProjectId(improperField)
+                                                .build();
         Event event = eventFactory.createEvent(eventMsg);
         MatchesStreamQuery predicate = eventWith(FIELD_NAME, properField);
         assertFalse(predicate.apply(event));
@@ -90,15 +90,15 @@ class MatchesStreamQueryTest {
 
     private static MatchesStreamQuery eventWith(String fieldPath, Message field) {
         FieldFilter filter = FieldFilter.newBuilder()
-                                              .setFieldPath(fieldPath)
-                                              .addValue(AnyPacker.pack(field))
-                                              .build();
+                                        .setFieldPath(fieldPath)
+                                        .addValue(AnyPacker.pack(field))
+                                        .build();
         EventFilter eventFilter = EventFilter.newBuilder()
-                                                   .addEventFieldFilter(filter)
-                                                   .build();
+                                             .addEventFieldFilter(filter)
+                                             .build();
         EventStreamQuery query = EventStreamQuery.newBuilder()
-                                                       .addFilter(eventFilter)
-                                                       .build();
+                                                 .addFilter(eventFilter)
+                                                 .build();
         MatchesStreamQuery predicate = new MatchesStreamQuery(query);
         return predicate;
     }

@@ -67,8 +67,8 @@ public class StorageTestEnv {
     public static CommandRecord newStorageRecord() {
         Command command = Given.ACommand.createProject();
         String commandType = CommandEnvelope.of(command)
-                                                  .getTypeName()
-                                                  .value();
+                                            .getTypeName()
+                                            .value();
 
         CommandRecord.Builder builder =
                 CommandRecord.newBuilder()

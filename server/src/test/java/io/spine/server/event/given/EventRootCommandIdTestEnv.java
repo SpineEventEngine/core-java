@@ -98,8 +98,8 @@ public class EventRootCommandIdTestEnv {
     private static TenantId tenantId() {
         String value = EventRootCommandIdTestEnv.class.getName();
         TenantId id = TenantId.newBuilder()
-                                    .setValue(value)
-                                    .build();
+                              .setValue(value)
+                              .build();
         return id;
     }
 
@@ -123,7 +123,7 @@ public class EventRootCommandIdTestEnv {
         EvAddTasks.Builder builder = EvAddTasks.newBuilder();
         for (int i = 0; i < count; i++) {
             Task task = (Task) Sample.builderForType(Task.class)
-                                           .build();
+                                     .build();
             builder.addTask(task);
         }
 
@@ -154,7 +154,7 @@ public class EventRootCommandIdTestEnv {
         EvInviteTeamMembers.Builder builder = EvInviteTeamMembers.newBuilder();
         for (int i = 0; i < count; i++) {
             EmailAddress task = (EmailAddress) Sample.builderForType(EmailAddress.class)
-                                                           .build();
+                                                     .build();
             builder.addEmail(task);
         }
 

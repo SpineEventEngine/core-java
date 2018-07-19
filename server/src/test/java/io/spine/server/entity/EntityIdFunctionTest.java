@@ -44,8 +44,8 @@ class EntityIdFunctionTest {
                 new RecordBasedRepository.EntityIdFunction<>(StringValue.class);
 
         EntityId wrongType = EntityId.newBuilder()
-                                           .setId(toAny(100L))
-                                           .build();
+                                     .setId(toAny(100L))
+                                     .build();
         assertThrows(IllegalStateException.class, () -> func.apply(wrongType));
     }
 
@@ -57,8 +57,8 @@ class EntityIdFunctionTest {
 
         String value = "abcd";
         EntityId type = EntityId.newBuilder()
-                                      .setId(toAny(value))
-                                      .build();
+                                .setId(toAny(value))
+                                .build();
         StringValue result = func.apply(type);
         assertNotNull(result);
         assertEquals(value, result.getValue());

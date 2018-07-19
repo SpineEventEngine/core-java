@@ -102,8 +102,8 @@ public class Given {
 
         private static InvalidProjectName invalidProjectName(ProjectId id) {
             InvalidProjectName invalidProjectName = InvalidProjectName.newBuilder()
-                                                                            .setProjectId(id)
-                                                                            .build();
+                                                                      .setProjectId(id)
+                                                                      .build();
             return invalidProjectName;
         }
     }

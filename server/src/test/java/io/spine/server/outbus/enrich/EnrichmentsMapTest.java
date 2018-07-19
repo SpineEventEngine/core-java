@@ -273,7 +273,7 @@ class EnrichmentsMapTest {
 
         for (Class<? extends Message> expectedClass : FluentIterable.from(eventClassesExpected)) {
             String expectedTypeName = TypeName.of(expectedClass)
-                                                    .value();
+                                              .value();
             assertTrue(eventTypesActual.contains(expectedTypeName));
         }
     }

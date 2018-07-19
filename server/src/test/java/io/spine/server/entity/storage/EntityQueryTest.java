@@ -70,7 +70,8 @@ class EntityQueryTest {
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(EntityIdFilter.class, EntityIdFilter.getDefaultInstance())
-                .setDefault(QueryParameters.class, QueryParameters.newBuilder().build())
+                .setDefault(QueryParameters.class, QueryParameters.newBuilder()
+                                                                  .build())
                 .testStaticMethods(EntityQuery.class, NullPointerTester.Visibility.PACKAGE);
     }
 
@@ -83,8 +84,8 @@ class EntityQueryTest {
         Multimap<EntityColumn, ColumnFilter> filters = of(column, filter);
         CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
         QueryParameters parameters = QueryParameters.newBuilder()
-                                                          .add(parameter)
-                                                          .build();
+                                                    .add(parameter)
+                                                    .build();
         Set<String> ids = singleton("my-awesome-ID");
         EntityQuery<String> query = EntityQuery.of(ids, parameters);
         reserializeAndAssert(query);
@@ -131,8 +132,8 @@ class EntityQueryTest {
                 ALL
         );
         QueryParameters parameters = QueryParameters.newBuilder()
-                                                          .add(queryParameter)
-                                                          .build();
+                                                    .add(queryParameter)
+                                                    .build();
         EntityQuery<String> query =
                 EntityQuery.of(Collections.<String>emptySet(), parameters);
         assertFalse(query.canAppendLifecycleFlags());
@@ -202,15 +203,14 @@ class EntityQueryTest {
 
     private static QueryParameters paramsFromValues(Map<EntityColumn, Object> values) {
         QueryParameters.Builder builder = QueryParameters.newBuilder();
-        Multimap<EntityColumn, ColumnFilter> filters = HashMultimap.create(values.size(),
-                                                                                 1);
+        Multimap<EntityColumn, ColumnFilter> filters = HashMultimap.create(values.size(), 1);
         for (Map.Entry<EntityColumn, Object> param : values.entrySet()) {
             EntityColumn column = param.getKey();
             ColumnFilter filter = ColumnFilter.newBuilder()
-                                                    .setOperator(EQUAL)
-                                                    .setValue(toAny(param.getValue()))
-                                                    .setColumnName(column.getName())
-                                                    .build();
+                                              .setOperator(EQUAL)
+                                              .setValue(toAny(param.getValue()))
+                                              .setColumnName(column.getName())
+                                              .build();
             filters.put(column, filter);
         }
         return builder.add(CompositeQueryParameter.from(filters, ALL))

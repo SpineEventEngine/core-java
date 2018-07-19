@@ -93,16 +93,16 @@ public class EventBusTestEnv {
 
     private static ProjectId projectId() {
         ProjectId id = ProjectId.newBuilder()
-                                      .setId(newUuid())
-                                      .build();
+                                .setId(newUuid())
+                                .build();
         return id;
     }
 
     private static TenantId tenantId() {
         String value = EventBusTestEnv.class.getName();
         TenantId id = TenantId.newBuilder()
-                                    .setValue(value)
-                                    .build();
+                              .setValue(value)
+                              .build();
         return id;
     }
 

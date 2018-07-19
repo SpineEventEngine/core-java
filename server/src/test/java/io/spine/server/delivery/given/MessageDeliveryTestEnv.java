@@ -47,6 +47,7 @@ import io.spine.test.aggregate.rejection.AggCannotReassignUnassignedTask;
 import io.spine.validate.StringValueVBuilder;
 
 import java.util.Optional;
+
 import static io.spine.core.BoundedContextNames.newName;
 
 /**
@@ -156,7 +157,7 @@ public class MessageDeliveryTestEnv {
         public EntityClass getShardedModelClass() {
             Class<DeliveryEqualityProject> someAggregate = DeliveryEqualityProject.class;
             AggregateClass<?> result = Model.getInstance()
-                                                  .asAggregateClass(someAggregate);
+                                            .asAggregateClass(someAggregate);
             return result;
         }
     }

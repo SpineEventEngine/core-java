@@ -70,10 +70,10 @@ class ColumnRecordsTest {
         EntityRecordWithColumns record = EntityRecordWithColumns.of(
                 EntityRecord.getDefaultInstance());
         ColumnTypeRegistry columnTypeRegistry = ColumnTypeRegistry.newBuilder()
-                                                                        .build();
+                                                                  .build();
         EntityQuery entityQuery = EntityQuery.of(Collections.emptyList(),
-                                                       QueryParameters.newBuilder()
-                                                                      .build());
+                                                 QueryParameters.newBuilder()
+                                                                .build());
         new NullPointerTester()
                 .setDefault(EntityRecordWithColumns.class, record)
                 .setDefault(ColumnTypeRegistry.class, columnTypeRegistry)

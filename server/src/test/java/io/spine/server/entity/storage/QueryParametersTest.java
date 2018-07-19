@@ -71,8 +71,8 @@ class QueryParametersTest {
         ColumnFilter filter = ColumnFilters.eq(columnName, 1);
         CompositeQueryParameter parameter = aggregatingParameter(column, filter);
         QueryParameters parameters = QueryParameters.newBuilder()
-                                                          .add(parameter)
-                                                          .build();
+                                                    .add(parameter)
+                                                    .build();
         reserializeAndAssert(parameters);
     }
 
@@ -89,18 +89,18 @@ class QueryParametersTest {
         EntityColumn bColumn = mockColumn();
         ColumnFilter bFilter = ColumnFilters.eq("b", "c");
         QueryParameters paramsB1 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
-                                                     .build();
+                                               .build();
         QueryParameters paramsB2 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
-                                                     .build();
+                                               .build();
         QueryParameters paramsB3 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
-                                                     .build();
+                                               .build();
 
         // --- Group C ---
         // Consists of an instance with a single filter targeting an integer number column
         EntityColumn cColumn = mockColumn();
         ColumnFilter cFilter = ColumnFilters.eq("a", 42);
         QueryParameters paramsC = newBuilder().add(aggregatingParameter(cColumn, cFilter))
-                                                    .build();
+                                              .build();
 
         // --- Check ---
         new EqualsTester().addEqualityGroup(paramsA1, paramsA2)
@@ -124,14 +124,15 @@ class QueryParametersTest {
                 eq("secondFilter", 42),
                 gt("thirdFilter", getCurrentTime())};
         Multimap<EntityColumn, ColumnFilter> columnFilters = of(mockColumn(), filters[0],
-                                                                      mockColumn(), filters[1],
-                                                                      mockColumn(), filters[2]);
+                                                                mockColumn(), filters[1],
+                                                                mockColumn(), filters[2]);
         CompositeQueryParameter parameter = from(columnFilters, ALL);
         QueryParameters parameters = newBuilder().add(parameter)
-                                                       .build();
+                                                 .build();
         Collection<ColumnFilter> results = newLinkedList();
         for (CompositeQueryParameter queryParameter : parameters) {
-            results.addAll(queryParameter.getFilters().values());
+            results.addAll(queryParameter.getFilters()
+                                         .values());
         }
         assertArrayEquals(filters, results.toArray());
     }
@@ -145,13 +146,14 @@ class QueryParametersTest {
                 gt("$3d", getCurrentTime())};
         EntityColumn[] columns = {mockColumn(), mockColumn(), mockColumn()};
         Multimap<EntityColumn, ColumnFilter> columnFilters = of(columns[0], filters[0],
-                                                                      columns[1], filters[1],
-                                                                      columns[2], filters[2]);
+                                                                columns[1], filters[1],
+                                                                columns[2], filters[2]);
         CompositeQueryParameter parameter = from(columnFilters, ALL);
         QueryParameters parameters = newBuilder().add(parameter)
-                                                       .build();
+                                                 .build();
         assertSize(1, newArrayList(parameters));
-        CompositeQueryParameter singleParameter = parameters.iterator().next();
+        CompositeQueryParameter singleParameter = parameters.iterator()
+                                                            .next();
         Multimap<EntityColumn, ColumnFilter> actualFilters = singleParameter.getFilters();
         for (int i = 0; i < columns.length; i++) {
             EntityColumn column = columns[i];
@@ -181,11 +183,12 @@ class QueryParametersTest {
                         .build();
         CompositeQueryParameter parameter = from(columnFilters, ALL);
         QueryParameters parameters = newBuilder().add(parameter)
-                                                       .build();
+                                                 .build();
         List<CompositeQueryParameter> aggregatingParameters = newArrayList(parameters);
         assertSize(1, aggregatingParameters);
         Multimap<EntityColumn, ColumnFilter> actualColumnFilters =
-                aggregatingParameters.get(0).getFilters();
+                aggregatingParameters.get(0)
+                                     .getFilters();
         Collection<ColumnFilter> timeFilters = actualColumnFilters.get(column);
         assertSize(2, timeFilters);
         assertContainsAll(timeFilters, startTimeFilter, deadlineFilter);

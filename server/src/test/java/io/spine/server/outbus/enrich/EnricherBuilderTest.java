@@ -84,7 +84,7 @@ class EnricherBuilderTest {
         @DisplayName("if no functions have been registered")
         void forNoFunctionsRegistered() {
             Enricher enricher = EventEnricher.newBuilder()
-                                                   .build();
+                                             .build();
             assertNotNull(enricher);
         }
 

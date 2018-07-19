@@ -402,9 +402,9 @@ class EntityTest {
         @DisplayName("status can be assigned")
         void supportAssignment() {
             LifecycleFlags status = LifecycleFlags.newBuilder()
-                                                        .setArchived(true)
-                                                        .setDeleted(false)
-                                                        .build();
+                                                  .setArchived(true)
+                                                  .setDeleted(false)
+                                                  .build();
             entityNew.setLifecycleFlags(status);
             assertEquals(status, entityNew.getLifecycleFlags());
         }

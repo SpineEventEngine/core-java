@@ -113,11 +113,11 @@ public class IntegrationBusTestEnv {
 
     public static BoundedContext contextWithTransport(TransportFactory transportFactory) {
         IntegrationBus.Builder builder = IntegrationBus.newBuilder()
-                                                             .setTransportFactory(transportFactory);
+                                                       .setTransportFactory(transportFactory);
         BoundedContext result = BoundedContext.newBuilder()
-                                                    .setName(newUuid())
-                                                    .setIntegrationBus(builder)
-                                                    .build();
+                                              .setName(newUuid())
+                                              .setIntegrationBus(builder)
+                                              .build();
         return result;
     }
 
@@ -138,7 +138,7 @@ public class IntegrationBusTestEnv {
     public static Event projectCreated() {
         ProjectId projectId = projectId();
         TestEventFactory eventFactory = newInstance(pack(projectId),
-                                                          IntegrationBusTestEnv.class);
+                                                    IntegrationBusTestEnv.class);
         return eventFactory.createEvent(ItgProjectCreated.newBuilder()
                                                          .setProjectId(projectId)
                                                          .build()
@@ -148,7 +148,7 @@ public class IntegrationBusTestEnv {
     public static Event projectStarted() {
         ProjectId projectId = projectId();
         TestEventFactory eventFactory = newInstance(pack(projectId),
-                                                          IntegrationBusTestEnv.class);
+                                                    IntegrationBusTestEnv.class);
         return eventFactory.createEvent(ItgProjectStarted.newBuilder()
                                                          .setProjectId(projectId)
                                                          .build()
@@ -159,8 +159,8 @@ public class IntegrationBusTestEnv {
     public static Rejection cannotStartArchivedProject() {
         ProjectId projectId = projectId();
         ItgStartProject cmdMessage = ItgStartProject.newBuilder()
-                                                          .setProjectId(projectId)
-                                                          .build();
+                                                    .setProjectId(projectId)
+                                                    .build();
         Command startProjectCmd = toCommand(cmdMessage);
         io.spine.test.integration.rejection.ItgCannotStartArchivedProject throwable =
                 new io.spine.test.integration.rejection.ItgCannotStartArchivedProject(projectId);

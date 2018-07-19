@@ -45,12 +45,12 @@ class DefaultEntityStorageConverterTest {
     @BeforeEach
     void setUp() {
         BoundedContext bc = BoundedContext.newBuilder()
-                                                .build();
+                                          .build();
         RecordBasedRepository<Long, TestEntity, StringValue> repository = new TestRepository();
         bc.register(repository);
 
         TypeUrl stateType = repository.entityClass()
-                                            .getStateType();
+                                      .getStateType();
         converter = forAllFields(stateType, repository.entityFactory());
     }
 
@@ -64,8 +64,8 @@ class DefaultEntityStorageConverterTest {
     @DisplayName("create instance with FieldMask")
     void createWithFieldMask() throws Exception {
         FieldMask fieldMask = FieldMask.newBuilder()
-                                             .addPaths("foo.bar")
-                                             .build();
+                                       .addPaths("foo.bar")
+                                       .build();
 
         EntityStorageConverter<Long, TestEntity, StringValue> withMasks =
                 converter.withFieldMask(fieldMask);
@@ -87,7 +87,7 @@ class DefaultEntityStorageConverterTest {
 
         EntityRecord out = converter.convert(entity);
         TestEntity back = converter.reverse()
-                                         .convert(out);
+                                   .convert(out);
         assertEquals(entity, back);
     }
 

@@ -199,8 +199,8 @@ class TransactionalEntityTest {
         LifecycleFlags originalFlags = entity.getLifecycleFlags();
 
         LifecycleFlags modifiedFlags = originalFlags.toBuilder()
-                                                          .setDeleted(true)
-                                                          .build();
+                                                    .setDeleted(true)
+                                                    .build();
 
         assertNotEquals(originalFlags, modifiedFlags);
 
@@ -229,14 +229,14 @@ class TransactionalEntityTest {
         void reflectingCurrentState() {
             TransactionalEntity entity = newEntity();
             Message originalState = entity.builderFromState()
-                                                .build();
+                                          .build();
 
             StringValue newState = newUuidValue();
             assertNotEquals(originalState, newState);
 
             TestTransaction.injectState(entity, newState, Version.getDefaultInstance());
             Message modifiedState = entity.builderFromState()
-                                                .build();
+                                          .build();
 
             assertEquals(newState, modifiedState);
         }

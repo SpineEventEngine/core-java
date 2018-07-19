@@ -51,8 +51,8 @@ public class EventStoreTestEnv {
 
     public static EventStore eventStore() {
         BoundedContext bc = BoundedContext.newBuilder()
-                                                .setMultitenant(false)
-                                                .build();
+                                          .setMultitenant(false)
+                                          .build();
         return EventStore.newBuilder()
                          .setStorageFactory(bc.getStorageFactory())
                          .setStreamExecutor(MoreExecutors.directExecutor())

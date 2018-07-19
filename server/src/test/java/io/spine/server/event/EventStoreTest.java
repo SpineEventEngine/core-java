@@ -104,9 +104,9 @@ public class EventStoreTest {
             eventStore.append(eventInFuture);
 
             EventStreamQuery query = EventStreamQuery.newBuilder()
-                                                           .setAfter(past)
-                                                           .setBefore(future)
-                                                           .build();
+                                                     .setAfter(past)
+                                                     .setBefore(future)
+                                                     .build();
             AtomicBoolean done = new AtomicBoolean(false);
             Collection<Event> resultEvents = newConcurrentHashSet();
             eventStore.read(query, new ResponseObserver(resultEvents, done));
@@ -114,7 +114,7 @@ public class EventStoreTest {
 
             assertSize(1, resultEvents);
             Event event = resultEvents.iterator()
-                                            .next();
+                                      .next();
             assertEquals(eventInPresent, event);
         }
 
@@ -132,11 +132,11 @@ public class EventStoreTest {
             eventStore.append(teasAdded2);
 
             EventFilter taskAddedType = EventFilter.newBuilder()
-                                                         .setEventType(of(TaskAdded.class).value())
-                                                         .build();
+                                                   .setEventType(of(TaskAdded.class).value())
+                                                   .build();
             EventStreamQuery query = EventStreamQuery.newBuilder()
-                                                           .addFilter(taskAddedType)
-                                                           .build();
+                                                     .addFilter(taskAddedType)
+                                                     .build();
             AtomicBoolean done = new AtomicBoolean(false);
             Collection<Event> resultEvents = newConcurrentHashSet();
             eventStore.read(query, new ResponseObserver(resultEvents, done));
@@ -163,12 +163,12 @@ public class EventStoreTest {
             eventStore.append(eventInFuture);
 
             EventFilter taskAddedType = EventFilter.newBuilder()
-                                                         .setEventType(of(TaskAdded.class).value())
-                                                         .build();
+                                                   .setEventType(of(TaskAdded.class).value())
+                                                   .build();
             EventStreamQuery query = EventStreamQuery.newBuilder()
-                                                           .setAfter(past)
-                                                           .addFilter(taskAddedType)
-                                                           .build();
+                                                     .setAfter(past)
+                                                     .addFilter(taskAddedType)
+                                                     .build();
             AtomicBoolean done = new AtomicBoolean(false);
             Collection<Event> resultEvents = newConcurrentHashSet();
             eventStore.read(query, new ResponseObserver(resultEvents, done));
@@ -176,7 +176,7 @@ public class EventStoreTest {
 
             assertSize(1, resultEvents);
             Event event = resultEvents.iterator()
-                                            .next();
+                                      .next();
             assertEquals(eventInFuture, event);
         }
     }
@@ -201,35 +201,35 @@ public class EventStoreTest {
     @DisplayName("fail to store events of different tenants in single operation")
     void rejectEventsFromDifferentTenants() {
         TenantId firstTenantId = TenantId.newBuilder()
-                                               .setValue("abc")
-                                               .build();
+                                         .setValue("abc")
+                                         .build();
         TenantId secondTenantId = TenantId.newBuilder()
-                                                .setValue("xyz")
-                                                .build();
+                                          .setValue("xyz")
+                                          .build();
         ActorContext firstTenantActor = ActorContext.newBuilder()
-                                                          .setTenantId(firstTenantId)
-                                                          .build();
+                                                    .setTenantId(firstTenantId)
+                                                    .build();
         ActorContext secondTenantActor = ActorContext.newBuilder()
-                                                           .setTenantId(secondTenantId)
-                                                           .build();
+                                                     .setTenantId(secondTenantId)
+                                                     .build();
         CommandContext firstTenantCommand = CommandContext.newBuilder()
-                                                                .setActorContext(firstTenantActor)
-                                                                .build();
+                                                          .setActorContext(firstTenantActor)
+                                                          .build();
         CommandContext secondTenantCommand = CommandContext.newBuilder()
-                                                                 .setActorContext(secondTenantActor)
-                                                                 .build();
+                                                           .setActorContext(secondTenantActor)
+                                                           .build();
         EventContext firstTenantContext = EventContext.newBuilder()
-                                                            .setCommandContext(firstTenantCommand)
-                                                            .build();
+                                                      .setCommandContext(firstTenantCommand)
+                                                      .build();
         EventContext secondTenantContext = EventContext.newBuilder()
-                                                             .setCommandContext(secondTenantCommand)
-                                                             .build();
+                                                       .setCommandContext(secondTenantCommand)
+                                                       .build();
         Event firstTenantEvent = Event.newBuilder()
-                                            .setContext(firstTenantContext)
-                                            .build();
+                                      .setContext(firstTenantContext)
+                                      .build();
         Event secondTenantEvent = Event.newBuilder()
-                                             .setContext(secondTenantContext)
-                                             .build();
+                                       .setContext(secondTenantContext)
+                                       .build();
         Collection<Event> event = ImmutableSet.of(firstTenantEvent, secondTenantEvent);
 
         assertThrows(IllegalArgumentException.class, () -> eventStore.appendAll(event));
@@ -243,16 +243,16 @@ public class EventStoreTest {
         void eventContext() {
             Event event = projectCreated(Time.getCurrentTime());
             Event enriched = event.toBuilder()
-                                        .setContext(event.getContext()
-                                                         .toBuilder()
-                                                         .setEnrichment(withOneAttribute()))
-                                        .build();
+                                  .setContext(event.getContext()
+                                                   .toBuilder()
+                                                   .setEnrichment(withOneAttribute()))
+                                  .build();
             eventStore.append(enriched);
             MemoizingObserver<Event> observer = memoizingObserver();
             eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
             EventContext context = observer.responses()
-                                                 .get(0)
-                                                 .getContext();
+                                           .get(0)
+                                           .getContext();
             assertTrue(isDefault(context.getEnrichment()));
         }
 
@@ -265,17 +265,17 @@ public class EventStoreTest {
                                     .build();
             Event event = projectCreated(Time.getCurrentTime());
             Event enriched = event.toBuilder()
-                                        .setContext(event.getContext()
-                                                         .toBuilder()
-                                                         .setRejectionContext(originContext))
-                                        .build();
+                                  .setContext(event.getContext()
+                                                   .toBuilder()
+                                                   .setRejectionContext(originContext))
+                                  .build();
             eventStore.append(enriched);
             MemoizingObserver<Event> observer = memoizingObserver();
             eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
             RejectionContext loadedOriginContext = observer.responses()
-                                                                 .get(0)
-                                                                 .getContext()
-                                                                 .getRejectionContext();
+                                                           .get(0)
+                                                           .getContext()
+                                                           .getRejectionContext();
             assertTrue(isDefault(loadedOriginContext.getEnrichment()));
         }
 
@@ -287,17 +287,17 @@ public class EventStoreTest {
                                 .setEnrichment(withOneAttribute());
             Event event = projectCreated(Time.getCurrentTime());
             Event enriched = event.toBuilder()
-                                        .setContext(event.getContext()
-                                                         .toBuilder()
-                                                         .setEventContext(originContext))
-                                        .build();
+                                  .setContext(event.getContext()
+                                                   .toBuilder()
+                                                   .setEventContext(originContext))
+                                  .build();
             eventStore.append(enriched);
             MemoizingObserver<Event> observer = memoizingObserver();
             eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
             EventContext loadedOriginContext = observer.responses()
-                                                             .get(0)
-                                                             .getContext()
-                                                             .getEventContext();
+                                                       .get(0)
+                                                       .getContext()
+                                                       .getEventContext();
             assertTrue(isDefault(loadedOriginContext.getEnrichment()));
         }
     }

@@ -35,27 +35,27 @@ public class TestEntity extends AbstractVersionableEntity<String, Project> {
 
     static TestEntity newInstance(String id) {
         TestEntity result = Given.entityOfClass(TestEntity.class)
-                                       .withId(id)
-                                       .build();
+                                 .withId(id)
+                                 .build();
         return result;
     }
 
     static TestEntity withState() {
         TestEntity result = Given.entityOfClass(TestEntity.class)
-                                       .withId(newUuid())
-                                       .withState(Sample.messageOfType(Project.class))
-                                       .withVersion(3)
-                                       .build();
+                                 .withId(newUuid())
+                                 .withState(Sample.messageOfType(Project.class))
+                                 .withVersion(3)
+                                 .build();
         return result;
     }
 
     static TestEntity withStateOf(TestEntity entity) {
         TestEntity result = Given.entityOfClass(TestEntity.class)
-                                       .withId(entity.getId())
-                                       .withState(entity.getState())
-                                       .withVersion(entity.getVersion()
-                                                          .getNumber())
-                                       .build();
+                                 .withId(entity.getId())
+                                 .withState(entity.getState())
+                                 .withVersion(entity.getVersion()
+                                                    .getNumber())
+                                 .build();
         return result;
     }
 

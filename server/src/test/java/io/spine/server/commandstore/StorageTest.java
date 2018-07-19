@@ -180,7 +180,7 @@ class StorageTest extends TenantAwareTest {
 
             assertEquals(1, records.size());
             String commandIdStr = Identifier.toString(records.get(0)
-                                                                   .getCommandId());
+                                                             .getCommandId());
             assertFalse(commandIdStr.isEmpty());
         }
 
@@ -202,8 +202,8 @@ class StorageTest extends TenantAwareTest {
         @DisplayName("multiple commands with status")
         void multipleCommandsWithStatus() {
             List<Command> commands = ImmutableList.of(Given.ACommand.createProject(),
-                                                            Given.ACommand.addTask(),
-                                                            Given.ACommand.startProject());
+                                                      Given.ACommand.addTask(),
+                                                      Given.ACommand.startProject());
             CommandStatus status = SCHEDULED;
 
             store(commands, status);
