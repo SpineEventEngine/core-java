@@ -24,10 +24,10 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
-import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.InvalidEntityStateException;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.testing.server.User;
+import io.spine.testing.server.entity.EntityBuilderTestEnv.TestEntity;
 import io.spine.testing.server.entity.EntityBuilderTestEnv.UserAggregate;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;
@@ -162,11 +162,5 @@ class EntityBuilderTest {
                 .build();
 
         assertEquals(user, aggregate.getState());
-    }
-
-    private static class TestEntity extends AbstractVersionableEntity<Long, StringValue> {
-        protected TestEntity(Long id) {
-            super(id);
-        }
     }
 }

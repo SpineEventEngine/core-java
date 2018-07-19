@@ -20,7 +20,9 @@
 
 package io.spine.testing.server.entity;
 
+import com.google.protobuf.StringValue;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.testing.server.User;
 import io.spine.testing.server.UserVBuilder;
 
@@ -35,6 +37,12 @@ public class EntityBuilderTestEnv {
      */
     static class UserAggregate extends Aggregate<String, User, UserVBuilder> {
         private UserAggregate(String id) {
+            super(id);
+        }
+    }
+
+    static class TestEntity extends AbstractVersionableEntity<Long, StringValue> {
+        protected TestEntity(Long id) {
             super(id);
         }
     }
