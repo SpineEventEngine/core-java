@@ -89,14 +89,14 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("by only entity type")
         void byType() {
-            final Class<? extends Message> testEntityClass = TestEntity.class;
-            final Query query = factory().query()
-                                         .select(testEntityClass)
-                                         .build();
+            Class<? extends Message> testEntityClass = TestEntity.class;
+            Query query = factory().query()
+                                   .select(testEntityClass)
+                                   .build();
             assertNotNull(query);
             assertFalse(query.hasFieldMask());
 
-            final Target target = query.getTarget();
+            Target target = query.getTarget();
             assertTrue(target.getIncludeAll());
 
             assertEquals(TypeUrl.of(testEntityClass)
@@ -106,23 +106,23 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("by id")
         void byId() {
-            final int id1 = 314;
-            final int id2 = 271;
-            final Query query = factory().query()
-                                         .select(TestEntity.class)
-                                         .byId(id1, id2)
-                                         .build();
+            int id1 = 314;
+            int id2 = 271;
+            Query query = factory().query()
+                                   .select(TestEntity.class)
+                                   .byId(id1, id2)
+                                   .build();
             assertNotNull(query);
             assertFalse(query.hasFieldMask());
 
-            final Target target = query.getTarget();
+            Target target = query.getTarget();
             assertFalse(target.getIncludeAll());
 
-            final EntityFilters entityFilters = target.getFilters();
-            final EntityIdFilter idFilter = entityFilters.getIdFilter();
-            final Collection<EntityId> idValues = idFilter.getIdsList();
-            final Function<EntityId, Integer> transformer = new EntityIdUnpacker<>(int.class);
-            final Collection<Integer> intIdValues = transform(idValues, transformer);
+            EntityFilters entityFilters = target.getFilters();
+            EntityIdFilter idFilter = entityFilters.getIdFilter();
+            Collection<EntityId> idValues = idFilter.getIdsList();
+            Function<EntityId, Integer> transformer = new EntityIdUnpacker<>(int.class);
+            Collection<Integer> intIdValues = transform(idValues, transformer);
 
             assertSize(2, idValues);
             assertThat(intIdValues, containsInAnyOrder(id1, id2));
@@ -131,16 +131,16 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("by field mask")
         void byFieldMask() {
-            final String fieldName = "TestEntity.firstField";
-            final Query query = factory().query()
-                                         .select(TestEntity.class)
-                                         .withMask(fieldName)
-                                         .build();
+            String fieldName = "TestEntity.firstField";
+            Query query = factory().query()
+                                   .select(TestEntity.class)
+                                   .withMask(fieldName)
+                                   .build();
             assertNotNull(query);
             assertTrue(query.hasFieldMask());
 
-            final FieldMask mask = query.getFieldMask();
-            final Collection<String> fieldNames = mask.getPathsList();
+            FieldMask mask = query.getFieldMask();
+            Collection<String> fieldNames = mask.getPathsList();
             assertSize(1, fieldNames);
             assertContains(fieldName, fieldNames);
         }
@@ -148,62 +148,62 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("by column filter")
         void byFilter() {
-            final String columnName = "myImaginaryColumn";
-            final Object columnValue = 42;
+            String columnName = "myImaginaryColumn";
+            Object columnValue = 42;
 
-            final Query query = factory().query()
-                                         .select(TestEntity.class)
-                                         .where(eq(columnName, columnValue))
-                                         .build();
+            Query query = factory().query()
+                                   .select(TestEntity.class)
+                                   .where(eq(columnName, columnValue))
+                                   .build();
             assertNotNull(query);
-            final Target target = query.getTarget();
+            Target target = query.getTarget();
             assertFalse(target.getIncludeAll());
 
-            final EntityFilters entityFilters = target.getFilters();
-            final List<CompositeColumnFilter> aggregatingColumnFilters =
+            EntityFilters entityFilters = target.getFilters();
+            List<CompositeColumnFilter> aggregatingColumnFilters =
                     entityFilters.getFilterList();
             assertSize(1, aggregatingColumnFilters);
-            final CompositeColumnFilter aggregatingColumnFilter = aggregatingColumnFilters.get(0);
-            final Collection<ColumnFilter> columnFilters = aggregatingColumnFilter.getFilterList();
+            CompositeColumnFilter aggregatingColumnFilter = aggregatingColumnFilters.get(0);
+            Collection<ColumnFilter> columnFilters = aggregatingColumnFilter.getFilterList();
             assertSize(1, columnFilters);
-            final Any actualValue = findByName(columnFilters, columnName).getValue();
+            Any actualValue = findByName(columnFilters, columnName).getValue();
             assertNotNull(columnValue);
-            final Int32Value messageValue = AnyPacker.unpack(actualValue);
-            final int actualGenericValue = messageValue.getValue();
+            Int32Value messageValue = AnyPacker.unpack(actualValue);
+            int actualGenericValue = messageValue.getValue();
             assertEquals(columnValue, actualGenericValue);
         }
 
         @Test
         @DisplayName("by multiple column filters")
         void byMultipleFilters() {
-            final String columnName1 = "myColumn";
-            final Object columnValue1 = 42;
-            final String columnName2 = "oneMore";
-            final Object columnValue2 = newMessageId();
+            String columnName1 = "myColumn";
+            Object columnValue1 = 42;
+            String columnName2 = "oneMore";
+            Object columnValue2 = newMessageId();
 
-            final Query query = factory().query()
-                                         .select(TestEntity.class)
-                                         .where(eq(columnName1, columnValue1),
-                                                eq(columnName2, columnValue2))
-                                         .build();
+            Query query = factory().query()
+                                   .select(TestEntity.class)
+                                   .where(eq(columnName1, columnValue1),
+                                          eq(columnName2, columnValue2))
+                                   .build();
             assertNotNull(query);
-            final Target target = query.getTarget();
+            Target target = query.getTarget();
             assertFalse(target.getIncludeAll());
 
-            final EntityFilters entityFilters = target.getFilters();
-            final List<CompositeColumnFilter> aggregatingColumnFilters =
+            EntityFilters entityFilters = target.getFilters();
+            List<CompositeColumnFilter> aggregatingColumnFilters =
                     entityFilters.getFilterList();
             assertSize(1, aggregatingColumnFilters);
-            final Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
-                                                                                   .getFilterList();
-            final Any actualValue1 = findByName(columnFilters, columnName1).getValue();
+            Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
+                                                                             .getFilterList();
+            Any actualValue1 = findByName(columnFilters, columnName1).getValue();
             assertNotNull(actualValue1);
-            final int actualGenericValue1 = toObject(actualValue1, int.class);
+            int actualGenericValue1 = toObject(actualValue1, int.class);
             assertEquals(columnValue1, actualGenericValue1);
 
-            final Any actualValue2 = findByName(columnFilters, columnName2).getValue();
+            Any actualValue2 = findByName(columnFilters, columnName2).getValue();
             assertNotNull(actualValue2);
-            final Message actualGenericValue2 = toObject(actualValue2, ProjectId.class);
+            Message actualGenericValue2 = toObject(actualValue2, ProjectId.class);
             assertEquals(columnValue2, actualGenericValue2);
         }
 
@@ -212,30 +212,30 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("by column filter grouping")
         void byFilterGrouping() {
-            final String establishedTimeColumn = "establishedTime";
-            final String companySizeColumn = "companySize";
-            final String countryColumn = "country";
-            final String countryName = "Ukraine";
+            String establishedTimeColumn = "establishedTime";
+            String companySizeColumn = "companySize";
+            String countryColumn = "country";
+            String countryName = "Ukraine";
 
-            final Timestamp twoDaysAgo = subtract(getCurrentTime(), fromHours(-48));
+            Timestamp twoDaysAgo = subtract(getCurrentTime(), fromHours(-48));
 
-            final Query query = factory().query()
-                                         .select(TestEntity.class)
-                                         .where(all(ge(companySizeColumn, 50),
-                                                    le(companySizeColumn, 1000)),
-                                                either(gt(establishedTimeColumn, twoDaysAgo),
-                                                       eq(countryColumn, countryName)))
-                                         .build();
-            final Target target = query.getTarget();
-            final List<CompositeColumnFilter> filters = target.getFilters()
-                                                              .getFilterList();
+            Query query = factory().query()
+                                   .select(TestEntity.class)
+                                   .where(all(ge(companySizeColumn, 50),
+                                              le(companySizeColumn, 1000)),
+                                          either(gt(establishedTimeColumn, twoDaysAgo),
+                                                 eq(countryColumn, countryName)))
+                                   .build();
+            Target target = query.getTarget();
+            List<CompositeColumnFilter> filters = target.getFilters()
+                                                        .getFilterList();
             assertSize(2, filters);
 
-            final CompositeColumnFilter firstFilter = filters.get(0);
-            final CompositeColumnFilter secondFilter = filters.get(1);
+            CompositeColumnFilter firstFilter = filters.get(0);
+            CompositeColumnFilter secondFilter = filters.get(1);
 
-            final List<ColumnFilter> allColumnFilters;
-            final List<ColumnFilter> eitherColumnFilters;
+            List<ColumnFilter> allColumnFilters;
+            List<ColumnFilter> eitherColumnFilters;
             if (firstFilter.getOperator() == ALL) {
                 assertEquals(EITHER, secondFilter.getOperator());
                 allColumnFilters = firstFilter.getFilterList();
@@ -248,26 +248,26 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             assertSize(2, allColumnFilters);
             assertSize(2, eitherColumnFilters);
 
-            final ColumnFilter companySizeLowerBound = allColumnFilters.get(0);
+            ColumnFilter companySizeLowerBound = allColumnFilters.get(0);
             assertEquals(companySizeColumn, companySizeLowerBound.getColumnName());
             assertEquals(50L,
                          (long) toObject(companySizeLowerBound.getValue(), int.class));
             assertEquals(ColumnFilter.Operator.GREATER_OR_EQUAL,
                          companySizeLowerBound.getOperator());
 
-            final ColumnFilter companySizeHigherBound = allColumnFilters.get(1);
+            ColumnFilter companySizeHigherBound = allColumnFilters.get(1);
             assertEquals(companySizeColumn, companySizeHigherBound.getColumnName());
             assertEquals(1000L,
                          (long) toObject(companySizeHigherBound.getValue(), int.class));
             assertEquals(ColumnFilter.Operator.LESS_OR_EQUAL, companySizeHigherBound.getOperator());
 
-            final ColumnFilter establishedTimeFilter = eitherColumnFilters.get(0);
+            ColumnFilter establishedTimeFilter = eitherColumnFilters.get(0);
             assertEquals(establishedTimeColumn, establishedTimeFilter.getColumnName());
             assertEquals(twoDaysAgo,
                          toObject(establishedTimeFilter.getValue(), Timestamp.class));
             assertEquals(ColumnFilter.Operator.GREATER_THAN, establishedTimeFilter.getOperator());
 
-            final ColumnFilter countryFilter = eitherColumnFilters.get(1);
+            ColumnFilter countryFilter = eitherColumnFilters.get(1);
             assertEquals(countryColumn, countryFilter.getColumnName());
             assertEquals(countryName,
                          toObject(countryFilter.getValue(), String.class));
@@ -279,58 +279,58 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("by all available arguments")
         void byAllArguments() {
-            final Class<? extends Message> testEntityClass = TestEntity.class;
-            final int id1 = 314;
-            final int id2 = 271;
-            final String columnName1 = "column1";
-            final Object columnValue1 = 42;
-            final String columnName2 = "column2";
-            final Object columnValue2 = newMessageId();
-            final String fieldName = "TestEntity.secondField";
-            final Query query = factory().query()
-                                         .select(testEntityClass)
-                                         .withMask(fieldName)
-                                         .byId(id1, id2)
-                                         .where(eq(columnName1, columnValue1),
-                                                eq(columnName2, columnValue2))
-                                         .build();
+            Class<? extends Message> testEntityClass = TestEntity.class;
+            int id1 = 314;
+            int id2 = 271;
+            String columnName1 = "column1";
+            Object columnValue1 = 42;
+            String columnName2 = "column2";
+            Object columnValue2 = newMessageId();
+            String fieldName = "TestEntity.secondField";
+            Query query = factory().query()
+                                   .select(testEntityClass)
+                                   .withMask(fieldName)
+                                   .byId(id1, id2)
+                                   .where(eq(columnName1, columnValue1),
+                                          eq(columnName2, columnValue2))
+                                   .build();
             assertNotNull(query);
 
             // Check FieldMask
-            final FieldMask mask = query.getFieldMask();
-            final Collection<String> fieldNames = mask.getPathsList();
+            FieldMask mask = query.getFieldMask();
+            Collection<String> fieldNames = mask.getPathsList();
             assertSize(1, fieldNames);
             assertContains(fieldName, fieldNames);
 
-            final Target target = query.getTarget();
+            Target target = query.getTarget();
             assertFalse(target.getIncludeAll());
-            final EntityFilters entityFilters = target.getFilters();
+            EntityFilters entityFilters = target.getFilters();
 
             // Check IDs
-            final EntityIdFilter idFilter = entityFilters.getIdFilter();
-            final Collection<EntityId> idValues = idFilter.getIdsList();
-            final Function<EntityId, Integer> transformer = new EntityIdUnpacker<>(int.class);
-            final Collection<Integer> intIdValues = transform(idValues, transformer);
+            EntityIdFilter idFilter = entityFilters.getIdFilter();
+            Collection<EntityId> idValues = idFilter.getIdsList();
+            Function<EntityId, Integer> transformer = new EntityIdUnpacker<>(int.class);
+            Collection<Integer> intIdValues = transform(idValues, transformer);
 
             assertSize(2, idValues);
             assertThat(intIdValues, containsInAnyOrder(id1, id2));
 
             // Check query params
-            final List<CompositeColumnFilter> aggregatingColumnFilters =
+            List<CompositeColumnFilter> aggregatingColumnFilters =
                     entityFilters.getFilterList();
             assertSize(1, aggregatingColumnFilters);
-            final Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
-                                                                                   .getFilterList();
+            Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
+                                                                             .getFilterList();
             assertSize(2, columnFilters);
 
-            final Any actualValue1 = findByName(columnFilters, columnName1).getValue();
+            Any actualValue1 = findByName(columnFilters, columnName1).getValue();
             assertNotNull(actualValue1);
-            final int actualGenericValue1 = toObject(actualValue1, int.class);
+            int actualGenericValue1 = toObject(actualValue1, int.class);
             assertEquals(columnValue1, actualGenericValue1);
 
-            final Any actualValue2 = findByName(columnFilters, columnName2).getValue();
+            Any actualValue2 = findByName(columnFilters, columnName2).getValue();
             assertNotNull(actualValue2);
-            final Message actualGenericValue2 = toObject(actualValue2, ProjectId.class);
+            Message actualGenericValue2 = toObject(actualValue2, ProjectId.class);
             assertEquals(columnValue2, actualGenericValue2);
         }
 
@@ -354,58 +354,58 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("IDs clause")
         void lastIds() {
-            final Iterable<?> genericIds = asList(newUuid(),
-                                                  -1,
-                                                  newMessageId());
-            final Long[] longIds = {1L, 2L, 3L};
-            final Message[] messageIds = {
+            Iterable<?> genericIds = asList(newUuid(),
+                                            -1,
+                                            newMessageId());
+            Long[] longIds = {1L, 2L, 3L};
+            Message[] messageIds = {
                     newMessageId(),
                     newMessageId(),
                     newMessageId()
             };
-            final String[] stringIds = {
+            String[] stringIds = {
                     newUuid(),
                     newUuid(),
                     newUuid()
             };
-            final Integer[] intIds = {4, 5, 6};
+            Integer[] intIds = {4, 5, 6};
 
-            final Query query = factory().query()
-                                         .select(TestEntity.class)
-                                         .byId(genericIds)
-                                         .byId(longIds)
-                                         .byId(stringIds)
-                                         .byId(intIds)
-                                         .byId(messageIds)
-                                         .build();
+            Query query = factory().query()
+                                   .select(TestEntity.class)
+                                   .byId(genericIds)
+                                   .byId(longIds)
+                                   .byId(stringIds)
+                                   .byId(intIds)
+                                   .byId(messageIds)
+                                   .build();
             assertNotNull(query);
 
-            final Target target = query.getTarget();
-            final EntityFilters filters = target.getFilters();
-            final Collection<EntityId> entityIds = filters.getIdFilter()
-                                                          .getIdsList();
+            Target target = query.getTarget();
+            EntityFilters filters = target.getFilters();
+            Collection<EntityId> entityIds = filters.getIdFilter()
+                                                    .getIdsList();
             assertSize(messageIds.length, entityIds);
-            final Function<EntityId, ProjectId> transformer =
+            Function<EntityId, ProjectId> transformer =
                     new EntityIdUnpacker<>(ProjectId.class);
-            final Iterable<? extends Message> actualValues = transform(entityIds, transformer);
+            Iterable<? extends Message> actualValues = transform(entityIds, transformer);
             assertThat(actualValues, containsInAnyOrder(messageIds));
         }
 
         @Test
         @DisplayName("field mask")
         void lastFieldMask() {
-            final Iterable<String> iterableFields = singleton("TestEntity.firstField");
-            final String[] arrayFields = {"TestEntity.secondField"};
+            Iterable<String> iterableFields = singleton("TestEntity.firstField");
+            String[] arrayFields = {"TestEntity.secondField"};
 
-            final Query query = factory().query()
-                                         .select(TestEntity.class)
-                                         .withMask(iterableFields)
-                                         .withMask(arrayFields)
-                                         .build();
+            Query query = factory().query()
+                                   .select(TestEntity.class)
+                                   .withMask(iterableFields)
+                                   .withMask(arrayFields)
+                                   .build();
             assertNotNull(query);
-            final FieldMask mask = query.getFieldMask();
+            FieldMask mask = query.getFieldMask();
 
-            final Collection<String> maskFields = mask.getPathsList();
+            Collection<String> maskFields = mask.getPathsList();
             assertSize(arrayFields.length, maskFields);
             assertThat(maskFields, contains(arrayFields));
         }
@@ -414,21 +414,21 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
     @Test
     @DisplayName("provide proper `toString()` method")
     void supportToString() {
-        final Class<? extends Message> testEntityClass = TestEntity.class;
-        final int id1 = 314;
-        final int id2 = 271;
-        final String columnName1 = "column1";
-        final Object columnValue1 = 42;
-        final String columnName2 = "column2";
-        final Message columnValue2 = newMessageId();
-        final String fieldName = "TestEntity.secondField";
-        final QueryBuilder builder = factory().query()
-                                              .select(testEntityClass)
-                                              .withMask(fieldName)
-                                              .byId(id1, id2)
-                                              .where(eq(columnName1, columnValue1),
-                                                     eq(columnName2, columnValue2));
-        final String stringRepr = builder.toString();
+        Class<? extends Message> testEntityClass = TestEntity.class;
+        int id1 = 314;
+        int id2 = 271;
+        String columnName1 = "column1";
+        Object columnValue1 = 42;
+        String columnName2 = "column2";
+        Message columnValue2 = newMessageId();
+        String fieldName = "TestEntity.secondField";
+        QueryBuilder builder = factory().query()
+                                        .select(testEntityClass)
+                                        .withMask(fieldName)
+                                        .byId(id1, id2)
+                                        .where(eq(columnName1, columnValue1),
+                                               eq(columnName2, columnValue2));
+        String stringRepr = builder.toString();
 
         assertThat(stringRepr, containsString(testEntityClass.getSimpleName()));
         assertThat(stringRepr, containsString(valueOf(id1)));
@@ -454,8 +454,8 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
         @Override
         public T apply(@Nullable EntityId entityId) {
             assertNotNull(entityId);
-            final Any value = entityId.getId();
-            final T actual = toObject(value, targetClass);
+            Any value = entityId.getId();
+            T actual = toObject(value, targetClass);
             return actual;
         }
     }

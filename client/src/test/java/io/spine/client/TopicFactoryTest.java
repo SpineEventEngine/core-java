@@ -56,8 +56,8 @@ class TopicFactoryTest
         @Test
         @DisplayName("for all entities of kind")
         void forAllOfKind() {
-            final Topic topic = factory().topic()
-                                         .allOf(TARGET_ENTITY_CLASS);
+            Topic topic = factory().topic()
+                                   .allOf(TARGET_ENTITY_CLASS);
 
             verifyTargetAndContext(topic);
 
@@ -71,20 +71,20 @@ class TopicFactoryTest
         @DisplayName("for specified entities of kind")
         void forSomeOfKind() {
 
-            final Set<TestEntityId> ids = newHashSet(entityId(1), entityId(2), entityId(3));
-            final Topic topic = factory().topic()
-                                         .someOf(TARGET_ENTITY_CLASS, ids);
+            Set<TestEntityId> ids = newHashSet(entityId(1), entityId(2), entityId(3));
+            Topic topic = factory().topic()
+                                   .someOf(TARGET_ENTITY_CLASS, ids);
 
             verifyTargetAndContext(topic);
 
-            final List<EntityId> actualIds = topic.getTarget()
-                                                  .getFilters()
-                                                  .getIdFilter()
-                                                  .getIdsList();
+            List<EntityId> actualIds = topic.getTarget()
+                                            .getFilters()
+                                            .getIdFilter()
+                                            .getIdsList();
             assertEquals(ids.size(), actualIds.size());
             for (EntityId actualId : actualIds) {
-                final Any rawId = actualId.getId();
-                final TestEntityId unpackedId = AnyPacker.unpack(rawId);
+                Any rawId = actualId.getId();
+                TestEntityId unpackedId = AnyPacker.unpack(rawId);
                 assertTrue(ids.contains(unpackedId));
             }
         }
@@ -92,9 +92,9 @@ class TopicFactoryTest
         @Test
         @DisplayName("for given target")
         void forTarget() {
-            final Target givenTarget = Targets.allOf(TARGET_ENTITY_CLASS);
-            final Topic topic = factory().topic()
-                                         .forTarget(givenTarget);
+            Target givenTarget = Targets.allOf(TARGET_ENTITY_CLASS);
+            Topic topic = factory().topic()
+                                   .forTarget(givenTarget);
 
             verifyTargetAndContext(topic);
         }
@@ -107,7 +107,7 @@ class TopicFactoryTest
                                                                .getType());
             assertEquals(FieldMask.getDefaultInstance(), topic.getFieldMask());
 
-            final ActorContext actualContext = topic.getContext();
+            ActorContext actualContext = topic.getContext();
             verifyContext(actualContext);
 
         }

@@ -201,27 +201,27 @@ public final class ColumnFilters {
     }
 
     private static ColumnFilter createFilter(String columnName, Object value, Operator operator) {
-        final Any wrappedValue = toAny(value);
-        final ColumnFilter filter = ColumnFilter.newBuilder()
-                                                .setColumnName(columnName)
-                                                .setValue(wrappedValue)
-                                                .setOperator(operator)
-                                                .build();
+        Any wrappedValue = toAny(value);
+        ColumnFilter filter = ColumnFilter.newBuilder()
+                                          .setColumnName(columnName)
+                                          .setValue(wrappedValue)
+                                          .setOperator(operator)
+                                          .build();
         return filter;
     }
 
     private static CompositeColumnFilter composeFilters(Collection<ColumnFilter> filters,
                                                         CompositeOperator operator) {
-        final CompositeColumnFilter result = CompositeColumnFilter.newBuilder()
-                                                                  .addAllFilter(filters)
-                                                                  .setOperator(operator)
-                                                                  .build();
+        CompositeColumnFilter result = CompositeColumnFilter.newBuilder()
+                                                            .addAllFilter(filters)
+                                                            .setOperator(operator)
+                                                            .build();
         return result;
     }
 
     private static void checkSupportedOrderingComparisonType(Class<?> cls) {
-        final Class<?> dataType = Primitives.wrap(cls);
-        final boolean supported = isSupportedNumber(dataType)
+        Class<?> dataType = Primitives.wrap(cls);
+        boolean supported = isSupportedNumber(dataType)
                 || Timestamp.class.isAssignableFrom(dataType)
                 || String.class.isAssignableFrom(dataType);
         checkArgument(supported,
@@ -230,7 +230,7 @@ public final class ColumnFilters {
     }
 
     private static boolean isSupportedNumber(Class<?> wrapperClass) {
-        final boolean result = (Number.class.isAssignableFrom(wrapperClass)
+        boolean result = (Number.class.isAssignableFrom(wrapperClass)
                 && Comparable.class.isAssignableFrom(wrapperClass));
         return result;
     }

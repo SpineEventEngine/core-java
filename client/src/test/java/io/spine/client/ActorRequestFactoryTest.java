@@ -166,7 +166,6 @@ abstract class ActorRequestFactoryTest {
         }
     }
 
-
     @Nested
     @DisplayName("Support moving between timezones")
     class TimeZoneMove {
