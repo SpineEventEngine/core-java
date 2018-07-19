@@ -33,8 +33,6 @@ import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
-import io.spine.test.aggregate.user.User;
-import io.spine.test.aggregate.user.UserVBuilder;
 import io.spine.validate.StringValueVBuilder;
 
 public class AggregatePartTestEnv {
@@ -62,8 +60,8 @@ public class AggregatePartTestEnv {
     }
 
     public static class AnAggregatePart extends AggregatePart<String,
-            User,
-            UserVBuilder,
+            StringValue,
+            StringValueVBuilder,
             AnAggregateRoot> {
 
         public AnAggregatePart(AnAggregateRoot root) {
