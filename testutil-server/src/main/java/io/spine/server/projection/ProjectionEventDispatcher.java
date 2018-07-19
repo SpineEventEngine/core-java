@@ -47,7 +47,7 @@ public class ProjectionEventDispatcher {
         checkNotNull(projection);
         checkNotNull(event);
 
-        final Message unpackedMessage = AnyPacker.unpack(event.getMessage());
+        Message unpackedMessage = AnyPacker.unpack(event.getMessage());
         dispatch(projection, unpackedMessage, event.getContext());
     }
 
@@ -62,7 +62,7 @@ public class ProjectionEventDispatcher {
         checkNotNull(eventMessage);
         checkNotNull(eventContext);
 
-        final ProjectionTransaction<?, ?, ?> tx = ProjectionTransaction.start(projection);
+        ProjectionTransaction<?, ?, ?> tx = ProjectionTransaction.start(projection);
         projection.apply(eventMessage, eventContext);
         tx.commit();
     }

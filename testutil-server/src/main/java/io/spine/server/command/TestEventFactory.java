@@ -54,12 +54,12 @@ public class TestEventFactory extends EventFactory {
     public static TestEventFactory newInstance(Any producerId,
                                                TestActorRequestFactory requestFactory) {
         checkNotNull(requestFactory);
-        final CommandEnvelope cmd = requestFactory.generateEnvelope();
+        CommandEnvelope cmd = requestFactory.generateEnvelope();
         return new TestEventFactory(cmd, producerId, 1);
     }
 
     public static TestEventFactory newInstance(TestActorRequestFactory requestFactory) {
-        final Message producerId = requestFactory.getActor();
+        Message producerId = requestFactory.getActor();
         return newInstance(pack(producerId), requestFactory);
     }
 
@@ -78,14 +78,14 @@ public class TestEventFactory extends EventFactory {
      * Creates an event produced at the passed time.
      */
     public Event createEvent(Message messageOrAny, @Nullable Version version, Timestamp atTime) {
-        final Event event = createEvent(messageOrAny, version);
-        final EventContext context = event.getContext()
-                                          .toBuilder()
-                                          .setTimestamp(atTime)
-                                          .build();
-        final Event result = event.toBuilder()
-                                  .setContext(context)
-                                  .build();
+        Event event = createEvent(messageOrAny, version);
+        EventContext context = event.getContext()
+                                    .toBuilder()
+                                    .setTimestamp(atTime)
+                                    .build();
+        Event result = event.toBuilder()
+                            .setContext(context)
+                            .build();
         return result;
     }
 }

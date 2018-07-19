@@ -85,16 +85,16 @@ public class TestActorRequestFactory extends ActorRequestFactory {
 
     /** Creates new command with the passed timestamp. */
     public Command createCommand(Message message, Timestamp timestamp) {
-        final Command command = command().create(message);
+        Command command = command().create(message);
         return withTimestamp(command, timestamp);
     }
 
     private static Command withTimestamp(Command command, Timestamp timestamp) {
-        final CommandContext context = command.getContext();
-        final ActorContext.Builder withTime = context.getActorContext()
-                                                     .toBuilder()
-                                                     .setTimestamp(timestamp);
-        final Command.Builder commandBuilder =
+        CommandContext context = command.getContext();
+        ActorContext.Builder withTime = context.getActorContext()
+                                               .toBuilder()
+                                               .setTimestamp(timestamp);
+        Command.Builder commandBuilder =
                 command.toBuilder()
                        .setContext(context.toBuilder()
                                           .setActorContext(withTime));
@@ -102,7 +102,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     }
 
     public Command createCommand(Message message) {
-        final Command command = command().create(message);
+        Command command = command().create(message);
         return command;
     }
 
@@ -121,16 +121,16 @@ public class TestActorRequestFactory extends ActorRequestFactory {
      * Generates a command and wraps it into envelope.
      */
     public CommandEnvelope generateEnvelope() {
-        final Command command = generateCommand();
-        final CommandEnvelope result = CommandEnvelope.of(command);
+        Command command = generateCommand();
+        CommandEnvelope result = CommandEnvelope.of(command);
         return result;
     }
 
     private Command generate() {
-        final String randomSuffix = String.valueOf(TestValues.random(10_000));
-        final StringValue msg = StringValue.newBuilder()
-                                           .setValue("GeneratedTestCommand" + randomSuffix)
-                                           .build();
+        String randomSuffix = String.valueOf(TestValues.random(10_000));
+        StringValue msg = StringValue.newBuilder()
+                                     .setValue("GeneratedTestCommand" + randomSuffix)
+                                     .build();
         return createCommand(msg);
     }
 
