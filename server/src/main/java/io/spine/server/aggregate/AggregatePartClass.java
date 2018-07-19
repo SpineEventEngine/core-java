@@ -70,18 +70,15 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
      * <p>Returns the constructor if the first parameter is aggregate ID
      * and the second constructor parameter is subtype of the {@code AggregateRoot}
      * For example:
-     * <pre>{@code
+     * <pre>
+     *  // A user-defined AggregateRoot:
+     *  class CustomAggregateRoot extends AggregateRoot { ... }
      *
-     * // A user-defined AggregateRoot:
-     * class CustomAggregateRoot extends AggregateRoot{...}
+     *  // An AggregatePart for the CustomAggregateRoot:
+     *  class CustomAggregatePart extends AggregatePart<...> { ... }
      *
-     * // An AggregatePart for the CustomAggregateRoot:
-     * class CustomAggregatePart extends AggregatePart<...>{
-     *
-     *     // The expected constructor:
-     *     CustomAggregatePart(AnAggregateId id, CustomAggregateRoot root){...}
-     *     }
-     * }
+     *  // The expected constructor:
+     *  CustomAggregatePart(AnAggregateId id, CustomAggregateRoot root) { ... }
      * </pre>
      *
      * <p>Throws {@code IllegalStateException} in other cases.
@@ -93,7 +90,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
     protected Constructor<A> findConstructor() {
         Class<? extends A> cls = value();
         checkNotNull(cls);
-        final Constructor<? extends A> ctor;
+        Constructor<? extends A> ctor;
         try {
             ctor = cls.getDeclaredConstructor(rootClass());
             ctor.setAccessible(true);
@@ -101,39 +98,39 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
             throw noSuchConstructor(cls, rootClass());
         }
         @SuppressWarnings("unchecked") // The cast is protected by generic params.
-        final Constructor<A> result = (Constructor<A>) ctor;
+                Constructor<A> result = (Constructor<A>) ctor;
         return result;
     }
 
     /**
      * Creates a new {@code AggregateRoot} within the passed Bounded Context.
      */
+    @SuppressWarnings("TypeParameterUnusedInFormals")
+    // The returned type _is_ bound with the type of identifiers.
     <I, R extends AggregateRoot<I>> R createRoot(BoundedContext bc, I aggregateId) {
         checkNotNull(bc);
         checkNotNull(aggregateId);
         @SuppressWarnings("unchecked") // Protected by generic parameters of the calling code.
-        final Class<R> rootClass = (Class<R>) rootClass();
+                Class<R> rootClass = (Class<R>) rootClass();
         R result;
         try {
-            final Constructor<R> ctor =
-                    rootClass.getDeclaredConstructor(BoundedContext.class,
-                                                     aggregateId.getClass());
+            Constructor<R> ctor =
+                    rootClass.getDeclaredConstructor(BoundedContext.class, aggregateId.getClass());
             ctor.setAccessible(true);
             result = ctor.newInstance(bc, aggregateId);
         } catch (NoSuchMethodException | InvocationTargetException |
-                 InstantiationException | IllegalAccessException e) {
+                InstantiationException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
         return result;
     }
 
-    private static ModelError noSuchConstructor(Class<?> aggregatePartClass,
-                                                Class<?> aggregateRootClass) {
-        final String errMsg =
+    private static ModelError noSuchConstructor(Class<?> partClass, Class<?> rootClass) {
+        String errMsg =
                 format("%s class must declare a constructor with one parameter of the %s type.",
-                       aggregatePartClass.getName(),
-                       aggregateRootClass.getName());
-        final NoSuchMethodException cause = new NoSuchMethodException(errMsg);
+                       partClass.getName(),
+                       rootClass.getName());
+        NoSuchMethodException cause = new NoSuchMethodException(errMsg);
         throw new ModelError(cause);
     }
 }
