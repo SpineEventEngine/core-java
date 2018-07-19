@@ -70,7 +70,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
      * <p>Returns the constructor if the first parameter is aggregate ID
      * and the second constructor parameter is subtype of the {@code AggregateRoot}
      * For example:
-     * <pre>
+     * <pre>{@code
      *  // A user-defined AggregateRoot:
      *  class CustomAggregateRoot extends AggregateRoot { ... }
      *
@@ -79,7 +79,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
      *
      *  // The expected constructor:
      *  CustomAggregatePart(AnAggregateId id, CustomAggregateRoot root) { ... }
-     * </pre>
+     * }</pre>
      *
      * <p>Throws {@code IllegalStateException} in other cases.
      *
