@@ -21,11 +21,12 @@
 package io.spine.server.tenant;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import io.spine.annotation.Internal;
 import io.spine.base.Environment;
 import io.spine.core.TenantId;
 import io.spine.server.storage.StorageFactory;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -83,6 +84,7 @@ public abstract class TenantAwareTest {
     }
 
     private static void checkInTests() {
-        checkState(Environment.getInstance().isTests());
+        checkState(Environment.getInstance()
+                              .isTests());
     }
 }

@@ -20,7 +20,6 @@
 
 package io.spine.server;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
@@ -42,6 +41,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.ImmutableList.copyOf;
@@ -67,7 +67,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @param <S> state message of the handling entity
  * @param <E> the type of the handling entity being tested
  * @param <X> the type of {@link AbstractExpected Expected} object
- *
  * @author Dmytro Dashenkov
  * @see CommandHandlerTest
  * @see EventReactionTest
@@ -205,7 +204,7 @@ public abstract class MessageHandlerTest<I,
             CommandClass commandClass = CommandClass.of(messageType);
             return Optional.of(commandClass);
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
@@ -277,7 +276,7 @@ public abstract class MessageHandlerTest<I,
         public Optional<Ack> accept(CommandEnvelope envelope) {
             interceptedCommands.add(unpack(envelope.getCommand()
                                                    .getMessage()));
-            return Optional.absent();
+            return Optional.empty();
         }
 
         @Override

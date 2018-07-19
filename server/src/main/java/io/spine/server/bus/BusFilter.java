@@ -20,10 +20,11 @@
 
 package io.spine.server.bus;
 
-import com.google.common.base.Optional;
 import io.spine.annotation.SPI;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
+
+import java.util.Optional;
 
 /**
  * The filter for the messages posted to a bus.
@@ -48,7 +49,7 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      * </ul>
      *
      * @param envelope the envelope with the message to filter
-     * @return {@code Optional.absent()} if the message passes the filter,
+     * @return {@code Optional.empty()} if the message passes the filter,
      *         {@linkplain Ack posting result} with either status otherwise
      */
     Optional<Ack> accept(E envelope);
