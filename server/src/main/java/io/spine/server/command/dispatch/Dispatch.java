@@ -45,13 +45,13 @@ public abstract class Dispatch<E extends MessageEnvelope> {
         this.envelope = envelope;
     }
 
-    /** 
-     * Dispatches an envelope to the target in a manner specified by inheritor. 
+    /**
+     * Dispatches an envelope to the target in a manner specified by inheritor.
      */
     protected abstract List<? extends Message> dispatch();
 
     /**
-     * @return a {@link MessageEnvelope message envelope} which is handled by 
+     * @return a {@link MessageEnvelope message envelope} which is handled by
      *         the current dispatch
      */
     protected E envelope() {
@@ -65,13 +65,14 @@ public abstract class Dispatch<E extends MessageEnvelope> {
      */
     public DispatchResult perform() {
         List<? extends Message> messages = dispatch();
-        List<? extends Message> filtered = Filtering.of(messages).perform();
+        List<? extends Message> filtered = Filtering.of(messages)
+                                                    .perform();
         return new DispatchResult(filtered, envelope);
     }
 
     /**
-     * @param command an envelope which is dispatched to some target 
-     * @return a {@link MessageDispatchFactory dispatch factory} for the provided 
+     * @param command an envelope which is dispatched to some target
+     * @return a {@link MessageDispatchFactory dispatch factory} for the provided
      *         {@link CommandEnvelope command envelope}
      */
     public static CommandDispatchFactory of(CommandEnvelope command) {
@@ -80,8 +81,8 @@ public abstract class Dispatch<E extends MessageEnvelope> {
     }
 
     /**
-     * @param event an envelope which is dispatched to some target 
-     * @return a {@link MessageDispatchFactory dispatch factory} for the provided 
+     * @param event an envelope which is dispatched to some target
+     * @return a {@link MessageDispatchFactory dispatch factory} for the provided
      *         {@link EventEnvelope event envelope}
      */
     public static EventDispatchFactory of(EventEnvelope event) {
@@ -90,8 +91,8 @@ public abstract class Dispatch<E extends MessageEnvelope> {
     }
 
     /**
-     * @param rejection an envelope which is dispatched to some target 
-     * @return a {@link MessageDispatchFactory dispatch factory} for the provided 
+     * @param rejection an envelope which is dispatched to some target
+     * @return a {@link MessageDispatchFactory dispatch factory} for the provided
      *         {@link RejectionEnvelope rejection envelope}
      */
     public static RejectionDispatchFactory of(RejectionEnvelope rejection) {

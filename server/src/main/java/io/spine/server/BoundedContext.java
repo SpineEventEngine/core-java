@@ -171,7 +171,7 @@ public abstract class BoundedContext
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkNotNull(repository);
         Message defaultState = Model.getInstance()
-                                          .getDefaultState(repository.getEntityClass());
+                                    .getDefaultState(repository.getEntityClass());
         checkNotNull(defaultState);
 
         repository.setBoundedContext(this);
@@ -306,7 +306,8 @@ public abstract class BoundedContext
      */
     @Override
     public void close() throws Exception {
-        storageFactory.get().close();
+        storageFactory.get()
+                      .close();
         commandBus.close();
         eventBus.close();
         integrationBus.close();

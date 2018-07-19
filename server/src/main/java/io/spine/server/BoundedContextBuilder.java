@@ -310,8 +310,8 @@ public final class BoundedContextBuilder {
     private void initTenantIndex(StorageFactory factory) {
         if (tenantIndex == null) {
             tenantIndex = multitenant
-                    ? TenantIndex.Factory.createDefault(factory)
-                    : TenantIndex.Factory.singleTenant();
+                          ? TenantIndex.Factory.createDefault(factory)
+                          : TenantIndex.Factory.singleTenant();
         }
     }
 
@@ -325,7 +325,7 @@ public final class BoundedContextBuilder {
             Boolean commandBusMultitenancy = commandBus.isMultitenant();
             if (commandBusMultitenancy != null) {
                 checkSameValue("CommandBus must match multitenancy of BoundedContext. " +
-                                        "Status in BoundedContext.Builder: %s CommandBus: %s",
+                                       "Status in BoundedContext.Builder: %s CommandBus: %s",
                                commandBusMultitenancy);
             } else {
                 commandBus.setMultitenant(this.multitenant);
@@ -399,8 +399,8 @@ public final class BoundedContextBuilder {
     private Stand.Builder createStand(StorageFactory factory) {
         StandStorage standStorage = factory.createStandStorage();
         Stand.Builder result = Stand.newBuilder()
-                                          .setMultitenant(multitenant)
-                                          .setStorage(standStorage);
+                                    .setMultitenant(multitenant)
+                                    .setStorage(standStorage);
         return result;
     }
 

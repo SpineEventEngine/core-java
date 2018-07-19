@@ -211,7 +211,8 @@ public abstract class Aggregate<I,
     protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
         idempotencyGuard.check(command);
         CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
-        Dispatch<CommandEnvelope> dispatch = Dispatch.of(command).to(this, method);
+        Dispatch<CommandEnvelope> dispatch = Dispatch.of(command)
+                                                     .to(this, method);
         DispatchResult dispatchResult = dispatch.perform();
         return dispatchResult.asMessages();
     }
@@ -219,7 +220,7 @@ public abstract class Aggregate<I,
     /**
      * Dispatches the event on which the aggregate reacts.
      *
-     * <p>Reacting on a event may result in emitting event messages. All the {@linkplain Empty empty} 
+     * <p>Reacting on a event may result in emitting event messages. All the {@linkplain Empty empty}
      * messages are filtered out from the result.
      *
      * @param  event the envelope with the event to dispatch
@@ -228,15 +229,16 @@ public abstract class Aggregate<I,
      */
     List<? extends Message> reactOn(EventEnvelope event) {
         EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
-        Dispatch<EventEnvelope> dispatch = Dispatch.of(event).to(this, method);
+        Dispatch<EventEnvelope> dispatch = Dispatch.of(event)
+                                                   .to(this, method);
         DispatchResult dispatchResult = dispatch.perform();
         return dispatchResult.asMessages();
     }
 
     /**
      * Dispatches the rejection to which the aggregate reacts.
-     * 
-     * <p>Reacting on a rejection may result in emitting event messages. All the 
+     *
+     * <p>Reacting on a rejection may result in emitting event messages. All the
      * {@linkplain Empty empty} messages are filtered out from the result.
      *
      * @param  rejection the envelope with the rejection
@@ -246,8 +248,10 @@ public abstract class Aggregate<I,
      */
     List<? extends Message> reactOn(RejectionEnvelope rejection) {
         CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
-        RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(), commandClass);
-        Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection).to(this, method);
+        RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
+                                                               commandClass);
+        Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection)
+                                                       .to(this, method);
         DispatchResult dispatchResult = dispatch.perform();
         return dispatchResult.asMessages();
     }
