@@ -77,8 +77,8 @@ public class CommandExpectedTestEnv {
         return asList(firstCommand, secondCommand);
     }
 
-    public static CommandHandlerExpected<UInt64Value> commandExpectedWithRejection(
-            Rejection rejection) {
+    public static CommandHandlerExpected<UInt64Value>
+    commandExpectedWithRejection(Rejection rejection) {
         CommandHandlerExpected<UInt64Value> expected =
                 new CommandHandlerExpected<>(events(),
                                              rejection,
