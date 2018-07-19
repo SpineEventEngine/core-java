@@ -57,10 +57,10 @@ class RejectionEnvelopeTest extends MessageEnvelopeTest<Rejection,
     protected Rejection outerObject() {
         Message commandMessage = Int32Value.getDefaultInstance();
         Command command = requestFactory.command()
-                                              .create(commandMessage);
+                                        .create(commandMessage);
         Message rejectionMessage = CannotPerformBusinessOperation.newBuilder()
-                                                                       .setOperationId(newUuid())
-                                                                       .build();
+                                                                 .setOperationId(newUuid())
+                                                                 .build();
         Rejection rejection = Rejections.createRejection(rejectionMessage, command);
         return rejection;
     }
@@ -80,7 +80,7 @@ class RejectionEnvelopeTest extends MessageEnvelopeTest<Rejection,
     void getCommandContext() {
         Rejection rejection = outerObject();
         Command command = rejection.getContext()
-                                         .getCommand();
+                                   .getCommand();
         RejectionEnvelope envelope = toEnvelope(rejection);
         assertEquals(command.getContext(), envelope.getCommandContext());
     }
@@ -90,7 +90,7 @@ class RejectionEnvelopeTest extends MessageEnvelopeTest<Rejection,
     void getCommandMessage() {
         Rejection rejection = outerObject();
         Command command = rejection.getContext()
-                                         .getCommand();
+                                   .getCommand();
         Message commandMessage = AnyPacker.unpack(command.getMessage());
         RejectionEnvelope envelope = toEnvelope(rejection);
         assertEquals(commandMessage, envelope.getCommandMessage());

@@ -62,8 +62,8 @@ public abstract class AggregateStorageVisibilityHandlingTest {
     @DisplayName("write entity status of aggregate")
     void writeEntityStatusOfAggregate() {
         LifecycleFlags status = LifecycleFlags.newBuilder()
-                                                    .setArchived(true)
-                                                    .build();
+                                              .setArchived(true)
+                                              .build();
         storage.writeLifecycleFlags(id, status);
         Optional<LifecycleFlags> readStatus = storage.readLifecycleFlags(id);
         assertTrue(readStatus.isPresent());
@@ -76,9 +76,9 @@ public abstract class AggregateStorageVisibilityHandlingTest {
         boolean archived = true;
         boolean deleted = true;
         LifecycleFlags expected = LifecycleFlags.newBuilder()
-                                                      .setArchived(archived)
-                                                      .setDeleted(deleted)
-                                                      .build();
+                                                .setArchived(archived)
+                                                .setDeleted(deleted)
+                                                .build();
         storage.writeLifecycleFlags(id, expected);
         Optional<LifecycleFlags> optionalActual = storage.readLifecycleFlags(id);
         assertStatus(optionalActual, true, true);

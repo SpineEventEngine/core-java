@@ -144,8 +144,8 @@ class InMemoryStandStorage extends StandStorage {
     @Override
     protected void writeRecord(AggregateStateId id, EntityRecordWithColumns record) {
         TypeUrl recordType = TypeUrl.parse(record.getRecord()
-                                                       .getState()
-                                                       .getTypeUrl());
+                                                 .getState()
+                                                 .getTypeUrl());
         TypeUrl recordTypeFromId = id.getStateType();
         checkState(recordTypeFromId.equals(recordType),
                    TYPE_URL_MISMATCH_MESSAGE_PATTERN,

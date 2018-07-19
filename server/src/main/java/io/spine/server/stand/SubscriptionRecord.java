@@ -106,12 +106,12 @@ final class SubscriptionRecord {
         boolean result;
         EntityIdFilter givenIdFilter = filters.getIdFilter();
         boolean idFilterSet = !EntityIdFilter.getDefaultInstance()
-                                                   .equals(givenIdFilter);
+                                             .equals(givenIdFilter);
         if (idFilterSet) {
             Any idAsAny = Identifier.pack(id);
             EntityId givenEntityId = EntityId.newBuilder()
-                                                   .setId(idAsAny)
-                                                   .build();
+                                             .setId(idAsAny)
+                                             .build();
             List<EntityId> idsList = givenIdFilter.getIdsList();
             result = idsList.contains(givenEntityId);
         } else {

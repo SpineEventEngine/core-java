@@ -125,7 +125,7 @@ class RejectionsTest {
         assertTrue(Timestamps.isValid(rejection.getContext()
                                                .getTimestamp()));
         Command commandFromContext = rejection.getContext()
-                                                    .getCommand();
+                                              .getCommand();
         assertEquals(command, commandFromContext);
     }
 

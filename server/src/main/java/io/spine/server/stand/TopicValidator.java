@@ -67,7 +67,7 @@ class TopicValidator extends AbstractTargetValidator<Topic> {
 
     private static RequestNotSupported<Topic> missingInRegistry(TypeUrl topicTargetType) {
         String errorMessage = format("The topic target type is not supported: %s",
-                                           topicTargetType.getTypeName());
+                                     topicTargetType.getTypeName());
         return new RequestNotSupported<Topic>(UNSUPPORTED_TOPIC_TARGET, errorMessage) {
 
             @Override

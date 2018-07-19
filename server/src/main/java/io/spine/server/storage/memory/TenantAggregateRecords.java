@@ -60,7 +60,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
     @Override
     public Iterator<I> index() {
         Iterator<I> result = records.keySet()
-                                          .iterator();
+                                    .iterator();
         return result;
     }
 

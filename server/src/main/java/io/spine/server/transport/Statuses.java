@@ -67,7 +67,7 @@ public class Statuses {
     private static StatusRuntimeException createException(Throwable cause, Error error) {
         Metadata metadata = MetadataConverter.toMetadata(error);
         StatusRuntimeException result = INVALID_ARGUMENT.withCause(cause)
-                                                              .asRuntimeException(metadata);
+                                                        .asRuntimeException(metadata);
         return result;
     }
 }

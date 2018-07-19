@@ -65,8 +65,8 @@ public class AggregateMessageDeliveryTestEnv {
     public static Command startProject() {
         ProjectId projectId = projectId();
         Command command = createCommand(AggStartProject.newBuilder()
-                                                             .setProjectId(projectId)
-                                                             .build());
+                                                       .setProjectId(projectId)
+                                                       .build());
         return command;
     }
 
@@ -79,8 +79,8 @@ public class AggregateMessageDeliveryTestEnv {
                 );
 
         AggProjectStarted msg = AggProjectStarted.newBuilder()
-                                                       .setProjectId(projectId)
-                                                       .build();
+                                                 .setProjectId(projectId)
+                                                 .build();
 
         Event result = eventFactory.createEvent(msg);
         return result;
@@ -95,8 +95,8 @@ public class AggregateMessageDeliveryTestEnv {
                 );
 
         AggProjectCancelled msg = AggProjectCancelled.newBuilder()
-                                                           .setProjectId(projectId)
-                                                           .build();
+                                                     .setProjectId(projectId)
+                                                     .build();
 
         Event result = eventFactory.createEvent(msg);
         return result;
@@ -112,8 +112,8 @@ public class AggregateMessageDeliveryTestEnv {
         ProjectId projectId = projectId();
 
         AggStartProject cmdMessage = AggStartProject.newBuilder()
-                                                          .setProjectId(projectId)
-                                                          .build();
+                                                    .setProjectId(projectId)
+                                                    .build();
         Command command = createCommand(cmdMessage);
 
         Rejection result = Rejections.toRejection(
@@ -165,8 +165,8 @@ public class AggregateMessageDeliveryTestEnv {
         AggProjectStarted on(AggStartProject cmd) {
             stats.recordCallingThread(getId());
             AggProjectStarted event = AggProjectStarted.newBuilder()
-                                                             .setProjectId(cmd.getProjectId())
-                                                             .build();
+                                                       .setProjectId(cmd.getProjectId())
+                                                       .build();
             return event;
         }
 

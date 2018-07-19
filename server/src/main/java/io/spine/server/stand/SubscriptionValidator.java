@@ -88,8 +88,8 @@ class SubscriptionValidator extends RequestValidator<Subscription> {
 
     private boolean checkInRegistry(Subscription request) {
         TenantId tenantId = request.getTopic()
-                                         .getContext()
-                                         .getTenantId();
+                                   .getContext()
+                                   .getTenantId();
         Boolean result = new TenantAwareFunction<Subscription, Boolean>(tenantId) {
 
             @Override

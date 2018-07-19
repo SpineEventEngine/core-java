@@ -113,9 +113,9 @@ class AggregatePartTest {
     @DisplayName("throw InvalidEntityStateException if entity state is invalid")
     void throwOnInvalidState() {
         User user = User.newBuilder()
-                              .setFirstName("|")
-                              .setLastName("|")
-                              .build();
+                        .setFirstName("|")
+                        .setLastName("|")
+                        .build();
         try {
             aggregatePartOfClass(AnAggregatePart.class)
                     .withRoot(root)

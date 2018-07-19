@@ -118,12 +118,12 @@ public class GrpcContainer {
      */
     public boolean isScheduledForDeployment(BindableService service) {
         String nameOfInterest = service.bindService()
-                                             .getServiceDescriptor()
-                                             .getName();
+                                       .getServiceDescriptor()
+                                       .getName();
         boolean serviceIsPresent = false;
         for (ServerServiceDefinition serverServiceDefinition : services) {
             String scheduledServiceName = serverServiceDefinition.getServiceDescriptor()
-                                                                       .getName();
+                                                                 .getName();
             serviceIsPresent = serviceIsPresent || scheduledServiceName.equals(nameOfInterest);
         }
         return serviceIsPresent;

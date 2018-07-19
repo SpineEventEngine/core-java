@@ -193,14 +193,14 @@ public abstract class RecordStorage<I>
         if (optional.isPresent()) {
             EntityRecord record = optional.get();
             EntityRecord updated = record.toBuilder()
-                                               .setLifecycleFlags(flags)
-                                               .build();
+                                         .setLifecycleFlags(flags)
+                                         .build();
             write(id, updated);
         } else {
             // The AggregateStateId is a special case, which is not handled by the Identifier class.
             String idStr = id instanceof AggregateStateId
-                                 ? id.toString()
-                                 : Identifier.toString(id);
+                           ? id.toString()
+                           : Identifier.toString(id);
             throw newIllegalStateException("Unable to load record for entity with ID: %s",
                                            idStr);
         }

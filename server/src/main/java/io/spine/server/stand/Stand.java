@@ -127,8 +127,8 @@ public class Stand implements AutoCloseable {
         storage = builder.getStorage();
         callbackExecutor = builder.getCallbackExecutor();
         multitenant = builder.multitenant != null
-                ? builder.multitenant
-                : false;
+                      ? builder.multitenant
+                      : false;
         subscriptionRegistry = builder.getSubscriptionRegistry();
         typeRegistry = builder.getTypeRegistry();
         topicValidator = builder.getTopicValidator();
@@ -138,7 +138,8 @@ public class Stand implements AutoCloseable {
 
     public void onCreated(BoundedContext parent) {
         if (storage == null) {
-            storage = parent.getStorageFactory().createStandStorage();
+            storage = parent.getStorageFactory()
+                            .createStandStorage();
         }
     }
 
@@ -203,12 +204,12 @@ public class Stand implements AutoCloseable {
                     @SuppressWarnings("OptionalGetWithoutIsPresent")    // checked above.
                     Version versionValue = entityVersion.get();
                     AggregateStateId aggregateStateId = AggregateStateId.of(id,
-                                                                                  entityTypeUrl);
+                                                                            entityTypeUrl);
 
                     EntityRecord record = EntityRecord.newBuilder()
-                                                            .setState(packedState)
-                                                            .setVersion(versionValue)
-                                                            .build();
+                                                      .setState(packedState)
+                                                      .setVersion(versionValue)
+                                                      .build();
                     getStorage().write(aggregateStateId, record);
                 }
                 notifyMatchingSubscriptions(id, packedState, entityTypeUrl);
@@ -236,7 +237,7 @@ public class Stand implements AutoCloseable {
         topicValidator.validate(topic, responseObserver);
 
         TenantId tenantId = topic.getContext()
-                                       .getTenantId();
+                                 .getTenantId();
         TenantAwareOperation op = new TenantAwareOperation(tenantId) {
 
             @Override
@@ -355,9 +356,9 @@ public class Stand implements AutoCloseable {
             public void run() {
                 ImmutableCollection<Any> readResult = queryProcessor.process(query());
                 QueryResponse response = QueryResponse.newBuilder()
-                                                            .addAllMessages(readResult)
-                                                            .setResponse(Responses.ok())
-                                                            .build();
+                                                      .addAllMessages(readResult)
+                                                      .setResponse(Responses.ok())
+                                                      .build();
                 responseObserver.onNext(response);
                 responseObserver.onCompleted();
             }
@@ -375,7 +376,7 @@ public class Stand implements AutoCloseable {
                 boolean stateMatches = subscriptionRecord.matches(typeUrl, id, entityState);
                 if (subscriptionIsActive && stateMatches) {
                     Runnable action = notifySubscriptionAction(subscriptionRecord,
-                                                                     id, entityState);
+                                                               id, entityState);
                     callbackExecutor.execute(action);
                 }
             }
@@ -488,9 +489,9 @@ public class Stand implements AutoCloseable {
                 checkNotNull(callback, "Notifying by a non-activated subscription.");
                 Any entityId = toAny(id);
                 EntityStateUpdate stateUpdate = EntityStateUpdate.newBuilder()
-                                                                       .setId(entityId)
-                                                                       .setState(entityState)
-                                                                       .build();
+                                                                 .setId(entityId)
+                                                                 .setState(entityState)
+                                                                 .build();
                 callback.onStateChanged(stateUpdate);
             }
         };
@@ -600,8 +601,8 @@ public class Stand implements AutoCloseable {
         @Internal
         public Stand build() {
             boolean multitenant = this.multitenant == null
-                    ? false
-                    : this.multitenant;
+                                  ? false
+                                  : this.multitenant;
 
             if (callbackExecutor == null) {
                 callbackExecutor = MoreExecutors.directExecutor();

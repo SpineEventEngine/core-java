@@ -101,11 +101,11 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
     public Set<TenantId> getAll() {
         Storage<TenantId, ?, ?> storage = getStorage();
         Iterator<TenantId> index = storage != null
-                                         ? storage.index()
-                                         : null;
+                                   ? storage.index()
+                                   : null;
         Set<TenantId> result = index != null
-                                     ? ImmutableSet.copyOf(index)
-                                     : ImmutableSet.<TenantId>of();
+                               ? ImmutableSet.copyOf(index)
+                               : ImmutableSet.<TenantId>of();
         cache.addAll(result);
         return result;
     }

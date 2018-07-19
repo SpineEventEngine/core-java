@@ -38,27 +38,27 @@ public class EventsTestEnv {
 
     public static RejectionContext rejectionContext(TenantId id) {
         Command command = Command.newBuilder()
-                                       .setContext(commandContext(id))
-                                       .build();
+                                 .setContext(commandContext(id))
+                                 .build();
         RejectionContext result = RejectionContext.newBuilder()
-                                                        .setCommand(command)
-                                                        .build();
+                                                  .setCommand(command)
+                                                  .build();
         return result;
     }
 
     public static RejectionContext rejectionContext() {
         RejectionContext result = RejectionContext.newBuilder()
-                                                        .build();
+                                                  .build();
         return result;
     }
 
     public static CommandContext commandContext(TenantId id) {
         ActorContext actorContext = ActorContext.newBuilder()
-                                                      .setTenantId(id)
-                                                      .build();
+                                                .setTenantId(id)
+                                                .build();
         CommandContext result = CommandContext.newBuilder()
-                                                    .setActorContext(actorContext)
-                                                    .build();
+                                              .setActorContext(actorContext)
+                                              .build();
         return result;
     }
 

@@ -97,11 +97,12 @@ public class InMemoryStorageFactory implements StorageFactory {
     @Override
     public <I> RecordStorage<I>
     createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
-        EntityClass<?> modelClass = Model.getInstance().asEntityClass(entityClass);
+        EntityClass<?> modelClass = Model.getInstance()
+                                         .asEntityClass(entityClass);
         Class<? extends Message> stateClass = modelClass.getStateClass();
         TypeUrl typeUrl = TypeUrl.of(stateClass);
         @SuppressWarnings("unchecked") // The cast is protected by generic params of the method.
-        Class<I> idClass = (Class<I>) modelClass.getIdClass();
+                Class<I> idClass = (Class<I>) modelClass.getIdClass();
         StorageSpec<I> spec = StorageSpec.of(boundedContextName, typeUrl, idClass);
         return InMemoryRecordStorage.newInstance(spec, isMultitenant(), entityClass);
     }
@@ -110,7 +111,8 @@ public class InMemoryStorageFactory implements StorageFactory {
     public <I> ProjectionStorage<I> createProjectionStorage(
             Class<? extends Projection<I, ?, ?>> projectionClass) {
         ProjectionClass<?> modelClass =
-                Model.getInstance().asProjectionClass(projectionClass);
+                Model.getInstance()
+                     .asProjectionClass(projectionClass);
         Class<? extends Message> stateClass = modelClass.getStateClass();
         @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the method.
         Class<I> idClass = (Class<I>) modelClass.getIdClass();

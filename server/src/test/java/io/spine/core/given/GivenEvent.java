@@ -48,14 +48,14 @@ public class GivenEvent {
 
     public static EventContext context() {
         Event event = eventFactory.createEvent(Time.getCurrentTime(),
-                                                     Tests.nullRef());
+                                               Tests.nullRef());
         return event.getContext();
     }
 
     public static Event occurredMinutesAgo(int minutesAgo) {
         Event result = eventFactory.createEvent(newUuidValue(),
-                                                      null,
-                                                      minutesAgo(minutesAgo));
+                                                null,
+                                                minutesAgo(minutesAgo));
         return result;
     }
 

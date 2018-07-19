@@ -69,15 +69,15 @@ class EnrichmentsTest {
      */
     private static EventContext givenContextEnrichedWith(Message enrichment) {
         String enrichmentKey = TypeName.of(enrichment)
-                                             .value();
+                                       .value();
         Enrichment.Builder enrichments =
                 Enrichment.newBuilder()
                           .setContainer(Enrichment.Container.newBuilder()
                                                             .putItems(enrichmentKey,
                                                                       pack(enrichment)));
         EventContext context = context().toBuilder()
-                                              .setEnrichment(enrichments.build())
-                                              .build();
+                                        .setEnrichment(enrichments.build())
+                                        .build();
         return context;
     }
 
