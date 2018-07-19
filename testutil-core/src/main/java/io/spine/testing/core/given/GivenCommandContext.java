@@ -61,11 +61,11 @@ public class GivenCommandContext {
     public static CommandContext withActorAndTime(UserId actor, Timestamp when) {
         TenantId tenantId = GivenTenantId.newUuid();
         ActorContext.Builder actorContext = ActorContext.newBuilder()
-                                                              .setActor(actor)
-                                                              .setTimestamp(when)
-                                                              .setTenantId(tenantId);
+                                                        .setActor(actor)
+                                                        .setTimestamp(when)
+                                                        .setTenantId(tenantId);
         CommandContext.Builder builder = CommandContext.newBuilder()
-                                                             .setActorContext(actorContext);
+                                                       .setActorContext(actorContext);
         return builder.build();
     }
 
