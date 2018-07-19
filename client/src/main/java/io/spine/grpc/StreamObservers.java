@@ -19,7 +19,6 @@
  */
 package io.spine.grpc;
 
-import com.google.common.base.Optional;
 import io.grpc.Metadata;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
@@ -28,6 +27,8 @@ import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.core.Response;
 import io.spine.core.Responses;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Responses.ok;
@@ -97,7 +98,7 @@ public class StreamObservers {
      * @return delegating observer, which only proxies errors.
      */
     @Internal
-    public static <T> StreamObserver<T> forwardErrorsOnly(final StreamObserver<?> delegate) {
+    public static <T> StreamObserver<T> forwardErrorsOnly(StreamObserver<?> delegate) {
         return new StreamObserver<T>() {
             @Override
             public void onError(Throwable t) {
@@ -140,24 +141,24 @@ public class StreamObservers {
      * <p>The {@code Error} is extracted from the trailer metadata of
      * either {@link StatusRuntimeException} or {@link StatusException} only.
      *
-     * <p>If any other type of {@code Throwable} is passed, {@code Optional.absent()} is returned.
+     * <p>If any other type of {@code Throwable} is passed, {@code Optional.empty()} is returned.
      *
      * @param throwable the {@code Throwable} to extract an {@link Error}
-     * @return the extracted error or {@code Optional.absent()} if the extraction failed
+     * @return the extracted error or {@code Optional.empty()} if the extraction failed
      */
     @SuppressWarnings("ChainOfInstanceofChecks") // Only way to check an exact throwable type.
     public static Optional<Error> fromStreamError(Throwable throwable) {
         checkNotNull(throwable);
 
         if (throwable instanceof StatusRuntimeException) {
-            final Metadata metadata = ((StatusRuntimeException) throwable).getTrailers();
+            Metadata metadata = ((StatusRuntimeException) throwable).getTrailers();
             return MetadataConverter.toError(metadata);
         }
         if (throwable instanceof StatusException) {
-            final Metadata metadata = ((StatusException) throwable).getTrailers();
+            Metadata metadata = ((StatusException) throwable).getTrailers();
             return MetadataConverter.toError(metadata);
         }
 
-        return Optional.absent();
+        return Optional.empty();
     }
 }

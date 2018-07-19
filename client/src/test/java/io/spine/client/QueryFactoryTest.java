@@ -61,8 +61,8 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("`read all`")
         void readAll() {
-            final Query readAllQuery = factory().query()
-                                                .all(TARGET_ENTITY_CLASS);
+            Query readAllQuery = factory().query()
+                                          .all(TARGET_ENTITY_CLASS);
             assertNotNull(readAllQuery);
 
             checkTypeCorrectAndFiltersEmpty(TARGET_ENTITY_CLASS, readAllQuery);
@@ -73,14 +73,14 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("`read by IDs`")
         void readByIds() {
-            final Set<TestEntityId> testEntityIds = multipleIds();
-            final Query readByIdsQuery = factory().query()
-                                                  .byIds(TARGET_ENTITY_CLASS, testEntityIds);
+            Set<TestEntityId> testEntityIds = multipleIds();
+            Query readByIdsQuery = factory().query()
+                                            .byIds(TARGET_ENTITY_CLASS, testEntityIds);
             assertNotNull(readByIdsQuery);
 
             checkFieldMaskEmpty(readByIdsQuery);
 
-            final Target target = checkTarget(TARGET_ENTITY_CLASS, readByIdsQuery);
+            Target target = checkTarget(TARGET_ENTITY_CLASS, readByIdsQuery);
 
             verifyIdFilter(testEntityIds, target.getFilters());
         }
@@ -88,8 +88,8 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("`read all` with single path mask")
         void readAllWithSinglePath() {
-            final String expectedEntityPath = singleTestEntityPath();
-            final Query readAllWithPathFilteringQuery =
+            String expectedEntityPath = singleTestEntityPath();
+            Query readAllWithPathFilteringQuery =
                     factory().query()
                              .allWithMask(TARGET_ENTITY_CLASS, expectedEntityPath);
             assertNotNull(readAllWithPathFilteringQuery);
@@ -101,17 +101,17 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("`read by IDs` with single path mask")
         void readByIdsWitSinglePath() {
-            final Set<TestEntityId> testEntityIds = multipleIds();
-            final String expectedPath = singleTestEntityPath();
-            final Query readByIdsWithSinglePathQuery = factory().query()
-                                                                .byIdsWithMask(
-                                                                        TARGET_ENTITY_CLASS,
-                                                                        testEntityIds,
-                                                                        expectedPath);
+            Set<TestEntityId> testEntityIds = multipleIds();
+            String expectedPath = singleTestEntityPath();
+            Query readByIdsWithSinglePathQuery = factory().query()
+                                                          .byIdsWithMask(
+                                                                  TARGET_ENTITY_CLASS,
+                                                                  testEntityIds,
+                                                                  expectedPath);
             assertNotNull(readByIdsWithSinglePathQuery);
 
-            final Target target = checkTarget(TARGET_ENTITY_CLASS,
-                                              readByIdsWithSinglePathQuery);
+            Target target = checkTarget(TARGET_ENTITY_CLASS,
+                                        readByIdsWithSinglePathQuery);
 
             verifyIdFilter(testEntityIds, target.getFilters());
             verifySinglePathInQuery(expectedPath, readByIdsWithSinglePathQuery);
@@ -120,8 +120,8 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("`read all` with multiple paths mask")
         void readAllWithMultiplePaths() {
-            final String[] paths = multipleRandomPaths();
-            final Query readAllWithPathFilteringQuery =
+            String[] paths = multipleRandomPaths();
+            Query readAllWithPathFilteringQuery =
                     factory().query()
                              .allWithMask(TARGET_ENTITY_CLASS, paths);
             assertNotNull(readAllWithPathFilteringQuery);
@@ -133,27 +133,27 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("`read by IDs` with multiple paths mask")
         void readByIdsWithMultiplePaths() {
-            final Set<TestEntityId> testEntityIds = multipleIds();
-            final String[] paths = multipleRandomPaths();
-            final Query readByIdsWithSinglePathQuery = factory().query()
-                                                                .byIdsWithMask(
-                                                                        TARGET_ENTITY_CLASS,
-                                                                        testEntityIds,
-                                                                        paths);
+            Set<TestEntityId> testEntityIds = multipleIds();
+            String[] paths = multipleRandomPaths();
+            Query readByIdsWithSinglePathQuery = factory().query()
+                                                          .byIdsWithMask(
+                                                                  TARGET_ENTITY_CLASS,
+                                                                  testEntityIds,
+                                                                  paths);
             assertNotNull(readByIdsWithSinglePathQuery);
 
-            final Target target = checkTarget(TARGET_ENTITY_CLASS,
-                                              readByIdsWithSinglePathQuery);
+            Target target = checkTarget(TARGET_ENTITY_CLASS,
+                                        readByIdsWithSinglePathQuery);
 
             verifyIdFilter(testEntityIds, target.getFilters());
             verifyMultiplePathsInQuery(paths, readByIdsWithSinglePathQuery);
         }
 
         private void verifySinglePathInQuery(String expectedEntityPath, Query query) {
-            final FieldMask fieldMask = query.getFieldMask();
+            FieldMask fieldMask = query.getFieldMask();
             assertEquals(1, fieldMask.getPathsCount());     // as we set the only path value.
 
-            final String firstPath = fieldMask.getPaths(0);
+            String firstPath = fieldMask.getPaths(0);
             assertEquals(expectedEntityPath, firstPath);
         }
 
@@ -166,9 +166,9 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
 
         private void verifyMultiplePathsInQuery(String[] paths,
                                                 Query readAllWithPathFilteringQuery) {
-            final FieldMask fieldMask = readAllWithPathFilteringQuery.getFieldMask();
+            FieldMask fieldMask = readAllWithPathFilteringQuery.getFieldMask();
             assertEquals(paths.length, fieldMask.getPathsCount());
-            final ProtocolStringList pathsList = fieldMask.getPathsList();
+            ProtocolStringList pathsList = fieldMask.getPathsList();
             for (String expectedPath : paths) {
                 assertTrue(pathsList.contains(expectedPath));
             }
@@ -179,39 +179,39 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
         }
 
         private void checkFieldMaskEmpty(Query query) {
-            final FieldMask fieldMask = query.getFieldMask();
+            FieldMask fieldMask = query.getFieldMask();
             assertNotNull(fieldMask);
             assertEquals(FieldMask.getDefaultInstance(), fieldMask);
         }
 
         private void checkTypeCorrectAndFiltersEmpty(Class<TestEntity> expectedTargetClass,
                                                      Query query) {
-            final Target entityTarget = checkTarget(expectedTargetClass, query);
+            Target entityTarget = checkTarget(expectedTargetClass, query);
 
-            final EntityFilters filters = entityTarget.getFilters();
+            EntityFilters filters = entityTarget.getFilters();
             assertNotNull(filters);
             assertEquals(EntityFilters.getDefaultInstance(), filters);
         }
 
         private void verifyIdFilter(Set<TestEntityId> expectedIds, EntityFilters filters) {
             assertNotNull(filters);
-            final EntityIdFilter idFilter = filters.getIdFilter();
+            EntityIdFilter idFilter = filters.getIdFilter();
             assertNotNull(idFilter);
-            final List<EntityId> actualListOfIds = idFilter.getIdsList();
+            List<EntityId> actualListOfIds = idFilter.getIdsList();
             for (TestEntityId testEntityId : expectedIds) {
-                final EntityId expectedEntityId = EntityId.newBuilder()
-                                                          .setId(AnyPacker.pack(testEntityId))
-                                                          .build();
+                EntityId expectedEntityId = EntityId.newBuilder()
+                                                    .setId(AnyPacker.pack(testEntityId))
+                                                    .build();
                 assertTrue(actualListOfIds.contains(expectedEntityId));
             }
         }
 
         private Target checkTarget(Class<? extends Message> targetEntityClass, Query query) {
-            final Target entityTarget = query.getTarget();
+            Target entityTarget = query.getTarget();
             assertNotNull(entityTarget);
 
-            final String expectedTypeName = TypeUrl.of(targetEntityClass)
-                                                   .value();
+            String expectedTypeName = TypeUrl.of(targetEntityClass)
+                                             .value();
             assertEquals(expectedTypeName, entityTarget.getType());
             return entityTarget;
         }
@@ -234,42 +234,42 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("by IDs")
         void byIdConsistently() {
-            final Set<TestEntityId> ids = multipleIds();
-            final Query fromFactory = factory().query()
-                                               .byIds(TestEntity.class, ids);
-            final Query fromBuilder = factory().query()
-                                               .select(TestEntity.class)
-                                               .byId(ids)
-                                               .build();
+            Set<TestEntityId> ids = multipleIds();
+            Query fromFactory = factory().query()
+                                         .byIds(TestEntity.class, ids);
+            Query fromBuilder = factory().query()
+                                         .select(TestEntity.class)
+                                         .byId(ids)
+                                         .build();
             checkIdQueriesEqual(fromFactory, fromBuilder);
         }
 
         @Test
         @DisplayName("by mask")
         void byMaskConsistently() {
-            final String field1 = "TestEntity.firstField";
-            final String field2 = "TesEntity.barField";
+            String field1 = "TestEntity.firstField";
+            String field2 = "TesEntity.barField";
 
-            final Query fromFactory = factory().query()
-                                               .allWithMask(TestEntity.class, field1, field2);
-            final Query fromBuilder = factory().query()
-                                               .select(TestEntity.class)
-                                               .withMask(field1, field2)
-                                               .build();
+            Query fromFactory = factory().query()
+                                         .allWithMask(TestEntity.class, field1, field2);
+            Query fromBuilder = factory().query()
+                                         .select(TestEntity.class)
+                                         .withMask(field1, field2)
+                                         .build();
             assertNotEquals(fromBuilder.getId(), fromFactory.getId());
-            final Target targetFromFactory = fromFactory.getTarget();
-            final Target targetFromBuilder = fromBuilder.getTarget();
+            Target targetFromFactory = fromFactory.getTarget();
+            Target targetFromBuilder = fromBuilder.getTarget();
             assertEquals(targetFromFactory, targetFromBuilder);
         }
 
         @Test
         @DisplayName("`read all`")
         void readAllConsistently() {
-            final Query fromFactory = factory().query()
-                                               .all(TestEntity.class);
-            final Query fromBuilder = factory().query()
-                                               .select(TestEntity.class)
-                                               .build();
+            Query fromFactory = factory().query()
+                                         .all(TestEntity.class);
+            Query fromBuilder = factory().query()
+                                         .select(TestEntity.class)
+                                         .build();
             assertEquals(fromFactory.getTarget(), fromBuilder.getTarget());
             assertNotEquals(fromFactory.getId(), fromBuilder.getId());
         }
@@ -277,29 +277,29 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("by IDs with mask")
         void byIdsWithMaskConsistently() {
-            final String field1 = "TestEntity.secondField";
-            final String field2 = "TesEntity.fooField";
+            String field1 = "TestEntity.secondField";
+            String field2 = "TesEntity.fooField";
 
-            final Set<TestEntityId> ids = multipleIds();
-            final Query fromFactory = factory().query()
-                                               .byIdsWithMask(TestEntity.class, ids, field1,
-                                                              field2);
-            final Query fromBuilder = factory().query()
-                                               .select(TestEntity.class)
-                                               .byId(ids)
-                                               .withMask(field1, field2)
-                                               .build();
+            Set<TestEntityId> ids = multipleIds();
+            Query fromFactory = factory().query()
+                                         .byIdsWithMask(TestEntity.class, ids, field1,
+                                                        field2);
+            Query fromBuilder = factory().query()
+                                         .select(TestEntity.class)
+                                         .byId(ids)
+                                         .withMask(field1, field2)
+                                         .build();
             checkIdQueriesEqual(fromFactory, fromBuilder);
         }
 
         private void checkIdQueriesEqual(Query query1, Query query2) {
             assertNotEquals(query1.getId(), query2.getId());
 
-            final Target targetFromFactory = query1.getTarget();
-            final Target targetFromBuilder = query2.getTarget();
+            Target targetFromFactory = query1.getTarget();
+            Target targetFromBuilder = query2.getTarget();
 
-            final EntityFilters filtersFromFactory = targetFromFactory.getFilters();
-            final EntityFilters filtersFromBuilder = targetFromBuilder.getFilters();
+            EntityFilters filtersFromFactory = targetFromFactory.getFilters();
+            EntityFilters filtersFromBuilder = targetFromBuilder.getFilters();
 
             // Everything except filters is the same
             assertEquals(targetFromFactory.toBuilder()
@@ -309,8 +309,8 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
                                           .clearFilters()
                                           .build());
 
-            final EntityIdFilter idFilterFromFactory = filtersFromFactory.getIdFilter();
-            final EntityIdFilter idFilterFromBuilder = filtersFromBuilder.getIdFilter();
+            EntityIdFilter idFilterFromFactory = filtersFromFactory.getIdFilter();
+            EntityIdFilter idFilterFromBuilder = filtersFromBuilder.getIdFilter();
 
             // Everything except ID filter is the same
             assertEquals(filtersFromBuilder.toBuilder()
@@ -320,8 +320,8 @@ class QueryFactoryTest extends ActorRequestFactoryTest {
                                            .clearIdFilter()
                                            .build());
 
-            final Collection<EntityId> entityIdsFromFactory = idFilterFromFactory.getIdsList();
-            final Collection<EntityId> entityIdsFromBuilder = idFilterFromBuilder.getIdsList();
+            Collection<EntityId> entityIdsFromFactory = idFilterFromFactory.getIdsList();
+            Collection<EntityId> entityIdsFromBuilder = idFilterFromBuilder.getIdsList();
 
             // Order may differ but all the elements are the same
             assertEquals(entityIdsFromFactory.size(), entityIdsFromBuilder.size());

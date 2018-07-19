@@ -19,7 +19,6 @@
  */
 package io.spine.grpc;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
@@ -36,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
@@ -103,7 +103,7 @@ class StreamObserversTest {
     @Test
     @DisplayName("create proper memoizing observer")
     void createMemoizingObserver() {
-        final MemoizingObserver<Object> observer = memoizingObserver();
+        MemoizingObserver<Object> observer = memoizingObserver();
 
         checkFirstResponse(observer);
         checkOnNext(observer);
@@ -188,8 +188,8 @@ class StreamObserversTest {
         @Test
         @DisplayName("from Throwable which is not status exception")
         void fromGenericThrowable() {
-            final String msg = "Neither a StatusException nor a StatusRuntimeException.";
-            final Exception exception = new Exception(msg);
+            String msg = "Neither a StatusException nor a StatusRuntimeException.";
+            Exception exception = new Exception(msg);
 
             assertFalse(fromStreamError(exception).isPresent());
         }

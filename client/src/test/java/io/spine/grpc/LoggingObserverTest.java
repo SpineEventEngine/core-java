@@ -70,20 +70,20 @@ class LoggingObserverTest {
     }
 
     private void assertAtLevel(Level level) {
-        final LoggingObserver<Object> observer = getObserver(level);
+        LoggingObserver<Object> observer = getObserver(level);
 
         assertNotNull(observer);
 
         // Since we're in the tests mode `Environment` returns `SubstituteLogger` instance.
-        final SubstituteLogger log = (SubstituteLogger) observer.log();
+        SubstituteLogger log = (SubstituteLogger) observer.log();
 
         // Restrict the queue size only to the number of calls we want to make.
-        final Queue<SubstituteLoggingEvent> queue = Queues.newArrayBlockingQueue(3);
+        Queue<SubstituteLoggingEvent> queue = Queues.newArrayBlockingQueue(3);
         log.setDelegate(new EventRecodingLogger(log, queue));
 
         SubstituteLoggingEvent loggingEvent;
 
-        final String value = newUuid();
+        String value = newUuid();
         observer.onNext(value);
         loggingEvent = queue.poll();
         assertNotNull(loggingEvent);
@@ -91,8 +91,8 @@ class LoggingObserverTest {
         assertContains(loggingEvent, value);
         assertContains(loggingEvent, "onNext");
 
-        final Timestamp currentTime = Time.getCurrentTime();
-        final String timeStr = Timestamps.toString(currentTime);
+        Timestamp currentTime = Time.getCurrentTime();
+        String timeStr = Timestamps.toString(currentTime);
         observer.onNext(currentTime);
         loggingEvent = queue.poll();
         assertNotNull(loggingEvent);
@@ -124,14 +124,14 @@ class LoggingObserverTest {
     }
 
     private static void assertContains(LoggingEvent event, String text) {
-        final String message = event.getMessage();
+        String message = event.getMessage();
         assertTrue(message.contains(text));
     }
 
     @Test
     @DisplayName("log error occurred")
     void logError() {
-        final LoggingObserver<Object> observer = getObserver(Level.INFO);
+        LoggingObserver<Object> observer = getObserver(Level.INFO);
         observer.onError(new RuntimeException("Testing logging observer"));
     }
 
