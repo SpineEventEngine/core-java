@@ -103,10 +103,10 @@ public final class ExternalMessages {
 
         String idString = Identifier.newUuid();
         ExternalMessage result = of(StringValue.newBuilder()
-                                                     .setValue(idString)
-                                                     .build(),
-                                          request,
-                                          origin);
+                                               .setValue(idString)
+                                               .build(),
+                                    request,
+                                    origin);
         return result;
     }
 
@@ -150,10 +150,10 @@ public final class ExternalMessages {
         Any packedMessage = AnyPacker.pack(message);
 
         ExternalMessage result = ExternalMessage.newBuilder()
-                                                      .setId(packedId)
-                                                      .setOriginalMessage(packedMessage)
-                                                      .setBoundedContextName(boundedContextName)
-                                                      .build();
+                                                .setId(packedId)
+                                                .setOriginalMessage(packedMessage)
+                                                .setBoundedContextName(boundedContextName)
+                                                .build();
         return result;
     }
 }

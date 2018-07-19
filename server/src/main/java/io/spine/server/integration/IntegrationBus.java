@@ -135,7 +135,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     @SuppressWarnings("ConstantConditions")     // `TransportFactory` has already been initialized.
     private IntegrationBus(Builder builder) {
         TransportFactory transportFactory = builder.getTransportFactory()
-                                                         .get();
+                                                   .get();
         this.boundedContextName = builder.boundedContextName;
         this.subscriberHub = new SubscriberHub(transportFactory);
         this.publisherHub = new PublisherHub(transportFactory);
@@ -219,7 +219,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                           markedEnvelope.getMessage()));
     }
 
-    private  ExternalMessageEnvelope markExternal(ExternalMessageEnvelope envelope) {
+    private ExternalMessageEnvelope markExternal(ExternalMessageEnvelope envelope) {
         ExternalMessage externalMessage = envelope.getOuterObject();
         BusAdapter<?, ?> adapter = adapterFor(externalMessage);
         return adapter.markExternal(externalMessage);
@@ -259,7 +259,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     }
 
     /**
-     * Unregisters a local dispatcher, which should no longer be subscribed 
+     * Unregisters a local dispatcher, which should no longer be subscribed
      * to {@code external} messages.
      *
      * @param dispatcher the dispatcher to unregister
@@ -350,7 +350,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                                                                integrationBus));
         }
     }
-    
+
     private void unsubscribeFromIncoming(ExternalMessageDispatcher<?> dispatcher) {
         IntegrationBus integrationBus = this;
         Iterable<ExternalMessageClass> transformed = dispatcher.getMessageClasses();
@@ -386,7 +386,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     private BusAdapter<?, ?> adapterFor(Class<? extends Message> messageClass) {
         for (BusAdapter<?, ?> localAdapter : localBusAdapters) {
-            if(localAdapter.accepts(messageClass)) {
+            if (localAdapter.accepts(messageClass)) {
                 return localAdapter;
             }
         }
@@ -428,8 +428,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
         public Optional<BoundedContextName> getBoundedContextName() {
             BoundedContextName value = Validate.isDefault(this.boundedContextName)
-                                             ? null
-                                             : this.boundedContextName;
+                                       ? null
+                                       : this.boundedContextName;
             return Optional.ofNullable(value);
         }
 

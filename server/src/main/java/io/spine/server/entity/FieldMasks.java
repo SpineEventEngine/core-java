@@ -215,9 +215,7 @@ public class FieldMasks {
         try {
             builderClass = (Class<B>) msgClass.getClasses()[0];
         } catch (ClassCastException e) {
-            String message = format(
-                    TYPE_CAST_ERROR_LOGGING_PATTERN,
-                    msgClass.getCanonicalName());
+            String message = format(TYPE_CAST_ERROR_LOGGING_PATTERN, msgClass.getCanonicalName());
             log().warn(message, e);
             builderClass = null;
         }

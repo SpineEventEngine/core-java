@@ -54,8 +54,8 @@ final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>
     ExternalMessageEnvelope toExternalEnvelope(ExternalMessage message) {
         Message unpacked = AnyPacker.unpack(message.getOriginalMessage());
         Event event = (Event) unpacked;
-        ExternalMessageEnvelope result =
-                ExternalMessageEnvelope.of(message, Events.getMessage(event));
+        ExternalMessageEnvelope result = ExternalMessageEnvelope.of(message,
+                                                                    Events.getMessage(event));
         return result;
     }
 
@@ -65,14 +65,13 @@ final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>
         Event event = AnyPacker.unpack(packedEvent);
         Event.Builder eventBuilder = event.toBuilder();
         EventContext modifiedContext = eventBuilder.getContext()
-                                                         .toBuilder()
-                                                         .setExternal(true)
-                                                         .build();
+                                                   .toBuilder()
+                                                   .setExternal(true)
+                                                   .build();
 
         Event marked = eventBuilder.setContext(modifiedContext)
-                                         .build();
-        ExternalMessage result = ExternalMessages.of(marked,
-                                                           externalMsg.getBoundedContextName());
+                                   .build();
+        ExternalMessage result = ExternalMessages.of(marked, externalMsg.getBoundedContextName());
         return ExternalMessageEnvelope.of(result, Events.getMessage(event));
     }
 
