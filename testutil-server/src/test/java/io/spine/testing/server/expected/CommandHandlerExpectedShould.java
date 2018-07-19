@@ -22,7 +22,7 @@ package io.spine.testing.server.expected;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
-import io.spine.core.Rejection;
+import io.spine.testing.server.Rejections.TUFailedToAssignProject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
@@ -49,7 +49,7 @@ class CommandHandlerExpectedShould {
     void trackRejection() {
         CommandHandlerExpected<UInt64Value> expected =
                 commandExpectedWithRejection(rejection());
-        expected.throwsRejection(Rejection.class);
+        expected.throwsRejection(TUFailedToAssignProject.class);
     }
 
     @Test
