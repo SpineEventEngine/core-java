@@ -40,6 +40,7 @@ import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.CommandSequence;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.procman.given.DirectQuizProcmanRepository;
@@ -301,17 +302,17 @@ class ProcessManagerTest {
         Message message = AnyPacker.unpack(event.getMessage());
 
         // The event type is CommandRouted.
-        assertThat(message, instanceOf(CommandRouted.class));
+        assertThat(message, instanceOf(CommandTransformed.class));
 
-        CommandRouted commandRouted = (CommandRouted) message;
+        CommandTransformed commandRouted = (CommandTransformed) message;
 
         // The source of the command is StartProject.
-        assertThat(getMessage(commandRouted.getOrigin()), instanceOf(PmStartProject.class));
+        assertThat(getMessage(commandRouted.getSource()), instanceOf(PmStartProject.class));
         List<CommandEnvelope> dispatchedCommands = dispatcher.getCommands();
         assertSize(1, dispatchedCommands);
         CommandEnvelope dispatchedCommand = dispatcher.getCommands()
                                                       .get(0);
-        DispatchedCommand generated = commandRouted.getGenerated(0);
+        DispatchedCommand generated = commandRouted.getProduced();
         assertEquals(generated.getMessage(), dispatchedCommand.getCommand()
                                                               .getMessage());
         assertEquals(generated.getContext(), dispatchedCommand.getCommand()
@@ -350,18 +351,16 @@ class ProcessManagerTest {
     class Create {
 
         @Test
-        @DisplayName("CommandRouter")
+        @DisplayName("split sequence")
         void commandRouter() {
             StringValue commandMessage = toMessage("create_router");
             CommandContext commandContext = requestFactory.createCommandContext();
 
             processManager.injectCommandBus(mock(CommandBus.class));
 
-            CommandRouter router = processManager.newRouterFor(commandMessage, commandContext);
-            assertNotNull(router);
-
-            assertEquals(commandMessage, router.getOriginMessage());
-            assertEquals(commandContext, router.getOriginContext());
+            CommandSequence.Split sequence = processManager.split(commandMessage, commandContext);
+            assertNotNull(sequence);
+            assertEquals(0, sequence.size());
         }
     }
 
@@ -369,8 +368,8 @@ class ProcessManagerTest {
     @DisplayName("require CommandBus when creating router")
     void requireCommandBusForRouter() {
         assertThrows(NullPointerException.class,
-                     () -> processManager.newRouterFor(StringValue.getDefaultInstance(),
-                                                       CommandContext.getDefaultInstance()));
+                     () -> processManager.split(StringValue.getDefaultInstance(),
+                                                CommandContext.getDefaultInstance()));
     }
 
     @Nested

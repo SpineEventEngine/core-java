@@ -33,7 +33,7 @@ import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.EventSubscriber;
-import io.spine.server.procman.CommandRouted;
+import io.spine.server.procman.CommandSplit;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.test.procman.Project;
@@ -155,15 +155,22 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         @Assign
-        CommandRouted handle(PmStartProject command, CommandContext context) {
+        CommandSplit handle(PmStartProject command, CommandContext context) {
             keep(command);
 
-            final Message addTask = ((PmAddTask.Builder)
+            ProjectId projectId = command.getProjectId();
+            Message addTask = ((PmAddTask.Builder)
                     Sample.builderForType(PmAddTask.class))
-                          .setProjectId(command.getProjectId())
-                          .build();
-            return newRouterFor(command, context)
+                    .setProjectId(projectId)
+                    .build();
+            Message doNothing = ((PmDoNothing.Builder)
+                    Sample.builderForType(PmDoNothing.class))
+                    .setProjectId(projectId)
+                    .build();
+
+            return split(command, context)
                     .add(addTask)
+                    .add(doNothing)
                     .postAll();
         }
 

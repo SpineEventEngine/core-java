@@ -34,8 +34,10 @@ import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
+import io.spine.core.DispatchedCommand;
 import io.spine.core.Status;
 import io.spine.server.procman.CommandSplit;
+import io.spine.server.procman.CommandTransformed;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -52,6 +54,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
  *
  * @param <R> the type of the result generated when the command sequence is posted
  * @param <B> the type of the result builder
+ * @param <S> the type of the sequence for the return type covariance
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ClassReferencesSubclass")
@@ -71,7 +74,7 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
     /** The handler for the posting errors. */
     private ErrorHandler errorHandler = new DefaultErrorHandler();
 
-    private CommandSequence(CommandBus bus, ActorContext actorContext) {
+    private CommandSequence(ActorContext actorContext, CommandBus bus) {
         this.commandBus = checkNotNull(bus);
         this.queue = Queues.newConcurrentLinkedQueue();
         this.commandFactory = ActorRequestFactory.fromContext(actorContext)
@@ -81,13 +84,27 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
     /**
      * Creates a sequence for splitting the source command into several ones.
      *
-     * @param bus the command bus to post commands
      * @param commandMessage the message of the source command
      * @param context the context of the source command
+     * @param bus the command bus to post commands
      * @return new empty sequence
      */
-    public static Split split(CommandBus bus, Message commandMessage, CommandContext context) {
+    public static Split split(Message commandMessage, CommandContext context, CommandBus bus) {
         return new Split(bus, commandMessage, context);
+    }
+
+    /**
+     * Creates a sequence for transforming incoming command into another one.
+     *
+     * @param commandMessage the message of the source command
+     * @param context the context of the source command
+     * @param bus the command bus to post commands
+     * @return new empty sequence
+     */
+    public static Transform transform(Message commandMessage,
+                                      CommandContext context,
+                                      CommandBus bus) {
+        return new Transform(bus, commandMessage, context);
     }
 
     /**
@@ -157,7 +174,7 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
      *
      * @return the result
      */
-    public R postAll() {
+    protected R postAll() {
         B builder = newBuilder();
         while (hasNext()) {
             Message message = next();
@@ -264,18 +281,14 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
         private final Message sourceMessage;
         private final CommandContext sourceContext;
 
-        protected OnCommand(CommandBus commandBus, Message message, CommandContext context) {
-            super(commandBus, context.getActorContext());
+        protected OnCommand(Message message, CommandContext context, CommandBus bus) {
+            super(context.getActorContext(), bus);
             this.sourceMessage = message;
             this.sourceContext = context;
         }
 
-        protected Message getSourceMessage() {
-            return sourceMessage;
-        }
-
-        protected CommandContext getSourceContext() {
-            return sourceContext;
+        protected DispatchedCommand source() {
+            return toDispatched(this.sourceMessage, this.sourceContext);
         }
     }
 
@@ -286,7 +299,7 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
     public static final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, Split> {
 
         private Split(CommandBus commandBus, Message sourceMessage, CommandContext sourceContext) {
-            super(commandBus, sourceMessage, sourceContext);
+            super(sourceMessage, sourceContext, commandBus);
         }
 
         /** {@inheritDoc} */
@@ -296,11 +309,17 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
             return super.add(commandMessage);
         }
 
+        /** {@inheritDoc} */
+        @Override
+        public int size() {
+            return super.size();
+        }
+
         @Override
         protected CommandSplit.Builder newBuilder() {
             CommandSplit.Builder result = CommandSplit
                     .newBuilder()
-                    .setSource(toDispatched(getSourceMessage(), getSourceContext()));
+                    .setSource(source());
             return result;
         }
 
@@ -320,6 +339,47 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
                                "`CommandSequence.transform()`."
             );
             return super.postAll();
+        }
+    }
+
+    /**
+     * A command sequence containing only one element
+     */
+    public static final class Transform
+            extends OnCommand<CommandTransformed, CommandTransformed.Builder, Transform> {
+
+        private Transform(CommandBus commandBus, Message sourceMessage, CommandContext context) {
+            super(sourceMessage, context, commandBus);
+        }
+
+        /**
+         * Sets the message for the target command.
+         */
+        public Transform to(Message targetMessage) {
+            return add(targetMessage);
+        }
+
+        /**
+         * Posts the command to the bus and returns resulting event.
+         */
+        public CommandTransformed post() {
+            checkState(size() == 1, "The conversion sequence must have exactly one command.");
+            return postAll();
+        }
+
+        @Override
+        protected CommandTransformed.Builder newBuilder() {
+            CommandTransformed.Builder result = CommandTransformed
+                    .newBuilder()
+                    .setSource(source());
+            return result;
+        }
+
+        @SuppressWarnings("CheckReturnValue") // calling builder method
+        @Override
+        protected void addPosted(CommandTransformed.Builder builder, Message message,
+                                 CommandContext context) {
+            builder.setProduced(toDispatched(message, context));
         }
     }
 }
