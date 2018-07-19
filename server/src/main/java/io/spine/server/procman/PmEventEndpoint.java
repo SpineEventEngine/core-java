@@ -64,7 +64,7 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
     protected Set<I> getTargets() {
         EventEnvelope event = envelope();
         Set<I> ids = repository().eventRouting()
-                                       .apply(event.getMessage(), event.getEventContext());
+                                 .apply(event.getMessage(), event.getEventContext());
         return ids;
     }
 

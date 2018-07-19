@@ -53,9 +53,9 @@ final class SameTransition implements Predicate<EnrichmentFunction> {
             return false;
         }
         boolean sameSourceClass = function.getSourceClass()
-                                                .equals(input.getSourceClass());
+                                          .equals(input.getSourceClass());
         boolean sameEnrichmentClass = function.getEnrichmentClass()
-                                                    .equals(input.getEnrichmentClass());
+                                              .equals(input.getEnrichmentClass());
         return sameSourceClass && sameEnrichmentClass;
     }
 }

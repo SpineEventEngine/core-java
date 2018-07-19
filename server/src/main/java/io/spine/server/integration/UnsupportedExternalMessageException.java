@@ -54,17 +54,17 @@ public class UnsupportedExternalMessageException
     @Override
     public Error asError() {
         String msgType = externalMessage.getDescriptorForType()
-                                              .getFullName();
+                                        .getFullName();
         String errMsg = format("External messages of the type `%s` are not supported.",
-                                     msgType);
+                               msgType);
         int errorCode = UNSUPPORTED_EXTERNAL_MESSAGE.getNumber();
         String errorType = ExternalMessageValidationError.getDescriptor()
-                                                               .getFullName();
+                                                         .getFullName();
         Error error = Error.newBuilder()
-                                 .setType(errorType)
-                                 .setCode(errorCode)
-                                 .setMessage(errMsg)
-                                 .build();
+                           .setType(errorType)
+                           .setCode(errorCode)
+                           .setMessage(errMsg)
+                           .build();
         return error;
     }
 

@@ -126,7 +126,7 @@ public class MethodAccessChecker {
     @VisibleForTesting
     void warnOnWrongModifier(String messageFormat) {
         String methodFullName = method.getDeclaringClass()
-                                            .getName() + '.' + method.getName() + "()";
+                                      .getName() + '.' + method.getName() + "()";
         log().warn(messageFormat, methodFullName);
     }
 

@@ -65,14 +65,14 @@ final class RejectionBusAdapter extends BusAdapter<RejectionEnvelope, RejectionD
         Rejection rejection = AnyPacker.unpack(packedEvent);
         Rejection.Builder rejectionBuilder = rejection.toBuilder();
         RejectionContext modifiedContext = rejectionBuilder.getContext()
-                                                                 .toBuilder()
-                                                                 .setExternal(true)
-                                                                 .build();
+                                                           .toBuilder()
+                                                           .setExternal(true)
+                                                           .build();
 
         Rejection marked = rejectionBuilder.setContext(modifiedContext)
-                                                 .build();
+                                           .build();
         ExternalMessage result = ExternalMessages.of(marked,
-                                                           externalMsg.getBoundedContextName());
+                                                     externalMsg.getBoundedContextName());
         return ExternalMessageEnvelope.of(result, Rejections.getMessage(rejection));
     }
 

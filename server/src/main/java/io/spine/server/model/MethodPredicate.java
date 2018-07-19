@@ -38,8 +38,8 @@ public abstract class MethodPredicate implements Predicate<Method> {
     public boolean apply(@Nullable Method method) {
         checkNotNull(method);
         boolean result = verifyAnnotation(method)
-                               && verifyParams(method)
-                               && verifyReturnType(method);
+                         && verifyParams(method)
+                         && verifyReturnType(method);
         return result;
     }
 

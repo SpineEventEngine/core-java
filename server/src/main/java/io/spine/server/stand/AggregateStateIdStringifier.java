@@ -62,18 +62,18 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
         checkNotNull(id);
 
         String typeUrl = id.getStateType()
-                                 .value();
+                           .value();
         Object genericId = id.getAggregateId();
         Class genericIdType = genericId.getClass();
         String idTypeString = idTypeToString(genericIdType);
         String genericIdString = Stringifiers.toString(genericId);
 
         String result = new StringBuilder(MEAN_STRING_LENGTH).append(typeUrl)
-                                                                   .append(DIVIDER)
-                                                                   .append(idTypeString)
-                                                                   .append(DIVIDER)
-                                                                   .append(genericIdString)
-                                                                   .toString();
+                                                             .append(DIVIDER)
+                                                             .append(idTypeString)
+                                                             .append(DIVIDER)
+                                                             .append(genericIdString)
+                                                             .toString();
         return result;
     }
 
@@ -106,7 +106,8 @@ final class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
         checkSupported(idType);
         String result;
         if (Message.class.isAssignableFrom(idType)) {
-            result = TypeName.of(idType).value();
+            result = TypeName.of(idType)
+                             .value();
         } else {
             result = idType.getSimpleName();
         }

@@ -58,7 +58,7 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     protected I getTargets() {
         CommandEnvelope envelope = envelope();
         I id = repository().getCommandRouting()
-                                 .apply(envelope.getMessage(), envelope.getCommandContext());
+                           .apply(envelope.getMessage(), envelope.getCommandContext());
         return id;
     }
 

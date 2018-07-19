@@ -158,10 +158,10 @@ class MessageEnrichment<S extends Message, T extends Message, C extends Message>
 
     private Object getSrcFieldValue(FieldDescriptor srcField, S eventMsg, C context) {
         boolean isContextField = srcField.getContainingType()
-                                               .equals(EventContext.getDescriptor());
+                                         .equals(EventContext.getDescriptor());
         Object result = isContextField
-                              ? context.getField(srcField)
-                              : eventMsg.getField(srcField);
+                        ? context.getField(srcField)
+                        : eventMsg.getField(srcField);
         return result;
     }
 }

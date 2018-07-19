@@ -63,8 +63,8 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
     @Override
     public Set<String> dispatch(RejectionEnvelope envelope) {
         Command originCommand = envelope.getOuterObject()
-                                              .getContext()
-                                              .getCommand();
+                                        .getContext()
+                                        .getCommand();
         CommandOperation op = new CommandOperation(originCommand) {
 
             @Override

@@ -108,7 +108,7 @@ final class ReferenceValidator {
         ImmutableList<EnrichmentFunction<?, ?, ?>> enrichmentFunctions =
                 ImmutableList.copyOf(functions);
         ValidationResult result = new ValidationResult(enrichmentFunctions,
-                                                             sourceToTargetMap);
+                                                       sourceToTargetMap);
         return result;
     }
 
@@ -132,14 +132,14 @@ final class ReferenceValidator {
      */
     private Collection<FieldDescriptor> findSourceFields(FieldDescriptor enrichmentField) {
         String byOptionArgument = enrichmentField.getOptions()
-                                                       .getExtension(OptionsProto.by);
+                                                 .getExtension(OptionsProto.by);
         checkNotNull(byOptionArgument);
         String targetFields = removeSpaces(byOptionArgument);
         int pipeSeparatorIndex = targetFields.indexOf(PIPE_SEPARATOR);
         if (pipeSeparatorIndex < 0) {
             FieldDescriptor fieldDescriptor = findSourceFieldByName(targetFields,
-                                                                          enrichmentField,
-                                                                          true);
+                                                                    enrichmentField,
+                                                                    true);
             return Collections.singleton(fieldDescriptor);
         } else {
             String[] targetFieldNames = PATTERN_PIPE_SEPARATOR.split(targetFields);
@@ -175,7 +175,7 @@ final class ReferenceValidator {
     private static String removeSpaces(String source) {
         checkNotNull(source);
         String result = SPACE_PATTERN.matcher(source)
-                                           .replaceAll(EMPTY_STRING);
+                                     .replaceAll(EMPTY_STRING);
         return result;
     }
 
@@ -243,13 +243,13 @@ final class ReferenceValidator {
      */
     private Descriptor getSrcMessage(String fieldName) {
         Descriptor msg = fieldName.contains(CONTEXT_REFERENCE)
-                               ? EventContext.getDescriptor()
-                               : eventDescriptor;
+                         ? EventContext.getDescriptor()
+                         : eventDescriptor;
         return msg;
     }
 
     private Optional<EnrichmentFunction<?, ?, ?>> getEnrichmentFunction(FieldDescriptor srcField,
-                                                                     FieldDescriptor targetField) {
+                                                                        FieldDescriptor targetField) {
         Class<?> sourceFieldClass = Field.getFieldClass(srcField);
         Class<?> targetFieldClass = Field.getFieldClass(targetField);
         Optional<EnrichmentFunction<?, ?, ?>> func =

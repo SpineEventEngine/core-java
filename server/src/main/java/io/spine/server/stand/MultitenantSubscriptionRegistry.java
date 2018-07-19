@@ -153,9 +153,9 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
             String typeAsString = target.getType();
             TypeUrl type = TypeUrl.parse(typeAsString);
             Subscription subscription = Subscription.newBuilder()
-                                                          .setId(subscriptionId)
-                                                          .setTopic(topic)
-                                                          .build();
+                                                    .setId(subscriptionId)
+                                                    .setTopic(topic)
+                                                    .build();
             SubscriptionRecord record = new SubscriptionRecord(subscription, target, type);
 
             if (!typeToRecord.containsKey(type)) {

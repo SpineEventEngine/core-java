@@ -83,7 +83,7 @@ class EnrichmentsMap {
 
     static Collection<String> getEventTypes(Class<? extends Message> enrichmentClass) {
         String enrichmentType = TypeName.of(enrichmentClass)
-                                              .value();
+                                        .value();
         ImmutableCollection<String> result = getInstance().get(enrichmentType);
         return result;
     }
@@ -148,11 +148,11 @@ class EnrichmentsMap {
          */
         private void putAllTypesFromPackage(String enrichmentType, String eventsPackage) {
             int lastSignificantCharPos = eventsPackage.length() -
-                                               PACKAGE_WILDCARD_INDICATOR.length();
+                    PACKAGE_WILDCARD_INDICATOR.length();
             String packageName = eventsPackage.substring(0, lastSignificantCharPos);
             Set<String> boundFields = getBoundFields(enrichmentType);
             Collection<TypeUrl> eventTypes = KnownTypes.instance()
-                                                             .getAllFromPackage(packageName);
+                                                       .getAllFromPackage(packageName);
             for (TypeUrl type : eventTypes) {
                 String typeQualifier = type.getTypeName();
                 if (hasOneOfTargetFields(typeQualifier, boundFields)) {
@@ -163,11 +163,11 @@ class EnrichmentsMap {
 
         private static Set<String> getBoundFields(String enrichmentType) {
             Descriptor enrichmentDescriptor = TypeName.of(enrichmentType)
-                                                            .getMessageDescriptor();
+                                                      .getMessageDescriptor();
             Set<String> result = new HashSet<>();
             for (FieldDescriptor field : enrichmentDescriptor.getFields()) {
                 String extension = field.getOptions()
-                                              .getExtension(OptionsProto.by);
+                                        .getExtension(OptionsProto.by);
                 Collection<String> fieldNames = parseFieldNames(extension);
                 result.addAll(fieldNames);
             }
@@ -200,7 +200,7 @@ class EnrichmentsMap {
         private static boolean hasOneOfTargetFields(String eventType,
                                                     Collection<String> targetFields) {
             Descriptor eventDescriptor = TypeName.of(eventType)
-                                                       .getMessageDescriptor();
+                                                 .getMessageDescriptor();
             List<FieldDescriptor> fields = eventDescriptor.getFields();
             Collection<String> fieldNames = Collections2.transform(
                     fields,

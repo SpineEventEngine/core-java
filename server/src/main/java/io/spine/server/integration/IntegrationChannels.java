@@ -76,12 +76,12 @@ class IntegrationChannels {
         TypeUrl typeUrl = TypeUrl.of(messageType);
 
         StringValue asStringValue = StringValue.newBuilder()
-                                                     .setValue(typeUrl.value())
-                                                     .build();
+                                               .setValue(typeUrl.value())
+                                               .build();
         Any packed = AnyPacker.pack(asStringValue);
         ChannelId channelId = ChannelId.newBuilder()
-                                             .setIdentifier(packed)
-                                             .build();
+                                       .setIdentifier(packed)
+                                       .build();
         return channelId;
     }
 
@@ -102,11 +102,11 @@ class IntegrationChannels {
 
         boolean isRejection = Rejections.isRejection(typeUrl.getMessageClass());
         String wrapperTypeUrl = isRejection ? REJECTION_TYPE_URL.value()
-                                                  : EVENT_TYPE_URL.value();
+                                            : EVENT_TYPE_URL.value();
         ExternalMessageType result = ExternalMessageType.newBuilder()
-                                                             .setMessageTypeUrl(typeUrl.value())
-                                                             .setWrapperTypeUrl(wrapperTypeUrl)
-                                                             .build();
+                                                        .setMessageTypeUrl(typeUrl.value())
+                                                        .setWrapperTypeUrl(wrapperTypeUrl)
+                                                        .build();
         return result;
     }
 }

@@ -86,11 +86,11 @@ public abstract class Enricher<M extends EnrichableMessageEnvelope<?, ?, C>, C e
         ImmutableMultimap<String, String> enrichmentsMap = EnrichmentsMap.getInstance();
         for (String enrichmentType : enrichmentsMap.keySet()) {
             Class<Message> enrichmentClass = TypeName.of(enrichmentType)
-                                                           .getMessageClass();
+                                                     .getMessageClass();
             ImmutableCollection<String> srcMessageTypes = enrichmentsMap.get(enrichmentType);
             for (String srcType : srcMessageTypes) {
                 Class<Message> messageClass = TypeName.of(srcType)
-                                                            .getMessageClass();
+                                                      .getMessageClass();
                 MessageEnrichment msgEnricher = create(this, messageClass, enrichmentClass);
                 functionsMap.put(messageClass, msgEnricher);
             }
@@ -124,7 +124,7 @@ public abstract class Enricher<M extends EnrichableMessageEnvelope<?, ?, C>, C e
 
     private boolean enrichmentRegistered(M message) {
         boolean result = functions.containsKey(message.getMessageClass()
-                                                            .value());
+                                                      .value());
         return result;
     }
 
@@ -173,7 +173,7 @@ public abstract class Enricher<M extends EnrichableMessageEnvelope<?, ?, C>, C e
      *        the class of the enrichment field
      */
     Optional<EnrichmentFunction<?, ?, ?>> functionFor(Class<?> fieldClass,
-                                                   Class<?> enrichmentFieldClass) {
+                                                      Class<?> enrichmentFieldClass) {
         Optional<EnrichmentFunction<?, ?, ?>> result =
                 functions.values()
                          .stream()
