@@ -18,19 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given.aggregate;
+package io.spine.testing.server.entity;
 
+import com.google.protobuf.StringValue;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.test.aggregate.user.User;
-import io.spine.test.aggregate.user.UserVBuilder;
+import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.testing.server.User;
+import io.spine.testing.server.UserVBuilder;
 
 /**
- * The test environment aggregate for testing validation during aggregate state transition.
- *
  * @author Alexander Yevsyukov
+ * @author Dmytro Kuzmin
  */
-public class UserAggregate extends Aggregate<String, User, UserVBuilder> {
-    private UserAggregate(String id) {
-        super(id);
+public class EntityBuilderTestEnv {
+
+    /**
+     * The test environment aggregate for testing validation during aggregate state transition.
+     */
+    static class UserAggregate extends Aggregate<String, User, UserVBuilder> {
+        private UserAggregate(String id) {
+            super(id);
+        }
+    }
+
+    static class TestEntity extends AbstractVersionableEntity<Long, StringValue> {
+        protected TestEntity(Long id) {
+            super(id);
+        }
     }
 }
