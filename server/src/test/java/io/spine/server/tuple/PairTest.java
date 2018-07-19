@@ -129,8 +129,8 @@ class PairTest {
     class AllowOptionalB {
 
         @Test
-        @DisplayName("absent")
-        void absent() {
+        @DisplayName("empty")
+        void empty() {
             StringValue a = TestValues.newUuidValue();
             Optional<BoolValue> b = Optional.empty();
 
@@ -154,7 +154,7 @@ class PairTest {
     }
 
     @Test
-    @DisplayName("return Empty for absent Optional in iterator")
+    @DisplayName("return Empty for empty Optional in iterator")
     void getAbsentInIterator() {
         StringValue a = TestValues.newUuidValue();
         Pair<StringValue, Optional<BoolValue>> pair = Pair.withNullable(a, null);

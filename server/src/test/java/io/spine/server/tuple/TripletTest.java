@@ -139,8 +139,8 @@ class TripletTest {
         }
 
         @Test
-        @DisplayName("absent")
-        void absent() {
+        @DisplayName("empty")
+        void empty() {
             Triplet<StringValue, Optional<BoolValue>, Optional<UInt32Value>> optTriplet =
                     Triplet.withNullable2(a, null, null);
 
