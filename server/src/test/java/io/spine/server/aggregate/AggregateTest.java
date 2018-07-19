@@ -42,10 +42,8 @@ import io.spine.server.aggregate.given.aggregate.TaskAggregate;
 import io.spine.server.aggregate.given.aggregate.TaskAggregateRepository;
 import io.spine.server.aggregate.given.aggregate.TestAggregate;
 import io.spine.server.aggregate.given.aggregate.TestAggregateRepository;
-import io.spine.server.aggregate.given.aggregate.UserAggregate;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
-import io.spine.server.entity.InvalidEntityStateException;
 import io.spine.server.model.Model;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -64,11 +62,9 @@ import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.test.aggregate.event.AggTaskAssigned;
 import io.spine.test.aggregate.event.AggUserNotified;
 import io.spine.test.aggregate.rejection.Rejections;
-import io.spine.test.aggregate.user.User;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.time.testing.TimeTests;
-import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -96,7 +92,6 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.env;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.event;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.newTenantId;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.reassignTask;
-import static io.spine.testing.Verify.assertSize;
 import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
@@ -106,7 +101,6 @@ import static io.spine.testing.server.TestEventClasses.getEventClasses;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchRejection;
 import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
-import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -500,11 +494,11 @@ public class AggregateTest {
 
     @Nested
     @DisplayName("by default, not have any event records")
-    class NotReturnEventRecords {
+    class NotHaveEventRecords {
 
         @Test
         @DisplayName("which are uncommitted")
-        void notReturnUncommittedEventsByDefault() {
+        void uncommitedByDefault() {
             List<Event> events = aggregate().getUncommittedEvents();
 
             assertTrue(events.isEmpty());
@@ -512,7 +506,7 @@ public class AggregateTest {
 
         @Test
         @DisplayName("which are being committed")
-        void notReturnAnyEventsWhenCommitByDefault() {
+        void beingCommitedByDefault() {
             List<Event> events = aggregate().commitEvents();
 
             assertTrue(events.isEmpty());
@@ -688,45 +682,6 @@ public class AggregateTest {
     @DisplayName("not allow getting state builder from outside event applier")
     void notGetStateBuilderOutsideOfApplier() {
         assertThrows(IllegalStateException.class, () -> new IntAggregate(100).getBuilder());
-    }
-
-    @SuppressWarnings("CheckReturnValue") // Method called to throw exception.
-    @Test
-    @DisplayName("throw InvalidEntityStateException if entity state is invalid")
-    void throwOnInvalidState() {
-        User user = User.newBuilder()
-                        .setFirstName("|")
-                        .setLastName("|")
-                        .build();
-        try {
-            aggregateOfClass(UserAggregate.class).withId(getClass().getName())
-                                                 .withVersion(1)
-                                                 .withState(user)
-                                                 .build();
-            fail("Should have thrown InvalidEntityStateException.");
-        } catch (InvalidEntityStateException e) {
-            List<ConstraintViolation> violations = e.getError()
-                                                    .getValidationError()
-                                                    .getConstraintViolationList();
-            assertSize(user.getAllFields()
-                           .size(), violations);
-        }
-    }
-
-    @Test
-    @DisplayName("update valid entity state")
-    void updateEntityState() {
-        User user = User.newBuilder()
-                        .setFirstName("Fname")
-                        .setLastName("Lname")
-                        .build();
-        UserAggregate aggregate = aggregateOfClass(UserAggregate.class)
-                .withId(getClass().getName())
-                .withVersion(1)
-                .withState(user)
-                .build();
-
-        assertEquals(user, aggregate.getState());
     }
 
     @Nested
