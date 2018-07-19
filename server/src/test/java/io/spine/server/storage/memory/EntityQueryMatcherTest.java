@@ -89,12 +89,12 @@ class EntityQueryMatcherTest {
 
         EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
         EntityRecord matching = EntityRecord.newBuilder()
-                                                  .setEntityId(entityId)
-                                                  .build();
+                                            .setEntityId(entityId)
+                                            .build();
         Any otherEntityId = AnyPacker.pack(Sample.messageOfType(ProjectId.class));
         EntityRecord nonMatching = EntityRecord.newBuilder()
-                                                     .setEntityId(otherEntityId)
-                                                     .build();
+                                               .setEntityId(otherEntityId)
+                                               .build();
         EntityRecordWithColumns matchingRecord = of(matching);
         EntityRecordWithColumns nonMatchingRecord = of(nonMatching);
         assertTrue(matcher.apply(matchingRecord));
@@ -117,11 +117,11 @@ class EntityQueryMatcherTest {
         Collection<Object> ids = Collections.emptyList();
 
         Multimap<EntityColumn, ColumnFilter> filters = of(target,
-                                                                eq(targetName, acceptedValue));
+                                                          eq(targetName, acceptedValue));
         CompositeQueryParameter parameter = createParams(filters, ALL);
         QueryParameters params = QueryParameters.newBuilder()
-                                                      .add(parameter)
-                                                      .build();
+                                                .add(parameter)
+                                                .build();
         EntityQuery<?> query = createQuery(ids, params);
 
         Any matchingId = AnyPacker.pack(Sample.messageOfType(TaskId.class));
@@ -129,11 +129,11 @@ class EntityQueryMatcherTest {
 
         EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
         EntityRecord matching = EntityRecord.newBuilder()
-                                                  .setEntityId(matchingId)
-                                                  .build();
+                                            .setEntityId(matchingId)
+                                            .build();
         EntityRecord nonMatching = EntityRecord.newBuilder()
-                                                     .setEntityId(nonMatchingId)
-                                                     .build();
+                                               .setEntityId(nonMatchingId)
+                                               .build();
         EntityColumn.MemoizedValue storedValue = mock(EntityColumn.MemoizedValue.class);
         when(storedValue.getSourceColumn()).thenReturn(target);
         when(storedValue.getValue()).thenReturn(acceptedValue);
@@ -168,11 +168,11 @@ class EntityQueryMatcherTest {
         EntityRecordWithColumns recordWithColumns = createRecord(record, columns);
 
         Multimap<EntityColumn, ColumnFilter> filters = of(column,
-                                                                eq(columnName, actualValue));
+                                                          eq(columnName, actualValue));
         CompositeQueryParameter parameter = createParams(filters, ALL);
         QueryParameters parameters = QueryParameters.newBuilder()
-                                                          .add(parameter)
-                                                          .build();
+                                                    .add(parameter)
+                                                    .build();
         EntityQuery<?> query = createQuery(emptySet(), parameters);
 
         EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
@@ -186,17 +186,17 @@ class EntityQueryMatcherTest {
         EntityColumn target = mock(EntityColumn.class);
 
         Multimap<EntityColumn, ColumnFilter> filters = of(target,
-                                                                eq(wrongName, "any"));
+                                                          eq(wrongName, "any"));
         CompositeQueryParameter parameter = createParams(filters, EITHER);
         QueryParameters params = QueryParameters.newBuilder()
-                                                      .add(parameter)
-                                                      .build();
+                                                .add(parameter)
+                                                .build();
         EntityQuery<?> query = createQuery(Collections.emptyList(), params);
         EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
 
         EntityRecord record = EntityRecord.newBuilder()
-                                                .setEntityId(Any.getDefaultInstance())
-                                                .build();
+                                          .setEntityId(Any.getDefaultInstance())
+                                          .build();
         EntityRecordWithColumns recordWithColumns = of(record);
         assertFalse(matcher.apply(recordWithColumns));
     }

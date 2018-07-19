@@ -46,16 +46,16 @@ public class InMemoryRecordStorageTest
     @Override
     protected InMemoryRecordStorage<ProjectId> newStorage(Class<? extends Entity> cls) {
         StorageSpec<ProjectId> spec = StorageSpec.of(newName(getClass().getSimpleName()),
-                                                           TypeUrl.of(Project.class),
-                                                           ProjectId.class);
+                                                     TypeUrl.of(Project.class),
+                                                     ProjectId.class);
         return InMemoryRecordStorage.newInstance(spec, false, cls);
     }
 
     @Override
     protected ProjectId newId() {
         ProjectId id = ProjectId.newBuilder()
-                                      .setId(newUuid())
-                                      .build();
+                                .setId(newUuid())
+                                .build();
         return id;
     }
 
@@ -63,11 +63,11 @@ public class InMemoryRecordStorageTest
     protected Message newState(ProjectId id) {
         String uniqueName = format("record-storage-test-%s-%s", id.getId(), nanoTime());
         Project project = Project.newBuilder()
-                                       .setId(id)
-                                       .setStatus(Project.Status.CREATED)
-                                       .setName(uniqueName)
-                                       .addTask(Task.getDefaultInstance())
-                                       .build();
+                                 .setId(id)
+                                 .setStatus(Project.Status.CREATED)
+                                 .setName(uniqueName)
+                                 .addTask(Task.getDefaultInstance())
+                                 .build();
         return project;
     }
 

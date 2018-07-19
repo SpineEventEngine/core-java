@@ -78,22 +78,22 @@ public class Given {
     public static Event validEvent() {
         Command cmd = validCommand();
         ProjectId.Builder projectIdBuilder = ProjectId.newBuilder()
-                                                            .setId("12345AD0");
+                                                      .setId("12345AD0");
         PrjProjectCreated eventMessage =
                 PrjProjectCreated.newBuilder()
                                  .setProjectId(projectIdBuilder)
                                  .build();
         StringValue producerId = toMessage(Given.class.getSimpleName());
         EventFactory eventFactory = EventFactory.on(CommandEnvelope.of(cmd),
-                                                          Identifier.pack(producerId));
+                                                    Identifier.pack(producerId));
         Event event = eventFactory.createEvent(eventMessage, nullRef());
         Event result = event.toBuilder()
-                                  .setContext(event.getContext()
-                                                   .toBuilder()
-                                                   .setEnrichment(Enrichment.newBuilder()
-                                                                            .setDoNotEnrich(true))
-                                                   .build())
-                                  .build();
+                            .setContext(event.getContext()
+                                             .toBuilder()
+                                             .setEnrichment(Enrichment.newBuilder()
+                                                                      .setDoNotEnrich(true))
+                                             .build())
+                            .build();
         return result;
     }
 

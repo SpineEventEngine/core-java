@@ -742,12 +742,12 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
         Project.Status value = Enum.valueOf(Project.Status.class, requiredValue.name());
         ColumnFilter status = eq(columnPath, value);
         CompositeColumnFilter aggregatingFilter = CompositeColumnFilter.newBuilder()
-                                                                             .setOperator(ALL)
-                                                                             .addFilter(status)
-                                                                             .build();
+                                                                       .setOperator(ALL)
+                                                                       .addFilter(status)
+                                                                       .build();
         EntityFilters filters = EntityFilters.newBuilder()
-                                                   .addFilter(aggregatingFilter)
-                                                   .build();
+                                             .addFilter(aggregatingFilter)
+                                             .build();
 
         RecordStorage<I> storage = getStorage();
 
@@ -771,7 +771,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
         storage.write(idWrong, recordWrong);
 
         Iterator<EntityRecord> readRecords = storage.readAll(query,
-                                                                   FieldMask.getDefaultInstance());
+                                                             FieldMask.getDefaultInstance());
         assertSingleRecord(fineRecord, readRecords);
     }
 
