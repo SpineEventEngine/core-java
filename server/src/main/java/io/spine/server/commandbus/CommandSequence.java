@@ -35,6 +35,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
 import io.spine.core.Status;
+import io.spine.server.procman.CommandSplit;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -43,6 +44,7 @@ import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.core.Commands.toDispatched;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
@@ -52,6 +54,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
  * @param <B> the type of the result builder
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("ClassReferencesSubclass")
 @Internal
 public abstract class CommandSequence<R extends Message, B extends Message.Builder,
         S extends CommandSequence<R, B, S>> {
@@ -76,6 +79,18 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
     }
 
     /**
+     * Creates a sequence for splitting the source command into several ones.
+     *
+     * @param bus the command bus to post commands
+     * @param commandMessage the message of the source command
+     * @param context the context of the source command
+     * @return new empty sequence
+     */
+    public static Split split(CommandBus bus, Message commandMessage, CommandContext context) {
+        return new Split(bus, commandMessage, context);
+    }
+
+    /**
      * Creates a new builder for the result generated when all the commands are posted.
      */
     protected abstract B newBuilder();
@@ -86,7 +101,7 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
     protected abstract void addPosted(B builder, Message message, CommandContext context);
 
     /**
-     * Adds a {@code commandMessage} to the sequence.
+     * Adds a command message to the sequence of commands to be posted.
      */
     @CanIgnoreReturnValue
     protected  S add(Message commandMessage) {
@@ -112,6 +127,13 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
     }
 
     /**
+     * Obtains the size of the command sequence.
+     */
+    protected int size() {
+        return queue.size();
+    }
+
+    /**
      * Tests whether the queue of command messages to be posted is empty.
      */
     private boolean hasNext() {
@@ -129,6 +151,9 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
 
     /**
      * Posts all commands to the {@code CommandBus} in the order that they were added.
+     *
+     * <p>The {@linkplain #size() size} of the sequence after this method is zero <em>if</em>
+     * all the commands were posted successfully.
      *
      * @return the result
      */
@@ -224,6 +249,77 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
         @Override
         public void onError(Message commandMessage, CommandContext context, Throwable throwable) {
             throw new CommandPostingException(commandMessage, context, throwable);
+        }
+    }
+
+    /**
+     * Abstract base for command sequences initiated from a source command.
+     */
+    private abstract static
+    class OnCommand<R extends Message,
+                    B extends Message.Builder,
+                    S extends CommandSequence<R, B, S>>
+            extends CommandSequence<R, B, S> {
+
+        private final Message sourceMessage;
+        private final CommandContext sourceContext;
+
+        protected OnCommand(CommandBus commandBus, Message message, CommandContext context) {
+            super(commandBus, context.getActorContext());
+            this.sourceMessage = message;
+            this.sourceContext = context;
+        }
+
+        protected Message getSourceMessage() {
+            return sourceMessage;
+        }
+
+        protected CommandContext getSourceContext() {
+            return sourceContext;
+        }
+    }
+
+    /**
+     * A {@code CommandSequence} of two or more commands which is generated in response to
+     * a source command.
+     */
+    public static final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, Split> {
+
+        private Split(CommandBus commandBus, Message sourceMessage, CommandContext sourceContext) {
+            super(commandBus, sourceMessage, sourceContext);
+        }
+
+        /** {@inheritDoc} */
+        @CanIgnoreReturnValue
+        @Override
+        public Split add(Message commandMessage) {
+            return super.add(commandMessage);
+        }
+
+        @Override
+        protected CommandSplit.Builder newBuilder() {
+            CommandSplit.Builder result = CommandSplit
+                    .newBuilder()
+                    .setSource(toDispatched(getSourceMessage(), getSourceContext()));
+            return result;
+        }
+
+        @SuppressWarnings("CheckReturnValue") // calling builder method
+        @Override
+        protected void addPosted(CommandSplit.Builder builder,
+                                 Message message,
+                                 CommandContext context) {
+            builder.addProduced(toDispatched(message, context));
+        }
+
+        @Override
+        public CommandSplit postAll() {
+            checkState(size() >= 2,
+                       "The split sequence must have at least two commands. " +
+                               "For converting a command to another please use " +
+                               "`CommandSequence.transform()`."
+            );
+            return super.postAll();
         }
     }
 }

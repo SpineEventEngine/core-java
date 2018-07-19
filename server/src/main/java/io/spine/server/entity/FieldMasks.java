@@ -33,9 +33,9 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -98,27 +98,25 @@ public class FieldMasks {
      */
     @Nonnull
     public static <M extends Message, B extends Message.Builder>
-    Collection<M> applyMask(FieldMask mask,
-                            Collection<M> messages,
-                            TypeUrl type) {
+    Collection<M> applyMask(FieldMask mask, Collection<M> messages, TypeUrl type) {
         checkNotNull(mask);
         checkNotNull(messages);
         checkNotNull(type);
 
-        final List<M> filtered = new LinkedList<>();
-        final ProtocolStringList filter = mask.getPathsList();
-        final Class<B> builderClass = getBuilderForType(type);
+        List<M> filtered = new ArrayList<>();
+        ProtocolStringList filter = mask.getPathsList();
+        Class<B> builderClass = getBuilderForType(type);
 
         if (filter.isEmpty() || builderClass == null) {
             return Collections.unmodifiableCollection(messages);
         }
 
         try {
-            final Constructor<B> builderConstructor = builderClass.getDeclaredConstructor();
+            Constructor<B> builderConstructor = builderClass.getDeclaredConstructor();
             builderConstructor.setAccessible(true);
 
             for (Message wholeMessage : messages) {
-                final M message = messageForFilter(filter, builderConstructor, wholeMessage);
+                M message = messageForFilter(filter, builderConstructor, wholeMessage);
                 filtered.add(message);
             }
         } catch (NoSuchMethodException |

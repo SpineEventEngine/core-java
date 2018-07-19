@@ -33,7 +33,6 @@ import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Commands;
-import io.spine.core.DispatchedCommand;
 import io.spine.server.commandbus.CommandBus;
 
 import java.util.NoSuchElementException;
@@ -41,7 +40,6 @@ import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.commandbus.CommandSequence.checkSent;
 import static io.spine.server.commandbus.CommandSequence.newAckObserver;
 
@@ -82,14 +80,7 @@ public final class CommandRouter {
         this.rootCommandContext = commandContext;
         this.eventBuilder = CommandRouted
                 .newBuilder()
-                .setOrigin(
-                        DispatchedCommand
-                                .newBuilder()
-                                .setMessage(pack(commandMessage))
-                                .setContext(commandContext)
-                                .build()
-                );
-
+                .setOrigin(Commands.toDispatched(commandMessage, commandContext));
         this.originMessage = commandMessage;
         this.queue = Queues.newConcurrentLinkedQueue();
         this.commandFactory = commandFactory(commandContext.getActorContext());

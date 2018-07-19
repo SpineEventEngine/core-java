@@ -108,10 +108,26 @@ public final class Commands {
      */
     public static DispatchedCommand toDispatched(Command command) {
         checkNotNull(command);
+        return toDispatched(command.getMessage(), command.getContext());
+    }
+
+    /**
+     * Creates a {@code DispatchedCommand} with the passed command message and context.
+     *
+     * @param commandMessage the message of the command, can be already packed into {@code Any}
+     * @param context the context of the message
+     * @return new instance of {@code DispatchedCommand}
+     */
+    public static DispatchedCommand toDispatched(Message commandMessage, CommandContext context) {
+        checkNotNull(commandMessage);
+        checkNotNull(context);
+        Any packed = commandMessage instanceof Any
+                ? (Any) commandMessage
+                : AnyPacker.pack(commandMessage);
         DispatchedCommand.Builder result = DispatchedCommand
                 .newBuilder()
-                .setMessage(command.getMessage())
-                .setContext(command.getContext());
+                .setMessage(packed)
+                .setContext(context);
         return result.build();
     }
 
