@@ -84,8 +84,8 @@ public class CommandExpectedTestEnv {
 
     private static Rejection rejection(Message rejectionMessage) {
         RejectionId id = RejectionId.newBuilder()
-                                         .setValue("test rejectionMessage")
-                                         .build();
+                                    .setValue("test rejection")
+                                    .build();
         return Rejection.newBuilder()
                         .setId(id)
                         .setMessage(pack(rejectionMessage))
