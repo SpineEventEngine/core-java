@@ -86,7 +86,7 @@ class Element implements Serializable {
      */
     private static void checkNotDefault(Message value) {
         String valueClass = value.getClass()
-                                       .getName();
+                                 .getName();
         checkArgument(
                 Validate.isNotDefault(value),
                 "Tuples cannot contain default values. Default value of %s encountered.",
