@@ -45,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class CommandHandlerExpectedTest {
 
     @Test
-    @DisplayName("validate the rejectionMessage")
+    @DisplayName("validate the rejection")
     void trackRejection() {
         CommandHandlerExpected<UInt64Value> expected =
                 commandExpectedWithRejection(rejectionMessage());
