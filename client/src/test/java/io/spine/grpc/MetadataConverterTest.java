@@ -20,7 +20,6 @@
 
 package io.spine.grpc;
 
-import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Metadata;
@@ -28,6 +27,7 @@ import io.spine.base.Error;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
@@ -68,8 +68,8 @@ class MetadataConverterTest {
     @Test
     @DisplayName("convert Metadata to Error")
     void convertMetadata() {
-        final Error expectedError = Error.getDefaultInstance();
-        final Metadata metadata = MetadataConverter.toMetadata(expectedError);
+        Error expectedError = Error.getDefaultInstance();
+        Metadata metadata = MetadataConverter.toMetadata(expectedError);
 
         Optional<Error> optional = MetadataConverter.toError(metadata);
         assertTrue(optional.isPresent());

@@ -55,7 +55,7 @@ public final class Queries {
     }
 
     public static QueryId generateId() {
-        final String formattedId = format(QUERY_ID_FORMAT, Identifier.newUuid());
+        String formattedId = format(QUERY_ID_FORMAT, Identifier.newUuid());
         return QueryId.newBuilder()
                       .setValue(formattedId)
                       .build();
@@ -73,10 +73,11 @@ public final class Queries {
     public static TypeUrl typeOf(Query query) {
         checkNotNull(query);
 
-        final Target target = query.getTarget();
-        final String type = target.getType();
-        final TypeUrl typeUrl = TypeUrl.parse(type);
-        checkState(KnownTypes.instance().contains(typeUrl),
+        Target target = query.getTarget();
+        String type = target.getType();
+        TypeUrl typeUrl = TypeUrl.parse(type);
+        checkState(KnownTypes.instance()
+                             .contains(typeUrl),
                    "Unknown type URL: `%s`.", type);
         return typeUrl;
     }
@@ -88,9 +89,9 @@ public final class Queries {
                                          @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass);
 
-        final Target target = composeTarget(entityClass, ids, columnFilters);
-        final Query.Builder queryBuilder = Query.newBuilder()
-                                                .setTarget(target);
+        Target target = composeTarget(entityClass, ids, columnFilters);
+        Query.Builder queryBuilder = Query.newBuilder()
+                                          .setTarget(target);
         if (fieldMask != null) {
             queryBuilder.setFieldMask(fieldMask);
         }
