@@ -125,14 +125,14 @@ class CommandRoutingRejectionTest {
         // Check that the command is rejected.
         assertEquals(CommandStatus.REJECTED, status.getCode());
         Message rejectionMessage = AnyPacker.unpack(status.getRejection()
-                                                                .getMessage());
+                                                          .getMessage());
         assertTrue(rejectionMessage instanceof Rejections.SwitchmanUnavailable);
 
         // Check that the event and the rejection were dispatched.
         Optional<Log> optional = logRepository.find(Log.ID);
         assertTrue(optional.isPresent());
         LogState log = optional.get()
-                                     .getState();
+                               .getState();
         assertTrue(log.containsCounters(switchmanName));
         assertTrue(log.getMissingSwitchmanList()
                       .contains(SwitchmanBureau.MISSING_SWITCHMAN_NAME));

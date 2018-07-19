@@ -168,9 +168,9 @@ public class ProjectionRepositoryTestEnv {
             keep(event);
 
             Project newState = getState().toBuilder()
-                                               .setId(event.getProjectId())
-                                               .setStatus(Project.Status.CREATED)
-                                               .build();
+                                         .setId(event.getProjectId())
+                                         .setStatus(Project.Status.CREATED)
+                                         .build();
             getBuilder().mergeFrom(newState);
         }
 
@@ -178,8 +178,8 @@ public class ProjectionRepositoryTestEnv {
         public void on(PrjTaskAdded event) {
             keep(event);
             Project newState = getState().toBuilder()
-                                               .addTask(event.getTask())
-                                               .build();
+                                         .addTask(event.getTask())
+                                         .build();
             getBuilder().mergeFrom(newState);
         }
 
@@ -195,8 +195,8 @@ public class ProjectionRepositoryTestEnv {
                        @SuppressWarnings("UnusedParameters") EventContext ignored) {
             keep(event);
             Project newState = getState().toBuilder()
-                                               .setStatus(Project.Status.STARTED)
-                                               .build();
+                                         .setStatus(Project.Status.STARTED)
+                                         .build();
             getBuilder().mergeFrom(newState);
         }
 

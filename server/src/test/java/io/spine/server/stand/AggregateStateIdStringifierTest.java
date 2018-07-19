@@ -117,7 +117,7 @@ class AggregateStateIdStringifierTest {
             Stringifier<AggregateStateId> stringifier = stringifier();
 
             AggregateStateId id = stringifier.reverse()
-                                                   .convert(stringId);
+                                             .convert(stringId);
 
             assertNotNull(id);
             assertEquals(ANY_TYPE_URL, id.getStateType());
@@ -132,7 +132,7 @@ class AggregateStateIdStringifierTest {
             Stringifier<AggregateStateId> stringifier = stringifier();
 
             AggregateStateId id = stringifier.reverse()
-                                                   .convert(stringId);
+                                             .convert(stringId);
 
             assertNotNull(id);
             assertEquals(ANY_TYPE_URL, id.getStateType());
@@ -147,7 +147,7 @@ class AggregateStateIdStringifierTest {
             Stringifier<AggregateStateId> stringifier = stringifier();
 
             AggregateStateId id = stringifier.reverse()
-                                                   .convert(stringId);
+                                             .convert(stringId);
 
             assertNotNull(id);
             assertEquals(ANY_TYPE_URL, id.getStateType());
@@ -164,7 +164,7 @@ class AggregateStateIdStringifierTest {
             Stringifier<AggregateStateId> stringifier = stringifier();
 
             AggregateStateId id = stringifier.reverse()
-                                                   .convert(stringId);
+                                             .convert(stringId);
 
             assertNotNull(id);
             assertEquals(ANY_TYPE_URL, id.getStateType());
@@ -214,7 +214,7 @@ class AggregateStateIdStringifierTest {
         assertNotNull(stringAggregateId);
 
         AggregateStateId restored = stringifier.reverse()
-                                                     .convert(stringAggregateId);
+                                               .convert(stringAggregateId);
         assertEquals(id, restored);
     }
 

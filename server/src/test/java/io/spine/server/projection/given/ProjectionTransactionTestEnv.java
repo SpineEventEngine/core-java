@@ -74,8 +74,8 @@ public class ProjectionTransactionTestEnv {
         public void event(PrjProjectCreated event) {
             receivedEvents.add(event);
             Project newState = Project.newBuilder(getState())
-                                            .setId(event.getProjectId())
-                                            .build();
+                                      .setId(event.getProjectId())
+                                      .build();
             getBuilder().mergeFrom(newState);
         }
 

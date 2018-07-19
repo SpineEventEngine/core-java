@@ -119,11 +119,11 @@ class ProcessManagerRepositoryTest
     @Override
     protected TestProcessManager createEntity() {
         ProjectId id = ProjectId.newBuilder()
-                                      .setId(newUuid())
-                                      .build();
+                                .setId(newUuid())
+                                .build();
         TestProcessManager result = Given.processManagerOfClass(TestProcessManager.class)
-                                               .withId(id)
-                                               .build();
+                                         .withId(id)
+                                         .build();
         return result;
     }
 

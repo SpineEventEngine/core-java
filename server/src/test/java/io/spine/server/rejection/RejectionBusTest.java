@@ -186,7 +186,7 @@ public class RejectionBusTest {
     @DisplayName("unregister registries on close")
     void unregisterAllOnClose() throws Exception {
         RejectionBus rejectionBus = RejectionBus.newBuilder()
-                                                      .build();
+                                                .build();
         rejectionBus.register(new BareDispatcher());
         rejectionBus.register(new InvalidProjectNameSubscriber());
         RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
@@ -344,7 +344,8 @@ public class RejectionBusTest {
         Ack result = observer.firstResponse();
         assertNotNull(result);
         assertEquals(ERROR, result.getStatus().getStatusCase());
-        Error error = result.getStatus().getError();
+        Error error = result.getStatus()
+                            .getError();
         assertEquals(UnhandledRejectionException.class.getCanonicalName(), error.getType());
     }
 

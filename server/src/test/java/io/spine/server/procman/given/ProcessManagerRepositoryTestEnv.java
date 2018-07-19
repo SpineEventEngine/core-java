@@ -112,23 +112,23 @@ public class ProcessManagerRepositoryTestEnv {
 
         private void handleProjectCreated(ProjectId projectId) {
             Project newState = getState().toBuilder()
-                                               .setId(projectId)
-                                               .setStatus(Project.Status.CREATED)
-                                               .build();
+                                         .setId(projectId)
+                                         .setStatus(Project.Status.CREATED)
+                                         .build();
             getBuilder().mergeFrom(newState);
         }
 
         private void handleTaskAdded(Task task) {
             Project newState = getState().toBuilder()
-                                               .addTask(task)
-                                               .build();
+                                         .addTask(task)
+                                         .build();
             getBuilder().mergeFrom(newState);
         }
 
         private void handleProjectStarted() {
             Project newState = getState().toBuilder()
-                                               .setStatus(Project.Status.STARTED)
-                                               .build();
+                                         .setStatus(Project.Status.STARTED)
+                                         .build();
             getBuilder().mergeFrom(newState);
         }
 
@@ -138,8 +138,8 @@ public class ProcessManagerRepositoryTestEnv {
 
             PmProjectCreated event = ((PmProjectCreated.Builder)
                     Sample.builderForType(PmProjectCreated.class))
-                          .setProjectId(command.getProjectId())
-                          .build();
+                    .setProjectId(command.getProjectId())
+                    .build();
             return event;
         }
 
@@ -149,8 +149,8 @@ public class ProcessManagerRepositoryTestEnv {
 
             PmTaskAdded event = ((PmTaskAdded.Builder)
                     Sample.builderForType(PmTaskAdded.class))
-                          .setProjectId(command.getProjectId())
-                          .build();
+                    .setProjectId(command.getProjectId())
+                    .build();
             return event;
         }
 
@@ -160,8 +160,8 @@ public class ProcessManagerRepositoryTestEnv {
 
             Message addTask = ((PmAddTask.Builder)
                     Sample.builderForType(PmAddTask.class))
-                          .setProjectId(command.getProjectId())
-                          .build();
+                    .setProjectId(command.getProjectId())
+                    .build();
             return newRouterFor(command, context)
                     .add(addTask)
                     .routeAll();

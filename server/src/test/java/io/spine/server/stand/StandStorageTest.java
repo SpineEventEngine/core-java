@@ -65,8 +65,8 @@ public abstract class StandStorageTest extends RecordStorageTest<AggregateStateI
     protected static final Supplier<AggregateStateId<ProjectId>> DEFAULT_ID_SUPPLIER
             = () -> {
         ProjectId projectId = ProjectId.newBuilder()
-                                             .setId(Identifier.newUuid())
-                                             .build();
+                                       .setId(Identifier.newUuid())
+                                       .build();
         return AggregateStateId.of(projectId, TypeUrl.of(Project.class));
     };
 
@@ -74,11 +74,11 @@ public abstract class StandStorageTest extends RecordStorageTest<AggregateStateI
     protected Message newState(AggregateStateId id) {
         String uniqueName = format("test-project-%s-%s", id.toString(), System.nanoTime());
         Project project = Project.newBuilder()
-                                       .setId((ProjectId) id.getAggregateId())
-                                       .setStatus(Project.Status.CREATED)
-                                       .setName(uniqueName)
-                                       .addTask(Task.getDefaultInstance())
-                                       .build();
+                                 .setId((ProjectId) id.getAggregateId())
+                                 .setStatus(Project.Status.CREATED)
+                                 .setName(uniqueName)
+                                 .addTask(Task.getDefaultInstance())
+                                 .build();
         return project;
     }
 
@@ -133,15 +133,15 @@ public abstract class StandStorageTest extends RecordStorageTest<AggregateStateI
             int tasksCount = 5;
             for (int i = 0; i < tasksCount; i++) {
                 TaskId genericId = TaskId.newBuilder()
-                                               .setId(i)
-                                               .build();
+                                         .setId(i)
+                                         .build();
                 AggregateStateId id =
                         AggregateStateId.of(genericId, TypeUrl.from(Task.getDescriptor()));
                 Task task = Task.newBuilder()
-                                      .setTaskId(genericId)
-                                      .setTitle("Test task")
-                                      .setDescription("With description")
-                                      .build();
+                                .setTaskId(genericId)
+                                .setTitle("Test task")
+                                .setDescription("With description")
+                                .build();
                 EntityRecord record = newRecord(task);
                 storage.write(id, record);
             }
@@ -247,9 +247,9 @@ public abstract class StandStorageTest extends RecordStorageTest<AggregateStateI
 
     private static EntityRecord newRecord(Message state) {
         EntityRecord record = EntityRecord.newBuilder()
-                                                .setState(AnyPacker.pack(state))
-                                                .setVersion(GivenVersion.withNumber(1))
-                                                .build();
+                                          .setState(AnyPacker.pack(state))
+                                          .setVersion(GivenVersion.withNumber(1))
+                                          .build();
         return record;
     }
 

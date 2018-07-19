@@ -57,14 +57,14 @@ public class ProjectionTestEnv {
         @Subscribe
         public void on(Int32Value event) {
             StringValue newState = createNewState("integerState",
-                                                        String.valueOf(event.getValue()));
+                                                  String.valueOf(event.getValue()));
             getBuilder().mergeFrom(newState);
         }
 
         private StringValue createNewState(String type, String value) {
             // Get the current state within the transaction.
             String currentState = getBuilder().internalBuild()
-                                                    .getValue();
+                                              .getValue();
             String result = currentState + (currentState.length() > 0 ? " + " : "") +
                     type + '(' + value + ')' + System.lineSeparator();
             return toMessage(result);

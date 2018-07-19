@@ -49,8 +49,8 @@ class SubscriptionRecordTest {
     @DisplayName("match record to given parameters")
     void matchRecordToParams() {
         SubscriptionRecord matchingRecord = new SubscriptionRecord(subscription(),
-                                                                         target(),
-                                                                         TYPE);
+                                                                   target(),
+                                                                   TYPE);
         Project entityState = Project.getDefaultInstance();
         Any wrappedState = AnyPacker.pack(entityState);
         ProjectId redundantId = ProjectId.getDefaultInstance();
@@ -63,14 +63,14 @@ class SubscriptionRecordTest {
     @DisplayName("fail to match improper type")
     void notMatchImproperType() {
         SubscriptionRecord notMatchingRecord = new SubscriptionRecord(subscription(),
-                                                                            target(),
-                                                                            TYPE);
+                                                                      target(),
+                                                                      TYPE);
         Project entityState = Project.getDefaultInstance();
         Any wrappedState = AnyPacker.pack(entityState);
         ProjectId redundantId = ProjectId.getDefaultInstance();
 
         boolean matchResult = notMatchingRecord.matches(OTHER_TYPE, redundantId,
-                                                              wrappedState);
+                                                        wrappedState);
         assertFalse(matchResult);
     }
 
@@ -78,11 +78,11 @@ class SubscriptionRecordTest {
     @DisplayName("fail to match improper target")
     void notMatchImproperTarget() {
         ProjectId nonExistingId = ProjectId.newBuilder()
-                                                 .setId("never-existed")
-                                                 .build();
+                                           .setId("never-existed")
+                                           .build();
         SubscriptionRecord notMatchingRecord = new SubscriptionRecord(subscription(),
-                                                                            target(nonExistingId),
-                                                                            TYPE);
+                                                                      target(nonExistingId),
+                                                                      TYPE);
         Project entityState = Project.getDefaultInstance();
         Any wrappedState = AnyPacker.pack(entityState);
         ProjectId redundantId = ProjectId.getDefaultInstance();
@@ -97,15 +97,15 @@ class SubscriptionRecordTest {
         Subscription oneSubscription = subscription();
         SubscriptionId breakingId = Subscriptions.newId("breaking-id");
         Subscription otherSubscription = Subscription.newBuilder()
-                                                           .setId(breakingId)
-                                                           .build();
+                                                     .setId(breakingId)
+                                                     .build();
         @SuppressWarnings("QuestionableName") SubscriptionRecord one = new SubscriptionRecord(oneSubscription, target(), TYPE);
         SubscriptionRecord similar = new SubscriptionRecord(otherSubscription,
-                                                                  target(),
-                                                                  TYPE);
+                                                            target(),
+                                                            TYPE);
         SubscriptionRecord same = new SubscriptionRecord(oneSubscription,
-                                                               target(),
-                                                               TYPE);
+                                                         target(),
+                                                         TYPE);
         assertNotEquals(one, similar);
         assertEquals(one, same);
     }

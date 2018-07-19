@@ -53,8 +53,8 @@ public class ProjectionEventDeliveryTestEnv {
                 );
 
         PrjProjectCreated msg = PrjProjectCreated.newBuilder()
-                                                       .setProjectId(projectId)
-                                                       .build();
+                                                 .setProjectId(projectId)
+                                                 .build();
 
         Event result = eventFactory.createEvent(msg);
         return result;

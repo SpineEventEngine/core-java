@@ -175,7 +175,7 @@ class RejectionRoutingTest {
         rejectionRouting.route(EntityAlreadyArchived.class, customRoute);
 
         Set<String> ids = rejectionRouting.apply(rejection,
-                                                       RejectionContext.getDefaultInstance());
+                                                 RejectionContext.getDefaultInstance());
 
         assertEquals(DEFAULT_ROUTE, ids);
     }
@@ -190,7 +190,7 @@ class RejectionRoutingTest {
                                      .setEntityId(thisTestAsEntity())
                                      .build();
         Set<String> ids = rejectionRouting.apply(rejection,
-                                                       RejectionContext.getDefaultInstance());
+                                                 RejectionContext.getDefaultInstance());
         assertEquals(CUSTOM_ROUTE, ids);
     }
 

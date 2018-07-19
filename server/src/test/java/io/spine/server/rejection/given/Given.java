@@ -57,16 +57,16 @@ public class Given {
                                                     .setProjectId(projectId)
                                                     .build();
         StringChange nameChange = StringChange.newBuilder()
-                                                    .setNewValue("Too short")
-                                                    .build();
+                                              .setNewValue("Too short")
+                                              .build();
         RjUpdateProjectName updateProjectName =
                 RjUpdateProjectNameVBuilder.newBuilder()
                                            .setId(projectId)
                                            .setNameUpdate(nameChange)
                                            .build();
         TenantId generatedTenantId = TenantId.newBuilder()
-                                                   .setValue(newUuid())
-                                                   .build();
+                                             .setValue(newUuid())
+                                             .build();
         TestActorRequestFactory factory =
                 TestActorRequestFactory.newInstance(RejectionBusTest.class, generatedTenantId);
         Command command = factory.createCommand(updateProjectName);
@@ -88,8 +88,8 @@ public class Given {
         ProjectId projectId = newProjectId();
         Any idAny = AnyPacker.pack(projectId);
         CannotModifyDeletedEntity rejectionMsg = CannotModifyDeletedEntity.newBuilder()
-                                                                                .setEntityId(idAny)
-                                                                                .build();
+                                                                          .setEntityId(idAny)
+                                                                          .build();
         Command command = io.spine.server.commandbus.Given.ACommand.withMessage(
                 Sample.messageOfType(commandMessage));
         return Rejections.createRejection(rejectionMsg, command);
@@ -97,8 +97,8 @@ public class Given {
 
     private static ProjectId newProjectId() {
         ProjectId projectId = ProjectId.newBuilder()
-                                             .setId(newUuid())
-                                             .build();
+                                       .setId(newUuid())
+                                       .build();
         return projectId;
     }
 }

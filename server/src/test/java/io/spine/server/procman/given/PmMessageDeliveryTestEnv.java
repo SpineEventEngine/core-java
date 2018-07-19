@@ -65,8 +65,8 @@ public class PmMessageDeliveryTestEnv {
     public static Command createProject() {
         ProjectId projectId = projectId();
         Command command = createCommand(PmCreateProject.newBuilder()
-                                                             .setProjectId(projectId)
-                                                             .build());
+                                                       .setProjectId(projectId)
+                                                       .build());
         return command;
     }
 
@@ -79,8 +79,8 @@ public class PmMessageDeliveryTestEnv {
                 );
 
         PmProjectStarted msg = PmProjectStarted.newBuilder()
-                                                     .setProjectId(projectId)
-                                                     .build();
+                                               .setProjectId(projectId)
+                                               .build();
 
         Event result = eventFactory.createEvent(msg);
         return result;
@@ -96,8 +96,8 @@ public class PmMessageDeliveryTestEnv {
         ProjectId projectId = projectId();
 
         PmStartProject cmdMessage = PmStartProject.newBuilder()
-                                                        .setProjectId(projectId)
-                                                        .build();
+                                                  .setProjectId(projectId)
+                                                  .build();
         Command command = createCommand(cmdMessage);
         Rejection result = toRejection(throwableWith(projectId), command);
         return result;

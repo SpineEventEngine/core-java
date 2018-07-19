@@ -101,7 +101,7 @@ class ProjectionEventTest {
     @DisplayName("return handled event classes")
     void exposeEventClasses() {
         Set<EventClass> classes = ProjectionClass.of(TestProjection.class)
-                                                       .getEventSubscriptions();
+                                                 .getEventSubscriptions();
 
         assertEquals(TestProjection.HANDLING_EVENT_COUNT, classes.size());
         assertTrue(classes.contains(EventClass.of(StringValue.class)));
@@ -113,11 +113,11 @@ class ProjectionEventTest {
     void exposePlayingEvents() {
         TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
         StringValue strValue = StringValue.newBuilder()
-                                                .setValue("eins zwei drei")
-                                                .build();
+                                          .setValue("eins zwei drei")
+                                          .build();
         Int32Value intValue = Int32Value.newBuilder()
-                                              .setValue(123)
-                                              .build();
+                                        .setValue(123)
+                                        .build();
         Version nextVersion = Versions.increment(projection.getVersion());
         Event e1 = eventFactory.createEvent(strValue, nextVersion);
         Event e2 = eventFactory.createEvent(intValue, Versions.increment(nextVersion));
@@ -125,7 +125,7 @@ class ProjectionEventTest {
         boolean projectionChanged = Projection.play(projection, ImmutableList.of(e1, e2));
 
         String projectionState = projection.getState()
-                                                 .getValue();
+                                           .getValue();
 
         assertTrue(projectionChanged);
         assertTrue(projectionState.contains(strValue.getValue()));

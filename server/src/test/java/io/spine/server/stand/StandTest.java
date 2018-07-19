@@ -197,8 +197,8 @@ class StandTest extends TenantAwareTest {
         void projectionRepositories() {
             boolean multitenant = isMultitenant();
             BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                                .setMultitenant(multitenant)
-                                                                .build();
+                                                          .setMultitenant(multitenant)
+                                                          .build();
             Stand stand = boundedContext.getStand();
 
             checkTypesEmpty(stand);
@@ -313,8 +313,8 @@ class StandTest extends TenantAwareTest {
                 AggregateStateId.of(customerId, customerType);
         Any packedState = AnyPacker.pack(customerState);
         EntityRecord expectedRecord = EntityRecord.newBuilder()
-                                                        .setState(packedState)
-                                                        .build();
+                                                  .setState(packedState)
+                                                  .build();
         verify(standStorageMock, times(1))
                 .write(eq(expectedAggregateStateId), recordStateMatcher(expectedRecord));
     }
@@ -337,10 +337,10 @@ class StandTest extends TenantAwareTest {
 
             Query readCustomersById = requestFactory.query()
                                                     .byIds(Customer.class,
-                                                                 newHashSet(
-                                                                  customerIdFor(1),
-                                                                  customerIdFor(2)
-                                                          ));
+                                                           newHashSet(
+                                                                   customerIdFor(1),
+                                                                   customerIdFor(2)
+                                                           ));
 
             checkEmptyResultForTargetOnEmptyStorage(readCustomersById);
         }
@@ -367,7 +367,7 @@ class StandTest extends TenantAwareTest {
             Stand stand = prepareStandWithAggregateRepo(standStorageMock);
 
             Query noneOfCustomersQuery = requestFactory.query()
-                                                             .byIds(Customer.class, emptySet());
+                                                       .byIds(Customer.class, emptySet());
 
             MemoizeQueryResponseObserver responseObserver =
                     new MemoizeQueryResponseObserver();
@@ -487,8 +487,8 @@ class StandTest extends TenantAwareTest {
         Map<CustomerId, Customer> sampleCustomers = fillSampleCustomers(10);
 
         Topic someCustomers = requestFactory.topic()
-                                                  .someOf(Customer.class,
-                                                          sampleCustomers.keySet());
+                                            .someOf(Customer.class,
+                                                    sampleCustomers.keySet());
         Map<CustomerId, Customer> callbackStates = newHashMap();
         MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback() {
             @Override
@@ -585,8 +585,8 @@ class StandTest extends TenantAwareTest {
         MemoizeEntityUpdateCallback callback = subscribeWithCallback(stand, allProjects);
 
         Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
-                                                                                 .iterator()
-                                                                                 .next();
+                                                                           .iterator()
+                                                                           .next();
         CustomerId customerId = sampleData.getKey();
         Customer customer = sampleData.getValue();
         Version stateVersion = GivenVersion.withNumber(1);
@@ -738,12 +738,12 @@ class StandTest extends TenantAwareTest {
     void selectByIdAndApplyMasks() {
         Stand stand = prepareStandWithAggregateRepo(createStandStorage());
         String customerDescriptor = Customer.getDescriptor()
-                                                  .getFullName();
+                                            .getFullName();
         @SuppressWarnings("DuplicateStringLiteralInspection")   // clashes with non-related tests.
                 String[] paths = {customerDescriptor + ".id", customerDescriptor + ".name"};
         FieldMask fieldMask = FieldMask.newBuilder()
-                                             .addAllPaths(Arrays.asList(paths))
-                                             .build();
+                                       .addAllPaths(Arrays.asList(paths))
+                                       .build();
 
         List<Customer> customers = Lists.newLinkedList();
         int count = 10;
@@ -1198,7 +1198,8 @@ class StandTest extends TenantAwareTest {
         Stand stand = prepareStandWithProjectionRepo(projectionRepository);
 
         Query readMultipleProjects =
-                requestFactory.query().byIds(Project.class, sampleProjects.keySet());
+                requestFactory.query()
+                              .byIds(Project.class, sampleProjects.keySet());
 
         MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readMultipleProjects, responseObserver);
@@ -1222,7 +1223,7 @@ class StandTest extends TenantAwareTest {
         for (int i = 0; i < querySize; i++) {
             Customer customer = getSampleCustomer().toBuilder()
                                                    .setId(CustomerId.newBuilder()
-                                                                          .setNumber(i))
+                                                                    .setNumber(i))
                                                    .build();
             Version stateVersion = GivenVersion.withNumber(1);
             stand.update(asEnvelope(customer.getId(), customer, stateVersion));
@@ -1231,7 +1232,8 @@ class StandTest extends TenantAwareTest {
         }
 
         Query customerQuery =
-                requestFactory.query().byIdsWithMask(Customer.class, ids, paths);
+                requestFactory.query()
+                              .byIdsWithMask(Customer.class, ids, paths);
 
         FieldMask fieldMask = FieldMask.newBuilder()
                                        .addAllPaths(Arrays.asList(paths))
@@ -1304,8 +1306,8 @@ class StandTest extends TenantAwareTest {
             Customer customer = sampleCustomers.get(customerId);
             Any customerState = AnyPacker.pack(customer);
             EntityRecord entityRecord = EntityRecord.newBuilder()
-                                                          .setState(customerState)
-                                                          .build();
+                                                    .setState(customerState)
+                                                    .build();
             stateIdsBuilder.add(stateId);
             recordsBuilder.add(entityRecord);
 
@@ -1431,8 +1433,8 @@ class StandTest extends TenantAwareTest {
             ProjectId customerId = projectIdFor(numericId);
 
             Project project = Project.newBuilder()
-                                           .setName(String.valueOf(numericId))
-                                           .build();
+                                     .setName(String.valueOf(numericId))
+                                     .build();
             sampleProjects.put(customerId, project);
         }
         return sampleProjects;
@@ -1443,9 +1445,9 @@ class StandTest extends TenantAwareTest {
         for (int projectIndex = 0; projectIndex < numberOfProjects; projectIndex++) {
             Project project = Project.getDefaultInstance();
             ProjectId projectId = ProjectId.newBuilder()
-                                                 .setId(UUID.randomUUID()
-                                                            .toString())
-                                                 .build();
+                                           .setId(UUID.randomUUID()
+                                                      .toString())
+                                           .build();
             sampleProjects.put(projectId, project);
         }
     }
