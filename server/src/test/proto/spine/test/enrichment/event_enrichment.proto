@@ -27,7 +27,7 @@ option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.event.enrichment";
 option java_multiple_files = true;
 
-import "spine/time/zone.proto";
+import "spine/time/time.proto";
 import "spine/people/person_name.proto";
 
 message ProjectCreatedEnrichmentAnotherPackage {

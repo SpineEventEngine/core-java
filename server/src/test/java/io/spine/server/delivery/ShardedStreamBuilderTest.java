@@ -20,11 +20,11 @@
 package io.spine.server.delivery;
 
 import io.spine.core.BoundedContextName;
-import io.spine.server.BoundedContext;
+import io.spine.core.BoundedContextNames;
 import io.spine.server.delivery.given.ShardedStreamTestEnv.TaskAggregateRepository;
-import io.spine.server.model.ModelTests;
-import io.spine.test.Tests;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.testing.Tests;
+import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -101,7 +101,7 @@ class ShardedStreamBuilderTest {
         @Test
         @DisplayName("BoundedContext name")
         void boundedContextName() {
-            BoundedContextName value = BoundedContext.newName("ShardedStreams");
+            BoundedContextName value = BoundedContextNames.newName("ShardedStreams");
             assertEquals(value, builder().setBoundedContextName(value)
                                          .getBoundedContextName());
         }

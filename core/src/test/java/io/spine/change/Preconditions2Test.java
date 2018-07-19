@@ -27,9 +27,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.change.Preconditions2.checkNewValueNotEmpty;
-import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DisplayName("Preconditions2 utility should")
@@ -51,14 +51,14 @@ class Preconditions2Test {
     @Test
     @DisplayName("not accept empty ByteString value")
     void failOnEmptyByteString() {
-        final ByteString str = ByteString.EMPTY;
+        ByteString str = ByteString.EMPTY;
         assertThrows(IllegalArgumentException.class, () -> checkNewValueNotEmpty(str));
     }
 
     @Test
     @DisplayName("not accept empty String value")
     void failOnEmptyString() {
-        final String str = "";
+        String str = "";
         assertThrows(IllegalArgumentException.class, () -> checkNewValueNotEmpty(str));
     }
 }

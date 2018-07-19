@@ -27,10 +27,10 @@ import io.spine.server.aggregate.given.AggregateRootTestEnv;
 import io.spine.server.aggregate.given.AggregateRootTestEnv.AnAggregateRoot;
 import io.spine.server.aggregate.given.AggregateRootTestEnv.ProjectDefinitionRepository;
 import io.spine.server.aggregate.given.AggregateRootTestEnv.ProjectLifeCycleRepository;
-import io.spine.server.model.ModelTests;
 import io.spine.test.aggregate.ProjectDefinition;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectLifecycle;
+import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Constructor;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @DisplayName("AggregateRoot should")

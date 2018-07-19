@@ -30,6 +30,10 @@ import io.spine.validate.ValidatingBuilder;
  *
  * <p>Provides an ability to add callbacks to the transaction execution stages.
  *
+ * @param <I> ID type of the entity under transaction
+ * @param <E> type of entity under transaction
+ * @param <S> state type of the entity under transaction
+ * @param <B> type of {@link ValidatingBuilder} of {@code S}
  * @author Alex Tymchenko
  */
 @Internal
@@ -70,6 +74,13 @@ public interface TransactionListener<I,
                              Version version, LifecycleFlags lifecycleFlags);
 
     /**
+     * A callback invoked after a successful commit.
+     *
+     * @param change the change of the entity under transaction
+     */
+    void onAfterCommit(EntityRecordChange change);
+
+    /**
      * An implementation of a {@code TransactionListener} which does not set any behavior for its
      * callbacks.
      */
@@ -81,19 +92,24 @@ public interface TransactionListener<I,
 
         @Override
         public void onAfterPhase(Phase<I, E, S, B> phase) {
-            // do nothing.
+            // Do nothing.
         }
 
         @Override
         public void onBeforeCommit(E entity, S state, Version version,
                                    LifecycleFlags lifecycleFlags) {
-            // do nothing.
+            // Do nothing.
         }
 
         @Override
         public void onTransactionFailed(Throwable t, E entity, S state,
                                         Version version, LifecycleFlags lifecycleFlags) {
-            // do nothing.
+            // Do nothing.
+        }
+
+        @Override
+        public void onAfterCommit(EntityRecordChange change) {
+            // Do nothing.
         }
     }
 }

@@ -19,7 +19,6 @@
  */
 package io.spine.grpc;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
@@ -29,13 +28,14 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.core.Response;
-import io.spine.test.Tests;
+import io.spine.testing.Tests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
@@ -44,8 +44,8 @@ import static io.spine.grpc.StreamObservers.forwardErrorsOnly;
 import static io.spine.grpc.StreamObservers.fromStreamError;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -103,7 +103,7 @@ class StreamObserversTest {
     @Test
     @DisplayName("create proper memoizing observer")
     void createMemoizingObserver() {
-        final MemoizingObserver<Object> observer = memoizingObserver();
+        MemoizingObserver<Object> observer = memoizingObserver();
 
         checkFirstResponse(observer);
         checkOnNext(observer);
@@ -188,8 +188,8 @@ class StreamObserversTest {
         @Test
         @DisplayName("from Throwable which is not status exception")
         void fromGenericThrowable() {
-            final String msg = "Neither a StatusException nor a StatusRuntimeException.";
-            final Exception exception = new Exception(msg);
+            String msg = "Neither a StatusException nor a StatusRuntimeException.";
+            Exception exception = new Exception(msg);
 
             assertFalse(fromStreamError(exception).isPresent());
         }

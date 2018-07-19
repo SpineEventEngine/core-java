@@ -23,7 +23,6 @@ package io.spine.server.outbus.enrich;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import io.spine.annotation.Internal;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

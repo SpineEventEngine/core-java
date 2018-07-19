@@ -30,9 +30,9 @@ import static io.spine.change.BooleanMismatch.expectedTrue;
 import static io.spine.change.BooleanMismatch.unpackActual;
 import static io.spine.change.BooleanMismatch.unpackExpected;
 import static io.spine.change.BooleanMismatch.unpackNewValue;
-import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -63,10 +63,10 @@ class BooleanMismatchTest {
         @Test
         @DisplayName("for `expectedFalse` case")
         void forExpectedFalse() {
-            final boolean expected = false;
-            final boolean actual = true;
-            final boolean newValue = true;
-            final ValueMismatch mismatch = expectedFalse(VERSION);
+            boolean expected = false;
+            boolean actual = true;
+            boolean newValue = true;
+            ValueMismatch mismatch = expectedFalse(VERSION);
 
             assertEquals(expected, unpackExpected(mismatch));
             assertEquals(actual, unpackActual(mismatch));
@@ -77,10 +77,10 @@ class BooleanMismatchTest {
         @Test
         @DisplayName("for `expectedTrue` case")
         void forExpectedTrue() {
-            final boolean expected = true;
-            final boolean actual = false;
-            final boolean newValue = false;
-            final ValueMismatch mismatch = expectedTrue(VERSION);
+            boolean expected = true;
+            boolean actual = false;
+            boolean newValue = false;
+            ValueMismatch mismatch = expectedTrue(VERSION);
 
             assertEquals(expected, unpackExpected(mismatch));
             assertEquals(actual, unpackActual(mismatch));
@@ -96,21 +96,21 @@ class BooleanMismatchTest {
         @Test
         @DisplayName("expected")
         void expectedWithWrongType() {
-            final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
+            ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
             assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackExpected(mismatch));
         }
 
         @Test
         @DisplayName("actual")
         void actualWithWrongType() {
-            final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
+            ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
             assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackActual(mismatch));
         }
 
         @Test
         @DisplayName("new value")
         void newValueWithWrongType() {
-            final ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
+            ValueMismatch mismatch = IntMismatch.of(1, 2, 3, VERSION);
             assertThrows(RuntimeException.class, () -> BooleanMismatch.unpackNewValue(mismatch));
         }
     }

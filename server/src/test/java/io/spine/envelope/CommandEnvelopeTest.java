@@ -20,11 +20,11 @@
 
 package io.spine.envelope;
 
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.MessageEnvelopeTest;
+import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

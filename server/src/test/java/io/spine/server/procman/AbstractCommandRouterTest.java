@@ -21,47 +21,30 @@
 package io.spine.server.procman;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.client.TestActorRequestFactory;
-import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.Commands;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import static io.spine.core.Commands.sameActorAndTenant;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static java.util.Collections.unmodifiableList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-abstract class AbstractCommandRouterTest<T extends AbstractCommandRouter> {
+abstract class AbstractCommandRouterTest {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
-
-    /** The command message we route. */
-    private Message sourceMessage;
-
-    /** The context of the command that we route. */
-    private CommandContext sourceContext;
-
-    /** The object we test. */
-    private T router;
 
     /** Command messages to be sent. */
     private final List<Message> messages = ImmutableList.of(toMessage("uno"),
@@ -70,12 +53,8 @@ abstract class AbstractCommandRouterTest<T extends AbstractCommandRouter> {
                                                             toMessage("cuatro")
     );
 
-    abstract T
+    abstract CommandRouter
     createRouter(CommandBus commandBus, Message sourceMessage, CommandContext commandContext);
-
-    T router() {
-        return router;
-    }
 
     public List<Message> getMessages() {
         return unmodifiableList(messages);
@@ -83,12 +62,6 @@ abstract class AbstractCommandRouterTest<T extends AbstractCommandRouter> {
 
     public TestActorRequestFactory getRequestFactory() {
         return requestFactory;
-    }
-
-    @SuppressWarnings("ReturnOfCollectionOrArrayField")
-        // OK as we return immutable impl.
-    List<Message> messages() {
-        return messages;
     }
 
     @BeforeEach
@@ -117,33 +90,15 @@ abstract class AbstractCommandRouterTest<T extends AbstractCommandRouter> {
             }
         });
 
-        sourceMessage = toMessage(getClass().getSimpleName());
-        sourceContext = requestFactory.createCommandContext();
+        // The command message we route.
+        Message sourceMessage = toMessage(getClass().getSimpleName());
+        // The context of the command that we route.
+        CommandContext sourceContext = requestFactory.createCommandContext();
 
-        router = createRouter(commandBus, sourceMessage, sourceContext);
-        router.addAll(messages);
-    }
-
-    /**
-     * Asserts that the {@code CommandRouted} instance has correct source command.
-     */
-    protected void assertSource(CommandRouted commandRouted) {
-        // Check that the source command is stored.
-        final Command source = commandRouted.getSource();
-        assertEquals(sourceMessage, Commands.getMessage(source));
-        assertEquals(sourceContext, source.getContext());
-    }
-
-    /**
-     * Asserts that the produced command context has correct fields.
-     */
-    protected void assertActorAndTenant(Command produced) {
-        assertTrue(sameActorAndTenant(sourceContext, produced.getContext()));
-    }
-
-    static List<StringValue> unpackAll(List<Any> anyList) {
-        return anyList.stream()
-                      .map(AnyPacker::<StringValue>unpack)
-                      .collect(Collectors.toList());
+        // The object we test.
+        CommandRouter router = createRouter(commandBus, sourceMessage, sourceContext);
+        for (Message message : messages) {
+            router.add(message);
+        }
     }
 }

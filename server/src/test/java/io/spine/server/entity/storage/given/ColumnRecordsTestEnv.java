@@ -23,7 +23,7 @@ package io.spine.server.entity.storage.given;
 import com.google.common.base.Function;
 import io.spine.server.entity.storage.ColumnType;
 import io.spine.server.entity.storage.EntityColumn;
-import io.spine.test.Tests;
+import io.spine.testing.Tests;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.ArrayList;

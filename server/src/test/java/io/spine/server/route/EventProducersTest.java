@@ -21,11 +21,11 @@
 package io.spine.server.route;
 
 import com.google.protobuf.Message;
-import io.spine.test.Tests;
+import io.spine.testing.Tests;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -44,14 +44,14 @@ class EventProducersTest {
     @Test
     @DisplayName("create function for taking ID from context")
     void getIdFromContext() {
-        final EventRoute<Object, Message> fn = EventProducers.fromContext();
+        EventRoute<Object, Message> fn = EventProducers.fromContext();
         assertFunction(fn);
     }
 
     @Test
     @DisplayName("create function for getting ID from first message field")
     void getIdFromFirstMsgField() {
-        final EventRoute<Object, Message> fn = EventProducers.fromFirstMessageField();
+        EventRoute<Object, Message> fn = EventProducers.fromFirstMessageField();
         assertFunction(fn);
     }
 

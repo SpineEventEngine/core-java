@@ -27,7 +27,6 @@ option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.core";
 option java_outer_classname = "CommandProto";
 option java_multiple_files = true;
-option java_generate_equals_and_hash = true;
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
@@ -157,6 +156,7 @@ enum CommandValidationError {
 
 // This enumeration defines possible statuses of command processing.
 enum CommandStatus {
+    option deprecated = true; // TODO:2018-07-05:dmytro.dashenkov: Delete this type.
 
     // Reserved value.
     UNDEFINED = 0;
@@ -178,4 +178,15 @@ enum CommandStatus {
 
     // A command was rejected during processing. No events were generated.
     REJECTED = 5;
+}
+
+// Data from a `Command` which is accessible from the end user code to which
+// the command was dispatched.
+message DispatchedCommand {
+
+    // The message of the command.
+    google.protobuf.Any message = 1 [(required) = true];
+
+    // Service information about the environment in which the command was created.
+    CommandContext context = 2 [(required) = true];
 }

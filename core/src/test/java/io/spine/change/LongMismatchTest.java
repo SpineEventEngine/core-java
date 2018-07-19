@@ -32,9 +32,9 @@ import static io.spine.change.LongMismatch.unexpectedValue;
 import static io.spine.change.LongMismatch.unpackActual;
 import static io.spine.change.LongMismatch.unpackExpected;
 import static io.spine.change.LongMismatch.unpackNewValue;
-import static io.spine.test.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.test.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
+import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -68,7 +68,7 @@ class LongMismatchTest {
         @Test
         @DisplayName("from given long values")
         void withLongs() {
-            final ValueMismatch mismatch = LongMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+            ValueMismatch mismatch = LongMismatch.of(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));
@@ -79,8 +79,8 @@ class LongMismatchTest {
         @Test
         @DisplayName("for expected zero amount")
         void forExpectedZero() {
-            final long expected = 0L;
-            final ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
+            long expected = 0L;
+            ValueMismatch mismatch = expectedZero(ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(expected, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));
@@ -91,8 +91,8 @@ class LongMismatchTest {
         @Test
         @DisplayName("for expected non zero amount")
         void forExpectedNonZero() {
-            final long actual = 0L;
-            final ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
+            long actual = 0L;
+            ValueMismatch mismatch = expectedNonZero(EXPECTED, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
             assertEquals(actual, unpackActual(mismatch));
@@ -104,7 +104,7 @@ class LongMismatchTest {
         @Test
         @DisplayName("for unexpected long value")
         void forUnexpectedLong() {
-            final ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
+            ValueMismatch mismatch = unexpectedValue(EXPECTED, ACTUAL, NEW_VALUE, VERSION);
 
             assertEquals(EXPECTED, unpackExpected(mismatch));
             assertEquals(ACTUAL, unpackActual(mismatch));
@@ -116,7 +116,7 @@ class LongMismatchTest {
     @Test
     @DisplayName("not accept same expected and actual values")
     void notAcceptSameExpectedAndActual() {
-        final long value = 1919L;
+        long value = 1919L;
         assertThrows(IllegalArgumentException.class,
                      () -> unexpectedValue(value, value, NEW_VALUE, VERSION));
     }
@@ -128,21 +128,21 @@ class LongMismatchTest {
         @Test
         @DisplayName("expected")
         void expectedWithWrongType() {
-            final ValueMismatch mismatch = expectedTrue(VERSION);
+            ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackExpected(mismatch));
         }
 
         @Test
         @DisplayName("actual")
         void actualWithWrongType() {
-            final ValueMismatch mismatch = expectedTrue(VERSION);
+            ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackActual(mismatch));
         }
 
         @Test
         @DisplayName("new value")
         void newValueWithWrongType() {
-            final ValueMismatch mismatch = expectedTrue(VERSION);
+            ValueMismatch mismatch = expectedTrue(VERSION);
             assertThrows(RuntimeException.class, () -> unpackNewValue(mismatch));
         }
     }

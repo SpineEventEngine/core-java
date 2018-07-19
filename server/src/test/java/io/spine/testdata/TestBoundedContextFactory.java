@@ -21,6 +21,7 @@
 package io.spine.testdata;
 
 import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventEnricher;
@@ -43,7 +44,7 @@ public class TestBoundedContextFactory {
             // Prevent instantiation of this utility class.
         }
 
-        private static BoundedContext.Builder newBuilder() {
+        private static BoundedContextBuilder newBuilder() {
             return BoundedContext.newBuilder()
                                  .setMultitenant(true);
         }

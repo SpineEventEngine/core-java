@@ -29,7 +29,6 @@ option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.client.grpc";
 option java_multiple_files = true;
 option java_outer_classname = "CommandServiceProto";
-option java_generate_equals_and_hash = true;
 
 import "spine/core/command.proto";
 import "spine/core/ack.proto";

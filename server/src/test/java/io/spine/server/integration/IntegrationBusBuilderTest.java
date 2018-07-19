@@ -20,7 +20,7 @@
 package io.spine.server.integration;
 
 import io.spine.core.BoundedContextName;
-import io.spine.server.BoundedContext;
+import io.spine.core.BoundedContextNames;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.event.EventBus;
 import io.spine.server.rejection.RejectionBus;
@@ -29,7 +29,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.test.Tests.nullRef;
+import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
@@ -115,7 +115,7 @@ class IntegrationBusBuilderTest
         @DisplayName("BoundedContextName")
         void boundedContextName() {
             final BoundedContextName name =
-                    BoundedContext.newName("Name that is expected back from the Builder");
+                    BoundedContextNames.newName("Name that is expected back from the Builder");
             assertEquals(name, builder().setBoundedContextName(name)
                                         .getBoundedContextName()
                                         .get());

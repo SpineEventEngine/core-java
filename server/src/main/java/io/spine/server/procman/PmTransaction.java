@@ -21,11 +21,11 @@ package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
 import io.spine.server.entity.EntityVersioning;
 import io.spine.server.entity.Transaction;
-import io.spine.server.entity.TransactionListener;
 import io.spine.validate.ValidatingBuilder;
 
 /**
@@ -36,9 +36,10 @@ import io.spine.validate.ValidatingBuilder;
  * @param <B> the type of a {@code ValidatingBuilder} for the process manager state
  * @author Alex Tymchenko
  */
-class PmTransaction<I,
-                    S extends Message,
-                    B extends ValidatingBuilder<S, ? extends Message.Builder>>
+@Internal
+public class PmTransaction<I,
+                           S extends Message,
+                           B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends Transaction<I, ProcessManager<I, S, B>, S, B> {
 
     @VisibleForTesting
@@ -47,14 +48,7 @@ class PmTransaction<I,
     }
 
     @VisibleForTesting
-    PmTransaction(ProcessManager<I, S, B> processManager,
-                  TransactionListener<I, ProcessManager<I, S, B>, S, B> listener) {
-        super(processManager, listener);
-    }
-
-
-    @VisibleForTesting
-    PmTransaction(ProcessManager<I, S, B> processManager, S state, Version version) {
+    protected PmTransaction(ProcessManager<I, S, B> processManager, S state, Version version) {
         super(processManager, state, version);
     }
 
@@ -69,8 +63,8 @@ class PmTransaction<I,
     /**
      * {@inheritDoc}
      *
-     * <p>This method is overridden to expose itself to repositories and state builders
-     * in this package.
+     * <p>This method is overridden to expose itself to repositories, state builders,
+     * and test utilities.
      */
     @Override
     protected void commit() {
@@ -88,31 +82,6 @@ class PmTransaction<I,
             B extends ValidatingBuilder<S, ? extends Message.Builder>>
     PmTransaction<I, S, B> start(ProcessManager<I, S, B> processManager) {
         final PmTransaction<I, S, B> tx = new PmTransaction<>(processManager);
-        return tx;
-    }
-
-    /**
-     * Creates a new transaction for a given {@code processManager} and sets the given {@code state}
-     * and {@code version} as a starting point for the transaction.
-     *
-     * <p>Please note that the state and version specified are not applied to the given process
-     * manager directly and require a {@linkplain Transaction#commit() transaction commit} in order
-     * to be applied.
-     *
-     * @param  processManager
-     *         the {@code ProcessManager} instance to start the transaction for
-     * @param  state
-     *         the starting state to set
-     * @param  version
-     *         the starting version to set
-     * @return the new transaction instance
-     */
-    static <I,
-            S extends Message,
-            B extends ValidatingBuilder<S, ? extends Message.Builder>,
-            P extends ProcessManager<I, S, B>>
-    PmTransaction<I, S, B> startWith(P processManager, S state, Version version) {
-        final PmTransaction<I, S, B> tx = new PmTransaction<>(processManager, state, version);
         return tx;
     }
 

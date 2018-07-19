@@ -21,7 +21,6 @@ package io.spine.envelope;
 
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
-import io.spine.client.TestActorRequestFactory;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.MessageEnvelopeTest;
@@ -31,6 +30,7 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.rejection.OperationRejections.CannotPerformBusinessOperation;
+import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

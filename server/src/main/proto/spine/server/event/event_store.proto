@@ -26,7 +26,6 @@ import "spine/options.proto";
 option (type_url_prefix) = "type.spine.io";
 // Put generated code under the 'grpc' sub-package, which is annotated @SPI.
 option java_package = "io.spine.server.event.grpc";
-option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "EventStoreProto";
 
