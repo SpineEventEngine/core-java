@@ -27,8 +27,7 @@ import io.spine.core.CommandContext;
 import static java.lang.String.format;
 
 /**
- * Exception that is thrown when a command could not be posted to the {@code CommandBus} by
- * a {@code ProcessManager}.
+ * Exception that is thrown when a command could not be posted to a {@code CommandBus}.
  *
  * @author Alexander Yevsyukov
  */
