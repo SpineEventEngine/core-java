@@ -100,8 +100,7 @@ public final class CommandRouting<I> extends MessageRouting<CommandContext, Comm
                                                        CommandRoute<I, M> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
-        Route<Message, CommandContext, I> casted =
-                (Route<Message, CommandContext, I>) via;
+        Route<Message, CommandContext, I> casted = (Route<Message, CommandContext, I>) via;
         return (CommandRouting<I>) doRoute(commandClass, casted);
     }
 

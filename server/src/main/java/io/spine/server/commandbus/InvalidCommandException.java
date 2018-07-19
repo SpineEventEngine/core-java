@@ -118,12 +118,11 @@ public class InvalidCommandException extends CommandException implements Message
     }
 
     private static Error inapplicableTenantError(Message commandMessage, String errMsg) {
-        Error.Builder error =
-                Error.newBuilder()
-                     .setType(InvalidCommandException.class.getCanonicalName())
-                     .setCode(CommandValidationError.TENANT_INAPPLICABLE.getNumber())
-                     .setMessage(errMsg)
-                     .putAllAttributes(commandTypeAttribute(commandMessage));
+        Error.Builder error = Error.newBuilder()
+                                   .setType(InvalidCommandException.class.getCanonicalName())
+                                   .setCode(CommandValidationError.TENANT_INAPPLICABLE.getNumber())
+                                   .setMessage(errMsg)
+                                   .putAllAttributes(commandTypeAttribute(commandMessage));
         return error.build();
     }
     /**

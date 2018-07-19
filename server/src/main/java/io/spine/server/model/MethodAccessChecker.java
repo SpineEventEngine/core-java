@@ -139,10 +139,9 @@ public class MethodAccessChecker {
      */
     private static boolean isPackagePrivate(Method method) {
         int modifiers = method.getModifiers();
-        boolean result =
-                !(Modifier.isPublic(modifiers)
-                        || Modifier.isProtected(modifiers)
-                        || Modifier.isPrivate(modifiers));
+        boolean result = !(Modifier.isPublic(modifiers)
+                         || Modifier.isProtected(modifiers)
+                         || Modifier.isPrivate(modifiers));
         return result;
     }
 

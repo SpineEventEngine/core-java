@@ -84,14 +84,13 @@ class Records {
                                             .getTypeName()
                                             .getSimpleName();
 
-        CommandRecord.Builder builder =
-                CommandRecord.newBuilder()
-                             .setCommandId(commandId)
-                             .setCommandType(commandType)
-                             .setCommand(command)
-                             .setTimestamp(getCurrentTime())
-                             .setStatus(ProcessingStatus.newBuilder()
-                                                        .setCode(status));
+        CommandRecord.Builder builder = CommandRecord.newBuilder()
+                                                     .setCommandId(commandId)
+                                                     .setCommandType(commandType)
+                                                     .setCommand(command)
+                                                     .setTimestamp(getCurrentTime())
+                                                     .setStatus(ProcessingStatus.newBuilder()
+                                                                                .setCode(status));
         return builder;
     }
 

@@ -108,8 +108,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
                                                      Message message,
                                                      CommandContext context,
                                                      Exception cause) {
-        HandlerMethodFailedException exception =
-                super.whyFailed(target, message, context, cause);
+        HandlerMethodFailedException exception = super.whyFailed(target, message, context, cause);
 
         Throwable rootCause = getRootCause(exception);
         if (rootCause instanceof ThrowableMessage) {
@@ -117,9 +116,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
 
             Optional<Any> producerId = idOf(target);
 
-            if (producerId.isPresent()) {
-                thrownMessage.initProducer(producerId.get());
-            }
+            producerId.ifPresent(thrownMessage::initProducer);
         }
 
         return exception;

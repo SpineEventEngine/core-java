@@ -115,9 +115,8 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
         Class<R> rootClass = (Class<R>) rootClass();
         R result;
         try {
-            Constructor<R> ctor =
-                    rootClass.getDeclaredConstructor(BoundedContext.class,
-                                                     aggregateId.getClass());
+            Constructor<R> ctor = rootClass.getDeclaredConstructor(BoundedContext.class,
+                                                                   aggregateId.getClass());
             ctor.setAccessible(true);
             result = ctor.newInstance(bc, aggregateId);
         } catch (NoSuchMethodException | InvocationTargetException |

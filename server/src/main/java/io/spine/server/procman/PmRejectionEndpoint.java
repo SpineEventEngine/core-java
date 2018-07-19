@@ -57,14 +57,13 @@ public class PmRejectionEndpoint<I, P extends ProcessManager<I, ?, ?>>
     @Override
     protected Set<I> getTargets() {
         RejectionEnvelope envelope = envelope();
-        Set<I> ids =
-                repository().getRejectionRouting()
-                            .apply(envelope.getMessage(), envelope.getMessageContext());
+        Set<I> ids = repository().getRejectionRouting()
+                                 .apply(envelope.getMessage(), envelope.getMessageContext());
         return ids;
     }
 
     @Override
-    protected PmRejectionDelivery<I,P> getEndpointDelivery() {
+    protected PmRejectionDelivery<I, P> getEndpointDelivery() {
         return repository().getRejectionEndpointDelivery();
     }
 

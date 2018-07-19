@@ -96,25 +96,21 @@ public abstract class ProcessManagerRepository<I,
 
     private final Supplier<PmCommandDelivery<I, P>> commandDeliverySupplier =
             memoize(() -> {
-                PmCommandDelivery<I, P> result =
-                        new PmCommandDelivery<>(this);
+                PmCommandDelivery<I, P> result = new PmCommandDelivery<>(this);
                 return result;
             });
 
     private final Supplier<PmEventDelivery<I, P>> eventDeliverySupplier =
             memoize(() -> {
-                PmEventDelivery<I, P> result =
-                        new PmEventDelivery<>(this);
+                PmEventDelivery<I, P> result = new PmEventDelivery<>(this);
                 return result;
             });
 
     private final Supplier<PmRejectionDelivery<I, P>> rejectionDeliverySupplier =
             memoize(() -> {
-                PmRejectionDelivery<I, P> result =
-                        new PmRejectionDelivery<>(this);
+                PmRejectionDelivery<I, P> result = new PmRejectionDelivery<>(this);
                 return result;
             });
-
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -185,7 +181,7 @@ public abstract class ProcessManagerRepository<I,
                                                      rejDispatcher.getExternalDispatcher());
         boolean handlesDomesticEvents = !getMessageClasses().isEmpty();
         boolean handlesExternalEvents = !getExternalEventDispatcher().getMessageClasses()
-                                                                           .isEmpty();
+                                                                     .isEmpty();
 
         boolean subscribesToEvents = handlesDomesticEvents || handlesExternalEvents;
         boolean reactsUponRejections = handlesDomesticRejections || handlesExternalRejections;
@@ -420,7 +416,6 @@ public abstract class ProcessManagerRepository<I,
         return eventDeliverySupplier.get();
     }
 
-
     /**
      * Defines a strategy of rejection delivery applied to the instances managed by this repository.
      *
@@ -472,7 +467,6 @@ public abstract class ProcessManagerRepository<I,
                         getRejectionEndpointDelivery().getConsumer());
         return result;
     }
-
 
     @Override
     public BoundedContextName getBoundedContextName() {

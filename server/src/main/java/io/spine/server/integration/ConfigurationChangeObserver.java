@@ -71,8 +71,7 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
     private void addNewSubscriptions(Iterable<ExternalMessageType> types,
                                      BoundedContextName origin) {
         for (ExternalMessageType newType : types) {
-            Collection<BoundedContextName> contextsWithSameRequest =
-                    requestedTypes.get(newType);
+            Collection<BoundedContextName> contextsWithSameRequest = requestedTypes.get(newType);
             if (contextsWithSameRequest.isEmpty()) {
 
                 // This item has not been requested by anyone yet.
@@ -103,10 +102,10 @@ final class ConfigurationChangeObserver extends AbstractChannelObserver implemen
 
         for (ExternalMessageType itemForRemoval : toRemove) {
             boolean wereNonEmpty = !requestedTypes.get(itemForRemoval)
-                                                        .isEmpty();
+                                                  .isEmpty();
             requestedTypes.remove(itemForRemoval, origin);
             boolean emptyNow = requestedTypes.get(itemForRemoval)
-                                                   .isEmpty();
+                                             .isEmpty();
 
             if (wereNonEmpty && emptyNow) {
                 unregisterInAdapter(itemForRemoval);

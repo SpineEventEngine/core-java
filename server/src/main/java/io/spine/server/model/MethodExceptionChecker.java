@@ -86,8 +86,7 @@ public class MethodExceptionChecker {
         checkNotNull(whiteList);
 
         Collection<Class<?>> allowedExceptions = Arrays.asList(whiteList);
-        Collection<Class<?>> exceptions =
-                obtainProhibitedExceptionsThrown(allowedExceptions);
+        Collection<Class<?>> exceptions = obtainProhibitedExceptionsThrown(allowedExceptions);
         if (!exceptions.isEmpty()) {
             throwCheckFailedException(exceptions, allowedExceptions);
         }

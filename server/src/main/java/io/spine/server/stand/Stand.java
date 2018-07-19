@@ -375,8 +375,7 @@ public class Stand implements AutoCloseable {
                 boolean subscriptionIsActive = subscriptionRecord.isActive();
                 boolean stateMatches = subscriptionRecord.matches(typeUrl, id, entityState);
                 if (subscriptionIsActive && stateMatches) {
-                    Runnable action = notifySubscriptionAction(subscriptionRecord,
-                                                               id, entityState);
+                    Runnable action = notifySubscriptionAction(subscriptionRecord, id, entityState);
                     callbackExecutor.execute(action);
                 }
             }

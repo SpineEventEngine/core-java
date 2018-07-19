@@ -131,7 +131,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         @SuppressWarnings("unchecked")
         // cast is safe because this type of messages is saved to the map
         S result = (S) Model.getInstance()
-                                  .getDefaultState(entityClass);
+                            .getDefaultState(entityClass);
         return result;
     }
 

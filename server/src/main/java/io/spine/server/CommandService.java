@@ -134,8 +134,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
          * handle such commands.
          */
         private ImmutableMap<CommandClass, BoundedContext> createMap() {
-            ImmutableMap.Builder<CommandClass, BoundedContext> builder =
-                    ImmutableMap.builder();
+            ImmutableMap.Builder<CommandClass, BoundedContext> builder = ImmutableMap.builder();
             for (BoundedContext boundedContext : boundedContexts) {
                 putIntoMap(boundedContext, builder);
             }

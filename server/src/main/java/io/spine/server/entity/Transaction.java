@@ -381,8 +381,7 @@ public abstract class Transaction<I,
 
     private S currentBuilderState() {
         @SuppressWarnings("unchecked")  // OK, as `AbstractValidatingBuilder` is the only subclass.
-                AbstractValidatingBuilder<S, ?> abstractBuilder =
-                (AbstractValidatingBuilder<S, ?>) builder;
+        AbstractValidatingBuilder<S, ?> abstractBuilder = (AbstractValidatingBuilder<S, ?>) builder;
         return abstractBuilder.internalBuild();
     }
 
@@ -452,8 +451,8 @@ public abstract class Transaction<I,
 
         int versionNumber = this.version.getNumber();
         if (versionNumber > 0) {
-            String errMsg = format(
-                    "initVersion() called on an entity with non-zero version number (%d).",
+            String errMsg =
+                    format("initVersion() called on an entity with non-zero version number (%d).",
                     versionNumber
             );
             throw new IllegalStateException(errMsg);

@@ -67,7 +67,7 @@ abstract class RequestValidator<M extends Message> {
      * @param request the request to test
        @return a {@linkplain RequestNotSupported value object} holding
                the details of support absence,
-       or {@code Optional.empty()} if the request is supported
+               or {@code Optional.empty()} if the request is supported
      */
     protected abstract Optional<RequestNotSupported<M>> isSupported(M request);
 
@@ -126,7 +126,7 @@ abstract class RequestValidator<M extends Message> {
         ProtocolMessageEnum unsupportedErrorCode = result.getErrorCode();
         String errorMessage = result.getErrorMessage();
         String errorTypeName = unsupportedErrorCode.getDescriptorForType()
-                                                         .getFullName();
+                                                   .getFullName();
         Error.Builder errorBuilder = Error.newBuilder()
                                           .setType(errorTypeName)
                                           .setCode(unsupportedErrorCode.getNumber())
@@ -134,8 +134,8 @@ abstract class RequestValidator<M extends Message> {
         Error error = errorBuilder.build();
 
         InvalidRequestException exception = result.createException(errorMessage,
-                                                                         request,
-                                                                         error);
+                                                                   request,
+                                                                   error);
         return Optional.of(exception);
     }
 
@@ -144,7 +144,7 @@ abstract class RequestValidator<M extends Message> {
      *
      * @param request the request message to validate.
      * @return an instance of exception,
-     *         or {@code Optional.empty()} if the request message is valid.
+     * or {@code Optional.empty()} if the request message is valid.
      */
     private Optional<InvalidRequestException> validateMessage(M request) {
         List<ConstraintViolation> violations = MessageValidator.newInstance()
@@ -153,17 +153,16 @@ abstract class RequestValidator<M extends Message> {
             return Optional.empty();
         }
 
-        ValidationError validationError =
-                ValidationError.newBuilder()
-                               .addAllConstraintViolation(violations)
-                               .build();
+        ValidationError validationError = ValidationError.newBuilder()
+                                                         .addAllConstraintViolation(violations)
+                                                         .build();
         ProtocolMessageEnum errorCode = getInvalidMessageErrorCode();
         String typeName = errorCode.getDescriptorForType()
-                                         .getFullName();
+                                   .getFullName();
         String errorTextTemplate = getErrorText(request);
         String errorText = format("%s %s",
-                                        errorTextTemplate,
-                                        toText(violations));
+                                  errorTextTemplate,
+                                  toText(violations));
 
         Error.Builder errorBuilder = Error.newBuilder()
                                           .setType(typeName)
@@ -171,7 +170,8 @@ abstract class RequestValidator<M extends Message> {
                                           .setValidationError(validationError)
                                           .setMessage(errorText);
         Error error = errorBuilder.build();
-        return Optional.of(onInvalidMessage(formatExceptionMessage(request, error), request, error));
+        return Optional.of(
+                onInvalidMessage(formatExceptionMessage(request, error), request, error));
     }
 
     private String formatExceptionMessage(M request, Error error) {

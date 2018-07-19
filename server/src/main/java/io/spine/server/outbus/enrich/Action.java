@@ -48,7 +48,7 @@ final class Action<M extends EnrichableMessageEnvelope<?, ?, C>, C extends Messa
     Action(Enricher<M, ?> parent, M envelope) {
         this.envelope = envelope;
         Class<? extends Message> sourceClass = envelope.getMessageClass()
-                                                             .value();
+                                                       .value();
         Collection<EnrichmentFunction<?, ?, ?>> functionsPerClass =
                 parent.getFunctions(sourceClass);
         this.availableFunctions = filter(functionsPerClass, EnrichmentFunction.activeOnly());
@@ -68,7 +68,7 @@ final class Action<M extends EnrichableMessageEnvelope<?, ?, C>, C extends Messa
             Message enriched = apply(function, sourceMessage, envelope.getMessageContext());
             checkResult(enriched, function);
             String typeName = TypeName.of(enriched)
-                                            .value();
+                                      .value();
             enrichments.put(typeName, AnyPacker.pack(enriched));
         }
     }

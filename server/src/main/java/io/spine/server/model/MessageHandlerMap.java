@@ -140,7 +140,7 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
                 HandlerKey handlerKey = handler.key();
                 if (tempMap.containsKey(handlerKey)) {
                     Method alreadyPresent = tempMap.get(handlerKey)
-                                                         .getMethod();
+                                                   .getMethod();
                     throw new DuplicateHandlerMethodError(
                             declaringClass,
                             handlerKey,

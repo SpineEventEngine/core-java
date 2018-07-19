@@ -114,22 +114,19 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     private final Supplier<AggregateCommandDelivery<I, A>> commandDeliverySupplier =
             memoize(() -> {
-                AggregateCommandDelivery<I, A> result =
-                        new AggregateCommandDelivery<>(this);
+                AggregateCommandDelivery<I, A> result = new AggregateCommandDelivery<>(this);
                 return result;
             });
 
     private final Supplier<AggregateEventDelivery<I, A>> eventDeliverySupplier =
             memoize(() -> {
-                AggregateEventDelivery<I, A> result =
-                        new AggregateEventDelivery<>(this);
+                AggregateEventDelivery<I, A> result = new AggregateEventDelivery<>(this);
                 return result;
             });
 
     private final Supplier<AggregateRejectionDelivery<I, A>> rejectionDeliverySupplier =
             memoize(() -> {
-                AggregateRejectionDelivery<I, A> result =
-                        new AggregateRejectionDelivery<>(this);
+                AggregateRejectionDelivery<I, A> result = new AggregateRejectionDelivery<>(this);
                 return result;
             });
 

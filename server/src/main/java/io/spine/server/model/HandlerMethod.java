@@ -116,7 +116,7 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
      */
     public static Class<? extends Message> getFirstParamType(Method handler) {
         @SuppressWarnings("unchecked") /* we always expect first param as {@link Message} */ Class<? extends Message> result =
-                (Class<? extends Message>) handler.getParameterTypes()[0];
+        (Class<? extends Message>) handler.getParameterTypes()[0];
         return result;
     }
 
@@ -128,8 +128,7 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
         checkNotNull(eventMessages);
         checkNotNull(origin);
 
-        EventFactory eventFactory =
-                EventFactory.on(origin, producerId);
+        EventFactory eventFactory = EventFactory.on(origin, producerId);
 
         return Lists.transform(eventMessages, new Function<Message, Event>() {
             @Override

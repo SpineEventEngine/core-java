@@ -125,8 +125,7 @@ public class InProcessSharding implements Sharding {
     bindWithKey(Iterable<ShardedStreamConsumer<?, ?>> consumers,
                 BoundedContextName bcName,
                 ShardingKey shardingKey) {
-        TransportBindFn fn = new TransportBindFn(bcName, shardingKey,
-                                                 transportFactory);
+        TransportBindFn fn = new TransportBindFn(bcName, shardingKey, transportFactory);
         ImmutableSet<ShardedStream<?, ?, ?>> result = FluentIterable.from(consumers)
                                                                     .transform(fn)
                                                                     .toSet();

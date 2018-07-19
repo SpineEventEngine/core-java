@@ -82,10 +82,9 @@ final class EventBusAdapter extends BusAdapter<EventEnvelope, EventDispatcher<?>
 
     @Override
     EventDispatcher<?> createDispatcher(Class<? extends Message> messageClass) {
-        DomesticEventPublisher result =
-                new DomesticEventPublisher(getBoundedContextName(),
-                                           getPublisherHub(),
-                                           EventClass.of(messageClass));
+        DomesticEventPublisher result = new DomesticEventPublisher(getBoundedContextName(),
+                                                                   getPublisherHub(),
+                                                                   EventClass.of(messageClass));
         return result;
     }
 

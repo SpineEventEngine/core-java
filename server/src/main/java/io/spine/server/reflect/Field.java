@@ -167,8 +167,9 @@ public final class Field {
         checkNotNull(cls);
         checkNotNull(fieldName);
 
-        @SuppressWarnings("DuplicateStringLiteralInspection") String fieldGetterName = "get" + fieldName.substring(0, 1)
-                                                                                                        .toUpperCase() + fieldName.substring(1);
+        @SuppressWarnings("DuplicateStringLiteralInspection")
+        String fieldGetterName = "get" + fieldName.substring(0, 1)
+                                                  .toUpperCase() + fieldName.substring(1);
         Method fieldGetter = cls.getMethod(fieldGetterName);
         return fieldGetter;
     }

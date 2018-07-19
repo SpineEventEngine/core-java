@@ -74,17 +74,17 @@ class MatchFilter implements Predicate<Event> {
     private static @Nullable TypeUrl getEventTypeUrl(EventFilter filter) {
         String eventType = filter.getEventType();
         TypeUrl result = eventType.isEmpty()
-                               ? null
-                               : TypeName.of(eventType)
-                                         .toUrl();
+                         ? null
+                         : TypeName.of(eventType)
+                                   .toUrl();
         return result;
     }
 
     private static @Nullable List<Any> getAggregateIdentifiers(EventFilter filter) {
         List<Any> aggregateIdList = filter.getAggregateIdList();
         List<Any> result = aggregateIdList.isEmpty()
-                            ? null
-                            : aggregateIdList;
+                           ? null
+                           : aggregateIdList;
         return result;
     }
 
@@ -168,9 +168,9 @@ class MatchFilter implements Predicate<Event> {
             return false;
         }
         Collection<Message> expectedValues = filter.getValueList()
-                                                         .stream()
-                                                         .map(unpackFunc())
-                                                         .collect(toList());
+                                                   .stream()
+                                                   .map(unpackFunc())
+                                                   .collect(toList());
         if (!value.isPresent()) {
             /* If there is no value in the field return `true`
                if the list of required values is also empty. */

@@ -293,8 +293,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
     private void notifyOfNeeds(Iterable<ChannelId> currentlyRequested) {
-        RequestForExternalMessages.Builder resultBuilder =
-                RequestForExternalMessages.newBuilder();
+        RequestForExternalMessages.Builder resultBuilder = RequestForExternalMessages.newBuilder();
         for (ChannelId channelId : currentlyRequested) {
             ExternalMessageType type = fromId(channelId);
             resultBuilder.addRequestedMessageTypes(type);
@@ -323,8 +322,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      * @param rejectionSubscriber the subscriber to register.
      */
     public void register(RejectionSubscriber rejectionSubscriber) {
-        ExternalRejectionSubscriber wrapped =
-                new ExternalRejectionSubscriber(rejectionSubscriber);
+        ExternalRejectionSubscriber wrapped = new ExternalRejectionSubscriber(rejectionSubscriber);
         register(wrapped);
     }
 

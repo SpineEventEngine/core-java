@@ -64,9 +64,8 @@ public class AggregateRejectionEndpoint<I, A extends Aggregate<I, ?, ?>>
     @Override
     protected Set<I> getTargets() {
         RejectionEnvelope envelope = envelope();
-        Set<I> ids =
-                repository().getRejectionRouting()
-                            .apply(envelope.getMessage(), envelope.getMessageContext());
+        Set<I> ids = repository().getRejectionRouting()
+                                 .apply(envelope.getMessage(), envelope.getMessageContext());
         return ids;
     }
 
