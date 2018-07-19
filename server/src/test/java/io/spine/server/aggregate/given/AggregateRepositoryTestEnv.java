@@ -153,7 +153,7 @@ public class AggregateRepositoryTestEnv {
 
     private static BoundedContext newBoundedContext() {
         BoundedContext context = BoundedContext.newBuilder()
-                                                     .build();
+                                               .build();
         return context;
     }
 
@@ -180,8 +180,8 @@ public class AggregateRepositoryTestEnv {
 
         public static ProjectAggregate withUncommittedEvents(ProjectId id) {
             ProjectAggregate aggregate = Given.aggregateOfClass(ProjectAggregate.class)
-                                                    .withId(id)
-                                                    .build();
+                                              .withId(id)
+                                              .build();
 
             AggCreateProject createProject =
                     ((AggCreateProject.Builder) Sample.builderForType(AggCreateProject.class))

@@ -136,7 +136,7 @@ class BoundedContextTest {
     private static void injectField(Object target, String fieldName, Object valueToInject) {
         try {
             Field defaultStates = target.getClass()
-                                              .getDeclaredField(fieldName);
+                                        .getDeclaredField(fieldName);
             defaultStates.setAccessible(true);
             defaultStates.set(target, valueToInject);
         } catch (NoSuchFieldException | IllegalAccessException ignored) {
@@ -202,8 +202,8 @@ class BoundedContextTest {
         @DisplayName("multitenancy state")
         void ifSetMultitenant() {
             BoundedContext bc = BoundedContext.newBuilder()
-                                                    .setMultitenant(true)
-                                                    .build();
+                                              .setMultitenant(true)
+                                              .build();
             assertTrue(bc.isMultitenant());
         }
     }
@@ -283,8 +283,8 @@ class BoundedContextTest {
     @DisplayName("set storage factory for EventBus")
     void setEventBusStorageFactory() {
         BoundedContext bc = BoundedContext.newBuilder()
-                                                .setEventBus(EventBus.newBuilder())
-                                                .build();
+                                          .setEventBus(EventBus.newBuilder())
+                                          .build();
         assertNotNull(bc.getEventBus());
     }
 
@@ -293,9 +293,9 @@ class BoundedContextTest {
     void useEventStoreIfSet() {
         EventStore eventStore = mock(EventStore.class);
         BoundedContext bc = BoundedContext.newBuilder()
-                                                .setEventBus(EventBus.newBuilder()
-                                                                     .setEventStore(eventStore))
-                                                .build();
+                                          .setEventBus(EventBus.newBuilder()
+                                                               .setEventStore(eventStore))
+                                          .build();
         assertEquals(eventStore, bc.getEventBus()
                                    .getEventStore());
     }
@@ -323,8 +323,8 @@ class BoundedContextTest {
         @DisplayName("when event is invalid")
         void forInvalidEvent() {
             BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                                .setMultitenant(true)
-                                                                .build();
+                                                          .setMultitenant(true)
+                                                          .build();
 
             // Unsupported message.
             Any invalidMsg = AnyPacker.pack(BcProjectCreated.getDefaultInstance());
@@ -351,7 +351,7 @@ class BoundedContextTest {
         @DisplayName("CommandBus")
         void ofCommandBus() {
             CommandBus.Builder commandBus = CommandBus.newBuilder()
-                                                            .setMultitenant(false);
+                                                      .setMultitenant(false);
             assertThrows(IllegalStateException.class, () -> BoundedContext.newBuilder()
                                                                           .setMultitenant(true)
                                                                           .setCommandBus(commandBus)
@@ -362,7 +362,7 @@ class BoundedContextTest {
         @DisplayName("Stand")
         void ofStand() {
             Stand.Builder stand = Stand.newBuilder()
-                                             .setMultitenant(false);
+                                       .setMultitenant(false);
             assertThrows(IllegalStateException.class, () -> BoundedContext.newBuilder()
                                                                           .setMultitenant(true)
                                                                           .setStand(stand)

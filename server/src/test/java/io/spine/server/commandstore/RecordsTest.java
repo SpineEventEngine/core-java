@@ -1,4 +1,5 @@
 /*
+/*
  * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
@@ -56,8 +57,8 @@ class RecordsTest {
         CommandStatus status = CommandStatus.RECEIVED;
 
         CommandRecord record = newRecordBuilder(command,
-                                                      status,
-                                                      null).build();
+                                                status,
+                                                null).build();
 
         checkRecord(record, command, status);
     }

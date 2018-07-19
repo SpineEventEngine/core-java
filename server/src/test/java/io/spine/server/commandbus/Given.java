@@ -71,8 +71,8 @@ public class Given {
         private static Command create(Message command, UserId userId,
                                       Timestamp when) {
             TenantId generatedTenantId = TenantId.newBuilder()
-                                                       .setValue(newUuid())
-                                                       .build();
+                                                 .setValue(newUuid())
+                                                 .build();
             TestActorRequestFactory factory =
                     TestActorRequestFactory.newInstance(userId, generatedTenantId);
             Command result = factory.createCommand(command, when);
@@ -194,8 +194,8 @@ public class Given {
 
         static FirstCmdCreateProject firstCreateProject(ProjectId projectId) {
             return FirstCmdCreateProject.newBuilder()
-                                    .setId(projectId)
-                                    .build();
+                                        .setId(projectId)
+                                        .build();
         }
 
         static SecondCmdStartProject secondStartProject(ProjectId projectId) {

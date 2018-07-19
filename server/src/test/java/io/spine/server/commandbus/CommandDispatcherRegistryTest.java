@@ -71,8 +71,8 @@ class CommandDispatcherRegistryTest {
         ModelTests.clearModel();
 
         BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setName(getClass().getSimpleName())
-                                                            .build();
+                                                      .setName(getClass().getSimpleName())
+                                                      .build();
         eventBus = boundedContext.getEventBus();
         registry = new CommandDispatcherRegistry();
     }

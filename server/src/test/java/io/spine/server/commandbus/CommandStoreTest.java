@@ -78,12 +78,12 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
             commandBus.register(createProjectHandler);
 
             Command command = requestFactory.command()
-                                                  .create(createProjectMessage());
+                                            .create(createProjectMessage());
             commandBus.post(command, observer);
 
             TenantId tenantId = command.getContext()
-                                             .getActorContext()
-                                             .getTenantId();
+                                       .getActorContext()
+                                       .getTenantId();
             CommandId commandId = command.getId();
             ProcessingStatus status = getStatus(commandId, tenantId);
 
@@ -96,7 +96,7 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
             ThrowingDispatcher dispatcher = new ThrowingDispatcher();
             commandBus.register(dispatcher);
             Command command = requestFactory.command()
-                                                  .create(createProjectMessage());
+                                            .create(createProjectMessage());
 
             commandBus.post(command, observer);
 
@@ -153,8 +153,8 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
             // Check that the status has the correct code,
             // and the rejection matches the thrown rejection.
             TenantId tenantId = command.getContext()
-                                             .getActorContext()
-                                             .getTenantId();
+                                       .getActorContext()
+                                       .getTenantId();
             ProcessingStatus status = getStatus(commandId, tenantId);
 
             assertEquals(CommandStatus.REJECTED, status.getCode());
@@ -167,8 +167,8 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
         @DisplayName("`ERROR` for expired scheduled command")
         void errorForExpiredCommand() {
             List<Command> commands = newArrayList(createProject(),
-                                                        addTask(),
-                                                        startProject());
+                                                  addTask(),
+                                                  startProject());
             Duration delay = fromMinutes(5);
             Timestamp schedulingTime = TimeTests.Past.minutesAgo(10); // time to post passed
             storeAsScheduled(commands, delay, schedulingTime);
@@ -208,8 +208,8 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
 
         private ProcessingStatus getProcessingStatus(CommandEnvelope commandEnvelope) {
             TenantId tenantId = commandEnvelope.getCommandContext()
-                                                     .getActorContext()
-                                                     .getTenantId();
+                                               .getActorContext()
+                                               .getTenantId();
             TenantAwareFunction<CommandId, ProcessingStatus> func =
                     new TenantAwareFunction<CommandId, ProcessingStatus>(tenantId) {
                         @Override
@@ -230,12 +230,12 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
         @DisplayName("command")
         void command() {
             Command command = requestFactory.command()
-                                                  .create(createProjectMessage());
+                                            .create(createProjectMessage());
             commandStore.store(command);
 
             TenantId tenantId = command.getContext()
-                                             .getActorContext()
-                                             .getTenantId();
+                                       .getActorContext()
+                                       .getTenantId();
             CommandId commandId = command.getId();
             ProcessingStatus status = getStatus(commandId, tenantId);
 
@@ -246,13 +246,13 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
         @DisplayName("command with status")
         void commandWithStatus() {
             Command command = requestFactory.command()
-                                                  .create(createProjectMessage());
+                                            .create(createProjectMessage());
             CommandStatus commandStatus = CommandStatus.OK;
             commandStore.store(command, commandStatus);
 
             TenantId tenantId = command.getContext()
-                                             .getActorContext()
-                                             .getTenantId();
+                                       .getActorContext()
+                                       .getTenantId();
             CommandId commandId = command.getId();
             ProcessingStatus status = getStatus(commandId, tenantId);
 
@@ -263,14 +263,14 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
         @DisplayName("command with error")
         void commandWithError() {
             Command command = requestFactory.command()
-                                                  .create(createProjectMessage());
+                                            .create(createProjectMessage());
             @SuppressWarnings("ThrowableNotThrown") // Creation without throwing is needed for test.
             DuplicateCommandException exception = of(command);
             commandStore.storeWithError(command, exception);
 
             TenantId tenantId = command.getContext()
-                                             .getActorContext()
-                                             .getTenantId();
+                                       .getActorContext()
+                                       .getTenantId();
             CommandId commandId = command.getId();
             ProcessingStatus status = getStatus(commandId, tenantId);
 
@@ -282,14 +282,14 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
         @DisplayName("command with exception")
         void commandWithException() {
             Command command = requestFactory.command()
-                                                  .create(createProjectMessage());
+                                            .create(createProjectMessage());
             @SuppressWarnings("ThrowableNotThrown") // Creation without throwing is needed for test.
             DuplicateCommandException exception = of(command);
             commandStore.store(command, exception);
 
             TenantId tenantId = command.getContext()
-                                             .getActorContext()
-                                             .getTenantId();
+                                       .getActorContext()
+                                       .getTenantId();
             CommandId commandId = command.getId();
             ProcessingStatus status = getStatus(commandId, tenantId);
 

@@ -127,7 +127,7 @@ public class Given {
          */
         public static Command create(Message command, UserId userId, Timestamp when) {
             Command result = TestActorRequestFactory.newInstance(userId)
-                                                          .createCommand(command, when);
+                                                    .createCommand(command, when);
             return result;
         }
     }
@@ -139,32 +139,32 @@ public class Given {
 
         public static AggCreateProject createProject(ProjectId id) {
             AggCreateProject.Builder builder = AggCreateProject.newBuilder()
-                                                                     .setProjectId(id)
-                                                                     .setName(projectName(id));
+                                                               .setProjectId(id)
+                                                               .setName(projectName(id));
             return builder.build();
         }
 
         public static AggPauseProject pauseProject(ProjectId id) {
             AggPauseProject.Builder builder = AggPauseProject.newBuilder()
-                                                                   .setProjectId(id);
+                                                             .setProjectId(id);
             return builder.build();
         }
 
         public static AggCancelProject cancelProject(ProjectId id) {
             AggCancelProject.Builder builder = AggCancelProject.newBuilder()
-                                                                     .setProjectId(id);
+                                                               .setProjectId(id);
             return builder.build();
         }
 
         public static AggAddTask addTask(ProjectId id) {
             AggAddTask.Builder builder = AggAddTask.newBuilder()
-                                                         .setProjectId(id);
+                                                   .setProjectId(id);
             return builder.build();
         }
 
         public static AggStartProject startProject(ProjectId id) {
             AggStartProject.Builder builder = AggStartProject.newBuilder()
-                                                                   .setProjectId(id);
+                                                             .setProjectId(id);
             return builder.build();
         }
     }

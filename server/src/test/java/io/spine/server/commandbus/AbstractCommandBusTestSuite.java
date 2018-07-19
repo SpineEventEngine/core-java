@@ -107,8 +107,8 @@ abstract class AbstractCommandBusTestSuite {
     static Command newCommandWithoutContext() {
         Command cmd = createProject();
         Command invalidCmd = cmd.toBuilder()
-                                      .setContext(CommandContext.getDefaultInstance())
-                                      .build();
+                                .setContext(CommandContext.getDefaultInstance())
+                                .build();
         return invalidCmd;
     }
 
@@ -163,10 +163,10 @@ abstract class AbstractCommandBusTestSuite {
                 ActorContext.newBuilder()
                             .setTenantId(TenantId.getDefaultInstance());
         Command result = cmd.toBuilder()
-                                  .setContext(cmd.getContext()
-                                                 .toBuilder()
-                                                 .setActorContext(withNoTenant))
-                                  .build();
+                            .setContext(cmd.getContext()
+                                           .toBuilder()
+                                           .setActorContext(withNoTenant))
+                            .build();
         return result;
     }
 
@@ -178,7 +178,7 @@ abstract class AbstractCommandBusTestSuite {
                 InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
                                                    this.multitenant);
         TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(this.multitenant,
-                                                                          storageFactory);
+                                                                    storageFactory);
         commandStore = spy(new CommandStore(storageFactory, tenantIndex));
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
@@ -197,8 +197,8 @@ abstract class AbstractCommandBusTestSuite {
                            .setStorageFactory(storageFactory)
                            .build();
         requestFactory = this.multitenant
-                            ? TestActorRequestFactory.newInstance(getClass(), newUuid())
-                            : TestActorRequestFactory.newInstance(getClass());
+                         ? TestActorRequestFactory.newInstance(getClass(), newUuid())
+                         : TestActorRequestFactory.newInstance(getClass());
         createProjectHandler = new CreateProjectHandler();
         observer = memoizingObserver();
     }
@@ -249,7 +249,8 @@ abstract class AbstractCommandBusTestSuite {
     protected void checkResult(Command cmd) {
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
-        CommandId commandId = unpack(observer.firstResponse().getMessageId());
+        CommandId commandId = unpack(observer.firstResponse()
+                                             .getMessageId());
         assertEquals(cmd.getId(), commandId);
     }
 

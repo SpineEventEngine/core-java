@@ -110,8 +110,8 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         Duration delayPrimary = Durations2.fromMinutes(5);
         Duration newDelayExpected = Durations2.fromMinutes(2); // = 5 - 3
         List<Command> commandsPrimary = newArrayList(createProject(),
-                                                           addTask(),
-                                                           startProject());
+                                                     addTask(),
+                                                     startProject());
         storeAsScheduled(commandsPrimary, delayPrimary, schedulingTime);
 
         commandBus.rescheduleCommands();
@@ -134,7 +134,8 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("in parallel if thread spawning is allowed")
         void inParallel() {
-            String mainThreadName = Thread.currentThread().getName();
+            String mainThreadName = Thread.currentThread()
+                                          .getName();
             StringBuilder threadNameUponScheduling = new StringBuilder(0);
             CountDownLatch latch = new CountDownLatch(1);
             CommandScheduler scheduler =
@@ -143,11 +144,11 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
 
             // Create CommandBus specific for this test.
             CommandBus commandBus = CommandBus.newBuilder()
-                                                    .setCommandStore(commandStore)
-                                                    .setCommandScheduler(scheduler)
-                                                    .setThreadSpawnAllowed(true)
-                                                    .setAutoReschedule(true)
-                                                    .build();
+                                              .setCommandStore(commandStore)
+                                              .setCommandScheduler(scheduler)
+                                              .setThreadSpawnAllowed(true)
+                                              .setAutoReschedule(true)
+                                              .build();
             assertNotNull(commandBus);
 
             // Await to ensure the commands have been rescheduled in parallel.
@@ -172,7 +173,8 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("synchronously if thread spawning is not allowed")
         void synchronously() {
-            String mainThreadName = Thread.currentThread().getName();
+            String mainThreadName = Thread.currentThread()
+                                          .getName();
             StringBuilder threadNameUponScheduling = new StringBuilder(0);
             CountDownLatch latch = new CountDownLatch(1);
             CommandScheduler scheduler =
@@ -181,11 +183,11 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
 
             // Create CommandBus specific for this test.
             CommandBus commandBus = CommandBus.newBuilder()
-                                                    .setCommandStore(commandStore)
-                                                    .setCommandScheduler(scheduler)
-                                                    .setThreadSpawnAllowed(false)
-                                                    .setAutoReschedule(true)
-                                                    .build();
+                                              .setCommandStore(commandStore)
+                                              .setCommandScheduler(scheduler)
+                                              .setThreadSpawnAllowed(false)
+                                              .setAutoReschedule(true)
+                                              .build();
             assertNotNull(commandBus);
 
             // Ensure the scheduler has been called for a single command,
@@ -227,13 +229,13 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         @DisplayName("scheduling options")
         void schedulingOptions() {
             Command cmd = requestFactory.command()
-                                              .create(toMessage(newUuid()));
+                                        .create(toMessage(newUuid()));
             Timestamp schedulingTime = getCurrentTime();
             Duration delay = Durations2.minutes(5);
 
             Command cmdUpdated = setSchedule(cmd, delay, schedulingTime);
             CommandContext.Schedule schedule = cmdUpdated.getContext()
-                                                               .getSchedule();
+                                                         .getSchedule();
 
             assertEquals(delay, schedule.getDelay());
             assertEquals(schedulingTime, cmdUpdated.getSystemProperties()
@@ -244,7 +246,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         @DisplayName("scheduling time")
         void schedulingTime() {
             Command cmd = requestFactory.command()
-                                              .create(toMessage(newUuid()));
+                                        .create(toMessage(newUuid()));
             Timestamp schedulingTime = getCurrentTime();
 
             Command cmdUpdated = CommandScheduler.setSchedulingTime(cmd, schedulingTime);

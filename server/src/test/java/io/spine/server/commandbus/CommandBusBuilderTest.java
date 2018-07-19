@@ -71,7 +71,7 @@ class CommandBusBuilderTest
     @DisplayName("create new CommandBus instance")
     void createNewInstance() {
         CommandBus commandBus = builder().setCommandStore(commandStore)
-                                               .build();
+                                         .build();
         assertNotNull(commandBus);
     }
 
@@ -98,7 +98,7 @@ class CommandBusBuilderTest
             CommandScheduler expectedScheduler = mock(CommandScheduler.class);
 
             CommandBus.Builder builder = builder().setCommandStore(commandStore)
-                                                        .setCommandScheduler(expectedScheduler);
+                                                  .setCommandScheduler(expectedScheduler);
 
             assertTrue(builder.getCommandScheduler()
                               .isPresent());
@@ -118,7 +118,7 @@ class CommandBusBuilderTest
             RejectionBus expectedRejectionBus = mock(RejectionBus.class);
 
             CommandBus.Builder builder = builder().setCommandStore(commandStore)
-                                                        .setRejectionBus(expectedRejectionBus);
+                                                  .setRejectionBus(expectedRejectionBus);
             assertTrue(builder.getRejectionBus()
                               .isPresent());
             assertEquals(expectedRejectionBus, builder.getRejectionBus()

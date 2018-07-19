@@ -68,18 +68,18 @@ public class StorageRecords {
         TestEventFactory eventFactory = newInstance(Given.class);
 
         Event e1 = eventFactory.createEvent(projectCreated(id, Given.projectName(id)),
-                                                  null,
-                                                  start);
+                                            null,
+                                            start);
         AggregateEventRecord record1 = StorageRecord.create(start, e1);
 
         Event e2 = eventFactory.createEvent(taskAdded(id),
-                                                  null,
-                                                  timestamp2);
+                                            null,
+                                            timestamp2);
         AggregateEventRecord record2 = StorageRecord.create(timestamp2, e2);
 
         Event e3 = eventFactory.createEvent(Given.EventMessage.projectStarted(id),
-                                                  null,
-                                                  timestamp3);
+                                            null,
+                                            timestamp3);
         AggregateEventRecord record3 = StorageRecord.create(timestamp3, e3);
 
         return newArrayList(record1, record2, record3);

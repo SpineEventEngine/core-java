@@ -213,8 +213,8 @@ class BoundedContextBuilderTest {
     @DisplayName("not accept CommandBus with different multitenancy state")
     void matchCommandBusMultitenancy() {
         CommandBus.Builder commandBus = CommandBus.newBuilder()
-                                                        .setMultitenant(true)
-                                                        .setCommandStore(mock(CommandStore.class));
+                                                  .setMultitenant(true)
+                                                  .setCommandStore(mock(CommandStore.class));
         assertThrows(IllegalStateException.class, () -> BoundedContext.newBuilder()
                                                                       .setMultitenant(false)
                                                                       .setCommandBus(commandBus)

@@ -62,8 +62,8 @@ class CommandValidatorViolationCheckTest {
     void notAllowDefaultId() {
         Command cmd = Given.ACommand.createProject();
         Command unidentifiableCommand = cmd.toBuilder()
-                                                 .setId(CommandId.getDefaultInstance())
-                                                 .build();
+                                           .setId(CommandId.getDefaultInstance())
+                                           .build();
         List<ConstraintViolation> violations =
                 inspect(CommandEnvelope.of(unidentifiableCommand));
 
@@ -75,10 +75,10 @@ class CommandValidatorViolationCheckTest {
     void notAllowInvalidMessage() {
         Any invalidMessagePacked = AnyPacker.pack(CmdCreateProject.getDefaultInstance());
         Command commandWithEmptyMessage = Command.newBuilder()
-                                                       .setId(generateId())
-                                                       .setMessage(invalidMessagePacked)
-                                                       .setContext(withRandomActor())
-                                                       .build();
+                                                 .setId(generateId())
+                                                 .setMessage(invalidMessagePacked)
+                                                 .setContext(withRandomActor())
+                                                 .build();
 
         List<ConstraintViolation> violations =
                 inspect(CommandEnvelope.of(commandWithEmptyMessage));
@@ -90,8 +90,8 @@ class CommandValidatorViolationCheckTest {
     @DisplayName("return violations if command has invalid context")
     void notAllowInvalidContext() {
         Command command = TestActorRequestFactory.newInstance(getClass())
-                                                       .createCommand(createProjectMessage(),
-                                                                      Time.getCurrentTime());
+                                                 .createCommand(createProjectMessage(),
+                                                                Time.getCurrentTime());
         Command commandWithoutContext =
                 command.toBuilder()
                        .setContext(CommandContext.getDefaultInstance())

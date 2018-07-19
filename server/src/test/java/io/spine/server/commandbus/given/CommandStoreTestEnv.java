@@ -114,11 +114,11 @@ public class CommandStoreTestEnv {
     public static <E extends ThrowableMessage> Command
     givenRejectingHandler(E throwable, CommandStoreTestAssets assets) {
         CommandHandler handler = new RejectingCreateProjectHandler(throwable,
-                                                                         assets.eventBus);
+                                                                   assets.eventBus);
         assets.commandBus.register(handler);
         CmdCreateProject msg = createProjectMessage();
         Command command = assets.requestFactory.command()
-                                                     .create(msg);
+                                               .create(msg);
         return command;
     }
 
@@ -152,7 +152,7 @@ public class CommandStoreTestEnv {
         assets.commandBus.register(handler);
         CmdCreateProject msg = createProjectMessage();
         Command command = assets.requestFactory.command()
-                                                     .create(msg);
+                                               .create(msg);
         return command;
     }
 

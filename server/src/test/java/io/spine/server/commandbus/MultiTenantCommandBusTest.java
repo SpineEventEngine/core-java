@@ -86,8 +86,8 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         @DisplayName("default if no custom one was specified")
         void setToDefault() {
             CommandBus bus = CommandBus.newBuilder()
-                                             .setCommandStore(commandStore)
-                                             .build();
+                                       .setCommandStore(commandStore)
+                                       .build();
             assertNotNull(bus.rejectionBus());
         }
 
@@ -96,9 +96,9 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         void setToCustom() {
             RejectionBus expectedRejectionBus = mock(RejectionBus.class);
             CommandBus commandBus = CommandBus.newBuilder()
-                                                    .setCommandStore(commandStore)
-                                                    .setRejectionBus(expectedRejectionBus)
-                                                    .build();
+                                              .setCommandStore(commandStore)
+                                              .setRejectionBus(expectedRejectionBus)
+                                              .build();
             assertNotNull(commandBus);
 
             RejectionBus actualRejectionBus = commandBus.rejectionBus();

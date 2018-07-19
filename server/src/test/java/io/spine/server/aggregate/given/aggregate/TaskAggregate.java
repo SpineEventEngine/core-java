@@ -174,7 +174,7 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
     Pair<AggUserNotified, Optional<AggUserNotified>>
     on(Rejections.AggCannotReassignUnassignedTask rejection) {
         AggUserNotified event = userNotified(rejection.getTaskId(),
-                                                   rejection.getUserId());
+                                             rejection.getUserId());
         return Pair.withNullable(event, null);
     }
 

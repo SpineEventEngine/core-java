@@ -109,8 +109,8 @@ public class Given {
             // An integration event ID may have a value which does not follow our internal
             // conventions. We simulate this in the initialization below
             EventId eventId = EventId.newBuilder()
-                                           .setValue("ieid-" + newUuid())
-                                           .build();
+                                     .setValue("ieid-" + newUuid())
+                                     .build();
 
             IntegrationEventContext.Builder builder =
                     IntegrationEventContext.newBuilder()

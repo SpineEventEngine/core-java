@@ -60,7 +60,8 @@ class ExecutorCommandSchedulerTest {
     private static final int WAIT_FOR_PROPAGATION_MS = 300;
 
     private final CommandFactory commandFactory =
-            TestActorRequestFactory.newInstance(ExecutorCommandSchedulerTest.class).command();
+            TestActorRequestFactory.newInstance(ExecutorCommandSchedulerTest.class)
+                                   .command();
 
     private CommandScheduler scheduler;
     private CommandContext context;
@@ -100,12 +101,12 @@ class ExecutorCommandSchedulerTest {
         String id = newUuid();
 
         Command expectedCmd = commandFactory.createBasedOnContext(createProjectMessage(id),
-                                                                        context);
+                                                                  context);
 
         Command extraCmd = commandFactory.createBasedOnContext(addTask(id), context)
-                                               .toBuilder()
-                                               .setId(expectedCmd.getId())
-                                               .build();
+                                         .toBuilder()
+                                         .setId(expectedCmd.getId())
+                                         .build();
 
         scheduler.schedule(expectedCmd);
         scheduler.schedule(extraCmd);
@@ -129,7 +130,7 @@ class ExecutorCommandSchedulerTest {
 
     private static Timestamp getSchedulingTime(Command cmd) {
         Timestamp time = cmd.getSystemProperties()
-                                  .getSchedulingTime();
+                            .getSchedulingTime();
         return time;
     }
 }
