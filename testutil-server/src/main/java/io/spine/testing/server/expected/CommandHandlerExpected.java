@@ -22,12 +22,14 @@ package io.spine.testing.server.expected;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
+import io.spine.core.Rejection;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static io.spine.protobuf.AnyPacker.unpack;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -44,10 +46,10 @@ public class CommandHandlerExpected<S extends Message>
         extends MessageProducingExpected<S, CommandHandlerExpected<S>> {
 
     @Nullable
-    private final Message rejection;
+    private final Rejection rejection;
 
     public CommandHandlerExpected(List<? extends Message> events,
-                                  @Nullable Message rejection,
+                                  @Nullable Rejection rejection,
                                   S initialState,
                                   S state,
                                   List<Message> interceptedCommands) {
@@ -121,7 +123,7 @@ public class CommandHandlerExpected<S extends Message>
     public CommandHandlerExpected<S> throwsRejection(Class<? extends Message> rejectionClass) {
         assertNotNull(rejection, format("No rejection encountered. Expected %s",
                                         rejectionClass.getSimpleName()));
-        assertTrue(rejectionClass.isInstance(rejection),
+        assertTrue(rejectionClass.isInstance(unpack(rejection.getMessage())),
                    format("%s is not an instance of %s.",
                           rejection.getClass()
                                    .getSimpleName(),

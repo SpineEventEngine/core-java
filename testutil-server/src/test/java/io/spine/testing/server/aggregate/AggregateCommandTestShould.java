@@ -21,7 +21,7 @@
 package io.spine.testing.server.aggregate;
 
 import com.google.protobuf.Timestamp;
-import io.spine.core.Rejection;
+import io.spine.testing.server.Rejections.TUFailedToAssignProject;
 import io.spine.testing.server.TUProjectAggregate;
 import io.spine.testing.server.aggregate.given.AggregateCommandTestShouldEnv.CommandHandlingAggregate;
 import io.spine.testing.server.expected.CommandHandlerExpected;
@@ -72,13 +72,13 @@ class AggregateCommandTestShould {
     }
 
     @Test
-    @DisplayName("not fail when rejected")
-    void shouldHandleRejection() {
+    @DisplayName("track rejection")
+    void trackGeneratedRejection() {
         aggregateRejectionCommandTest.setUp();
         CommandHandlingAggregate testAggregate = aggregate();
         CommandHandlerExpected<TUProjectAggregate> expected =
                 aggregateRejectionCommandTest.expectThat(testAggregate);
-        expected.throwsRejection(Rejection.class);
+        expected.throwsRejection(TUFailedToAssignProject.class);
     }
 }
 
