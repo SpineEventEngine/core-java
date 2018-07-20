@@ -20,7 +20,6 @@
 
 package io.spine.server.tenant;
 
-
 import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
 
