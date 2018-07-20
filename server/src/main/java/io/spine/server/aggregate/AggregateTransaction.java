@@ -82,7 +82,7 @@ public class AggregateTransaction<I,
      */
     @SuppressWarnings("unchecked")  // to avoid massive generic-related issues.
     static AggregateTransaction start(Aggregate aggregate) {
-        final AggregateTransaction tx = new AggregateTransaction(aggregate);
+        AggregateTransaction tx = new AggregateTransaction(aggregate);
         return tx;
     }
 }

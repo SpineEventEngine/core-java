@@ -56,7 +56,7 @@ abstract class FieldAtIndex<I, M extends Message, C extends Message> implements 
     @Override
     public I apply(M message, C ignored) throws MessageFieldException {
         @SuppressWarnings("unchecked") // we expect that the field is of this type
-        final I id = (I) idField.getValue(message);
+        I id = (I) idField.getValue(message);
         return id;
     }
 
@@ -76,7 +76,7 @@ abstract class FieldAtIndex<I, M extends Message, C extends Message> implements 
 
         @Override
         protected boolean isFieldAvailable(Message message) {
-            final boolean result = MessageField.getFieldCount(message) > getIndex();
+            boolean result = MessageField.getFieldCount(message) > getIndex();
             return result;
         }
     }

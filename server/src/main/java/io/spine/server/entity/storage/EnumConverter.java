@@ -53,8 +53,8 @@ abstract class EnumConverter implements ColumnValueConverter {
                     "Value passed to the EnumConverter should be of Enum type, actual type: %s",
                     value.getClass());
         }
-        final Enum enumValue = (Enum) value;
-        final Serializable convertedValue = convertEnumValue(enumValue);
+        Enum enumValue = (Enum) value;
+        Serializable convertedValue = convertEnumValue(enumValue);
         return convertedValue;
     }
 
@@ -82,8 +82,8 @@ abstract class EnumConverter implements ColumnValueConverter {
      * @return {@code true} if the value is of the {@link Enum} type, {@code false} otherwise
      */
     private static boolean isEnumType(Object value) {
-        final Class<?> valueType = value.getClass();
-        final boolean isJavaEnum = Enum.class.isAssignableFrom(valueType);
+        Class<?> valueType = value.getClass();
+        boolean isJavaEnum = Enum.class.isAssignableFrom(valueType);
         return isJavaEnum;
     }
 }

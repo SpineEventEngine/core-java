@@ -20,13 +20,13 @@
 
 package io.spine.server.bus;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Queues;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 
 import java.util.Deque;
 import java.util.Iterator;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -57,12 +57,12 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>, F extends BusFilter<
         checkNotNull(envelope);
         checkNotClosed();
         for (F filter : chain) {
-            final Optional<Ack> output = filter.accept(envelope);
+            Optional<Ack> output = filter.accept(envelope);
             if (output.isPresent()) {
                 return output;
             }
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     /**
@@ -79,9 +79,9 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>, F extends BusFilter<
     public void close() throws Exception {
         checkNotClosed();
         closed = true;
-        final Iterator<F> filters = chain.descendingIterator();
+        Iterator<F> filters = chain.descendingIterator();
         while (filters.hasNext()) {
-            final F filter = filters.next();
+            F filter = filters.next();
             filter.close();
         }
     }

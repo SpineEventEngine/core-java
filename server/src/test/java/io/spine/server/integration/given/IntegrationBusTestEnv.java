@@ -20,6 +20,7 @@
 package io.spine.server.integration.given;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -78,9 +79,10 @@ public class IntegrationBusTestEnv {
         // Prevent instantiation of this utility class.
     }
 
+    @CanIgnoreReturnValue
     public static BoundedContext
     contextWithExtEntitySubscribers(TransportFactory transportFactory) {
-        final BoundedContext boundedContext = contextWithTransport(transportFactory);
+        BoundedContext boundedContext = contextWithTransport(transportFactory);
         boundedContext.register(new ProjectDetailsRepository());
         boundedContext.register(new ProjectWizardRepository());
         boundedContext.register(new ProjectCountAggregateRepository());
@@ -89,20 +91,21 @@ public class IntegrationBusTestEnv {
 
     public static BoundedContext contextWithContextAwareEntitySubscriber(
             TransportFactory transportFactory) {
-        final BoundedContext boundedContext = contextWithTransport(transportFactory);
+        BoundedContext boundedContext = contextWithTransport(transportFactory);
         boundedContext.register(new ContextAwareProjectDetailsRepository());
         return boundedContext;
     }
 
+    @CanIgnoreReturnValue
     public static BoundedContext contextWithExternalSubscribers(TransportFactory transportFactory) {
-        final BoundedContext boundedContext = contextWithTransport(transportFactory);
-        final EventSubscriber eventSubscriber = new ProjectEventsSubscriber();
+        BoundedContext boundedContext = contextWithTransport(transportFactory);
+        EventSubscriber eventSubscriber = new ProjectEventsSubscriber();
         boundedContext.getIntegrationBus()
                       .register(eventSubscriber);
         boundedContext.getEventBus()
                       .register(eventSubscriber);
 
-        final RejectionSubscriber rejectionSubscriber = new ProjectRejectionsExtSubscriber();
+        RejectionSubscriber rejectionSubscriber = new ProjectRejectionsExtSubscriber();
         boundedContext.getRejectionBus().register(rejectionSubscriber);
         boundedContext.getIntegrationBus().register(rejectionSubscriber);
 
@@ -112,33 +115,33 @@ public class IntegrationBusTestEnv {
     }
 
     public static BoundedContext contextWithTransport(TransportFactory transportFactory) {
-        final IntegrationBus.Builder builder = IntegrationBus.newBuilder()
-                                                             .setTransportFactory(transportFactory);
-        final BoundedContext result = BoundedContext.newBuilder()
-                                                    .setName(newUuid())
-                                                    .setIntegrationBus(builder)
-                                                    .build();
+        IntegrationBus.Builder builder = IntegrationBus.newBuilder()
+                                                       .setTransportFactory(transportFactory);
+        BoundedContext result = BoundedContext.newBuilder()
+                                              .setName(newUuid())
+                                              .setIntegrationBus(builder)
+                                              .build();
         return result;
     }
 
     public static BoundedContext contextWithProjectCreatedNeeds(TransportFactory factory) {
-        final BoundedContext result = contextWithTransport(factory);
+        BoundedContext result = contextWithTransport(factory);
         result.getIntegrationBus()
               .register(new ProjectEventsSubscriber());
         return result;
     }
 
     public static BoundedContext contextWithProjectStartedNeeds(TransportFactory factory) {
-        final BoundedContext result = contextWithTransport(factory);
+        BoundedContext result = contextWithTransport(factory);
         result.getIntegrationBus()
               .register(new ProjectStartedExtSubscriber());
         return result;
     }
 
     public static Event projectCreated() {
-        final ProjectId projectId = projectId();
-        final TestEventFactory eventFactory = newInstance(pack(projectId),
-                                                          IntegrationBusTestEnv.class);
+        ProjectId projectId = projectId();
+        TestEventFactory eventFactory = newInstance(pack(projectId),
+                                                    IntegrationBusTestEnv.class);
         return eventFactory.createEvent(ItgProjectCreated.newBuilder()
                                                          .setProjectId(projectId)
                                                          .build()
@@ -146,9 +149,9 @@ public class IntegrationBusTestEnv {
     }
 
     public static Event projectStarted() {
-        final ProjectId projectId = projectId();
-        final TestEventFactory eventFactory = newInstance(pack(projectId),
-                                                          IntegrationBusTestEnv.class);
+        ProjectId projectId = projectId();
+        TestEventFactory eventFactory = newInstance(pack(projectId),
+                                                    IntegrationBusTestEnv.class);
         return eventFactory.createEvent(ItgProjectStarted.newBuilder()
                                                          .setProjectId(projectId)
                                                          .build()
@@ -157,15 +160,15 @@ public class IntegrationBusTestEnv {
 
     @SuppressWarnings("ThrowableNotThrown")     // used to create a rejection
     public static Rejection cannotStartArchivedProject() {
-        final ProjectId projectId = projectId();
-        final ItgStartProject cmdMessage = ItgStartProject.newBuilder()
-                                                          .setProjectId(projectId)
-                                                          .build();
-        final Command startProjectCmd = toCommand(cmdMessage);
-        final io.spine.test.integration.rejection.ItgCannotStartArchivedProject throwable =
+        ProjectId projectId = projectId();
+        ItgStartProject cmdMessage = ItgStartProject.newBuilder()
+                                                    .setProjectId(projectId)
+                                                    .build();
+        Command startProjectCmd = toCommand(cmdMessage);
+        io.spine.test.integration.rejection.ItgCannotStartArchivedProject throwable =
                 new io.spine.test.integration.rejection.ItgCannotStartArchivedProject(projectId);
         throwable.initProducer(AnyPacker.pack(projectId));
-        final Rejection rejection = toRejection(throwable, startProjectCmd);
+        Rejection rejection = toRejection(throwable, startProjectCmd);
         return rejection;
     }
 

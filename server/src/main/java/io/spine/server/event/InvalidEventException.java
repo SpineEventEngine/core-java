@@ -60,7 +60,7 @@ public class InvalidEventException extends EventException implements MessageInva
     public static InvalidEventException onConstraintViolations(
             Message eventMsg, Iterable<ConstraintViolation> violations) {
 
-        final ConstraintViolationExceptionFactory helper = new ConstraintViolationExceptionFactory(
+        ConstraintViolationExceptionFactory helper = new ConstraintViolationExceptionFactory(
                 eventMsg, violations);
         return helper.newException();
     }

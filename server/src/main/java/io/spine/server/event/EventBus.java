@@ -20,7 +20,6 @@
 package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
@@ -43,6 +42,7 @@ import io.spine.validate.MessageValidator;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Deque;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -220,7 +220,7 @@ public class EventBus
         if (enricher == null || !enricher.canBeEnriched(event)) {
             return event;
         }
-        final EventEnvelope enriched = enricher.enrich(event);
+        EventEnvelope enriched = enricher.enrich(event);
         return enriched;
     }
 
@@ -326,7 +326,7 @@ public class EventBus
         }
 
         public Optional<StorageFactory> getStorageFactory() {
-            return Optional.fromNullable(storageFactory);
+            return Optional.ofNullable(storageFactory);
         }
 
         /**
@@ -350,7 +350,7 @@ public class EventBus
         }
 
         public Optional<EventStore> getEventStore() {
-            return Optional.fromNullable(eventStore);
+            return Optional.ofNullable(eventStore);
         }
 
         /**
@@ -373,7 +373,7 @@ public class EventBus
         }
 
         public Optional<Executor> getEventStoreStreamExecutor() {
-            return Optional.fromNullable(eventStoreStreamExecutor);
+            return Optional.ofNullable(eventStoreStreamExecutor);
         }
 
         @CanIgnoreReturnValue
@@ -383,7 +383,7 @@ public class EventBus
         }
 
         public Optional<MessageValidator> getEventValidator() {
-            return Optional.fromNullable(eventValidator);
+            return Optional.ofNullable(eventValidator);
         }
 
         /**
@@ -402,7 +402,7 @@ public class EventBus
         }
 
         public Optional<EventEnricher> getEnricher() {
-            return Optional.fromNullable(enricher);
+            return Optional.ofNullable(enricher);
         }
 
         /**
@@ -432,8 +432,8 @@ public class EventBus
         @Override
         @Internal
         public EventBus build() {
-            final String message = "Either storageFactory or eventStore must be " +
-                                   "set to build the EventBus instance";
+            String message = "Either storageFactory or eventStore must be " +
+                             "set to build the EventBus instance";
             checkState(storageFactory != null || eventStore != null, message);
 
             if (eventStoreStreamExecutor == null) {
@@ -453,7 +453,7 @@ public class EventBus
                 eventValidator = MessageValidator.newInstance();
             }
 
-            final EventBus result = new EventBus(this);
+            EventBus result = new EventBus(this);
             return result;
         }
 
@@ -464,21 +464,21 @@ public class EventBus
     }
 
     /**
-     * Handles a dead event by saving it to the {@link EventStore} and producing an 
+     * Handles a dead event by saving it to the {@link EventStore} and producing an
      * {@link UnsupportedEventException}.
      *
-     * <p> We must store dead events, as they are still emitted by some entity and therefore are 
+     * <p> We must store dead events, as they are still emitted by some entity and therefore are
      * a part of the history for the current bounded context.
      */
     private class DeadEventTap implements DeadMessageHandler<EventEnvelope> {
         @Override
         public UnsupportedEventException handle(EventEnvelope envelope) {
 
-            final Event event = envelope.getOuterObject();
+            Event event = envelope.getOuterObject();
             store(of(event));
 
-            final Message message = envelope.getMessage();
-            final UnsupportedEventException exception = new UnsupportedEventException(message);
+            Message message = envelope.getMessage();
+            UnsupportedEventException exception = new UnsupportedEventException(message);
             return exception;
         }
     }

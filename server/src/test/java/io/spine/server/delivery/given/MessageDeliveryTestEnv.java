@@ -19,7 +19,6 @@
  */
 package io.spine.server.delivery.given;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.protobuf.StringValue;
 import io.spine.core.BoundedContextName;
@@ -47,6 +46,8 @@ import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.rejection.AggCannotReassignUnassignedTask;
 import io.spine.validate.StringValueVBuilder;
 
+import java.util.Optional;
+
 import static io.spine.core.BoundedContextNames.newName;
 
 /**
@@ -71,7 +72,7 @@ public class MessageDeliveryTestEnv {
     }
 
     public static void setShardingTransport(InMemoryTransportFactory transport) {
-        final Sharding inProcessSharding = new InProcessSharding(transport);
+        Sharding inProcessSharding = new InProcessSharding(transport);
         ServerEnvironment.getInstance()
                          .replaceSharding(inProcessSharding);
     }
@@ -108,12 +109,12 @@ public class MessageDeliveryTestEnv {
 
         @React
         public Optional<AggProjectCancelled> on(AggProjectCancelled event) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         @React
         public Optional<AggProjectPaused> on(AggCannotReassignUnassignedTask rejection) {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
@@ -154,9 +155,9 @@ public class MessageDeliveryTestEnv {
 
         @Override
         public EntityClass getShardedModelClass() {
-            final Class<DeliveryEqualityProject> someAggregate = DeliveryEqualityProject.class;
-            final AggregateClass<?> result = Model.getInstance()
-                                                  .asAggregateClass(someAggregate);
+            Class<DeliveryEqualityProject> someAggregate = DeliveryEqualityProject.class;
+            AggregateClass<?> result = Model.getInstance()
+                                            .asAggregateClass(someAggregate);
             return result;
         }
     }

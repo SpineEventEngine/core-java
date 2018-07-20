@@ -20,9 +20,8 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.common.base.Optional;
-
 import java.util.Iterator;
+import java.util.Optional;
 
 /**
  * Base interface for data stored in memory for one tenant.

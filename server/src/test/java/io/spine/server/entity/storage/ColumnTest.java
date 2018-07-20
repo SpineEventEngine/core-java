@@ -76,7 +76,7 @@ class ColumnTest {
         @Test
         @DisplayName("non-null getter without errors")
         void getter() {
-            final EntityColumn column = forMethod("getVersion", VersionableEntity.class);
+            EntityColumn column = forMethod("getVersion", VersionableEntity.class);
             column.restoreGetter();
         }
 
@@ -85,7 +85,7 @@ class ColumnTest {
         @Test
         @DisplayName("non-null value converter without errors")
         void valueConverter() {
-            final EntityColumn column = forMethod("getVersion", VersionableEntity.class);
+            EntityColumn column = forMethod("getVersion", VersionableEntity.class);
             column.restoreValueConverter();
         }
     }

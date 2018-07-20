@@ -78,7 +78,7 @@ public final class InvalidEntityStateException extends RuntimeException {
      */
     public static InvalidEntityStateException onConstraintViolations(
             Message entityState, Iterable<ConstraintViolation> violations) {
-        final ConstraintViolationExceptionFactory helper = new ConstraintViolationExceptionFactory(
+        ConstraintViolationExceptionFactory helper = new ConstraintViolationExceptionFactory(
                 entityState, violations);
         return helper.newException();
     }
@@ -88,7 +88,7 @@ public final class InvalidEntityStateException extends RuntimeException {
      */
     public Message getEntityState() {
         if (entityState instanceof Any) {
-            final Any any = (Any) entityState;
+            Any any = (Any) entityState;
             Message unpacked = AnyPacker.unpack(any);
             return unpacked;
         }
@@ -150,11 +150,11 @@ public final class InvalidEntityStateException extends RuntimeException {
          */
         @Override
         protected Map<String, Value> getMessageTypeAttribute(Message entityState) {
-            final String entityStateType = TypeName.of(entityState)
-                                                   .value();
-            final Value value = Value.newBuilder()
-                                     .setStringValue(entityStateType)
-                                     .build();
+            String entityStateType = TypeName.of(entityState)
+                                             .value();
+            Value value = Value.newBuilder()
+                               .setStringValue(entityStateType)
+                               .build();
             return ImmutableMap.of(ATTR_ENTITY_STATE_TYPE_NAME, value);
         }
 

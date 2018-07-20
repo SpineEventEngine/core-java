@@ -37,33 +37,33 @@ public class EventsTestEnv {
     }
 
     public static RejectionContext rejectionContext(TenantId id) {
-        final Command command = Command.newBuilder()
-                                       .setContext(commandContext(id))
-                                       .build();
-        final RejectionContext result = RejectionContext.newBuilder()
-                                                        .setCommand(command)
-                                                        .build();
+        Command command = Command.newBuilder()
+                                 .setContext(commandContext(id))
+                                 .build();
+        RejectionContext result = RejectionContext.newBuilder()
+                                                  .setCommand(command)
+                                                  .build();
         return result;
     }
 
     public static RejectionContext rejectionContext() {
-        final RejectionContext result = RejectionContext.newBuilder()
-                                                        .build();
+        RejectionContext result = RejectionContext.newBuilder()
+                                                  .build();
         return result;
     }
 
     public static CommandContext commandContext(TenantId id) {
-        final ActorContext actorContext = ActorContext.newBuilder()
-                                                      .setTenantId(id)
-                                                      .build();
-        final CommandContext result = CommandContext.newBuilder()
-                                                    .setActorContext(actorContext)
-                                                    .build();
+        ActorContext actorContext = ActorContext.newBuilder()
+                                                .setTenantId(id)
+                                                .build();
+        CommandContext result = CommandContext.newBuilder()
+                                              .setActorContext(actorContext)
+                                              .build();
         return result;
     }
 
     public static TenantId tenantId() {
-        final String value = EventsTestEnv.class.getName();
+        String value = EventsTestEnv.class.getName();
         return TenantId.newBuilder()
                        .setValue(value)
                        .build();

@@ -74,9 +74,9 @@ public abstract class EntityMessageEndpoint<I,
      * @return the result of the message processing
      */
     public final R handle() {
-        final TenantId tenantId = envelope().getTenantId();
-        final TenantAwareFunction0<R> operation = new Operation(tenantId);
-        final R result = operation.execute();
+        TenantId tenantId = envelope().getTenantId();
+        TenantAwareFunction0<R> operation = new Operation(tenantId);
+        R result = operation.execute();
         return result;
     }
 
@@ -86,9 +86,9 @@ public abstract class EntityMessageEndpoint<I,
      */
     @SuppressWarnings("unchecked")
     private R dispatch() {
-        final R targets = getTargets();
+        R targets = getTargets();
         if (targets instanceof Set) {
-            final Set<I> handlingAggregates = (Set<I>) targets;
+            Set<I> handlingAggregates = (Set<I>) targets;
             return (R)(dispatchToMany(handlingAggregates));
         }
         try {
@@ -105,9 +105,10 @@ public abstract class EntityMessageEndpoint<I,
      * @param entityId the ID of the entity for which to dispatch the message
      */
     private void dispatchToOne(I entityId) {
-        final M envelope = envelope();
-        final Delivery<I, E, M, ?, ?> delivery = getEndpointDelivery();
-        delivery.getSender().send(entityId, envelope);
+        M envelope = envelope();
+        Delivery<I, E, M, ?, ?> delivery = getEndpointDelivery();
+        delivery.getSender()
+                .send(entityId, envelope);
     }
 
     /**
@@ -144,7 +145,7 @@ public abstract class EntityMessageEndpoint<I,
      * @param entity the entity to store
      */
     protected final void store(E entity) {
-        final boolean isModified = isModified(entity);
+        boolean isModified = isModified(entity);
         if (isModified) {
             onModified(entity);
         } else {
@@ -180,7 +181,7 @@ public abstract class EntityMessageEndpoint<I,
      * @return the set of aggregate IDs to which the message was successfully dispatched
      */
     private Set<I> dispatchToMany(Set<I> targets) {
-        final ImmutableSet.Builder<I> result = ImmutableSet.builder();
+        ImmutableSet.Builder<I> result = ImmutableSet.builder();
         for (I id : targets) {
             try {
                 dispatchToOne(id);
@@ -221,10 +222,11 @@ public abstract class EntityMessageEndpoint<I,
      * @throws IllegalStateException always
      */
     protected void onUnhandledCommand(Entity<R, ?> entity, CommandEnvelope cmd, String format) {
-        final String entityId = Stringifiers.toString(entity.getId());
-        final String entityClass = entity.getClass().getName();
-        final String commandId = Stringifiers.toString(cmd.getId());
-        final CommandClass commandClass = cmd.getMessageClass();
+        String entityId = Stringifiers.toString(entity.getId());
+        String entityClass = entity.getClass()
+                                   .getName();
+        String commandId = Stringifiers.toString(cmd.getId());
+        CommandClass commandClass = cmd.getMessageClass();
         throw newIllegalStateException(format, entityClass, entityId, commandClass, commandId);
     }
 

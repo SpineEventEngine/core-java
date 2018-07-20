@@ -52,7 +52,7 @@ final class TransactionalEventPlayer implements EventPlayer {
     public void play(Iterable<Event> events) {
         checkNotNull(events);
         for (Event event : events) {
-            final EventEnvelope eventEnvelope = EventEnvelope.of(event);
+            EventEnvelope eventEnvelope = EventEnvelope.of(event);
             transaction.apply(eventEnvelope);
         }
     }

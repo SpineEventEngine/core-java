@@ -47,26 +47,23 @@ public class GivenEvent {
     }
 
     public static EventContext context() {
-        final Event event = eventFactory.createEvent(Time.getCurrentTime(),
-                                                     Tests.nullRef());
+        Event event = eventFactory.createEvent(Time.getCurrentTime(), Tests.nullRef());
         return event.getContext();
     }
 
     public static Event occurredMinutesAgo(int minutesAgo) {
-        final Event result = eventFactory.createEvent(newUuidValue(),
-                                                      null,
-                                                      minutesAgo(minutesAgo));
+        Event result = eventFactory.createEvent(newUuidValue(), null, minutesAgo(minutesAgo));
         return result;
     }
 
     public static Event withMessage(Message message) {
-        final Event event = eventFactory.createEvent(message);
+        Event event = eventFactory.createEvent(message);
         return event;
     }
 
     public static Event withDisabledEnrichmentOf(Message message) {
-        final Event event = withMessage(message);
-        final Event.Builder builder =
+        Event event = withMessage(message);
+        Event.Builder builder =
                 event.toBuilder()
                      .setContext(event.getContext()
                                       .toBuilder()

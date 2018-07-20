@@ -81,7 +81,7 @@ public class PmTransaction<I,
             S extends Message,
             B extends ValidatingBuilder<S, ? extends Message.Builder>>
     PmTransaction<I, S, B> start(ProcessManager<I, S, B> processManager) {
-        final PmTransaction<I, S, B> tx = new PmTransaction<>(processManager);
+        PmTransaction<I, S, B> tx = new PmTransaction<>(processManager);
         return tx;
     }
 

@@ -52,27 +52,27 @@ final class RejectionBusAdapter extends BusAdapter<RejectionEnvelope, RejectionD
 
     @Override
     ExternalMessageEnvelope toExternalEnvelope(ExternalMessage message) {
-        final Any packedRejection = message.getOriginalMessage();
-        final Rejection rejection = AnyPacker.unpack(packedRejection);
-        final ExternalMessageEnvelope result =
+        Any packedRejection = message.getOriginalMessage();
+        Rejection rejection = AnyPacker.unpack(packedRejection);
+        ExternalMessageEnvelope result =
                 ExternalMessageEnvelope.of(message, Rejections.getMessage(rejection));
         return result;
     }
 
     @Override
     ExternalMessageEnvelope markExternal(ExternalMessage externalMsg) {
-        final Any packedEvent = externalMsg.getOriginalMessage();
-        final Rejection rejection = AnyPacker.unpack(packedEvent);
-        final Rejection.Builder rejectionBuilder = rejection.toBuilder();
-        final RejectionContext modifiedContext = rejectionBuilder.getContext()
-                                                                 .toBuilder()
-                                                                 .setExternal(true)
-                                                                 .build();
+        Any packedEvent = externalMsg.getOriginalMessage();
+        Rejection rejection = AnyPacker.unpack(packedEvent);
+        Rejection.Builder rejectionBuilder = rejection.toBuilder();
+        RejectionContext modifiedContext = rejectionBuilder.getContext()
+                                                           .toBuilder()
+                                                           .setExternal(true)
+                                                           .build();
 
-        final Rejection marked = rejectionBuilder.setContext(modifiedContext)
-                                                 .build();
-        final ExternalMessage result = ExternalMessages.of(marked,
-                                                           externalMsg.getBoundedContextName());
+        Rejection marked = rejectionBuilder.setContext(modifiedContext)
+                                           .build();
+        ExternalMessage result = ExternalMessages.of(marked,
+                                                     externalMsg.getBoundedContextName());
         return ExternalMessageEnvelope.of(result, Rejections.getMessage(rejection));
     }
 
@@ -83,7 +83,7 @@ final class RejectionBusAdapter extends BusAdapter<RejectionEnvelope, RejectionD
 
     @Override
     RejectionDispatcher<?> createDispatcher(Class<? extends Message> messageClass) {
-        final DomesticRejectionPublisher result =
+        DomesticRejectionPublisher result =
                 new DomesticRejectionPublisher(getBoundedContextName(),
                                                getPublisherHub(),
                                                RejectionClass.of(messageClass));

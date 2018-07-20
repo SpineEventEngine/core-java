@@ -85,19 +85,19 @@ public class ColumnReader {
      * @throws IllegalStateException if entity column definitions are incorrect
      */
     Collection<EntityColumn> readColumns() {
-        final BeanInfo entityDescriptor;
+        BeanInfo entityDescriptor;
         try {
             entityDescriptor = Introspector.getBeanInfo(entityClass);
         } catch (IntrospectionException e) {
             throw new IllegalStateException(e);
         }
 
-        final Collection<EntityColumn> entityColumns = newLinkedList();
+        Collection<EntityColumn> entityColumns = newLinkedList();
         for (PropertyDescriptor property : entityDescriptor.getPropertyDescriptors()) {
-            final Method getter = property.getReadMethod();
-            final boolean isEntityColumn = getAnnotatedVersion(getter).isPresent();
+            Method getter = property.getReadMethod();
+            boolean isEntityColumn = getAnnotatedVersion(getter).isPresent();
             if (isEntityColumn) {
-                final EntityColumn column = EntityColumn.from(getter);
+                EntityColumn column = EntityColumn.from(getter);
                 entityColumns.add(column);
             }
         }
@@ -116,9 +116,9 @@ public class ColumnReader {
      * @throws IllegalStateException if columns contain repeated names
      */
     private void checkRepeatedColumnNames(Iterable<EntityColumn> columns) {
-        final Collection<String> checkedNames = newLinkedList();
+        Collection<String> checkedNames = newLinkedList();
         for (EntityColumn column : columns) {
-            final String columnName = column.getStoredName();
+            String columnName = column.getStoredName();
             if (checkedNames.contains(columnName)) {
                 throw newIllegalStateException(
                         "The entity `%s` has columns with the same name for storing `%s`.",

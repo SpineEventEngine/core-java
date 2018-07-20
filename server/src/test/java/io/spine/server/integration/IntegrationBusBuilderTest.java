@@ -87,7 +87,7 @@ class IntegrationBusBuilderTest
         @Test
         @DisplayName("TransportFactory")
         void transportFactory() {
-            final TransportFactory mock = mock(TransportFactory.class);
+            TransportFactory mock = mock(TransportFactory.class);
             assertEquals(mock, builder().setTransportFactory(mock)
                                         .getTransportFactory()
                                         .get());
@@ -96,7 +96,7 @@ class IntegrationBusBuilderTest
         @Test
         @DisplayName("EventBus")
         void eventBus() {
-            final EventBus mock = mock(EventBus.class);
+            EventBus mock = mock(EventBus.class);
             assertEquals(mock, builder().setEventBus(mock)
                                         .getEventBus()
                                         .get());
@@ -105,7 +105,7 @@ class IntegrationBusBuilderTest
         @Test
         @DisplayName("RejectionBus")
         void rejectionBus() {
-            final RejectionBus mock = mock(RejectionBus.class);
+            RejectionBus mock = mock(RejectionBus.class);
             assertEquals(mock, builder().setRejectionBus(mock)
                                         .getRejectionBus()
                                         .get());
@@ -114,7 +114,7 @@ class IntegrationBusBuilderTest
         @Test
         @DisplayName("BoundedContextName")
         void boundedContextName() {
-            final BoundedContextName name =
+            BoundedContextName name =
                     BoundedContextNames.newName("Name that is expected back from the Builder");
             assertEquals(name, builder().setBoundedContextName(name)
                                         .getBoundedContextName()

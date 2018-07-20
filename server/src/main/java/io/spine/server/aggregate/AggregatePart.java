@@ -90,7 +90,7 @@ public abstract class AggregatePart<I,
      *                               the ID type of the {@code root}
      */
     protected <P extends Message> P getPartState(Class<P> partStateClass) {
-        final P partState = root.getPartState(partStateClass);
+        P partState = root.getPartState(partStateClass);
         return partState;
     }
 

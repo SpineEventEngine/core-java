@@ -19,12 +19,13 @@
  */
 package io.spine.server.stand;
 
-import com.google.common.base.Optional;
 import io.spine.base.Error;
 import io.spine.client.Target;
 import io.spine.client.Topic;
 import io.spine.client.TopicValidationError;
 import io.spine.type.TypeUrl;
+
+import java.util.Optional;
 
 import static io.spine.client.TopicValidationError.INVALID_TOPIC;
 import static io.spine.client.TopicValidationError.UNSUPPORTED_TOPIC_TARGET;
@@ -55,18 +56,18 @@ class TopicValidator extends AbstractTargetValidator<Topic> {
 
     @Override
     protected Optional<RequestNotSupported<Topic>> isSupported(Topic request) {
-        final Target target = request.getTarget();
-        final boolean targetSupported = checkTargetSupported(target);
+        Target target = request.getTarget();
+        boolean targetSupported = checkTargetSupported(target);
         if (targetSupported) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         return Optional.of(missingInRegistry(getTypeOf(target)));
     }
 
     private static RequestNotSupported<Topic> missingInRegistry(TypeUrl topicTargetType) {
-        final String errorMessage = format("The topic target type is not supported: %s",
-                                           topicTargetType.getTypeName());
+        String errorMessage = format("The topic target type is not supported: %s",
+                                     topicTargetType.getTypeName());
         return new RequestNotSupported<Topic>(UNSUPPORTED_TOPIC_TARGET, errorMessage) {
 
             @Override

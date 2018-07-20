@@ -106,7 +106,7 @@ class EventPredicatesTest {
         @Test
         @DisplayName("`isBetween` predicate")
         void isBetween() {
-            final Event event = GivenEvent.occurredMinutesAgo(5);
+            Event event = GivenEvent.occurredMinutesAgo(5);
             assertTrue(EventPredicates.isBetween(minutesAgo(10), minutesAgo(1)).apply(event));
             assertFalse(EventPredicates.isBetween(minutesAgo(2), minutesAgo(1)).apply(event));
         }

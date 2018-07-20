@@ -22,14 +22,14 @@ package io.spine.server.outbus.enrich;
 
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import com.google.protobuf.Message;
 import io.spine.server.event.EventBus;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -140,7 +140,7 @@ abstract class EnrichmentFunction<S, T, C extends Message> {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final EnrichmentFunction other = (EnrichmentFunction) obj;
+        EnrichmentFunction other = (EnrichmentFunction) obj;
         return Objects.equals(this.sourceClass, other.sourceClass)
                 && Objects.equals(this.enrichmentClass, other.enrichmentClass);
     }
@@ -172,8 +172,10 @@ abstract class EnrichmentFunction<S, T, C extends Message> {
     static Optional<EnrichmentFunction<?, ?, ?>>
     firstThat(Iterable<EnrichmentFunction<?, ?, ?>> functions,
               Predicate<? super EnrichmentFunction<?, ?, ?>> predicate) {
-        final FluentIterable<EnrichmentFunction<?, ?, ?>> fi = FluentIterable.from(functions);
-        final Optional<EnrichmentFunction<?, ?, ?>> optional = fi.firstMatch(predicate);
+        Optional<EnrichmentFunction<?, ?, ?>> optional =
+                StreamSupport.stream(functions.spliterator(), false)
+                             .filter(predicate)
+                             .findFirst();
         return optional;
     }
 }

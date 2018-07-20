@@ -55,8 +55,8 @@ public class RejectionShardedStream<I> extends ShardedStream<I, Rejection, Rejec
 
         @Override
         protected RejectionEnvelope toEnvelope(Any packedRejection) {
-            final Rejection rejection = AnyPacker.unpack(packedRejection);
-            final RejectionEnvelope result = RejectionEnvelope.of(rejection);
+            Rejection rejection = AnyPacker.unpack(packedRejection);
+            RejectionEnvelope result = RejectionEnvelope.of(rejection);
             return result;
         }
     }

@@ -71,7 +71,7 @@ public final class DeliveryTag<E extends MessageEnvelope<?, ?, ?>> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final DeliveryTag<?> that = (DeliveryTag<?>) o;
+        DeliveryTag<?> that = (DeliveryTag<?>) o;
         return Objects.equals(boundedContextName, that.boundedContextName) &&
                 Objects.equals(entityClass, that.entityClass) &&
                 Objects.equals(envelopeType, that.envelopeType);
@@ -130,7 +130,7 @@ public final class DeliveryTag<E extends MessageEnvelope<?, ?, ?>> {
         checkNotNull(entityClass);
         checkNotNull(envelopeClass);
 
-        final DeliveryTag<E> id = new DeliveryTag<>(bcName, entityClass, envelopeClass);
+        DeliveryTag<E> id = new DeliveryTag<>(bcName, entityClass, envelopeClass);
         return id;
     }
 

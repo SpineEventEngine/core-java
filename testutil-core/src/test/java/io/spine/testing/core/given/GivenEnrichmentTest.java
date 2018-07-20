@@ -49,7 +49,7 @@ class GivenEnrichmentTest {
     void createWithOneAttribute() {
         Enrichment enrichment = withOneAttribute();
         Map<String, Any> enrichmentAttributes = enrichment.getContainer()
-                                                          .getItems();
+                                                          .getItemsMap();
         assertSize(1, enrichmentAttributes);
     }
 }

@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.SPI;
 import io.spine.base.Identifier;
@@ -31,6 +30,7 @@ import io.spine.server.storage.StorageWithLifecycleFlags;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -69,7 +69,7 @@ public abstract class AggregateStorage<I>
      * {@linkplain #historyBackward(AggregateReadRequest) aggregate history}.
      *
      * @param request the aggregate read request based on which to form a record
-     * @return the record instance or {@code Optional.absent()} if the
+     * @return the record instance or {@code Optional.empty()} if the
      *         {@linkplain #historyBackward(AggregateReadRequest) aggregate history} is empty
      * @throws IllegalStateException if the storage was closed before
      */

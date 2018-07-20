@@ -90,9 +90,9 @@ public class AggregateRoot<I> {
      */
     protected <S extends Message, A extends AggregatePart<I, S, ?, ?>>
     S getPartState(Class<S> partStateClass) {
-        final AggregatePartRepository<I, A, ?> repo = getRepository(partStateClass);
-        final AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(getId());
-        final S partState = aggregatePart.getState();
+        AggregatePartRepository<I, A, ?> repo = getRepository(partStateClass);
+        AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(getId());
+        S partState = aggregatePart.getState();
         return partState;
     }
 
@@ -107,7 +107,7 @@ public class AggregateRoot<I> {
     private <S extends Message, A extends AggregatePart<I, S, ?, ?>>
     AggregatePartRepository<I, A, ?> getRepository(Class<S> stateClass) {
 
-        final AggregatePartRepository<I, A, ?> result;
+        AggregatePartRepository<I, A, ?> result;
         try {
             result = (AggregatePartRepository<I, A, ?>) cache.get(stateClass);
         } catch (ExecutionException e) {
@@ -140,11 +140,11 @@ public class AggregateRoot<I> {
     private <S extends Message, A extends AggregatePart<I, S, ?, ?>>
     AggregatePartRepository<I, A, ?> lookup(Class<S> stateClass) {
         @SuppressWarnings("unchecked") // The type is ensured by getId() result.
-        final Class<I> idClass = (Class<I>) getId().getClass();
-        final AggregatePartRepositoryLookup<I, S> lookup = createLookup(getBoundedContext(),
-                                                                        idClass,
-                                                                        stateClass);
-        final AggregatePartRepository<I, A, ?> result = lookup.find();
+        Class<I> idClass = (Class<I>) getId().getClass();
+        AggregatePartRepositoryLookup<I, S> lookup = createLookup(getBoundedContext(),
+                                                                  idClass,
+                                                                  stateClass);
+        AggregatePartRepository<I, A, ?> result = lookup.find();
         return result;
     }
 }

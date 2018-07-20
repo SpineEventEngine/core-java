@@ -78,8 +78,8 @@ public class AggregatePartTestEnv {
 
         @Assign
         AggTaskAdded handle(AggAddTask msg) {
-            final AggTaskAdded result = AggTaskAdded.newBuilder()
-                                                    .build();
+            AggTaskAdded result = AggTaskAdded.newBuilder()
+                                              .build();
             //This command can be empty since we use apply method to setup aggregate part.
             return result;
         }
@@ -101,10 +101,10 @@ public class AggregatePartTestEnv {
 
         @Assign
         AggProjectCreated handle(AggCreateProject msg) {
-            final AggProjectCreated result = AggProjectCreated.newBuilder()
-                                                              .setProjectId(msg.getProjectId())
-                                                              .setName(msg.getName())
-                                                              .build();
+            AggProjectCreated result = AggProjectCreated.newBuilder()
+                                                        .setProjectId(msg.getProjectId())
+                                                        .setName(msg.getName())
+                                                        .build();
             return result;
         }
 

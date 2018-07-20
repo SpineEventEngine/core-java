@@ -19,12 +19,13 @@
  */
 package io.spine.server.stand;
 
-import com.google.common.base.Optional;
 import io.spine.base.Error;
 import io.spine.client.Query;
 import io.spine.client.QueryValidationError;
 import io.spine.client.Target;
 import io.spine.type.TypeUrl;
+
+import java.util.Optional;
 
 import static io.spine.client.QueryValidationError.INVALID_QUERY;
 import static io.spine.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;
@@ -54,19 +55,19 @@ class QueryValidator extends AbstractTargetValidator<Query> {
 
     @Override
     protected Optional<RequestNotSupported<Query>> isSupported(Query request) {
-        final Target target = request.getTarget();
-        final boolean targetSupported = checkTargetSupported(target);
+        Target target = request.getTarget();
+        boolean targetSupported = checkTargetSupported(target);
 
         if (targetSupported) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         return Optional.of(missingInRegistry(getTypeOf(target)));
     }
 
     private static RequestNotSupported<Query> missingInRegistry(TypeUrl topicTargetType) {
-        final String errorMessage = format("The query target type is not supported: %s",
-                                           topicTargetType.getTypeName());
+        String errorMessage = format("The query target type is not supported: %s",
+                                     topicTargetType.getTypeName());
         return new RequestNotSupported<Query>(UNSUPPORTED_QUERY_TARGET, errorMessage) {
 
             @Override

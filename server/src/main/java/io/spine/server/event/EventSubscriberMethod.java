@@ -106,7 +106,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventClass, Event
 
         @Override
         public void checkAccessModifier(Method method) {
-            final MethodAccessChecker checker = forMethod(method);
+            MethodAccessChecker checker = forMethod(method);
             checker.checkPublic("Event subscriber {} must be declared 'public'");
         }
 
@@ -136,9 +136,9 @@ public final class EventSubscriberMethod extends HandlerMethod<EventClass, Event
         protected boolean verifyParams(Method method) {
             if (super.verifyParams(method)) {
                 @SuppressWarnings("unchecked") // The case is safe since super returned `true`.
-                final Class<? extends Message> firstParameter =
+                Class<? extends Message> firstParameter =
                         (Class<? extends Message>) method.getParameterTypes()[0];
-                final boolean isRejection = isRejection(firstParameter);
+                boolean isRejection = isRejection(firstParameter);
                 return !isRejection;
             }
             return false;
@@ -146,7 +146,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventClass, Event
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            final boolean isVoid = Void.TYPE.equals(method.getReturnType());
+            boolean isVoid = Void.TYPE.equals(method.getReturnType());
             return isVoid;
         }
     }

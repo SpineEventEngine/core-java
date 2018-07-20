@@ -84,7 +84,7 @@ public abstract class EventDispatchingRepository<I,
             registerAsEventDispatcher();
         }
 
-        final ExternalMessageDispatcher<I> thisAsExternal = getExternalEventDispatcher();
+        ExternalMessageDispatcher<I> thisAsExternal = getExternalEventDispatcher();
         if(!thisAsExternal.getMessageClasses().isEmpty()) {
             getBoundedContext().getIntegrationBus()
                                .register(getExternalEventDispatcher());
@@ -148,9 +148,9 @@ public abstract class EventDispatchingRepository<I,
 
         @Override
         public Set<I> dispatch(ExternalMessageEnvelope envelope) {
-            final ExternalMessage externalMessage = envelope.getOuterObject();
-            final Event event = unpack(externalMessage.getOriginalMessage());
-            final EventEnvelope eventEnvelope = EventEnvelope.of(event);
+            ExternalMessage externalMessage = envelope.getOuterObject();
+            Event event = unpack(externalMessage.getOriginalMessage());
+            EventEnvelope eventEnvelope = EventEnvelope.of(event);
             return EventDispatchingRepository.this.dispatch(eventEnvelope);
         }
     }

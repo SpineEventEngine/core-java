@@ -105,7 +105,7 @@ class Rescheduler {
             @Override
             public void run() {
                 while (commands.hasNext()) {
-                    final Command command = commands.next();
+                    Command command = commands.next();
                     reschedule(command);
                 }
             }

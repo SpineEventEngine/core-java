@@ -48,7 +48,7 @@ public final class EitherOfTwo<A extends Message, B extends Message>
      */
     public static <A extends Message, B extends Message> EitherOfTwo<A, B> withA(A a) {
         checkNotNull(a);
-        final EitherOfTwo<A, B> result = new EitherOfTwo<>(a, 0);
+        EitherOfTwo<A, B> result = new EitherOfTwo<>(a, 0);
         return result;
     }
 
@@ -57,7 +57,7 @@ public final class EitherOfTwo<A extends Message, B extends Message>
      */
     public static <A extends Message, B extends Message> EitherOfTwo<A, B> withB(B b) {
         checkNotNull(b);
-        final EitherOfTwo<A, B> result = new EitherOfTwo<>(b, 1);
+        EitherOfTwo<A, B> result = new EitherOfTwo<>(b, 1);
         return result;
     }
 

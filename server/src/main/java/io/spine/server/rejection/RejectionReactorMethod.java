@@ -77,8 +77,8 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
                                           RejectionContext context) {
         ensureExternalMatch(this, context.getExternal());
 
-        final Object output = doInvoke(target, rejectionMessage, context);
-        final List<? extends Message> eventMessages = toList(output);
+        Object output = doInvoke(target, rejectionMessage, context);
+        List<? extends Message> eventMessages = toList(output);
         return eventMessages;
     }
 
@@ -108,13 +108,13 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
 
         @Override
         public void checkAccessModifier(Method method) {
-            final MethodAccessChecker checker = forMethod(method);
+            MethodAccessChecker checker = forMethod(method);
             checker.checkPublic("Rejection reactor {} must be declared 'public'");
         }
 
         @Override
         protected RejectionReactorMethod createFromMethod(Method method) {
-            final RejectionReactorMethod result = new RejectionReactorMethod(method);
+            RejectionReactorMethod result = new RejectionReactorMethod(method);
             return result;
         }
 
@@ -142,7 +142,7 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            final boolean result = returnsMessageOrIterable(method);
+            boolean result = returnsMessageOrIterable(method);
             return result;
         }
     }

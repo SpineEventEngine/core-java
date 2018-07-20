@@ -73,9 +73,9 @@ public class CommandStoreTestEnv {
     }
 
     public static ProcessingStatus getStatus(CommandId commandId,
-                                             final TenantId tenantId,
+                                             TenantId tenantId,
                                              CommandStore commandStore) {
-        final TenantAwareFunction<CommandId, ProcessingStatus> func =
+        TenantAwareFunction<CommandId, ProcessingStatus> func =
                 new TenantAwareFunction<CommandId, ProcessingStatus>(tenantId) {
                     @Override
                     public @Nullable ProcessingStatus apply(@Nullable CommandId input) {
@@ -113,12 +113,12 @@ public class CommandStoreTestEnv {
 
     public static <E extends ThrowableMessage> Command
     givenRejectingHandler(E throwable, CommandStoreTestAssets assets) {
-        final CommandHandler handler = new RejectingCreateProjectHandler(throwable,
-                                                                         assets.eventBus);
+        CommandHandler handler = new RejectingCreateProjectHandler(throwable,
+                                                                   assets.eventBus);
         assets.commandBus.register(handler);
-        final CmdCreateProject msg = createProjectMessage();
-        final Command command = assets.requestFactory.command()
-                                                     .create(msg);
+        CmdCreateProject msg = createProjectMessage();
+        Command command = assets.requestFactory.command()
+                                               .create(msg);
         return command;
     }
 
@@ -148,11 +148,11 @@ public class CommandStoreTestEnv {
 
     public static <E extends RuntimeException> Command
     givenThrowingHandler(E exception, CommandStoreTestAssets assets) {
-        final CommandHandler handler = new ThrowingCreateProjectHandler(exception, assets.eventBus);
+        CommandHandler handler = new ThrowingCreateProjectHandler(exception, assets.eventBus);
         assets.commandBus.register(handler);
-        final CmdCreateProject msg = createProjectMessage();
-        final Command command = assets.requestFactory.command()
-                                                     .create(msg);
+        CmdCreateProject msg = createProjectMessage();
+        Command command = assets.requestFactory.command()
+                                               .create(msg);
         return command;
     }
 

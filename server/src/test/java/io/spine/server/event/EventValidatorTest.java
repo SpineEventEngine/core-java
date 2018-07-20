@@ -20,7 +20,6 @@
 
 package io.spine.server.event;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.Event;
@@ -34,6 +33,8 @@ import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -54,17 +55,17 @@ class EventValidatorTest {
     @Test
     @DisplayName("validate event messages")
     void validateEventMessages() {
-        final MessageValidator messageValidator = mock(MessageValidator.class);
+        MessageValidator messageValidator = mock(MessageValidator.class);
         when(messageValidator.validate(any(Message.class)))
                 .thenReturn(newArrayList(ConstraintViolation.getDefaultInstance(),
                                          ConstraintViolation.getDefaultInstance()));
-        final Event event = eventFactory.createEvent(Sample.messageOfType(ProjectCreated.class));
+        Event event = eventFactory.createEvent(Sample.messageOfType(ProjectCreated.class));
 
-        final EventValidator eventValidator = new EventValidator(messageValidator);
+        EventValidator eventValidator = new EventValidator(messageValidator);
 
-        final Optional<MessageInvalid> error = eventValidator.validate(EventEnvelope.of(event));
+        Optional<MessageInvalid> error = eventValidator.validate(EventEnvelope.of(event));
         assertTrue(error.isPresent());
-        final Error actualError = error.get().asError();
+        Error actualError = error.get().asError();
         assertEquals(EventValidationError.getDescriptor().getFullName(), actualError.getType());
     }
 }

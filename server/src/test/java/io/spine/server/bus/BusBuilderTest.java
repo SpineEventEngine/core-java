@@ -49,8 +49,7 @@ public abstract class BusBuilderTest<B extends Bus.AbstractBuilder<E, T, ?>,
     @Test
     @DisplayName("allow adding filter")
     void allowAddingFilter() {
-        @SuppressWarnings("unchecked")
-        final BusFilter<E> filter = mock(BusFilter.class);
+        @SuppressWarnings("unchecked") BusFilter<E> filter = mock(BusFilter.class);
 
         assertTrue(builder().appendFilter(filter)
                             .getFilters()
@@ -60,8 +59,7 @@ public abstract class BusBuilderTest<B extends Bus.AbstractBuilder<E, T, ?>,
     @Test
     @DisplayName("allow removing filter")
     void allowRemovingFilter() {
-        @SuppressWarnings("unchecked")
-        final BusFilter<E> filter = mock(BusFilter.class);
+        @SuppressWarnings("unchecked") BusFilter<E> filter = mock(BusFilter.class);
 
         assertFalse(builder().appendFilter(filter)
                              .removeFilter(filter)
@@ -73,15 +71,13 @@ public abstract class BusBuilderTest<B extends Bus.AbstractBuilder<E, T, ?>,
     @Test
     @DisplayName("preserve filters order")
     void preserveFiltersOrder() {
-        @SuppressWarnings("unchecked")
-        final BusFilter<E> first = mock(BusFilter.class);
-        @SuppressWarnings("unchecked")
-        final BusFilter<E> second = mock(BusFilter.class);
+        @SuppressWarnings("unchecked") BusFilter<E> first = mock(BusFilter.class);
+        @SuppressWarnings("unchecked") BusFilter<E> second = mock(BusFilter.class);
 
-        final B builder = builder();
+        B builder = builder();
         builder.appendFilter(first)
                .appendFilter(second);
-        final Deque<BusFilter<E>> filters = builder.getFilters();
+        Deque<BusFilter<E>> filters = builder.getFilters();
         assertEquals(first, filters.pop());
         assertEquals(second, filters.pop());
     }
