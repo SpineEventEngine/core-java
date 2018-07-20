@@ -99,26 +99,6 @@ public final class CommandFactory {
     }
 
     /**
-     * Creates a new {@code Command} with the passed {@code message} and {@code context}.
-     *
-     * @param message the command message
-     * @param context the command context
-     * @return a new command instance
-     * @throws ValidationException if the passed message does not satisfy the constraints
-     *                             set for it in its Protobuf definition
-     */
-    @Internal
-    public Command createWithContext(Message message, CommandContext context)
-            throws ValidationException {
-        checkNotNull(message);
-        checkNotNull(context);
-        checkValid(message);
-
-        Command result = createCommand(message, context);
-        return result;
-    }
-
-    /**
      * Creates new {@code Command} with the passed message, using the existing context.
      *
      * <p>The produced command is created with a {@code CommandContext} instance, copied from

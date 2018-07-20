@@ -157,12 +157,11 @@ public final class Rejections {
      * Extracts the message from the passed {@code Rejection} instance.
      *
      * @param rejection a rejection to extract a message from
-     * @param <M>       a type of the rejection message
      * @return an unpacked message
      */
-    public static <M extends Message> M getMessage(Rejection rejection) {
+    public static Message getMessage(Rejection rejection) {
         checkNotNull(rejection);
-        M result = unpack(rejection.getMessage());
+        Message result = unpack(rejection.getMessage());
         return result;
     }
 
