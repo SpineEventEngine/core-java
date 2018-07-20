@@ -199,6 +199,6 @@ class RejectionReactorMethodTest {
 
     private static void assertIsRejectionReactor(Method reactor, boolean isReactor) {
         assertEquals(isReactor, RejectionReactorMethod.predicate()
-                                                      .apply(reactor));
+                                                      .test(reactor));
     }
 }

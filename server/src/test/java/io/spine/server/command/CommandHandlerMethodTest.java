@@ -299,6 +299,6 @@ class CommandHandlerMethodTest {
     }
 
     private static void assertIsCommandHandler(Method handler, boolean isHandler) {
-        assertEquals(isHandler, predicate().apply(handler));
+        assertEquals(isHandler, predicate().test(handler));
     }
 }

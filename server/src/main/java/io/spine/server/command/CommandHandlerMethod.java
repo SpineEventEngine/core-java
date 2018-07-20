@@ -20,8 +20,6 @@
 
 package io.spine.server.command;
 
-import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
@@ -29,6 +27,7 @@ import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
+import io.spine.core.Rejection;
 import io.spine.server.entity.Entity;
 import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethod;
@@ -40,6 +39,8 @@ import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Throwables.getRootCause;
 
@@ -92,8 +93,8 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
      */
     @Override
     public List<? extends Message> invoke(Object target, Message message, CommandContext context) {
-        final Object handlingResult = super.invoke(target, message, context);
-        final List<? extends Message> events = toList(handlingResult);
+        Object handlingResult = super.invoke(target, message, context);
+        List<? extends Message> events = toList(handlingResult);
         return events;
     }
 
@@ -108,18 +109,15 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
                                                      Message message,
                                                      CommandContext context,
                                                      Exception cause) {
-        final HandlerMethodFailedException exception =
+        HandlerMethodFailedException exception =
                 super.whyFailed(target, message, context, cause);
 
-        final Throwable rootCause = getRootCause(exception);
+        Throwable rootCause = getRootCause(exception);
         if (rootCause instanceof ThrowableMessage) {
-            final ThrowableMessage thrownMessage = (ThrowableMessage)rootCause;
+            ThrowableMessage thrownMessage = (ThrowableMessage) rootCause;
 
-            final Optional<Any> producerId = idOf(target);
-
-            if (producerId.isPresent()) {
-                thrownMessage.initProducer(producerId.get());
-            }
+            Optional<Any> producerId = idOf(target);
+            producerId.ifPresent(thrownMessage::initProducer);
         }
 
         return exception;
@@ -133,13 +131,13 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
      */
     @SuppressWarnings("ChainOfInstanceofChecks")
     private static Optional<Any> idOf(Object target) {
-        final Any producerId;
+        Any producerId;
         if (target instanceof Entity) {
             producerId = Identifier.pack(((Entity) target).getId());
         } else if (target instanceof CommandHandler) {
             producerId = Identifier.pack(((CommandHandler) target).getId());
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
         return Optional.of(producerId);
     }
@@ -175,7 +173,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
          * {@inheritDoc}
          *
          * <p>For the {@link CommandHandlerMethod}, the {@link ThrowableMessage} checked exception
-         * type is allowed, because the mechanism of {@linkplain io.spine.core.Rejection
+         * type is allowed, because the mechanism of {@linkplain Rejection
          * command rejections} is based on this type.
          */
         @Override

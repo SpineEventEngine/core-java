@@ -20,7 +20,6 @@
 package io.spine.server.rejection;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
@@ -31,6 +30,7 @@ import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
+import java.util.function.Predicate;
 
 import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
@@ -121,7 +121,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
         }
 
         private static Factory getInstance() {
-            return Factory.Singleton.INSTANCE.value;
+            return Singleton.INSTANCE.value;
         }
     }
 

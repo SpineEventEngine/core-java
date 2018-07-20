@@ -40,7 +40,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -68,7 +67,7 @@ class EventSubscriberMethodTest {
 
     @Test
     @DisplayName("invoke subscriber method")
-    void invokeSubscriberMethod() throws InvocationTargetException {
+    void invokeSubscriberMethod() {
         final ValidTwoParams subscriberObject;
         subscriberObject = spy(new ValidTwoParams());
         final EventSubscriberMethod subscriber =
@@ -182,6 +181,6 @@ class EventSubscriberMethodTest {
 
     private static void assertIsEventSubscriber(Method subscriber, boolean isSubscriber) {
         assertEquals(isSubscriber, EventSubscriberMethod.predicate()
-                                                        .apply(subscriber));
+                                                        .test(subscriber));
     }
 }

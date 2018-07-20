@@ -21,7 +21,6 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -33,6 +32,7 @@ import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
+import java.util.function.Predicate;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 

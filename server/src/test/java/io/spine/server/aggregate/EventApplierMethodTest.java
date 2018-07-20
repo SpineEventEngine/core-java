@@ -32,7 +32,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -93,7 +92,7 @@ class EventApplierMethodTest {
 
     @Test
     @DisplayName("allow invocation")
-    void invokeApplierMethod() throws InvocationTargetException {
+    void invokeApplierMethod() {
         final ValidApplier applierObject = new ValidApplier();
         final EventApplierMethod applier = EventApplierMethod.from(applierObject.getMethod());
         final RefProjectCreated event = Sample.messageOfType(RefProjectCreated.class);
@@ -133,7 +132,7 @@ class EventApplierMethodTest {
 
         private void assertIsEventApplier(Method applier) {
             assertTrue(EventApplierMethod.predicate()
-                                         .apply(applier));
+                                         .test(applier));
         }
     }
 
@@ -183,7 +182,7 @@ class EventApplierMethodTest {
 
         private void assertIsNotEventApplier(Method applier) {
             assertFalse(EventApplierMethod.predicate()
-                                          .apply(applier));
+                                          .test(applier));
         }
     }
 

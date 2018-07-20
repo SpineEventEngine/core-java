@@ -20,7 +20,6 @@
 
 package io.spine.server.event;
 
-import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -32,6 +31,7 @@ import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;

@@ -20,7 +20,6 @@
 
 package io.spine.server.model.given;
 
-import com.google.common.base.Predicate;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
@@ -31,6 +30,7 @@ import io.spine.server.model.HandlerMethod;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.function.Predicate;
 
 /**
  * @author Alexander Litus

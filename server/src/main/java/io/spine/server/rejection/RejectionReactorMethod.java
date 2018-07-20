@@ -20,7 +20,6 @@
 package io.spine.server.rejection;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.React;
@@ -31,6 +30,7 @@ import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
@@ -77,8 +77,8 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
                                           RejectionContext context) {
         ensureExternalMatch(this, context.getExternal());
 
-        final Object output = doInvoke(target, rejectionMessage, context);
-        final List<? extends Message> eventMessages = toList(output);
+        Object output = doInvoke(target, rejectionMessage, context);
+        List<? extends Message> eventMessages = toList(output);
         return eventMessages;
     }
 
@@ -108,7 +108,7 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
 
         @Override
         public void checkAccessModifier(Method method) {
-            final MethodAccessChecker checker = forMethod(method);
+            MethodAccessChecker checker = forMethod(method);
             checker.checkPublic("Rejection reactor {} must be declared 'public'");
         }
 
@@ -142,7 +142,7 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            final boolean result = returnsMessageOrIterable(method);
+            boolean result = returnsMessageOrIterable(method);
             return result;
         }
     }
