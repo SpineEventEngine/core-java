@@ -26,10 +26,13 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionId;
+import io.spine.testing.server.Rejections.TUFailedToAssignProject;
+import io.spine.testing.server.TUProjectId;
 import io.spine.testing.server.expected.CommandHandlerExpected;
 
 import java.util.List;
 
+import static com.google.protobuf.Any.pack;
 import static io.spine.testing.server.expected.given.EventHandlerExpectedTestEnv.events;
 import static io.spine.testing.server.expected.given.EventHandlerExpectedTestEnv.newState;
 import static io.spine.testing.server.expected.given.EventHandlerExpectedTestEnv.oldState;
@@ -48,16 +51,17 @@ public class CommandExpectedTestEnv {
     private CommandExpectedTestEnv() {
     }
 
-    public static Message rejection() {
-        RejectionId id = RejectionId.newBuilder()
-                                    .setValue("test rejection")
-                                    .build();
-        return Rejection.newBuilder()
-                        .setId(id)
-                        .build();
+    public static Message rejectionMessage() {
+        TUProjectId entityId = TUProjectId.newBuilder()
+                                          .setValue("entity ID")
+                                          .build();
+        TUFailedToAssignProject rejectionMessage = TUFailedToAssignProject.newBuilder()
+                                                                          .setId(entityId)
+                                                                          .build();
+        return rejectionMessage;
     }
 
-    public static List<Message> interceptedCommands() {
+    private static List<Message> interceptedCommands() {
         StringValue firstCommand = StringValue.newBuilder()
                                               .setValue("command 1")
                                               .build();
@@ -67,14 +71,25 @@ public class CommandExpectedTestEnv {
         return asList(firstCommand, secondCommand);
     }
 
-    public static CommandHandlerExpected<UInt64Value> commandExpectedWithRejection(Message rejection) {
+    public static CommandHandlerExpected<UInt64Value>
+    commandExpectedWithRejection(Message rejectionMessage) {
         CommandHandlerExpected<UInt64Value> expected =
                 new CommandHandlerExpected<>(events(),
-                                             rejection,
+                                             rejection(rejectionMessage),
                                              oldState(),
                                              newState(),
                                              interceptedCommands());
         return expected;
+    }
+
+    private static Rejection rejection(Message rejectionMessage) {
+        RejectionId id = RejectionId.newBuilder()
+                                    .setValue("test rejection")
+                                    .build();
+        return Rejection.newBuilder()
+                        .setId(id)
+                        .setMessage(pack(rejectionMessage))
+                        .build();
     }
 
     public static CommandHandlerExpected<UInt64Value> commandExpectedWithEvent(Message event) {

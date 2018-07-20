@@ -18,19 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given.aggregate;
+package io.spine.testing.server;
 
-import io.spine.server.aggregate.Aggregate;
-import io.spine.test.aggregate.user.User;
-import io.spine.test.aggregate.user.UserVBuilder;
+import io.spine.server.BoundedContext;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
- * The test environment aggregate for testing validation during aggregate state transition.
- *
- * @author Alexander Yevsyukov
+ * @author Vladyslav Lubenskyi
  */
-public class UserAggregate extends Aggregate<String, User, UserVBuilder> {
-    private UserAggregate(String id) {
-        super(id);
+@DisplayName("TestBoundedContext should")
+class TestBoundedContextTest {
+
+    @Test
+    @DisplayName("create instance")
+    void create() {
+        BoundedContext context = TestBoundedContext.create();
+        assertNotNull(context);
     }
 }
