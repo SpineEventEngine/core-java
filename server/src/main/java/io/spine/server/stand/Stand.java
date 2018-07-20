@@ -481,18 +481,15 @@ public class Stand implements AutoCloseable {
      */
     private static Runnable notifySubscriptionAction(SubscriptionRecord subscriptionRecord,
                                                      Object id, Any entityState) {
-        Runnable result = new Runnable() {
-            @Override
-            public void run() {
-                EntityUpdateCallback callback = subscriptionRecord.getCallback();
-                checkNotNull(callback, "Notifying by a non-activated subscription.");
-                Any entityId = toAny(id);
-                EntityStateUpdate stateUpdate = EntityStateUpdate.newBuilder()
-                                                                 .setId(entityId)
-                                                                 .setState(entityState)
-                                                                 .build();
-                callback.onStateChanged(stateUpdate);
-            }
+        Runnable result = () -> {
+            EntityUpdateCallback callback = subscriptionRecord.getCallback();
+            checkNotNull(callback, "Notifying by a non-activated subscription.");
+            Any entityId = toAny(id);
+            EntityStateUpdate stateUpdate = EntityStateUpdate.newBuilder()
+                                                             .setId(entityId)
+                                                             .setState(entityState)
+                                                             .build();
+            callback.onStateChanged(stateUpdate);
         };
         return result;
     }

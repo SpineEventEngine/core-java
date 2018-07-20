@@ -49,14 +49,11 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  */
 public final class CompositeQueryParameter implements Serializable {
 
-    private static final Predicate<EntityColumn> isLifecycleColumn = new Predicate<EntityColumn>() {
-        @Override
-        public boolean apply(@Nullable EntityColumn column) {
-            checkNotNull(column);
-            boolean result = archived.name().equals(column.getName())
-                    || deleted.name().equals(column.getName());
-            return result;
-        }
+    private static final Predicate<EntityColumn> isLifecycleColumn = column -> {
+        checkNotNull(column);
+        boolean result = archived.name().equals(column.getName())
+                || deleted.name().equals(column.getName());
+        return result;
     };
 
     private static final long serialVersionUID = 0L;

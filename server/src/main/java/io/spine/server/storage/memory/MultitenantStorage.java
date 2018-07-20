@@ -60,9 +60,8 @@ abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
      */
     S getStorage() {
         TenantFunction<S> func = new TenantFunction<S>(isMultitenant()) {
-            @Nullable
             @Override
-            public S apply(@Nullable TenantId tenantId) {
+            public @Nullable S apply(@Nullable TenantId tenantId) {
                 checkNotNull(tenantId);
                 lock.lock();
                 try {

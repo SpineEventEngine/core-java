@@ -35,9 +35,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 enum EntityRecordUnpacker implements Function<EntityRecordWithColumns, EntityRecord> {
     INSTANCE;
 
-    @Nullable
     @Override
-    public EntityRecord apply(@Nullable EntityRecordWithColumns input) {
+    public @Nullable EntityRecord apply(@Nullable EntityRecordWithColumns input) {
         if (input == null) {
             return null;
         }

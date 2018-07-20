@@ -163,9 +163,8 @@ final class ModelVerifier {
     enum GetDestinationDir implements Function<JavaCompile, URL> {
         FUNCTION;
 
-        @Nullable
         @Override
-        public URL apply(@Nullable JavaCompile task) {
+        public @Nullable URL apply(@Nullable JavaCompile task) {
             checkNotNull(task);
             File destDir = task.getDestinationDir();
             if (destDir == null) {

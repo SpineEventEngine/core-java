@@ -64,8 +64,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     private final Deque<BusFilter<RejectionEnvelope>> filterChain;
 
     /** The enricher for posted rejections or {@code null} if the enrichment is not supported. */
-    @Nullable
-    private final RejectionEnricher enricher;
+    private final @Nullable RejectionEnricher enricher;
 
     /**
      * Creates a new instance according to the pre-configured {@code Builder}.
@@ -172,8 +171,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
          * <p>If not set, the enrichments will NOT be supported
          * in the {@code RejectionBus} instance built.
          */
-        @Nullable
-        private RejectionEnricher enricher;
+        private @Nullable RejectionEnricher enricher;
 
         /** Prevents direct instantiation. */
         private Builder() {

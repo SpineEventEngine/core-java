@@ -206,17 +206,14 @@ public class EventStore implements AutoCloseable {
 
         logReadingStart(request, responseObserver);
 
-        streamExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                Iterator<Event> eventRecords = iterator(request);
-                while (eventRecords.hasNext()) {
-                    Event event = eventRecords.next();
-                    responseObserver.onNext(event);
-                }
-                responseObserver.onCompleted();
-                logReadingComplete(responseObserver);
+        streamExecutor.execute(() -> {
+            Iterator<Event> eventRecords = iterator(request);
+            while (eventRecords.hasNext()) {
+                Event event = eventRecords.next();
+                responseObserver.onNext(event);
             }
+            responseObserver.onCompleted();
+            logReadingComplete(responseObserver);
         });
     }
 
