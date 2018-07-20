@@ -20,7 +20,6 @@
 package io.spine.server.aggregate;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
@@ -62,6 +61,7 @@ import io.spine.server.storage.StorageFactory;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -113,25 +113,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             RejectionRouting.withDefault(RejectionProducers.fromContext());
 
     private final Supplier<AggregateCommandDelivery<I, A>> commandDeliverySupplier =
-            memoize(() -> {
-                final AggregateCommandDelivery<I, A> result =
-                        new AggregateCommandDelivery<>(this);
-                return result;
-            });
+            memoize(() -> new AggregateCommandDelivery<>(this));
 
     private final Supplier<AggregateEventDelivery<I, A>> eventDeliverySupplier =
-            memoize(() -> {
-                final AggregateEventDelivery<I, A> result =
-                        new AggregateEventDelivery<>(this);
-                return result;
-            });
+            memoize(() -> new AggregateEventDelivery<>(this));
 
     private final Supplier<AggregateRejectionDelivery<I, A>> rejectionDeliverySupplier =
-            memoize(() -> {
-                final AggregateRejectionDelivery<I, A> result =
-                        new AggregateRejectionDelivery<>(this);
-                return result;
-            });
+            memoize(() -> new AggregateRejectionDelivery<>(this));
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -159,25 +147,25 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public void onRegistered() {
         super.onRegistered();
-        final BoundedContext boundedContext = getBoundedContext();
+        BoundedContext boundedContext = getBoundedContext();
 
-        final Set<CommandClass> commandClasses = getMessageClasses();
+        Set<CommandClass> commandClasses = getMessageClasses();
 
-        final DelegatingEventDispatcher<I> eventDispatcher;
+        DelegatingEventDispatcher<I> eventDispatcher;
         eventDispatcher = DelegatingEventDispatcher.of(this);
-        final Set<EventClass> eventClasses = eventDispatcher.getMessageClasses();
+        Set<EventClass> eventClasses = eventDispatcher.getMessageClasses();
 
-        final ExternalMessageDispatcher<I> extEventDispatcher;
+        ExternalMessageDispatcher<I> extEventDispatcher;
         extEventDispatcher = eventDispatcher.getExternalDispatcher();
-        final Set<ExternalMessageClass> extEventClasses = extEventDispatcher.getMessageClasses();
+        Set<ExternalMessageClass> extEventClasses = extEventDispatcher.getMessageClasses();
 
-        final DelegatingRejectionDispatcher<I> rejectionDispatcher;
+        DelegatingRejectionDispatcher<I> rejectionDispatcher;
         rejectionDispatcher = DelegatingRejectionDispatcher.of(this);
-        final Set<RejectionClass> rejectionClasses = rejectionDispatcher.getMessageClasses();
+        Set<RejectionClass> rejectionClasses = rejectionDispatcher.getMessageClasses();
 
-        final ExternalMessageDispatcher<I> extRejectionDispatcher;
+        ExternalMessageDispatcher<I> extRejectionDispatcher;
         extRejectionDispatcher = rejectionDispatcher.getExternalDispatcher();
-        final Set<ExternalMessageClass> extRejectionClasses =
+        Set<ExternalMessageClass> extRejectionClasses =
                 extRejectionDispatcher.getMessageClasses();
 
         if (commandClasses.isEmpty() && eventClasses.isEmpty() && rejectionClasses.isEmpty()
