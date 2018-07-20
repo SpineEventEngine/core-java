@@ -124,7 +124,7 @@ public class CommandBus extends Bus<Command,
         this.systemGateway = builder.systemGateway;
         this.filterChain = builder.getFilters();
         this.tenantIndex = builder.tenantIndex;
-        this.deadCommandHandler = new DeadCommandHandler()
+        this.deadCommandHandler = new DeadCommandHandler();
     }
 
     /**
