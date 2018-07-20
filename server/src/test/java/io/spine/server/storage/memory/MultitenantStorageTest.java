@@ -63,8 +63,7 @@ class MultitenantStorageTest {
     void returnSameSlice()
             throws InterruptedException, ExecutionException {
         int numberOfTasks = 1000;
-        Collection<Callable<TenantRecords>> tasks =
-                newArrayListWithExpectedSize(numberOfTasks);
+        Collection<Callable<TenantRecords>> tasks = newArrayListWithExpectedSize(numberOfTasks);
 
         for (int i = 0; i < numberOfTasks; i++) {
             tasks.add(() -> {
@@ -91,9 +90,8 @@ class MultitenantStorageTest {
 
     private static <R> List<Future<R>>
     executeInMultithreadedEnvironment(Collection<Callable<R>> tasks) throws InterruptedException {
-        ExecutorService executor =
-                Executors.newFixedThreadPool(Runtime.getRuntime()
-                                                    .availableProcessors() * 2);
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime()
+                                                                       .availableProcessors() * 2);
         List<Future<R>> futures = executor.invokeAll(tasks);
         return futures;
     }

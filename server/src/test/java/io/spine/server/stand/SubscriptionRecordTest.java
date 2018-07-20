@@ -48,9 +48,7 @@ class SubscriptionRecordTest {
     @Test
     @DisplayName("match record to given parameters")
     void matchRecordToParams() {
-        SubscriptionRecord matchingRecord = new SubscriptionRecord(subscription(),
-                                                                   target(),
-                                                                   TYPE);
+        SubscriptionRecord matchingRecord = new SubscriptionRecord(subscription(), target(), TYPE);
         Project entityState = Project.getDefaultInstance();
         Any wrappedState = AnyPacker.pack(entityState);
         ProjectId redundantId = ProjectId.getDefaultInstance();
@@ -69,8 +67,7 @@ class SubscriptionRecordTest {
         Any wrappedState = AnyPacker.pack(entityState);
         ProjectId redundantId = ProjectId.getDefaultInstance();
 
-        boolean matchResult = notMatchingRecord.matches(OTHER_TYPE, redundantId,
-                                                        wrappedState);
+        boolean matchResult = notMatchingRecord.matches(OTHER_TYPE, redundantId, wrappedState);
         assertFalse(matchResult);
     }
 
@@ -99,13 +96,10 @@ class SubscriptionRecordTest {
         Subscription otherSubscription = Subscription.newBuilder()
                                                      .setId(breakingId)
                                                      .build();
-        @SuppressWarnings("QuestionableName") SubscriptionRecord one = new SubscriptionRecord(oneSubscription, target(), TYPE);
-        SubscriptionRecord similar = new SubscriptionRecord(otherSubscription,
-                                                            target(),
-                                                            TYPE);
-        SubscriptionRecord same = new SubscriptionRecord(oneSubscription,
-                                                         target(),
-                                                         TYPE);
+        @SuppressWarnings("QuestionableName")
+        SubscriptionRecord one = new SubscriptionRecord(oneSubscription, target(), TYPE);
+        SubscriptionRecord similar = new SubscriptionRecord(otherSubscription, target(), TYPE);
+        SubscriptionRecord same = new SubscriptionRecord(oneSubscription, target(), TYPE);
         assertNotEquals(one, similar);
         assertEquals(one, same);
     }

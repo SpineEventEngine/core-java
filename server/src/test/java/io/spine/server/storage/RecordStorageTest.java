@@ -498,8 +498,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
         storage.write(idWrong1, recordWrong1);
         storage.write(idWrong2, recordWrong2);
 
-        Iterator<EntityRecord> readRecords = storage.readAll(query,
-                                                             FieldMask.getDefaultInstance());
+        Iterator<EntityRecord> readRecords = storage.readAll(query, FieldMask.getDefaultInstance());
         assertSingleRecord(fineRecord, readRecords);
     }
 
@@ -700,13 +699,11 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
                 .newBuilder()
                 .addIds(toEntityId(targetId))
                 .build();
-        CompositeColumnFilter columnFilter =
-                all(eq("projectStatusValue", CANCELLED.getNumber()));
-        EntityFilters filters = EntityFilters
-                .newBuilder()
-                .setIdFilter(idFilter)
-                .addFilter(columnFilter)
-                .build();
+        CompositeColumnFilter columnFilter = all(eq("projectStatusValue", CANCELLED.getNumber()));
+        EntityFilters filters = EntityFilters.newBuilder()
+                                             .setIdFilter(idFilter)
+                                             .addFilter(columnFilter)
+                                             .build();
         RecordStorage<I> storage = getStorage();
         EntityQuery<I> query = from(filters, storage).withLifecycleFlags(storage);
         Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
@@ -770,8 +767,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
         storage.write(idMatching, recordRight);
         storage.write(idWrong, recordWrong);
 
-        Iterator<EntityRecord> readRecords = storage.readAll(query,
-                                                             FieldMask.getDefaultInstance());
+        Iterator<EntityRecord> readRecords = storage.readAll(query, FieldMask.getDefaultInstance());
         assertSingleRecord(fineRecord, readRecords);
     }
 

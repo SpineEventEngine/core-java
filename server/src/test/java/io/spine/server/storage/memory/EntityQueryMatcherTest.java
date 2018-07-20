@@ -116,8 +116,7 @@ class EntityQueryMatcherTest {
 
         Collection<Object> ids = Collections.emptyList();
 
-        Multimap<EntityColumn, ColumnFilter> filters = of(target,
-                                                          eq(targetName, acceptedValue));
+        Multimap<EntityColumn, ColumnFilter> filters = of(target, eq(targetName, acceptedValue));
         CompositeQueryParameter parameter = createParams(filters, ALL);
         QueryParameters params = QueryParameters.newBuilder()
                                                 .add(parameter)
@@ -167,8 +166,7 @@ class EntityQueryMatcherTest {
         Map<String, EntityColumn.MemoizedValue> columns = singletonMap(columnName, value);
         EntityRecordWithColumns recordWithColumns = createRecord(record, columns);
 
-        Multimap<EntityColumn, ColumnFilter> filters = of(column,
-                                                          eq(columnName, actualValue));
+        Multimap<EntityColumn, ColumnFilter> filters = of(column, eq(columnName, actualValue));
         CompositeQueryParameter parameter = createParams(filters, ALL);
         QueryParameters parameters = QueryParameters.newBuilder()
                                                     .add(parameter)
@@ -185,8 +183,7 @@ class EntityQueryMatcherTest {
         String wrongName = "wrong";
         EntityColumn target = mock(EntityColumn.class);
 
-        Multimap<EntityColumn, ColumnFilter> filters = of(target,
-                                                          eq(wrongName, "any"));
+        Multimap<EntityColumn, ColumnFilter> filters = of(target, eq(wrongName, "any"));
         CompositeQueryParameter parameter = createParams(filters, EITHER);
         QueryParameters params = QueryParameters.newBuilder()
                                                 .add(parameter)

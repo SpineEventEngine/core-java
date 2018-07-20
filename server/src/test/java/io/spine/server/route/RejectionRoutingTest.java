@@ -166,16 +166,14 @@ class RejectionRoutingTest {
     @DisplayName("apply default route")
     void applyDefaultRoute() {
         // Create a rejection for which there's no custom path.
-        EntityAlreadyDeleted rejection =
-                EntityAlreadyDeleted.newBuilder()
-                                    .setEntityId(thisTestAsEntity())
-                                    .build();
+        EntityAlreadyDeleted rejection = EntityAlreadyDeleted.newBuilder()
+                                                             .setEntityId(thisTestAsEntity())
+                                                             .build();
 
         // Do have custom route.
         rejectionRouting.route(EntityAlreadyArchived.class, customRoute);
 
-        Set<String> ids = rejectionRouting.apply(rejection,
-                                                 RejectionContext.getDefaultInstance());
+        Set<String> ids = rejectionRouting.apply(rejection, RejectionContext.getDefaultInstance());
 
         assertEquals(DEFAULT_ROUTE, ids);
     }
@@ -185,12 +183,10 @@ class RejectionRoutingTest {
     void applyCustomRoute() {
         rejectionRouting.route(EntityAlreadyArchived.class, customRoute);
 
-        EntityAlreadyArchived rejection =
-                EntityAlreadyArchived.newBuilder()
-                                     .setEntityId(thisTestAsEntity())
-                                     .build();
-        Set<String> ids = rejectionRouting.apply(rejection,
-                                                 RejectionContext.getDefaultInstance());
+        EntityAlreadyArchived rejection = EntityAlreadyArchived.newBuilder()
+                                                               .setEntityId(thisTestAsEntity())
+                                                               .build();
+        Set<String> ids = rejectionRouting.apply(rejection, RejectionContext.getDefaultInstance());
         assertEquals(CUSTOM_ROUTE, ids);
     }
 

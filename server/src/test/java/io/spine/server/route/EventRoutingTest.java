@@ -182,8 +182,7 @@ class EventRoutingTest {
         eventRouting.route(StringValue.class, customRoute);
 
         // An event which has `StringValue` as its message, which should go the custom route.
-        EventEnvelope event = EventEnvelope.of(
-                eventFactory.createEvent(TestValues.newUuidValue()));
+        EventEnvelope event = EventEnvelope.of(eventFactory.createEvent(TestValues.newUuidValue()));
 
         Set<Long> ids = eventRouting.apply(event.getMessage(), event.getEventContext());
         assertEquals(CUSTOM_ROUTE, ids);

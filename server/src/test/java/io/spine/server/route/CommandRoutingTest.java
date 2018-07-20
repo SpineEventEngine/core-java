@@ -145,8 +145,7 @@ class CommandRoutingTest {
                       // Have custom route too.
                       .route(StringValue.class, customRoute);
 
-        CommandEnvelope command =
-                CommandEnvelope.of(factory.createCommand(Time.getCurrentTime()));
+        CommandEnvelope command = CommandEnvelope.of(factory.createCommand(Time.getCurrentTime()));
 
         long id = commandRouting.apply(command.getMessage(), command.getCommandContext());
 

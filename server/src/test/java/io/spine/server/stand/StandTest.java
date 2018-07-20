@@ -228,15 +228,15 @@ class StandTest extends TenantAwareTest {
 
             checkTypesEmpty(stand);
 
-            CustomerAggregateRepository customerAggregateRepo =
-                    new CustomerAggregateRepository();
+            CustomerAggregateRepository customerAggregateRepo = new CustomerAggregateRepository();
             stand.registerTypeSupplier(customerAggregateRepo);
 
             Descriptors.Descriptor customerEntityDescriptor = Customer.getDescriptor();
             checkHasExactlyOne(stand.getExposedTypes(), customerEntityDescriptor);
             checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
 
-            @SuppressWarnings("LocalVariableNamingConvention") CustomerAggregateRepository anotherCustomerAggregateRepo =
+            @SuppressWarnings("LocalVariableNamingConvention")
+            CustomerAggregateRepository anotherCustomerAggregateRepo =
                     new CustomerAggregateRepository();
             stand.registerTypeSupplier(anotherCustomerAggregateRepo);
             checkHasExactlyOne(stand.getExposedTypes(), customerEntityDescriptor);
@@ -248,15 +248,13 @@ class StandTest extends TenantAwareTest {
     @DisplayName("use provided executor upon update of watched type")
     void useProvidedExecutor() {
         Executor executor = mock(Executor.class);
-        BoundedContext boundedContext =
-                BoundedContext.newBuilder()
-                              .setStand(Stand.newBuilder()
-                                             .setCallbackExecutor(executor))
-                              .build();
+        BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                      .setStand(Stand.newBuilder()
+                                                                     .setCallbackExecutor(executor))
+                                                      .build();
         Stand stand = boundedContext.getStand();
 
-        StandTestProjectionRepository standTestProjectionRepo =
-                new StandTestProjectionRepository();
+        StandTestProjectionRepository standTestProjectionRepo = new StandTestProjectionRepository();
         stand.registerTypeSupplier(standTestProjectionRepo);
 
         Topic projectProjections = requestFactory.topic()
@@ -293,8 +291,7 @@ class StandTest extends TenantAwareTest {
 
         assertNotNull(stand);
 
-        CustomerAggregateRepository customerAggregateRepo =
-                new CustomerAggregateRepository();
+        CustomerAggregateRepository customerAggregateRepo = new CustomerAggregateRepository();
         boundedContext.register(customerAggregateRepo);
 
         int numericIdValue = 17;
@@ -309,8 +306,7 @@ class StandTest extends TenantAwareTest {
 
         stand.update(asEnvelope(customerId, customerState, stateVersion));
 
-        AggregateStateId expectedAggregateStateId =
-                AggregateStateId.of(customerId, customerType);
+        AggregateStateId expectedAggregateStateId = AggregateStateId.of(customerId, customerType);
         Any packedState = AnyPacker.pack(customerState);
         EntityRecord expectedRecord = EntityRecord.newBuilder()
                                                   .setState(packedState)
@@ -1197,9 +1193,8 @@ class StandTest extends TenantAwareTest {
 
         Stand stand = prepareStandWithProjectionRepo(projectionRepository);
 
-        Query readMultipleProjects =
-                requestFactory.query()
-                              .byIds(Project.class, sampleProjects.keySet());
+        Query readMultipleProjects = requestFactory.query()
+                                                   .byIds(Project.class, sampleProjects.keySet());
 
         MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readMultipleProjects, responseObserver);
@@ -1410,11 +1405,10 @@ class StandTest extends TenantAwareTest {
 
             int numericId = randomizer.nextInt();
             CustomerId customerId = customerIdFor(numericId);
-            Customer customer =
-                    Customer.newBuilder()
-                            .setName(PersonName.newBuilder()
-                                               .setGivenName(String.valueOf(numericId)))
-                            .build();
+            Customer customer = Customer.newBuilder()
+                                        .setName(PersonName.newBuilder()
+                                                           .setGivenName(String.valueOf(numericId)))
+                                        .build();
             sampleCustomers.put(customerId, customer);
         }
         return sampleCustomers;
@@ -1466,21 +1460,18 @@ class StandTest extends TenantAwareTest {
     }
 
     protected Stand prepareStandWithAggregateRepo(StandStorage standStorage) {
-        BoundedContext boundedContext =
-                BoundedContext.newBuilder()
-                              .setMultitenant(multitenant)
-                              .setStand(Stand.newBuilder()
-                                             .setStorage(standStorage))
-                              .build();
+        BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                      .setMultitenant(multitenant)
+                                                      .setStand(Stand.newBuilder()
+                                                                     .setStorage(standStorage))
+                                                      .build();
 
         Stand stand = boundedContext.getStand();
         assertNotNull(stand);
 
-        CustomerAggregateRepository customerAggregateRepo =
-                new CustomerAggregateRepository();
+        CustomerAggregateRepository customerAggregateRepo = new CustomerAggregateRepository();
         stand.registerTypeSupplier(customerAggregateRepo);
-        StandTestProjectionRepository projectProjectionRepo =
-                new StandTestProjectionRepository();
+        StandTestProjectionRepository projectProjectionRepo = new StandTestProjectionRepository();
         stand.registerTypeSupplier(projectProjectionRepo);
         return stand;
     }

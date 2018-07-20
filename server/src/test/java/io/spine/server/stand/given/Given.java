@@ -69,8 +69,7 @@ public class Given {
     }
 
     public static Command validCommand() {
-        TestActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(Given.class);
+        TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(Given.class);
         return requestFactory.command()
                              .create(PrjCreateProject.getDefaultInstance());
     }
@@ -79,10 +78,9 @@ public class Given {
         Command cmd = validCommand();
         ProjectId.Builder projectIdBuilder = ProjectId.newBuilder()
                                                       .setId("12345AD0");
-        PrjProjectCreated eventMessage =
-                PrjProjectCreated.newBuilder()
-                                 .setProjectId(projectIdBuilder)
-                                 .build();
+        PrjProjectCreated eventMessage = PrjProjectCreated.newBuilder()
+                                                          .setProjectId(projectIdBuilder)
+                                                          .build();
         StringValue producerId = toMessage(Given.class.getSimpleName());
         EventFactory eventFactory = EventFactory.on(CommandEnvelope.of(cmd),
                                                     Identifier.pack(producerId));
