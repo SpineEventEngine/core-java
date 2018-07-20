@@ -72,7 +72,7 @@ public class AssignLookup extends SpineAnnotationProcessor {
 
     @Override
     public Set<String> getSupportedOptions() {
-        final Set<String> result = newHashSet(super.getSupportedOptions());
+        Set<String> result = newHashSet(super.getSupportedOptions());
         result.add(OUTPUT_OPTION_NAME);
         return result;
     }
@@ -88,9 +88,9 @@ public class AssignLookup extends SpineAnnotationProcessor {
 
     @Override
     protected void onRoundFinished() {
-        final String spineOutput = getOption(OUTPUT_OPTION_NAME).or(DEFAULT_OUTPUT_OPTION);
-        final String fileName = spineOutput + '/' + DESTINATION_PATH;
-        final File serializedModelStorage = new File(fileName);
+        String spineOutput = getOption(OUTPUT_OPTION_NAME).or(DEFAULT_OUTPUT_OPTION);
+        String fileName = spineOutput + '/' + DESTINATION_PATH;
+        File serializedModelStorage = new File(fileName);
         mergeOldHandlersFrom(serializedModelStorage);
         writeHandlersTo(serializedModelStorage);
     }
@@ -108,9 +108,9 @@ public class AssignLookup extends SpineAnnotationProcessor {
      */
     @SuppressWarnings("CheckReturnValue") // calling builder
     private void mergeOldHandlersFrom(File file) {
-        final boolean fileWithData = existsNonEmpty(file);
+        boolean fileWithData = existsNonEmpty(file);
         if (fileWithData) {
-            final CommandHandlers preexistingModel = readExisting(file);
+            CommandHandlers preexistingModel = readExisting(file);
             commandHandlers.mergeFrom(preexistingModel);
         }
     }
@@ -129,7 +129,7 @@ public class AssignLookup extends SpineAnnotationProcessor {
     private void writeHandlersTo(File file) {
         ensureFile(file);
         removeDuplicates();
-        final CommandHandlers serializedModel = commandHandlers.build();
+        CommandHandlers serializedModel = commandHandlers.build();
         if (!isDefault(serializedModel)) {
             try (FileOutputStream out = new FileOutputStream(file)) {
                 serializedModel.writeTo(out);
@@ -170,7 +170,7 @@ public class AssignLookup extends SpineAnnotationProcessor {
             return CommandHandlers.getDefaultInstance();
         } else {
             try (InputStream in = new FileInputStream(file)) {
-                final CommandHandlers preexistingModel = CommandHandlers.parseFrom(in);
+                CommandHandlers preexistingModel = CommandHandlers.parseFrom(in);
                 return preexistingModel;
             } catch (IOException e) {
                 throw new IllegalStateException(e);

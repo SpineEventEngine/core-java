@@ -131,7 +131,7 @@ public abstract class SpineAnnotationProcessor extends AbstractProcessor {
 
     @Override
     public final Set<String> getSupportedAnnotationTypes() {
-        final Set<String> names = singleton(getAnnotationType().getName());
+        Set<String> names = singleton(getAnnotationType().getName());
         return names;
     }
 
@@ -149,13 +149,13 @@ public abstract class SpineAnnotationProcessor extends AbstractProcessor {
         onRoundStarted();
         processAnnotation(getAnnotationType(), roundEnv);
         onRoundFinished();
-        final boolean result = isFinished();
+        boolean result = isFinished();
         return result;
     }
 
     private void processAnnotation(Class<? extends Annotation> annotation,
                                    RoundEnvironment roundEnv) {
-        final Set<? extends Element> annotated = roundEnv.getElementsAnnotatedWith(annotation);
+        Set<? extends Element> annotated = roundEnv.getElementsAnnotatedWith(annotation);
         for (Element element : annotated) {
             processElement(element);
         }
@@ -193,7 +193,7 @@ public abstract class SpineAnnotationProcessor extends AbstractProcessor {
      *         the option is not present in the processor or has no value (i.e. is a flag option)
      */
     protected final Optional<String> getOption(String optName) {
-        final String optValue = options.get(optName);
+        String optValue = options.get(optName);
         return Optional.fromNullable(optValue);
     }
 }
