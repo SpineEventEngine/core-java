@@ -50,7 +50,6 @@ import io.spine.validate.StringValueVBuilder;
 import java.util.List;
 import java.util.Set;
 
-import static io.spine.protobuf.AnyPacker.pack;
 import static java.util.Collections.emptyList;
 
 /**

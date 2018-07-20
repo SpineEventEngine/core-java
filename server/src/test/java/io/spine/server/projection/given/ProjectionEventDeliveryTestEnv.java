@@ -33,8 +33,6 @@ import io.spine.test.projection.ProjectVBuilder;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.testing.server.TestEventFactory;
 
-import static io.spine.protobuf.AnyPacker.pack;
-
 /**
  * @author Alex Tymchenko
  */

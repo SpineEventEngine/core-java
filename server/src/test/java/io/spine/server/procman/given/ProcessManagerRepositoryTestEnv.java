@@ -55,7 +55,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
-import static io.spine.protobuf.AnyPacker.pack;
 import static java.util.Collections.emptyList;
 
 /**

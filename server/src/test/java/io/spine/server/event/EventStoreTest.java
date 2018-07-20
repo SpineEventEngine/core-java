@@ -57,7 +57,6 @@ import static io.spine.server.event.given.EventStoreTestEnv.taskAdded;
 import static io.spine.testing.Verify.assertContainsAll;
 import static io.spine.testing.Verify.assertSize;
 import static io.spine.testing.core.given.GivenEnrichment.withOneAttribute;
-import static io.spine.type.TypeName.of;
 import static io.spine.validate.Validate.isDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

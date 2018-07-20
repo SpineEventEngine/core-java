@@ -45,7 +45,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectName;
 import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.GetProjectOwnerId;
@@ -53,7 +52,6 @@ import static io.spine.server.event.given.EventEnricherTestEnv.Enrichment.newEve
 import static io.spine.server.event.given.EventEnricherTestEnv.GivenEvent.projectStarted;
 import static io.spine.server.event.given.EventEnricherTestEnv.createEvent;
 import static io.spine.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;

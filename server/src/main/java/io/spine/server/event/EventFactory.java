@@ -123,11 +123,12 @@ public class EventFactory {
         checkNotNull(messageOrAny);
         checkNotNull(context);
         Any packed = pack(messageOrAny);
-        Event result = Event.newBuilder()
-                            .setId(id)
-                            .setMessage(packed)
-                            .setContext(context)
-                            .build();
+        Event result = Event
+                .newBuilder()
+                .setId(id)
+                .setMessage(packed)
+                .setContext(context)
+                .build();
         return result;
     }
 
@@ -137,27 +138,28 @@ public class EventFactory {
     public static Event toEvent(IntegrationEvent integrationEvent) {
         IntegrationEventContext sourceContext = integrationEvent.getContext();
         EventContext context = toEventContext(sourceContext);
-        Event result = createEvent(sourceContext.getEventId(),
-                                   integrationEvent.getMessage(),
-                                   context);
+        Any eventMessage = integrationEvent.getMessage();
+        Event result = createEvent(sourceContext.getEventId(), eventMessage, context);
         return result;
     }
 
     private static EventContext toEventContext(IntegrationEventContext value) {
         Timestamp timestamp = value.getTimestamp();
         Any producerId = toAny(value.getBoundedContextName());
-        return EventContext.newBuilder()
-                           .setTimestamp(timestamp)
-                           .setProducerId(producerId)
-                           .build();
+        EventContext.Builder result = EventContext
+                .newBuilder()
+                .setTimestamp(timestamp)
+                .setProducerId(producerId);
+        return result.build();
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder    
     private EventContext createContext(@Nullable Version version) {
         Timestamp timestamp = getCurrentTime();
-        EventContext.Builder builder = EventContext.newBuilder()
-                                                   .setTimestamp(timestamp)
-                                                   .setProducerId(producerId);
+        EventContext.Builder builder = EventContext
+                .newBuilder()
+                .setTimestamp(timestamp)
+                .setProducerId(producerId);
         origin.setOriginFields(builder);
         if (version != null) {
             builder.setVersion(version);

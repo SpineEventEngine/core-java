@@ -19,7 +19,6 @@
  */
 package io.spine.server.integration;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
@@ -40,7 +39,6 @@ import io.spine.server.transport.SubscriberHub;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.validate.Validate;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Deque;
 import java.util.Optional;

@@ -83,11 +83,8 @@ import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.Give
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.projectStarted;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.startProject;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.taskAdded;
-import static io.spine.testing.server.TestCommandClasses.assertContains;
-import static io.spine.testing.server.TestEventClasses.assertContains;
 import static io.spine.testing.server.TestRejectionClasses.assertContains;
 import static java.lang.String.format;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;

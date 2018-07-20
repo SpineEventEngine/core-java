@@ -51,8 +51,6 @@ import io.spine.validate.EmptyVBuilder;
 
 import java.util.List;
 
-import static com.google.common.collect.Lists.newArrayList;
-
 public class BoundedContextTestEnv {
 
     private BoundedContextTestEnv() {
