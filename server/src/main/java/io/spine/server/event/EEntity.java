@@ -65,8 +65,7 @@ public class EEntity extends AbstractEntity<EventId, Event> {
     static final String TYPE_COLUMN = "type";
 
     /** Cached value of the event message type name. */
-    @Nullable
-    private TypeName typeName;
+    private @Nullable TypeName typeName;
 
     /**
      * Compares event entities by timestamps of events.

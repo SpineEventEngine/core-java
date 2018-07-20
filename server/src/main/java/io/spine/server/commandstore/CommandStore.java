@@ -276,9 +276,8 @@ public class CommandStore implements AutoCloseable {
         TenantId tenantId = Commands.getTenantId(command);
         TenantAwareFunction<CommandId, ProcessingStatus> func =
                 new TenantAwareFunction<CommandId, ProcessingStatus>(tenantId) {
-                    @Nullable
                     @Override
-                    public ProcessingStatus apply(@Nullable CommandId commandId) {
+                    public @Nullable ProcessingStatus apply(@Nullable CommandId commandId) {
                         checkNotNull(commandId);
                         return getStatus(commandId);
                     }
