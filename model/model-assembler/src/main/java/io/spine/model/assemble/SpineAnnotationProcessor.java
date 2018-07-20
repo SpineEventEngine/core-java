@@ -20,7 +20,6 @@
 
 package io.spine.model.assemble;
 
-import com.google.common.base.Optional;
 import io.spine.annotation.SPI;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -32,6 +31,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.lang.annotation.Annotation;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static java.util.Collections.singleton;
@@ -189,11 +189,11 @@ public abstract class SpineAnnotationProcessor extends AbstractProcessor {
      * <p>The options are passed to the compiler as follows: {@code javac -Akey=value [...]}.
      *
      * @param optName the name of the desired option
-     * @return the value of the desired option or {@link Optional#absent() Optional.absent()} if
+     * @return the value of the desired option or {@link Optional#empty() Optional.empty()} if
      *         the option is not present in the processor or has no value (i.e. is a flag option)
      */
     protected final Optional<String> getOption(String optName) {
         String optValue = options.get(optName);
-        return Optional.fromNullable(optValue);
+        return Optional.ofNullable(optValue);
     }
 }
