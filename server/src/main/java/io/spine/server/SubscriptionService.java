@@ -89,18 +89,14 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
         try {
             BoundedContext boundedContext = selectBoundedContext(subscription);
 
-            Stand.EntityUpdateCallback updateCallback = new Stand.EntityUpdateCallback() {
-                @Override
-                public void onStateChanged(EntityStateUpdate stateUpdate) {
-                    checkNotNull(subscription);
-                    SubscriptionUpdate update =
-                            SubscriptionUpdate.newBuilder()
-                                              .setSubscription(subscription)
-                                              .setResponse(Responses.ok())
-                                              .addEntityStateUpdates(stateUpdate)
-                                              .build();
-                    responseObserver.onNext(update);
-                }
+            Stand.EntityUpdateCallback updateCallback = stateUpdate -> {
+                checkNotNull(subscription);
+                SubscriptionUpdate update = SubscriptionUpdate.newBuilder()
+                                                              .setSubscription(subscription)
+                                                              .setResponse(Responses.ok())
+                                                              .addEntityStateUpdates(stateUpdate)
+                                                              .build();
+                responseObserver.onNext(update);
             };
             Stand targetStand = boundedContext.getStand();
             targetStand.activate(subscription,

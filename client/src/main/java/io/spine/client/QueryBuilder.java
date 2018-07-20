@@ -93,14 +93,11 @@ public final class QueryBuilder {
         the query `Target` more efficiently.
      */
 
-    @Nullable
-    private Set<?> ids;
+    private @Nullable Set<?> ids;
 
-    @Nullable
-    private Set<CompositeColumnFilter> columns;
+    private @Nullable Set<CompositeColumnFilter> columns;
 
-    @Nullable
-    private Set<String> fieldMask;
+    private @Nullable Set<String> fieldMask;
 
     QueryBuilder(Class<? extends Message> targetType, QueryFactory queryFactory) {
         this.targetType = checkNotNull(targetType);
@@ -314,8 +311,7 @@ public final class QueryBuilder {
         return result;
     }
 
-    @Nullable
-    private FieldMask composeMask() {
+    private @Nullable FieldMask composeMask() {
         if (fieldMask == null || fieldMask.isEmpty()) {
             return null;
         }
@@ -325,15 +321,13 @@ public final class QueryBuilder {
         return mask;
     }
 
-    @Nullable
-    private Set<Any> composeIdPredicate() {
+    private @Nullable Set<Any> composeIdPredicate() {
         if (ids == null || ids.isEmpty()) {
             return null;
         }
         Collection<Any> entityIds = transform(ids, new Function<Object, Any>() {
-            @Nullable
             @Override
-            public Any apply(@Nullable Object o) {
+            public @Nullable Any apply(@Nullable Object o) {
                 checkNotNull(o);
                 Any id = Identifier.pack(o);
                 return id;

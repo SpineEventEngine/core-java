@@ -55,9 +55,8 @@ public class TestEventClasses {
 
     public static Collection<EventClass> getEventClasses(Collection<Event> events) {
         return transform(events, new Function<Event, EventClass>() {
-            @Nullable // return null because an exception won't be propagated in this case
-            @Override
-            public EventClass apply(@Nullable Event record) {
+            @Override // return null because an exception won't be propagated in this case
+            public @Nullable EventClass apply(@Nullable Event record) {
                 if (record == null) {
                     return null;
                 }

@@ -177,9 +177,8 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
             this.fieldMask = fieldMask;
         }
 
-        @Nullable
         @Override
-        public EntityRecord apply(@Nullable EntityRecord input) {
+        public @Nullable EntityRecord apply(@Nullable EntityRecord input) {
             checkNotNull(input);
             Any packedState = input.getState();
             Message state = unpack(packedState);

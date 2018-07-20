@@ -204,12 +204,9 @@ class EnrichmentsMap {
             List<FieldDescriptor> fields = eventDescriptor.getFields();
             Collection<String> fieldNames = Collections2.transform(
                     fields,
-                    new Function<FieldDescriptor, String>() {
-                        @Override
-                        public String apply(@Nullable FieldDescriptor input) {
-                            checkNotNull(input);
-                            return input.getName();
-                        }
+                    input -> {
+                        checkNotNull(input);
+                        return input.getName();
                     });
             for (String field : targetFields) {
                 if (fieldNames.contains(field)) {
