@@ -51,7 +51,7 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
     /** The {@code EventBut} to which the dispatcher posts events it produces. */
     private final EventBus eventBus;
 
-    /** Fully qualified name of the class wrapped into {@code Any}. */
+    /** Supplier for a packed version of the dispatcher ID. */
     private final Supplier<Any> producerId =
             memoize(() -> pack(TypeConverter.<String, StringValue>toMessage(getId())));
 
