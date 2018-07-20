@@ -33,9 +33,9 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -98,14 +98,12 @@ public class FieldMasks {
      */
     @Nonnull
     public static <M extends Message, B extends Message.Builder>
-    Collection<M> applyMask(FieldMask mask,
-                            Collection<M> messages,
-                            TypeUrl type) {
+    Collection<M> applyMask(FieldMask mask, Collection<M> messages, TypeUrl type) {
         checkNotNull(mask);
         checkNotNull(messages);
         checkNotNull(type);
 
-        List<M> filtered = new LinkedList<>();
+        List<M> filtered = new ArrayList<>();
         ProtocolStringList filter = mask.getPathsList();
         Class<B> builderClass = getBuilderForType(type);
 

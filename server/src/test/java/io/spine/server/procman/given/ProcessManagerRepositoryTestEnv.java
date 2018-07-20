@@ -33,7 +33,7 @@ import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.EventSubscriber;
-import io.spine.server.procman.CommandRouted;
+import io.spine.server.procman.CommandSplit;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.test.procman.Project;
@@ -138,8 +138,8 @@ public class ProcessManagerRepositoryTestEnv {
 
             PmProjectCreated event = ((PmProjectCreated.Builder)
                     Sample.builderForType(PmProjectCreated.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
+                          .setProjectId(command.getProjectId())
+                          .build();
             return event;
         }
 
@@ -149,22 +149,29 @@ public class ProcessManagerRepositoryTestEnv {
 
             PmTaskAdded event = ((PmTaskAdded.Builder)
                     Sample.builderForType(PmTaskAdded.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
+                          .setProjectId(command.getProjectId())
+                          .build();
             return event;
         }
 
         @Assign
-        CommandRouted handle(PmStartProject command, CommandContext context) {
+        CommandSplit handle(PmStartProject command, CommandContext context) {
             keep(command);
 
+            ProjectId projectId = command.getProjectId();
             Message addTask = ((PmAddTask.Builder)
                     Sample.builderForType(PmAddTask.class))
-                    .setProjectId(command.getProjectId())
+                    .setProjectId(projectId)
                     .build();
-            return newRouterFor(command, context)
+            Message doNothing = ((PmDoNothing.Builder)
+                    Sample.builderForType(PmDoNothing.class))
+                    .setProjectId(projectId)
+                    .build();
+
+            return split(command, context)
                     .add(addTask)
-                    .routeAll();
+                    .add(doNothing)
+                    .postAll();
         }
 
         @Assign

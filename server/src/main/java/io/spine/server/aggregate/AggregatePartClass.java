@@ -71,18 +71,15 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
      * and the second constructor parameter is subtype of the {@code AggregateRoot}
      * For example:
      * <pre>{@code
+     *  // A user-defined AggregateRoot:
+     *  class CustomAggregateRoot extends AggregateRoot { ... }
      *
-     * // A user-defined AggregateRoot:
-     * class CustomAggregateRoot extends AggregateRoot{...}
+     *  // An AggregatePart for the CustomAggregateRoot:
+     *  class CustomAggregatePart extends AggregatePart<...> { ... }
      *
-     * // An AggregatePart for the CustomAggregateRoot:
-     * class CustomAggregatePart extends AggregatePart<...>{
-     *
-     *     // The expected constructor:
-     *     CustomAggregatePart(AnAggregateId id, CustomAggregateRoot root){...}
-     *     }
-     * }
-     * </pre>
+     *  // The expected constructor:
+     *  CustomAggregatePart(AnAggregateId id, CustomAggregateRoot root) { ... }
+     * }</pre>
      *
      * <p>Throws {@code IllegalStateException} in other cases.
      *
@@ -108,6 +105,8 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
     /**
      * Creates a new {@code AggregateRoot} within the passed Bounded Context.
      */
+    @SuppressWarnings("TypeParameterUnusedInFormals")
+    // The returned type _is_ bound with the type of identifiers.
     <I, R extends AggregateRoot<I>> R createRoot(BoundedContext bc, I aggregateId) {
         checkNotNull(bc);
         checkNotNull(aggregateId);
@@ -120,18 +119,17 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
             ctor.setAccessible(true);
             result = ctor.newInstance(bc, aggregateId);
         } catch (NoSuchMethodException | InvocationTargetException |
-                 InstantiationException | IllegalAccessException e) {
+                InstantiationException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
         return result;
     }
 
-    private static ModelError noSuchConstructor(Class<?> aggregatePartClass,
-                                                Class<?> aggregateRootClass) {
+    private static ModelError noSuchConstructor(Class<?> partClass, Class<?> rootClass) {
         String errMsg =
                 format("%s class must declare a constructor with one parameter of the %s type.",
-                       aggregatePartClass.getName(),
-                       aggregateRootClass.getName());
+                       partClass.getName(),
+                       rootClass.getName());
         NoSuchMethodException cause = new NoSuchMethodException(errMsg);
         throw new ModelError(cause);
     }

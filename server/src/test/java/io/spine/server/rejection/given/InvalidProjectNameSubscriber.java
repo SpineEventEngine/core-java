@@ -20,7 +20,6 @@
 
 package io.spine.server.rejection.given;
 
-import io.spine.client.CommandFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Rejection;
@@ -29,7 +28,8 @@ import io.spine.core.Subscribe;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.test.rejection.ProjectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.RjUpdateProjectName;
-import io.spine.testing.client.TestActorRequestFactory;
+
+import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * @author Alexander Yevsyukov
@@ -42,11 +42,14 @@ public class InvalidProjectNameSubscriber extends RejectionSubscriber {
     public void on(InvalidProjectName rejection,
                    RjUpdateProjectName commandMessage,
                    CommandContext context) {
-        CommandFactory commandFactory =
-                TestActorRequestFactory.newInstance(InvalidProjectNameSubscriber.class)
-                                       .command();
-        Command command = commandFactory.createWithContext(commandMessage, context);
-        this.rejectionHandled = Rejections.createRejection(rejection, command);
+        // Compose partial `Command` instance since we need to store only incoming
+        // command message and its context.
+        // The real backend code that creates rejections uses real `Command` instances.
+        Command cmd = Command.newBuilder()
+                .setMessage(pack(commandMessage))
+                .setContext(context)
+                .build();
+        this.rejectionHandled = Rejections.createRejection(rejection, cmd);
     }
 
     public Rejection getRejectionHandled() {

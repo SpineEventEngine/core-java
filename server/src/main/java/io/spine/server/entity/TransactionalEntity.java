@@ -153,7 +153,8 @@ public abstract class TransactionalEntity<I,
         return result;
     }
 
-    @SuppressWarnings("ObjectEquality") // the refs must to point to the same object; see below.
+    @SuppressWarnings({"ObjectEquality", "ReferenceEquality"}
+            /* The refs must to point to the same object; see below. */)
     void injectTransaction(Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> tx) {
         checkNotNull(tx);
 
