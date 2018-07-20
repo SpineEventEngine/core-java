@@ -26,10 +26,13 @@ import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.event.EventFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The events emitted as a result of message dispatch.
@@ -50,8 +53,9 @@ public final class DispatchResult {
      * @param <E>      {@link MessageEnvelope} dispatched message type
      */
     <E extends MessageEnvelope> DispatchResult(List<? extends Message> messages, E origin) {
+        checkNotNull(messages);
         this.messages = ImmutableList.copyOf(messages);
-        this.origin = origin;
+        this.origin = checkNotNull(origin);
     }
 
     /**
@@ -65,6 +69,12 @@ public final class DispatchResult {
      * @return dispatch result representation as a list of events
      */
     public List<Event> asEvents(Any producerId, @Nullable Version version) {
-        return HandlerMethod.toEvents(producerId, version, messages, origin);
+        checkNotNull(producerId);
+        EventFactory eventFactory = EventFactory.on(origin, producerId);
+        List<Event> result =
+                messages.stream()
+                        .map(eventMessage -> eventFactory.createEvent(eventMessage, version))
+                        .collect(Collectors.toList());
+        return result;
     }
 }

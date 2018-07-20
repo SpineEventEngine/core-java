@@ -19,18 +19,11 @@
  */
 package io.spine.server.model;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
-import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.core.Event;
-import io.spine.core.MessageEnvelope;
-import io.spine.core.Version;
-import io.spine.server.event.EventFactory;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -115,31 +108,10 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
      * @throws ClassCastException if the first parameter isn't a class implementing {@link Message}
      */
     public static Class<? extends Message> getFirstParamType(Method handler) {
-        @SuppressWarnings("unchecked") /* we always expect first param as {@link Message} */
-        final Class<? extends Message> result =
+        @SuppressWarnings("unchecked") /* We always expect first param as `Message`. */
+        Class<? extends Message> result =
                 (Class<? extends Message>) handler.getParameterTypes()[0];
         return result;
-    }
-
-    public static List<Event> toEvents(Any producerId,
-                                       @Nullable Version version,
-                                       List<? extends Message> eventMessages,
-                                       MessageEnvelope origin) {
-        checkNotNull(producerId);
-        checkNotNull(eventMessages);
-        checkNotNull(origin);
-
-        final EventFactory eventFactory =
-                EventFactory.on(origin, producerId);
-
-        return Lists.transform(
-                eventMessages,
-                (Function<Message, Event>) eventMessage -> {
-                    checkNotNull(eventMessage);
-                    Event result = eventFactory.createEvent(eventMessage, version);
-                    return result;
-                }
-        );
     }
 
     /** Returns the handling method. */
@@ -153,13 +125,13 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
 
     /** Returns {@code true} if the method is declared {@code public}, {@code false} otherwise. */
     protected boolean isPublic() {
-        final boolean result = Modifier.isPublic(getModifiers());
+        boolean result = Modifier.isPublic(getModifiers());
         return result;
     }
 
     /** Returns {@code true} if the method is declared {@code private}, {@code false} otherwise. */
     protected boolean isPrivate() {
-        final boolean result = Modifier.isPrivate(getModifiers());
+        boolean result = Modifier.isPrivate(getModifiers());
         return result;
     }
 
@@ -169,14 +141,14 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
     }
 
     /** Returns the set of method attributes configured for this method. */
-    public final Set<MethodAttribute<?>> getAttributes() {
+    public Set<MethodAttribute<?>> getAttributes() {
         return attributes;
     }
 
     private static Set<MethodAttribute<?>> discoverAttributes(Method method) {
         checkNotNull(method);
-        final ExternalAttribute externalAttribute = ExternalAttribute.of(method);
-        return ImmutableSet.<MethodAttribute<?>>of(externalAttribute);
+        ExternalAttribute externalAttribute = ExternalAttribute.of(method);
+        return ImmutableSet.of(externalAttribute);
     }
 
     /**
@@ -202,17 +174,17 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
         if (output instanceof List) {
             // Cast to the list of messages as it is the one of the return types
             // we expect by methods we call.
-            final List<? extends Message> result = (List<? extends Message>) output;
+            List<? extends Message> result = (List<? extends Message>) output;
             return result;
         }
 
         // If it's not a list it could be another `Iterable`.
         if (output instanceof Iterable) {
-            return ImmutableList.copyOf((Iterable<? extends Message>)output);
+            return ImmutableList.copyOf((Iterable<? extends Message>) output);
         }
 
         // Another type of result is single event message (as Message).
-        final List<Message> result = singletonList((Message) output);
+        List<Message> result = singletonList((Message) output);
         return result;
     }
 
@@ -269,7 +241,7 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
+        int prime = 31;
         return (prime + method.hashCode());
     }
 
@@ -281,7 +253,7 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final HandlerMethod other = (HandlerMethod) obj;
+        HandlerMethod other = (HandlerMethod) obj;
 
         return Objects.equals(this.method, other.method);
     }
