@@ -105,21 +105,21 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("reschedule commands from storage")
     void rescheduleCmdsFromStorage() {
-        final Timestamp schedulingTime = minutesAgo(3);
-        final Duration delayPrimary = Durations2.fromMinutes(5);
-        final Duration newDelayExpected = Durations2.fromMinutes(2); // = 5 - 3
-        final List<Command> commandsPrimary = newArrayList(createProject(),
-                                                           addTask(),
-                                                           startProject());
+        Timestamp schedulingTime = minutesAgo(3);
+        Duration delayPrimary = Durations2.fromMinutes(5);
+        Duration newDelayExpected = Durations2.fromMinutes(2); // = 5 - 3
+        List<Command> commandsPrimary = newArrayList(createProject(),
+                                                     addTask(),
+                                                     startProject());
         storeAsScheduled(commandsPrimary, delayPrimary, schedulingTime);
 
         commandBus.rescheduleCommands();
 
-        final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
+        ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
         verify(scheduler, times(commandsPrimary.size())).schedule(commandCaptor.capture());
-        final List<Command> commandsRescheduled = commandCaptor.getAllValues();
+        List<Command> commandsRescheduled = commandCaptor.getAllValues();
         for (Command cmd : commandsRescheduled) {
-            final long actualDelay = getDelaySeconds(cmd);
+            long actualDelay = getDelaySeconds(cmd);
             Tests.assertSecondsEqual(newDelayExpected.getSeconds(), actualDelay, /*maxDiffSec=*/1);
         }
     }
@@ -138,12 +138,13 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
             final CountDownLatch latch = new CountDownLatch(1);
             final CommandScheduler scheduler =
                     threadAwareScheduler(threadNameUponScheduling, latch);
-            storeSingleCommandForRescheduling();
+            TestSystemGateway gateway = new TestSingleTenantSystemGateway();
+            storeSingleCommandForRescheduling(gateway);
 
             // Create CommandBus specific for this test.
             final CommandBus commandBus = CommandBus.newBuilder()
                                                     .injectTenantIndex(tenantIndex)
-                                                    .injectSystemGateway(NoOpSystemGateway.INSTANCE)
+                                                    .injectSystemGateway(gateway)
                                                     .setCommandScheduler(scheduler)
                                                     .setThreadSpawnAllowed(true)
                                                     .setAutoReschedule(true)
@@ -269,9 +270,15 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
      * Creates and stores one scheduled command.
      */
     private Command storeSingleCommandForRescheduling() {
+        return storeSingleCommandForRescheduling(systemGateway);
+    }
+
+    /**
+     * Creates and stores one scheduled command.
+     */
+    private static Command storeSingleCommandForRescheduling(TestSystemGateway gateway) {
         final Command cmdWithSchedule = createScheduledCommand();
-        //commandStore.store(cmdWithSchedule, SCHEDULED);
-        // TODO:2018-07-18:dmytro.dashenkov: Create a projection.
+        gateway.schedule(cmdWithSchedule);
         return cmdWithSchedule;
     }
 

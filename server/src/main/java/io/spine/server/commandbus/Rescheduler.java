@@ -35,7 +35,7 @@ import io.spine.system.server.CommandIndex;
 import io.spine.time.Durations2;
 import io.spine.time.Timestamps2;
 
-import java.util.Set;
+import java.util.Iterator;
 
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Time.getCurrentTime;
@@ -79,9 +79,11 @@ class Rescheduler {
 
     @VisibleForTesting
     private void doRescheduleCommands() {
-        Set<TenantId> tenants = tenantIndex.getAll();
-        for (TenantId tenantId : tenants) {
-            rescheduleForTenant(tenantId);
+        if (bus.isMultitenant()) {
+            tenantIndex.getAll()
+                       .forEach(this::rescheduleForTenant);
+        } else {
+            doReschedule();
         }
     }
 
@@ -96,8 +98,8 @@ class Rescheduler {
     }
 
     private void doReschedule() {
-        commandIndex.scheduledCommands()
-                    .forEachRemaining(this::reschedule);
+        Iterator<Command> iterator = commandIndex.scheduledCommands();
+        iterator.forEachRemaining(this::reschedule);
     }
 
     private void reschedule(Command command) {

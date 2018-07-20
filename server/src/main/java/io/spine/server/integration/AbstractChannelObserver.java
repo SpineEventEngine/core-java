@@ -74,7 +74,7 @@ public abstract class AbstractChannelObserver implements StreamObserver<External
     public final void onNext(ExternalMessage message) {
         checkNotNull(message);
 
-        final BoundedContextName source = message.getBoundedContextName();
+        BoundedContextName source = message.getBoundedContextName();
         if (this.boundedContextName.equals(source)){
             return;
         }

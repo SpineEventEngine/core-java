@@ -121,10 +121,10 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
         return result;
     }
 
-    public static List<Event> toEvents(final Any producerId,
-                                       @Nullable final Version version,
-                                       final List<? extends Message> eventMessages,
-                                       final MessageEnvelope origin) {
+    public static List<Event> toEvents(Any producerId,
+                                       @Nullable Version version,
+                                       List<? extends Message> eventMessages,
+                                       MessageEnvelope origin) {
         checkNotNull(producerId);
         checkNotNull(eventMessages);
         checkNotNull(origin);

@@ -32,6 +32,7 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.Commands;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
@@ -77,6 +78,8 @@ public class CommandBus extends Bus<Command,
 
     private final SystemGateway systemGateway;
 
+    private final TenantIndex tenantIndex;
+
     /**
      * Is {@code true}, if the {@code BoundedContext} (to which this {@code CommandBus} belongs)
      * is multi-tenant.
@@ -120,7 +123,8 @@ public class CommandBus extends Bus<Command,
         this.rejectionBus = builder.rejectionBus;
         this.systemGateway = builder.systemGateway;
         this.filterChain = builder.getFilters();
-        this.deadCommandHandler = new DeadCommandHandler();
+        this.tenantIndex = builder.tenantIndex;
+        this.deadCommandHandler = new DeadCommandHandler()
     }
 
     /**
@@ -205,9 +209,7 @@ public class CommandBus extends Bus<Command,
 
     private static TenantId tenantOf(Iterable<Command> commands) {
         return Streams.stream(commands)
-                      .map(command -> command.getContext()
-                                             .getActorContext()
-                                             .getTenantId())
+                      .map(Commands::getTenantId)
                       .findAny()
                       .orElse(TenantId.getDefaultInstance());
     }
@@ -287,7 +289,8 @@ public class CommandBus extends Bus<Command,
 
     @Override
     protected void store(Iterable<Command> commands) {
-        // NoOp.
+        TenantId tenantId = tenantOf(commands);
+        tenantIndex.keep(tenantId);
     }
 
     private CommandDispatcher<?> getDispatcher(CommandEnvelope commandEnvelope) {

@@ -306,7 +306,7 @@ public abstract class ProcessManagerRepository<I,
      * @see CommandHandlingEntity#dispatchCommand(CommandEnvelope)
      */
     @Override
-    public I dispatchCommand(final CommandEnvelope command) {
+    public I dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
         return PmCommandEndpoint.handle(this, command);
     }

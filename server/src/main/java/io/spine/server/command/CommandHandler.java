@@ -22,6 +22,7 @@ package io.spine.server.command;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
+import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -29,9 +30,13 @@ import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.dispatch.Dispatch;
 import io.spine.server.command.dispatch.DispatchResult;
+import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.commandbus.CommandErrorHandler;
 import io.spine.server.event.EventBus;
+import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.Model;
+import io.spine.server.rejection.RejectionBus;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 import org.slf4j.Logger;
@@ -41,7 +46,9 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.protobuf.TypeConverter.toMessage;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 
 /**
@@ -88,6 +95,7 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
 
     /** Lazily initialized logger. */
     private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
+    private CommandErrorHandler errorHandler;
 
     /**
      * Creates a new instance of the command handler.
@@ -98,6 +106,19 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
         this.eventBus = eventBus;
         final StringValue className = toMessage(getClass().getName());
         this.producerId = AnyPacker.pack(className);
+    }
+
+    @Internal
+    public void init(RejectionBus bus) {
+        checkNotNull(bus);
+        this.errorHandler = CommandErrorHandler.with(bus);
+    }
+
+    private CommandErrorHandler errorHanlder() {
+        checkState(errorHandler != null,
+                   "%s is not registered in a %s.",
+                   CommandHandler.class.getSimpleName(), CommandBus.class.getSimpleName());
+        return errorHandler;
     }
 
     /**
@@ -124,10 +145,20 @@ public abstract class CommandHandler implements CommandDispatcher<String> {
     public String dispatch(CommandEnvelope envelope) {
         CommandHandlerMethod method = thisClass.getHandler(envelope.getMessageClass());
         Dispatch<CommandEnvelope> dispatch = Dispatch.of(envelope).to(this, method);
-        DispatchResult dispatchResult = dispatch.perform();
+        DispatchResult dispatchResult = doDispatch(envelope, dispatch);
         List<Event> events = dispatchResult.asEvents(producerId, null);
         postEvents(events);
         return getId();
+    }
+
+    private DispatchResult doDispatch(CommandEnvelope envelope,
+                                      Dispatch<CommandEnvelope> dispatch) {
+        try {
+            return dispatch.perform();
+        } catch (HandlerMethodFailedException e) {
+            errorHanlder().handleError(envelope, e);
+            throw illegalStateWithCauseOf(e);
+        }
     }
 
     @Override
