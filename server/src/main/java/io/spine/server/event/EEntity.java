@@ -71,15 +71,12 @@ public class EEntity extends AbstractEntity<EventId, Event> {
     /**
      * Compares event entities by timestamps of events.
      */
-    private static final Comparator<EEntity> comparator = new Comparator<EEntity>() {
-        @Override
-        public int compare(EEntity e1, EEntity e2) {
-            Event event1 = e1.getState();
-            Event event2 = e2.getState();
-            int result = Events.eventComparator()
-                               .compare(event1, event2);
-            return result;
-        }
+    private static final Comparator<EEntity> comparator = (e1, e2) -> {
+        Event event1 = e1.getState();
+        Event event2 = e2.getState();
+        int result = Events.eventComparator()
+                           .compare(event1, event2);
+        return result;
     };
 
     EEntity(EventId id) {

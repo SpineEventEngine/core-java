@@ -130,13 +130,10 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
 
         EventFactory eventFactory = EventFactory.on(origin, producerId);
 
-        return Lists.transform(eventMessages, new Function<Message, Event>() {
-            @Override
-            public Event apply(@Nullable Message eventMessage) {
-                checkNotNull(eventMessage);
-                Event result = eventFactory.createEvent(eventMessage, version);
-                return result;
-            }
+        return Lists.transform(eventMessages, (Function<Message, Event>) eventMessage -> {
+            checkNotNull(eventMessage);
+            Event result = eventFactory.createEvent(eventMessage, version);
+            return result;
         });
     }
 

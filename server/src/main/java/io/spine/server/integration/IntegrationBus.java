@@ -152,12 +152,9 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     private ConfigurationChangeObserver observeConfigurationChanges() {
         return new ConfigurationChangeObserver(
                 boundedContextName,
-                new Function<Class<? extends Message>, BusAdapter<?, ?>>() {
-                    @Override
-                    public BusAdapter<?, ?> apply(@Nullable Class<? extends Message> message) {
-                        checkNotNull(message);
-                        return adapterFor(message);
-                    }
+                message -> {
+                    checkNotNull(message);
+                    return adapterFor(message);
                 });
     }
 

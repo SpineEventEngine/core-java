@@ -118,12 +118,9 @@ abstract class EnrichmentFunction<S, T, C extends Message> {
      * A helper predicate to filter the active functions only.
      */
     static Predicate<EnrichmentFunction<?, ?, ?>> activeOnly() {
-        return new Predicate<EnrichmentFunction<?, ?, ?>>() {
-            @Override
-            public boolean apply(@Nullable EnrichmentFunction<?, ?, ?> input) {
-                checkNotNull(input);
-                return input.isActive();
-            }
+        return input -> {
+            checkNotNull(input);
+            return input.isActive();
         };
     }
 
