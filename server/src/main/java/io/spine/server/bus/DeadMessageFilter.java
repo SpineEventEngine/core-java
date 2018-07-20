@@ -20,7 +20,6 @@
 
 package io.spine.server.bus;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
@@ -30,6 +29,7 @@ import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.bus.Buses.reject;
@@ -57,17 +57,16 @@ final class DeadMessageFilter<T extends Message,
 
     @Override
     public Optional<Ack> accept(E envelope) {
-        @SuppressWarnings("unchecked")
-        final C cls = (C) envelope.getMessageClass();
-        final Collection<D> dispatchers = registry.getDispatchers(cls);
+        @SuppressWarnings("unchecked") C cls = (C) envelope.getMessageClass();
+        Collection<D> dispatchers = registry.getDispatchers(cls);
         if (dispatchers.isEmpty()) {
-            final MessageUnhandled report = deadMessageHandler.handle(envelope);
-            final Error error = report.asError();
-            final Any packedId = Identifier.pack(envelope.getId());
-            final Ack result = reject(packedId, error);
+            MessageUnhandled report = deadMessageHandler.handle(envelope);
+            Error error = report.asError();
+            Any packedId = Identifier.pack(envelope.getId());
+            Ack result = reject(packedId, error);
             return Optional.of(result);
         } else {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 }

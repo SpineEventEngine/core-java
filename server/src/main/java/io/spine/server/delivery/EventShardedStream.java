@@ -55,8 +55,8 @@ public class EventShardedStream<I> extends ShardedStream<I, Event, EventEnvelope
 
         @Override
         protected EventEnvelope toEnvelope(Any packedEvent) {
-            final Event event = AnyPacker.unpack(packedEvent);
-            final EventEnvelope result = EventEnvelope.of(event);
+            Event event = AnyPacker.unpack(packedEvent);
+            EventEnvelope result = EventEnvelope.of(event);
             return result;
         }
     }

@@ -48,8 +48,8 @@ public final class HandlerMethods {
         return new Predicate<M>() {
             @Override
             public boolean apply(@Nullable M input) {
-                final M method = checkNotNull(input);
-                final boolean result = isExternal(method);
+                M method = checkNotNull(input);
+                boolean result = isExternal(method);
                 return result;
             }
         };
@@ -66,8 +66,8 @@ public final class HandlerMethods {
         return new Predicate<M>() {
             @Override
             public boolean apply(@Nullable M input) {
-                final M method = checkNotNull(input);
-                final boolean result = !isExternal(method);
+                M method = checkNotNull(input);
+                boolean result = !isExternal(method);
                 return result;
             }
         };

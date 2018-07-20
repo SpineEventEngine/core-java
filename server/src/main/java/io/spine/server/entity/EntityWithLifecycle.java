@@ -77,8 +77,8 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
                         if (input == null) {
                             return true;
                         }
-                        final LifecycleFlags flags = input.getLifecycleFlags();
-                        final boolean result = isEntityVisible.apply(flags);
+                        LifecycleFlags flags = input.getLifecycleFlags();
+                        boolean result = isEntityVisible.apply(flags);
                         return result;
                     }
                 };
@@ -90,7 +90,7 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
                         if (input == null) {
                             return false;
                         }
-                        final EntityRecord record = input.getRecord();
+                        EntityRecord record = input.getRecord();
                         return isRecordVisible().apply(record);
                     }
                 };

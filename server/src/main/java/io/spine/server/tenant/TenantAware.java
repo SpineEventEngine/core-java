@@ -21,9 +21,10 @@
 package io.spine.server.tenant;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.validate.Validate.isDefault;
@@ -70,7 +71,7 @@ abstract class TenantAware {
     @Internal
     @VisibleForTesting
     public static boolean isTenantSet() {
-        final Optional<TenantId> currentTenant = CurrentTenant.get();
+        Optional<TenantId> currentTenant = CurrentTenant.get();
         return currentTenant.isPresent();
     }
 

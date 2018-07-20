@@ -22,7 +22,6 @@ package io.spine.server.commandstore;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
@@ -36,6 +35,7 @@ import io.spine.server.entity.DefaultRecordBasedRepository;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 import static com.google.common.collect.Iterators.transform;
 import static io.spine.core.CommandStatus.RECEIVED;
@@ -85,7 +85,7 @@ class CRepository extends DefaultRecordBasedRepository<CommandId, CEntity, Comma
      */
     void store(Command command, CommandStatus status) {
         checkNotClosed();
-        final CEntity entity = CEntity.createForStatus(command, status);
+        CEntity entity = CEntity.createForStatus(command, status);
         store(entity);
     }
 
@@ -98,7 +98,7 @@ class CRepository extends DefaultRecordBasedRepository<CommandId, CEntity, Comma
      */
     void store(Command command, Error error) {
         checkNotClosed();
-        final CEntity entity = CEntity.createForError(command, error);
+        CEntity entity = CEntity.createForError(command, error);
         store(entity);
     }
 
@@ -111,14 +111,14 @@ class CRepository extends DefaultRecordBasedRepository<CommandId, CEntity, Comma
      */
     Iterator<CommandRecord> iterator(CommandStatus status) {
         checkNotClosed();
-        final Iterator<CEntity> filteredEntities = iterator(new MatchesStatus(status));
-        final Iterator<CommandRecord> transformed = transform(filteredEntities, getRecordFunc());
+        Iterator<CEntity> filteredEntities = iterator(new MatchesStatus(status));
+        Iterator<CommandRecord> transformed = transform(filteredEntities, getRecordFunc());
         return transformed;
     }
 
     ProcessingStatus getStatus(CommandId commandId) {
         checkNotClosed();
-        final CEntity entity = loadEntity(commandId);
+        CEntity entity = loadEntity(commandId);
         return entity.getState()
                      .getStatus();
     }
@@ -128,7 +128,7 @@ class CRepository extends DefaultRecordBasedRepository<CommandId, CEntity, Comma
      */
     void setOkStatus(CommandId commandId) {
         checkNotClosed();
-        final CEntity entity = loadEntity(commandId);
+        CEntity entity = loadEntity(commandId);
         entity.setOkStatus();
         store(entity);
     }
@@ -141,7 +141,7 @@ class CRepository extends DefaultRecordBasedRepository<CommandId, CEntity, Comma
      */
     void updateStatus(CommandId commandId, Error error) {
         checkNotClosed();
-        final CEntity entity = loadEntity(commandId);
+        CEntity entity = loadEntity(commandId);
         entity.setToError(error);
         store(entity);
     }
@@ -154,15 +154,15 @@ class CRepository extends DefaultRecordBasedRepository<CommandId, CEntity, Comma
      */
     void updateStatus(CommandId commandId, Rejection rejection) {
         checkNotClosed();
-        final CEntity entity = loadEntity(commandId);
+        CEntity entity = loadEntity(commandId);
         entity.setToRejected(rejection);
         store(entity);
     }
 
     private CEntity loadEntity(CommandId commandId) {
-        final Optional<CEntity> loaded = find(commandId);
+        Optional<CEntity> loaded = find(commandId);
         if (!loaded.isPresent()) {
-            final String idStr = Identifier.toString(commandId);
+            String idStr = Identifier.toString(commandId);
             throw new IllegalStateException("Unable to load entity for command ID: " + idStr);
         }
 
@@ -185,9 +185,9 @@ class CRepository extends DefaultRecordBasedRepository<CommandId, CEntity, Comma
             if (input == null) {
                 return false;
             }
-            final boolean result = input.getState()
-                                        .getStatus()
-                                        .getCode() == commandStatus;
+            boolean result = input.getState()
+                                  .getStatus()
+                                  .getCode() == commandStatus;
             return result;
         }
     }

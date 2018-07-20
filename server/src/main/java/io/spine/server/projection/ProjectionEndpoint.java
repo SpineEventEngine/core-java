@@ -54,8 +54,8 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
 
     static <I, P extends Projection<I, ?, ?>>
     Set<I> handle(ProjectionRepository<I, P, ?> repository, EventEnvelope event) {
-        final ProjectionEndpoint<I, P> endpoint = of(repository, event);
-        final Set<I> result = endpoint.handle();
+        ProjectionEndpoint<I, P> endpoint = of(repository, event);
+        Set<I> result = endpoint.handle();
         return result;
     }
 
@@ -104,7 +104,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
 
     @Override
     protected boolean isModified(P projection) {
-        final boolean result = projection.isChanged();
+        boolean result = projection.isChanged();
         return result;
     }
 

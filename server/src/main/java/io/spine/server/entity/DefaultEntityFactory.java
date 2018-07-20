@@ -58,7 +58,7 @@ class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements EntityF
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final DefaultEntityFactory other = (DefaultEntityFactory) obj;
+        DefaultEntityFactory other = (DefaultEntityFactory) obj;
         return Objects.equals(this.entityClass, other.entityClass);
     }
 }

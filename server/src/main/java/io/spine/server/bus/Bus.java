@@ -21,7 +21,6 @@
 package io.spine.server.bus;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
@@ -32,6 +31,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Deque;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -141,10 +141,10 @@ public abstract class Bus<T extends Message,
         checkNotNull(messages);
         checkNotNull(observer);
 
-        final Iterable<T> filteredMessages = filter(messages, observer);
+        Iterable<T> filteredMessages = filter(messages, observer);
         if (!isEmpty(filteredMessages)) {
             store(filteredMessages);
-            final Iterable<E> envelopes = transform(filteredMessages, toEnvelope());
+            Iterable<E> envelopes = transform(filteredMessages, toEnvelope());
             doPost(envelopes, observer);
         }
         observer.onCompleted();
@@ -197,10 +197,10 @@ public abstract class Bus<T extends Message,
      */
     private BusFilter<E> filterChain() {
         if (filterChain == null) {
-            final Deque<BusFilter<E>> filters = createFilterChain();
-            final BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(),
-                                                                       registry());
-            final BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
+            Deque<BusFilter<E>> filters = createFilterChain();
+            BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(),
+                                                                 registry());
+            BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
             filters.push(deadMsgFilter);
             filters.push(validatingFilter);
             filterChain = new FilterChain<>(filters);
@@ -253,14 +253,14 @@ public abstract class Bus<T extends Message,
      * @param messages the message to filter
      * @param observer the observer to receive the negative outcome of the operation
      * @return the message itself if it passes the filtering or
-     * {@link Optional#absent() Optional.absent()} otherwise
+     * {@link Optional#empty() Optional.empty()} otherwise
      */
     private Iterable<T> filter(Iterable<T> messages, StreamObserver<Ack> observer) {
         checkNotNull(messages);
         checkNotNull(observer);
-        final Collection<T> result = newLinkedList();
+        Collection<T> result = newLinkedList();
         for (T message : messages) {
-            final Optional<Ack> response = filter(toEnvelope(message));
+            Optional<Ack> response = filter(toEnvelope(message));
             if (response.isPresent()) {
                 observer.onNext(response.get());
             } else {
@@ -277,14 +277,14 @@ public abstract class Bus<T extends Message,
      * the returned {@link Optional} contains a value with either status.
      *
      * <p>If the message should be passed to the dispatchers, the result of this method is
-     * {@link Optional#absent() Optional.absent()}.
+     * {@link Optional#empty() Optional.empty()}.
      *
      * @param message the {@linkplain MessageEnvelope message envelope} to pre-process
      * @return the result of message processing by this bus if any, or
-     * {@link Optional#absent() Optional.absent()} otherwise
+     * {@link Optional#empty() Optional.empty()} otherwise
      */
     private Optional<Ack> filter(E message) {
-        final Optional<Ack> filterOutput = filterChain().accept(message);
+        Optional<Ack> filterOutput = filterChain().accept(message);
         return filterOutput;
     }
 
@@ -414,7 +414,7 @@ public abstract class Bus<T extends Message,
         @Override
         public E apply(@Nullable T message) {
             checkNotNull(message);
-            final E result = toEnvelope(message);
+            E result = toEnvelope(message);
             return result;
         }
     }

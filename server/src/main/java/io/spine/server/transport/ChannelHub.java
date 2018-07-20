@@ -78,7 +78,7 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
      */
     public synchronized C get(ChannelId channelId) {
         if(!channels.containsKey(channelId)) {
-            final C newChannel = newChannel(channelId);
+            C newChannel = newChannel(channelId);
             channels.put(channelId, newChannel);
         }
         return channels.get(channelId);
@@ -88,16 +88,16 @@ public abstract class ChannelHub<C extends MessageChannel> implements AutoClosea
      * Closes the stale channels and removes those from the hub.
      */
     public void closeStaleChannels() {
-        final Set<ChannelId> staleChannels = detectStale();
+        Set<ChannelId> staleChannels = detectStale();
         for (ChannelId id : staleChannels) {
             channels.remove(id);
         }
     }
 
     private Set<ChannelId> detectStale() {
-        final Set<ChannelId> toRemove = newHashSet();
+        Set<ChannelId> toRemove = newHashSet();
         for (ChannelId id : channels.keySet()) {
-            final C channel = channels.get(id);
+            C channel = channels.get(id);
             if(channel.isStale()) {
                 try {
                     channel.close();

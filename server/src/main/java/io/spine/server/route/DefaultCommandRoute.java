@@ -20,10 +20,11 @@
 
 package io.spine.server.route;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.protobuf.MessageFieldException;
+
+import java.util.Optional;
 
 /**
  * Obtains a command target entity ID based on a command message and context.
@@ -53,17 +54,17 @@ public class DefaultCommandRoute<I> extends FieldAtIndex<I, Message, CommandCont
      * Tries to obtain a target ID from the passed command message.
      *
      * @param commandMessage a message to get ID from
-     * @return an {@link Optional} of the ID or {@code Optional.absent()}
+     * @return an {@link Optional} of the ID or {@code Optional.empty()}
      * if {@link DefaultCommandRoute#apply(Message, Message)} throws an exception
      * (in the case if the command is not for an entity)
      */
     public static <I> Optional<I> asOptional(Message commandMessage) {
         try {
-            final DefaultCommandRoute<I> function = newInstance();
-            final I id = function.apply(commandMessage, CommandContext.getDefaultInstance());
+            DefaultCommandRoute<I> function = newInstance();
+            I id = function.apply(commandMessage, CommandContext.getDefaultInstance());
             return Optional.of(id);
         } catch (MessageFieldException | ClassCastException ignored) {
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 }

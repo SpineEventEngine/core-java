@@ -44,18 +44,18 @@ class ColumnTypeTest {
     @Test
     @DisplayName("convert Java type to storage type")
     void convertJavaType() {
-        final String stringValue = String.valueOf(VALUE);
-        final ColumnType<Integer, String, ?, ?> type = new TestColumnType<>();
-        final String storedValue = type.convertColumnValue(VALUE);
+        String stringValue = String.valueOf(VALUE);
+        ColumnType<Integer, String, ?, ?> type = new TestColumnType<>();
+        String storedValue = type.convertColumnValue(VALUE);
         assertEquals(stringValue, storedValue);
     }
 
     @Test
     @DisplayName("store value to container")
     void storeValueToContainer() {
-        final String stringValue = String.valueOf(VALUE);
-        final StringBuilder container = new StringBuilder(16);
-        final ColumnType<?, String, StringBuilder, String> type = new TestColumnType<>();
+        String stringValue = String.valueOf(VALUE);
+        StringBuilder container = new StringBuilder(16);
+        ColumnType<?, String, StringBuilder, String> type = new TestColumnType<>();
         type.setColumnValue(container, stringValue, KEY);
 
         assertThat(container.toString(), containsString(EXPECTED_RESULT));
@@ -64,8 +64,8 @@ class ColumnTypeTest {
     @Test
     @DisplayName("provide interface for entire storage preparation flow")
     void provideFullInterface() {
-        final ColumnType<Integer, String, StringBuilder, String> type = new TestColumnType<>();
-        final StringBuilder container = new StringBuilder(16);
+        ColumnType<Integer, String, StringBuilder, String> type = new TestColumnType<>();
+        StringBuilder container = new StringBuilder(16);
 
         type.setColumnValue(container, type.convertColumnValue(VALUE), KEY);
 

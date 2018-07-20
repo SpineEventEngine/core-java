@@ -53,8 +53,8 @@ public class StorageTestEnv {
     }
 
     public static Rejection newRejection() {
-        final Any packedMessage = toAny("newRejection");
-        final RejectionId id = Rejections.generateId(Commands.generateId());
+        Any packedMessage = toAny("newRejection");
+        RejectionId id = Rejections.generateId(Commands.generateId());
         return Rejection.newBuilder()
                         .setId(id)
                         .setMessage(packedMessage)
@@ -65,19 +65,18 @@ public class StorageTestEnv {
     }
 
     public static CommandRecord newStorageRecord() {
-        final Command command = Given.ACommand.createProject();
-        final String commandType = CommandEnvelope.of(command)
-                                                  .getTypeName()
-                                                  .value();
+        Command command = Given.ACommand.createProject();
+        String commandType = CommandEnvelope.of(command)
+                                            .getTypeName()
+                                            .value();
 
-        final CommandRecord.Builder builder =
-                CommandRecord.newBuilder()
-                             .setCommandType(commandType)
-                             .setCommandId(command.getId())
-                             .setCommand(command)
-                             .setTimestamp(getCurrentTime())
-                             .setStatus(ProcessingStatus.newBuilder()
-                                                        .setCode(RECEIVED));
+        CommandRecord.Builder builder = CommandRecord.newBuilder()
+                                                     .setCommandType(commandType)
+                                                     .setCommandId(command.getId())
+                                                     .setCommand(command)
+                                                     .setTimestamp(getCurrentTime())
+                                                     .setStatus(ProcessingStatus.newBuilder()
+                                                                                .setCode(RECEIVED));
         return builder.build();
     }
 }

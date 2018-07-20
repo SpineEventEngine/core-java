@@ -132,7 +132,7 @@ class RepositoryTest {
     void closeStorageOnClose() {
         repository.initStorage(storageFactory);
 
-        final RecordStorage<?> storage = (RecordStorage<?>) repository.getStorage();
+        RecordStorage<?> storage = (RecordStorage<?>) repository.getStorage();
         repository.close();
 
         assertTrue(storage.isClosed());
@@ -152,7 +152,7 @@ class RepositoryTest {
      * Creates three entities in the repository.
      */
     private void createAndStoreEntities() {
-        final TenantAwareOperation op = new TenantAwareOperation(tenantId) {
+        TenantAwareOperation op = new TenantAwareOperation(tenantId) {
             @Override
             public void run() {
                 repository.initStorage(storageFactory);
@@ -170,10 +170,10 @@ class RepositoryTest {
     void iterateOverEntities() {
         createAndStoreEntities();
 
-        final int numEntities = new TenantAwareFunction0<Integer>(tenantId) {
+        int numEntities = new TenantAwareFunction0<Integer>(tenantId) {
             @Override
             public Integer apply() {
-                final List<ProjectEntity> entities = newArrayList(getIterator(tenantId));
+                List<ProjectEntity> entities = newArrayList(getIterator(tenantId));
                 return entities.size();
             }
         }.execute();
@@ -185,12 +185,12 @@ class RepositoryTest {
     @DisplayName("not allow removal in entities iterator")
     void notAllowRemovalInIterator() {
         createAndStoreEntities();
-        final Iterator<ProjectEntity> iterator = getIterator(tenantId);
+        Iterator<ProjectEntity> iterator = getIterator(tenantId);
         assertThrows(UnsupportedOperationException.class, iterator::remove);
     }
 
     private Iterator<ProjectEntity> getIterator(TenantId tenantId) {
-        final TenantAwareFunction0<Iterator<ProjectEntity>> op =
+        TenantAwareFunction0<Iterator<ProjectEntity>> op =
                 new TenantAwareFunction0<Iterator<ProjectEntity>>(tenantId) {
                     @Override
                     public Iterator<ProjectEntity> apply() {

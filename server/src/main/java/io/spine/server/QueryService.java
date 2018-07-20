@@ -61,9 +61,9 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
     public void read(Query query, StreamObserver<QueryResponse> responseObserver) {
         log().debug("Incoming query: {}", query);
 
-        final TypeUrl type = Queries.typeOf(query);
-        final BoundedContext boundedContext = typeToContextMap.get(type);
-        final Stand stand = boundedContext.getStand();
+        TypeUrl type = Queries.typeOf(query);
+        BoundedContext boundedContext = typeToContextMap.get(type);
+        Stand stand = boundedContext.getStand();
         try {
             stand.execute(query, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
@@ -97,16 +97,16 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
          */
         public QueryService build() throws IllegalStateException {
             if (boundedContexts.isEmpty()) {
-                final String message = "Query service must have at least one `BoundedContext`.";
+                String message = "Query service must have at least one `BoundedContext`.";
                 throw new IllegalStateException(message);
             }
-            final ImmutableMap<TypeUrl, BoundedContext> map = createMap();
-            final QueryService result = new QueryService(map);
+            ImmutableMap<TypeUrl, BoundedContext> map = createMap();
+            QueryService result = new QueryService(map);
             return result;
         }
 
         private ImmutableMap<TypeUrl, BoundedContext> createMap() {
-            final ImmutableMap.Builder<TypeUrl, BoundedContext> builder = ImmutableMap.builder();
+            ImmutableMap.Builder<TypeUrl, BoundedContext> builder = ImmutableMap.builder();
             for (BoundedContext boundedContext : boundedContexts) {
                 putIntoMap(boundedContext, builder);
             }
@@ -116,8 +116,8 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
         private static void putIntoMap(BoundedContext boundedContext,
                                        ImmutableMap.Builder<TypeUrl, BoundedContext> mapBuilder) {
 
-            final Stand stand = boundedContext.getStand();
-            final ImmutableSet<TypeUrl> exposedTypes = stand.getExposedTypes();
+            Stand stand = boundedContext.getStand();
+            ImmutableSet<TypeUrl> exposedTypes = stand.getExposedTypes();
 
             for (TypeUrl availableType : exposedTypes) {
                 mapBuilder.put(availableType, boundedContext);

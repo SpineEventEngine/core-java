@@ -59,9 +59,9 @@ class AbstractEntityTest {
         @Test
         @DisplayName("`updateState`")
         void updateState() throws NoSuchMethodException {
-            final Method updateState =
+            Method updateState =
                     AbstractEntity.class.getDeclaredMethod("updateState", Message.class);
-            final int modifiers = updateState.getModifiers();
+            int modifiers = updateState.getModifiers();
             assertTrue(Modifier.isFinal(modifiers));
         }
 
@@ -72,9 +72,8 @@ class AbstractEntityTest {
         @Test
         @DisplayName("`validate`")
         void validate() throws NoSuchMethodException {
-            final Method validate =
-                    AbstractEntity.class.getDeclaredMethod("validate", Message.class);
-            final int modifiers = validate.getModifiers();
+            Method validate = AbstractEntity.class.getDeclaredMethod("validate", Message.class);
+            int modifiers = validate.getModifiers();
             assertTrue(Modifier.isPrivate(modifiers) || Modifier.isFinal(modifiers));
         }
     }
@@ -82,8 +81,8 @@ class AbstractEntityTest {
     @Test
     @DisplayName("throw InvalidEntityStateException if state is invalid")
     void rejectInvalidState() {
-        final NaturalNumberEntity entity = new NaturalNumberEntity(0L);
-        final NaturalNumber invalidNaturalNumber = newNaturalNumber(-1);
+        NaturalNumberEntity entity = new NaturalNumberEntity(0L);
+        NaturalNumber invalidNaturalNumber = newNaturalNumber(-1);
         try {
             // This should pass.
             entity.updateState(newNaturalNumber(1));
@@ -111,7 +110,7 @@ class AbstractEntityTest {
     @Test
     @DisplayName("allow valid state")
     void allowValidState() {
-        final AnEntity entity = new AnEntity(0L);
+        AnEntity entity = new AnEntity(0L);
         assertTrue(entity.checkEntityState(StringValue.getDefaultInstance())
                          .isEmpty());
     }
@@ -119,7 +118,7 @@ class AbstractEntityTest {
     @Test
     @DisplayName("return string ID")
     void returnStringId() {
-        final AnEntity entity = new AnEntity(1_234_567L);
+        AnEntity entity = new AnEntity(1_234_567L);
 
         assertEquals("1234567", entity.stringId());
         assertSame(entity.stringId(), entity.stringId());

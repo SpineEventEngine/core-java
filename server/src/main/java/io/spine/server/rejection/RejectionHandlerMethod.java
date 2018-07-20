@@ -72,7 +72,7 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionCont
     public HandlerKey key() {
         if (kind == Kind.COMMAND_AWARE || kind == Kind.COMMAND_MESSAGE_AWARE) {
             @SuppressWarnings("unchecked") // RejectionFilterPredicate ensures that
-            final Class<? extends Message> rawCommandClass = (Class<? extends Message>) getMethod().getParameterTypes()[1];
+            Class<? extends Message> rawCommandClass = (Class<? extends Message>) getMethod().getParameterTypes()[1];
             return HandlerKey.of(getMessageClass(), CommandClass.of(rawCommandClass));
         } else {
             return HandlerKey.of(getMessageClass());
@@ -80,13 +80,13 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionCont
     }
 
     private static Kind getKind(Method method) {
-        final Class[] paramTypes = method.getParameterTypes();
-        final int paramCount = paramTypes.length;
+        Class[] paramTypes = method.getParameterTypes();
+        int paramCount = paramTypes.length;
         switch (paramCount) {
             case 1:
                 return Kind.REJECTION_MESSAGE_AWARE;
             case 2:
-                final Class<?> secondParamType = paramTypes[1];
+                Class<?> secondParamType = paramTypes[1];
                 if (secondParamType.equals(CommandContext.class)) {
                     return Kind.COMMAND_CONTEXT_AWARE;
                 }
@@ -119,11 +119,11 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionCont
         checkNotNull(target);
         checkNotNull(rejectionMsg);
         checkNotNull(context);
-        final Command command = context.getCommand();
-        final CommandContext commandContext = command.getContext();
+        Command command = context.getCommand();
+        CommandContext commandContext = command.getContext();
         try {
-            final Object output;
-            final Method method = getMethod();
+            Object output;
+            Method method = getMethod();
             Message commandMessage;
             switch (kind) {
                 case REJECTION_MESSAGE_AWARE:
@@ -274,16 +274,16 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionCont
 
         @Override
         protected boolean verifyParams(Method method) {
-            final Class<?>[] paramTypes = method.getParameterTypes();
-            final int paramCount = paramTypes.length;
-            final boolean paramCountCorrect = paramCount >= 1 && paramCount <= 3;
+            Class<?>[] paramTypes = method.getParameterTypes();
+            int paramCount = paramTypes.length;
+            boolean paramCountCorrect = paramCount >= 1 && paramCount <= 3;
             if (!paramCountCorrect) {
                 return false;
             }
 
-            final boolean firstParamIsMessage = Message.class.isAssignableFrom(paramTypes[0]);
+            boolean firstParamIsMessage = Message.class.isAssignableFrom(paramTypes[0]);
             @SuppressWarnings("unchecked")  // checked above.
-            final boolean firstParamCorrect =
+            boolean firstParamCorrect =
                     firstParamIsMessage && isRejection((Class<? extends Message>) paramTypes[0]);
             if (!firstParamCorrect) {
                 return false;
@@ -292,7 +292,7 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionCont
                 return true;
             }
 
-            final boolean secondParamCorrect = Message.class.isAssignableFrom(paramTypes[1]);
+            boolean secondParamCorrect = Message.class.isAssignableFrom(paramTypes[1]);
             if (!secondParamCorrect) {
                 return false;
             }
@@ -300,8 +300,8 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionCont
                 return true;
             }
 
-            final Class<? extends Message> contextClass = getContextClass();
-            final boolean thirdParamCorrect = contextClass == paramTypes[2];
+            Class<? extends Message> contextClass = getContextClass();
+            boolean thirdParamCorrect = contextClass == paramTypes[2];
             return thirdParamCorrect;
         }
     }

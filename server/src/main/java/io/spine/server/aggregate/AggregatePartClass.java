@@ -98,7 +98,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
             throw noSuchConstructor(cls, rootClass());
         }
         @SuppressWarnings("unchecked") // The cast is protected by generic params.
-                Constructor<A> result = (Constructor<A>) ctor;
+        Constructor<A> result = (Constructor<A>) ctor;
         return result;
     }
 
@@ -111,11 +111,11 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
         checkNotNull(bc);
         checkNotNull(aggregateId);
         @SuppressWarnings("unchecked") // Protected by generic parameters of the calling code.
-                Class<R> rootClass = (Class<R>) rootClass();
+        Class<R> rootClass = (Class<R>) rootClass();
         R result;
         try {
-            Constructor<R> ctor =
-                    rootClass.getDeclaredConstructor(BoundedContext.class, aggregateId.getClass());
+            Constructor<R> ctor = rootClass.getDeclaredConstructor(BoundedContext.class,
+                                                                   aggregateId.getClass());
             ctor.setAccessible(true);
             result = ctor.newInstance(bc, aggregateId);
         } catch (NoSuchMethodException | InvocationTargetException |

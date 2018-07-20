@@ -82,10 +82,10 @@ public class UniformAcrossTargets implements ShardingStrategy {
      */
     @Override
     public ShardIndex indexForTarget(Object targetId) {
-        final int hashValue = targetId.hashCode();
-        final int totalShards = getNumberOfShards();
-        final int indexValue = abs(hashValue % totalShards);
-        final ShardIndex result = newIndex(indexValue, totalShards);
+        int hashValue = targetId.hashCode();
+        int totalShards = getNumberOfShards();
+        int indexValue = abs(hashValue % totalShards);
+        ShardIndex result = newIndex(indexValue, totalShards);
 
         return result;
     }
@@ -95,10 +95,10 @@ public class UniformAcrossTargets implements ShardingStrategy {
      */
     @Override
     public Set<ShardIndex> allIndexes() {
-        final ImmutableSet.Builder<ShardIndex> resultBuilder = ImmutableSet.builder();
-        final int totalShards = getNumberOfShards();
+        ImmutableSet.Builder<ShardIndex> resultBuilder = ImmutableSet.builder();
+        int totalShards = getNumberOfShards();
         for (int indexValue = 0; indexValue < totalShards; indexValue++) {
-            final ShardIndex shardIndex = newIndex(indexValue, totalShards);
+            ShardIndex shardIndex = newIndex(indexValue, totalShards);
             resultBuilder.add(shardIndex);
         }
         return resultBuilder.build();
@@ -112,7 +112,7 @@ public class UniformAcrossTargets implements ShardingStrategy {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final UniformAcrossTargets that = (UniformAcrossTargets) o;
+        UniformAcrossTargets that = (UniformAcrossTargets) o;
         return numberOfShards == that.numberOfShards;
     }
 
@@ -143,7 +143,7 @@ public class UniformAcrossTargets implements ShardingStrategy {
      * @return a uniform distribution strategy instance for a given shard number
      */
     public static ShardingStrategy forNumber(int totalShards) {
-        final UniformAcrossTargets result = new UniformAcrossTargets(totalShards);
+        UniformAcrossTargets result = new UniformAcrossTargets(totalShards);
         return result;
     }
 

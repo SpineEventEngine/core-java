@@ -50,14 +50,14 @@ public class IgTestAggregate
 
     @Assign
     AggProjectCreated handle(AggCreateProject cmd) {
-        final AggProjectCreated event = projectCreated(cmd.getProjectId(),
+        AggProjectCreated event = projectCreated(cmd.getProjectId(),
                                                        cmd.getName());
         return event;
     }
 
     @Assign
     AggProjectStarted handle(AggStartProject cmd) {
-        final AggProjectStarted message = projectStarted(cmd.getProjectId());
+        AggProjectStarted message = projectStarted(cmd.getProjectId());
         return message;
     }
 

@@ -47,9 +47,9 @@ final class Action<M extends EnrichableMessageEnvelope<?, ?, C>, C extends Messa
 
     Action(Enricher<M, ?> parent, M envelope) {
         this.envelope = envelope;
-        final Class<? extends Message> sourceClass = envelope.getMessageClass()
-                                                             .value();
-        final Collection<EnrichmentFunction<?, ?, ?>> functionsPerClass =
+        Class<? extends Message> sourceClass = envelope.getMessageClass()
+                                                       .value();
+        Collection<EnrichmentFunction<?, ?, ?>> functionsPerClass =
                 parent.getFunctions(sourceClass);
         this.availableFunctions = filter(functionsPerClass, EnrichmentFunction.activeOnly());
     }
@@ -58,17 +58,17 @@ final class Action<M extends EnrichableMessageEnvelope<?, ?, C>, C extends Messa
         createEnrichments();
         @SuppressWarnings("unchecked")
             // The cast is safe because envelopes produce enriched versions of the same type.
-        final M enriched = (M) envelope.toEnriched(enrichments);
+        M enriched = (M) envelope.toEnriched(enrichments);
         return enriched;
     }
 
     private void createEnrichments() {
-        final Message sourceMessage = envelope.getMessage();
+        Message sourceMessage = envelope.getMessage();
         for (EnrichmentFunction function : availableFunctions) {
-            final Message enriched = apply(function, sourceMessage, envelope.getMessageContext());
+            Message enriched = apply(function, sourceMessage, envelope.getMessageContext());
             checkResult(enriched, function);
-            final String typeName = TypeName.of(enriched)
-                                            .value();
+            String typeName = TypeName.of(enriched)
+                                      .value();
             enrichments.put(typeName, AnyPacker.pack(enriched));
         }
     }
@@ -84,7 +84,7 @@ final class Action<M extends EnrichableMessageEnvelope<?, ?, C>, C extends Messa
      */
     @SuppressWarnings("unchecked")
     private Message apply(EnrichmentFunction function, Message input, C context) {
-        final Message result = (Message) function.apply(input, context);
+        Message result = (Message) function.apply(input, context);
         return result;
     }
 

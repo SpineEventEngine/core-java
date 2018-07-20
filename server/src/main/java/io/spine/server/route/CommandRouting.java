@@ -20,12 +20,11 @@
 
 package io.spine.server.route;
 
-import com.google.common.base.Optional;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-
+import java.util.Optional;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -55,7 +54,7 @@ public final class CommandRouting<I> extends MessageRouting<CommandContext, Comm
      * @return new routing instance
      */
     public static <I> CommandRouting<I> newInstance() {
-        final CommandRoute<I, Message> defaultRoute = DefaultCommandRoute.newInstance();
+        CommandRoute<I, Message> defaultRoute = DefaultCommandRoute.newInstance();
         return new CommandRouting<>(defaultRoute);
     }
 
@@ -101,8 +100,7 @@ public final class CommandRouting<I> extends MessageRouting<CommandContext, Comm
                                                        CommandRoute<I, M> via)
             throws IllegalStateException {
         @SuppressWarnings("unchecked") // The cast is required to adapt the type to internal API.
-        final Route<Message, CommandContext, I> casted =
-                (Route<Message, CommandContext, I>) via;
+        Route<Message, CommandContext, I> casted = (Route<Message, CommandContext, I>) via;
         return (CommandRouting<I>) doRoute(commandClass, casted);
     }
 
@@ -114,12 +112,12 @@ public final class CommandRouting<I> extends MessageRouting<CommandContext, Comm
      * @return optionally available route
      */
     public <M extends Message> Optional<CommandRoute<I, M>> get(Class<M> commandClass) {
-        final Optional<? extends Route<Message, CommandContext, I>> optional = doGet(commandClass);
+        Optional<? extends Route<Message, CommandContext, I>> optional = doGet(commandClass);
         if (optional.isPresent()) {
-            final CommandRoute<I, M> route = (CommandRoute<I, M>) optional.get();
+            CommandRoute<I, M> route = (CommandRoute<I, M>) optional.get();
             return Optional.of(route);
         }
-        return Optional.absent();
+        return Optional.empty();
     }
 
     @Override

@@ -48,9 +48,9 @@ public abstract class DefaultRecordBasedRepository<I,
     protected DefaultRecordBasedRepository() {
         super();
         @SuppressWarnings("OverridableMethodCallDuringObjectConstruction") // get generic param
-        final Class<E> entityClass = getEntityClass();
+        Class<E> entityClass = getEntityClass();
         this.entityFactory = new DefaultEntityFactory<>(entityClass);
-        final TypeUrl stateType = entityClass().getStateType();
+        TypeUrl stateType = entityClass().getStateType();
         this.storageConverter = DefaultEntityStorageConverter.forAllFields(stateType,
                                                                            this.entityFactory);
     }

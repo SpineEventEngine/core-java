@@ -20,7 +20,6 @@
 
 package io.spine.server;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
@@ -39,6 +38,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -140,7 +140,7 @@ public final class BoundedContextBuilder {
     }
 
     public Optional<Supplier<StorageFactory>> getStorageFactorySupplier() {
-        return Optional.fromNullable(storageFactorySupplier);
+        return Optional.ofNullable(storageFactorySupplier);
     }
 
     Supplier<StorageFactory> buildStorageFactorySupplier() {
@@ -154,7 +154,7 @@ public final class BoundedContextBuilder {
     }
 
     public Optional<CommandBus.Builder> getCommandBus() {
-        return Optional.fromNullable(commandBus);
+        return Optional.ofNullable(commandBus);
     }
 
     CommandBus buildCommandBus() {
@@ -162,7 +162,7 @@ public final class BoundedContextBuilder {
     }
 
     public Optional<? extends TenantIndex> getTenantIndex() {
-        return Optional.fromNullable(tenantIndex);
+        return Optional.ofNullable(tenantIndex);
     }
 
     TenantIndex buildTenantIndex() {
@@ -175,7 +175,7 @@ public final class BoundedContextBuilder {
     }
 
     public Optional<EventBus.Builder> getEventBus() {
-        return Optional.fromNullable(eventBus);
+        return Optional.ofNullable(eventBus);
     }
 
     EventBus buildEventBus() {
@@ -188,7 +188,7 @@ public final class BoundedContextBuilder {
     }
 
     public Optional<Stand.Builder> getStand() {
-        return Optional.fromNullable(stand);
+        return Optional.ofNullable(stand);
     }
 
     Stand buildStand() {
@@ -201,7 +201,7 @@ public final class BoundedContextBuilder {
     }
 
     public Optional<IntegrationBus.Builder> getIntegrationBus() {
-        return Optional.fromNullable(integrationBus);
+        return Optional.ofNullable(integrationBus);
     }
 
     public BoundedContextBuilder setTenantIndex(TenantIndex tenantIndex) {
@@ -260,13 +260,9 @@ public final class BoundedContextBuilder {
                                                      .setName(name)
                                                      .setTransportFactory(getTransportFactory());
         Optional<? extends Supplier<StorageFactory>> storage = getStorageFactorySupplier();
-        if (storage.isPresent()) {
-            system.setStorageFactorySupplier(storage.get());
-        }
+        storage.ifPresent(system::setStorageFactorySupplier);
         Optional<? extends TenantIndex> tenantIndex = getTenantIndex();
-        if (tenantIndex.isPresent()) {
-            system.setTenantIndex(tenantIndex.get());
-        }
+        tenantIndex.ifPresent(system::setTenantIndex);
         SystemBoundedContext result = system.buildPartial(SystemBoundedContext::newInstance);
         return result;
     }
@@ -293,7 +289,7 @@ public final class BoundedContextBuilder {
                     StorageFactorySwitch.newInstance(name, multitenant);
         }
 
-        final StorageFactory storageFactory = storageFactorySupplier.get();
+        StorageFactory storageFactory = storageFactorySupplier.get();
 
         if (storageFactory == null) {
             throw newIllegalStateException(
@@ -314,29 +310,29 @@ public final class BoundedContextBuilder {
     private void initTenantIndex(StorageFactory factory) {
         if (tenantIndex == null) {
             tenantIndex = multitenant
-                    ? TenantIndex.Factory.createDefault(factory)
-                    : TenantIndex.Factory.singleTenant();
+                          ? TenantIndex.Factory.createDefault(factory)
+                          : TenantIndex.Factory.singleTenant();
         }
     }
 
     private void initCommandBus(StorageFactory factory) {
         if (commandBus == null) {
-            final CommandStore commandStore = createCommandStore(factory, tenantIndex);
+            CommandStore commandStore = createCommandStore(factory, tenantIndex);
             commandBus = CommandBus.newBuilder()
                                    .setMultitenant(this.multitenant)
                                    .setCommandStore(commandStore);
         } else {
-            final Boolean commandBusMultitenancy = commandBus.isMultitenant();
+            Boolean commandBusMultitenancy = commandBus.isMultitenant();
             if (commandBusMultitenancy != null) {
                 checkSameValue("CommandBus must match multitenancy of BoundedContext. " +
-                                        "Status in BoundedContext.Builder: %s CommandBus: %s",
+                                       "Status in BoundedContext.Builder: %s CommandBus: %s",
                                commandBusMultitenancy);
             } else {
                 commandBus.setMultitenant(this.multitenant);
             }
 
             if (commandBus.getCommandStore() == null) {
-                final CommandStore commandStore = createCommandStore(factory, tenantIndex);
+                CommandStore commandStore = createCommandStore(factory, tenantIndex);
                 commandBus.setCommandStore(commandStore);
             }
         }
@@ -347,8 +343,8 @@ public final class BoundedContextBuilder {
             eventBus = EventBus.newBuilder()
                                .setStorageFactory(storageFactory);
         } else {
-            final boolean eventStoreConfigured = eventBus.getEventStore()
-                                                         .isPresent();
+            boolean eventStoreConfigured = eventBus.getEventStore()
+                                                   .isPresent();
             if (!eventStoreConfigured) {
                 eventBus.setStorageFactory(storageFactory);
             }
@@ -359,7 +355,7 @@ public final class BoundedContextBuilder {
         if (stand == null) {
             stand = createStand(factory);
         } else {
-            final Boolean standMultitenant = stand.isMultitenant();
+            Boolean standMultitenant = stand.isMultitenant();
             // Check that both either multi-tenant or single-tenant.
             if (standMultitenant == null) {
                 stand.setMultitenant(multitenant);
@@ -396,15 +392,15 @@ public final class BoundedContextBuilder {
     }
 
     private static CommandStore createCommandStore(StorageFactory factory, TenantIndex index) {
-        final CommandStore result = new CommandStore(factory, index);
+        CommandStore result = new CommandStore(factory, index);
         return result;
     }
 
     private Stand.Builder createStand(StorageFactory factory) {
-        final StandStorage standStorage = factory.createStandStorage();
-        final Stand.Builder result = Stand.newBuilder()
-                                          .setMultitenant(multitenant)
-                                          .setStorage(standStorage);
+        StandStorage standStorage = factory.createStandStorage();
+        Stand.Builder result = Stand.newBuilder()
+                                    .setMultitenant(multitenant)
+                                    .setStorage(standStorage);
         return result;
     }
 

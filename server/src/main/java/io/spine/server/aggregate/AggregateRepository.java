@@ -19,7 +19,6 @@
  */
 package io.spine.server.aggregate;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import io.spine.annotation.SPI;
@@ -61,6 +60,7 @@ import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -114,22 +114,19 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     private final Supplier<AggregateCommandDelivery<I, A>> commandDeliverySupplier =
             memoize(() -> {
-                final AggregateCommandDelivery<I, A> result =
-                        new AggregateCommandDelivery<>(this);
+                AggregateCommandDelivery<I, A> result = new AggregateCommandDelivery<>(this);
                 return result;
             });
 
     private final Supplier<AggregateEventDelivery<I, A>> eventDeliverySupplier =
             memoize(() -> {
-                final AggregateEventDelivery<I, A> result =
-                        new AggregateEventDelivery<>(this);
+                AggregateEventDelivery<I, A> result = new AggregateEventDelivery<>(this);
                 return result;
             });
 
     private final Supplier<AggregateRejectionDelivery<I, A>> rejectionDeliverySupplier =
             memoize(() -> {
-                final AggregateRejectionDelivery<I, A> result =
-                        new AggregateRejectionDelivery<>(this);
+                AggregateRejectionDelivery<I, A> result = new AggregateRejectionDelivery<>(this);
                 return result;
             });
 
@@ -159,25 +156,25 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public void onRegistered() {
         super.onRegistered();
-        final BoundedContext boundedContext = getBoundedContext();
+        BoundedContext boundedContext = getBoundedContext();
 
-        final Set<CommandClass> commandClasses = getMessageClasses();
+        Set<CommandClass> commandClasses = getMessageClasses();
 
-        final DelegatingEventDispatcher<I> eventDispatcher;
+        DelegatingEventDispatcher<I> eventDispatcher;
         eventDispatcher = DelegatingEventDispatcher.of(this);
-        final Set<EventClass> eventClasses = eventDispatcher.getMessageClasses();
+        Set<EventClass> eventClasses = eventDispatcher.getMessageClasses();
 
-        final ExternalMessageDispatcher<I> extEventDispatcher;
+        ExternalMessageDispatcher<I> extEventDispatcher;
         extEventDispatcher = eventDispatcher.getExternalDispatcher();
-        final Set<ExternalMessageClass> extEventClasses = extEventDispatcher.getMessageClasses();
+        Set<ExternalMessageClass> extEventClasses = extEventDispatcher.getMessageClasses();
 
-        final DelegatingRejectionDispatcher<I> rejectionDispatcher;
+        DelegatingRejectionDispatcher<I> rejectionDispatcher;
         rejectionDispatcher = DelegatingRejectionDispatcher.of(this);
-        final Set<RejectionClass> rejectionClasses = rejectionDispatcher.getMessageClasses();
+        Set<RejectionClass> rejectionClasses = rejectionDispatcher.getMessageClasses();
 
-        final ExternalMessageDispatcher<I> extRejectionDispatcher;
+        ExternalMessageDispatcher<I> extRejectionDispatcher;
         extRejectionDispatcher = rejectionDispatcher.getExternalDispatcher();
-        final Set<ExternalMessageClass> extRejectionClasses =
+        Set<ExternalMessageClass> extRejectionClasses =
                 extRejectionDispatcher.getMessageClasses();
 
         if (commandClasses.isEmpty() && eventClasses.isEmpty() && rejectionClasses.isEmpty()
@@ -299,7 +296,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     protected Storage<I, ?, ?> createStorage(StorageFactory factory) {
-        final Storage<I, ?, ?> result = factory.createAggregateStorage(getEntityClass());
+        Storage<I, ?, ?> result = factory.createAggregateStorage(getEntityClass());
         return result;
     }
 
@@ -487,7 +484,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * {@linkplain #play restored} from its state history.
      *
      * @param id the ID of the aggregate
-     * @return the loaded instance or {@code Optional.absent()} if there is no {@code Aggregate}
+     * @return the loaded instance or {@code Optional.empty()} if there is no {@code Aggregate}
      *         with the ID
      */
     private Optional<A> load(I id) {
@@ -497,7 +494,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             return Optional.of(result);
         } else {
             lifecycleOf(id).onEntityCreated(AGGREGATE);
-            return Optional.absent();
+            return Optional.empty();
         }
     }
 
@@ -510,7 +507,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @param id the ID of the {@code Aggregate} to fetch
      * @return the {@link AggregateStateRecord} for the {@code Aggregate} or
-     *         {@code Optional.absent()} if there is no record with the ID
+     *         {@code Optional.empty()} if there is no record with the ID
      */
     protected Optional<AggregateStateRecord> fetchHistory(I id) {
         AggregateReadRequest<I> request = new AggregateReadRequest<>(id, snapshotTrigger);
@@ -557,7 +554,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * it is loaded and returned.
      *
      * @param  id the ID of the aggregate to load
-     * @return the loaded object or {@link Optional#absent()} if there are no events for the aggregate
+     * @return the loaded object or {@link Optional#empty()} if there are no events for the aggregate
      * @throws IllegalStateException
      *         if the storage of the repository is not {@linkplain #initStorage(StorageFactory)
      *         initialized} prior to this call

@@ -71,7 +71,7 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
      * @param predicate a predicate for handler methods to filter the corresponding message classes
      */
     public ImmutableSet<M> getMessageClasses(Predicate<H> predicate) {
-        final Map<HandlerKey, H> filtered = Maps.filterValues(map, predicate);
+        Map<HandlerKey, H> filtered = Maps.filterValues(map, predicate);
         return messageClasses(filtered.values());
     }
 
@@ -83,7 +83,7 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
      * @throws IllegalStateException if there is no method found in the map
      */
     public H getMethod(HandlerKey handlerKey) {
-        final H handlerMethod = map.get(handlerKey);
+        H handlerMethod = map.get(handlerKey);
         checkState(handlerMethod != null,
                    "Unable to find handler with key %s", handlerKey);
         return handlerMethod;
@@ -101,7 +101,7 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
      * @throws IllegalStateException if there is no method found in the map
      */
     public H getMethod(M messageClass, MessageClass originClass) {
-        final HandlerKey keyWithOrigin = HandlerKey.of(messageClass, originClass);
+        HandlerKey keyWithOrigin = HandlerKey.of(messageClass, originClass);
         if (map.containsKey(keyWithOrigin)) {
             return getMethod(keyWithOrigin);
         }
@@ -116,13 +116,13 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
      * @throws IllegalStateException if there is no method found in the map
      */
     public H getMethod(M messageClass) {
-        final HandlerKey key = HandlerKey.of(messageClass);
+        HandlerKey key = HandlerKey.of(messageClass);
         return getMethod(key);
     }
 
     private static <M extends MessageClass, H extends HandlerMethod<M, ?>>
     ImmutableSet<M> messageClasses(Iterable<H> handlerMethods) {
-        final Set<M> setToSwallowDuplicates = newHashSet();
+        Set<M> setToSwallowDuplicates = newHashSet();
         for (H handler : handlerMethods) {
             setToSwallowDuplicates.add(handler.getMessageClass());
         }
@@ -131,16 +131,16 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
 
     private static <M extends MessageClass, H extends HandlerMethod<M, ?>>
     ImmutableMap<HandlerKey, H> scan(Class<?> declaringClass, HandlerMethod.Factory<H> factory) {
-        final Predicate<Method> filter = factory.getPredicate();
-        final Map<HandlerKey, H> tempMap = Maps.newHashMap();
-        final Method[] declaredMethods = declaringClass.getDeclaredMethods();
+        Predicate<Method> filter = factory.getPredicate();
+        Map<HandlerKey, H> tempMap = Maps.newHashMap();
+        Method[] declaredMethods = declaringClass.getDeclaredMethods();
         for (Method method : declaredMethods) {
             if (filter.apply(method)) {
-                final H handler = factory.create(method);
-                final HandlerKey handlerKey = handler.key();
+                H handler = factory.create(method);
+                HandlerKey handlerKey = handler.key();
                 if (tempMap.containsKey(handlerKey)) {
-                    final Method alreadyPresent = tempMap.get(handlerKey)
-                                                         .getMethod();
+                    Method alreadyPresent = tempMap.get(handlerKey)
+                                                   .getMethod();
                     throw new DuplicateHandlerMethodError(
                             declaringClass,
                             handlerKey,
@@ -150,7 +150,7 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
                 tempMap.put(handlerKey, handler);
             }
         }
-        final ImmutableMap<HandlerKey, H> result = ImmutableMap.copyOf(tempMap);
+        ImmutableMap<HandlerKey, H> result = ImmutableMap.copyOf(tempMap);
         return result;
     }
 }

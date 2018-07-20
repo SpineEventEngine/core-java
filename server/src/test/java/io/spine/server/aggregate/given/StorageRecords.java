@@ -61,26 +61,24 @@ public class StorageRecords {
      * @param start the timestamp of first record.
      */
     public static List<AggregateEventRecord> sequenceFor(ProjectId id, Timestamp start) {
-        final Duration delta = seconds(10);
-        final Timestamp timestamp2 = add(start, delta);
-        final Timestamp timestamp3 = add(timestamp2, delta);
+        Duration delta = seconds(10);
+        Timestamp timestamp2 = add(start, delta);
+        Timestamp timestamp3 = add(timestamp2, delta);
 
-        final TestEventFactory eventFactory = newInstance(Given.class);
+        TestEventFactory eventFactory = newInstance(Given.class);
 
-        final Event e1 = eventFactory.createEvent(projectCreated(id, Given.projectName(id)),
-                                                  null,
-                                                  start);
-        final AggregateEventRecord record1 = StorageRecord.create(start, e1);
+        Event e1 = eventFactory.createEvent(projectCreated(id, Given.projectName(id)),
+                                            null,
+                                            start);
+        AggregateEventRecord record1 = StorageRecord.create(start, e1);
 
-        final Event e2 = eventFactory.createEvent(taskAdded(id),
-                                                  null,
-                                                  timestamp2);
-        final AggregateEventRecord record2 = StorageRecord.create(timestamp2, e2);
+        Event e2 = eventFactory.createEvent(taskAdded(id), null, timestamp2);
+        AggregateEventRecord record2 = StorageRecord.create(timestamp2, e2);
 
-        final Event e3 = eventFactory.createEvent(Given.EventMessage.projectStarted(id),
-                                                  null,
-                                                  timestamp3);
-        final AggregateEventRecord record3 = StorageRecord.create(timestamp3, e3);
+        Event e3 = eventFactory.createEvent(Given.EventMessage.projectStarted(id),
+                                            null,
+                                            timestamp3);
+        AggregateEventRecord record3 = StorageRecord.create(timestamp3, e3);
 
         return newArrayList(record1, record2, record3);
     }

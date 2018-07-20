@@ -105,19 +105,21 @@ public class RecordStorageTestEnv {
 
         @Column
         public Project.Status getProjectStatusOrdinal() {
-            return Enum.valueOf(Project.Status.class, getState().getStatus().name());
+            return Enum.valueOf(Project.Status.class, getState().getStatus()
+                                                                .name());
         }
 
         @Column
         @Enumerated(STRING)
         public Project.Status getProjectStatusString() {
-            return Enum.valueOf(Project.Status.class, getState().getStatus().name());
+            return Enum.valueOf(Project.Status.class, getState().getStatus()
+                                                                .name());
         }
 
         public void assignStatus(Project.Status status) {
-            final Project newState = Project.newBuilder(getState())
-                                            .setStatus(status)
-                                            .build();
+            Project newState = Project.newBuilder(getState())
+                                      .setStatus(status)
+                                      .build();
             injectState(this, newState, getCounterVersion());
         }
 

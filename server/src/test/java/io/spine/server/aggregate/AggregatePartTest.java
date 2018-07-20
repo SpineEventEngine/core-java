@@ -78,8 +78,7 @@ class AggregatePartTest {
         prepareAggregatePart();
         taskDescriptionPart = new TaskDescriptionPart(root);
         taskRepository = new TaskRepository();
-        final TaskDescriptionRepository taskDescriptionRepository =
-                new TaskDescriptionRepository();
+        TaskDescriptionRepository taskDescriptionRepository = new TaskDescriptionRepository();
         boundedContext.register(taskRepository);
         boundedContext.register(taskDescriptionRepository);
     }
@@ -96,14 +95,13 @@ class AggregatePartTest {
     @DisplayName("return aggregate part state by class")
     void returnAggregatePartStateByClass() {
         taskRepository.store(taskPart);
-        final Task task = taskDescriptionPart.getPartState(Task.class);
+        Task task = taskDescriptionPart.getPartState(Task.class);
         assertEquals(TASK_DESCRIPTION, task.getDescription());
     }
 
     private NullPointerTester createNullPointerTester() throws NoSuchMethodException {
         Constructor constructor =
-                AnAggregateRoot.class
-                        .getDeclaredConstructor(BoundedContext.class, String.class);
+                AnAggregateRoot.class.getDeclaredConstructor(BoundedContext.class, String.class);
         NullPointerTester tester = new NullPointerTester();
         tester.setDefault(Constructor.class, constructor)
               .setDefault(BoundedContext.class, boundedContext)

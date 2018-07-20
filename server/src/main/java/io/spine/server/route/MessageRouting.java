@@ -20,12 +20,12 @@
 
 package io.spine.server.route;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 
 import java.util.HashMap;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -107,14 +107,14 @@ abstract class MessageRouting<C extends Message, K extends MessageClass, R>
             throws IllegalStateException {
         checkNotNull(messageClass);
         checkNotNull(via);
-        final Optional route = doGet(messageClass);
+        Optional route = doGet(messageClass);
         if (route.isPresent()) {
             throw newIllegalStateException(
                     "The route for the message class %s already set. " +
                             "Please remove the route (%s) before setting new route.",
                     messageClass.getName(), route.get());
         }
-        final K cls = toMessageClass(messageClass);
+        K cls = toMessageClass(messageClass);
         routes.put(cls, via);
         return this;
     }
@@ -128,9 +128,9 @@ abstract class MessageRouting<C extends Message, K extends MessageClass, R>
      */
     <M extends Message> Optional<? extends Route<Message, C, R>> doGet(Class<M> msgCls) {
         checkNotNull(msgCls);
-        final K cls = toMessageClass(msgCls);
-        final Route<Message, C, R> route = routes.get(cls);
-        return Optional.fromNullable(route);
+        K cls = toMessageClass(msgCls);
+        Route<Message, C, R> route = routes.get(cls);
+        return Optional.ofNullable(route);
     }
 
     /**
@@ -140,7 +140,7 @@ abstract class MessageRouting<C extends Message, K extends MessageClass, R>
      */
     public void remove(Class<? extends Message> messageClass) {
         checkNotNull(messageClass);
-        final K cls = toMessageClass(messageClass);
+        K cls = toMessageClass(messageClass);
         if (!routes.containsKey(cls)) {
             throw newIllegalStateException("Cannot remove the route for the message class (%s):" +
                                                    " a custom route was not previously set.",
@@ -162,14 +162,14 @@ abstract class MessageRouting<C extends Message, K extends MessageClass, R>
     public R apply(Message message, C context) {
         checkNotNull(message);
         checkNotNull(context);
-        final K messageClass = toMessageClass(message);
-        final Route<Message, C, R> func = routes.get(messageClass);
+        K messageClass = toMessageClass(message);
+        Route<Message, C, R> func = routes.get(messageClass);
         if (func != null) {
-            final R result = func.apply(message, context);
+            R result = func.apply(message, context);
             return result;
         }
 
-        final R result = getDefault().apply(message, context);
+        R result = getDefault().apply(message, context);
         return result;
     }
 }

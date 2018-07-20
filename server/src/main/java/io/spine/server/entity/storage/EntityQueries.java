@@ -69,8 +69,8 @@ public final class EntityQueries {
         checkNotNull(entityFilters);
         checkNotNull(storage);
 
-        final Collection<EntityColumn> entityColumns = storage.entityColumns();
-        final EntityQuery<I> result = from(entityFilters, entityColumns);
+        Collection<EntityColumn> entityColumns = storage.entityColumns();
+        EntityQuery<I> result = from(entityFilters, entityColumns);
         return result;
     }
 
@@ -80,22 +80,22 @@ public final class EntityQueries {
         checkNotNull(entityFilters);
         checkNotNull(entityColumns);
 
-        final QueryParameters queryParams = toQueryParams(entityFilters, entityColumns);
-        final Collection<I> ids = toGenericIdValues(entityFilters);
+        QueryParameters queryParams = toQueryParams(entityFilters, entityColumns);
+        Collection<I> ids = toGenericIdValues(entityFilters);
 
-        final EntityQuery<I> result = EntityQuery.of(ids, queryParams);
+        EntityQuery<I> result = EntityQuery.of(ids, queryParams);
         return result;
     }
 
     private static QueryParameters toQueryParams(EntityFilters entityFilters,
                                                  Collection<EntityColumn> entityColumns) {
-        final QueryParameters.Builder builder = QueryParameters.newBuilder();
+        QueryParameters.Builder builder = QueryParameters.newBuilder();
 
         for (CompositeColumnFilter filter : entityFilters.getFilterList()) {
-            final Multimap<EntityColumn, ColumnFilter> columnFilters =
+            Multimap<EntityColumn, ColumnFilter> columnFilters =
                     splitFilters(filter, entityColumns);
-            final CompositeOperator operator = filter.getOperator();
-            final CompositeQueryParameter parameter =
+            CompositeOperator operator = filter.getOperator();
+            CompositeQueryParameter parameter =
                     CompositeQueryParameter.from(columnFilters, operator);
             builder.add(parameter);
         }
@@ -104,10 +104,10 @@ public final class EntityQueries {
 
     private static Multimap<EntityColumn, ColumnFilter> splitFilters(CompositeColumnFilter filter,
                                                                      Collection<EntityColumn> entityColumns) {
-        final Multimap<EntityColumn, ColumnFilter> columnFilters =
+        Multimap<EntityColumn, ColumnFilter> columnFilters =
                 create(filter.getFilterCount(), 1);
         for (ColumnFilter columnFilter : filter.getFilterList()) {
-            final EntityColumn column = findMatchingColumn(columnFilter, entityColumns);
+            EntityColumn column = findMatchingColumn(columnFilter, entityColumns);
             checkFilterType(column, columnFilter);
             columnFilters.put(column, columnFilter);
         }
@@ -128,10 +128,10 @@ public final class EntityQueries {
     }
 
     private static void checkFilterType(EntityColumn column, ColumnFilter filter) {
-        final Class<?> expectedType = column.getType();
-        final Any filterConvent = filter.getValue();
-        final Object filterValue = toObject(filterConvent, expectedType);
-        final Class<?> actualType = filterValue.getClass();
+        Class<?> expectedType = column.getType();
+        Any filterConvent = filter.getValue();
+        Object filterValue = toObject(filterConvent, expectedType);
+        Class<?> actualType = filterValue.getClass();
         checkArgument(wrap(expectedType).isAssignableFrom(wrap(actualType)),
                       "EntityColumn type mismatch. EntityColumn %s cannot have value %s.",
                       column,
@@ -139,11 +139,11 @@ public final class EntityQueries {
     }
 
     private static <I> Collection<I> toGenericIdValues(EntityFilters entityFilters) {
-        final EntityIdFilter idFilter = entityFilters.getIdFilter();
-        final Collection<I> ids = new LinkedList<>();
+        EntityIdFilter idFilter = entityFilters.getIdFilter();
+        Collection<I> ids = new LinkedList<>();
         for (EntityId entityId : idFilter.getIdsList()) {
-            final Any wrappedMessageId = entityId.getId();
-            final I genericId = Identifier.unpack(wrappedMessageId);
+            Any wrappedMessageId = entityId.getId();
+            I genericId = Identifier.unpack(wrappedMessageId);
             ids.add(genericId);
         }
         return ids;

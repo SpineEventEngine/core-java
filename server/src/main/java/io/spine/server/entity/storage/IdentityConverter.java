@@ -43,7 +43,7 @@ final class IdentityConverter implements ColumnValueConverter {
     @Override
     public Serializable convert(Object value) {
         checkNotNull(value);
-        final Serializable result = (Serializable) value;
+        Serializable result = (Serializable) value;
         return result;
     }
 

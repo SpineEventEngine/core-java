@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.protobuf.FieldMask;
 import io.spine.server.entity.Entity;
@@ -33,6 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Memory-based implementation of {@link RecordStorage}.
@@ -81,14 +81,14 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> givenIds,
                                                                    FieldMask fieldMask) {
-        final TenantRecords<I> storage = getStorage();
+        TenantRecords<I> storage = getStorage();
 
         // It is not possible to return an immutable collection,
         // since null may be present in it.
-        final Collection<EntityRecord> result = Lists.newLinkedList();
+        Collection<EntityRecord> result = Lists.newLinkedList();
 
         for (I givenId : givenIds) {
-            final EntityRecord matchingResult = storage.findAndApplyFieldMask(givenId, fieldMask);
+            EntityRecord matchingResult = storage.findAndApplyFieldMask(givenId, fieldMask);
             result.add(matchingResult);
         }
         return result.iterator();
@@ -127,7 +127,7 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected Optional<EntityRecord> readRecord(I id) {
         return getStorage().get(id)
-                           .transform(EntityRecordUnpacker.INSTANCE);
+                           .map(EntityRecordUnpacker.INSTANCE);
     }
 
     @Override
@@ -137,7 +137,7 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected void writeRecords(Map<I, EntityRecordWithColumns> records) {
-        final TenantRecords<I> storage = getStorage();
+        TenantRecords<I> storage = getStorage();
         for (Map.Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
             storage.put(record.getKey(), record.getValue());
         }

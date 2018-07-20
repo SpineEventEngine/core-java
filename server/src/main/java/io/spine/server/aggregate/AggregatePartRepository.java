@@ -45,8 +45,8 @@ public abstract class AggregatePartRepository<I,
     @SuppressWarnings("MethodDoesntCallSuperMethod") // We create objects of another class.
     @Override
     public A create(I id) {
-        final AggregateRoot<I> root = createAggregateRoot(id);
-        final A result = createAggregatePart(root);
+        AggregateRoot<I> root = createAggregateRoot(id);
+        A result = createAggregatePart(root);
         return result;
     }
 
@@ -63,7 +63,7 @@ public abstract class AggregatePartRepository<I,
 
     //TODO:2017-06-06:alexander.yevsyukov: Cache aggregate roots shared among part repositories
     private AggregateRoot<I> createAggregateRoot(I id) {
-        final AggregateRoot<I> result = aggregatePartClass().createRoot(getBoundedContext(), id);
+        AggregateRoot<I> result = aggregatePartClass().createRoot(getBoundedContext(), id);
         return result;
     }
 

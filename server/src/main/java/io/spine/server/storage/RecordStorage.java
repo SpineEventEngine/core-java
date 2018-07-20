@@ -20,7 +20,6 @@
 
 package io.spine.server.storage;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -47,6 +46,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -94,14 +94,14 @@ public abstract class RecordStorage<I>
      * Reads a record, which matches the specified {@linkplain RecordReadRequest request}.
      *
      * @param  request the request to read the record
-     * @return a record instance or {@code Optional.absent()} if there is no record with this ID
+     * @return a record instance or {@code Optional.empty()} if there is no record with this ID
      */
     @Override
     public Optional<EntityRecord> read(RecordReadRequest<I> request) {
         checkNotClosed();
         checkNotNull(request);
 
-        final Optional<EntityRecord> record = readRecord(request.getRecordId());
+        Optional<EntityRecord> record = readRecord(request.getRecordId());
         return record;
     }
 
@@ -112,25 +112,25 @@ public abstract class RecordStorage<I>
      * @param  request   the request to read the record
      * @param  fieldMask fields to read.
      * @return the item with the given ID and with the {@code FieldMask} applied
-     *         or {@code Optional.absent()} if there is no record matching this request
+     *         or {@code Optional.empty()} if there is no record matching this request
      * @see    #read(RecordReadRequest)
      */
     @SuppressWarnings("CheckReturnValue") // calling builder method
     public Optional<EntityRecord> read(RecordReadRequest<I> request, FieldMask fieldMask) {
-        final Optional<EntityRecord> rawResult = read(request);
+        Optional<EntityRecord> rawResult = read(request);
 
         if (!rawResult.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
-        final EntityRecord.Builder builder = EntityRecord.newBuilder(rawResult.get());
-        final Any state = builder.getState();
-        final TypeUrl type = TypeUrl.parse(state.getTypeUrl());
-        final Message stateAsMessage = AnyPacker.unpack(state);
+        EntityRecord.Builder builder = EntityRecord.newBuilder(rawResult.get());
+        Any state = builder.getState();
+        TypeUrl type = TypeUrl.parse(state.getTypeUrl());
+        Message stateAsMessage = AnyPacker.unpack(state);
 
-        final Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);
+        Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);
 
-        final Any packedState = AnyPacker.pack(maskedState);
+        Any packedState = AnyPacker.pack(maskedState);
         builder.setState(packedState);
         return Optional.of(builder.build());
     }
@@ -159,8 +159,7 @@ public abstract class RecordStorage<I>
      */
     @Override
     public void write(I id, EntityRecord record) {
-        final EntityRecordWithColumns recordWithStorageFields =
-                EntityRecordWithColumns.of(record);
+        EntityRecordWithColumns recordWithStorageFields = EntityRecordWithColumns.of(record);
         write(id, recordWithStorageFields);
     }
 
@@ -181,32 +180,27 @@ public abstract class RecordStorage<I>
 
     @Override
     public Optional<LifecycleFlags> readLifecycleFlags(I id) {
-        final RecordReadRequest<I> request = new RecordReadRequest<>(id);
-        final Optional<EntityRecord> optional = read(request);
-        if (optional.isPresent()) {
-            return Optional.of(optional.get()
-                                       .getLifecycleFlags());
-        }
-        return Optional.absent();
+        RecordReadRequest<I> request = new RecordReadRequest<>(id);
+        Optional<EntityRecord> optional = read(request);
+        return optional.map(EntityRecord::getLifecycleFlags);
     }
 
     @Override
     public void writeLifecycleFlags(I id, LifecycleFlags flags) {
-        final RecordReadRequest<I> request = new RecordReadRequest<>(id);
-        final Optional<EntityRecord> optional = read(request);
+        RecordReadRequest<I> request = new RecordReadRequest<>(id);
+        Optional<EntityRecord> optional = read(request);
         if (optional.isPresent()) {
-            final EntityRecord record = optional.get();
-            final EntityRecord updated = record.toBuilder()
-                                               .setLifecycleFlags(flags)
-                                               .build();
+            EntityRecord record = optional.get();
+            EntityRecord updated = record.toBuilder()
+                                         .setLifecycleFlags(flags)
+                                         .build();
             write(id, updated);
         } else {
             // The AggregateStateId is a special case, which is not handled by the Identifier class.
-            final String idStr = id instanceof AggregateStateId
-                                 ? id.toString()
-                                 : Identifier.toString(id);
-            throw newIllegalStateException("Unable to load record for entity with ID: %s",
-                                           idStr);
+            String idStr = id instanceof AggregateStateId
+                              ? id.toString()
+                              : Identifier.toString(id);
+            throw newIllegalStateException("Unable to load record for entity with ID: %s", idStr);
         }
     }
 
@@ -310,10 +304,10 @@ public abstract class RecordStorage<I>
      */
     @Internal
     public Map<String, EntityColumn> entityLifecycleColumns() {
-        final HashMap<String, EntityColumn> lifecycleColumns = new HashMap<>();
+        HashMap<String, EntityColumn> lifecycleColumns = new HashMap<>();
         for (LifecycleFlagField field : LifecycleFlagField.values()) {
-            final String name = field.name();
-            final EntityColumn column = entityColumnCache().findColumn(name);
+            String name = field.name();
+            EntityColumn column = entityColumnCache().findColumn(name);
             lifecycleColumns.put(name, column);
         }
         return lifecycleColumns;

@@ -50,9 +50,9 @@ class CommandValidatorViolationCheckTest {
     @Test
     @DisplayName("validate command and return empty violations list if command is valid")
     void returnNothingForValidCmd() {
-        final Command cmd = Given.ACommand.createProject();
+        Command cmd = Given.ACommand.createProject();
 
-        final List<ConstraintViolation> violations = inspect(CommandEnvelope.of(cmd));
+        List<ConstraintViolation> violations = inspect(CommandEnvelope.of(cmd));
 
         assertEquals(0, violations.size());
     }
@@ -60,12 +60,11 @@ class CommandValidatorViolationCheckTest {
     @Test
     @DisplayName("not allow commands without IDs")
     void notAllowDefaultId() {
-        final Command cmd = Given.ACommand.createProject();
-        final Command unidentifiableCommand = cmd.toBuilder()
-                                                 .setId(CommandId.getDefaultInstance())
-                                                 .build();
-        final List<ConstraintViolation> violations =
-                inspect(CommandEnvelope.of(unidentifiableCommand));
+        Command cmd = Given.ACommand.createProject();
+        Command unidentifiableCommand = cmd.toBuilder()
+                                           .setId(CommandId.getDefaultInstance())
+                                           .build();
+        List<ConstraintViolation> violations = inspect(CommandEnvelope.of(unidentifiableCommand));
 
         assertEquals(1, violations.size());
     }
@@ -73,15 +72,14 @@ class CommandValidatorViolationCheckTest {
     @Test
     @DisplayName("return violations if command has invalid Message")
     void notAllowInvalidMessage() {
-        final Any invalidMessagePacked = AnyPacker.pack(CmdCreateProject.getDefaultInstance());
-        final Command commandWithEmptyMessage = Command.newBuilder()
-                                                       .setId(generateId())
-                                                       .setMessage(invalidMessagePacked)
-                                                       .setContext(withRandomActor())
-                                                       .build();
+        Any invalidMessagePacked = AnyPacker.pack(CmdCreateProject.getDefaultInstance());
+        Command commandWithEmptyMessage = Command.newBuilder()
+                                                 .setId(generateId())
+                                                 .setMessage(invalidMessagePacked)
+                                                 .setContext(withRandomActor())
+                                                 .build();
 
-        final List<ConstraintViolation> violations =
-                inspect(CommandEnvelope.of(commandWithEmptyMessage));
+        List<ConstraintViolation> violations = inspect(CommandEnvelope.of(commandWithEmptyMessage));
 
         assertEquals(3, violations.size());
     }
@@ -89,16 +87,14 @@ class CommandValidatorViolationCheckTest {
     @Test
     @DisplayName("return violations if command has invalid context")
     void notAllowInvalidContext() {
-        final Command command = TestActorRequestFactory.newInstance(getClass())
-                                                       .createCommand(createProjectMessage(),
-                                                                      Time.getCurrentTime());
-        final Command commandWithoutContext =
-                command.toBuilder()
-                       .setContext(CommandContext.getDefaultInstance())
-                       .build();
+        Command command = TestActorRequestFactory.newInstance(getClass())
+                                                 .createCommand(createProjectMessage(),
+                                                                Time.getCurrentTime());
+        Command commandWithoutContext = command.toBuilder()
+                                               .setContext(CommandContext.getDefaultInstance())
+                                               .build();
 
-        final List<ConstraintViolation> violations =
-                inspect(CommandEnvelope.of(commandWithoutContext));
+        List<ConstraintViolation> violations = inspect(CommandEnvelope.of(commandWithoutContext));
 
         assertEquals(1, violations.size());
     }

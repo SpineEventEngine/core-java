@@ -64,24 +64,23 @@ final class ExternalRejectionSubscriber implements ExternalMessageDispatcher<Str
 
     @Override
     public Set<ExternalMessageClass> getMessageClasses() {
-        final RejectionSubscriberClass<?> subscriberClass =
-                Model.getInstance()
-                     .asRejectionSubscriber(delegate.getClass());
-        final Set<RejectionClass> extSubscriptions =
-                subscriberClass.getExternalRejectionSubscriptions();
+        RejectionSubscriberClass<?> subscriberClass = Model.getInstance()
+                                                           .asRejectionSubscriber(
+                                                                   delegate.getClass());
+        Set<RejectionClass> extSubscriptions = subscriberClass.getExternalRejectionSubscriptions();
         return ExternalMessageClass.fromRejectionClasses(extSubscriptions);
     }
 
     @Override
     public Set<String> dispatch(ExternalMessageEnvelope envelope) {
-        final ExternalMessage externalMessage = envelope.getOuterObject();
-        final Message unpacked = AnyPacker.unpack(externalMessage.getOriginalMessage());
+        ExternalMessage externalMessage = envelope.getOuterObject();
+        Message unpacked = AnyPacker.unpack(externalMessage.getOriginalMessage());
         if (!(unpacked instanceof Rejection)) {
             throw newIllegalStateException("Unexpected object %s while dispatching the external " +
                                                    "rejection to the rejection subscriber.",
                                            Stringifiers.toString(unpacked));
         }
-        final Rejection rejection = (Rejection) unpacked;
+        Rejection rejection = (Rejection) unpacked;
         checkArgument(isExternal(rejection.getContext()),
                       "External rejection expected, but got %s",
                       Stringifiers.toString(rejection));
@@ -93,9 +92,9 @@ final class ExternalRejectionSubscriber implements ExternalMessageDispatcher<Str
         checkNotNull(envelope);
         checkNotNull(exception);
 
-        final MessageClass messageClass = envelope.getMessageClass();
-        final String messageId = Stringifiers.toString(envelope.getId());
-        final String errorMessage =
+        MessageClass messageClass = envelope.getMessageClass();
+        String messageId = Stringifiers.toString(envelope.getId());
+        String errorMessage =
                 format("Error handling external rejection subscription (class: %s id: %s).",
                        messageClass, messageId);
         log().error(errorMessage, exception);

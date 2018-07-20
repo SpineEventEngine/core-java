@@ -20,7 +20,6 @@
 
 package io.spine.server.route;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
@@ -33,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -93,7 +93,7 @@ class RejectionRoutingTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        final NullPointerTester nullPointerTester = new NullPointerTester()
+        NullPointerTester nullPointerTester = new NullPointerTester()
                 .setDefault(RejectionContext.class, RejectionContext.getDefaultInstance());
 
         nullPointerTester.testAllPublicInstanceMethods(rejectionRouting);
@@ -109,7 +109,7 @@ class RejectionRoutingTest {
     @Test
     @DisplayName("allow replacing default route")
     void allowReplacingDefaultRoute() {
-        final RejectionRoute<String, Message> newDefault =
+        RejectionRoute<String, Message> newDefault =
                 new RejectionRoute<String, Message>() {
                     private static final long serialVersionUID = 0L;
 
@@ -130,7 +130,7 @@ class RejectionRoutingTest {
         assertSame(rejectionRouting, rejectionRouting.route(EntityAlreadyArchived.class,
                                                             customRoute));
 
-        final Optional<RejectionRoute<String, EntityAlreadyArchived>> route =
+        Optional<RejectionRoute<String, EntityAlreadyArchived>> route =
                 rejectionRouting.get(EntityAlreadyArchived.class);
 
         assertTrue(route.isPresent());
@@ -166,16 +166,14 @@ class RejectionRoutingTest {
     @DisplayName("apply default route")
     void applyDefaultRoute() {
         // Create a rejection for which there's no custom path.
-        final EntityAlreadyDeleted rejection =
-                EntityAlreadyDeleted.newBuilder()
-                                    .setEntityId(thisTestAsEntity())
-                                    .build();
+        EntityAlreadyDeleted rejection = EntityAlreadyDeleted.newBuilder()
+                                                             .setEntityId(thisTestAsEntity())
+                                                             .build();
 
         // Do have custom route.
         rejectionRouting.route(EntityAlreadyArchived.class, customRoute);
 
-        final Set<String> ids = rejectionRouting.apply(rejection,
-                                                       RejectionContext.getDefaultInstance());
+        Set<String> ids = rejectionRouting.apply(rejection, RejectionContext.getDefaultInstance());
 
         assertEquals(DEFAULT_ROUTE, ids);
     }
@@ -185,12 +183,10 @@ class RejectionRoutingTest {
     void applyCustomRoute() {
         rejectionRouting.route(EntityAlreadyArchived.class, customRoute);
 
-        final EntityAlreadyArchived rejection =
-                EntityAlreadyArchived.newBuilder()
-                                     .setEntityId(thisTestAsEntity())
-                                     .build();
-        final Set<String> ids = rejectionRouting.apply(rejection,
-                                                       RejectionContext.getDefaultInstance());
+        EntityAlreadyArchived rejection = EntityAlreadyArchived.newBuilder()
+                                                               .setEntityId(thisTestAsEntity())
+                                                               .build();
+        Set<String> ids = rejectionRouting.apply(rejection, RejectionContext.getDefaultInstance());
         assertEquals(CUSTOM_ROUTE, ids);
     }
 

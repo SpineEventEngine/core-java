@@ -65,7 +65,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
         @Test
         @DisplayName("to single shard")
         void toSingleShard() throws Exception {
-            final ParallelDispatcher<ProjectId, Command> dispatcher =
+            ParallelDispatcher<ProjectId, Command> dispatcher =
                     new ParallelDispatcher<ProjectId, Command>(42, 400, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {
@@ -90,7 +90,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
         @Test
         @DisplayName("to several shards")
         void toSeveralShards() throws Exception {
-            final ParallelDispatcher<ProjectId, Command> dispatcher =
+            ParallelDispatcher<ProjectId, Command> dispatcher =
                     new ParallelDispatcher<ProjectId, Command>(23, 423, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {
@@ -120,7 +120,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
         @Test
         @DisplayName("to single shard")
         void toSingleShard() throws Exception {
-            final ParallelDispatcher<ProjectId, Event> dispatcher =
+            ParallelDispatcher<ProjectId, Event> dispatcher =
                     new ParallelDispatcher<ProjectId, Event>(130, 500, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {
@@ -145,7 +145,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
         @Test
         @DisplayName("to several shards")
         void toSeveralShards() throws Exception {
-            final ParallelDispatcher<ProjectId, Event> dispatcher =
+            ParallelDispatcher<ProjectId, Event> dispatcher =
                     new ParallelDispatcher<ProjectId, Event>(190, 900, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {
@@ -175,7 +175,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
         @Test
         @DisplayName("to single shard")
         void toSingleShard() throws Exception {
-            final ParallelDispatcher<ProjectId, Rejection> dispatcher =
+            ParallelDispatcher<ProjectId, Rejection> dispatcher =
                     new ParallelDispatcher<ProjectId, Rejection>(36, 12, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {
@@ -200,7 +200,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
         @Test
         @DisplayName("to several shards")
         void toSeveralShards() throws Exception {
-            final ParallelDispatcher<ProjectId, Rejection> dispatcher =
+            ParallelDispatcher<ProjectId, Rejection> dispatcher =
                     new ParallelDispatcher<ProjectId, Rejection>(40, 603, dispatchWaitTime()) {
                         @Override
                         protected ThreadStats<ProjectId> getStats() {

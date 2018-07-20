@@ -72,8 +72,8 @@ public abstract class CommandOutputBus<M extends Message,
 
     @Override
     protected void dispatch(E envelope) {
-        final E enrichedEnvelope = enrich(envelope);
-        final int dispatchersCalled = callDispatchers(enrichedEnvelope);
+        E enrichedEnvelope = enrich(envelope);
+        int dispatchersCalled = callDispatchers(enrichedEnvelope);
         checkState(dispatchersCalled != 0,
                    format("Message %s has no dispatchers.", envelope.getMessage()));
     }

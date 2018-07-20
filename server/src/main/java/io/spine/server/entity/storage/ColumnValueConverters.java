@@ -53,17 +53,17 @@ class ColumnValueConverters {
      */
     static ColumnValueConverter of(Method getter) {
         checkNotNull(getter);
-        final Class<?> columnType = getter.getReturnType();
-        final ColumnValueConverter converter;
+        Class<?> columnType = getter.getReturnType();
+        ColumnValueConverter converter;
         if (isEnumType(columnType)) {
-            final EnumType enumType = getEnumType(getter);
+            EnumType enumType = getEnumType(getter);
             @SuppressWarnings("unchecked") // Checked at runtime.
-            final Class<? extends Enum> type = (Class<? extends Enum>) columnType;
+            Class<? extends Enum> type = (Class<? extends Enum>) columnType;
             converter = createFor(enumType, type);
         } else {
             @SuppressWarnings("unchecked")
                 // It's impossible to create an Entity Column from the non-serializable type getter.
-            final Class<? extends Serializable> type = (Class<? extends Serializable>) columnType;
+            Class<? extends Serializable> type = (Class<? extends Serializable>) columnType;
             converter = new IdentityConverter(type);
         }
         return converter;
@@ -76,7 +76,7 @@ class ColumnValueConverters {
      * @return {@code true} if the specified type is Java Enum, {@code false} otherwise
      */
     private static boolean isEnumType(Class<?> type) {
-        final boolean isJavaEnum = Enum.class.isAssignableFrom(type);
+        boolean isJavaEnum = Enum.class.isAssignableFrom(type);
         return isJavaEnum;
     }
 
@@ -98,8 +98,8 @@ class ColumnValueConverters {
         if (!getter.isAnnotationPresent(Enumerated.class)) {
             return ORDINAL;
         }
-        final EnumType type = getter.getAnnotation(Enumerated.class)
-                                    .value();
+        EnumType type = getter.getAnnotation(Enumerated.class)
+                              .value();
         return type;
     }
 }

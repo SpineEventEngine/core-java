@@ -56,7 +56,7 @@ public abstract class AbstractMessageDeliveryTest {
      * @param transport the transport to use for the sharding in the current server environment
      */
     protected void switchToShardingWithTransport(TransportFactory transport) {
-        final Sharding inProcessSharding = newSharding(transport);
+        Sharding inProcessSharding = newSharding(transport);
         ServerEnvironment.getInstance()
                          .replaceSharding(inProcessSharding);
     }

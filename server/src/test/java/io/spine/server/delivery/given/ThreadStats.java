@@ -40,8 +40,8 @@ public class ThreadStats<I extends Message> {
             Multimaps.synchronizedMultimap(HashMultimap.create());
 
     public void recordCallingThread(I id) {
-        final long currentThreadId = Thread.currentThread()
-                                           .getId();
+        long currentThreadId = Thread.currentThread()
+                                     .getId();
         threadToId.put(currentThreadId, id);
     }
 

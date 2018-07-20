@@ -70,7 +70,7 @@ public final class ExternalMessageClass extends MessageClass {
      */
     public static Set<ExternalMessageClass> fromEventClasses(Set<EventClass> classes) {
         checkNotNull(classes);
-        final ImmutableSet.Builder<ExternalMessageClass> builder = ImmutableSet.builder();
+        ImmutableSet.Builder<ExternalMessageClass> builder = ImmutableSet.builder();
         for (EventClass eventClass : classes) {
             builder.add(of(eventClass));
         }
@@ -87,7 +87,7 @@ public final class ExternalMessageClass extends MessageClass {
      */
     public static Set<ExternalMessageClass> fromRejectionClasses(Set<RejectionClass> classes) {
         checkNotNull(classes);
-        final ImmutableSet.Builder<ExternalMessageClass> builder = ImmutableSet.builder();
+        ImmutableSet.Builder<ExternalMessageClass> builder = ImmutableSet.builder();
         for (RejectionClass rejectionClass : classes) {
             builder.add(of(rejectionClass));
         }

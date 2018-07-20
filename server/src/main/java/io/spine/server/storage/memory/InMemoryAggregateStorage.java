@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.common.base.Optional;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.aggregate.AggregateReadRequest;
 import io.spine.server.aggregate.AggregateStorage;
@@ -28,6 +27,7 @@ import io.spine.server.entity.LifecycleFlags;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -70,7 +70,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected int readEventCountAfterLastSnapshot(I id) {
         checkNotClosed();
-        final int result = getStorage().getEventCount(id);
+        int result = getStorage().getEventCount(id);
         return result;
     }
 
@@ -101,7 +101,7 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
     @Override
     protected Iterator<AggregateEventRecord> historyBackward(AggregateReadRequest<I> request) {
         checkNotNull(request);
-        final List<AggregateEventRecord> records = getStorage().getHistoryBackward(request);
+        List<AggregateEventRecord> records = getStorage().getHistoryBackward(request);
         return records.iterator();
     }
 }

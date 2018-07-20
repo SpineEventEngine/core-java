@@ -80,7 +80,7 @@ public final class RecentHistory {
      * @return an events iterator
      */
     public Iterator<Event> iterator() {
-        final ImmutableList<Event> events = ImmutableList.copyOf(history);
+        ImmutableList<Event> events = ImmutableList.copyOf(history);
         return events.iterator();
     }
 
@@ -108,7 +108,7 @@ public final class RecentHistory {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final RecentHistory other = (RecentHistory) obj;
+        RecentHistory other = (RecentHistory) obj;
         return Objects.equals(this.history, other.history);
     }
 

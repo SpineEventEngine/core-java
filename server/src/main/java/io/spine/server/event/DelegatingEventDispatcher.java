@@ -91,28 +91,28 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
         return new ExternalMessageDispatcher<I>() {
             @Override
             public Set<ExternalMessageClass> getMessageClasses() {
-                final Set<EventClass> eventClasses = delegate.getExternalEventClasses();
+                Set<EventClass> eventClasses = delegate.getExternalEventClasses();
                 return ExternalMessageClass.fromEventClasses(eventClasses);
             }
 
             @Override
             public Set<I> dispatch(ExternalMessageEnvelope envelope) {
-                final EventEnvelope eventEnvelope = asEventEnvelope(envelope);
-                final Set<I> ids = delegate.dispatchEvent(eventEnvelope);
+                EventEnvelope eventEnvelope = asEventEnvelope(envelope);
+                Set<I> ids = delegate.dispatchEvent(eventEnvelope);
                 return ids;
             }
 
             @Override
             public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-                final EventEnvelope eventEnvelope = asEventEnvelope(envelope);
+                EventEnvelope eventEnvelope = asEventEnvelope(envelope);
                 delegate.onError(eventEnvelope, exception);
             }
         };
     }
 
     private static EventEnvelope asEventEnvelope(ExternalMessageEnvelope envelope) {
-        final ExternalMessage externalMessage = envelope.getOuterObject();
-        final Event event = unpack(externalMessage.getOriginalMessage());
+        ExternalMessage externalMessage = envelope.getOuterObject();
+        Event event = unpack(externalMessage.getOriginalMessage());
         return EventEnvelope.of(event);
     }
 

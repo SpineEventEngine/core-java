@@ -50,9 +50,9 @@ public class EventStoreTestEnv {
     }
 
     public static EventStore eventStore() {
-        final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setMultitenant(false)
-                                                .build();
+        BoundedContext bc = BoundedContext.newBuilder()
+                                          .setMultitenant(false)
+                                          .build();
         return EventStore.newBuilder()
                          .setStorageFactory(bc.getStorageFactory())
                          .setStreamExecutor(MoreExecutors.directExecutor())
@@ -61,12 +61,12 @@ public class EventStoreTestEnv {
     }
 
     public static Event projectCreated(Timestamp when) {
-        final ProjectCreated msg = Sample.messageOfType(ProjectCreated.class);
+        ProjectCreated msg = Sample.messageOfType(ProjectCreated.class);
         return eventFactory.createEvent(msg, null, when);
     }
 
     public static Event taskAdded(Timestamp when) {
-        final TaskAdded msg = Sample.messageOfType(TaskAdded.class);
+        TaskAdded msg = Sample.messageOfType(TaskAdded.class);
         return eventFactory.createEvent(msg, null, when);
     }
 
