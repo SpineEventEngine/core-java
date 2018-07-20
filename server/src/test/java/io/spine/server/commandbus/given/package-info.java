@@ -22,7 +22,10 @@
  * Test environments for tests of the {@code io.spine.server.commandbus} package.
  */
 
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.commandbus.given;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -19,12 +19,12 @@
  */
 
 /**
- * Test environment classes for the {@code io.spine.server.rejection} package.
+ * Test environment classes for tests of the {@code io.spine.server.model} package.
  */
 
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.server.rejection.given;
+package io.spine.server.model.given;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 

@@ -22,7 +22,10 @@
  * Test environments for tests of the {@code io.spine.server.commandstore} package.
  */
 
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.commandstore.given;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;
