@@ -45,15 +45,12 @@ import static io.spine.core.Commands.generateId;
 class Records {
 
     private static final Function<CommandRecord, Command> TO_COMMAND =
-            new Function<CommandRecord, Command>() {
-                @Override
-                public Command apply(@Nullable CommandRecord record) {
-                    if (record == null) {
-                        return Command.getDefaultInstance();
-                    }
-                    Command cmd = record.getCommand();
-                    return cmd;
+            record -> {
+                if (record == null) {
+                    return Command.getDefaultInstance();
                 }
+                Command cmd = record.getCommand();
+                return cmd;
             };
 
     private Records() {

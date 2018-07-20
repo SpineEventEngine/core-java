@@ -54,12 +54,10 @@ class MessageEnrichment<S extends Message, T extends Message, C extends Message>
     private boolean active = false;
 
     /** A map from source message field class to enrichment functions. */
-    @Nullable
-    private ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> fieldFunctions;
+    private @Nullable ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> fieldFunctions;
 
     /** A map from source message/context field to target enrichment field descriptors. */
-    @Nullable
-    private ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
+    private @Nullable ImmutableMultimap<FieldDescriptor, FieldDescriptor> fieldMap;
 
     /** Creates a new message enricher instance. */
     static <S extends Message, T extends Message, C extends Message>

@@ -94,8 +94,7 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
      *
      * @return the time of the last event or {@code null} if there is no event in the storage
      */
-    @Nullable
-    protected abstract Timestamp readLastHandledEventTime();
+    protected abstract @Nullable Timestamp readLastHandledEventTime();
 
     /** Returns an entity storage implementation. */
     protected abstract RecordStorage<I> recordStorage();

@@ -72,9 +72,8 @@ public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     public void writeLastHandledEventTime(Timestamp timestamp) {
         checkNotNull(timestamp);
         TenantFunction<Void> func = new TenantFunction<Void>(isMultitenant()) {
-            @Nullable
             @Override
-            public Void apply(@Nullable TenantId tenantId) {
+            public @Nullable Void apply(@Nullable TenantId tenantId) {
                 checkNotNull(tenantId);
                 timestampOfLastEvent.put(tenantId, timestamp);
                 return null;
@@ -86,9 +85,8 @@ public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     @Override
     public Timestamp readLastHandledEventTime() {
         TenantFunction<Timestamp> func = new TenantFunction<Timestamp>(isMultitenant()) {
-            @Nullable
             @Override
-            public Timestamp apply(@Nullable TenantId tenantId) {
+            public @Nullable Timestamp apply(@Nullable TenantId tenantId) {
                 checkNotNull(tenantId);
                 Timestamp result = timestampOfLastEvent.get(tenantId);
                 return result;

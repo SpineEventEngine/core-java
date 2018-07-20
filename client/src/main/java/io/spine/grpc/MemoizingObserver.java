@@ -108,8 +108,7 @@ public class MemoizingObserver<T> implements StreamObserver<T> {
      *
      * @return an error, or {@code null} if no error has been received
      */
-    @Nullable
-    public Throwable getError() {
+    public @Nullable Throwable getError() {
         return throwable;
     }
 }

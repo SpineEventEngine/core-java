@@ -86,8 +86,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
     /**
      * A lazily-initialized converter for the sharded messages.
      */
-    @Nullable
-    private ShardedMessageConverter<I, M, E> converter;
+    private @Nullable ShardedMessageConverter<I, M, E> converter;
 
     ShardedStream(AbstractBuilder<I, E, ?, ? extends ShardedStream> builder) {
         this.boundedContextName = builder.boundedContextName;

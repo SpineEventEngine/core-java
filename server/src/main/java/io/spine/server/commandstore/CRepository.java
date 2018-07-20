@@ -54,9 +54,8 @@ class CRepository extends DefaultRecordBasedRepository<CommandId, CEntity, Comma
     /** The function to obtain a {@code CommandRecord} from {@code CommandEntity}. */
     private static final Function<CEntity, CommandRecord> GET_RECORD =
             new Function<CEntity, CommandRecord>() {
-        @Nullable
         @Override
-        public CommandRecord apply(@Nullable CEntity input) {
+        public @Nullable CommandRecord apply(@Nullable CEntity input) {
             if (input == null) {
                 return null;
             }

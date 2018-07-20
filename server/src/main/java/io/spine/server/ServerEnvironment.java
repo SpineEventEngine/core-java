@@ -39,8 +39,7 @@ public class ServerEnvironment {
     static final String ENV_KEY_APP_ENGINE_RUNTIME_VERSION = "com.google.appengine.runtime.version";
 
     /** If set, contains the version of AppEngine obtained from the system property. */
-    @Nullable
-    private static final String appEngineRuntimeVersion =
+    private static final @Nullable String appEngineRuntimeVersion =
             System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION);
 
     /** A sharding strategy for this server environment. */
