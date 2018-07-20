@@ -22,8 +22,8 @@ package io.spine.grpc;
 
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -53,7 +53,8 @@ public class MemoizingObserver<T> implements StreamObserver<T> {
     }
 
     /** Prevent instantiation from the outside. */
-    private MemoizingObserver() {}
+    private MemoizingObserver() {
+    }
 
     @Override
     public void onNext(T value) {
@@ -108,8 +109,7 @@ public class MemoizingObserver<T> implements StreamObserver<T> {
      *
      * @return an error, or {@code null} if no error has been received
      */
-    @Nullable
-    public Throwable getError() {
+    public @Nullable Throwable getError() {
         return throwable;
     }
 }

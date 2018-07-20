@@ -25,19 +25,19 @@ import com.google.protobuf.StringValue;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.logging.Logging;
-import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
-import io.spine.util.Suppliers2;
 import org.slf4j.Logger;
 
 import java.util.Objects;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Suppliers.memoize;
+import static io.spine.protobuf.AnyPacker.pack;
 import static java.lang.String.format;
 
 /**
@@ -52,9 +52,8 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
     private final EventBus eventBus;
 
     /** Fully qualified name of the class wrapped into {@code Any}. */
-    private final Supplier<Any> producerId = Suppliers2.memoize(
-            () -> AnyPacker.pack(TypeConverter.<String, StringValue>toMessage(getId()))
-    );
+    private final Supplier<Any> producerId =
+            memoize(() -> pack(TypeConverter.<String, StringValue>toMessage(getId())));
 
     /** Lazily initialized logger. */
     private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
