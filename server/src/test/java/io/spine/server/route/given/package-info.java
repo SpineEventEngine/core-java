@@ -19,7 +19,7 @@
  */
 
 /**
- * Test environments for the {@code io.spine.server.route} package.
+ * Test environment for the {@code io.spine.server.route} package.
  */
 
 @CheckReturnValue

@@ -19,7 +19,7 @@
  */
 
 /**
- * Test environments for tests of the {@code io.spine.server.commandbus} package.
+ * Test environment for tests of the {@code io.spine.server.commandbus} package.
  */
 
 @CheckReturnValue

@@ -19,7 +19,7 @@
  */
 
 /**
- * Test environments for the {@link io.spine.server.tuple}.
+ * Test environment for the {@link io.spine.server.tuple}.
  *
  * @author Alexander Yevsyukov
  */

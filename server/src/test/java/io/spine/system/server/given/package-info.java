@@ -19,7 +19,7 @@
  */
 
 /**
- * Test environments for the {@code io.spine.server.system.server}.
+ * Test environment for the {@code io.spine.server.system.server}.
  */
 
 @CheckReturnValue

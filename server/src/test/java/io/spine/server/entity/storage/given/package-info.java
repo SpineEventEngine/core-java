@@ -19,12 +19,12 @@
  */
 
 /**
- * Test environment for tests of the {@code io.spine.server.command} package.
+ * Test environment classes for the {@code io.spine.server.entity.storage} package.
  */
 
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.server.command.given;
+package io.spine.server.entity.storage.given;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 
