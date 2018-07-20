@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.base.ThrowableMessage;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Command;
+import io.spine.core.Rejection;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -85,7 +86,7 @@ public abstract class CommandHandlerTest<I,
     @Override
     protected CommandHandlerExpected<S> expectThat(E entity) {
         S initialState = entity.getState();
-        Message rejection = null;
+        Rejection rejection = null;
 
         List<? extends Message> events = emptyList();
         try {
