@@ -88,7 +88,7 @@ public class AssignLookup extends SpineAnnotationProcessor {
 
     @Override
     protected void onRoundFinished() {
-        String spineOutput = getOption(OUTPUT_OPTION_NAME).or(DEFAULT_OUTPUT_OPTION);
+        String spineOutput = getOption(OUTPUT_OPTION_NAME).orElse(DEFAULT_OUTPUT_OPTION);
         String fileName = spineOutput + '/' + DESTINATION_PATH;
         File serializedModelStorage = new File(fileName);
         mergeOldHandlersFrom(serializedModelStorage);
