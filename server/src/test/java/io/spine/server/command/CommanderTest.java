@@ -18,24 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.command;
+
+import io.spine.server.BoundedContext;
+import io.spine.server.commandbus.CommandBus;
+import io.spine.server.event.EventBus;
+import org.junit.jupiter.api.BeforeEach;
+
 /**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * @author Alexander Yevsyukov
  */
- 
-def final SPINE_VERSION = '0.10.54-SNAPSHOT'
+class CommanderTest {
 
-ext {
+    private final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                                .build();
+    private Commander commander;
 
-    // The version of the modules in this project.
-    spineVersion = SPINE_VERSION
+    @BeforeEach
+    void setUp() {
+        commander = new Commendatore(boundedContext.getCommandBus(), boundedContext.getEventBus());
+    }
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.10.53-SNAPSHOT'
+    private static final class Commendatore extends Commander {
 
-    spineTimeVersion = '0.10.45-SNAPSHOT'
-
-    gRpcVersion = '1.13.0'
+        private Commendatore(CommandBus commandBus, EventBus eventBus) {
+            super(commandBus, eventBus);
+        }
+    }
 }

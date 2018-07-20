@@ -27,6 +27,7 @@ import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.server.model.HandlerMethod;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
@@ -40,8 +41,8 @@ import java.util.List;
  */
 public final class DispatchResult {
 
-    private final List<? extends Message> messages;
     private final MessageEnvelope origin;
+    private final List<? extends Message> messages;
 
     /**
      * @param messages messages which were emitted by the dispatch
@@ -54,16 +55,16 @@ public final class DispatchResult {
     }
 
     /**
-     * @return dispatch result representation as a list of domain events
+     * @return dispatch result representation as a list of domain event messages
      */
     public List<? extends Message> asMessages() {
         return ImmutableList.copyOf(this.messages);
     }
 
     /**
-     * @return dispatch result representation as a list of Spine events
+     * @return dispatch result representation as a list of events
      */
-    public List<Event> asEvents(Any producerId, Version version) {
+    public List<Event> asEvents(Any producerId, @Nullable Version version) {
         return HandlerMethod.toEvents(producerId, version, messages, origin);
     }
 }

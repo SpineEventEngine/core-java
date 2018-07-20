@@ -18,24 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
- */
- 
-def final SPINE_VERSION = '0.10.54-SNAPSHOT'
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.model.given;
 
-ext {
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    // The version of the modules in this project.
-    spineVersion = SPINE_VERSION
-
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.10.53-SNAPSHOT'
-
-    spineTimeVersion = '0.10.45-SNAPSHOT'
-
-    gRpcVersion = '1.13.0'
-}
+import javax.annotation.ParametersAreNonnullByDefault;

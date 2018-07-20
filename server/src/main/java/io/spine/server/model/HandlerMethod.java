@@ -121,10 +121,10 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
         return result;
     }
 
-    public static List<Event> toEvents(final Any producerId,
-                                       @Nullable final Version version,
-                                       final List<? extends Message> eventMessages,
-                                       final MessageEnvelope origin) {
+    public static List<Event> toEvents(Any producerId,
+                                       @Nullable Version version,
+                                       List<? extends Message> eventMessages,
+                                       MessageEnvelope origin) {
         checkNotNull(producerId);
         checkNotNull(eventMessages);
         checkNotNull(origin);
@@ -132,14 +132,14 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
         final EventFactory eventFactory =
                 EventFactory.on(origin, producerId);
 
-        return Lists.transform(eventMessages, new Function<Message, Event>() {
-            @Override
-            public Event apply(@Nullable Message eventMessage) {
-                checkNotNull(eventMessage);
-                final Event result = eventFactory.createEvent(eventMessage, version);
-                return result;
-            }
-        });
+        return Lists.transform(
+                eventMessages,
+                (Function<Message, Event>) eventMessage -> {
+                    checkNotNull(eventMessage);
+                    Event result = eventFactory.createEvent(eventMessage, version);
+                    return result;
+                }
+        );
     }
 
     /** Returns the handling method. */
