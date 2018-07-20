@@ -114,7 +114,7 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
 
         @Override
         protected RejectionReactorMethod createFromMethod(Method method) {
-            final RejectionReactorMethod result = new RejectionReactorMethod(method);
+            RejectionReactorMethod result = new RejectionReactorMethod(method);
             return result;
         }
 

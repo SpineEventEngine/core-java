@@ -34,12 +34,12 @@ class DelegatingCommandDispatcherTest {
     @Test
     @DisplayName("delegate `onError`")
     void delegateOnError() throws Exception {
-        final EmptyCommandDispatcherDelegate delegate = new EmptyCommandDispatcherDelegate();
+        EmptyCommandDispatcherDelegate delegate = new EmptyCommandDispatcherDelegate();
 
-        final DelegatingCommandDispatcher<String> delegatingDispatcher =
+        DelegatingCommandDispatcher<String> delegatingDispatcher =
                 DelegatingCommandDispatcher.of(delegate);
 
-        final CommandEnvelope commandEnvelope =
+        CommandEnvelope commandEnvelope =
                 TestActorRequestFactory.newInstance(getClass()).generateEnvelope();
 
         delegatingDispatcher.onError(commandEnvelope, new RuntimeException(getClass().getName()));

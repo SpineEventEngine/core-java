@@ -20,7 +20,6 @@
 
 package io.spine.server.tuple;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.server.tuple.Element.AValue;
 import io.spine.server.tuple.Element.BValue;
@@ -28,8 +27,10 @@ import io.spine.server.tuple.Element.CValue;
 import io.spine.server.tuple.Element.DValue;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import static com.google.common.base.Optional.fromNullable;
+import java.util.Optional;
+
 import static io.spine.server.tuple.Element.value;
+import static java.util.Optional.ofNullable;
 
 /**
  * A tuple with four elements.
@@ -37,7 +38,7 @@ import static io.spine.server.tuple.Element.value;
  * <p>The first element must be a non-default {@link Message}
  * (and not {@link com.google.protobuf.Empty Empty}).
  *
- * <p>Other three can be {@code Message}, {@link com.google.common.base.Optional Optional} or
+ * <p>Other three can be {@code Message}, {@link java.util.Optional Optional} or
  * {@link Either}.
  *
  * @param <A> the type of the first element
@@ -63,7 +64,7 @@ public final class Quartet<A extends Message, B, C, D>
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     Quartet<A, B, C, D> of(A a, B b, C c, D d) {
         checkAllNotNullOrEmpty(Quartet.class, a, b, c, d);
-        final Quartet<A, B, C, D> result = new Quartet<>(a, b, c, d);
+        Quartet<A, B, C, D> result = new Quartet<>(a, b, c, d);
         return result;
     }
 
@@ -74,7 +75,7 @@ public final class Quartet<A extends Message, B, C, D>
     Quartet<A, B, C, Optional<D>> withNullable(A a, B b, C c, @Nullable D d) {
         checkAllNotNullOrEmpty(Quartet.class, a, b, c);
         checkNotEmpty(Quartet.class, d);
-        final Quartet<A, B, C, Optional<D>> result = new Quartet<>(a, b, c, fromNullable(d));
+        Quartet<A, B, C, Optional<D>> result = new Quartet<>(a, b, c, ofNullable(d));
         return result;
     }
 
@@ -85,8 +86,8 @@ public final class Quartet<A extends Message, B, C, D>
     Quartet<A, B, Optional<C>, Optional<D>> withNullable2(A a, B b, @Nullable C c, @Nullable D d) {
         checkAllNotNullOrEmpty(Quartet.class, a, b);
         checkAllNotEmpty(Quartet.class, c, d);
-        final Quartet<A, B, Optional<C>, Optional<D>> result =
-                new Quartet<>(a, b, fromNullable(c), fromNullable(d));
+        Quartet<A, B, Optional<C>, Optional<D>> result =
+                new Quartet<>(a, b, ofNullable(c), ofNullable(d));
         return result;
     }
 
@@ -98,8 +99,8 @@ public final class Quartet<A extends Message, B, C, D>
     withNullable3(A a, @Nullable B b, @Nullable C c, @Nullable D d) {
         checkNotNullOrEmpty(Quartet.class, a);
         checkAllNotEmpty(Quartet.class, b, c, d);
-        final Quartet<A, Optional<B>, Optional<C>, Optional<D>> result =
-                new Quartet<>(a, fromNullable(b), fromNullable(c), fromNullable(d));
+        Quartet<A, Optional<B>, Optional<C>, Optional<D>> result =
+                new Quartet<>(a, ofNullable(b), ofNullable(c), ofNullable(d));
         return result;
     }
 

@@ -45,8 +45,8 @@ public class UnsupportedCommandException extends CommandException implements Mes
 
     /** Creates an instance of unsupported command error. */
     private static Error unsupportedCommand(Command command) {
-        final String format = "Commands of the type `%s` are not supported.";
-        final CommandValidationError errorCode = CommandValidationError.UNSUPPORTED_COMMAND;
+        String format = "Commands of the type `%s` are not supported.";
+        CommandValidationError errorCode = CommandValidationError.UNSUPPORTED_COMMAND;
         return createError(format, command, errorCode);
     }
 }

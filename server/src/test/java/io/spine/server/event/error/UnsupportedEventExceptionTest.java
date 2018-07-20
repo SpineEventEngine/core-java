@@ -38,9 +38,9 @@ class UnsupportedEventExceptionTest {
     @Test
     @DisplayName("have message and error")
     void haveMessageAndError() {
-        final StringValue msg = toMessage("");
+        StringValue msg = toMessage("");
 
-        final UnsupportedEventException exception = new UnsupportedEventException(msg);
+        UnsupportedEventException exception = new UnsupportedEventException(msg);
 
         assertNotNull(exception.getMessage());
         assertNotNull(exception.asError());

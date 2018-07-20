@@ -67,13 +67,13 @@ class ColumnRecordsTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        final EntityRecordWithColumns record = EntityRecordWithColumns.of(
+        EntityRecordWithColumns record = EntityRecordWithColumns.of(
                 EntityRecord.getDefaultInstance());
-        final ColumnTypeRegistry columnTypeRegistry = ColumnTypeRegistry.newBuilder()
-                                                                        .build();
-        final EntityQuery entityQuery = EntityQuery.of(Collections.emptyList(),
-                                                       QueryParameters.newBuilder()
-                                                                      .build());
+        ColumnTypeRegistry columnTypeRegistry = ColumnTypeRegistry.newBuilder()
+                                                                  .build();
+        EntityQuery entityQuery = EntityQuery.of(Collections.emptyList(),
+                                                 QueryParameters.newBuilder()
+                                                                .build());
         new NullPointerTester()
                 .setDefault(EntityRecordWithColumns.class, record)
                 .setDefault(ColumnTypeRegistry.class, columnTypeRegistry)
@@ -85,19 +85,19 @@ class ColumnRecordsTest {
     @DisplayName("feed entity columns to database record")
     void feedColumnsToDbRecord() {
         // Set up mocks and arguments
-        final List<Object> destination = new ArrayList<>(MOCK_COLUMNS_COUNT);
+        List<Object> destination = new ArrayList<>(MOCK_COLUMNS_COUNT);
 
-        final Map<String, EntityColumn.MemoizedValue> columns = setupMockColumnsAllowingNulls();
+        Map<String, EntityColumn.MemoizedValue> columns = setupMockColumnsAllowingNulls();
 
-        final CollectAnyColumnType type = spy(CollectAnyColumnType.class);
-        final ColumnTypeRegistry<CollectAnyColumnType> registry =
+        CollectAnyColumnType type = spy(CollectAnyColumnType.class);
+        ColumnTypeRegistry<CollectAnyColumnType> registry =
                 ColumnTypeRegistry.<CollectAnyColumnType>newBuilder()
                         .put(Object.class, type)
                         .build();
-        final EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.of(
+        EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.of(
                 EntityRecord.getDefaultInstance(), columns);
 
-        final Function<String, Object> colIdMapper = spy(new NoOpColumnIdentifierMapper());
+        Function<String, Object> colIdMapper = spy(new NoOpColumnIdentifierMapper());
 
         // Invoke the pre-persistence action
         ColumnRecords.feedColumnsTo(destination, recordWithColumns, registry, colIdMapper);
@@ -108,7 +108,7 @@ class ColumnRecordsTest {
                 .setColumnValue(eq(destination), any(Object.class), anyString());
         verify(type, times(MOCK_NULL_COLUMNS_COUNT)).setNull(eq(destination), anyString());
 
-        final int indexOfNull = destination.indexOf(null);
+        int indexOfNull = destination.indexOf(null);
         assertTrue(indexOfNull >= 0, "Null value was not saved to the destination");
         assertContainsAll(destination, getNonNullColumnValues().toArray());
     }

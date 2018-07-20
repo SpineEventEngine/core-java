@@ -41,7 +41,7 @@ public class Given {
     }
 
     static ProjectId newProjectId() {
-        final String uuid = newUuid();
+        String uuid = newUuid();
         return ProjectId.newBuilder()
                         .setId(uuid)
                         .build();
@@ -101,9 +101,9 @@ public class Given {
         }
 
         private static InvalidProjectName invalidProjectName(ProjectId id) {
-            final InvalidProjectName invalidProjectName = InvalidProjectName.newBuilder()
-                                                                            .setProjectId(id)
-                                                                            .build();
+            InvalidProjectName invalidProjectName = InvalidProjectName.newBuilder()
+                                                                      .setProjectId(id)
+                                                                      .build();
             return invalidProjectName;
         }
     }

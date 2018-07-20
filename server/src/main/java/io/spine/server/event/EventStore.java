@@ -20,8 +20,6 @@
 package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
-import com.google.common.base.Predicates;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.TextFormat;
@@ -40,8 +38,11 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -103,7 +104,7 @@ public class EventStore implements AutoCloseable {
                        StorageFactory storageFactory,
                        @Nullable Logger logger) {
         super();
-        final ERepository eventRepository = new ERepository();
+        ERepository eventRepository = new ERepository();
         eventRepository.initStorage(storageFactory);
         this.storage = eventRepository;
         this.streamExecutor = streamExecutor;
@@ -119,9 +120,9 @@ public class EventStore implements AutoCloseable {
      *
      * @param event the record to append
      */
-    public void append(final Event event) {
+    public void append(Event event) {
         checkNotNull(event);
-        final TenantAwareOperation op = new EventOperation(event) {
+        TenantAwareOperation op = new EventOperation(event) {
             @Override
             public void run() {
                 store(event);
@@ -142,9 +143,11 @@ public class EventStore implements AutoCloseable {
      *
      * @param events the events to append
      */
-    public void appendAll(final Iterable<Event> events) {
+    public void appendAll(Iterable<Event> events) {
         checkNotNull(events);
-        Optional<Event> tenantDefiningEvent = tryFind(events, Predicates.notNull());
+        Optional<Event> tenantDefiningEvent = StreamSupport.stream(events.spliterator(), false)
+                                                           .filter(Objects::nonNull)
+                                                           .findFirst();
         if (!tenantDefiningEvent.isPresent()) {
             return;
         }
@@ -197,23 +200,20 @@ public class EventStore implements AutoCloseable {
      * @param request          the query with filtering parameters for the event history
      * @param responseObserver observer for the resulting stream
      */
-    public void read(final EventStreamQuery request, final StreamObserver<Event> responseObserver) {
+    public void read(EventStreamQuery request, StreamObserver<Event> responseObserver) {
         checkNotNull(request);
         checkNotNull(responseObserver);
 
         logReadingStart(request, responseObserver);
 
-        streamExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                final Iterator<Event> eventRecords = iterator(request);
-                while (eventRecords.hasNext()) {
-                    final Event event = eventRecords.next();
-                    responseObserver.onNext(event);
-                }
-                responseObserver.onCompleted();
-                logReadingComplete(responseObserver);
+        streamExecutor.execute(() -> {
+            Iterator<Event> eventRecords = iterator(request);
+            while (eventRecords.hasNext()) {
+                Event event = eventRecords.next();
+                responseObserver.onNext(event);
             }
+            responseObserver.onCompleted();
+            logReadingComplete(responseObserver);
         });
     }
 
@@ -328,7 +328,7 @@ public class EventStore implements AutoCloseable {
      * The builder of {@code EventStore} instance exposed as gRPC service.
      *
      * @see EventStoreGrpc.EventStoreImplBase
-     *      EventStoreGrpc.EventStoreImplBase
+     * EventStoreGrpc.EventStoreImplBase
      */
     public static class ServiceBuilder
             extends AbstractBuilder<ServerServiceDefinition, ServiceBuilder> {
@@ -369,7 +369,7 @@ public class EventStore implements AutoCloseable {
         }
 
         if (logger.isInfoEnabled()) {
-            final String requestData = TextFormat.shortDebugString(request);
+            String requestData = TextFormat.shortDebugString(request);
             logger.info("Creating stream on request: {} for observer: {}",
                         requestData,
                         responseObserver);

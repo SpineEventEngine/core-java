@@ -134,7 +134,7 @@ public class ProjectionRepositoryTestEnv {
         }
 
         public static boolean processed(Message eventMessage) {
-            final boolean result = eventMessagesDelivered.containsValue(eventMessage);
+            boolean result = eventMessagesDelivered.containsValue(eventMessage);
             return result;
         }
 
@@ -144,7 +144,7 @@ public class ProjectionRepositoryTestEnv {
          * <p>Empty set is returned if no instance processed the given message.
          */
         public static Set<ProjectId> whoProcessed(Message eventMessage) {
-            final ImmutableSet.Builder<ProjectId> builder = ImmutableSet.builder();
+            ImmutableSet.Builder<ProjectId> builder = ImmutableSet.builder();
             for (ProjectId projectId : eventMessagesDelivered.keySet()) {
                 if(eventMessagesDelivered.get(projectId)
                                          .contains(eventMessage)) {
@@ -167,19 +167,19 @@ public class ProjectionRepositoryTestEnv {
             // Keep the event message for further inspection in tests.
             keep(event);
 
-            final Project newState = getState().toBuilder()
-                                               .setId(event.getProjectId())
-                                               .setStatus(Project.Status.CREATED)
-                                               .build();
+            Project newState = getState().toBuilder()
+                                         .setId(event.getProjectId())
+                                         .setStatus(Project.Status.CREATED)
+                                         .build();
             getBuilder().mergeFrom(newState);
         }
 
         @Subscribe
         public void on(PrjTaskAdded event) {
             keep(event);
-            final Project newState = getState().toBuilder()
-                                               .addTask(event.getTask())
-                                               .build();
+            Project newState = getState().toBuilder()
+                                         .addTask(event.getTask())
+                                         .build();
             getBuilder().mergeFrom(newState);
         }
 
@@ -194,9 +194,9 @@ public class ProjectionRepositoryTestEnv {
         public void on(PrjProjectStarted event,
                        @SuppressWarnings("UnusedParameters") EventContext ignored) {
             keep(event);
-            final Project newState = getState().toBuilder()
-                                               .setStatus(Project.Status.STARTED)
-                                               .build();
+            Project newState = getState().toBuilder()
+                                         .setStatus(Project.Status.STARTED)
+                                         .build();
             getBuilder().mergeFrom(newState);
         }
 

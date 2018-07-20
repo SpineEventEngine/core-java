@@ -20,7 +20,6 @@
 
 package io.spine.server.outbus.enrich;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import io.spine.server.outbus.enrich.ReferenceValidator.ValidationResult;
@@ -39,6 +38,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static io.spine.testing.Verify.assertEmpty;
 import static io.spine.testing.Verify.assertSize;
@@ -124,7 +124,7 @@ class ReferenceValidatorTest {
     void skipMappingIfNoFuncDefined() {
         Enricher<?, ?> mockEnricher = mock(Enricher.class);
         when(mockEnricher.functionFor(any(Class.class), any(Class.class)))
-                .thenReturn(Optional.absent());
+                .thenReturn(Optional.empty());
         ReferenceValidator validator
                 = new ReferenceValidator(mockEnricher,
                                          UserDeletedEvent.class,

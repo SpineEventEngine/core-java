@@ -65,7 +65,7 @@ public class CommandStore implements AutoCloseable {
     public CommandStore(StorageFactory storageFactory, TenantIndex tenantIndex) {
         checkNotNull(storageFactory);
         this.tenantIndex = checkNotNull(tenantIndex);
-        final CRepository repository = new CRepository();
+        CRepository repository = new CRepository();
         repository.initStorage(storageFactory);
         this.repository = repository;
     }
@@ -81,7 +81,7 @@ public class CommandStore implements AutoCloseable {
 
     /** Returns {@code true} if the store is open, {@code false} otherwise */
     public boolean isOpen() {
-        final boolean isOpened = repository.isOpen();
+        boolean isOpened = repository.isOpen();
         return isOpened;
     }
 
@@ -93,9 +93,9 @@ public class CommandStore implements AutoCloseable {
      * @param command the command to store
      * @throws IllegalStateException if the storage is closed
      */
-    public void store(final Command command) {
+    public void store(Command command) {
         keepTenantId(command);
-        final TenantAwareOperation op = new Operation(this, command) {
+        TenantAwareOperation op = new Operation(this, command) {
             @Override
             public void run() {
                 repository.store(command);
@@ -120,9 +120,9 @@ public class CommandStore implements AutoCloseable {
      * @param command a command to store
      * @param error an error occurred
      */
-    public void store(final Command command, final Error error) {
+    public void store(Command command, Error error) {
         keepTenantId(command);
-        final TenantAwareOperation op = new Operation(this, command) {
+        TenantAwareOperation op = new Operation(this, command) {
             @Override
             public void run() {
                 repository.store(command, error);
@@ -140,7 +140,7 @@ public class CommandStore implements AutoCloseable {
     public void store(Command command, Exception exception) {
         checkNotClosed();
         keepTenantId(command);
-        final TenantAwareOperation op = new Operation(this, command) {
+        TenantAwareOperation op = new Operation(this, command) {
             @Override
             public void run() {
                 repository.store(command, Errors.fromThrowable(exception));
@@ -166,9 +166,9 @@ public class CommandStore implements AutoCloseable {
      * @param command a command to store
      * @param status a command status
      */
-    public void store(final Command command, final CommandStatus status) {
+    public void store(Command command, CommandStatus status) {
         keepTenantId(command);
-        final TenantAwareOperation op = new Operation(this, command) {
+        TenantAwareOperation op = new Operation(this, command) {
             @Override
             public void run() {
                 repository.store(command, status);
@@ -182,7 +182,7 @@ public class CommandStore implements AutoCloseable {
      */
     public void setCommandStatusOk(CommandEnvelope commandEnvelope) {
         keepTenantId(commandEnvelope.getCommand());
-        final TenantAwareOperation op = new Operation(this, commandEnvelope) {
+        TenantAwareOperation op = new Operation(this, commandEnvelope) {
             @Override
             public void run() {
                 repository.setOkStatus(commandId());
@@ -197,9 +197,9 @@ public class CommandStore implements AutoCloseable {
      * @param commandEnvelope the ID of the command
      * @param error           the error, which occurred during command processing
      */
-    private void updateStatus(CommandEnvelope commandEnvelope, final Error error) {
+    private void updateStatus(CommandEnvelope commandEnvelope, Error error) {
         keepTenantId(commandEnvelope.getCommand());
-        final TenantAwareOperation op = new CommandOperation(commandEnvelope.getCommand()) {
+        TenantAwareOperation op = new CommandOperation(commandEnvelope.getCommand()) {
             @Override
             public void run() {
                 repository.updateStatus(commandId(), error);
@@ -220,9 +220,9 @@ public class CommandStore implements AutoCloseable {
      * @param commandEnvelope the command to update
      * @param rejection       why the command was rejected
      */
-    private void updateStatus(CommandEnvelope commandEnvelope, final Rejection rejection) {
+    private void updateStatus(CommandEnvelope commandEnvelope, Rejection rejection) {
         keepTenantId(commandEnvelope.getCommand());
-        final TenantAwareOperation op = new Operation(this, commandEnvelope) {
+        TenantAwareOperation op = new Operation(this, commandEnvelope) {
             @Override
             public void run() {
                 repository.updateStatus(commandId(), rejection);
@@ -237,14 +237,14 @@ public class CommandStore implements AutoCloseable {
      * @param status a command status to search by
      * @return commands with the given status
      */
-    public Iterator<Command> iterator(final CommandStatus status) {
-        final Func<CommandStatus, Iterator<Command>> func =
+    public Iterator<Command> iterator(CommandStatus status) {
+        Func<CommandStatus, Iterator<Command>> func =
                 new Func<CommandStatus, Iterator<Command>>(this) {
             @Override
             public Iterator<Command> apply(@Nullable CommandStatus input) {
                 checkNotNull(input);
-                final Iterator<CommandRecord> recordIterator = repository.iterator(status);
-                final Iterator<Command> commands = Records.toCommandIterator(recordIterator);
+                Iterator<CommandRecord> recordIterator = repository.iterator(status);
+                Iterator<Command> commands = Records.toCommandIterator(recordIterator);
                 return commands;
             }
         };
@@ -258,11 +258,11 @@ public class CommandStore implements AutoCloseable {
      * {@link TenantAwareOperation}.
      */
     public ProcessingStatus getStatus(CommandId commandId) {
-        final Func<CommandId, ProcessingStatus> func = new Func<CommandId, ProcessingStatus>(this) {
+        Func<CommandId, ProcessingStatus> func = new Func<CommandId, ProcessingStatus>(this) {
             @Override
             public ProcessingStatus apply(@Nullable CommandId input) {
                 checkNotNull(input);
-                final ProcessingStatus status = repository.getStatus(input);
+                ProcessingStatus status = repository.getStatus(input);
                 return status;
             }
         };
@@ -273,12 +273,11 @@ public class CommandStore implements AutoCloseable {
      * Obtains the processing status for the passed command.
      */
     public ProcessingStatus getStatus(Command command) {
-        final TenantId tenantId = Commands.getTenantId(command);
-        final TenantAwareFunction<CommandId, ProcessingStatus> func =
+        TenantId tenantId = Commands.getTenantId(command);
+        TenantAwareFunction<CommandId, ProcessingStatus> func =
                 new TenantAwareFunction<CommandId, ProcessingStatus>(tenantId) {
-                    @Nullable
                     @Override
-                    public ProcessingStatus apply(@Nullable CommandId commandId) {
+                    public @Nullable ProcessingStatus apply(@Nullable CommandId commandId) {
                         checkNotNull(commandId);
                         return getStatus(commandId);
                     }
@@ -288,20 +287,20 @@ public class CommandStore implements AutoCloseable {
 
     @SuppressWarnings("ChainOfInstanceofChecks") // OK for this consolidated error handling.
     public void updateCommandStatus(CommandEnvelope commandEnvelope, Throwable cause, Log log) {
-        final Message commandMessage = commandEnvelope.getMessage();
-        final CommandId commandId = commandEnvelope.getId();
+        Message commandMessage = commandEnvelope.getMessage();
+        CommandId commandId = commandEnvelope.getId();
         if (cause instanceof ThrowableMessage) {
-            final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
+            ThrowableMessage throwableMessage = (ThrowableMessage) cause;
             log.rejectedWith(throwableMessage, commandMessage, commandId);
             updateStatus(commandEnvelope,
                          toRejection(throwableMessage, commandEnvelope.getCommand()));
         } else if (cause instanceof Exception) {
-            final Exception exception = (Exception) cause;
+            Exception exception = (Exception) cause;
             log.errorHandling(exception, commandMessage, commandId);
             updateStatus(commandEnvelope, exception);
         } else {
             log.errorHandlingUnknown(cause, commandMessage, commandId);
-            final Error error = Errors.fromThrowable(cause);
+            Error error = Errors.fromThrowable(cause);
             updateStatus(commandEnvelope, error);
         }
     }

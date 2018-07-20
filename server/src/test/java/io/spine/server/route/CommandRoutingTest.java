@@ -84,7 +84,7 @@ class CommandRoutingTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        final NullPointerTester nullPointerTester = new NullPointerTester()
+        NullPointerTester nullPointerTester = new NullPointerTester()
                 .setDefault(CommandContext.class, CommandContext.getDefaultInstance());
 
         nullPointerTester.testAllPublicInstanceMethods(commandRouting);
@@ -138,17 +138,16 @@ class CommandRoutingTest {
     @Test
     @DisplayName("apply default route")
     void applyDefaultRoute() {
-        final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
+        TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
 
         // Replace the default route since we have custom command message.
         commandRouting.replaceDefault(customDefault)
                       // Have custom route too.
                       .route(StringValue.class, customRoute);
 
-        final CommandEnvelope command =
-                CommandEnvelope.of(factory.createCommand(Time.getCurrentTime()));
+        CommandEnvelope command = CommandEnvelope.of(factory.createCommand(Time.getCurrentTime()));
 
-        final long id = commandRouting.apply(command.getMessage(), command.getCommandContext());
+        long id = commandRouting.apply(command.getMessage(), command.getCommandContext());
 
         assertEquals(DEFAULT_ANSWER, id);
     }
@@ -156,14 +155,14 @@ class CommandRoutingTest {
     @Test
     @DisplayName("apply custom route")
     void applyCustomRoute() {
-        final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
+        TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
 
         // Have custom route.
         commandRouting.route(StringValue.class, customRoute);
 
-        final CommandEnvelope command = factory.generateEnvelope();
+        CommandEnvelope command = factory.generateEnvelope();
 
-        final long id = commandRouting.apply(command.getMessage(), command.getCommandContext());
+        long id = commandRouting.apply(command.getMessage(), command.getCommandContext());
 
         assertEquals(CUSTOM_ANSWER, id);
     }

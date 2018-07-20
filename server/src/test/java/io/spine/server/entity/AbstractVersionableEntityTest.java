@@ -42,8 +42,8 @@ class AbstractVersionableEntityTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() throws Exception {
-        final AvEntity entity = new AvEntity(88L);
-        final AvEntity another = new AvEntity(88L);
+        AvEntity entity = new AvEntity(88L);
+        AvEntity another = new AvEntity(88L);
         another.updateState(entity.getState(), entity.getVersion());
 
         new EqualsTester().addEqualityGroup(entity, another)
@@ -57,10 +57,10 @@ class AbstractVersionableEntityTest {
     void haveUpdateStatePackagePrivate() throws NoSuchMethodException {
         boolean methodFound = false;
 
-        final Method[] methods = AbstractVersionableEntity.class.getDeclaredMethods();
+        Method[] methods = AbstractVersionableEntity.class.getDeclaredMethods();
         for (Method method : methods) {
             if ("updateState".equals(method.getName())) {
-                final Invokable<?, Object> updateState = Invokable.from(method);
+                Invokable<?, Object> updateState = Invokable.from(method);
                 assertTrue(updateState.isPackagePrivate());
                 methodFound = true;
             }

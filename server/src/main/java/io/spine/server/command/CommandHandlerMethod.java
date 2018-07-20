@@ -165,7 +165,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
 
         @Override
         public void checkAccessModifier(Method method) {
-            final MethodAccessChecker checker = MethodAccessChecker.forMethod(method);
+            MethodAccessChecker checker = MethodAccessChecker.forMethod(method);
             checker.checkPackagePrivate("Command handler method {} should be package-private.");
         }
 
@@ -178,7 +178,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
          */
         @Override
         protected void checkThrownExceptions(Method method) {
-            final MethodExceptionChecker checker = MethodExceptionChecker.forMethod(method);
+            MethodExceptionChecker checker = MethodExceptionChecker.forMethod(method);
             checker.checkThrowsNoExceptionsBut(RuntimeException.class, ThrowableMessage.class);
         }
 
@@ -201,7 +201,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            final boolean result = returnsMessageOrIterable(method);
+            boolean result = returnsMessageOrIterable(method);
             return result;
         }
     }

@@ -20,7 +20,6 @@
 
 package io.spine.server.commandbus;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Ack;
@@ -31,10 +30,9 @@ import io.spine.core.CommandId;
 import io.spine.server.bus.BusFilter;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.base.Optional.absent;
-import static com.google.common.base.Optional.of;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
@@ -43,6 +41,8 @@ import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.Commands.isScheduled;
 import static io.spine.server.bus.Buses.acknowledge;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 
 /**
  * Schedules commands delivering them to the target according to the scheduling options.
@@ -79,16 +79,16 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
     @Override
     public Optional<Ack> accept(CommandEnvelope envelope) {
-        final Command command = envelope.getCommand();
+        Command command = envelope.getCommand();
         if (isScheduled(command)) {
             scheduleAndStore(envelope);
             return of(acknowledge(envelope.getId()));
         }
-        return absent();
+        return empty();
     }
 
     private void scheduleAndStore(CommandEnvelope commandEnvelope) {
-        final Command command = commandEnvelope.getCommand();
+        Command command = commandEnvelope.getCommand();
         schedule(command);
         commandBus().commandStore()
                     .store(command, SCHEDULED);
@@ -112,7 +112,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         if (isScheduledAlready(command)) {
             return;
         }
-        final Command commandUpdated = setSchedulingTime(command, getCurrentTime());
+        Command commandUpdated = setSchedulingTime(command, getCurrentTime());
         doSchedule(commandUpdated);
         rememberAsScheduled(commandUpdated);
     }
@@ -151,13 +151,13 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
     }
 
     private static boolean isScheduledAlready(Command command) {
-        final CommandId id = command.getId();
-        final boolean isScheduledAlready = scheduledCommandIds.contains(id);
+        CommandId id = command.getId();
+        boolean isScheduledAlready = scheduledCommandIds.contains(id);
         return isScheduledAlready;
     }
 
     private static void rememberAsScheduled(Command command) {
-        final CommandId id = command.getId();
+        CommandId id = command.getId();
         scheduledCommandIds.add(id);
     }
 
@@ -183,10 +183,10 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         checkNotNull(command);
         checkNotNull(schedulingTime);
 
-        final Duration delay = command.getContext()
-                                      .getSchedule()
-                                      .getDelay();
-        final Command result = setSchedule(command, delay, schedulingTime);
+        Duration delay = command.getContext()
+                                .getSchedule()
+                                .getDelay();
+        Command result = setSchedule(command, delay, schedulingTime);
         return result;
     }
 
@@ -204,23 +204,23 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         checkNotNull(schedulingTime);
         checkValid(schedulingTime);
 
-        final CommandContext context = command.getContext();
-        final CommandContext.Schedule scheduleUpdated = context.getSchedule()
-                                                               .toBuilder()
-                                                               .setDelay(delay)
-                                                               .build();
-        final CommandContext contextUpdated = context.toBuilder()
-                                                     .setSchedule(scheduleUpdated)
-                                                     .build();
-
-        final Command.SystemProperties sysProps = command.getSystemProperties()
+        CommandContext context = command.getContext();
+        CommandContext.Schedule scheduleUpdated = context.getSchedule()
                                                          .toBuilder()
-                                                         .setSchedulingTime(schedulingTime)
+                                                         .setDelay(delay)
                                                          .build();
-        final Command result = command.toBuilder()
-                                      .setContext(contextUpdated)
-                                      .setSystemProperties(sysProps)
-                                      .build();
+        CommandContext contextUpdated = context.toBuilder()
+                                               .setSchedule(scheduleUpdated)
+                                               .build();
+
+        Command.SystemProperties sysProps = command.getSystemProperties()
+                                                   .toBuilder()
+                                                   .setSchedulingTime(schedulingTime)
+                                                   .build();
+        Command result = command.toBuilder()
+                                .setContext(contextUpdated)
+                                .setSystemProperties(sysProps)
+                                .build();
         return result;
     }
 }

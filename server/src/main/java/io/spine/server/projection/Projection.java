@@ -96,20 +96,20 @@ public abstract class Projection<I,
      * @return {@code true} if the projection state was changed as the result of playing the events
      */
     static boolean play(Projection projection, Iterable<Event> events) {
-        final ProjectionTransaction tx = ProjectionTransaction.start(projection);
+        ProjectionTransaction tx = ProjectionTransaction.start(projection);
         projection.play(events);
         tx.commit();
         return projection.isChanged();
     }
 
     void apply(Message eventMessage, EventContext eventContext) {
-        final EventSubscriberMethod method = thisClass().getSubscriber(EventClass.of(eventMessage));
+        EventSubscriberMethod method = thisClass().getSubscriber(EventClass.of(eventMessage));
         method.invoke(this, eventMessage, eventContext);
     }
 
     @Override
     public void play(Iterable<Event> events) {
-        final EventPlayer eventPlayer = EventPlayers.forTransactionOf(this);
+        EventPlayer eventPlayer = EventPlayers.forTransactionOf(this);
         eventPlayer.play(events);
     }
 }

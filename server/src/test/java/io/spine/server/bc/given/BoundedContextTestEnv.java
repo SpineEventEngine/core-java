@@ -77,7 +77,7 @@ public class BoundedContextTestEnv {
 
         @Assign
         public List<BcProjectStarted> handle(BcStartProject cmd, CommandContext ctx) {
-            final BcProjectStarted message = Given.EventMessage.projectStarted(cmd.getProjectId());
+            BcProjectStarted message = Given.EventMessage.projectStarted(cmd.getProjectId());
             return newArrayList(message);
         }
 

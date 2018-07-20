@@ -125,8 +125,8 @@ public class MethodAccessChecker {
      */
     @VisibleForTesting
     void warnOnWrongModifier(String messageFormat) {
-        final String methodFullName = method.getDeclaringClass()
-                                            .getName() + '.' + method.getName() + "()";
+        String methodFullName = method.getDeclaringClass()
+                                      .getName() + '.' + method.getName() + "()";
         log().warn(messageFormat, methodFullName);
     }
 
@@ -138,11 +138,10 @@ public class MethodAccessChecker {
      *         otherwise
      */
     private static boolean isPackagePrivate(Method method) {
-        final int modifiers = method.getModifiers();
-        final boolean result =
-                !(Modifier.isPublic(modifiers)
-                        || Modifier.isProtected(modifiers)
-                        || Modifier.isPrivate(modifiers));
+        int modifiers = method.getModifiers();
+        boolean result = !(Modifier.isPublic(modifiers)
+                         || Modifier.isProtected(modifiers)
+                         || Modifier.isPrivate(modifiers));
         return result;
     }
 

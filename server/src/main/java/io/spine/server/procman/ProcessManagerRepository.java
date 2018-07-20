@@ -96,25 +96,21 @@ public abstract class ProcessManagerRepository<I,
 
     private final Supplier<PmCommandDelivery<I, P>> commandDeliverySupplier =
             memoize(() -> {
-                final PmCommandDelivery<I, P> result =
-                        new PmCommandDelivery<>(this);
+                PmCommandDelivery<I, P> result = new PmCommandDelivery<>(this);
                 return result;
             });
 
     private final Supplier<PmEventDelivery<I, P>> eventDeliverySupplier =
             memoize(() -> {
-                final PmEventDelivery<I, P> result =
-                        new PmEventDelivery<>(this);
+                PmEventDelivery<I, P> result = new PmEventDelivery<>(this);
                 return result;
             });
 
     private final Supplier<PmRejectionDelivery<I, P>> rejectionDeliverySupplier =
             memoize(() -> {
-                final PmRejectionDelivery<I, P> result =
-                        new PmRejectionDelivery<>(this);
+                PmRejectionDelivery<I, P> result = new PmRejectionDelivery<>(this);
                 return result;
             });
-
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -173,22 +169,22 @@ public abstract class ProcessManagerRepository<I,
     public void onRegistered() {
         super.onRegistered();
 
-        final BoundedContext boundedContext = getBoundedContext();
-        final DelegatingRejectionDispatcher<I> rejDispatcher =
+        BoundedContext boundedContext = getBoundedContext();
+        DelegatingRejectionDispatcher<I> rejDispatcher =
                 DelegatingRejectionDispatcher.of(this);
 
-        final boolean handlesCommands = register(boundedContext.getCommandBus(),
-                                                 DelegatingCommandDispatcher.of(this));
-        final boolean handlesDomesticRejections = register(boundedContext.getRejectionBus(),
-                                                           rejDispatcher);
-        final boolean handlesExternalRejections = register(boundedContext.getIntegrationBus(),
-                                                           rejDispatcher.getExternalDispatcher());
-        final boolean handlesDomesticEvents = !getMessageClasses().isEmpty();
-        final boolean handlesExternalEvents = !getExternalEventDispatcher().getMessageClasses()
-                                                                           .isEmpty();
+        boolean handlesCommands = register(boundedContext.getCommandBus(),
+                                           DelegatingCommandDispatcher.of(this));
+        boolean handlesDomesticRejections = register(boundedContext.getRejectionBus(),
+                                                     rejDispatcher);
+        boolean handlesExternalRejections = register(boundedContext.getIntegrationBus(),
+                                                     rejDispatcher.getExternalDispatcher());
+        boolean handlesDomesticEvents = !getMessageClasses().isEmpty();
+        boolean handlesExternalEvents = !getExternalEventDispatcher().getMessageClasses()
+                                                                     .isEmpty();
 
-        final boolean subscribesToEvents = handlesDomesticEvents || handlesExternalEvents;
-        final boolean reactsUponRejections = handlesDomesticRejections || handlesExternalRejections;
+        boolean subscribesToEvents = handlesDomesticEvents || handlesExternalEvents;
+        boolean reactsUponRejections = handlesDomesticRejections || handlesExternalRejections;
 
         if (!handlesCommands && !subscribesToEvents && !reactsUponRejections) {
             throw newIllegalStateException(
@@ -215,8 +211,8 @@ public abstract class ProcessManagerRepository<I,
     @SuppressWarnings("unchecked")  // To avoid a long "train" of generic parameter definitions.
     private static <D extends MessageDispatcher<?, ?, ?>> boolean register(Bus<?, ?, ?, D> bus,
                                                                            D dispatcher) {
-        final boolean hasHandlerMethods = !dispatcher.getMessageClasses()
-                                                     .isEmpty();
+        boolean hasHandlerMethods = !dispatcher.getMessageClasses()
+                                               .isEmpty();
         if (hasHandlerMethods) {
             bus.register(dispatcher);
         }
@@ -306,7 +302,7 @@ public abstract class ProcessManagerRepository<I,
      * @see CommandHandlingEntity#dispatchCommand(CommandEnvelope)
      */
     @Override
-    public I dispatchCommand(final CommandEnvelope command) {
+    public I dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
         return PmCommandEndpoint.handle(this, command);
     }
@@ -359,7 +355,7 @@ public abstract class ProcessManagerRepository<I,
      * Posts passed events to {@link EventBus}.
      */
     void postEvents(Iterable<Event> events) {
-        final EventBus eventBus = getBoundedContext().getEventBus();
+        EventBus eventBus = getBoundedContext().getEventBus();
         for (Event event : events) {
             eventBus.post(event);
         }
@@ -386,8 +382,8 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     protected P findOrCreate(I id) {
-        final P result = super.findOrCreate(id);
-        final CommandBus commandBus = getBoundedContext().getCommandBus();
+        P result = super.findOrCreate(id);
+        CommandBus commandBus = getBoundedContext().getCommandBus();
         result.setCommandBus(commandBus);
         return result;
     }
@@ -419,7 +415,6 @@ public abstract class ProcessManagerRepository<I,
     protected PmEventDelivery<I, P> getEventEndpointDelivery() {
         return eventDeliverySupplier.get();
     }
-
 
     /**
      * Defines a strategy of rejection delivery applied to the instances managed by this repository.
@@ -465,7 +460,7 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
-        final Iterable<ShardedStreamConsumer<?, ?>> result =
+        Iterable<ShardedStreamConsumer<?, ?>> result =
                 ImmutableList.<ShardedStreamConsumer<?, ?>>of(
                         getCommandEndpointDelivery().getConsumer(),
                         getEventEndpointDelivery().getConsumer(),
@@ -473,10 +468,9 @@ public abstract class ProcessManagerRepository<I,
         return result;
     }
 
-
     @Override
     public BoundedContextName getBoundedContextName() {
-        final BoundedContextName name = getBoundedContext().getName();
+        BoundedContextName name = getBoundedContext().getName();
         return name;
     }
 
@@ -496,9 +490,9 @@ public abstract class ProcessManagerRepository<I,
 
         @Override
         public Set<ExternalMessageClass> getMessageClasses() {
-            final ProcessManagerClass<?> pmClass = Model.getInstance()
-                                                        .asProcessManagerClass(getEntityClass());
-            final Set<EventClass> eventClasses = pmClass.getExternalEventReactions();
+            ProcessManagerClass<?> pmClass = Model.getInstance()
+                                                  .asProcessManagerClass(getEntityClass());
+            Set<EventClass> eventClasses = pmClass.getExternalEventReactions();
             return ExternalMessageClass.fromEventClasses(eventClasses);
         }
 

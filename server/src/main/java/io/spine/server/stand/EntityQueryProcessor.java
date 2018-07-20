@@ -48,26 +48,26 @@ class EntityQueryProcessor implements QueryProcessor {
 
     @Override
     public ImmutableCollection<Any> process(Query query) {
-        final ImmutableList.Builder<Any> resultBuilder = ImmutableList.builder();
+        ImmutableList.Builder<Any> resultBuilder = ImmutableList.builder();
 
-        final Target target = query.getTarget();
-        final FieldMask fieldMask = query.getFieldMask();
+        Target target = query.getTarget();
+        FieldMask fieldMask = query.getFieldMask();
 
-        final Iterator<? extends Entity> entities;
+        Iterator<? extends Entity> entities;
         if (target.getIncludeAll() && fieldMask.getPathsList()
                                                .isEmpty()) {
             entities = repository.loadAll();
         } else {
-            final EntityFilters filters = target.getFilters();
+            EntityFilters filters = target.getFilters();
             entities = repository.find(filters, fieldMask);
         }
         while (entities.hasNext()) {
-            final Entity entity = entities.next();
-            final Message state = entity.getState();
-            final Any packedState = AnyPacker.pack(state);
+            Entity entity = entities.next();
+            Message state = entity.getState();
+            Any packedState = AnyPacker.pack(state);
             resultBuilder.add(packedState);
         }
-        final ImmutableList<Any> result = resultBuilder.build();
+        ImmutableList<Any> result = resultBuilder.build();
         return result;
     }
 }

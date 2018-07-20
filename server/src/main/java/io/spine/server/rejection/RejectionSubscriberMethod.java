@@ -74,7 +74,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
     public Object invoke(Object target, Message rejectionMessage, RejectionContext context) {
         ensureExternalMatch(this, context.getExternal());
 
-        final Object result = doInvoke(target, rejectionMessage, context);
+        Object result = doInvoke(target, rejectionMessage, context);
         return result;
     }
 
@@ -104,13 +104,13 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
 
         @Override
         public void checkAccessModifier(Method method) {
-            final MethodAccessChecker checker = forMethod(method);
+            MethodAccessChecker checker = forMethod(method);
             checker.checkPublic("Rejection subscriber {} must be declared 'public'");
         }
 
         @Override
         protected RejectionSubscriberMethod createFromMethod(Method method) {
-            final RejectionSubscriberMethod result = new RejectionSubscriberMethod(method);
+            RejectionSubscriberMethod result = new RejectionSubscriberMethod(method);
             return result;
         }
 
@@ -138,7 +138,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            final boolean isVoid = Void.TYPE.equals(method.getReturnType());
+            boolean isVoid = Void.TYPE.equals(method.getReturnType());
             return isVoid;
         }
     }

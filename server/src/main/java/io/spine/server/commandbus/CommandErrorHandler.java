@@ -75,7 +75,7 @@ public final class CommandErrorHandler {
         checkNotNull(envelope);
         checkNotNull(exception);
         if (causedByRejection(exception)) {
-            final Rejection rejection = rejectWithCause(envelope.getCommand(), exception);
+            Rejection rejection = rejectWithCause(envelope.getCommand(), exception);
             rejectionBus.post(rejection);
         } else {
             log().error(format("Error dispatching command (class: %s id: %s).",

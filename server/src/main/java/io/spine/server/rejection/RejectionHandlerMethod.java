@@ -72,7 +72,7 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionCont
     public HandlerKey key() {
         if (kind == Kind.COMMAND_AWARE || kind == Kind.COMMAND_MESSAGE_AWARE) {
             @SuppressWarnings("unchecked") // RejectionFilterPredicate ensures that
-            Class<? extends Message> rawCommandClass = 
+            Class<? extends Message> rawCommandClass =
                     (Class<? extends Message>) getMethod().getParameterTypes()[1];
             return HandlerKey.of(getMessageClass(), CommandClass.of(rawCommandClass));
         } else {
@@ -81,13 +81,13 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionCont
     }
 
     private static Kind getKind(Method method) {
-        final Class[] paramTypes = method.getParameterTypes();
-        final int paramCount = paramTypes.length;
+        Class[] paramTypes = method.getParameterTypes();
+        int paramCount = paramTypes.length;
         switch (paramCount) {
             case 1:
                 return Kind.REJECTION_MESSAGE_AWARE;
             case 2:
-                final Class<?> secondParamType = paramTypes[1];
+                Class<?> secondParamType = paramTypes[1];
                 if (secondParamType.equals(CommandContext.class)) {
                     return Kind.COMMAND_CONTEXT_AWARE;
                 }
@@ -120,11 +120,11 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionCont
         checkNotNull(target);
         checkNotNull(rejectionMsg);
         checkNotNull(context);
-        final Command command = context.getCommand();
-        final CommandContext commandContext = command.getContext();
+        Command command = context.getCommand();
+        CommandContext commandContext = command.getContext();
         try {
-            final Object output;
-            final Method method = getMethod();
+            Object output;
+            Method method = getMethod();
             Message commandMessage;
             switch (kind) {
                 case REJECTION_MESSAGE_AWARE:

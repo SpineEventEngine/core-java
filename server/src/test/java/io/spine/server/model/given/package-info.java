@@ -18,6 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * Test environment classes for tests of the {@code io.spine.server.model} package.
+ */
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.model.given;

@@ -93,7 +93,7 @@ public interface TenantIndex extends AutoCloseable {
          */
         public static TenantIndex createDefault(StorageFactory storageFactory) {
             checkNotNull(storageFactory);
-            final DefaultTenantRepository tenantRepo = new DefaultTenantRepository();
+            DefaultTenantRepository tenantRepo = new DefaultTenantRepository();
             tenantRepo.initStorage(storageFactory);
             return tenantRepo;
         }

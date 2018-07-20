@@ -108,13 +108,13 @@ public class AggregateTestEnv {
         return eventFactory().createEvent(eventMessage, withNumber(versionNumber));
     }
 
-    public static RejectionEnvelope 
+    public static RejectionEnvelope
     cannotModifyDeletedEntity(Class<? extends Message> commandMessageCls) {
-        final CannotModifyDeletedEntity rejectionMsg = CannotModifyDeletedEntity.newBuilder()
+        CannotModifyDeletedEntity rejectionMsg = CannotModifyDeletedEntity.newBuilder()
                                                                                 .build();
-        final Command command = io.spine.server.commandbus.Given.ACommand.withMessage(
+        Command command = io.spine.server.commandbus.Given.ACommand.withMessage(
                 Sample.messageOfType(commandMessageCls));
-        final Rejection rejection = Rejections.createRejection(rejectionMsg, command);
+        Rejection rejection = Rejections.createRejection(rejectionMsg, command);
         return RejectionEnvelope.of(rejection);
     }
 

@@ -320,7 +320,7 @@ public abstract class HandlerMethod<M extends MessageClass, C extends Message> {
          * @see MethodExceptionChecker
          */
         protected void checkThrownExceptions(Method method) {
-            final MethodExceptionChecker checker = forMethod(method);
+            MethodExceptionChecker checker = forMethod(method);
             checker.checkThrowsNoCheckedExceptions();
         }
     }

@@ -90,7 +90,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("invalid command")
         void invalidCmd() {
-            final Command cmd = newCommandWithoutContext();
+            Command cmd = newCommandWithoutContext();
 
             commandBus.post(cmd, observer);
 
@@ -104,7 +104,7 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
         @DisplayName("multitenant command in single tenant context")
         void multitenantCmdIfSingleTenant() {
             // Create a multi-tenant command.
-            final Command cmd = createProject();
+            Command cmd = createProject();
 
             commandBus.post(cmd, observer);
 
@@ -118,20 +118,20 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("propagate rejections to rejection bus")
     void propagateRejections() {
-        final FaultyHandler faultyHandler = new FaultyHandler(eventBus);
+        FaultyHandler faultyHandler = new FaultyHandler(eventBus);
         commandBus.register(faultyHandler);
         MemoizingRejectionSubscriber rejectionSubscriber = new MemoizingRejectionSubscriber();
         rejectionBus.register(rejectionSubscriber);
 
-        final Command addTaskCommand = clearTenantId(addTask());
-        final MemoizingObserver<Ack> observer = memoizingObserver();
+        Command addTaskCommand = clearTenantId(addTask());
+        MemoizingObserver<Ack> observer = memoizingObserver();
         commandBus.post(addTaskCommand, observer);
 
-        final InvalidProjectName throwable = faultyHandler.getThrowable();
-        final Rejection expectedRejection = toRejection(throwable, addTaskCommand);
+        InvalidProjectName throwable = faultyHandler.getThrowable();
+        Rejection expectedRejection = toRejection(throwable, addTaskCommand);
         rejectionSubscriber.verifyGot(expectedRejection);
 
-        final Ack ack = observer.firstResponse();
+        Ack ack = observer.firstResponse();
         assertTrue(ack.getStatus()
                       .hasOk());
     }
@@ -144,8 +144,8 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
                                                                   secondCommand);
         commandBus.register(handler);
 
-        final Command firstCommand = clearTenantId(firstCreateProject());
-        final MemoizingObserver<Ack> observer = memoizingObserver();
+        Command firstCommand = clearTenantId(firstCreateProject());
+        MemoizingObserver<Ack> observer = memoizingObserver();
         commandBus.post(firstCommand, observer);
 
         List<Message> handledCommands = handler.handledCommands();
@@ -157,14 +157,14 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("do not propagate dispatching errors")
     void doNotPropagateExceptions() {
-        final FaultyHandler faultyHandler = new FaultyHandler(eventBus);
+        FaultyHandler faultyHandler = new FaultyHandler(eventBus);
         commandBus.register(faultyHandler);
 
-        final Command remoteTaskCommand = clearTenantId(removeTask());
-        final MemoizingObserver<Ack> observer = memoizingObserver();
+        Command remoteTaskCommand = clearTenantId(removeTask());
+        MemoizingObserver<Ack> observer = memoizingObserver();
         commandBus.post(remoteTaskCommand, observer);
 
-        final Ack ack = observer.firstResponse();
+        Ack ack = observer.firstResponse();
         assertTrue(ack.getStatus()
                       .hasOk());
     }
@@ -172,14 +172,14 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("create validator once")
     void createValidatorOnce() {
-        final EnvelopeValidator<CommandEnvelope> validator = commandBus.getValidator();
+        EnvelopeValidator<CommandEnvelope> validator = commandBus.getValidator();
         assertNotNull(validator);
         assertSame(validator, commandBus.getValidator());
     }
 
     @Override
     protected Command newCommand() {
-        final Message commandMessage = Given.CommandMessage.createProjectMessage();
+        Message commandMessage = Given.CommandMessage.createProjectMessage();
         return TestActorRequestFactory.newInstance(SingleTenantCommandBusTest.class)
                                       .createCommand(commandMessage);
     }

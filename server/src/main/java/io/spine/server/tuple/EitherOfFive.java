@@ -61,7 +61,7 @@ public class EitherOfFive <A extends Message,
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
     EitherOfFive<A, B, C, D, E> withA(A a) {
         checkNotNull(a);
-        final EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(a, 0);
+        EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(a, 0);
         return result;
     }
 
@@ -72,7 +72,7 @@ public class EitherOfFive <A extends Message,
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
     EitherOfFive<A, B, C, D, E> withB(B b) {
         checkNotNull(b);
-        final EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(b, 1);
+        EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(b, 1);
         return result;
     }
 
@@ -83,7 +83,7 @@ public class EitherOfFive <A extends Message,
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
     EitherOfFive<A, B, C, D, E> withC(C c) {
         checkNotNull(c);
-        final EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(c, 2);
+        EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(c, 2);
         return result;
     }
 
@@ -94,7 +94,7 @@ public class EitherOfFive <A extends Message,
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
     EitherOfFive<A, B, C, D, E> withD(D d) {
         checkNotNull(d);
-        final EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(d, 3);
+        EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(d, 3);
         return result;
     }
 
@@ -105,7 +105,7 @@ public class EitherOfFive <A extends Message,
     <A extends Message, B extends Message, C extends Message, D extends Message, E extends Message>
     EitherOfFive<A, B, C, D, E> withE(E e) {
         checkNotNull(e);
-        final EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(e, 4);
+        EitherOfFive<A, B, C, D, E> result = new EitherOfFive<>(e, 4);
         return result;
     }
 

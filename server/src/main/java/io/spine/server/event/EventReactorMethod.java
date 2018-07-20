@@ -70,8 +70,8 @@ public final class EventReactorMethod extends HandlerMethod<EventClass, EventCon
     public List<? extends Message> invoke(Object target, Message message, EventContext context) {
         ensureExternalMatch(this, context.getExternal());
 
-        final Object handlingResult = super.invoke(target, message, context);
-        final List<? extends Message> eventMessages = toList(handlingResult);
+        Object handlingResult = super.invoke(target, message, context);
+        List<? extends Message> eventMessages = toList(handlingResult);
         return eventMessages;
     }
 
@@ -110,7 +110,7 @@ public final class EventReactorMethod extends HandlerMethod<EventClass, EventCon
 
         @Override
         public void checkAccessModifier(Method method) {
-            final MethodAccessChecker checker = forMethod(method);
+            MethodAccessChecker checker = forMethod(method);
             checker.checkPackagePrivate("Reactive handler method {} should be package-private.");
         }
 
@@ -131,7 +131,7 @@ public final class EventReactorMethod extends HandlerMethod<EventClass, EventCon
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            final boolean returnsMessageOrIterable = returnsMessageOrIterable(method);
+            boolean returnsMessageOrIterable = returnsMessageOrIterable(method);
             if (returnsMessageOrIterable) {
                 checkOutputMessageType(method);
                 return true;
@@ -149,7 +149,7 @@ public final class EventReactorMethod extends HandlerMethod<EventClass, EventCon
          *                               the return value
          */
         private static void checkOutputMessageType(Method method) {
-            final Class<?> returnType = method.getReturnType();
+            Class<?> returnType = method.getReturnType();
 
             // The method returns List. We're OK.
             if (Iterable.class.isAssignableFrom(returnType)) {
@@ -157,14 +157,14 @@ public final class EventReactorMethod extends HandlerMethod<EventClass, EventCon
             }
 
             // The returned value must not be of the same type as the passed message param.
-            final Class<?>[] paramTypes = method.getParameterTypes();
+            Class<?>[] paramTypes = method.getParameterTypes();
             if (paramTypes.length < 1) {
                 /* The number of parameters is checked by `verifyParams()`.
                    We check the number of parameters here to avoid accidental exception in case
                    this method is called before `verifyParams()`. */
                 return;
             }
-            final Class<?> firstParamType = paramTypes[0];
+            Class<?> firstParamType = paramTypes[0];
             if (firstParamType.equals(returnType)) {
                 throw newIllegalStateException(
                         "React method cannot return the same event message {}",

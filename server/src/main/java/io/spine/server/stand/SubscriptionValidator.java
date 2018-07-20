@@ -19,13 +19,14 @@
  */
 package io.spine.server.stand;
 
-import com.google.common.base.Optional;
 import io.spine.base.Error;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionValidationError;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantAwareFunction;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -62,10 +63,10 @@ class SubscriptionValidator extends RequestValidator<Subscription> {
 
     @Override
     protected Optional<RequestNotSupported<Subscription>> isSupported(Subscription request) {
-        final boolean includedInRegistry = checkInRegistry(request);
+        boolean includedInRegistry = checkInRegistry(request);
 
         if (includedInRegistry) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         return Optional.of(missingInRegistry());
@@ -86,15 +87,15 @@ class SubscriptionValidator extends RequestValidator<Subscription> {
     }
 
     private boolean checkInRegistry(Subscription request) {
-        final TenantId tenantId = request.getTopic()
-                                         .getContext()
-                                         .getTenantId();
-        final Boolean result = new TenantAwareFunction<Subscription, Boolean>(tenantId) {
+        TenantId tenantId = request.getTopic()
+                                   .getContext()
+                                   .getTenantId();
+        Boolean result = new TenantAwareFunction<Subscription, Boolean>(tenantId) {
 
             @Override
             public Boolean apply(@Nullable Subscription input) {
                 checkNotNull(input);
-                final boolean result = registry.containsId(input.getId());
+                boolean result = registry.containsId(input.getId());
                 return result;
             }
         }.execute(request);

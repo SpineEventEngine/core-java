@@ -20,14 +20,17 @@
 
 package io.spine.server.tuple;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Empty;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import io.spine.validate.Validate;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -46,8 +49,8 @@ class Element implements Serializable {
     private static final long serialVersionUID = 0L;
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass") // possible values are serializable
-    private final Object value;
-    private final Type type;
+    private Object value;
+    private Type type;
 
     /**
      * Creates a tuple element with a value which can be {@link GeneratedMessageV3},
@@ -60,7 +63,7 @@ class Element implements Serializable {
         } else if (value instanceof Optional) {
             this.type = Type.OPTIONAL;
         } else if (value instanceof GeneratedMessageV3) {
-            final GeneratedMessageV3 messageV3 = (GeneratedMessageV3) value;
+            GeneratedMessageV3 messageV3 = (GeneratedMessageV3) value;
             checkNotDefault(messageV3);
             this.type = Type.MESSAGE;
         } else {
@@ -77,7 +80,7 @@ class Element implements Serializable {
      */
     static <T> T value(Tuple tuple, int index) {
         @SuppressWarnings("unchecked") // The caller is responsible for the correct type.
-        final T value = (T) tuple.get(index);
+        T value = (T) tuple.get(index);
         return value;
     }
 
@@ -85,8 +88,8 @@ class Element implements Serializable {
      * Ensures that the passed message is not default or is an instance of {@link Empty}.
      */
     private static void checkNotDefault(Message value) {
-        final String valueClass = value.getClass()
-                                       .getName();
+        String valueClass = value.getClass()
+                                 .getName();
         checkArgument(
                 Validate.isNotDefault(value),
                 "Tuples cannot contain default values. Default value of %s encountered.",
@@ -104,7 +107,7 @@ class Element implements Serializable {
             case EITHER:
                 return ((Either) value).getValue();
             case OPTIONAL: {
-                final Optional optional = (Optional) value;
+                Optional optional = (Optional) value;
                 Message result = optional.isPresent()
                                  ? (Message) optional.get()
                                  : Empty.getDefaultInstance();
@@ -117,6 +120,27 @@ class Element implements Serializable {
 
     private IllegalStateException uncoveredType() {
         throw newIllegalStateException("Unsupported element type encountered %s", this.type);
+    }
+
+    private void writeObject(ObjectOutputStream o) throws IOException {
+        o.writeObject(type);
+        if (type == Type.OPTIONAL) {
+            Optional optionalValue = (Optional) value;
+            o.writeObject(optionalValue.orElse(null));
+        }
+        if (type != Type.OPTIONAL) {
+            o.writeObject(value);
+        }
+    }
+
+    private void readObject(ObjectInputStream o) throws IOException, ClassNotFoundException {
+        type = (Type) o.readObject();
+        if (type == Type.OPTIONAL) {
+            value = Optional.ofNullable(o.readObject());
+        }
+        if (type != Type.OPTIONAL) {
+            value = o.readObject();
+        }
     }
 
     @Override
@@ -132,7 +156,7 @@ class Element implements Serializable {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        final Element other = (Element) obj;
+        Element other = (Element) obj;
         return Objects.equals(this.value, other.value)
                 && Objects.equals(this.type, other.type);
     }
@@ -152,7 +176,7 @@ class Element implements Serializable {
 
     /**
      * A marker interface for a tuple element which value can be
-     * {@link com.google.common.base.Optional Optional}.
+     * {@link java.util.Optional Optional}.
      */
     interface OptionalValue {
     }

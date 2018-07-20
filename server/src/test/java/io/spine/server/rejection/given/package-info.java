@@ -22,7 +22,10 @@
  * Test environment classes for the {@code io.spine.server.rejection} package.
  */
 
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.rejection.given;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

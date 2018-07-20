@@ -74,16 +74,16 @@ class IdempotencyGuardTest {
     @Test
     @DisplayName("throw DuplicateCommandException when command was handled since last snapshot")
     void throwExceptionForDuplicateCommand() {
-        final TenantId tenantId = newTenantId();
-        final ProjectId projectId = newProjectId();
-        final Command createCommand = command(createProject(projectId), tenantId);
+        TenantId tenantId = newTenantId();
+        ProjectId projectId = newProjectId();
+        Command createCommand = command(createProject(projectId), tenantId);
 
-        final CommandBus commandBus = boundedContext.getCommandBus();
-        final StreamObserver<Ack> noOpObserver = noOpObserver();
+        CommandBus commandBus = boundedContext.getCommandBus();
+        StreamObserver<Ack> noOpObserver = noOpObserver();
         commandBus.post(createCommand, noOpObserver);
 
-        final IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
-        final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
+        IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
+        IdempotencyGuard guard = new IdempotencyGuard(aggregate);
         assertThrows(DuplicateCommandException.class, () -> guard.check(of(createCommand)));
     }
 
@@ -92,47 +92,47 @@ class IdempotencyGuardTest {
     void notThrowForCommandHandledAfterSnapshot() {
         repository.setSnapshotTrigger(1);
 
-        final TenantId tenantId = newTenantId();
-        final ProjectId projectId = newProjectId();
-        final Command createCommand = command(createProject(projectId), tenantId);
+        TenantId tenantId = newTenantId();
+        ProjectId projectId = newProjectId();
+        Command createCommand = command(createProject(projectId), tenantId);
 
-        final CommandBus commandBus = boundedContext.getCommandBus();
-        final StreamObserver<Ack> noOpObserver = noOpObserver();
+        CommandBus commandBus = boundedContext.getCommandBus();
+        StreamObserver<Ack> noOpObserver = noOpObserver();
         commandBus.post(createCommand, noOpObserver);
 
-        final IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
+        IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
 
-        final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
+        IdempotencyGuard guard = new IdempotencyGuard(aggregate);
         guard.check(of(createCommand));
     }
 
     @Test
     @DisplayName("not throw exception if command was not handled")
     void notThrowForCommandNotHandled() {
-        final TenantId tenantId = newTenantId();
-        final ProjectId projectId = newProjectId();
-        final Command createCommand = command(createProject(projectId), tenantId);
-        final IgTestAggregate aggregate = new IgTestAggregate(projectId);
+        TenantId tenantId = newTenantId();
+        ProjectId projectId = newProjectId();
+        Command createCommand = command(createProject(projectId), tenantId);
+        IgTestAggregate aggregate = new IgTestAggregate(projectId);
 
-        final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
+        IdempotencyGuard guard = new IdempotencyGuard(aggregate);
         guard.check(of(createCommand));
     }
 
     @Test
     @DisplayName("not throw exception if another command was handled")
     void notThrowIfAnotherCommandHandled() {
-        final TenantId tenantId = newTenantId();
-        final ProjectId projectId = newProjectId();
-        final Command createCommand = command(createProject(projectId), tenantId);
-        final Command startCommand = command(startProject(projectId), tenantId);
+        TenantId tenantId = newTenantId();
+        ProjectId projectId = newProjectId();
+        Command createCommand = command(createProject(projectId), tenantId);
+        Command startCommand = command(startProject(projectId), tenantId);
 
-        final CommandBus commandBus = boundedContext.getCommandBus();
-        final StreamObserver<Ack> noOpObserver = noOpObserver();
+        CommandBus commandBus = boundedContext.getCommandBus();
+        StreamObserver<Ack> noOpObserver = noOpObserver();
         commandBus.post(createCommand, noOpObserver);
 
-        final IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
+        IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
 
-        final IdempotencyGuard guard = new IdempotencyGuard(aggregate);
+        IdempotencyGuard guard = new IdempotencyGuard(aggregate);
         guard.check(of(startCommand));
     }
 }

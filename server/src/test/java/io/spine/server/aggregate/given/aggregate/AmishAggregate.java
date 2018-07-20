@@ -65,14 +65,14 @@ public class AmishAggregate extends Aggregate<ProjectId, Project, ProjectVBuilde
 
     @Assign
     AggProjectPaused handle(AggPauseProject cmd, CommandContext ctx) {
-        final AggProjectPaused event = projectPaused(cmd.getProjectId());
+        AggProjectPaused event = projectPaused(cmd.getProjectId());
         return event;
     }
 
     @Assign
     List<Message> handle(AggCancelProject cmd, CommandContext ctx) {
-        final AggProjectPaused firstPaused = projectPaused(cmd.getProjectId());
-        final AggProjectCancelled thenCancelled = projectCancelled(cmd.getProjectId());
+        AggProjectPaused firstPaused = projectPaused(cmd.getProjectId());
+        AggProjectCancelled thenCancelled = projectCancelled(cmd.getProjectId());
         return Lists.newArrayList(firstPaused, thenCancelled);
     }
 

@@ -114,7 +114,7 @@ final class EventApplierMethod extends HandlerMethod<EventClass, Empty> {
 
         @Override
         public void checkAccessModifier(Method method) {
-            final MethodAccessChecker checker = forMethod(method);
+            MethodAccessChecker checker = forMethod(method);
             checker.checkPrivate("Event applier method {} must be declared 'private'.");
         }
 
@@ -139,19 +139,19 @@ final class EventApplierMethod extends HandlerMethod<EventClass, Empty> {
         @SuppressWarnings("MethodDoesntCallSuperMethod") // because we override the checking.
         @Override
         protected boolean verifyParams(Method method) {
-            final Class<?>[] parameterTypes = method.getParameterTypes();
-            final boolean paramCountIsValid = parameterTypes.length == NUMBER_OF_PARAMS;
+            Class<?>[] parameterTypes = method.getParameterTypes();
+            boolean paramCountIsValid = parameterTypes.length == NUMBER_OF_PARAMS;
             if (!paramCountIsValid) {
                 return false;
             }
-            final Class<?> paramType = parameterTypes[EVENT_PARAM_INDEX];
-            final boolean paramIsMessage = Message.class.isAssignableFrom(paramType);
+            Class<?> paramType = parameterTypes[EVENT_PARAM_INDEX];
+            boolean paramIsMessage = Message.class.isAssignableFrom(paramType);
             return paramIsMessage;
         }
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            final boolean isVoid = Void.TYPE.equals(method.getReturnType());
+            boolean isVoid = Void.TYPE.equals(method.getReturnType());
             return isVoid;
         }
     }

@@ -53,7 +53,7 @@ class IdempotencyGuard {
      */
     void check(CommandEnvelope envelope) {
         if (didHandleSinceLastSnapshot(envelope)) {
-            final Command command = envelope.getOuterObject();
+            Command command = envelope.getOuterObject();
             throw DuplicateCommandException.of(command);
         }
     }
@@ -71,11 +71,11 @@ class IdempotencyGuard {
      * @return {@code true} if the command was handled since last snapshot, {@code false} otherwise
      */
     private boolean didHandleSinceLastSnapshot(CommandEnvelope envelope) {
-        final CommandId newCommandId = envelope.getId();
-        final Iterator<Event> iterator = aggregate.historyBackward();
+        CommandId newCommandId = envelope.getId();
+        Iterator<Event> iterator = aggregate.historyBackward();
         while (iterator.hasNext()) {
-            final Event event = iterator.next();
-            final CommandId eventRootCommandId = getRootCommandId(event);
+            Event event = iterator.next();
+            CommandId eventRootCommandId = getRootCommandId(event);
             if (newCommandId.equals(eventRootCommandId)) {
                 return true;
             }

@@ -45,13 +45,10 @@ public final class HandlerMethods {
      * @return the predicate
      */
     public static <M extends HandlerMethod<?, ?>> Predicate<M> externalPredicate() {
-        return new Predicate<M>() {
-            @Override
-            public boolean apply(@Nullable M input) {
-                final M method = checkNotNull(input);
-                final boolean result = isExternal(method);
-                return result;
-            }
+        return input -> {
+            M method = checkNotNull(input);
+            boolean result = isExternal(method);
+            return result;
         };
     }
 
@@ -63,13 +60,10 @@ public final class HandlerMethods {
      * @return the predicate
      */
     public static <M extends HandlerMethod<?, ?>> Predicate<M> domesticPredicate() {
-        return new Predicate<M>() {
-            @Override
-            public boolean apply(@Nullable M input) {
-                final M method = checkNotNull(input);
-                final boolean result = !isExternal(method);
-                return result;
-            }
+        return input -> {
+            M method = checkNotNull(input);
+            boolean result = !isExternal(method);
+            return result;
         };
     }
 

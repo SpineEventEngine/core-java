@@ -20,7 +20,6 @@
 
 package io.spine.server.entity.given;
 
-import com.google.common.base.Optional;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.DefaultRecordBasedRepository;
 import io.spine.server.entity.Repository;
@@ -28,6 +27,8 @@ import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
+
+import java.util.Optional;
 
 /**
  * @author Alexander Yevsyukov
@@ -92,7 +93,7 @@ public class RepositoryTestEnv {
         @Override
         public Optional<ProjectEntity> find(ProjectId id) {
             if (id.equals(troublesome)) {
-                return Optional.absent();
+                return Optional.empty();
             }
             return super.find(id);
         }

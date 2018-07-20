@@ -52,7 +52,7 @@ public final class EitherOfThree<A extends Message, B extends Message, C extends
     public static <A extends Message, B extends Message, C extends Message>
     EitherOfThree<A, B, C> withA(A a) {
         checkNotNull(a);
-        final EitherOfThree<A, B, C> result = new EitherOfThree<>(a, 0);
+        EitherOfThree<A, B, C> result = new EitherOfThree<>(a, 0);
         return result;
     }
 
@@ -62,7 +62,7 @@ public final class EitherOfThree<A extends Message, B extends Message, C extends
     public static <A extends Message, B extends Message, C extends Message>
     EitherOfThree<A, B, C> withB(B b) {
         checkNotNull(b);
-        final EitherOfThree<A, B, C> result = new EitherOfThree<>(b, 1);
+        EitherOfThree<A, B, C> result = new EitherOfThree<>(b, 1);
         return result;
     }
 
@@ -72,7 +72,7 @@ public final class EitherOfThree<A extends Message, B extends Message, C extends
     public static <A extends Message, B extends Message, C extends Message>
     EitherOfThree<A, B, C> withC(C c) {
         checkNotNull(c);
-        final EitherOfThree<A, B, C> result = new EitherOfThree<>(c, 2);
+        EitherOfThree<A, B, C> result = new EitherOfThree<>(c, 2);
         return result;
     }
 

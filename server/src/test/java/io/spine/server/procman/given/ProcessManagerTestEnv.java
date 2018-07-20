@@ -124,8 +124,8 @@ public class ProcessManagerTestEnv {
          */
         public void injectCommandBus(CommandBus commandBus) {
             try {
-                final Method method = ProcessManager.class.getDeclaredMethod("setCommandBus",
-                                                                             CommandBus.class);
+                Method method = ProcessManager.class.getDeclaredMethod("setCommandBus",
+                                                                       CommandBus.class);
                 method.setAccessible(true);
                 method.invoke(this, commandBus);
             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {

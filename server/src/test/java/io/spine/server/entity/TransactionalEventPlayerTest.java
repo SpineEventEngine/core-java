@@ -58,11 +58,11 @@ class TransactionalEventPlayerTest {
     @Test
     @DisplayName("delegate applying events to transaction when playing")
     void delegateEventsToTx() {
-        final TxPlayingEntity entity = entityWithActiveTx(false);
-        final Transaction txMock = entity.getTransaction();
+        TxPlayingEntity entity = entityWithActiveTx(false);
+        Transaction txMock = entity.getTransaction();
         assertNotNull(txMock);
-        final Event firstEvent = eventFactory.createEvent(newUuidValue());
-        final Event secondEvent = eventFactory.createEvent(newUuidValue());
+        Event firstEvent = eventFactory.createEvent(newUuidValue());
+        Event secondEvent = eventFactory.createEvent(newUuidValue());
 
         entity.play(newArrayList(firstEvent, secondEvent));
 
@@ -72,8 +72,8 @@ class TransactionalEventPlayerTest {
 
     @SuppressWarnings("unchecked")  // OK for the test.
     private static TxPlayingEntity entityWithActiveTx(boolean txChanged) {
-        final TxPlayingEntity entity = new TxPlayingEntity();
-        final Transaction tx = spy(mock(Transaction.class));
+        TxPlayingEntity entity = new TxPlayingEntity();
+        Transaction tx = spy(mock(Transaction.class));
         when(tx.isActive()).thenReturn(true);
         when(tx.isStateChanged()).thenReturn(txChanged);
         when(tx.getEntity()).thenReturn(entity);

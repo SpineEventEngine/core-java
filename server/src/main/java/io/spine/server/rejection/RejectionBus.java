@@ -20,7 +20,6 @@
 package io.spine.server.rejection;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
@@ -40,10 +39,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Deque;
+import java.util.Optional;
 import java.util.Set;
 
-import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Optional.empty;
 
 /**
  * Dispatches the business rejections that occur during the command processing
@@ -64,8 +64,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     private final Deque<BusFilter<RejectionEnvelope>> filterChain;
 
     /** The enricher for posted rejections or {@code null} if the enrichment is not supported. */
-    @Nullable
-    private final RejectionEnricher enricher;
+    private final @Nullable RejectionEnricher enricher;
 
     /**
      * Creates a new instance according to the pre-configured {@code Builder}.
@@ -97,7 +96,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
         if (enricher == null || !enricher.canBeEnriched(rejection)) {
             return rejection;
         }
-        final RejectionEnvelope enriched = enricher.enrich(rejection);
+        RejectionEnvelope enriched = enricher.enrich(rejection);
         return enriched;
     }
 
@@ -114,7 +113,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
 
     @Override
     protected RejectionEnvelope toEnvelope(Rejection message) {
-        final RejectionEnvelope result = RejectionEnvelope.of(message);
+        RejectionEnvelope result = RejectionEnvelope.of(message);
         return result;
     }
 
@@ -172,8 +171,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
          * <p>If not set, the enrichments will NOT be supported
          * in the {@code RejectionBus} instance built.
          */
-        @Nullable
-        private RejectionEnricher enricher;
+        private @Nullable RejectionEnricher enricher;
 
         /** Prevents direct instantiation. */
         private Builder() {
@@ -196,7 +194,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
         }
 
         public Optional<RejectionEnricher> getEnricher() {
-            return Optional.fromNullable(enricher);
+            return Optional.ofNullable(enricher);
         }
 
         @Override
@@ -218,8 +216,8 @@ public class RejectionBus extends CommandOutputBus<Rejection,
 
         @Override
         public UnhandledRejectionException handle(RejectionEnvelope envelope) {
-            final Message message = envelope.getMessage();
-            final UnhandledRejectionException exception = new UnhandledRejectionException(message);
+            Message message = envelope.getMessage();
+            UnhandledRejectionException exception = new UnhandledRejectionException(message);
             return exception;
         }
     }
@@ -233,7 +231,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
         @Override
         public Optional<MessageInvalid> validate(RejectionEnvelope envelope) {
             checkNotNull(envelope);
-            return absent();
+            return empty();
         }
     }
 

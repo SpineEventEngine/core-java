@@ -63,7 +63,7 @@ public class DispatcherRegistry<C extends MessageClass,
      */
     protected void register(D dispatcher) {
         checkDispatcher(dispatcher);
-        final Set<C> messageClasses = dispatcher.getMessageClasses();
+        Set<C> messageClasses = dispatcher.getMessageClasses();
         for (C messageClass : messageClasses) {
             dispatchers.put(messageClass, dispatcher);
         }
@@ -78,7 +78,7 @@ public class DispatcherRegistry<C extends MessageClass,
         checkNotNull(dispatcher);
         checkNotEmpty(dispatcher);
 
-        final Set<C> messageClasses = dispatcher.getMessageClasses();
+        Set<C> messageClasses = dispatcher.getMessageClasses();
         for (C messageClass : messageClasses) {
             dispatchers.remove(messageClass, dispatcher);
         }
@@ -106,7 +106,7 @@ public class DispatcherRegistry<C extends MessageClass,
      */
     protected Set<D> getDispatchers(C messageClass) {
         checkNotNull(messageClass);
-        final Collection<D> dispatchers = this.dispatchers.get(messageClass);
+        Collection<D> dispatchers = this.dispatchers.get(messageClass);
         return ImmutableSet.copyOf(dispatchers);
     }
 
@@ -125,7 +125,7 @@ public class DispatcherRegistry<C extends MessageClass,
     }
 
     private static <D extends MessageDispatcher> void checkNotEmpty(D dispatcher) {
-        final Set<?> messageClasses = dispatcher.getMessageClasses();
+        Set<?> messageClasses = dispatcher.getMessageClasses();
         checkArgument(!messageClasses.isEmpty(),
                       "The dispatcher (%s) has empty message class set.",
                       dispatcher);

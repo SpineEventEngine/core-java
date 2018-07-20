@@ -41,9 +41,9 @@ class InvalidEventExceptionTest {
     @Test
     @DisplayName("create exception with violations")
     void createWithViolations() {
-        final StringValue msg = toMessage("");
+        StringValue msg = toMessage("");
 
-        final InvalidEventException exception = InvalidEventException.onConstraintViolations(
+        InvalidEventException exception = InvalidEventException.onConstraintViolations(
                 msg,
                 singletonList(ConstraintViolation.getDefaultInstance()));
 

@@ -51,7 +51,7 @@ class MatchesStreamQueryTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        final MatchesStreamQuery predicate = new MatchesStreamQuery(
+        MatchesStreamQuery predicate = new MatchesStreamQuery(
                 EventStreamQuery.getDefaultInstance());
 
         new NullPointerTester()
@@ -62,44 +62,44 @@ class MatchesStreamQueryTest {
     @Test
     @DisplayName("match proper records")
     void matchProperRecords() {
-        final ProjectId properField = ProjectId.newBuilder()
-                                               .setId(newUuid())
-                                               .build();
-        final ProjectCreated eventMsg = ProjectCreated.newBuilder()
-                                                      .setProjectId(properField)
-                                                      .build();
-        final Event event = eventFactory.createEvent(eventMsg);
-        final MatchesStreamQuery predicate = eventWith(FIELD_NAME, properField);
+        ProjectId properField = ProjectId.newBuilder()
+                                         .setId(newUuid())
+                                         .build();
+        ProjectCreated eventMsg = ProjectCreated.newBuilder()
+                                                .setProjectId(properField)
+                                                .build();
+        Event event = eventFactory.createEvent(eventMsg);
+        MatchesStreamQuery predicate = eventWith(FIELD_NAME, properField);
         assertTrue(predicate.apply(event));
     }
 
     @Test
     @DisplayName("not match improper records")
     void notMatchImproperRecords() {
-        final ProjectId properField = ProjectId.newBuilder()
-                                               .setId(newUuid())
-                                               .build();
-        final ProjectId improperField = ProjectId.getDefaultInstance();
-        final ProjectCreated eventMsg = ProjectCreated.newBuilder()
-                                                      .setProjectId(improperField)
-                                                      .build();
-        final Event event = eventFactory.createEvent(eventMsg);
-        final MatchesStreamQuery predicate = eventWith(FIELD_NAME, properField);
+        ProjectId properField = ProjectId.newBuilder()
+                                         .setId(newUuid())
+                                         .build();
+        ProjectId improperField = ProjectId.getDefaultInstance();
+        ProjectCreated eventMsg = ProjectCreated.newBuilder()
+                                                .setProjectId(improperField)
+                                                .build();
+        Event event = eventFactory.createEvent(eventMsg);
+        MatchesStreamQuery predicate = eventWith(FIELD_NAME, properField);
         assertFalse(predicate.apply(event));
     }
 
     private static MatchesStreamQuery eventWith(String fieldPath, Message field) {
-        final FieldFilter filter = FieldFilter.newBuilder()
-                                              .setFieldPath(fieldPath)
-                                              .addValue(AnyPacker.pack(field))
-                                              .build();
-        final EventFilter eventFilter = EventFilter.newBuilder()
-                                                   .addEventFieldFilter(filter)
-                                                   .build();
-        final EventStreamQuery query = EventStreamQuery.newBuilder()
-                                                       .addFilter(eventFilter)
-                                                       .build();
-        final MatchesStreamQuery predicate = new MatchesStreamQuery(query);
+        FieldFilter filter = FieldFilter.newBuilder()
+                                        .setFieldPath(fieldPath)
+                                        .addValue(AnyPacker.pack(field))
+                                        .build();
+        EventFilter eventFilter = EventFilter.newBuilder()
+                                             .addEventFieldFilter(filter)
+                                             .build();
+        EventStreamQuery query = EventStreamQuery.newBuilder()
+                                                 .addFilter(eventFilter)
+                                                 .build();
+        MatchesStreamQuery predicate = new MatchesStreamQuery(query);
         return predicate;
     }
 

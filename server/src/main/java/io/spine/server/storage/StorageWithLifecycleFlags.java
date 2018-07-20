@@ -20,9 +20,10 @@
 
 package io.spine.server.storage;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.server.entity.LifecycleFlags;
+
+import java.util.Optional;
 
 /**
  * A storage that allows to update {@linkplain LifecycleFlags lifecycle flags} of entities.
@@ -35,11 +36,11 @@ public interface StorageWithLifecycleFlags<I, M extends Message, R extends ReadR
     /**
      * Reads the visibility status for the entity with the passed ID.
      *
-     * <p>This method returns {@code Optional.absent()} if none of the
+     * <p>This method returns {@code Optional.empty()} if none of the
      * flags of visibility flags were set before.
      *
      * @param id the ID of the entity
-     * @return the aggregate visibility or {@code Optional.absent()}
+     * @return the aggregate visibility or {@code Optional.empty()}
      */
     Optional<LifecycleFlags> readLifecycleFlags(I id);
 

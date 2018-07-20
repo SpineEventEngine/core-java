@@ -87,7 +87,7 @@ public class EventMessageEnricherTestEnv {
                 if (id == null) {
                     return null;
                 }
-                final String name = "pr-" + id.getId();
+                String name = "pr-" + id.getId();
                 return name;
             }
         }

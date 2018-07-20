@@ -20,7 +20,6 @@
 
 package io.spine.server.route;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
@@ -44,6 +43,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -98,8 +99,8 @@ class CommandRoutingRejectionTest {
     @DisplayName("result in rejected command")
     void resultInRejectedCommand() {
         // Post a successful command to make sure general case works.
-        final String switchmanName = Switchman.class.getName();
-        final Command command = requestFactory.createCommand(
+        String switchmanName = Switchman.class.getName();
+        Command command = requestFactory.createCommand(
                 SetSwitch.newBuilder()
                          .setSwitchId(generateSwitchId())
                          .setSwitchmanName(switchmanName)
@@ -110,7 +111,7 @@ class CommandRoutingRejectionTest {
         assertEquals(CommandStatus.OK, commandStore.getStatus(command).getCode());
 
         // Post a command with the argument which causes rejection in routing.
-        final Command commandToReject = requestFactory.createCommand(
+        Command commandToReject = requestFactory.createCommand(
                 SetSwitch.newBuilder()
                          .setSwitchmanName(SwitchmanBureau.MISSING_SWITCHMAN_NAME)
                          .setSwitchId(generateSwitchId())
@@ -119,19 +120,19 @@ class CommandRoutingRejectionTest {
         );
 
         commandBus.post(commandToReject, observer);
-        final ProcessingStatus status = commandStore.getStatus(commandToReject);
+        ProcessingStatus status = commandStore.getStatus(commandToReject);
 
         // Check that the command is rejected.
         assertEquals(CommandStatus.REJECTED, status.getCode());
-        final Message rejectionMessage = AnyPacker.unpack(status.getRejection()
-                                                                .getMessage());
+        Message rejectionMessage = AnyPacker.unpack(status.getRejection()
+                                                          .getMessage());
         assertTrue(rejectionMessage instanceof Rejections.SwitchmanUnavailable);
 
         // Check that the event and the rejection were dispatched.
-        final Optional<Log> optional = logRepository.find(Log.ID);
+        Optional<Log> optional = logRepository.find(Log.ID);
         assertTrue(optional.isPresent());
-        final LogState log = optional.get()
-                                     .getState();
+        LogState log = optional.get()
+                               .getState();
         assertTrue(log.containsCounters(switchmanName));
         assertTrue(log.getMissingSwitchmanList()
                       .contains(SwitchmanBureau.MISSING_SWITCHMAN_NAME));

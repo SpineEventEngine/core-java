@@ -63,7 +63,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     public EntityClass(Class<? extends E> cls) {
         super(cls);
         checkNotNull((Class<? extends Entity>) cls);
-        final Class<?> idClass = Entity.GenericParameter.ID.getArgumentIn(cls);
+        Class<?> idClass = Entity.GenericParameter.ID.getArgumentIn(cls);
         checkIdClass(idClass);
         this.idClass = idClass;
         this.stateClass = getStateClass(cls);
@@ -75,7 +75,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      */
     public E createEntity(Object constructorArgument) {
         checkNotNull(constructorArgument);
-        final Constructor<E> ctor = getConstructor();
+        Constructor<E> ctor = getConstructor();
         E result;
         try {
             result = ctor.newInstance(constructorArgument);
@@ -90,7 +90,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     }
 
     private static ModelError noSuchConstructor(String entityClass, String idClass) {
-        final String errMsg = format(
+        String errMsg = format(
                 "%s class must declare a constructor with a single %s ID parameter.",
                 entityClass, idClass
         );
@@ -106,7 +106,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
      */
     private static <S extends Message> Class<S> getStateClass(Class<? extends Entity> entityClass) {
         @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
-        final Class<S> result = (Class<S>) Entity.GenericParameter.STATE.getArgumentIn(entityClass);
+        Class<S> result = (Class<S>) Entity.GenericParameter.STATE.getArgumentIn(entityClass);
         return result;
     }
 
@@ -145,7 +145,7 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     protected Constructor<E> findConstructor() {
         Class<? extends E> entityClass = value();
         Class<?> idClass = getIdClass();
-        final Constructor<E> result;
+        Constructor<E> result;
         try {
             result = (Constructor<E>) entityClass.getDeclaredConstructor(idClass);
             result.setAccessible(true);

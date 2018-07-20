@@ -51,11 +51,11 @@ class EventSubscriberTest {
     @DisplayName("catch exceptions caused by methods")
     void catchMethodExceptions() {
         // Create event which should fail.
-        final EventEnvelope eventEnvelope = createEvent(false);
+        EventEnvelope eventEnvelope = createEvent(false);
 
-        final Set<String> dispatchingResult = subscriber.dispatch(eventEnvelope);
+        Set<String> dispatchingResult = subscriber.dispatch(eventEnvelope);
 
-        final FailingSubscriber sub = (FailingSubscriber) this.subscriber;
+        FailingSubscriber sub = (FailingSubscriber) this.subscriber;
         assertTrue(sub.isMethodCalled());
         assertEquals(0, dispatchingResult.size());
         assertEquals(eventEnvelope, sub.getLastErrorEnvelope());
@@ -65,11 +65,11 @@ class EventSubscriberTest {
     @Test
     @DisplayName("dispatch event")
     void dispatchEvent() {
-        final EventEnvelope eventEnvelope = createEvent(true);
+        EventEnvelope eventEnvelope = createEvent(true);
 
-        final Set<String> dispatchingResult = subscriber.dispatch(eventEnvelope);
+        Set<String> dispatchingResult = subscriber.dispatch(eventEnvelope);
 
-        final FailingSubscriber sub = (FailingSubscriber) this.subscriber;
+        FailingSubscriber sub = (FailingSubscriber) this.subscriber;
         assertTrue(sub.isMethodCalled());
         assertEquals(1, dispatchingResult.size());
         assertNull(sub.getLastException());

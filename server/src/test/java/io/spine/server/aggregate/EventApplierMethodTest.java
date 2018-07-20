@@ -251,7 +251,7 @@ class EventApplierMethodTest {
         private static final String APPLIER_METHOD_NAME = "apply";
 
         public Method getMethod() {
-            final Method[] methods = getClass().getDeclaredMethods();
+            Method[] methods = getClass().getDeclaredMethods();
             for (Method method : methods) {
                 if (method.getName().equals(APPLIER_METHOD_NAME)) {
                     method.setAccessible(true);

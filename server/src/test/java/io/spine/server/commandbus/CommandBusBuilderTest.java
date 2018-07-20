@@ -59,7 +59,7 @@ class CommandBusBuilderTest
 
     @BeforeEach
     void setUp() {
-        final boolean multitenant = true;
+        boolean multitenant = true;
         InMemoryStorageFactory storageFactory =
                 InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
                                                    multitenant);
@@ -70,8 +70,8 @@ class CommandBusBuilderTest
     @Test
     @DisplayName("create new CommandBus instance")
     void createNewInstance() {
-        final CommandBus commandBus = builder().setCommandStore(commandStore)
-                                               .build();
+        CommandBus commandBus = builder().setCommandStore(commandStore)
+                                         .build();
         assertNotNull(commandBus);
     }
 
@@ -95,30 +95,30 @@ class CommandBusBuilderTest
         @Test
         @DisplayName("CommandScheduler")
         void commandScheduler() {
-            final CommandScheduler expectedScheduler = mock(CommandScheduler.class);
+            CommandScheduler expectedScheduler = mock(CommandScheduler.class);
 
-            final CommandBus.Builder builder = builder().setCommandStore(commandStore)
-                                                        .setCommandScheduler(expectedScheduler);
+            CommandBus.Builder builder = builder().setCommandStore(commandStore)
+                                                  .setCommandScheduler(expectedScheduler);
 
             assertTrue(builder.getCommandScheduler()
                               .isPresent());
             assertEquals(expectedScheduler, builder.getCommandScheduler()
                                                    .get());
 
-            final CommandBus commandBus = builder.build();
+            CommandBus commandBus = builder.build();
             assertNotNull(commandBus);
 
-            final CommandScheduler actualScheduler = commandBus.scheduler();
+            CommandScheduler actualScheduler = commandBus.scheduler();
             assertEquals(expectedScheduler, actualScheduler);
         }
 
         @Test
         @DisplayName("RejectionBus")
         void rejectionBus() {
-            final RejectionBus expectedRejectionBus = mock(RejectionBus.class);
+            RejectionBus expectedRejectionBus = mock(RejectionBus.class);
 
-            final CommandBus.Builder builder = builder().setCommandStore(commandStore)
-                                                        .setRejectionBus(expectedRejectionBus);
+            CommandBus.Builder builder = builder().setCommandStore(commandStore)
+                                                  .setRejectionBus(expectedRejectionBus);
             assertTrue(builder.getRejectionBus()
                               .isPresent());
             assertEquals(expectedRejectionBus, builder.getRejectionBus()
@@ -148,7 +148,7 @@ class CommandBusBuilderTest
         @Test
         @DisplayName("CommandStore")
         void commandStore() {
-            final CommandStore commandStore = mock(CommandStore.class);
+            CommandStore commandStore = mock(CommandStore.class);
 
             assertEquals(commandStore, builder().setCommandStore(commandStore)
                                                 .getCommandStore());

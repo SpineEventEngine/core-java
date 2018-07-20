@@ -97,7 +97,7 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
     @Override
     protected void injectState(E entity, S state, EntityRecord entityRecord) {
         if (entity instanceof AbstractVersionableEntity) {
-            final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
+            AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
             versionable.updateState(state, entityRecord.getVersion());
             versionable.setLifecycleFlags(entityRecord.getLifecycleFlags());
         } else {

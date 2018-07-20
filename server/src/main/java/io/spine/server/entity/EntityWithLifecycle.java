@@ -61,38 +61,26 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
     class Predicates {
 
         private static final Predicate<LifecycleFlags> isEntityVisible =
-                new Predicate<LifecycleFlags>() {
-                    @Override
-                    public boolean apply(@Nullable LifecycleFlags input) {
-                        return input == null ||
-                                !(input.getArchived() || input.getDeleted());
-                    }
-                };
+                input -> input == null ||
+                        !(input.getArchived() || input.getDeleted());
 
         private static final Predicate<EntityRecord> isRecordVisible =
-                new Predicate<EntityRecord>() {
-
-                    @Override
-                    public boolean apply(@Nullable EntityRecord input) {
-                        if (input == null) {
-                            return true;
-                        }
-                        final LifecycleFlags flags = input.getLifecycleFlags();
-                        final boolean result = isEntityVisible.apply(flags);
-                        return result;
+                input -> {
+                    if (input == null) {
+                        return true;
                     }
+                    LifecycleFlags flags = input.getLifecycleFlags();
+                    boolean result = isEntityVisible.apply(flags);
+                    return result;
                 };
 
         private static final Predicate<EntityRecordWithColumns> isRecordWithColumnsVisible =
-                new Predicate<EntityRecordWithColumns>() {
-                    @Override
-                    public boolean apply(@Nullable EntityRecordWithColumns input) {
-                        if (input == null) {
-                            return false;
-                        }
-                        final EntityRecord record = input.getRecord();
-                        return isRecordVisible().apply(record);
+                input -> {
+                    if (input == null) {
+                        return false;
                     }
+                    EntityRecord record = input.getRecord();
+                    return isRecordVisible().apply(record);
                 };
 
         private Predicates() {

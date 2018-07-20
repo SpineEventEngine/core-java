@@ -49,7 +49,7 @@ public class Given {
     }
 
     private static ProjectId newProjectId() {
-        final String uuid = newUuid();
+        String uuid = newUuid();
         return ProjectId.newBuilder()
                         .setId(uuid)
                         .build();
@@ -70,12 +70,12 @@ public class Given {
          */
         private static Command create(Message command, UserId userId,
                                       Timestamp when) {
-            final TenantId generatedTenantId = TenantId.newBuilder()
-                                                       .setValue(newUuid())
-                                                       .build();
-            final TestActorRequestFactory factory =
+            TenantId generatedTenantId = TenantId.newBuilder()
+                                                 .setValue(newUuid())
+                                                 .build();
+            TestActorRequestFactory factory =
                     TestActorRequestFactory.newInstance(userId, generatedTenantId);
-            final Command result = factory.createCommand(command, when);
+            Command result = factory.createCommand(command, when);
             return result;
         }
 
@@ -98,12 +98,12 @@ public class Given {
         }
 
         static Command addTask(UserId userId, ProjectId projectId, Timestamp when) {
-            final CmdAddTask command = CommandMessage.addTask(projectId);
+            CmdAddTask command = CommandMessage.addTask(projectId);
             return create(command, userId, when);
         }
 
         static Command removeTask() {
-            final CmdRemoveTask command = CommandMessage.removeTask(PROJECT_ID);
+            CmdRemoveTask command = CommandMessage.removeTask(PROJECT_ID);
             return create(command, USER_ID, getCurrentTime());
         }
 
@@ -118,19 +118,18 @@ public class Given {
 
         static Command createProject(Duration delay) {
 
-            final CmdCreateProject projectMessage = CommandMessage.createProjectMessage();
-            final CommandContext commandContext = GivenCommandContext.withScheduledDelayOf(delay);
-            final CommandFactory commandFactory =
-                    TestActorRequestFactory.newInstance(ACommand.class)
-                                           .command();
-            final Command cmd = commandFactory.createBasedOnContext(projectMessage, commandContext);
+            CmdCreateProject projectMessage = CommandMessage.createProjectMessage();
+            CommandContext commandContext = GivenCommandContext.withScheduledDelayOf(delay);
+            CommandFactory commandFactory = TestActorRequestFactory.newInstance(ACommand.class)
+                                                                   .command();
+            Command cmd = commandFactory.createBasedOnContext(projectMessage, commandContext);
             return cmd;
         }
 
         static Command createProject(UserId userId,
                                      ProjectId projectId,
                                      Timestamp when) {
-            final CmdCreateProject command = CommandMessage.createProjectMessage(projectId);
+            CmdCreateProject command = CommandMessage.createProjectMessage(projectId);
             return create(command, userId, when);
         }
 
@@ -141,7 +140,7 @@ public class Given {
         static Command startProject(UserId userId,
                                     ProjectId projectId,
                                     Timestamp when) {
-            final CmdStartProject command = CommandMessage.startProject(projectId);
+            CmdStartProject command = CommandMessage.startProject(projectId);
             return create(command, userId, when);
         }
     }
@@ -194,8 +193,8 @@ public class Given {
 
         static FirstCmdCreateProject firstCreateProject(ProjectId projectId) {
             return FirstCmdCreateProject.newBuilder()
-                                    .setId(projectId)
-                                    .build();
+                                        .setId(projectId)
+                                        .build();
         }
 
         static SecondCmdStartProject secondStartProject(ProjectId projectId) {

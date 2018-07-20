@@ -86,16 +86,15 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
     /**
      * A lazily-initialized converter for the sharded messages.
      */
-    @Nullable
-    private ShardedMessageConverter<I, M, E> converter;
+    private @Nullable ShardedMessageConverter<I, M, E> converter;
 
     ShardedStream(AbstractBuilder<I, E, ?, ? extends ShardedStream> builder) {
         this.boundedContextName = builder.boundedContextName;
         this.key = builder.key;
         this.tag = builder.tag;
         this.targetIdClass = builder.targetIdClass;
-        final Class<E> envelopeCls = getEnvelopeClass();
-        final ChannelId channelId = ChannelIds.toChannelId(builder.boundedContextName, key, envelopeCls);
+        Class<E> envelopeCls = getEnvelopeClass();
+        ChannelId channelId = ChannelIds.toChannelId(builder.boundedContextName, key, envelopeCls);
         this.subscriber = builder.transportFactory.createSubscriber(channelId);
         this.publisher = builder.transportFactory.createPublisher(channelId);
 
@@ -151,14 +150,14 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
     public final void post(I targetId, E messageEnvelope) {
         checkNotNull(messageEnvelope);
 
-        final ShardedMessage shardedMessage = converter().convert(targetId, messageEnvelope);
+        ShardedMessage shardedMessage = converter().convert(targetId, messageEnvelope);
         checkNotNull(shardedMessage);
 
         post(shardedMessage);
     }
 
     private void post(ShardedMessage message) {
-        final ExternalMessage externalMessage = ExternalMessages.of(message, boundedContextName);
+        ExternalMessage externalMessage = ExternalMessages.of(message, boundedContextName);
         publisher.publish(externalMessage.getId(), externalMessage);
     }
 
@@ -177,7 +176,7 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        final ShardedStream<?, ?, ?> that = (ShardedStream<?, ?, ?>) o;
+        ShardedStream<?, ?, ?> that = (ShardedStream<?, ?, ?>) o;
         return Objects.equals(boundedContextName, that.boundedContextName) &&
                 Objects.equals(key, that.key) &&
                 Objects.equals(tag, that.tag) &&
@@ -216,10 +215,10 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         @Override
         public void onNext(ExternalMessage value) {
             checkNotNull(value);
-            final ShardedMessage shardedMessage = ExternalMessages.asShardedMessage(value);
+            ShardedMessage shardedMessage = ExternalMessages.asShardedMessage(value);
 
-            final E envelope = converter().envelopeOf(shardedMessage);
-            final I targetId = converter().targetIdOf(shardedMessage, getTargetIdClass());
+            E envelope = converter().envelopeOf(shardedMessage);
+            I targetId = converter().targetIdOf(shardedMessage, getTargetIdClass());
             checkNotNull(envelope);
             delegate.onNext(targetId, envelope);
         }
@@ -289,14 +288,14 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
                                   Class<E> envelopeClass,
                                   ClassName className,
                                   ShardIndex shardIndex) {
-            final String value = on("__").join(Prefix.BOUNDED_CONTEXT, bcName.getValue(),
-                                               Prefix.TARGET_CLASS, className,
-                                               Prefix.SHARD_INDEX,
-                                               Stringifiers.toString(shardIndex),
-                                               Prefix.ENVELOPE_CLASS, envelopeClass);
-            final StringValue result = StringValue.newBuilder()
-                                                  .setValue(value)
-                                                  .build();
+            String value = on("__").join(Prefix.BOUNDED_CONTEXT, bcName.getValue(),
+                                         Prefix.TARGET_CLASS, className,
+                                         Prefix.SHARD_INDEX,
+                                         Stringifiers.toString(shardIndex),
+                                         Prefix.ENVELOPE_CLASS, envelopeClass);
+            StringValue result = StringValue.newBuilder()
+                                            .setValue(value)
+                                            .build();
             return result;
         }
 
@@ -308,17 +307,17 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
             checkNotNull(boundedContextName);
             checkNotNull(envelopeClass);
 
-            final Class<?> keyClass = key.getEntityClass()
-                                         .value();
-            final ClassName className = ClassName.of(keyClass);
-            final ShardIndex shardIndex = key.getIndex();
+            Class<?> keyClass = key.getEntityClass()
+                                   .value();
+            ClassName className = ClassName.of(keyClass);
+            ShardIndex shardIndex = key.getIndex();
 
-            final StringValue asMsg = asChannelName(boundedContextName, envelopeClass, className,
-                                                    shardIndex);
-            final Any asAny = AnyPacker.pack(asMsg);
-            final ChannelId result = ChannelId.newBuilder()
-                                              .setIdentifier(asAny)
-                                              .build();
+            StringValue asMsg = asChannelName(boundedContextName, envelopeClass, className,
+                                              shardIndex);
+            Any asAny = AnyPacker.pack(asMsg);
+            ChannelId result = ChannelId.newBuilder()
+                                        .setIdentifier(asAny)
+                                        .build();
             return result;
         }
 
@@ -439,11 +438,11 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
             checkPresent(consumer, "Consumer");
 
             this.transportFactory = transportFactory;
-            final S result = createStream();
+            S result = createStream();
             return result;
         }
 
-        private static void checkPresent(Object value, final String fieldName) {
+        private static void checkPresent(Object value, String fieldName) {
             checkNotNull(value, fieldName + " must be set");
         }
     }
