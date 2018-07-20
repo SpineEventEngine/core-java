@@ -61,7 +61,7 @@ public class TestEventClasses {
                 if (record == null) {
                     return null;
                 }
-                final Message eventMessage = unpack(record.getMessage());
+                Message eventMessage = unpack(record.getMessage());
                 return EventClass.of(eventMessage);
             }
         });
