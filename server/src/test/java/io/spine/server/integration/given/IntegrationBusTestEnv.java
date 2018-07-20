@@ -20,6 +20,7 @@
 package io.spine.server.integration.given;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -78,6 +79,7 @@ public class IntegrationBusTestEnv {
         // Prevent instantiation of this utility class.
     }
 
+    @CanIgnoreReturnValue
     public static BoundedContext
     contextWithExtEntitySubscribers(TransportFactory transportFactory) {
         BoundedContext boundedContext = contextWithTransport(transportFactory);
@@ -94,6 +96,7 @@ public class IntegrationBusTestEnv {
         return boundedContext;
     }
 
+    @CanIgnoreReturnValue
     public static BoundedContext contextWithExternalSubscribers(TransportFactory transportFactory) {
         BoundedContext boundedContext = contextWithTransport(transportFactory);
         EventSubscriber eventSubscriber = new ProjectEventsSubscriber();
