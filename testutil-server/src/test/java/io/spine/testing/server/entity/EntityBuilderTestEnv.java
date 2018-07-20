@@ -18,24 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server;
+package io.spine.testing.server.entity;
 
-import io.spine.server.BoundedContext;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import com.google.protobuf.StringValue;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.testing.server.User;
+import io.spine.testing.server.UserVBuilder;
 
 /**
- * @author Vladyslav Lubenskyi
+ * @author Alexander Yevsyukov
+ * @author Dmytro Kuzmin
  */
-@DisplayName("TestBoundedContext should")
-class TestBoundedContextShould {
+public class EntityBuilderTestEnv {
 
-    @Test
-    @DisplayName("create instance")
-    void create() {
-        BoundedContext context = TestBoundedContext.create();
-        assertNotNull(context);
+    /**
+     * The test environment aggregate for testing validation during aggregate state transition.
+     */
+    static class UserAggregate extends Aggregate<String, User, UserVBuilder> {
+        private UserAggregate(String id) {
+            super(id);
+        }
+    }
+
+    static class TestEntity extends AbstractVersionableEntity<Long, StringValue> {
+        protected TestEntity(Long id) {
+            super(id);
+        }
     }
 }
