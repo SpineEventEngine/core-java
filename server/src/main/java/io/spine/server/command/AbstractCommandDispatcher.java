@@ -32,7 +32,6 @@ import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 import org.slf4j.Logger;
 
-import java.util.Objects;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -113,13 +112,13 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
             return false;
         }
         AbstractCommandDispatcher otherHandler = (AbstractCommandDispatcher) otherObj;
-        boolean equals = getMessageClasses().equals(otherHandler.getMessageClasses());
+        boolean equals = getId().equals(otherHandler.getId());
         return equals;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getMessageClasses());
+        return getId().hashCode();
     }
 
     /**
