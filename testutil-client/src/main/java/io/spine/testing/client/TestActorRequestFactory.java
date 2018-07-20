@@ -56,8 +56,8 @@ public class TestActorRequestFactory extends ActorRequestFactory {
                                  .setZoneId(zoneId));
     }
 
-    protected TestActorRequestFactory(TenantId tenantId, 
-                                      UserId actor, 
+    protected TestActorRequestFactory(TenantId tenantId,
+                                      UserId actor,
                                       ZoneOffset zoneOffset,
                                       ZoneId zoneId) {
         super(ActorRequestFactory.newBuilder()
@@ -67,7 +67,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
                                  .setZoneId(zoneId));
     }
 
-    public static TestActorRequestFactory newInstance(String actor, 
+    public static TestActorRequestFactory newInstance(String actor,
                                                       ZoneOffset zoneOffset,
                                                       ZoneId zoneId) {
         return newInstance(of(actor), zoneOffset, zoneId);
@@ -88,13 +88,13 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     }
 
     public static TestActorRequestFactory newInstance(UserId actor, TenantId tenantId) {
-        return new TestActorRequestFactory(tenantId, actor, 
-                                           ZoneOffsets.getDefault(), 
+        return new TestActorRequestFactory(tenantId, actor,
+                                           ZoneOffsets.getDefault(),
                                            ZoneIds.systemDefault());
     }
 
     public static TestActorRequestFactory newInstance(Class<?> testClass, TenantId tenantId) {
-        return new TestActorRequestFactory(tenantId, 
+        return new TestActorRequestFactory(tenantId,
                                            of(testClass.getName()),
                                            ZoneOffsets.getDefault(),
                                            ZoneIds.systemDefault());

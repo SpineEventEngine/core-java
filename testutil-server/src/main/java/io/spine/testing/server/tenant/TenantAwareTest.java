@@ -81,7 +81,7 @@ public abstract class TenantAwareTest {
      */
     @SuppressWarnings("ConstantConditions") // see Javadoc
     protected TenantId tenantId() {
-        final Optional<TenantId> optional = CurrentTenant.get();
+        Optional<TenantId> optional = CurrentTenant.get();
         return optional.get();
     }
 
