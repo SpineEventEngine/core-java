@@ -60,7 +60,7 @@ public final class Pair<A extends Message, B>
      */
     public static <A extends Message, B extends Message> Pair<A, B> of(A a, B b) {
         Pair<A, B> result = new Pair<>(checkNotNullOrEmpty(Pair.class, a),
-                                             checkNotNullOrEmpty(Pair.class, b));
+                                       checkNotNullOrEmpty(Pair.class, b));
         return result;
     }
 

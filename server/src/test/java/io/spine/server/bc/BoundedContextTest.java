@@ -215,8 +215,7 @@ class BoundedContextTest {
         @Test
         @DisplayName("AggregateRepository")
         void aggregateRepository() {
-            ProjectAggregateRepository repository =
-                    new ProjectAggregateRepository();
+            ProjectAggregateRepository repository = new ProjectAggregateRepository();
             boundedContext.register(repository);
         }
 
@@ -256,8 +255,7 @@ class BoundedContextTest {
         ProjectAggregateRepository repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
 
-        AnotherProjectAggregateRepository anotherRepo =
-                new AnotherProjectAggregateRepository();
+        AnotherProjectAggregateRepository anotherRepo = new AnotherProjectAggregateRepository();
 
         assertThrows(IllegalStateException.class, () -> boundedContext.register(anotherRepo));
     }
@@ -328,11 +326,10 @@ class BoundedContextTest {
 
             // Unsupported message.
             Any invalidMsg = AnyPacker.pack(BcProjectCreated.getDefaultInstance());
-            IntegrationEvent event =
-                    Given.AnIntegrationEvent.projectCreated()
-                                            .toBuilder()
-                                            .setMessage(invalidMsg)
-                                            .build();
+            IntegrationEvent event = Given.AnIntegrationEvent.projectCreated()
+                                                             .toBuilder()
+                                                             .setMessage(invalidMsg)
+                                                             .build();
 
             MemoizingObserver<Ack> observer = memoizingObserver();
             boundedContext.notify(event, observer);

@@ -47,15 +47,12 @@ public class GivenEvent {
     }
 
     public static EventContext context() {
-        Event event = eventFactory.createEvent(Time.getCurrentTime(),
-                                               Tests.nullRef());
+        Event event = eventFactory.createEvent(Time.getCurrentTime(), Tests.nullRef());
         return event.getContext();
     }
 
     public static Event occurredMinutesAgo(int minutesAgo) {
-        Event result = eventFactory.createEvent(newUuidValue(),
-                                                null,
-                                                minutesAgo(minutesAgo));
+        Event result = eventFactory.createEvent(newUuidValue(), null, minutesAgo(minutesAgo));
         return result;
     }
 

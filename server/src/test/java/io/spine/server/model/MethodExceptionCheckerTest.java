@@ -64,8 +64,7 @@ class MethodExceptionCheckerTest {
             noExceptionsChecker.checkThrowsNoCheckedExceptions();
 
             Method methodRuntimeExceptions = getMethod("methodRuntimeException");
-            MethodExceptionChecker runtimeExceptionsChecker =
-                    forMethod(methodRuntimeExceptions);
+            MethodExceptionChecker runtimeExceptionsChecker = forMethod(methodRuntimeExceptions);
             runtimeExceptionsChecker.checkThrowsNoCheckedExceptions();
         }
 

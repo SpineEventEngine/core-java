@@ -72,9 +72,7 @@ public class StorageRecords {
                                             start);
         AggregateEventRecord record1 = StorageRecord.create(start, e1);
 
-        Event e2 = eventFactory.createEvent(taskAdded(id),
-                                            null,
-                                            timestamp2);
+        Event e2 = eventFactory.createEvent(taskAdded(id), null, timestamp2);
         AggregateEventRecord record2 = StorageRecord.create(timestamp2, e2);
 
         Event e3 = eventFactory.createEvent(Given.EventMessage.projectStarted(id),

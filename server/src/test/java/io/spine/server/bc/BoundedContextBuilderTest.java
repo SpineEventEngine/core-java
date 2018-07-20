@@ -159,9 +159,8 @@ class BoundedContextBuilderTest {
         @DisplayName("CommandBus")
         void commandBus() {
             // Pass EventBus to builder initialization, and do NOT pass CommandBus.
-            BoundedContext boundedContext = builder
-                    .setEventBus(EventBus.newBuilder())
-                    .build();
+            BoundedContext boundedContext = builder.setEventBus(EventBus.newBuilder())
+                                                   .build();
             assertNotNull(boundedContext.getCommandBus());
         }
 
@@ -169,10 +168,9 @@ class BoundedContextBuilderTest {
         @DisplayName("EventBus")
         void eventBus() {
             // Pass CommandBus.Builder to builder initialization, and do NOT pass EventBus.
-            BoundedContext boundedContext = builder
-                    .setMultitenant(true)
-                    .setCommandBus(CommandBus.newBuilder())
-                    .build();
+            BoundedContext boundedContext = builder.setMultitenant(true)
+                                                   .setCommandBus(CommandBus.newBuilder())
+                                                   .build();
             assertNotNull(boundedContext.getEventBus());
         }
 

@@ -76,11 +76,10 @@ public class InMemoryStorageFactory implements StorageFactory {
 
     @Override
     public StandStorage createStandStorage() {
-        InMemoryStandStorage result =
-                InMemoryStandStorage.newBuilder()
-                                    .setBoundedContextName(boundedContextName)
-                                    .setMultitenant(isMultitenant())
-                                    .build();
+        InMemoryStandStorage result = InMemoryStandStorage.newBuilder()
+                                                          .setBoundedContextName(boundedContextName)
+                                                          .setMultitenant(isMultitenant())
+                                                          .build();
         return result;
     }
 
@@ -110,9 +109,8 @@ public class InMemoryStorageFactory implements StorageFactory {
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(
             Class<? extends Projection<I, ?, ?>> projectionClass) {
-        ProjectionClass<?> modelClass =
-                Model.getInstance()
-                     .asProjectionClass(projectionClass);
+        ProjectionClass<?> modelClass = Model.getInstance()
+                                             .asProjectionClass(projectionClass);
         Class<? extends Message> stateClass = modelClass.getStateClass();
         @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the method.
         Class<I> idClass = (Class<I>) modelClass.getIdClass();

@@ -98,10 +98,9 @@ public class Given {
         public static IntegrationEvent projectCreated(ProjectId projectId,
                                                       IntegrationEventContext eventContext) {
             BcProjectCreated event = EventMessage.projectCreated(projectId);
-            IntegrationEvent.Builder builder =
-                    IntegrationEvent.newBuilder()
-                                    .setContext(eventContext)
-                                    .setMessage(AnyPacker.pack(event));
+            IntegrationEvent.Builder builder = IntegrationEvent.newBuilder()
+                                                               .setContext(eventContext)
+                                                               .setMessage(AnyPacker.pack(event));
             return builder.build();
         }
 

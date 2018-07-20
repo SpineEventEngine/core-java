@@ -73,9 +73,8 @@ public class PmMessageDeliveryTestEnv {
     public static Event projectStarted() {
         ProjectId projectId = projectId();
         TestEventFactory eventFactory =
-                TestEventFactory.newInstance(
-                        AnyPacker.pack(projectId),
-                        PmMessageDeliveryTestEnv.class
+                TestEventFactory.newInstance(AnyPacker.pack(projectId),
+                                             PmMessageDeliveryTestEnv.class
                 );
 
         PmProjectStarted msg = PmProjectStarted.newBuilder()
@@ -109,9 +108,8 @@ public class PmMessageDeliveryTestEnv {
     }
 
     private static Command createCommand(Message cmdMessage) {
-        Command result =
-                TestActorRequestFactory.newInstance(AggregateMessageDeliveryTestEnv.class)
-                                       .createCommand(cmdMessage);
+        Command result = TestActorRequestFactory.newInstance(AggregateMessageDeliveryTestEnv.class)
+                                                .createCommand(cmdMessage);
         return result;
     }
 

@@ -92,13 +92,11 @@ public class EventsTest {
 
     @BeforeEach
     void setUp() {
-        TestActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(getClass());
+        TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(getClass());
         CommandEnvelope cmd = requestFactory.generateEnvelope();
         StringValue producerId = toMessage(getClass().getSimpleName());
         EventFactory eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
-        event = eventFactory.createEvent(Time.getCurrentTime(),
-                                         Tests.nullRef());
+        event = eventFactory.createEvent(Time.getCurrentTime(), Tests.nullRef());
         context = event.getContext();
     }
 

@@ -70,14 +70,13 @@ public class StorageTestEnv {
                                             .getTypeName()
                                             .value();
 
-        CommandRecord.Builder builder =
-                CommandRecord.newBuilder()
-                             .setCommandType(commandType)
-                             .setCommandId(command.getId())
-                             .setCommand(command)
-                             .setTimestamp(getCurrentTime())
-                             .setStatus(ProcessingStatus.newBuilder()
-                                                        .setCode(RECEIVED));
+        CommandRecord.Builder builder = CommandRecord.newBuilder()
+                                                     .setCommandType(commandType)
+                                                     .setCommandId(command.getId())
+                                                     .setCommand(command)
+                                                     .setTimestamp(getCurrentTime())
+                                                     .setStatus(ProcessingStatus.newBuilder()
+                                                                                .setCode(RECEIVED));
         return builder.build();
     }
 }

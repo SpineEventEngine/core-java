@@ -127,9 +127,8 @@ public class EventBusTestEnv {
     }
 
     public static Task newTask(boolean done) {
-        Task task = ((Task.Builder) Sample.builderForType(Task.class))
-                .setDone(done)
-                .build();
+        Task task = ((Task.Builder) Sample.builderForType(Task.class)).setDone(done)
+                                                                      .build();
         return task;
     }
 
@@ -210,16 +209,14 @@ public class EventBusTestEnv {
 
         @Apply
         private void event(EBProjectCreated event) {
-            getBuilder()
-                    .setId(event.getProjectId())
-                    .setStatus(Project.Status.CREATED);
+            getBuilder().setId(event.getProjectId())
+                        .setStatus(Project.Status.CREATED);
         }
 
         @Apply
         private void event(EBTaskAdded event) {
-            getBuilder()
-                    .setId(event.getProjectId())
-                    .addTask(event.getTask());
+            getBuilder().setId(event.getProjectId())
+                        .addTask(event.getTask());
         }
 
         private static EBProjectCreated projectCreated(ProjectId projectId) {

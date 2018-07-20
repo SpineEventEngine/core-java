@@ -132,8 +132,7 @@ class EntityTest {
         @DisplayName("Integer")
         void ofIntegerType() {
             Integer integerId = 12;
-            TestEntityWithIdInteger entityWithIntegerId =
-                    new TestEntityWithIdInteger(integerId);
+            TestEntityWithIdInteger entityWithIntegerId = new TestEntityWithIdInteger(integerId);
 
             assertEquals(integerId, entityWithIntegerId.getId());
         }
@@ -142,8 +141,7 @@ class EntityTest {
         @DisplayName("Message")
         void ofMessageType() {
             StringValue messageId = toMessage("messageId");
-            TestEntityWithIdMessage entityWithMessageID =
-                    new TestEntityWithIdMessage(messageId);
+            TestEntityWithIdMessage entityWithMessageID = new TestEntityWithIdMessage(messageId);
 
             assertEquals(messageId, entityWithMessageID.getId());
         }

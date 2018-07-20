@@ -45,10 +45,9 @@ public class StorageRecord {
     public static AggregateEventRecord create(Timestamp timestamp) {
         Message eventMessage = Sample.messageOfType(AggProjectCreated.class);
         Event event = eventFactory.createEvent(eventMessage);
-        AggregateEventRecord.Builder builder
-                = AggregateEventRecord.newBuilder()
-                                      .setTimestamp(timestamp)
-                                      .setEvent(event);
+        AggregateEventRecord.Builder builder = AggregateEventRecord.newBuilder()
+                                                                   .setTimestamp(timestamp)
+                                                                   .setEvent(event);
         return builder.build();
     }
 

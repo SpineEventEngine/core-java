@@ -71,8 +71,8 @@ class CommandHandlerTest {
     void setUp() {
         ModelTests.clearModel();
         BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .setMultitenant(true)
-                                                            .build();
+                                                      .setMultitenant(true)
+                                                      .build();
         commandBus = boundedContext.getCommandBus();
         eventBus = boundedContext.getEventBus();
         handler = new TestCommandHandler(eventBus);
@@ -132,7 +132,8 @@ class CommandHandlerTest {
         List<EventEnvelope> actualEvents = eventCatcher.getDispatched();
         for (int i = 0; i < expectedMessages.size(); i++) {
             Message expected = expectedMessages.get(i);
-            Message actual = Events.getMessage(actualEvents.get(i).getOuterObject());
+            Message actual = Events.getMessage(actualEvents.get(i)
+                                                           .getOuterObject());
             assertEquals(expected, actual);
         }
     }
@@ -223,6 +224,7 @@ class CommandHandlerTest {
     }
 
     private CommandEnvelope givenCommandEnvelope() {
-        return TestActorRequestFactory.newInstance(getClass()).generateEnvelope();
+        return TestActorRequestFactory.newInstance(getClass())
+                                      .generateEnvelope();
     }
 }

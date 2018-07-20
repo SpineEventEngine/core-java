@@ -64,8 +64,7 @@ class CommandValidatorViolationCheckTest {
         Command unidentifiableCommand = cmd.toBuilder()
                                            .setId(CommandId.getDefaultInstance())
                                            .build();
-        List<ConstraintViolation> violations =
-                inspect(CommandEnvelope.of(unidentifiableCommand));
+        List<ConstraintViolation> violations = inspect(CommandEnvelope.of(unidentifiableCommand));
 
         assertEquals(1, violations.size());
     }
@@ -80,8 +79,7 @@ class CommandValidatorViolationCheckTest {
                                                  .setContext(withRandomActor())
                                                  .build();
 
-        List<ConstraintViolation> violations =
-                inspect(CommandEnvelope.of(commandWithEmptyMessage));
+        List<ConstraintViolation> violations = inspect(CommandEnvelope.of(commandWithEmptyMessage));
 
         assertEquals(3, violations.size());
     }
@@ -92,13 +90,11 @@ class CommandValidatorViolationCheckTest {
         Command command = TestActorRequestFactory.newInstance(getClass())
                                                  .createCommand(createProjectMessage(),
                                                                 Time.getCurrentTime());
-        Command commandWithoutContext =
-                command.toBuilder()
-                       .setContext(CommandContext.getDefaultInstance())
-                       .build();
+        Command commandWithoutContext = command.toBuilder()
+                                               .setContext(CommandContext.getDefaultInstance())
+                                               .build();
 
-        List<ConstraintViolation> violations =
-                inspect(CommandEnvelope.of(commandWithoutContext));
+        List<ConstraintViolation> violations = inspect(CommandEnvelope.of(commandWithoutContext));
 
         assertEquals(1, violations.size());
     }

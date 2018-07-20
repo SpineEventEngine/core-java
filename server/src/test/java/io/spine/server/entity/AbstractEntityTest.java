@@ -72,8 +72,7 @@ class AbstractEntityTest {
         @Test
         @DisplayName("`validate`")
         void validate() throws NoSuchMethodException {
-            Method validate =
-                    AbstractEntity.class.getDeclaredMethod("validate", Message.class);
+            Method validate = AbstractEntity.class.getDeclaredMethod("validate", Message.class);
             int modifiers = validate.getModifiers();
             assertTrue(Modifier.isPrivate(modifiers) || Modifier.isFinal(modifiers));
         }

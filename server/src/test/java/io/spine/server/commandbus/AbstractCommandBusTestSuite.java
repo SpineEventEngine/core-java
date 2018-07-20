@@ -146,9 +146,8 @@ abstract class AbstractCommandBusTestSuite {
 
     protected static Command newCommandWithoutTenantId() {
         Command cmd = createProject();
-        ActorContext.Builder withNoTenant =
-                ActorContext.newBuilder()
-                            .setTenantId(TenantId.getDefaultInstance());
+        ActorContext.Builder withNoTenant = ActorContext.newBuilder()
+                                                        .setTenantId(TenantId.getDefaultInstance());
         Command invalidCmd =
                 cmd.toBuilder()
                    .setContext(cmd.getContext()
@@ -159,9 +158,8 @@ abstract class AbstractCommandBusTestSuite {
     }
 
     protected static Command clearTenantId(Command cmd) {
-        ActorContext.Builder withNoTenant =
-                ActorContext.newBuilder()
-                            .setTenantId(TenantId.getDefaultInstance());
+        ActorContext.Builder withNoTenant = ActorContext.newBuilder()
+                                                        .setTenantId(TenantId.getDefaultInstance());
         Command result = cmd.toBuilder()
                             .setContext(cmd.getContext()
                                            .toBuilder()

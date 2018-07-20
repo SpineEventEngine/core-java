@@ -99,7 +99,7 @@ public class TestAggregate
     AggProjectCreated handle(AggCreateProject cmd, CommandContext ctx) {
         isCreateProjectCommandHandled = true;
         AggProjectCreated event = projectCreated(cmd.getProjectId(),
-                                                       cmd.getName());
+                                                 cmd.getName());
         return event;
     }
 
@@ -126,9 +126,8 @@ public class TestAggregate
 
     @Apply
     void event(AggProjectCreated event) {
-        getBuilder()
-                .setId(event.getProjectId())
-                .setStatus(Status.CREATED);
+        getBuilder().setId(event.getProjectId())
+                    .setStatus(Status.CREATED);
 
         isProjectCreatedEventApplied = true;
     }
@@ -141,9 +140,8 @@ public class TestAggregate
 
     @Apply
     void event(AggProjectStarted event) {
-        getBuilder()
-                .setId(event.getProjectId())
-                .setStatus(Status.STARTED);
+        getBuilder().setId(event.getProjectId())
+                    .setStatus(Status.STARTED);
 
         isProjectStartedEventApplied = true;
     }

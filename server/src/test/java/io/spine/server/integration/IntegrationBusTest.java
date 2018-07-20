@@ -96,8 +96,7 @@ class IntegrationBusTest {
         @Test
         @DisplayName("to entities with external subscribers of another BC")
         void toEntitiesOfBc() {
-            InMemoryTransportFactory transportFactory =
-                    InMemoryTransportFactory.newInstance();
+            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
             BoundedContext sourceContext = contextWithTransport(transportFactory);
             contextWithExtEntitySubscribers(transportFactory);
@@ -119,8 +118,7 @@ class IntegrationBusTest {
         @Test
         @DisplayName("to external subscribers of another BC")
         void toBcSubscribers() {
-            InMemoryTransportFactory transportFactory =
-                    InMemoryTransportFactory.newInstance();
+            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
             BoundedContext sourceContext = contextWithTransport(transportFactory);
             contextWithExternalSubscribers(transportFactory);
@@ -137,8 +135,7 @@ class IntegrationBusTest {
         @Test
         @DisplayName("to entities with external subscribers of multiple BCs")
         void toEntitiesOfMultipleBcs() {
-            InMemoryTransportFactory transportFactory =
-                    InMemoryTransportFactory.newInstance();
+            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
             Set<BoundedContextName> destinationNames = newHashSet();
             BoundedContext sourceContext = contextWithTransport(transportFactory);
@@ -170,8 +167,7 @@ class IntegrationBusTest {
         @Test
         @DisplayName("to two BCs with different needs")
         void toTwoBcSubscribers() {
-            InMemoryTransportFactory transportFactory =
-                    InMemoryTransportFactory.newInstance();
+            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
             BoundedContext sourceContext = contextWithTransport(transportFactory);
             BoundedContext destA = contextWithProjectCreatedNeeds(transportFactory);
@@ -223,8 +219,7 @@ class IntegrationBusTest {
         @Test
         @DisplayName("to domestic entity subscribers of another BC")
         void toDomesticEntitySubscribers() {
-            InMemoryTransportFactory transportFactory =
-                    InMemoryTransportFactory.newInstance();
+            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
             BoundedContext sourceContext = contextWithTransport(transportFactory);
             BoundedContext destContext = contextWithExtEntitySubscribers(transportFactory);
@@ -247,8 +242,7 @@ class IntegrationBusTest {
         @Test
         @DisplayName("to domestic standalone subscribers of another BC")
         void toDomesticStandaloneSubscribers() {
-            InMemoryTransportFactory transportFactory =
-                    InMemoryTransportFactory.newInstance();
+            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
             BoundedContext sourceContext = contextWithTransport(transportFactory);
             BoundedContext destContext = contextWithExternalSubscribers(transportFactory);
@@ -356,8 +350,7 @@ class IntegrationBusTest {
         @Test
         @DisplayName("events")
         void eventsIfNeedExternal() {
-            InMemoryTransportFactory transportFactory =
-                    InMemoryTransportFactory.newInstance();
+            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
             BoundedContext context = contextWithExtEntitySubscribers(transportFactory);
             ProjectEventsSubscriber eventSubscriber = new ProjectEventsSubscriber();
@@ -381,8 +374,7 @@ class IntegrationBusTest {
         @Test
         @DisplayName("rejections")
         void rejectionsIfNeedExternal() {
-            InMemoryTransportFactory transportFactory =
-                    InMemoryTransportFactory.newInstance();
+            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
             BoundedContext sourceContext = contextWithExtEntitySubscribers(transportFactory);
             ProjectRejectionsExtSubscriber standaloneSubscriber =

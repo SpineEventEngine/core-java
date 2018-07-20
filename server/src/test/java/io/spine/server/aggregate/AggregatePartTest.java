@@ -86,8 +86,7 @@ class AggregatePartTest {
         prepareAggregatePart();
         taskDescriptionPart = new TaskDescriptionPart(root);
         taskRepository = new TaskRepository();
-        TaskDescriptionRepository taskDescriptionRepository =
-                new TaskDescriptionRepository();
+        TaskDescriptionRepository taskDescriptionRepository = new TaskDescriptionRepository();
         boundedContext.register(taskRepository);
         boundedContext.register(taskDescriptionRepository);
     }
@@ -125,10 +124,9 @@ class AggregatePartTest {
                     .build();
             fail("Should have thrown InvalidEntityStateException.");
         } catch (InvalidEntityStateException e) {
-            List<ConstraintViolation> violations =
-                    e.getError()
-                     .getValidationError()
-                     .getConstraintViolationList();
+            List<ConstraintViolation> violations = e.getError()
+                                                    .getValidationError()
+                                                    .getConstraintViolationList();
             assertSize(user.getAllFields()
                            .size(), violations);
         }
@@ -153,8 +151,7 @@ class AggregatePartTest {
 
     private NullPointerTester createNullPointerTester() throws NoSuchMethodException {
         Constructor constructor =
-                AnAggregateRoot.class
-                        .getDeclaredConstructor(BoundedContext.class, String.class);
+                AnAggregateRoot.class.getDeclaredConstructor(BoundedContext.class, String.class);
         NullPointerTester tester = new NullPointerTester();
         tester.setDefault(Constructor.class, constructor)
               .setDefault(BoundedContext.class, boundedContext)

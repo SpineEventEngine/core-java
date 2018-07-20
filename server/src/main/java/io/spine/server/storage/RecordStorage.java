@@ -159,8 +159,7 @@ public abstract class RecordStorage<I>
      */
     @Override
     public void write(I id, EntityRecord record) {
-        EntityRecordWithColumns recordWithStorageFields =
-                EntityRecordWithColumns.of(record);
+        EntityRecordWithColumns recordWithStorageFields = EntityRecordWithColumns.of(record);
         write(id, recordWithStorageFields);
     }
 
@@ -199,10 +198,9 @@ public abstract class RecordStorage<I>
         } else {
             // The AggregateStateId is a special case, which is not handled by the Identifier class.
             String idStr = id instanceof AggregateStateId
-                           ? id.toString()
-                           : Identifier.toString(id);
-            throw newIllegalStateException("Unable to load record for entity with ID: %s",
-                                           idStr);
+                              ? id.toString()
+                              : Identifier.toString(id);
+            throw newIllegalStateException("Unable to load record for entity with ID: %s", idStr);
         }
     }
 

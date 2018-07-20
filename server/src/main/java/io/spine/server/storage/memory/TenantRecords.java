@@ -60,7 +60,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
     @Override
     public Iterator<I> index() {
         Iterator<I> result = filtered.keySet()
-                                           .iterator();
+                                     .iterator();
         return result;
     }
 
@@ -85,8 +85,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
 
     Map<I, EntityRecord> readAllRecords() {
         Map<I, EntityRecordWithColumns> filtered = filtered();
-        Map<I, EntityRecord> records = transformValues(filtered,
-                                                             EntityRecordUnpacker.INSTANCE);
+        Map<I, EntityRecord> records = transformValues(filtered, EntityRecordUnpacker.INSTANCE);
         ImmutableMap<I, EntityRecord> result = ImmutableMap.copyOf(records);
         return result;
     }
@@ -94,10 +93,8 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
     Map<I, EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
         Map<I, EntityRecordWithColumns> filtered =
                 filterValues(records, new EntityQueryMatcher<>(query));
-        Map<I, EntityRecord> records = transformValues(filtered,
-                                                             EntityRecordUnpacker.INSTANCE);
-        Function<EntityRecord, EntityRecord> fieldMaskApplier =
-                new FieldMaskApplier(fieldMask);
+        Map<I, EntityRecord> records = transformValues(filtered, EntityRecordUnpacker.INSTANCE);
+        Function<EntityRecord, EntityRecord> fieldMaskApplier = new FieldMaskApplier(fieldMask);
         Map<I, EntityRecord> maskedRecords = transformValues(records, fieldMaskApplier);
         ImmutableMap<I, EntityRecord> result = ImmutableMap.copyOf(maskedRecords);
         return result;
@@ -144,16 +141,16 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
         for (Map.Entry<I, EntityRecordWithColumns> storageEntry : filtered.entrySet()) {
             I id = storageEntry.getKey();
             EntityRecord rawRecord = storageEntry.getValue()
-                                                       .getRecord();
+                                                 .getRecord();
             TypeUrl type = TypeUrl.parse(rawRecord.getState()
-                                                        .getTypeUrl());
+                                                  .getTypeUrl());
             Any recordState = rawRecord.getState();
             Message stateAsMessage = unpack(recordState);
             Message processedState = applyMask(fieldMask, stateAsMessage, type);
             Any packedState = pack(processedState);
             EntityRecord resultingRecord = EntityRecord.newBuilder()
-                                                             .setState(packedState)
-                                                             .build();
+                                                       .setState(packedState)
+                                                       .build();
             result.put(id, resultingRecord);
         }
 
@@ -190,8 +187,8 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
             Message maskedState = applyMask(fieldMask, state, typeUrl);
             Any repackedState = pack(maskedState);
             EntityRecord result = EntityRecord.newBuilder(input)
-                                                    .setState(repackedState)
-                                                    .build();
+                                              .setState(repackedState)
+                                              .build();
             return result;
         }
     }

@@ -124,9 +124,8 @@ public class AggregateMessageDeliveryTestEnv {
     }
 
     private static Command createCommand(Message cmdMessage) {
-        Command result =
-                TestActorRequestFactory.newInstance(AggregateMessageDeliveryTestEnv.class)
-                                       .createCommand(cmdMessage);
+        Command result = TestActorRequestFactory.newInstance(AggregateMessageDeliveryTestEnv.class)
+                                                .createCommand(cmdMessage);
         return result;
     }
 

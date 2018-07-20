@@ -67,7 +67,7 @@ abstract class AbstractCommandRouterTest {
     @BeforeEach
     void setUp() {
         BoundedContext boundedContext = BoundedContext.newBuilder()
-                                                            .build();
+                                                      .build();
         CommandBus commandBus = boundedContext.getCommandBus();
 
         // Register dispatcher for `StringValue` message type.

@@ -115,9 +115,7 @@ class EnrichmentsTest {
     @Test
     @DisplayName("recognize if event enrichment is disabled")
     void recognizeEnrichmentDisabled() {
-        EventEnvelope event = EventEnvelope.of(
-                GivenEvent.withDisabledEnrichmentOf(stringValue)
-        );
+        EventEnvelope event = EventEnvelope.of(GivenEvent.withDisabledEnrichmentOf(stringValue));
 
         assertFalse(event.isEnrichmentEnabled());
     }
@@ -149,8 +147,7 @@ class EnrichmentsTest {
     void obtainSpecificEnrichment() {
         EventContext context = givenContextEnrichedWith(stringValue);
 
-        Optional<? extends StringValue> enrichment =
-                getEnrichment(stringValue.getClass(), context);
+        Optional<? extends StringValue> enrichment = getEnrichment(stringValue.getClass(), context);
 
         assertTrue(enrichment.isPresent());
         assertEquals(stringValue, enrichment.get());

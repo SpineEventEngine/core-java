@@ -125,17 +125,14 @@ class EntityQueryTest {
     @Test
     @DisplayName("fail to append lifecycle columns if they are already present")
     void notDuplicateLifecycleColumns() {
-        EntityColumn deletedColumn =
-                Columns.findColumn(EntityWithLifecycle.class, deleted.name());
+        EntityColumn deletedColumn = Columns.findColumn(EntityWithLifecycle.class, deleted.name());
         CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
-                ImmutableMultimap.of(deletedColumn, ColumnFilter.getDefaultInstance()),
-                ALL
+                ImmutableMultimap.of(deletedColumn, ColumnFilter.getDefaultInstance()), ALL
         );
         QueryParameters parameters = QueryParameters.newBuilder()
                                                     .add(queryParameter)
                                                     .build();
-        EntityQuery<String> query =
-                EntityQuery.of(Collections.<String>emptySet(), parameters);
+        EntityQuery<String> query = EntityQuery.of(Collections.<String>emptySet(), parameters);
         assertFalse(query.canAppendLifecycleFlags());
     }
 

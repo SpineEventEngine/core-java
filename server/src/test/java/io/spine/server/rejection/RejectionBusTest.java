@@ -140,8 +140,7 @@ public class RejectionBusTest {
             RejectionSubscriber subscriberTwo = new InvalidProjectNameSubscriber();
             rejectionBus.register(subscriberOne);
             rejectionBus.register(subscriberTwo);
-            RejectionClass rejectionClass = RejectionClass.of(
-                    InvalidProjectName.class);
+            RejectionClass rejectionClass = RejectionClass.of(InvalidProjectName.class);
 
             rejectionBus.unregister(subscriberOne);
 
@@ -169,8 +168,7 @@ public class RejectionBusTest {
             rejectionBus.register(dispatcherTwo);
 
             rejectionBus.unregister(dispatcherOne);
-            Set<RejectionDispatcher<?>> dispatchers =
-                    rejectionBus.getDispatchers(rejectionClass);
+            Set<RejectionDispatcher<?>> dispatchers = rejectionBus.getDispatchers(rejectionClass);
 
             // Check we don't have 1st dispatcher, but have 2nd.
             assertFalse(dispatchers.contains(dispatcherOne));

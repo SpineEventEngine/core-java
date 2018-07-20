@@ -138,8 +138,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
                                           .getName();
             StringBuilder threadNameUponScheduling = new StringBuilder(0);
             CountDownLatch latch = new CountDownLatch(1);
-            CommandScheduler scheduler =
-                    threadAwareScheduler(threadNameUponScheduling, latch);
+            CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling, latch);
             storeSingleCommandForRescheduling();
 
             // Create CommandBus specific for this test.
@@ -177,8 +176,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
                                           .getName();
             StringBuilder threadNameUponScheduling = new StringBuilder(0);
             CountDownLatch latch = new CountDownLatch(1);
-            CommandScheduler scheduler =
-                    threadAwareScheduler(threadNameUponScheduling, latch);
+            CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling, latch);
             storeSingleCommandForRescheduling();
 
             // Create CommandBus specific for this test.
@@ -302,11 +300,10 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     }
 
     private static long getDelaySeconds(Command cmd) {
-        long delaySec = cmd
-                .getContext()
-                .getSchedule()
-                .getDelay()
-                .getSeconds();
+        long delaySec = cmd.getContext()
+                           .getSchedule()
+                           .getDelay()
+                           .getSeconds();
         return delaySec;
     }
 }

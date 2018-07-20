@@ -71,8 +71,7 @@ class EventSubscriberMethodTest {
     void invokeSubscriberMethod() throws InvocationTargetException {
         ValidTwoParams subscriberObject;
         subscriberObject = spy(new ValidTwoParams());
-        EventSubscriberMethod subscriber =
-                EventSubscriberMethod.from(subscriberObject.getMethod());
+        EventSubscriberMethod subscriber = EventSubscriberMethod.from(subscriberObject.getMethod());
         RefProjectCreated msg = Given.EventMessage.projectCreated();
 
         subscriber.invoke(subscriberObject, msg, EventContext.getDefaultInstance());

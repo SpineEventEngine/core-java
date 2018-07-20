@@ -41,7 +41,7 @@ public class ThreadStats<I extends Message> {
 
     public void recordCallingThread(I id) {
         long currentThreadId = Thread.currentThread()
-                                           .getId();
+                                     .getId();
         threadToId.put(currentThreadId, id);
     }
 

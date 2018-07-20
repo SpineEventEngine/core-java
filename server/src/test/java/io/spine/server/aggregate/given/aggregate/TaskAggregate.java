@@ -88,11 +88,10 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
         if (assignee.equals(emptyUserId)) {
             return null;
         }
-        AggTaskAssigned event =
-                AggTaskAssigned.newBuilder()
-                               .setTaskId(id)
-                               .setNewAssignee(assignee)
-                               .build();
+        AggTaskAssigned event = AggTaskAssigned.newBuilder()
+                                               .setTaskId(id)
+                                               .setNewAssignee(assignee)
+                                               .build();
         return event;
     }
 
@@ -146,8 +145,7 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
     on(AggTaskAssigned event) {
         AggTaskId taskId = event.getTaskId();
         UserId previousAssignee = event.getPreviousAssignee();
-        AggUserNotified previousAssigneeNotified =
-                userNotifiedOrNull(taskId, previousAssignee);
+        AggUserNotified previousAssigneeNotified = userNotifiedOrNull(taskId, previousAssignee);
         UserId newAssignee = event.getNewAssignee();
         AggUserNotified newAssigneeNotified = userNotified(taskId, newAssignee);
         return Pair.withNullable(newAssigneeNotified, previousAssigneeNotified);
@@ -162,11 +160,10 @@ public class TaskAggregate extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder
     }
 
     private static AggUserNotified userNotified(AggTaskId taskId, UserId userId) {
-        AggUserNotified event =
-                AggUserNotified.newBuilder()
-                               .setTaskId(taskId)
-                               .setUserId(userId)
-                               .build();
+        AggUserNotified event = AggUserNotified.newBuilder()
+                                               .setTaskId(taskId)
+                                               .setUserId(userId)
+                                               .build();
         return event;
     }
 

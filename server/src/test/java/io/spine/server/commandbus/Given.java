@@ -120,9 +120,8 @@ public class Given {
 
             CmdCreateProject projectMessage = CommandMessage.createProjectMessage();
             CommandContext commandContext = GivenCommandContext.withScheduledDelayOf(delay);
-            CommandFactory commandFactory =
-                    TestActorRequestFactory.newInstance(ACommand.class)
-                                           .command();
+            CommandFactory commandFactory = TestActorRequestFactory.newInstance(ACommand.class)
+                                                                   .command();
             Command cmd = commandFactory.createBasedOnContext(projectMessage, commandContext);
             return cmd;
         }

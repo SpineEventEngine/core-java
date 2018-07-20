@@ -299,8 +299,7 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
     }
 
     private ProcessingStatus getStatus(CommandId commandId, TenantId tenantId) {
-        ProcessingStatus status =
-                CommandStoreTestEnv.getStatus(commandId, tenantId, commandStore);
+        ProcessingStatus status = CommandStoreTestEnv.getStatus(commandId, tenantId, commandStore);
         return status;
     }
 }
