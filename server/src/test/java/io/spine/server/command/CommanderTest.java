@@ -23,6 +23,8 @@ package io.spine.server.command;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
+import io.spine.test.command.CmdCreateProject;
+import io.spine.test.command.FirstCmdCreateProject;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
@@ -39,10 +41,21 @@ class CommanderTest {
         commander = new Commendatore(boundedContext.getCommandBus(), boundedContext.getEventBus());
     }
 
+    /**
+     * Test environment class that generates new commands in response to incoming messages.
+     */
     private static final class Commendatore extends Commander {
 
         private Commendatore(CommandBus commandBus, EventBus eventBus) {
             super(commandBus, eventBus);
+        }
+
+        @Command
+        FirstCmdCreateProject on(CmdCreateProject command) {
+            return FirstCmdCreateProject
+                    .newBuilder()
+                    .setId(command.getProjectId())
+                    .build();
         }
     }
 }

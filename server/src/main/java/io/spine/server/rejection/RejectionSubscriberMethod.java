@@ -130,7 +130,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
      *
      * <p>Please see {@link Subscribe} annotation for more information.
      */
-    private static class FilterPredicate extends RejectionFilterPredicate {
+    private static class FilterPredicate extends AbstractFilterPredicate {
 
         private FilterPredicate() {
             super(Subscribe.class);

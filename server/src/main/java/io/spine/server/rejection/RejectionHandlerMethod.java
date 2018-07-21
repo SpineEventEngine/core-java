@@ -266,10 +266,10 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionCont
     /**
      * The abstract base for predicates allowing to filter rejection handler methods.
      */
-    protected abstract static class RejectionFilterPredicate
+    protected abstract static class AbstractFilterPredicate
             extends HandlerMethodPredicate<CommandContext> {
 
-        RejectionFilterPredicate(Class<? extends Annotation> annotationClass) {
+        AbstractFilterPredicate(Class<? extends Annotation> annotationClass) {
             super(annotationClass, CommandContext.class);
         }
 

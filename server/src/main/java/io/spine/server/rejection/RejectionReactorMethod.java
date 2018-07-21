@@ -134,7 +134,7 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
      *
      * <p>Please see {@link React} annotation for more information.
      */
-    private static class FilterPredicate extends RejectionFilterPredicate {
+    private static class FilterPredicate extends AbstractFilterPredicate {
 
         private FilterPredicate() {
             super(React.class);
