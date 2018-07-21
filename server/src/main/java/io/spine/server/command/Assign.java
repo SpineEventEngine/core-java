@@ -31,12 +31,17 @@ import java.lang.annotation.Target;
  * <p>A command handler method <strong>must</strong>:
  * <ul>
  *     <li>be annotated with {@link Assign @Assign};
- *     <li>return an event derived from {@link com.google.protobuf.Message Message}
- *     <strong>or</strong> a {@link java.util.List List} of messages;
+ *     <li>return an event message derived from {@link com.google.protobuf.Message Message}
+ *     if there is only one event generated;
+ *     <strong>or</strong> an {@link java.lang.Iterable Iterable} of event messages for two or
+ *     more events;
  *     <li>accept a command message derived from {@link com.google.protobuf.Message Message}
  *         as the first parameter.
  * </ul>
  *
+ * <p>A command handler method <strong>may</strong> accept a {@link io.spine.core.CommandContext
+ * CommandContext} as the second parameter, if handling of the command requires its context.
+
  * <p>If the annotation is applied to a method which doesn't satisfy any of these requirements,
  * this method is not considered a command handler and is <strong>not</strong> registered for
  * command dispatching.
@@ -45,14 +50,17 @@ import java.lang.annotation.Target;
  * calling this method from tests. The method should not be {@code public} because it is not
  * supposed to be called directly.
  *
- * <p>A command handler method <strong>may</strong> accept a {@link io.spine.core.CommandContext
- * CommandContext} as the second parameter if handling of the command requires its context.
+ * <h2>One Handler per Command</h2>
  *
- * <p><strong>IMPORTANT:</strong> an application must have one and only one handler per command
- * message class. Declaring two methods that handle the same command class will result in run-time
- * error.
+ * <p>An application must have one and only one handler per command message class.
+ * This includes {@linkplain io.spine.server.command.Command the case} of transforming an incoming
+ * command into one or more commands that will to be handled instead of the received one.
+ *
+ * <p>Declaring two methods that handle the same command class will result in run-time error.
  *
  * @author Alexander Yevsyukov
+ * @see io.spine.server.tuple Returning Two or More Event Messages
+ * @see io.spine.server.command.Command Converting Commands
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

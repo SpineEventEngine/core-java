@@ -19,30 +19,34 @@
  */
 
 /**
- * This package provides tuples for return values of command handling methods.
+ * This package provides tuples for return values from
+ * {@linkplain io.spine.server.command.Assign command handling} or
+ * {@linkplain io.spine.server.command.Command commanding} methods.
  *
  * <p>Although tuples are <a href="https://github.com/google/guava/wiki/IdeaGraveyard#tuples-for-n--2">
- * considered harmful</a> in general, there is a valid case of their usage when there is a need for
- * returning more than one event message from a command handling method.
+ * considered harmful</a> in general, they are useful for describing types of several messages
+ * returned by a method. Consider the following example.
  *
- * <p>For example, the return value of the below method does not say much about the number and types
+ * <p>The return value of the below method does not say much about the number and types
  * of returned event messages.
  * <pre>{@code
- *     {@literal @}Assign
+ *     @Assign
  *     List<Message> on(CreateTask cmd) { ... }
  * }</pre>
  *
- * The below declaration gives both number and types of events:
+ * The below declaration gives both number and types of the events:
  * <pre>{@code
- *     {@literal @}Assign
+ *     @Assign
  *     Pair<TaskCreated, TaskAssigned> on(CreateTask cmd) { ... }
  * }</pre>
+ *
+ * <p>It should re-iterated that the purpose of this package is limited to the scenarios
+ * described above. Programmers are strongly discouraged from applying tuples for other purposes.
  *
  * <h2>Generic Types</h2>
  *
  * <p>Classes provided by this package can support up to 5 generic parameters. They are named from
- * {@code <A>} through {@code <E>}. Methods obtaining these values are named after the types:
- * {@code getA()}, {@code getB()} and so on.
+ * {@code <A>} through {@code <E>}.
  *
  * <p>The first generic parameter {@code <A>} must always be a specific
  * {@link com.google.protobuf.Message Message} class.
