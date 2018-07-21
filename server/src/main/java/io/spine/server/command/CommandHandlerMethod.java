@@ -89,7 +89,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
     /**
      * {@inheritDoc}
      *
-     * @return the list of event messages (or an empty list if the handler returns nothing)
+     * @return the list of event messages
      */
     @Override
     public List<? extends Message> invoke(Object target, Message message, CommandContext context) {
@@ -143,7 +143,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
     }
 
     /**
-     * The factory for filtering {@linkplain CommandHandlerMethod command handling methods}.
+     * The factory of {@link CommandHandlerMethod}s.
      */
     private static class Factory extends HandlerMethod.Factory<CommandHandlerMethod> {
 

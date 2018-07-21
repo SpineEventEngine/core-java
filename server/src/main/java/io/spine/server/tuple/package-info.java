@@ -30,13 +30,13 @@
  * <p>The return value of the below method does not say much about the number and types
  * of returned event messages.
  * <pre>{@code
- *     @Assign
+ *     {@literal @}Assign
  *     List<Message> on(CreateTask cmd) { ... }
  * }</pre>
  *
  * The below declaration gives both number and types of the events:
  * <pre>{@code
- *     @Assign
+ *     {@literal @}Assign
  *     Pair<TaskCreated, TaskAssigned> on(CreateTask cmd) { ... }
  * }</pre>
  *
