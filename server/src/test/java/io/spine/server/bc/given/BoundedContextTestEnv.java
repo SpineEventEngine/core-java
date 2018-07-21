@@ -76,7 +76,7 @@ public class BoundedContextTestEnv {
         @Assign
         public List<BcProjectStarted> handle(BcStartProject cmd, CommandContext ctx) {
             BcProjectStarted message = Given.EventMessage.projectStarted(cmd.getProjectId());
-            return newArrayList(message);
+            return Lists.newArrayList(message);
         }
 
         @Apply
@@ -101,6 +101,7 @@ public class BoundedContextTestEnv {
             extends AggregateRepository<ProjectId, ProjectAggregate> {
     }
 
+    @SuppressWarnings("unused") // OK to have unused parameters in this test env. class
     public static class TestEventSubscriber extends EventSubscriber {
 
         private Message handledEvent;

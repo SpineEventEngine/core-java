@@ -53,7 +53,6 @@ import io.spine.test.projection.event.PrjProjectDeleted;
 import io.spine.test.projection.event.PrjProjectStarted;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.testing.client.TestActorRequestFactory;
-import io.spine.testing.server.TestEventClasses;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.AfterEach;
@@ -68,6 +67,7 @@ import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
+import static io.spine.testing.server.Assertions.assertEventClasses;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -317,10 +317,10 @@ class ProjectionRepositoryTest
         @DisplayName("processed event classes")
         void eventClasses() {
             Set<EventClass> eventClasses = repository().getMessageClasses();
-            TestEventClasses.assertContains(eventClasses,
-                                            PrjProjectCreated.class,
-                                            PrjTaskAdded.class,
-                                            PrjProjectStarted.class);
+            assertEventClasses(eventClasses,
+                               PrjProjectCreated.class,
+                               PrjTaskAdded.class,
+                               PrjProjectStarted.class);
         }
 
         @Test

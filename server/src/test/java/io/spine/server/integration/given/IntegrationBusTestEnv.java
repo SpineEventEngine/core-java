@@ -33,7 +33,6 @@ import io.spine.core.React;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Subscribe;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
@@ -66,6 +65,8 @@ import java.util.List;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Rejections.toRejection;
+import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.testing.server.TestEventFactory.newInstance;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
@@ -73,8 +74,8 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
  */
 public class IntegrationBusTestEnv {
 
+    /** Prevents instantiation of this utility class. */
     private IntegrationBusTestEnv() {
-        // Prevent instantiation of this utility class.
     }
 
     @CanIgnoreReturnValue
@@ -115,10 +116,11 @@ public class IntegrationBusTestEnv {
     public static BoundedContext contextWithTransport(TransportFactory transportFactory) {
         IntegrationBus.Builder builder = IntegrationBus.newBuilder()
                                                        .setTransportFactory(transportFactory);
-        BoundedContext result = BoundedContext.newBuilder()
-                                              .setName(newUuid())
-                                              .setIntegrationBus(builder)
-                                              .build();
+        BoundedContext result = BoundedContext
+                .newBuilder()
+                .setName(newUuid())
+                .setIntegrationBus(builder)
+                .build();
         return result;
     }
 
@@ -138,34 +140,36 @@ public class IntegrationBusTestEnv {
 
     public static Event projectCreated() {
         ProjectId projectId = projectId();
-        TestEventFactory eventFactory = newInstance(pack(projectId),
-                                                    IntegrationBusTestEnv.class);
-        return eventFactory.createEvent(ItgProjectCreated.newBuilder()
-                                                         .setProjectId(projectId)
-                                                         .build()
+        TestEventFactory eventFactory = newInstance(pack(projectId), IntegrationBusTestEnv.class);
+        return eventFactory.createEvent(
+                ItgProjectCreated.newBuilder()
+                                 .setProjectId(projectId)
+                                 .build()
         );
     }
 
     public static Event projectStarted() {
         ProjectId projectId = projectId();
-        TestEventFactory eventFactory = newInstance(pack(projectId),
-                                                    IntegrationBusTestEnv.class);
-        return eventFactory.createEvent(ItgProjectStarted.newBuilder()
-                                                         .setProjectId(projectId)
-                                                         .build()
+        TestEventFactory eventFactory =
+                newInstance(pack(projectId), IntegrationBusTestEnv.class);
+        return eventFactory.createEvent(
+                ItgProjectStarted.newBuilder()
+                                 .setProjectId(projectId)
+                                 .build()
         );
     }
 
     @SuppressWarnings("ThrowableNotThrown")     // used to create a rejection
     public static Rejection cannotStartArchivedProject() {
         ProjectId projectId = projectId();
-        ItgStartProject cmdMessage = ItgStartProject.newBuilder()
-                                                    .setProjectId(projectId)
-                                                    .build();
+        ItgStartProject cmdMessage = ItgStartProject
+                .newBuilder()
+                .setProjectId(projectId)
+                .build();
         Command startProjectCmd = toCommand(cmdMessage);
         io.spine.test.integration.rejection.ItgCannotStartArchivedProject throwable =
                 new io.spine.test.integration.rejection.ItgCannotStartArchivedProject(projectId);
-        throwable.initProducer(AnyPacker.pack(projectId));
+        throwable.initProducer(pack(projectId));
         Rejection rejection = toRejection(throwable, startProjectCmd);
         return rejection;
     }
@@ -491,6 +495,7 @@ public class IntegrationBusTestEnv {
      * {@linkplain io.spine.server.model.HandlerMethods#ensureExternalMatch(HandlerMethod, boolean)
      * external attribute mismatch check}.
      */
+    @SuppressWarnings("unused") // OK to have unused params in this test env. class
     public static final class ExternalMismatchSubscriber extends RejectionSubscriber {
 
         @Subscribe(external = true)

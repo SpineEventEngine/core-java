@@ -27,6 +27,8 @@ option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.command";
 option java_multiple_files = true;
 
+import "spine/core/user_id.proto";
+
 message ProjectId {
     string id = 1;
 }
@@ -54,4 +56,5 @@ message Task {
     TaskId task_id = 1;
     string title = 2;
     string description = 3;
+    core.UserId assignee = 4;
 }

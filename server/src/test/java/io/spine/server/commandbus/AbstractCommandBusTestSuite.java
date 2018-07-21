@@ -171,32 +171,34 @@ abstract class AbstractCommandBusTestSuite {
     @BeforeEach
     void setUp() {
         ModelTests.clearModel();
-
+        Class<? extends AbstractCommandBusTestSuite> cls = getClass();
         InMemoryStorageFactory storageFactory =
-                InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
-                                                   this.multitenant);
-        TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(this.multitenant,
-                                                                    storageFactory);
+                InMemoryStorageFactory.newInstance(newName(cls.getSimpleName()), multitenant);
+        TenantIndex tenantIndex = 
+                TenantAwareTest.createTenantIndex(multitenant, storageFactory);
         commandStore = spy(new CommandStore(storageFactory, tenantIndex));
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
         rejectionBus = spy(RejectionBus.newBuilder()
                                        .build());
-        commandBus = CommandBus.newBuilder()
-                               .setMultitenant(this.multitenant)
-                               .setCommandStore(commandStore)
-                               .setCommandScheduler(scheduler)
-                               .setRejectionBus(rejectionBus)
-                               .setThreadSpawnAllowed(false)
-                               .setLog(log)
-                               .setAutoReschedule(false)
-                               .build();
-        eventBus = EventBus.newBuilder()
-                           .setStorageFactory(storageFactory)
-                           .build();
-        requestFactory = this.multitenant
-                         ? TestActorRequestFactory.newInstance(getClass(), newUuid())
-                         : TestActorRequestFactory.newInstance(getClass());
+        commandBus = CommandBus
+                .newBuilder()
+                .setMultitenant(multitenant)
+                .setCommandStore(commandStore)
+                .setCommandScheduler(scheduler)
+                .setRejectionBus(rejectionBus)
+                .setThreadSpawnAllowed(false)
+                .setLog(log)
+                .setAutoReschedule(false)
+                .build();
+        eventBus = EventBus
+                .newBuilder()
+                .setStorageFactory(storageFactory)
+                .build();
+        requestFactory = 
+                multitenant
+                ? TestActorRequestFactory.newInstance(cls, newUuid())
+                : TestActorRequestFactory.newInstance(cls);
         createProjectHandler = new CreateProjectHandler();
         observer = memoizingObserver();
     }
@@ -252,9 +254,7 @@ abstract class AbstractCommandBusTestSuite {
         assertEquals(cmd.getId(), commandId);
     }
 
-    void storeAsScheduled(Iterable<Command> commands,
-                          Duration delay,
-                          Timestamp schedulingTime) {
+    void storeAsScheduled(Iterable<Command> commands, Duration delay, Timestamp schedulingTime) {
         for (Command cmd : commands) {
             Command cmdWithSchedule = setSchedule(cmd, delay, schedulingTime);
             commandStore.store(cmdWithSchedule, SCHEDULED);

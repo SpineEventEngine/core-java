@@ -72,6 +72,7 @@ import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.bus.Buses.reject;
 import static java.util.Optional.empty;
 
