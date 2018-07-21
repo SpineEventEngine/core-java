@@ -95,6 +95,9 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
     public List<? extends Message> invoke(Object target, Message message, CommandContext context) {
         Object handlingResult = super.invoke(target, message, context);
         List<? extends Message> events = toList(handlingResult);
+        //TODO:2018-07-22:alexander.yevsyukov: Have the below check once ProcessManagers stop violating the contract of `@Assign`.
+        // see: https://github.com/SpineEventEngine/core-java/issues/773
+        // checkState(!events.isEmpty(), "Command handling method did not produce events");
         return events;
     }
 
