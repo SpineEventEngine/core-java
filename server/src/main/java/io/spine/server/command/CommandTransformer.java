@@ -21,12 +21,17 @@
 package io.spine.server.command;
 
 import io.spine.annotation.Internal;
+import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.server.model.HandlerKey;
+import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.MethodAccessChecker;
+import io.spine.server.model.MethodExceptionChecker;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
+import java.util.function.Predicate;
 
 /**
  * A method that produces one or more command messages in response to an incoming command.
@@ -59,6 +64,40 @@ public final class CommandTransformer extends CommandingMethod<CommandClass, Com
     @Override
     public HandlerKey key() {
         return HandlerKey.of(getMessageClass());
+    }
+
+    private static class Factory extends HandlerMethod.Factory<CommandTransformer> {
+
+        private static final Factory INSTANCE = new Factory();
+
+        @Override
+        public Class<CommandTransformer> getMethodClass() {
+            return CommandTransformer.class;
+        }
+
+        @Override
+        public Predicate<Method> getPredicate() {
+            return predicate();
+        }
+
+        @Override
+        public void checkAccessModifier(Method method) {
+            MethodAccessChecker checker = MethodAccessChecker.forMethod(method);
+            checker.checkPackagePrivate(
+                    "Command transformation method {} should be package-private."
+            );
+        }
+
+        @Override
+        protected void checkThrownExceptions(Method method) {
+            MethodExceptionChecker checker = MethodExceptionChecker.forMethod(method);
+            checker.checkThrowsNoExceptionsBut(ThrowableMessage.class);
+        }
+
+        @Override
+        protected CommandTransformer createFromMethod(Method method) {
+            return from(method);
+        }
     }
 
     /**

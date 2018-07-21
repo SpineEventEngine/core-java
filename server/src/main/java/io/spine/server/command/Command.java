@@ -53,6 +53,17 @@ import java.lang.annotation.Target;
  * this method is not considered a command handler and is <strong>not</strong> registered for
  * command generation.
  *
+ * <h2>Throwables</h2>
+ * <p>A commanding method may throw a {@link io.spine.base.ThrowableMessage ThrowableMessage}
+ * <em>if, and only if</em> it accepts a command message. This means that the incoming command
+ * may be either rejected, or substituting command(s) must be generated.
+ *
+ * <p>Throwing {@linkplain Throwable other types} in command transforming methods in not allowed.
+ *
+ * <p>Commanding methods accepting events or rejections may not throw.
+ *
+ * <h2>Access Modifiers</h2>
+ *
  * <p>A commanding method <strong>should</strong> have package-private access. It will allow
  * calling this method from tests. The method should not be {@code public} because it is not
  * supposed to be called directly.
