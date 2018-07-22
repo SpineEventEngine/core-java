@@ -42,9 +42,6 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  */
 final class EventApplier extends AbstractHandlerMethod<EventClass, Empty> {
 
-    /** The instance of the predicate to filter event applier methods of an aggregate class. */
-    private static final MethodPredicate PREDICATE = new Filter();
-
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
@@ -69,12 +66,12 @@ final class EventApplier extends AbstractHandlerMethod<EventClass, Empty> {
     }
 
     @VisibleForTesting
-    static MethodPredicate predicate() {
-        return PREDICATE;
+    static Predicate<Method> predicate() {
+        return factory().getPredicate();
     }
 
     public static AbstractHandlerMethod.Factory<EventApplier> factory() {
-        return Factory.getInstance();
+        return Factory.INSTANCE;
     }
 
     /**
@@ -97,10 +94,6 @@ final class EventApplier extends AbstractHandlerMethod<EventClass, Empty> {
 
         private static final Factory INSTANCE = new Factory();
 
-        private static Factory getInstance() {
-            return INSTANCE;
-        }
-
         @Override
         public Class<EventApplier> getMethodClass() {
             return EventApplier.class;
@@ -108,7 +101,7 @@ final class EventApplier extends AbstractHandlerMethod<EventClass, Empty> {
 
         @Override
         public Predicate<Method> getPredicate() {
-            return predicate();
+            return Filter.INSTANCE;
         }
 
         @Override
@@ -118,7 +111,7 @@ final class EventApplier extends AbstractHandlerMethod<EventClass, Empty> {
         }
 
         @Override
-        protected EventApplier createFromMethod(Method method) {
+        protected EventApplier doCreate(Method method) {
             return from(method);
         }
     }
@@ -127,6 +120,8 @@ final class EventApplier extends AbstractHandlerMethod<EventClass, Empty> {
      * The predicate for filtering event applier methods.
      */
     private static class Filter extends HandlerMethodPredicate<Empty> {
+
+        private static final MethodPredicate INSTANCE = new Filter();
 
         private static final int NUMBER_OF_PARAMS = 1;
         private static final int EVENT_PARAM_INDEX = 0;

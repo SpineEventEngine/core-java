@@ -175,7 +175,7 @@ public class HandlerMethodTestEnv {
             }
 
             @Override
-            protected OneParamMethod createFromMethod(Method method) {
+            protected OneParamMethod doCreate(Method method) {
                 return new OneParamMethod(method);
             }
         }

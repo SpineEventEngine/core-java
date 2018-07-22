@@ -297,11 +297,11 @@ public abstract class AbstractHandlerMethod<M extends MessageClass, C extends Me
         public H create(Method method) {
             checkAccessModifier(method);
             checkThrownExceptions(method);
-            return createFromMethod(method);
+            return doCreate(method);
         }
 
         /** Creates a wrapper object from a method. */
-        protected abstract H createFromMethod(Method method);
+        protected abstract H doCreate(Method method);
 
         /**
          * Ensures method does not throw any prohibited exception types.

@@ -45,9 +45,6 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
 @Internal
 public class RejectionSubscriberMethod extends RejectionHandlerMethod {
 
-    /** The instance of the predicate to filter rejection subscriber methods of a class. */
-    private static final MethodPredicate PREDICATE = new Filter();
-
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
@@ -83,10 +80,6 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
         return Factory.getInstance();
     }
 
-    static MethodPredicate predicate() {
-        return PREDICATE;
-    }
-
     /**
      * The factory for filtering methods that match {@code RejectionSubscriberMethod} specification.
      */
@@ -99,7 +92,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
 
         @Override
         public Predicate<Method> getPredicate() {
-            return predicate();
+            return Filter.INSTANCE;
         }
 
         @Override
@@ -109,7 +102,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
         }
 
         @Override
-        protected RejectionSubscriberMethod createFromMethod(Method method) {
+        protected RejectionSubscriberMethod doCreate(Method method) {
             RejectionSubscriberMethod result = new RejectionSubscriberMethod(method);
             return result;
         }
@@ -131,6 +124,8 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
      * <p>Please see {@link Subscribe} annotation for more information.
      */
     private static class Filter extends AbstractPredicate {
+
+        private static final MethodPredicate INSTANCE = new Filter();
 
         private Filter() {
             super(Subscribe.class);

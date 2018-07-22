@@ -45,9 +45,6 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  */
 public final class EventSubscriberMethod extends AbstractHandlerMethod<EventClass, EventContext> {
 
-    /** The instance of the predicate to filter event subscriber methods of a class. */
-    private static final MethodPredicate PREDICATE = new Filter();
-
     /** Creates a new instance. */
     private EventSubscriberMethod(Method method) {
         super(method);
@@ -79,10 +76,6 @@ public final class EventSubscriberMethod extends AbstractHandlerMethod<EventClas
         return super.invoke(target, message, context);
     }
 
-    static MethodPredicate predicate() {
-        return PREDICATE;
-    }
-
     /**
      * The factory for creating {@linkplain EventSubscriberMethod event subscriber} methods.
      */
@@ -101,7 +94,7 @@ public final class EventSubscriberMethod extends AbstractHandlerMethod<EventClas
 
         @Override
         public Predicate<Method> getPredicate() {
-            return predicate();
+            return Filter.INSTANCE;
         }
 
         @Override
@@ -111,7 +104,7 @@ public final class EventSubscriberMethod extends AbstractHandlerMethod<EventClas
         }
 
         @Override
-        protected EventSubscriberMethod createFromMethod(Method method) {
+        protected EventSubscriberMethod doCreate(Method method) {
             return from(method);
         }
     }
@@ -122,6 +115,8 @@ public final class EventSubscriberMethod extends AbstractHandlerMethod<EventClas
      * <p>Please see {@link Subscribe} annotation for more information.
      */
     private static class Filter extends EventMethodPredicate {
+
+        private static final MethodPredicate INSTANCE = new Filter();
 
         private Filter() {
             super(Subscribe.class);

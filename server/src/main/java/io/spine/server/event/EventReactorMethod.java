@@ -45,8 +45,6 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public final class EventReactorMethod extends AbstractHandlerMethod<EventClass, EventContext> {
 
-    private static final MethodPredicate PREDICATE = new Filter();
-
     private EventReactorMethod(Method method) {
         super(method);
     }
@@ -79,12 +77,8 @@ public final class EventReactorMethod extends AbstractHandlerMethod<EventClass, 
         return new EventReactorMethod(method);
     }
 
-    static MethodPredicate predicate() {
-        return PREDICATE;
-    }
-
     public static AbstractHandlerMethod.Factory<EventReactorMethod> factory() {
-        return Factory.getInstance();
+        return Factory.INSTANCE;
     }
 
     /**
@@ -94,10 +88,6 @@ public final class EventReactorMethod extends AbstractHandlerMethod<EventClass, 
 
         private static final Factory INSTANCE = new Factory();
 
-        private static Factory getInstance() {
-            return INSTANCE;
-        }
-
         @Override
         public Class<EventReactorMethod> getMethodClass() {
             return EventReactorMethod.class;
@@ -105,7 +95,7 @@ public final class EventReactorMethod extends AbstractHandlerMethod<EventClass, 
 
         @Override
         public Predicate<Method> getPredicate() {
-            return predicate();
+            return Filter.INSTANCE;
         }
 
         @Override
@@ -115,7 +105,7 @@ public final class EventReactorMethod extends AbstractHandlerMethod<EventClass, 
         }
 
         @Override
-        protected EventReactorMethod createFromMethod(Method method) {
+        protected EventReactorMethod doCreate(Method method) {
             return from(method);
         }
     }
@@ -124,6 +114,8 @@ public final class EventReactorMethod extends AbstractHandlerMethod<EventClass, 
      * The predicate that filters event reactor methods.
      */
     private static class Filter extends EventMethodPredicate {
+
+        private static final MethodPredicate INSTANCE = new Filter();
 
         private Filter() {
             super(React.class);

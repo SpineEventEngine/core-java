@@ -27,7 +27,6 @@ import io.spine.core.CommandContext;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
-import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.util.function.Predicate;
@@ -42,19 +41,12 @@ public final class CommandSubstMethod
         extends CommandAcceptingMethod
         implements CommandingMethod<CommandClass, CommandContext> {
 
-    /** The instance of the predicate to filter command substitution methods of a class. */
-    private static final MethodPredicate PREDICATE = new Filter();
-
     private CommandSubstMethod(Method method) {
         super(method);
     }
 
     static CommandSubstMethod from(Method method) {
         return new CommandSubstMethod(method);
-    }
-
-    static MethodPredicate predicate() {
-        return PREDICATE;
     }
 
     private static class Factory extends AbstractHandlerMethod.Factory<CommandSubstMethod> {
@@ -68,7 +60,7 @@ public final class CommandSubstMethod
 
         @Override
         public Predicate<Method> getPredicate() {
-            return predicate();
+            return Filter.INSTANCE;
         }
 
         @Override
@@ -86,7 +78,7 @@ public final class CommandSubstMethod
         }
 
         @Override
-        protected CommandSubstMethod createFromMethod(Method method) {
+        protected CommandSubstMethod doCreate(Method method) {
             return from(method);
         }
     }
@@ -95,6 +87,8 @@ public final class CommandSubstMethod
      * Filters command substitution methods.
      */
     private static final class Filter extends AbstractPredicate<CommandContext> {
+
+        private static final Filter INSTANCE = new Filter();
 
         private Filter() {
             super(CommandContext.class);

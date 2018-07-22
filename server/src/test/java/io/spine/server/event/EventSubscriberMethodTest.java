@@ -179,7 +179,8 @@ class EventSubscriberMethodTest {
     }
 
     private static void assertIsEventSubscriber(Method subscriber, boolean isSubscriber) {
-        assertEquals(isSubscriber, EventSubscriberMethod.predicate()
+        assertEquals(isSubscriber, EventSubscriberMethod.factory()
+                                                        .getPredicate()
                                                         .test(subscriber));
     }
 }

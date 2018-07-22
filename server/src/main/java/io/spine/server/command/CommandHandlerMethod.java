@@ -29,7 +29,6 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
-import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -42,9 +41,6 @@ import java.util.function.Predicate;
  */
 @Internal
 public final class CommandHandlerMethod extends CommandAcceptingMethod {
-
-    /** The instance of the predicate to filter command handler methods of a class. */
-    private static final MethodPredicate PREDICATE = new Filter();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -59,12 +55,8 @@ public final class CommandHandlerMethod extends CommandAcceptingMethod {
         return new CommandHandlerMethod(method);
     }
 
-    static MethodPredicate predicate() {
-        return PREDICATE;
-    }
-
     public static AbstractHandlerMethod.Factory<CommandHandlerMethod> factory() {
-        return Factory.getInstance();
+        return Factory.INSTANCE;
     }
 
     /**
@@ -89,10 +81,6 @@ public final class CommandHandlerMethod extends CommandAcceptingMethod {
 
         private static final Factory INSTANCE = new Factory();
 
-        private static Factory getInstance() {
-            return INSTANCE;
-        }
-
         @Override
         public Class<CommandHandlerMethod> getMethodClass() {
             return CommandHandlerMethod.class;
@@ -100,7 +88,7 @@ public final class CommandHandlerMethod extends CommandAcceptingMethod {
 
         @Override
         public Predicate<Method> getPredicate() {
-            return predicate();
+            return Filter.INSTANCE;
         }
 
         @Override
@@ -123,7 +111,7 @@ public final class CommandHandlerMethod extends CommandAcceptingMethod {
         }
 
         @Override
-        protected CommandHandlerMethod createFromMethod(Method method) {
+        protected CommandHandlerMethod doCreate(Method method) {
             return from(method);
         }
     }
@@ -134,6 +122,8 @@ public final class CommandHandlerMethod extends CommandAcceptingMethod {
      * <p>See {@link Assign} annotation for more info about such methods.
      */
     private static class Filter extends HandlerMethodPredicate<CommandContext> {
+
+        private static final Filter INSTANCE = new Filter();
 
         private Filter() {
             super(Assign.class, CommandContext.class);
