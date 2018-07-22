@@ -20,21 +20,18 @@
 
 package io.spine.server.procman;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
 import io.spine.server.entity.CommandHandlingEntityClass;
 import io.spine.server.event.EventReactorMethod;
-import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.event.ReactorClass;
 import io.spine.server.rejection.RejectionReactorMethod;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.model.HandlerMethod.domestic;
-import static io.spine.server.model.HandlerMethod.external;
 
 /**
  * Provides message handling information on a process manager class.
@@ -45,29 +42,16 @@ import static io.spine.server.model.HandlerMethod.external;
 @Internal
 @SuppressWarnings("ReturnOfCollectionOrArrayField") // returning an immutable impl.
 public final class ProcessManagerClass<P extends ProcessManager>
-        extends CommandHandlingEntityClass<P> {
+        extends CommandHandlingEntityClass<P>
+        implements ReactorClass {
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactors;
-    private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactors;
+    private final ReactorClass.Delegate<P> delegate;
 
-    private final ImmutableSet<EventClass> domesticEventReactions;
-    private final ImmutableSet<EventClass> externalEventReactions;
-    private final ImmutableSet<RejectionClass> domesticRejectionReactions;
-    private final ImmutableSet<RejectionClass> externalRejectionReactions;
-
-
-    private ProcessManagerClass(Class<? extends P> cls) {
+    private ProcessManagerClass(Class<P> cls) {
         super(cls);
-        this.eventReactors =  new MessageHandlerMap<>(cls, EventReactorMethod.factory());
-        this.rejectionReactors =  new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
-
-        this.domesticEventReactions = eventReactors.getMessageClasses(domestic());
-        this.externalEventReactions = eventReactors.getMessageClasses(external());
-
-        this.domesticRejectionReactions = rejectionReactors.getMessageClasses(domestic());
-        this.externalRejectionReactions = rejectionReactors.getMessageClasses(external());
+        this.delegate = new ReactorClass.Delegate<>(cls);
     }
 
     public static <P extends ProcessManager> ProcessManagerClass<P> of(Class<P> cls) {
@@ -75,27 +59,33 @@ public final class ProcessManagerClass<P extends ProcessManager>
         return new ProcessManagerClass<>(cls);
     }
 
-    Set<EventClass> getEventReactions() {
-        return domesticEventReactions;
+    @Override
+    public Set<EventClass> getEventReactions() {
+        return delegate.getEventReactions();
     }
 
-    Set<EventClass> getExternalEventReactions() {
-        return externalEventReactions;
+    @Override
+    public Set<EventClass> getExternalEventReactions() {
+        return delegate.getExternalEventReactions();
     }
 
-    Set<RejectionClass> getRejectionReactions() {
-        return domesticRejectionReactions;
+    @Override
+    public Set<RejectionClass> getRejectionReactions() {
+        return delegate.getRejectionReactions();
     }
 
-    Set<RejectionClass> getExternalRejectionReactions() {
-        return externalRejectionReactions;
+    @Override
+    public Set<RejectionClass> getExternalRejectionReactions() {
+        return delegate.getExternalRejectionReactions();
     }
 
-    EventReactorMethod getReactor(EventClass eventClass) {
-        return eventReactors.getMethod(eventClass);
+    @Override
+    public EventReactorMethod getReactor(EventClass eventClass) {
+        return delegate.getReactor(eventClass);
     }
 
-    RejectionReactorMethod getReactor(RejectionClass cls, CommandClass commandCls) {
-        return rejectionReactors.getMethod(cls, commandCls);
+    @Override
+    public RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls) {
+        return delegate.getReactor(rejCls, cmdCls);
     }
 }

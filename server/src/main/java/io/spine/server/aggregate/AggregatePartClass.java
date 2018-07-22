@@ -47,7 +47,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
     private volatile @Nullable Class<? extends AggregateRoot> rootClass;
 
     /** Creates new instance. */
-    public AggregatePartClass(Class<? extends A> cls) {
+    public AggregatePartClass(Class<A> cls) {
         super(cls);
     }
 
