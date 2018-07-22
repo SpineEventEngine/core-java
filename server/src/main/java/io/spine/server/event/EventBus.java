@@ -33,7 +33,6 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
-import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
@@ -42,7 +41,6 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.validate.MessageValidator;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Deque;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -109,9 +107,6 @@ public class EventBus
     /** The handler for dead events. */
     private final DeadMessageHandler<EventEnvelope> deadMessageHandler;
 
-    /** Filters applied when an event is posted. */
-    private final Deque<BusFilter<EventEnvelope>> filterChain;
-
     /** The observer of post operations. */
     private final StreamObserver<Ack> streamObserver;
 
@@ -123,10 +118,10 @@ public class EventBus
 
     /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {
+        super(builder);
         this.eventStore = builder.eventStore;
         this.enricher = builder.enricher;
         this.eventMessageValidator = builder.eventValidator;
-        this.filterChain = builder.getFilters();
         this.streamObserver = LoggingObserver.forClass(getClass(), builder.logLevelForPost);
 
         this.deadMessageHandler = new DeadEventTap();
@@ -163,12 +158,6 @@ public class EventBus
     @Override
     protected OutputDispatcherRegistry<EventClass, EventDispatcher<?>> createRegistry() {
         return new EventDispatcherRegistry();
-    }
-
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
-    @Override
-    protected Deque<BusFilter<EventEnvelope>> filterChainTail() {
-        return filterChain;
     }
 
     @Override

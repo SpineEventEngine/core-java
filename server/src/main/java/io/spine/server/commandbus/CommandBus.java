@@ -20,6 +20,7 @@
 package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
@@ -48,6 +49,7 @@ import io.spine.system.server.ScheduleCommand;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Collection;
 import java.util.Deque;
 import java.util.Optional;
 import java.util.Set;
@@ -76,16 +78,10 @@ public class CommandBus extends Bus<Command,
                                     CommandClass,
                                     CommandDispatcher<?>> {
 
-    private final Deque<BusFilter<CommandEnvelope>> filterChain;
-
     private final CommandScheduler scheduler;
-
     private final RejectionBus rejectionBus;
-
     private final Log log;
-
     private final SystemGateway systemGateway;
-
     private final TenantIndex tenantIndex;
 
     /**
@@ -121,7 +117,7 @@ public class CommandBus extends Bus<Command,
      */
     @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as nested objects only
     private CommandBus(Builder builder) {
-        super();
+        super(builder);
         this.multitenant = builder.multitenant != null
                            ? builder.multitenant
                            : false;
@@ -130,7 +126,6 @@ public class CommandBus extends Bus<Command,
         this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
         this.rejectionBus = builder.rejectionBus;
         this.systemGateway = builder.systemGateway;
-        this.filterChain = builder.getFilters();
         this.tenantIndex = builder.tenantIndex;
         this.deadCommandHandler = new DeadCommandHandler();
     }
@@ -188,9 +183,8 @@ public class CommandBus extends Bus<Command,
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a protected factory method
     @Override
-    protected Deque<BusFilter<CommandEnvelope>> filterChainTail() {
-        filterChain.push(scheduler);
-        return filterChain;
+    protected Collection<BusFilter<CommandEnvelope>> filterChainTail() {
+        return ImmutableList.of(scheduler);
     }
 
     @Override

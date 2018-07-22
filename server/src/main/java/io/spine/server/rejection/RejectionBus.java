@@ -30,7 +30,6 @@ import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
 import io.spine.grpc.StreamObservers;
-import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
@@ -39,7 +38,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Deque;
 import java.util.Optional;
 import java.util.Set;
 
@@ -61,9 +59,6 @@ public class RejectionBus extends CommandOutputBus<Rejection,
                                                    RejectionClass,
                                                    RejectionDispatcher<?>> {
 
-    /** Filters applied when a rejection is posted. */
-    private final Deque<BusFilter<RejectionEnvelope>> filterChain;
-
     /** The enricher for posted rejections or {@code null} if the enrichment is not supported. */
     private final @Nullable RejectionEnricher enricher;
 
@@ -71,7 +66,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
      * Creates a new instance according to the pre-configured {@code Builder}.
      */
     private RejectionBus(Builder builder) {
-        this.filterChain = builder.getFilters();
+        super(builder);
         this.enricher = builder.enricher;
     }
 
@@ -104,12 +99,6 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     @Override
     protected OutputDispatcherRegistry<RejectionClass, RejectionDispatcher<?>> createRegistry() {
         return new RejectionDispatcherRegistry();
-    }
-
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
-    @Override
-    protected Deque<BusFilter<RejectionEnvelope>> filterChainTail() {
-        return filterChain;
     }
 
     @Override

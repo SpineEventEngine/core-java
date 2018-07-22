@@ -33,13 +33,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentLinkedDeque;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.isEmpty;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.validate.Validate.isNotDefault;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 
@@ -71,9 +71,13 @@ public abstract class Bus<T extends Message,
      *
      * @see #filterChain() for the non-null filter chain value
      */
-    private @Nullable FilterChain<E, ?> filterChain;
+    private @Nullable FilterChain<E> filterChain;
 
-    private final Deque<BusFilter<E>> emptyFilters = newLinkedList();
+    private final ChainBuilder<E> chainBuilder;
+
+    protected Bus(AbstractBuilder<E, T, ?> builder) {
+        this.chainBuilder = builder.chainBuilder.copy();
+    }
 
     /**
      * Registers the passed dispatcher.
@@ -213,29 +217,58 @@ public abstract class Bus<T extends Message,
      * a chain always has the following format:
      *
      * <pre>
-     *     {@link ValidatingFilter} -> {@link DeadMessageFilter} -> custom filters if any...
+     *     Chain head -> {@link ValidatingFilter} -> {@link DeadMessageFilter} -> custom filters from {@linkplain AbstractBuilder Builder} -> chain tail.
      * </pre>
+     *
+     * <p>The head and the tail of the chain are created by the {@code Bus} itself. Those are
+     * typically empty. Override {@link #filterChainHead()} and {@link #filterChainHead()} to add
+     * some filters to the respective chain side.
      *
      * @return the value of the bus filter chain
      */
     private BusFilter<E> filterChain() {
         if (filterChain == null) {
-            Deque<BusFilter<E>> filters = newLinkedList();
-            Deque<BusFilter<E>> tail = filterChainTail();
-            filters.addAll(tail);
-
-            BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(),
-                                                                 registry());
-            BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
-
-            filters.push(deadMsgFilter);
-            filters.push(validatingFilter);
-            Deque<BusFilter<E>> head = filterChainHead();
-            head.forEach(filters::push);
-
-            filterChain = new FilterChain<>(filters);
+            initChain();
         }
         return filterChain;
+    }
+
+    private void initChain() {
+        Collection<BusFilter<E>> tail = filterChainTail();
+        tail.forEach(chainBuilder::append);
+
+        BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(),
+                                                             registry());
+        BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
+
+        chainBuilder.prepend(deadMsgFilter);
+        chainBuilder.prepend(validatingFilter);
+        Collection<BusFilter<E>> head = filterChainHead();
+        head.forEach(chainBuilder::prepend);
+
+        filterChain = chainBuilder.build();
+    }
+
+    /**
+     * Obtains the {@link BusFilter}s to append to the chain tail.
+     *
+     * <p>By default, returns an empty collection.
+     *
+     * @see #filterChain()
+     */
+    protected Collection<BusFilter<E>> filterChainTail() {
+        return emptyList();
+    }
+
+    /**
+     * Obtains the {@link BusFilter}s to prepend to the chain head.
+     *
+     * <p>By default, returns an empty collection.
+     *
+     * @see #filterChain()
+     */
+    protected Collection<BusFilter<E>> filterChainHead() {
+        return emptyList();
     }
 
     /**
@@ -256,21 +289,6 @@ public abstract class Bus<T extends Message,
      * Factory method for creating an instance of the registry for dispatchers of the bus.
      */
     protected abstract DispatcherRegistry<C, D> createRegistry();
-
-    /**
-     * Creates a {@link Deque} of the custom {@linkplain BusFilter bus filters} for the current
-     * instance of {@code Bus}.
-     *
-     * <p>This method should be invoked only once when initializing
-     * the {@linkplain #filterChain() filter chain} of this bus.
-     *
-     * @return a deque of the bus custom filters
-     */
-    protected abstract Deque<BusFilter<E>> filterChainTail();
-
-    protected Deque<BusFilter<E>> filterChainHead() {
-        return emptyFilters;
-    }
 
     /**
      * Filters the given messages.
@@ -373,13 +391,13 @@ public abstract class Bus<T extends Message,
                                                  T extends Message,
                                                  B extends AbstractBuilder<E, T, B>> {
 
-        private final Deque<BusFilter<E>> filters;
+        private final ChainBuilder<E> chainBuilder;
 
         /**
          * Creates a new instance of the bus builder.
          */
         protected AbstractBuilder() {
-            this.filters = newLinkedList();
+            this.chainBuilder = FilterChain.newBuilder();
         }
 
         /**
@@ -392,20 +410,7 @@ public abstract class Bus<T extends Message,
          */
         public final B appendFilter(BusFilter<E> filter) {
             checkNotNull(filter);
-            this.filters.offer(filter);
-            return self();
-        }
-
-        /**
-         * Removes the specified filter from the filter queue.
-         *
-         * <p>If the filter is not present in the queue, no action is performed.
-         *
-         * @param filter the filter to delete
-         */
-        public final B removeFilter(BusFilter<E> filter) {
-            checkNotNull(filter);
-            this.filters.remove(filter);
+            chainBuilder.append(filter);
             return self();
         }
 
@@ -415,7 +420,7 @@ public abstract class Bus<T extends Message,
          * @see #appendFilter(BusFilter)
          */
         public final Deque<BusFilter<E>> getFilters() {
-            return new ConcurrentLinkedDeque<>(filters);
+            return chainBuilder.getFilters();
         }
 
         /**

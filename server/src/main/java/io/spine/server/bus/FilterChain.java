@@ -20,7 +20,6 @@
 
 package io.spine.server.bus;
 
-import com.google.common.collect.Queues;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 
@@ -43,22 +42,26 @@ import static java.util.stream.Collectors.joining;
  *
  * @author Dmytro Dashenkov
  */
-final class FilterChain<E extends MessageEnvelope<?, ?, ?>, F extends BusFilter<E>>
+final class FilterChain<E extends MessageEnvelope<?, ?, ?>>
         implements BusFilter<E> {
 
-    private final Deque<F> chain;
+    private final Deque<BusFilter<E>> chain;
 
     private volatile boolean closed;
 
-    FilterChain(Iterable<F> chain) {
-        this.chain = Queues.newLinkedBlockingDeque(chain);
+    FilterChain(ChainBuilder<E> builder) {
+        this.chain = builder.getFilters();
+    }
+
+    static <E extends MessageEnvelope<?, ?, ?>> ChainBuilder<E> newBuilder() {
+        return new ChainBuilder<>();
     }
 
     @Override
     public Optional<Ack> accept(E envelope) {
         checkNotNull(envelope);
         checkNotClosed();
-        for (F filter : chain) {
+        for (BusFilter<E> filter : chain) {
             Optional<Ack> output = filter.accept(envelope);
             if (output.isPresent()) {
                 return output;
@@ -81,9 +84,9 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>, F extends BusFilter<
     public void close() throws Exception {
         checkNotClosed();
         closed = true;
-        Iterator<F> filters = chain.descendingIterator();
+        Iterator<BusFilter<E>> filters = chain.descendingIterator();
         while (filters.hasNext()) {
-            F filter = filters.next();
+            BusFilter<?> filter = filters.next();
             filter.close();
         }
     }
