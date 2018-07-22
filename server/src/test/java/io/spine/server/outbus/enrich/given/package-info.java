@@ -22,7 +22,10 @@
  * Test environment classes for testing event enrichment.
  */
 
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.outbus.enrich.given;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

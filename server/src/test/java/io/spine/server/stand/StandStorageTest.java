@@ -64,21 +64,21 @@ public abstract class StandStorageTest extends RecordStorageTest<AggregateStateI
     @SuppressWarnings("unchecked") // OK for test.
     protected static final Supplier<AggregateStateId<ProjectId>> DEFAULT_ID_SUPPLIER
             = () -> {
-        final ProjectId projectId = ProjectId.newBuilder()
-                                             .setId(Identifier.newUuid())
-                                             .build();
+        ProjectId projectId = ProjectId.newBuilder()
+                                       .setId(Identifier.newUuid())
+                                       .build();
         return AggregateStateId.of(projectId, TypeUrl.of(Project.class));
     };
 
     @Override
     protected Message newState(AggregateStateId id) {
-        final String uniqueName = format("test-project-%s-%s", id.toString(), System.nanoTime());
-        final Project project = Project.newBuilder()
-                                       .setId((ProjectId) id.getAggregateId())
-                                       .setStatus(Project.Status.CREATED)
-                                       .setName(uniqueName)
-                                       .addTask(Task.getDefaultInstance())
-                                       .build();
+        String uniqueName = format("test-project-%s-%s", id.toString(), System.nanoTime());
+        Project project = Project.newBuilder()
+                                 .setId((ProjectId) id.getAggregateId())
+                                 .setStatus(Project.Status.CREATED)
+                                 .setName(uniqueName)
+                                 .addTask(Task.getDefaultInstance())
+                                 .build();
         return project;
     }
 
@@ -89,21 +89,21 @@ public abstract class StandStorageTest extends RecordStorageTest<AggregateStateI
         @Test
         @DisplayName("all")
         void all() {
-            final StandStorage storage = getStorage();
-            final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER);
+            StandStorage storage = getStorage();
+            List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER);
 
-            final Iterator<EntityRecord> allRecords = storage.readAll();
+            Iterator<EntityRecord> allRecords = storage.readAll();
             checkIds(ids, allRecords);
         }
 
         @Test
         @DisplayName("by IDs")
         void byIds() {
-            final StandStorage storage = getStorage();
+            StandStorage storage = getStorage();
             // Use a subset of IDs
-            final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER).subList(0, 5);
+            List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER).subList(0, 5);
 
-            final Iterator<EntityRecord> records = storage.readMultiple(ids);
+            Iterator<EntityRecord> records = storage.readMultiple(ids);
             checkIds(ids, records);
         }
 
@@ -116,47 +116,47 @@ public abstract class StandStorageTest extends RecordStorageTest<AggregateStateI
         @Test
         @DisplayName("by type with field mask")
         void byTypeAndFieldMask() {
-            final FieldMask mask = FieldMasks.maskOf(Project.getDescriptor(), 1, 2);
+            FieldMask mask = FieldMasks.maskOf(Project.getDescriptor(), 1, 2);
             checkByTypeRead(mask);
         }
 
         @SuppressWarnings({"MethodWithMultipleLoops", "ConstantConditions"}) // OK for this test.
         private void checkByTypeRead(FieldMask fieldMask) {
-            final boolean withFieldMask = !fieldMask.equals(FieldMask.getDefaultInstance());
-            final StandStorage storage = getStorage();
-            final TypeUrl type = TypeUrl.from(Project.getDescriptor());
+            boolean withFieldMask = !fieldMask.equals(FieldMask.getDefaultInstance());
+            StandStorage storage = getStorage();
+            TypeUrl type = TypeUrl.from(Project.getDescriptor());
 
-            final int projectsCount = 4;
-            final List<AggregateStateId> projectIds =
+            int projectsCount = 4;
+            List<AggregateStateId> projectIds =
                     fill(storage, projectsCount, DEFAULT_ID_SUPPLIER);
 
-            final int tasksCount = 5;
+            int tasksCount = 5;
             for (int i = 0; i < tasksCount; i++) {
-                final TaskId genericId = TaskId.newBuilder()
-                                               .setId(i)
-                                               .build();
-                final AggregateStateId id =
+                TaskId genericId = TaskId.newBuilder()
+                                         .setId(i)
+                                         .build();
+                AggregateStateId id =
                         AggregateStateId.of(genericId, TypeUrl.from(Task.getDescriptor()));
-                final Task task = Task.newBuilder()
-                                      .setTaskId(genericId)
-                                      .setTitle("Test task")
-                                      .setDescription("With description")
-                                      .build();
-                final EntityRecord record = newRecord(task);
+                Task task = Task.newBuilder()
+                                .setTaskId(genericId)
+                                .setTitle("Test task")
+                                .setDescription("With description")
+                                .build();
+                EntityRecord record = newRecord(task);
                 storage.write(id, record);
             }
 
-            final Iterator<EntityRecord> readRecords
+            Iterator<EntityRecord> readRecords
                     = withFieldMask
                       ? storage.readAllByType(TypeUrl.from(Project.getDescriptor()), fieldMask)
                       : storage.readAllByType(TypeUrl.from(Project.getDescriptor()));
-            final Set<EntityRecord> readDistinct = Sets.newHashSet(readRecords);
+            Set<EntityRecord> readDistinct = Sets.newHashSet(readRecords);
             assertSize(projectsCount, readDistinct);
 
             for (EntityRecord record : readDistinct) {
-                final Any state = record.getState();
-                final Project project = AnyPacker.unpack(state);
-                final AggregateStateId restored = AggregateStateId.of(project.getId(), type);
+                Any state = record.getState();
+                Project project = AnyPacker.unpack(state);
+                AggregateStateId restored = AggregateStateId.of(project.getId(), type);
                 assertContains(restored, projectIds);
 
                 if (withFieldMask) {
@@ -232,12 +232,12 @@ public abstract class StandStorageTest extends RecordStorageTest<AggregateStateI
     protected List<AggregateStateId> fill(StandStorage storage,
                                           int count,
                                           Supplier<AggregateStateId<ProjectId>> idSupplier) {
-        final List<AggregateStateId> ids = new LinkedList<>();
+        List<AggregateStateId> ids = new LinkedList<>();
 
         for (int i = 0; i < count; i++) {
-            final AggregateStateId genericId = idSupplier.get();
-            final Message state = newState(genericId);
-            final EntityRecord record = newRecord(state);
+            AggregateStateId genericId = idSupplier.get();
+            Message state = newState(genericId);
+            EntityRecord record = newRecord(state);
             storage.write(genericId, record);
             ids.add(genericId);
         }
@@ -246,18 +246,18 @@ public abstract class StandStorageTest extends RecordStorageTest<AggregateStateI
     }
 
     private static EntityRecord newRecord(Message state) {
-        final EntityRecord record = EntityRecord.newBuilder()
-                                                .setState(AnyPacker.pack(state))
-                                                .setVersion(GivenVersion.withNumber(1))
-                                                .build();
+        EntityRecord record = EntityRecord.newBuilder()
+                                          .setState(AnyPacker.pack(state))
+                                          .setVersion(GivenVersion.withNumber(1))
+                                          .build();
         return record;
     }
 
     protected void checkIds(List<AggregateStateId> ids, Iterator<EntityRecord> records) {
-        final Collection<EntityRecord> recordsToCheck = newArrayList(records);
+        Collection<EntityRecord> recordsToCheck = newArrayList(records);
         assertSize(ids.size(), recordsToCheck);
 
-        final Collection<ProjectId> projectIds =
+        Collection<ProjectId> projectIds =
                 Collections2.transform(ids, new Function<AggregateStateId, ProjectId>() {
                     @Override
                     public @Nullable ProjectId apply(@Nullable AggregateStateId input) {
@@ -269,9 +269,9 @@ public abstract class StandStorageTest extends RecordStorageTest<AggregateStateI
                 });
 
         for (EntityRecord record : recordsToCheck) {
-            final Any packedState = record.getState();
-            final Project state = AnyPacker.unpack(packedState);
-            final ProjectId id = state.getId();
+            Any packedState = record.getState();
+            Project state = AnyPacker.unpack(packedState);
+            ProjectId id = state.getId();
 
             assertContains(id, projectIds);
         }

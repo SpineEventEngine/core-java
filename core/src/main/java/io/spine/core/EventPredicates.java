@@ -46,7 +46,7 @@ public final class EventPredicates {
      */
     public static Predicate<Event> isAfter(Timestamp timestamp) {
         checkValid(timestamp);
-        final Predicate<Event> result = new IsAfter(timestamp);
+        Predicate<Event> result = new IsAfter(timestamp);
         return result;
     }
 
@@ -55,7 +55,7 @@ public final class EventPredicates {
      */
     public static Predicate<Event> isBefore(Timestamp timestamp) {
         checkValid(timestamp);
-        final Predicate<Event> result = new IsBefore(timestamp);
+        Predicate<Event> result = new IsBefore(timestamp);
         return result;
     }
 
@@ -64,7 +64,7 @@ public final class EventPredicates {
      */
     public static Predicate<Event> isBetween(Timestamp start, Timestamp finish) {
         IsBetween.checkArguments(start, finish);
-        final Predicate<Event> result = new IsBetween(start, finish);
+        Predicate<Event> result = new IsBetween(start, finish);
         return result;
     }
 
@@ -82,8 +82,8 @@ public final class EventPredicates {
             if (record == null) {
                 return false;
             }
-            final Timestamp ts = Events.getTimestamp(record);
-            final boolean result = compare(ts, this.timestamp) > 0;
+            Timestamp ts = Events.getTimestamp(record);
+            boolean result = compare(ts, this.timestamp) > 0;
             return result;
         }
     }
@@ -103,8 +103,8 @@ public final class EventPredicates {
                 return false;
             }
 
-            final Timestamp ts = Events.getTimestamp(record);
-            final boolean result = compare(ts, this.timestamp) < 0;
+            Timestamp ts = Events.getTimestamp(record);
+            boolean result = compare(ts, this.timestamp) < 0;
             return result;
         }
     }
@@ -135,8 +135,8 @@ public final class EventPredicates {
                 return false;
             }
 
-            final Timestamp ts = Events.getTimestamp(event);
-            final boolean result = Timestamps2.isBetween(ts, start, finish);
+            Timestamp ts = Events.getTimestamp(event);
+            boolean result = Timestamps2.isBetween(ts, start, finish);
             return result;
         }
     }

@@ -44,10 +44,10 @@ class ColumnMemoizedValueTest {
     @Test
     @DisplayName("be serializable")
     void beSerializable() {
-        final EntityColumn column = findColumn(TestEntity.class, MUTABLE_STATE_COLUMN);
-        final TestEntity entity = new TestEntity("my-id");
+        EntityColumn column = findColumn(TestEntity.class, MUTABLE_STATE_COLUMN);
+        TestEntity entity = new TestEntity("my-id");
         entity.setMutableState(42);
-        final MemoizedValue value = column.memoizeFor(entity);
+        MemoizedValue value = column.memoizeFor(entity);
 
         reserializeAndAssert(value);
     }
@@ -64,23 +64,23 @@ class ColumnMemoizedValueTest {
                 from the EntityColumn#equals).
          */
 
-        final EntityColumn columnA = findColumn(TestEntity.class, MUTABLE_STATE_COLUMN);
-        final EntityColumn columnB = findColumn(TestEntity.class, ARCHIVED_COLUMN);
-        final EntityColumn columnC = mock(EntityColumn.class);
+        EntityColumn columnA = findColumn(TestEntity.class, MUTABLE_STATE_COLUMN);
+        EntityColumn columnB = findColumn(TestEntity.class, ARCHIVED_COLUMN);
+        EntityColumn columnC = mock(EntityColumn.class);
 
-        final TestEntity entity = new TestEntity("ID");
+        TestEntity entity = new TestEntity("ID");
 
-        final MemoizedValue valueA1 = columnA.memoizeFor(entity);
-        final MemoizedValue valueA2 = columnA.memoizeFor(entity);
-        final MemoizedValue valueA3 = columnA.memoizeFor(entity);
+        MemoizedValue valueA1 = columnA.memoizeFor(entity);
+        MemoizedValue valueA2 = columnA.memoizeFor(entity);
+        MemoizedValue valueA3 = columnA.memoizeFor(entity);
 
         entity.setMutableState(42);
 
-        final MemoizedValue valueAMutated = columnA.memoizeFor(entity);
+        MemoizedValue valueAMutated = columnA.memoizeFor(entity);
 
-        final MemoizedValue valueB = columnB.memoizeFor(entity);
+        MemoizedValue valueB = columnB.memoizeFor(entity);
 
-        final MemoizedValue valueC = new MemoizedValue(columnC, entity.getState());
+        MemoizedValue valueC = new MemoizedValue(columnC, entity.getState());
 
         new EqualsTester().addEqualityGroup(valueA1, valueA2, valueA3)
                           .addEqualityGroup(valueAMutated)

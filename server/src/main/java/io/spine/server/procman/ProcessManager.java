@@ -33,15 +33,16 @@ import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.dispatch.Dispatch;
 import io.spine.server.command.dispatch.DispatchResult;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.CommandSequence;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.Model;
 import io.spine.server.rejection.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine
@@ -76,7 +77,7 @@ public abstract class ProcessManager<I,
         extends CommandHandlingEntity<I, S, B> {
 
     /** The Command Bus to post routed commands. */
-    private volatile CommandBus commandBus;
+    private volatile @MonotonicNonNull CommandBus commandBus;
 
     /**
      * Creates a new instance.
@@ -104,8 +105,12 @@ public abstract class ProcessManager<I,
         this.commandBus = checkNotNull(commandBus);
     }
 
-    /** Returns the {@code CommandBus} to which post commands produced by this process manager. */
-    protected CommandBus getCommandBus() {
+    /**
+     * Returns the {@code CommandBus} to which the commands produced by this process manager
+     * are to be posted.
+     */
+    private CommandBus getCommandBus() {
+        checkNotNull(commandBus, "CommandBus is not set in ProcessManager %s", this);
         return commandBus;
     }
 
@@ -180,21 +185,19 @@ public abstract class ProcessManager<I,
     }
 
     /**
-     * Creates a new {@link CommandRouter}.
-     *
-     * <p>A {@code CommandRouter} allows to create and post one or more commands
-     * in response to a command received by the {@code ProcessManager}.
+     * Creates a new empty command sequence for posting two or more commands in response to
+     * an incoming command.
      *
      * <p>A typical usage looks like this:
      *
      * <pre>
      *     {@literal @}Assign
-     *     CommandRouted on(MyCommand message, CommandContext context) {
+     *     CommandSplit on(MyCommand message, CommandContext context) {
      *         // Create new command messages here.
-     *         return newRouterFor(message, context)
+     *         return split(message, context)
      *                  .add(messageOne)
      *                  .add(messageTwo)
-     *                  .routeAll();
+     *                  .postAll();
      *     }
      * </pre>
      *
@@ -202,65 +205,44 @@ public abstract class ProcessManager<I,
      * That is, the {@code actor} and {@code zoneOffset} fields of created {@code CommandContext}
      * instances will be the same as in the incoming command.
      *
-     * @param commandMessage the source command message
-     * @param commandContext the context of the source command
-     * @return new {@code CommandRouter}
+     * @param commandMessage the message of the command to split
+     * @param context the context of the command
+     * @return new empty sequence
      */
-    protected CommandRouter newRouterFor(Message commandMessage, CommandContext commandContext) {
+    protected CommandSequence.Split split(Message commandMessage, CommandContext context) {
         checkNotNull(commandMessage);
-        checkNotNull(commandContext);
-        CommandBus commandBus = ensureCommandBus();
-        CommandRouter router = new CommandRouter(commandBus, commandMessage, commandContext);
-        return router;
+        checkNotNull(context);
+        CommandSequence.Split result =
+                CommandSequence.split(commandMessage, context, getCommandBus());
+        return result;
     }
 
     /**
-     * Creates a new {@code IteratingCommandRouter}.
-     *
-     * <p>An {@code IteratingCommandRouter} allows to create several commands
-     * in response to a command received by the {@code ProcessManager} and post these commands
-     * one by one.
+     * Creates a new empty command transformation sequence for posting exactly one command
+     * in response to incoming one.
      *
      * <p>A typical usage looks like this:
+     *
      * <pre>
      *     {@literal @}Assign
-     *     CommandRouted on(MyCommand message, CommandContext context) {
-     *         // Create new command messages here.
-     *         router = newIteratingRouterFor(message, context);
-     *         return router.add(messageOne)
-     *                      .add(messageTwo)
-     *                      .add(messageThree)
-     *                      .routeFirst();
-     *     }
-     *
-     *     {@literal @}Subscribe
-     *     void on(EventOne message, EventContext context) {
-     *         if (router.hasNext()) {
-     *             router.routeNext();
-     *         }
+     *     CommandTransformed on(MyCommand message, CommandContext context) {
+     *         // Create new command message here.
+     *         return transform(message, context)
+     *                  .to(anotherMessage)
+     *                  .post();
      *     }
      * </pre>
      *
-     * @param commandMessage the source command message
-     * @param commandContext the context of the source command
-     * @return new {@code IteratingCommandRouter}
-     * @see IteratingCommandRouter#routeFirst()
-     * @see IteratingCommandRouter#routeNext()
+     * @param commandMessage the message of the command which we transform
+     * @param context the context of the command
+     * @return new empty sequence
      */
-    protected IteratingCommandRouter newIteratingRouterFor(Message commandMessage,
-                                                           CommandContext commandContext) {
+    protected CommandSequence.Transform transform(Message commandMessage, CommandContext context) {
         checkNotNull(commandMessage);
-        checkNotNull(commandContext);
-        CommandBus commandBus = ensureCommandBus();
-        IteratingCommandRouter router =
-                new IteratingCommandRouter(commandBus, commandMessage, commandContext);
-        return router;
-    }
-
-    private CommandBus ensureCommandBus() {
-        CommandBus commandBus = getCommandBus();
-        checkState(commandBus != null, "CommandBus must be initialized");
-        return commandBus;
+        checkNotNull(context);
+        CommandSequence.Transform result =
+            CommandSequence.transform(commandMessage, context, getCommandBus());
+        return result;
     }
 
     @Override

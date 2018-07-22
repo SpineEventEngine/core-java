@@ -24,8 +24,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Error;
-import io.spine.base.ThrowableMessage;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Rejection;
@@ -122,14 +120,14 @@ public abstract class Bus<T extends Message,
      * {@link io.spine.core.Status.StatusCase#OK OK} status is passed to the observer.
      *
      * <p>If the message cannot be sent due to some issues, a corresponding
-     * {@link Error Error} status is passed in {@code Ack} instance.
+     * {@link io.spine.base.Error Error} status is passed in {@code Ack} instance.
      *
      * <p>Depending on the underlying {@link MessageDispatcher}, a message which causes a business
      * {@link Rejection} may result ether a {@link Rejection} status or
      * an {@link io.spine.core.Status.StatusCase#OK OK} status {@link Ack} instance. Usually,
      * the {@link Rejection} status may only pop up if the {@link MessageDispatcher}
      * processes the message sequentially and throws the rejection (wrapped in a
-     * the {@linkplain ThrowableMessage ThrowableMessages}) instead of handling them.
+     * the {@linkplain io.spine.base.ThrowableMessage ThrowableMessages}) instead of handling them.
      * Otherwise, the {@code OK} status should be expected.
      *
      * <p>Note that {@linkplain StreamObserver#onError StreamObserver.onError()} is never called
@@ -220,10 +218,10 @@ public abstract class Bus<T extends Message,
      */
     private BusFilter<E> filterChain() {
         if (filterChain == null) {
-            final Deque<BusFilter<E>> filters = createFilterChain();
-            final BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(),
-                                                                       registry());
-            final BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
+            Deque<BusFilter<E>> filters = createFilterChain();
+            BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(),
+                                                                 registry());
+            BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
             filters.push(deadMsgFilter);
             filters.push(validatingFilter);
             filterChain = new FilterChain<>(filters);
@@ -275,15 +273,14 @@ public abstract class Bus<T extends Message,
      *
      * @param messages the message to filter
      * @param observer the observer to receive the negative outcome of the operation
-     * @return the message itself if it passes the filtering or
-     * {@link Optional#empty()} otherwise
+     * @return a {@code Collection} of messages, which passed all the filters
      */
     private Collection<T> filter(Iterable<T> messages, StreamObserver<Ack> observer) {
         checkNotNull(messages);
         checkNotNull(observer);
-        final Collection<T> result = newLinkedList();
+        Collection<T> result = newLinkedList();
         for (T message : messages) {
-            final Optional<Ack> response = filter(toEnvelope(message));
+            Optional<Ack> response = filter(toEnvelope(message));
             if (response.isPresent()) {
                 observer.onNext(response.get());
             } else {
@@ -307,7 +304,7 @@ public abstract class Bus<T extends Message,
      * {@link Optional#empty()} otherwise
      */
     private Optional<Ack> filter(E message) {
-        final Optional<Ack> filterOutput = filterChain().accept(message);
+        Optional<Ack> filterOutput = filterChain().accept(message);
         return filterOutput;
     }
 

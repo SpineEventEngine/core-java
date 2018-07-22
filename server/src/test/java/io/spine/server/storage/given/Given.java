@@ -40,7 +40,7 @@ public class Given {
     }
 
     static ProjectId newProjectId() {
-        final String uuid = newUuid();
+        String uuid = newUuid();
         return ProjectId.newBuilder()
                         .setId(uuid)
                         .build();

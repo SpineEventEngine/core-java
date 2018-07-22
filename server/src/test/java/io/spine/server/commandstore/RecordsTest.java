@@ -1,4 +1,5 @@
 /*
+/*
  * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
@@ -52,12 +53,12 @@ class RecordsTest {
     @Test
     @DisplayName("convert command to record")
     void convertCmdToRecord() {
-        final Command command = Given.ACommand.createProject();
-        final CommandStatus status = CommandStatus.RECEIVED;
+        Command command = Given.ACommand.createProject();
+        CommandStatus status = CommandStatus.RECEIVED;
 
-        final CommandRecord record = newRecordBuilder(command,
-                                                      status,
-                                                      null).build();
+        CommandRecord record = newRecordBuilder(command,
+                                                status,
+                                                null).build();
 
         checkRecord(record, command, status);
     }

@@ -33,8 +33,6 @@ import io.spine.test.aggregate.command.AggAddTask;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
 import io.spine.test.aggregate.event.AggTaskAdded;
-import io.spine.test.aggregate.user.User;
-import io.spine.test.aggregate.user.UserVBuilder;
 import io.spine.validate.StringValueVBuilder;
 
 public class AggregatePartTestEnv {
@@ -62,8 +60,8 @@ public class AggregatePartTestEnv {
     }
 
     public static class AnAggregatePart extends AggregatePart<String,
-            User,
-            UserVBuilder,
+            StringValue,
+            StringValueVBuilder,
             AnAggregateRoot> {
 
         public AnAggregatePart(AnAggregateRoot root) {
@@ -80,8 +78,8 @@ public class AggregatePartTestEnv {
 
         @Assign
         AggTaskAdded handle(AggAddTask msg) {
-            final AggTaskAdded result = AggTaskAdded.newBuilder()
-                                                    .build();
+            AggTaskAdded result = AggTaskAdded.newBuilder()
+                                              .build();
             //This command can be empty since we use apply method to setup aggregate part.
             return result;
         }
@@ -103,10 +101,10 @@ public class AggregatePartTestEnv {
 
         @Assign
         AggProjectCreated handle(AggCreateProject msg) {
-            final AggProjectCreated result = AggProjectCreated.newBuilder()
-                                                              .setProjectId(msg.getProjectId())
-                                                              .setName(msg.getName())
-                                                              .build();
+            AggProjectCreated result = AggProjectCreated.newBuilder()
+                                                        .setProjectId(msg.getProjectId())
+                                                        .setName(msg.getName())
+                                                        .build();
             return result;
         }
 

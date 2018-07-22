@@ -96,8 +96,8 @@ public class EventEnricherTest {
         @Test
         @DisplayName("is enclosed to event")
         void enclosedToEvent() {
-            final ProjectStarted msg = GivenEventMessage.projectStarted();
-            final Event event = createEvent(msg);
+            ProjectStarted msg = GivenEventMessage.projectStarted();
+            Event event = createEvent(msg);
 
             eventBus.post(event);
 
@@ -108,7 +108,7 @@ public class EventEnricherTest {
         @Test
         @DisplayName("is not enclosed to event and is located in same package")
         void fromSamePackage() {
-            final ProjectCreated msg = GivenEventMessage.projectCreated();
+            ProjectCreated msg = GivenEventMessage.projectCreated();
 
             eventBus.post(createEvent(msg));
 
@@ -119,7 +119,7 @@ public class EventEnricherTest {
         @Test
         @DisplayName("is located in another package")
         void fromAnotherPackage() {
-            final ProjectCreated msg = GivenEventMessage.projectCreated();
+            ProjectCreated msg = GivenEventMessage.projectCreated();
 
             eventBus.post(createEvent(msg));
 
@@ -131,8 +131,8 @@ public class EventEnricherTest {
     @Test
     @DisplayName("enrich event with several fields by same source ID")
     void enrichSeveralFieldsProperly() {
-        final ProjectCreated msg = GivenEventMessage.projectCreated();
-        final ProjectId projectId = msg.getProjectId();
+        ProjectCreated msg = GivenEventMessage.projectCreated();
+        ProjectId projectId = msg.getProjectId();
 
         eventBus.post(createEvent(msg));
 
@@ -149,10 +149,10 @@ public class EventEnricherTest {
         @Test
         @DisplayName("with same enrichment message having wildcard")
         void byMessageWithWildcard() {
-            final ProjectCompleted completed = GivenEventMessage.projectCompleted();
-            final ProjectStarred starred = GivenEventMessage.projectStarred();
-            final ProjectId completedProjectId = completed.getProjectId();
-            final ProjectId starredProjectId = starred.getProjectId();
+            ProjectCompleted completed = GivenEventMessage.projectCompleted();
+            ProjectStarred starred = GivenEventMessage.projectStarred();
+            ProjectId completedProjectId = completed.getProjectId();
+            ProjectId starredProjectId = starred.getProjectId();
 
             eventBus.post(createEvent(completed));
             eventBus.post(createEvent(starred));
@@ -166,11 +166,9 @@ public class EventEnricherTest {
         @Test
         @DisplayName("bound by fields")
         void boundByFields() {
-            final EventEnvelope permissionGranted =
-                    EventEnvelope.of(GivenEvent.permissionGranted());
-            final EventEnvelope permissionRevoked =
-                    EventEnvelope.of(GivenEvent.permissionRevoked());
-            final EventEnvelope sharingRequestApproved =
+            EventEnvelope permissionGranted = EventEnvelope.of(GivenEvent.permissionGranted());
+            EventEnvelope permissionRevoked = EventEnvelope.of(GivenEvent.permissionRevoked());
+            EventEnvelope sharingRequestApproved =
                     EventEnvelope.of(GivenEvent.sharingRequestApproved());
 
             assertTrue(enricher.canBeEnriched(permissionGranted));
@@ -192,7 +190,7 @@ public class EventEnricherTest {
         @Test
         @DisplayName("if there is no enrichment registered for it")
         void withoutEnrichment() {
-            final EventEnvelope dummyEvent = EventEnvelope.of(createEvent(toMessage(newUuid())));
+            EventEnvelope dummyEvent = EventEnvelope.of(createEvent(toMessage(newUuid())));
 
             assertFalse(enricher.canBeEnriched(dummyEvent));
         }
@@ -200,15 +198,15 @@ public class EventEnricherTest {
         @Test
         @DisplayName("if its enrichment is disabled")
         void withDisabledEnrichment() {
-            final Event event = createEvent(toMessage(newUuid()));
-            final Enrichment.Builder enrichment = event.getContext()
-                                                       .getEnrichment()
-                                                       .toBuilder()
-                                                       .setDoNotEnrich(true);
-            final EventContext.Builder context = event.getContext()
-                                                      .toBuilder()
-                                                      .setEnrichment(enrichment);
-            final EventEnvelope notEnrichableEvent = EventEnvelope.of(
+            Event event = createEvent(toMessage(newUuid()));
+            Enrichment.Builder enrichment = event.getContext()
+                                                 .getEnrichment()
+                                                 .toBuilder()
+                                                 .setDoNotEnrich(true);
+            EventContext.Builder context = event.getContext()
+                                                .toBuilder()
+                                                .setEnrichment(enrichment);
+            EventEnvelope notEnrichableEvent = EventEnvelope.of(
                     event.toBuilder()
                          .setContext(context)
                          .build()

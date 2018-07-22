@@ -69,10 +69,10 @@ public enum ExternalAttribute implements MethodAttribute<Boolean> {
      */
     public static ExternalAttribute of(Method method) {
         checkNotNull(method);
-        final React reactAnnotation = method.getAnnotation(React.class);
+        React reactAnnotation = method.getAnnotation(React.class);
         boolean isExternal = (reactAnnotation != null && reactAnnotation.external());
         if(!isExternal) {
-            final Subscribe subscribeAnnotation = method.getAnnotation(Subscribe.class);
+            Subscribe subscribeAnnotation = method.getAnnotation(Subscribe.class);
             isExternal = (subscribeAnnotation != null && subscribeAnnotation.external());
         }
 

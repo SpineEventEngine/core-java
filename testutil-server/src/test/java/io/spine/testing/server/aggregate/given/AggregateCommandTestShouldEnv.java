@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.aggregate.given;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
@@ -138,6 +139,7 @@ public class AggregateCommandTestShouldEnv {
             return new CommandHandlingAggregateRepository();
         }
 
+        @CanIgnoreReturnValue
         @Override
         public CommandHandlerExpected<TUProjectAggregate>
         expectThat(CommandHandlingAggregate entity) {

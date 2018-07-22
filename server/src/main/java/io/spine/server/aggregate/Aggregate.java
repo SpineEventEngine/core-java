@@ -212,9 +212,10 @@ public abstract class Aggregate<I,
     protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
         idempotencyGuard.check(command);
         CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
-        Dispatch<CommandEnvelope> dispatch = Dispatch.of(command).to(this, method);
+        Dispatch<CommandEnvelope> dispatch = Dispatch.of(command)
+                                                     .to(this, method);
         DispatchResult dispatchResult = dispatch.perform();
-        return dispatchResult.asMessages(); 
+        return dispatchResult.asMessages();
     }
 
     /**
@@ -236,8 +237,8 @@ public abstract class Aggregate<I,
 
     /**
      * Dispatches the rejection to which the aggregate reacts.
-     * 
-     * <p>Reacting on a rejection may result in emitting event messages. All the 
+     *
+     * <p>Reacting on a rejection may result in emitting event messages. All the
      * {@linkplain Empty empty} messages are filtered out from the result.
      *
      * @param  rejection the envelope with the rejection
@@ -249,7 +250,8 @@ public abstract class Aggregate<I,
         CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
         RejectionClass rejectionClass = rejection.getMessageClass();
         RejectionReactorMethod method = thisClass().getReactor(rejectionClass, commandClass);
-        Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection).to(this, method);
+        Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection)
+                                                       .to(this, method);
         DispatchResult dispatchResult = dispatch.perform();
         return dispatchResult.asMessages();
     }
@@ -260,7 +262,8 @@ public abstract class Aggregate<I,
      * @param eventMessage the event message to apply
      */
     void invokeApplier(Message eventMessage) {
-        final EventApplierMethod method = thisClass().getApplier(EventClass.of(eventMessage));
+        EventClass eventClass = EventClass.of(eventMessage);
+        EventApplierMethod method = thisClass().getApplier(eventClass);
         method.invoke(this, eventMessage);
     }
 
@@ -283,11 +286,11 @@ public abstract class Aggregate<I,
      *         the thrown instance
      */
     void play(AggregateStateRecord aggregateStateRecord) {
-        final Snapshot snapshot = aggregateStateRecord.getSnapshot();
+        Snapshot snapshot = aggregateStateRecord.getSnapshot();
         if (isNotDefault(snapshot)) {
             restore(snapshot);
         }
-        final List<Event> events = aggregateStateRecord.getEventList();
+        List<Event> events = aggregateStateRecord.getEventList();
 
         play(events);
         remember(events);
@@ -301,11 +304,10 @@ public abstract class Aggregate<I,
      * @see #ensureEventMessage(Message)
      */
     void apply(Iterable<? extends Message> eventMessages, MessageEnvelope origin) {
-        final List<? extends Message> messages = newArrayList(eventMessages);
-        final EventFactory eventFactory =
-                EventFactory.on(origin, getProducerId());
+        List<? extends Message> messages = newArrayList(eventMessages);
+        EventFactory eventFactory = EventFactory.on(origin, getProducerId());
 
-        final List<Event> events = newArrayListWithCapacity(messages.size());
+        List<Event> events = newArrayListWithCapacity(messages.size());
 
         Version projectedEventVersion = getVersion();
 
@@ -313,14 +315,14 @@ public abstract class Aggregate<I,
             /* Applying each message would increment the entity version.
                Therefore, we should simulate this behaviour. */
             projectedEventVersion = Versions.increment(projectedEventVersion);
-            final Message eventMessage = ensureEventMessage(eventOrMessage);
+            Message eventMessage = ensureEventMessage(eventOrMessage);
 
-            final Event event;
+            Event event;
             if (eventOrMessage instanceof Event) {
                 /* If we get instances of Event, it means we are dealing with an import command,
                    which contains these events in the body. So we deal with a command envelope.
                 */
-                final CommandEnvelope ce = (CommandEnvelope)origin;
+                CommandEnvelope ce = (CommandEnvelope)origin;
                 event = importEvent((Event) eventOrMessage,
                                     ce.getCommandContext(),
                                     projectedEventVersion);
@@ -342,15 +344,15 @@ public abstract class Aggregate<I,
      * @return an event with updated command context and entity version
      */
     private static Event importEvent(Event event, CommandContext commandContext, Version version) {
-        final EventContext eventContext = event.getContext()
-                                               .toBuilder()
-                                               .setCommandContext(commandContext)
-                                               .setTimestamp(getCurrentTime())
-                                               .setVersion(version)
-                                               .build();
-        final Event result = event.toBuilder()
-                                  .setContext(eventContext)
-                                  .build();
+        EventContext eventContext = event.getContext()
+                                         .toBuilder()
+                                         .setCommandContext(commandContext)
+                                         .setTimestamp(getCurrentTime())
+                                         .setVersion(version)
+                                         .build();
+        Event result = event.toBuilder()
+                            .setContext(eventContext)
+                            .build();
         return result;
     }
 
@@ -368,9 +370,9 @@ public abstract class Aggregate<I,
      *         {@code Event} instance
      */
     private static Message ensureEventMessage(Message eventOrMsg) {
-        final Message eventMsg;
+        Message eventMsg;
         if (eventOrMsg instanceof Event) {
-            final Event event = (Event) eventOrMsg;
+            Event event = (Event) eventOrMsg;
             eventMsg = getMessage(event);
         } else {
             eventMsg = eventOrMsg;
@@ -390,8 +392,8 @@ public abstract class Aggregate<I,
      * @param snapshot the snapshot with the state to restore
      */
     void restore(Snapshot snapshot) {
-        final S stateToRestore = AnyPacker.unpack(snapshot.getState());
-        final Version versionFromSnapshot = snapshot.getVersion();
+        S stateToRestore = AnyPacker.unpack(snapshot.getState());
+        Version versionFromSnapshot = snapshot.getVersion();
         setInitialState(stateToRestore, versionFromSnapshot);
     }
 
@@ -419,7 +421,7 @@ public abstract class Aggregate<I,
      * @return the list of events
      */
     List<Event> commitEvents() {
-        final List<Event> result = ImmutableList.copyOf(uncommittedEvents);
+        List<Event> result = ImmutableList.copyOf(uncommittedEvents);
         uncommittedEvents.clear();
         remember(result);
         return result;
@@ -440,12 +442,12 @@ public abstract class Aggregate<I,
      * @return new snapshot
      */
     Snapshot toShapshot() {
-        final Any state = AnyPacker.pack(getState());
-        final Snapshot.Builder builder = Snapshot.newBuilder()
-                .setState(state)
-                .setVersion(getVersion())
-                .setTimestamp(getCurrentTime());
-        final Snapshot snapshot = builder.build();
+        Any state = AnyPacker.pack(getState());
+        Snapshot.Builder builder = Snapshot.newBuilder()
+                                           .setState(state)
+                                           .setVersion(getVersion())
+                                           .setTimestamp(getCurrentTime());
+        Snapshot snapshot = builder.build();
         return snapshot;
     }
 

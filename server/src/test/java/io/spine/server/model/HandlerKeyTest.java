@@ -52,8 +52,8 @@ class HandlerKeyTest {
     @Test
     @DisplayName("return command class of Empty if there is no origin")
     void getEmptyClassWhenNoOrigin() {
-        final CommandClass handledMessage = stringClass;
-        final HandlerKey key = HandlerKey.of(handledMessage);
+        CommandClass handledMessage = stringClass;
+        HandlerKey key = HandlerKey.of(handledMessage);
         assertEquals(handledMessage, key.getHandledMessageCls());
         assertEquals(emptyClass, key.getOriginCls());
     }
@@ -61,9 +61,9 @@ class HandlerKeyTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        final HandlerKey first = HandlerKey.of(stringClass);
-        final HandlerKey second = HandlerKey.of(stringClass, stringClass);
-        final HandlerKey third = HandlerKey.of(emptyClass, stringClass);
+        HandlerKey first = HandlerKey.of(stringClass);
+        HandlerKey second = HandlerKey.of(stringClass, stringClass);
+        HandlerKey third = HandlerKey.of(emptyClass, stringClass);
 
         new EqualsTester().addEqualityGroup(first)
                           .addEqualityGroup(second)

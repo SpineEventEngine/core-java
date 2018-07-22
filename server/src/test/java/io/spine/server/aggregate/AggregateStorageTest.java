@@ -21,7 +21,6 @@
 package io.spine.server.aggregate;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
@@ -48,6 +47,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;

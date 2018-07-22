@@ -20,7 +20,6 @@
 
 package io.spine.core;
 
-import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Timestamp;
@@ -33,6 +32,8 @@ import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static io.spine.core.Rejections.causedByRejection;
 import static io.spine.core.Rejections.getProducer;
@@ -107,10 +108,10 @@ class RejectionsTest {
     @Test
     @DisplayName("generate rejection ID upon command ID")
     void generateRejectionIdUponCommandId() {
-        final CommandId commandId = Commands.generateId();
-        final RejectionId actual = Rejections.generateId(commandId);
+        CommandId commandId = Commands.generateId();
+        RejectionId actual = Rejections.generateId(commandId);
 
-        final String expected = format(Rejections.REJECTION_ID_FORMAT, commandId.getUuid());
+        String expected = format(Rejections.REJECTION_ID_FORMAT, commandId.getUuid());
         assertEquals(expected, actual.getValue());
     }
 
@@ -123,8 +124,8 @@ class RejectionsTest {
                              .isEmpty());
         assertTrue(Timestamps.isValid(rejection.getContext()
                                                .getTimestamp()));
-        final Command commandFromContext = rejection.getContext()
-                                                    .getCommand();
+        Command commandFromContext = rejection.getContext()
+                                              .getCommand();
         assertEquals(command, commandFromContext);
     }
 
@@ -132,15 +133,15 @@ class RejectionsTest {
     @DisplayName("obtain rejection producer if set")
     void getRejectionProducerIfSet() {
         // We initialized producer ID as the name of this test class in setUp().
-        final Optional<Object> producer = Rejections.getProducer(rejection.getContext());
+        Optional<Object> producer = Rejections.getProducer(rejection.getContext());
         assertEquals(getClass().getName(), producer.get());
     }
 
     @Test
     @DisplayName("return absent if rejection producer is not set")
     void returnAbsentOnEmptyProducer() {
-        final TestThrowableMessage freshThrowable = new TestThrowableMessage(rejectionMessage);
-        final Rejection freshRejection = toRejection(freshThrowable, command);
+        TestThrowableMessage freshThrowable = new TestThrowableMessage(rejectionMessage);
+        Rejection freshRejection = toRejection(freshThrowable, command);
         assertFalse(getProducer(freshRejection.getContext()).isPresent());
     }
 
@@ -152,7 +153,7 @@ class RejectionsTest {
     @DisplayName("tell if RuntimeException was caused by command rejection")
     void recognizeExceptionCausedByRejection() {
         assertFalse(causedByRejection(new RuntimeException()));
-        final ThrowableMessage throwableMessage = new ThrowableMessage(Time.getCurrentTime()) {
+        ThrowableMessage throwableMessage = new ThrowableMessage(Time.getCurrentTime()) {
             private static final long serialVersionUID = 0L;
         };
         assertTrue(causedByRejection(new IllegalStateException(throwableMessage)));

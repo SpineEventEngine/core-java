@@ -19,7 +19,6 @@
  */
 package io.spine.server;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.protobuf.Message;
@@ -56,6 +55,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 
@@ -175,8 +175,8 @@ public abstract class BoundedContext
      */
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkNotNull(repository);
-        final Message defaultState = Model.getInstance()
-                                          .getDefaultState(repository.getEntityClass());
+        Message defaultState = Model.getInstance()
+                                    .getDefaultState(repository.getEntityClass());
         checkNotNull(defaultState);
 
         repository.setBoundedContext(this);
@@ -190,7 +190,7 @@ public abstract class BoundedContext
     @Experimental
     @Override
     public void notify(IntegrationEvent integrationEvent, StreamObserver<Ack> observer) {
-        final Event event = EventFactory.toEvent(integrationEvent);
+        Event event = EventFactory.toEvent(integrationEvent);
         eventBus.post(event, observer);
     }
 
@@ -198,7 +198,7 @@ public abstract class BoundedContext
      * Obtains a set of entity type names by their visibility.
      */
     public Set<TypeName> getEntityTypes(Visibility visibility) {
-        final Set<TypeName> result = guard.getEntityTypes(visibility);
+        Set<TypeName> result = guard.getEntityTypes(visibility);
         return result;
     }
 
@@ -212,7 +212,7 @@ public abstract class BoundedContext
             throw newIllegalStateException("No repository found for the the entity state class %s",
                                            entityStateClass.getName());
         }
-        final Optional<Repository> repository = guard.getRepository(entityStateClass);
+        Optional<Repository> repository = guard.getRepository(entityStateClass);
         return repository;
     }
 
@@ -311,7 +311,8 @@ public abstract class BoundedContext
      */
     @Override
     public void close() throws Exception {
-        storageFactory.get().close();
+        storageFactory.get()
+                      .close();
         commandBus.close();
         eventBus.close();
         integrationBus.close();

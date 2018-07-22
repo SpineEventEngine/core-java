@@ -81,8 +81,8 @@ public class ProcessManagerCommandTestShouldEnv {
         @Assign
         @SuppressWarnings("CheckReturnValue")
         TUTaskCreated handle(TUCreateTask command, CommandContext context) {
-            newRouterFor(command, context).add(NESTED_COMMAND)
-                                          .routeAll();
+            transform(command, context).to(NESTED_COMMAND)
+                                       .post();
             return TUTaskCreated.newBuilder()
                                 .setId(command.getId())
                                 .build();

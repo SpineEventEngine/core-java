@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
@@ -36,6 +35,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.util.Exceptions.unsupported;
@@ -59,8 +59,8 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
 
     @Override
     public Iterator<I> index() {
-        final Iterator<I> result = records.keySet()
-                                          .iterator();
+        Iterator<I> result = records.keySet()
+                                    .iterator();
         return result;
     }
 
@@ -82,7 +82,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
      * @return immutable list
      */
     List<AggregateEventRecord> getHistoryBackward(AggregateReadRequest<I> request) {
-        final I id = request.getRecordId();
+        I id = request.getRecordId();
         return ImmutableList.copyOf(records.get(id));
     }
 
@@ -95,7 +95,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
      * @return the number of events stored for the aggregate or zero
      */
     int getEventCount(I id) {
-        final Integer count = eventCounts.get(id);
+        Integer count = eventCounts.get(id);
         if (count == null) {
             return 0;
         }
@@ -108,8 +108,8 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
      * <p>If no status stored, the default instance is returned.
      */
     Optional<LifecycleFlags> getStatus(I id) {
-        final LifecycleFlags entityStatus = statuses.get(id);
-        return Optional.fromNullable(entityStatus);
+        LifecycleFlags entityStatus = statuses.get(id);
+        return Optional.ofNullable(entityStatus);
     }
 
     @Override
@@ -150,8 +150,8 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
             }
 
             // To define an order:
-            final int firstHashCode = first.hashCode();
-            final int secondHashCode = second.hashCode();
+            int firstHashCode = first.hashCode();
+            int secondHashCode = second.hashCode();
 
             result = Integer.compare(firstHashCode, secondHashCode);
             return result;
@@ -194,8 +194,8 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
          */
         private static int compareSimilarRecords(AggregateEventRecord first,
                                                  AggregateEventRecord second) {
-            final boolean firstIsSnapshot = isSnapshot(first);
-            final boolean secondIsSnapshot = isSnapshot(second);
+            boolean firstIsSnapshot = isSnapshot(first);
+            boolean secondIsSnapshot = isSnapshot(second);
             if (firstIsSnapshot && !secondIsSnapshot) {
                 return -1;
             } else if (secondIsSnapshot && !firstIsSnapshot) {
@@ -213,8 +213,8 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
         private static int compareVersions(AggregateEventRecord first,
                                            AggregateEventRecord second) {
             int result;
-            final int secondEventVersion = versionNumberOf(second);
-            final int firstEventVersion = versionNumberOf(first);
+            int secondEventVersion = versionNumberOf(second);
+            int firstEventVersion = versionNumberOf(first);
             result = Integer.compare(secondEventVersion, firstEventVersion);
             return result;
         }
@@ -225,9 +225,9 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
         }
 
         private static int versionNumberOf(AggregateEventRecord record) {
-            final int versionNumber;
+            int versionNumber;
 
-            final Event event = record.getEvent();
+            Event event = record.getEvent();
             if (isDefault(event)) {
                 versionNumber = record.getSnapshot()
                                       .getVersion()

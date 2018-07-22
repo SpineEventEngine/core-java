@@ -20,7 +20,6 @@
 
 package io.spine.server.outbus.enrich;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedListMultimap;
@@ -38,6 +37,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -97,18 +97,18 @@ final class ReferenceValidator {
      * functions.
      */
     ValidationResult validate() {
-        final List<EnrichmentFunction<?, ?, ?>> functions = new LinkedList<>();
-        final Multimap<FieldDescriptor, FieldDescriptor> fields = LinkedListMultimap.create();
+        List<EnrichmentFunction<?, ?, ?>> functions = new LinkedList<>();
+        Multimap<FieldDescriptor, FieldDescriptor> fields = LinkedListMultimap.create();
         for (FieldDescriptor enrichmentField : enrichmentDescriptor.getFields()) {
-            final Collection<FieldDescriptor> sourceFields = findSourceFields(enrichmentField);
+            Collection<FieldDescriptor> sourceFields = findSourceFields(enrichmentField);
             putEnrichmentsByField(functions, fields, enrichmentField, sourceFields);
         }
-        final ImmutableMultimap<FieldDescriptor, FieldDescriptor> sourceToTargetMap =
+        ImmutableMultimap<FieldDescriptor, FieldDescriptor> sourceToTargetMap =
                 ImmutableMultimap.copyOf(fields);
-        final ImmutableList<EnrichmentFunction<?, ?, ?>> enrichmentFunctions =
+        ImmutableList<EnrichmentFunction<?, ?, ?>> enrichmentFunctions =
                 ImmutableList.copyOf(functions);
-        final ValidationResult result = new ValidationResult(enrichmentFunctions,
-                                                             sourceToTargetMap);
+        ValidationResult result = new ValidationResult(enrichmentFunctions,
+                                                       sourceToTargetMap);
         return result;
     }
 
@@ -117,7 +117,7 @@ final class ReferenceValidator {
                                        FieldDescriptor enrichmentField,
                                        Iterable<FieldDescriptor> sourceFields) {
         for (FieldDescriptor sourceField : sourceFields) {
-            final Optional<EnrichmentFunction<?, ?, ?>> function =
+            Optional<EnrichmentFunction<?, ?, ?>> function =
                     getEnrichmentFunction(sourceField, enrichmentField);
             if (function.isPresent()) {
                 functions.add(function.get());
@@ -131,18 +131,18 @@ final class ReferenceValidator {
      * field {@code by} option.
      */
     private Collection<FieldDescriptor> findSourceFields(FieldDescriptor enrichmentField) {
-        final String byOptionArgument = enrichmentField.getOptions()
-                                                       .getExtension(OptionsProto.by);
+        String byOptionArgument = enrichmentField.getOptions()
+                                                 .getExtension(OptionsProto.by);
         checkNotNull(byOptionArgument);
-        final String targetFields = removeSpaces(byOptionArgument);
-        final int pipeSeparatorIndex = targetFields.indexOf(PIPE_SEPARATOR);
+        String targetFields = removeSpaces(byOptionArgument);
+        int pipeSeparatorIndex = targetFields.indexOf(PIPE_SEPARATOR);
         if (pipeSeparatorIndex < 0) {
-            final FieldDescriptor fieldDescriptor = findSourceFieldByName(targetFields,
-                                                                          enrichmentField,
-                                                                          true);
+            FieldDescriptor fieldDescriptor = findSourceFieldByName(targetFields,
+                                                                    enrichmentField,
+                                                                    true);
             return Collections.singleton(fieldDescriptor);
         } else {
-            final String[] targetFieldNames = PATTERN_PIPE_SEPARATOR.split(targetFields);
+            String[] targetFieldNames = PATTERN_PIPE_SEPARATOR.split(targetFields);
             return findSourceFieldsByNames(targetFieldNames, enrichmentField);
         }
     }
@@ -164,8 +164,8 @@ final class ReferenceValidator {
                                                   FieldDescriptor enrichmentField,
                                                   boolean strict) {
         checkSourceFieldName(name, enrichmentField);
-        final Descriptor srcMessage = getSrcMessage(name);
-        final FieldDescriptor field = findField(name, srcMessage);
+        Descriptor srcMessage = getSrcMessage(name);
+        FieldDescriptor field = findField(name, srcMessage);
         if (field == null && strict) {
             throw noFieldException(name, srcMessage, enrichmentField);
         }
@@ -174,8 +174,8 @@ final class ReferenceValidator {
 
     private static String removeSpaces(String source) {
         checkNotNull(source);
-        final String result = SPACE_PATTERN.matcher(source)
-                                           .replaceAll(EMPTY_STRING);
+        String result = SPACE_PATTERN.matcher(source)
+                                     .replaceAll(EMPTY_STRING);
         return result;
     }
 
@@ -185,12 +185,12 @@ final class ReferenceValidator {
         checkArgument(names.length > 1,
                       "Enrichment target field names may not be a singleton array. " +
                       "Use findSourceFieldByName().");
-        final Collection<FieldDescriptor> result = new HashSet<>(names.length);
+        Collection<FieldDescriptor> result = new HashSet<>(names.length);
 
         FieldDescriptor.Type basicType = null;
         Descriptor messageType = null;
         for (String name : names) {
-            final FieldDescriptor field = findSourceFieldByName(name, enrichmentField, false);
+            FieldDescriptor field = findSourceFieldByName(name, enrichmentField, false);
             if (field == null) {
                 /* We don't know at this stage the type of the event.
                    The enrichment is to be included anyway,
@@ -212,7 +212,7 @@ final class ReferenceValidator {
                 }
             }
 
-            final boolean noDuplicateFiled = result.add(field);
+            boolean noDuplicateFiled = result.add(field);
             checkState(
                     noDuplicateFiled,
                     "Enrichment target field names may contain no duplicates. " +
@@ -229,8 +229,8 @@ final class ReferenceValidator {
 
     private static FieldDescriptor findField(String fieldNameFull, Descriptor srcMessage) {
         if (fieldNameFull.contains(PROTO_FQN_SEPARATOR)) { // is event field FQN or context field
-            final int firstCharIndex = fieldNameFull.lastIndexOf(PROTO_FQN_SEPARATOR) + 1;
-            final String fieldName = fieldNameFull.substring(firstCharIndex);
+            int firstCharIndex = fieldNameFull.lastIndexOf(PROTO_FQN_SEPARATOR) + 1;
+            String fieldName = fieldNameFull.substring(firstCharIndex);
             return srcMessage.findFieldByName(fieldName);
         } else {
             return srcMessage.findFieldByName(fieldNameFull);
@@ -242,17 +242,17 @@ final class ReferenceValidator {
      * if the field name contains {@link ReferenceValidator#CONTEXT_REFERENCE}.
      */
     private Descriptor getSrcMessage(String fieldName) {
-        final Descriptor msg = fieldName.contains(CONTEXT_REFERENCE)
-                               ? EventContext.getDescriptor()
-                               : eventDescriptor;
+        Descriptor msg = fieldName.contains(CONTEXT_REFERENCE)
+                         ? EventContext.getDescriptor()
+                         : eventDescriptor;
         return msg;
     }
 
     private Optional<EnrichmentFunction<?, ?, ?>> getEnrichmentFunction(FieldDescriptor srcField,
-                                                                     FieldDescriptor targetField) {
-        final Class<?> sourceFieldClass = Field.getFieldClass(srcField);
-        final Class<?> targetFieldClass = Field.getFieldClass(targetField);
-        final Optional<EnrichmentFunction<?, ?, ?>> func =
+                                                                        FieldDescriptor targetField) {
+        Class<?> sourceFieldClass = Field.getFieldClass(srcField);
+        Class<?> targetFieldClass = Field.getFieldClass(targetField);
+        Optional<EnrichmentFunction<?, ?, ?>> func =
                 enricher.functionFor(sourceFieldClass,targetFieldClass);
         if (!func.isPresent()) {
             logNoFunction(sourceFieldClass, targetFieldClass);

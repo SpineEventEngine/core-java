@@ -20,7 +20,7 @@
 
 package io.spine.server.route;
 
-import com.google.common.base.Optional;
+import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.Command;
@@ -43,8 +43,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.collect.Lists.newLinkedList;
+
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -100,8 +102,8 @@ class CommandRoutingRejectionTest {
     @DisplayName("result in rejected command")
     void resultInRejectedCommand() {
         // Post a successful command to make sure general case works.
-        final String switchmanName = Switchman.class.getName();
-        final Command command = requestFactory.createCommand(
+        String switchmanName = Switchman.class.getName();
+        Command command = requestFactory.createCommand(
                 SetSwitch.newBuilder()
                          .setSwitchId(generateSwitchId())
                          .setSwitchmanName(switchmanName)
@@ -113,7 +115,7 @@ class CommandRoutingRejectionTest {
         assertEquals(1, switchmanObserver.events.size());
 
         // Post a command with the argument which causes rejection in routing.
-        final Command commandToReject = requestFactory.createCommand(
+        Command commandToReject = requestFactory.createCommand(
                 SetSwitch.newBuilder()
                          .setSwitchmanName(SwitchmanBureau.MISSING_SWITCHMAN_NAME)
                          .setSwitchId(generateSwitchId())
@@ -122,10 +124,9 @@ class CommandRoutingRejectionTest {
         );
 
         commandBus.post(commandToReject, observer);
-        final Optional<Log> optional = logRepository.find(Log.ID);
-        assertTrue(optional.isPresent());
-        final LogState log = optional.get()
-                                     .getState();
+        Optional<Log> foundLog = logRepository.find(Log.ID);
+        assertTrue(foundLog.isPresent());
+        LogState log = foundLog.get().getState();
         assertTrue(log.containsCounters(switchmanName));
         assertTrue(log.getMissingSwitchmanList()
                       .contains(SwitchmanBureau.MISSING_SWITCHMAN_NAME));

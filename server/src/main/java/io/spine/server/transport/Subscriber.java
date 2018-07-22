@@ -91,7 +91,7 @@ public abstract class Subscriber extends AbstractChannel {
      *
      * @param message the subscription update to pass to the observers for this channel
      */
-    public void onMessage(final ExternalMessage message) {
+    public void onMessage(ExternalMessage message) {
         callObservers(message);
     }
 

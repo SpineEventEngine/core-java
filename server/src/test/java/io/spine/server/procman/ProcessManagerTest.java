@@ -30,6 +30,7 @@ import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.DispatchedCommand;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
@@ -39,6 +40,8 @@ import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.CommandSequence;
+import io.spine.server.commandstore.CommandStore;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.procman.given.DirectQuizProcmanRepository;
 import io.spine.server.procman.given.ProcessManagerTestEnv.AddTaskDispatcher;
@@ -298,9 +301,9 @@ class ProcessManagerTest {
         Message message = AnyPacker.unpack(event.getMessage());
 
         // The event type is CommandRouted.
-        assertThat(message, instanceOf(CommandRouted.class));
+        assertThat(message, instanceOf(CommandTransformed.class));
 
-        CommandRouted commandRouted = (CommandRouted) message;
+        CommandTransformed commandRouted = (CommandTransformed) message;
 
         // The source of the command is StartProject.
         assertThat(getMessage(commandRouted.getSource()), instanceOf(PmStartProject.class));
@@ -308,7 +311,11 @@ class ProcessManagerTest {
         assertSize(1, dispatchedCommands);
         CommandEnvelope dispatchedCommand = dispatcher.getCommands()
                                                       .get(0);
-        assertEquals(commandRouted.getProduced(0), dispatchedCommand.getCommand());
+        DispatchedCommand generated = commandRouted.getProduced();
+        assertEquals(generated.getMessage(), dispatchedCommand.getCommand()
+                                                              .getMessage());
+        assertEquals(generated.getContext(), dispatchedCommand.getCommand()
+                                                              .getContext());
     }
 
     @Nested
@@ -343,46 +350,25 @@ class ProcessManagerTest {
     class Create {
 
         @Test
-        @DisplayName("CommandRouter")
+        @DisplayName("split sequence")
         void commandRouter() {
             StringValue commandMessage = toMessage("create_router");
             CommandContext commandContext = requestFactory.createCommandContext();
 
             processManager.injectCommandBus(mock(CommandBus.class));
 
-            CommandRouter router = processManager.newRouterFor(commandMessage, commandContext);
-            assertNotNull(router);
-
-            assertEquals(commandMessage, getMessage(router.getSource()));
-            assertEquals(commandContext, router.getSource()
-                                               .getContext());
-        }
-
-        @Test
-        @DisplayName("IteratingCommandRouter")
-        void iteratingCommandRouter() {
-            StringValue commandMessage = toMessage("create_iterating_router");
-            CommandContext commandContext = requestFactory.createCommandContext();
-
-            processManager.injectCommandBus(mock(CommandBus.class));
-
-            IteratingCommandRouter router
-                    = processManager.newIteratingRouterFor(commandMessage,
-                                                           commandContext);
-            assertNotNull(router);
-
-            assertEquals(commandMessage, getMessage(router.getSource()));
-            assertEquals(commandContext, router.getSource()
-                                               .getContext());
+            CommandSequence.Split sequence = processManager.split(commandMessage, commandContext);
+            assertNotNull(sequence);
+            assertEquals(0, sequence.size());
         }
     }
 
     @Test
-    @DisplayName("require command bus when creating router")
+    @DisplayName("require CommandBus when creating router")
     void requireCommandBusForRouter() {
-        assertThrows(IllegalStateException.class,
-                     () -> processManager.newRouterFor(StringValue.getDefaultInstance(),
-                                                       CommandContext.getDefaultInstance()));
+        assertThrows(NullPointerException.class,
+                     () -> processManager.split(StringValue.getDefaultInstance(),
+                                                CommandContext.getDefaultInstance()));
     }
 
     @Nested

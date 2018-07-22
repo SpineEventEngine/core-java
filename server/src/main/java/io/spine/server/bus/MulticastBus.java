@@ -44,8 +44,8 @@ public abstract class MulticastBus<M extends Message,
      */
     protected int callDispatchers(E messageEnvelope) {
         @SuppressWarnings("unchecked")  // it's fine, since the message is validated previously.
-        final C messageClass = (C) messageEnvelope.getMessageClass();
-        final Collection<D> dispatchers = registry().getDispatchers(messageClass);
+        C messageClass = (C) messageEnvelope.getMessageClass();
+        Collection<D> dispatchers = registry().getDispatchers(messageClass);
         for (D dispatcher : dispatchers) {
             dispatcher.dispatch(messageEnvelope);
         }

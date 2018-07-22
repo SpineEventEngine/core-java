@@ -62,27 +62,26 @@ class MultitenantStorageTest {
     @DisplayName("return same slice within single tenant and multitenant environment")
     void returnSameSlice()
             throws InterruptedException, ExecutionException {
-        final int numberOfTasks = 1000;
-        final Collection<Callable<TenantRecords>> tasks =
-                newArrayListWithExpectedSize(numberOfTasks);
+        int numberOfTasks = 1000;
+        Collection<Callable<TenantRecords>> tasks = newArrayListWithExpectedSize(numberOfTasks);
 
         for (int i = 0; i < numberOfTasks; i++) {
             tasks.add(() -> {
-                final TenantRecords<ProjectId> storage = multitenantStorage.getStorage();
+                TenantRecords<ProjectId> storage = multitenantStorage.getStorage();
                 return storage;
             });
         }
 
-        final List<Future<TenantRecords>> futures = executeInMultithreadedEnvironment(tasks);
-        final Set<TenantRecords> tenantRecords = convertFuturesToSetOfCompletedResults(futures);
+        List<Future<TenantRecords>> futures = executeInMultithreadedEnvironment(tasks);
+        Set<TenantRecords> tenantRecords = convertFuturesToSetOfCompletedResults(futures);
 
-        final int expected = 1;
+        int expected = 1;
         assertEquals(expected, tenantRecords.size());
     }
 
     private static <R> Set<R> convertFuturesToSetOfCompletedResults(List<Future<R>> futures)
             throws ExecutionException, InterruptedException {
-        final Set<R> tenantRecords = newHashSetWithExpectedSize(futures.size());
+        Set<R> tenantRecords = newHashSetWithExpectedSize(futures.size());
         for (Future<R> future : futures) {
             tenantRecords.add(future.get());
         }
@@ -91,10 +90,9 @@ class MultitenantStorageTest {
 
     private static <R> List<Future<R>>
     executeInMultithreadedEnvironment(Collection<Callable<R>> tasks) throws InterruptedException {
-        final ExecutorService executor =
-                Executors.newFixedThreadPool(Runtime.getRuntime()
-                                                    .availableProcessors() * 2);
-        final List<Future<R>> futures = executor.invokeAll(tasks);
+        ExecutorService executor = Executors.newFixedThreadPool(Runtime.getRuntime()
+                                                                       .availableProcessors() * 2);
+        List<Future<R>> futures = executor.invokeAll(tasks);
         return futures;
     }
 }

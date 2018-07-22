@@ -83,25 +83,25 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("default if no custom one was specified")
         void setToDefault() {
-            final CommandBus bus = CommandBus.newBuilder()
-                                             .injectTenantIndex(tenantIndex)
-                                             .injectSystemGateway(NoOpSystemGateway.INSTANCE)
-                                             .build();
+            CommandBus bus = CommandBus.newBuilder()
+                                       .injectTenantIndex(tenantIndex)
+                                       .injectSystemGateway(systemGateway)
+                                       .build();
             assertNotNull(bus.rejectionBus());
         }
 
         @Test
         @DisplayName("custom if one was specified via Builder")
         void setToCustom() {
-            final RejectionBus expectedRejectionBus = mock(RejectionBus.class);
-            final CommandBus commandBus = CommandBus.newBuilder()
-                                                    .injectTenantIndex(tenantIndex)
-                                                    .injectSystemGateway(NoOpSystemGateway.INSTANCE)
-                                                    .setRejectionBus(expectedRejectionBus)
-                                                    .build();
+            RejectionBus expectedRejectionBus = mock(RejectionBus.class);
+            CommandBus commandBus = CommandBus.newBuilder()
+                                              .injectTenantIndex(tenantIndex)
+                                              .injectSystemGateway(systemGateway)
+                                              .setRejectionBus(expectedRejectionBus)
+                                              .build();
             assertNotNull(commandBus);
 
-            final RejectionBus actualRejectionBus = commandBus.rejectionBus();
+            RejectionBus actualRejectionBus = commandBus.rejectionBus();
             assertEquals(expectedRejectionBus, actualRejectionBus);
         }
     }
@@ -137,7 +137,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @DisplayName("verify tenant ID attribute if is multitenant")
     void requireTenantId() {
         commandBus.register(createProjectHandler);
-        final Command cmd = newCommandWithoutTenantId();
+        Command cmd = newCommandWithoutTenantId();
 
         commandBus.post(cmd, observer);
 
@@ -150,7 +150,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("state command not supported when there is neither handler nor dispatcher for it")
     void requireHandlerOrDispatcher() {
-        final Command command = addTask();
+        Command command = addTask();
         commandBus.post(command, observer);
 
         checkCommandError(observer.firstResponse(),
@@ -191,7 +191,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("command dispatcher")
         void commandDispatcher() {
-            final CommandDispatcher<Message> dispatcher = new AddTaskDispatcher();
+            CommandDispatcher<Message> dispatcher = new AddTaskDispatcher();
             commandBus.register(dispatcher);
             commandBus.unregister(dispatcher);
 
@@ -205,7 +205,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("command handler")
         void commandHandler() {
-            final CommandHandler handler = newCommandHandler();
+            CommandHandler handler = newCommandHandler();
 
             commandBus.register(handler);
             commandBus.unregister(handler);
@@ -227,37 +227,10 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     void postCommand() {
         commandBus.register(createProjectHandler);
 
-        final Command command = createProject();
+        Command command = createProject();
         commandBus.post(command, observer);
 
         checkResult(command);
-    }
-
-    @Nested
-    @DisplayName("store")
-    class StoreWhenPosted {
-
-        @Test
-        @DisplayName("valid command when it is posted")
-        void validCommand() {
-            commandBus.register(createProjectHandler);
-            final Command cmd = createProject();
-
-            commandBus.post(cmd, observer);
-
-//            verify(commandStore).store(cmd);
-        }
-
-        @Test
-        @DisplayName("invalid command with `ERROR` status")
-        void invalidCommand() {
-            commandBus.register(createProjectHandler);
-            final Command cmd = newCommandWithoutContext();
-
-            commandBus.post(cmd, observer);
-
-//            verify(commandStore).store(eq(cmd), isA(Error.class));
-        }
     }
 
     @Nested
@@ -277,7 +250,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("command dispatcher")
         void commandDispatcher() {
-            final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
+            AddTaskDispatcher dispatcher = new AddTaskDispatcher();
             commandBus.register(dispatcher);
 
             commandBus.post(addTask(), observer);
@@ -292,7 +265,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
         commandBus.register(new AddTaskDispatcher());
 
-        final Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
+        Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
 
         assertTrue(cmdClasses.contains(CommandClass.of(CmdCreateProject.class)));
         assertTrue(cmdClasses.contains(CommandClass.of(CmdAddTask.class)));

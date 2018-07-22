@@ -144,19 +144,19 @@ public final class EntityQuery<I> implements Serializable {
     public EntityQuery<I> withLifecycleFlags(RecordStorage<I> storage) {
         checkState(canAppendLifecycleFlags(),
                    "The query overrides Lifecycle Flags default values.");
-        final Map<String, EntityColumn> lifecycleColumns = storage.entityLifecycleColumns();
-        final EntityColumn archivedColumn = lifecycleColumns.get(archived.name());
-        final EntityColumn deletedColumn = lifecycleColumns.get(deleted.name());
-        final CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
+        Map<String, EntityColumn> lifecycleColumns = storage.entityLifecycleColumns();
+        EntityColumn archivedColumn = lifecycleColumns.get(archived.name());
+        EntityColumn deletedColumn = lifecycleColumns.get(deleted.name());
+        CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
                 ImmutableMultimap.of(archivedColumn, eq(archived.name(), false),
                                      deletedColumn, eq(deletedColumn.getName(), false)),
                 ALL
         );
-        final QueryParameters parameters = QueryParameters.newBuilder()
-                                                          .addAll(getParameters())
-                                                          .add(lifecycleParameter)
-                                                          .build();
-        final EntityQuery<I> result = new EntityQuery<>(ids, parameters);
+        QueryParameters parameters = QueryParameters.newBuilder()
+                                                    .addAll(getParameters())
+                                                    .add(lifecycleParameter)
+                                                    .build();
+        EntityQuery<I> result = new EntityQuery<>(ids, parameters);
         return result;
     }
 

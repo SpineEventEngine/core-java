@@ -27,7 +27,6 @@ option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.server.event";
 option java_multiple_files = true;
 option java_outer_classname = "EventFilterProto";
-option java_generate_equals_and_hash = true;
 
 import "google/protobuf/any.proto";
 

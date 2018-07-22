@@ -39,7 +39,7 @@ class Topics {
     }
 
     static TopicId generateId() {
-        final String formattedId = format(TOPIC_ID_FORMAT, Identifier.newUuid());
+        String formattedId = format(TOPIC_ID_FORMAT, Identifier.newUuid());
         return TopicId.newBuilder()
                       .setValue(formattedId)
                       .build();

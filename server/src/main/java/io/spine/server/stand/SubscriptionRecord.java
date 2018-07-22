@@ -72,7 +72,7 @@ final class SubscriptionRecord {
      * Checks whether this record has a callback attached.
      */
     boolean isActive() {
-        final boolean result = this.callback != null;
+        boolean result = this.callback != null;
         return result;
     }
 
@@ -89,12 +89,12 @@ final class SubscriptionRecord {
                     Object id,
                     // entityState will be later used for more advanced filtering
                     @SuppressWarnings("UnusedParameters") Any entityState) {
-        final boolean result;
+        boolean result;
 
-        final boolean typeMatches = this.type.equals(type);
+        boolean typeMatches = this.type.equals(type);
         if (typeMatches) {
-            final boolean includeAll = target.getIncludeAll();
-            final EntityFilters filters = target.getFilters();
+            boolean includeAll = target.getIncludeAll();
+            EntityFilters filters = target.getFilters();
             result = includeAll || matchByFilters(id, filters);
         } else {
             result = false;
@@ -103,16 +103,16 @@ final class SubscriptionRecord {
     }
 
     private static boolean matchByFilters(Object id, EntityFilters filters) {
-        final boolean result;
-        final EntityIdFilter givenIdFilter = filters.getIdFilter();
-        final boolean idFilterSet = !EntityIdFilter.getDefaultInstance()
-                                                   .equals(givenIdFilter);
+        boolean result;
+        EntityIdFilter givenIdFilter = filters.getIdFilter();
+        boolean idFilterSet = !EntityIdFilter.getDefaultInstance()
+                                             .equals(givenIdFilter);
         if (idFilterSet) {
-            final Any idAsAny = Identifier.pack(id);
-            final EntityId givenEntityId = EntityId.newBuilder()
-                                                   .setId(idAsAny)
-                                                   .build();
-            final List<EntityId> idsList = givenIdFilter.getIdsList();
+            Any idAsAny = Identifier.pack(id);
+            EntityId givenEntityId = EntityId.newBuilder()
+                                             .setId(idAsAny)
+                                             .build();
+            List<EntityId> idsList = givenIdFilter.getIdsList();
             result = idsList.contains(givenEntityId);
         } else {
             result = false;

@@ -27,13 +27,13 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
-import io.spine.time.testing.TimeTests;
 import io.spine.test.commands.RequiredFieldCommand;
 import io.spine.testing.core.given.GivenTenantId;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.Timestamps2;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
+import io.spine.time.testing.TimeTests;
 import io.spine.validate.ValidationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -128,6 +128,7 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("from invalid Message")
         void invalidMessage() {
+            RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
             assertThrows(ValidationException.class, () -> factory().command()
                                                                    .create(invalidCommand));
         }
@@ -135,6 +136,7 @@ class CommandFactoryTest extends ActorRequestFactoryTest {
         @Test
         @DisplayName("from invalid Message with version")
         void invalidMessageWithVersion() {
+            RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
             assertThrows(ValidationException.class, () -> factory().command()
                                                                    .create(invalidCommand, 42));
         }

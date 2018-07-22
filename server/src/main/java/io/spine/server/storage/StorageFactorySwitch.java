@@ -21,13 +21,14 @@
 package io.spine.server.storage;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.Environment;
 import io.spine.core.BoundedContextName;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -115,7 +116,7 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
      */
     @VisibleForTesting
     Optional<Supplier<StorageFactory>> productionSupplier() {
-        return Optional.fromNullable(productionSupplier);
+        return Optional.ofNullable(productionSupplier);
     }
 
     /**
@@ -123,7 +124,7 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
      */
     @VisibleForTesting
     Optional<Supplier<StorageFactory>> testsSupplier() {
-        return Optional.fromNullable(testsSupplier);
+        return Optional.ofNullable(testsSupplier);
     }
 
     /**

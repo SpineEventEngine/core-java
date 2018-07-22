@@ -18,24 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server;
-
-import io.spine.server.BoundedContext;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 /**
- * @author Vladyslav Lubenskyi
+ * Test environment for the {@link io.spine.testing.server.aggregate} package.
  */
-@DisplayName("TestBoundedContext should")
-class TestBoundedContextShould {
 
-    @Test
-    @DisplayName("create instance")
-    void create() {
-        BoundedContext context = TestBoundedContext.create();
-        assertNotNull(context);
-    }
-}
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testing.server.aggregate.given;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

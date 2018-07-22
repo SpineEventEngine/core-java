@@ -116,10 +116,10 @@ abstract class AbstractCommandBusTestSuite {
     }
 
     static Command newCommandWithoutContext() {
-        final Command cmd = createProject();
-        final Command invalidCmd = cmd.toBuilder()
-                                      .setContext(CommandContext.getDefaultInstance())
-                                      .build();
+        Command cmd = createProject();
+        Command invalidCmd = cmd.toBuilder()
+                                .setContext(CommandContext.getDefaultInstance())
+                                .build();
         return invalidCmd;
     }
 
@@ -156,11 +156,11 @@ abstract class AbstractCommandBusTestSuite {
     }
 
     protected static Command newCommandWithoutTenantId() {
-        final Command cmd = createProject();
-        final ActorContext.Builder withNoTenant =
-                ActorContext.newBuilder()
-                            .setTenantId(TenantId.getDefaultInstance());
-        final Command invalidCmd =
+        Command cmd = createProject();
+        ActorContext.Builder withNoTenant = ActorContext
+                .newBuilder()
+                .setTenantId(TenantId.getDefaultInstance());
+        Command invalidCmd =
                 cmd.toBuilder()
                    .setContext(cmd.getContext()
                                   .toBuilder()
@@ -170,14 +170,14 @@ abstract class AbstractCommandBusTestSuite {
     }
 
     protected static Command clearTenantId(Command cmd) {
-        final ActorContext.Builder withNoTenant =
-                ActorContext.newBuilder()
-                            .setTenantId(TenantId.getDefaultInstance());
-        final Command result = cmd.toBuilder()
-                                  .setContext(cmd.getContext()
-                                                 .toBuilder()
-                                                 .setActorContext(withNoTenant))
-                                  .build();
+        ActorContext.Builder withNoTenant = ActorContext
+                .newBuilder()
+                .setTenantId(TenantId.getDefaultInstance());
+        Command result = cmd.toBuilder()
+                            .setContext(cmd.getContext()
+                                           .toBuilder()
+                                           .setActorContext(withNoTenant))
+                            .build();
         return result;
     }
 
@@ -224,28 +224,27 @@ abstract class AbstractCommandBusTestSuite {
     @Test
     @DisplayName("post commands in bulk")
     void postCommandsInBulk() {
-        final Command first = newCommand();
-        final Command second = newCommand();
-        final List<Command> commands = newArrayList(first, second);
+        Command first = newCommand();
+        Command second = newCommand();
+        List<Command> commands = newArrayList(first, second);
 
         // Some derived test suite classes may register the handler in setUp().
         // This prevents the repeating registration (which is an illegal operation).
         commandBus.unregister(createProjectHandler);
         commandBus.register(createProjectHandler);
 
-        final CommandBus spy = spy(commandBus);
+        CommandBus spy = spy(commandBus);
         spy.post(commands, memoizingObserver());
 
-        @SuppressWarnings("unchecked")
-        final ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);
+        @SuppressWarnings("unchecked") ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);
         verify(spy).store(storingCaptor.capture());
-        final Iterable<Command> storingArgs = storingCaptor.getValue();
+        Iterable<Command> storingArgs = storingCaptor.getValue();
         assertSize(commands.size(), storingArgs);
         assertContainsAll(storingArgs, first, second);
 
-        final ArgumentCaptor<CommandEnvelope> postingCaptor = forClass(CommandEnvelope.class);
+        ArgumentCaptor<CommandEnvelope> postingCaptor = forClass(CommandEnvelope.class);
         verify(spy, times(2)).dispatch(postingCaptor.capture());
-        final List<CommandEnvelope> postingArgs = postingCaptor.getAllValues();
+        List<CommandEnvelope> postingArgs = postingCaptor.getAllValues();
         assertSize(commands.size(), postingArgs);
         assertEquals(commands.get(0), postingArgs.get(0).getCommand());
         assertEquals(commands.get(1), postingArgs.get(1).getCommand());
@@ -260,7 +259,8 @@ abstract class AbstractCommandBusTestSuite {
     protected void checkResult(Command cmd) {
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
-        final CommandId commandId = unpack(observer.firstResponse().getMessageId());
+        CommandId commandId = unpack(observer.firstResponse()
+                                             .getMessageId());
         assertEquals(cmd.getId(), commandId);
     }
 

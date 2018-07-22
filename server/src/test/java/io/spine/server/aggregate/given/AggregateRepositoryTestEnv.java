@@ -21,7 +21,6 @@
 package io.spine.server.aggregate.given;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.BoolValue;
@@ -78,6 +77,7 @@ import io.spine.validate.StringValueVBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static io.spine.core.Events.nothing;
@@ -146,14 +146,14 @@ public class AggregateRepositoryTestEnv {
     }
 
     private static TestActorRequestFactory newRequestFactory() {
-        final TestActorRequestFactory requestFactory =
+        TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(AggregateRepositoryTest.class);
         return requestFactory;
     }
 
     private static BoundedContext newBoundedContext() {
-        final BoundedContext context = BoundedContext.newBuilder()
-                                                     .build();
+        BoundedContext context = BoundedContext.newBuilder()
+                                               .build();
         return context;
     }
 
@@ -179,19 +179,19 @@ public class AggregateRepositoryTestEnv {
         }
 
         public static ProjectAggregate withUncommittedEvents(ProjectId id) {
-            final ProjectAggregate aggregate = Given.aggregateOfClass(ProjectAggregate.class)
-                                                    .withId(id)
-                                                    .build();
+            ProjectAggregate aggregate = Given.aggregateOfClass(ProjectAggregate.class)
+                                              .withId(id)
+                                              .build();
 
-            final AggCreateProject createProject =
+            AggCreateProject createProject =
                     ((AggCreateProject.Builder) Sample.builderForType(AggCreateProject.class))
                             .setProjectId(id)
                             .build();
-            final AggAddTask addTask =
+            AggAddTask addTask =
                     ((AggAddTask.Builder) Sample.builderForType(AggAddTask.class))
                             .setProjectId(id)
                             .build();
-            final AggStartProject startProject =
+            AggStartProject startProject =
                     ((AggStartProject.Builder) Sample.builderForType(AggStartProject.class))
                             .setProjectId(id)
                             .build();
@@ -359,7 +359,7 @@ public class AggregateRepositoryTestEnv {
         @Override
         public Optional<ProjectAggregate> find(ProjectId id) {
             if (id.equals(troublesome)) {
-                return Optional.absent();
+                return Optional.empty();
             }
             return super.find(id);
         }
@@ -393,7 +393,7 @@ public class AggregateRepositoryTestEnv {
 
         @SuppressWarnings("NumericCastThatLosesPrecision") // Int. part as ID.
         static long toId(FloatValue message) {
-            final float floatValue = message.getValue();
+            float floatValue = message.getValue();
             return (long) Math.abs(floatValue);
         }
 
@@ -430,9 +430,9 @@ public class AggregateRepositoryTestEnv {
 
         @React
         Timestamp on(FloatValue value) {
-            final float floatValue = value.getValue();
+            float floatValue = value.getValue();
             if (floatValue < 0) {
-                final long longValue = toId(value);
+                long longValue = toId(value);
                 // Complain only if the passed value represents ID of this aggregate.
                 // This would allow other aggregates react on this message.
                 if (longValue == getId()) {
@@ -483,7 +483,7 @@ public class AggregateRepositoryTestEnv {
                         @Override
                         public Set<Long> apply(Message message, EventContext context) {
                             if (message instanceof FloatValue) {
-                                final long absValue = FailingAggregate.toId((FloatValue) message);
+                                long absValue = FailingAggregate.toId((FloatValue) message);
                                 return ImmutableSet.of(absValue, absValue + 100, absValue + 200);
                             }
                             return ImmutableSet.of(1L, 2L);
@@ -662,7 +662,7 @@ public class AggregateRepositoryTestEnv {
         @React
         private Iterable<AggProjectArchived> on(
                 Rejections.AggCannotStartArchivedProject rejection) {
-            final List<ProjectId> childIdList = rejection.getChildProjectIdList();
+            List<ProjectId> childIdList = rejection.getChildProjectIdList();
             if (childIdList.contains(getId())) {
                 return ImmutableList.of(AggProjectArchived.newBuilder()
                                                           .setProjectId(getId())

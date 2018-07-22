@@ -45,15 +45,12 @@ import static io.spine.core.Commands.generateId;
 class Records {
 
     private static final Function<CommandRecord, Command> TO_COMMAND =
-            new Function<CommandRecord, Command>() {
-                @Override
-                public Command apply(@Nullable CommandRecord record) {
-                    if (record == null) {
-                        return Command.getDefaultInstance();
-                    }
-                    final Command cmd = record.getCommand();
-                    return cmd;
+            record -> {
+                if (record == null) {
+                    return Command.getDefaultInstance();
                 }
+                Command cmd = record.getCommand();
+                return cmd;
             };
 
     private Records() {
@@ -76,22 +73,21 @@ class Records {
     static CommandRecord.Builder newRecordBuilder(Command command,
                                                   CommandStatus status,
                                                   @Nullable CommandId generatedCommandId) {
-        final CommandId commandId = generatedCommandId != null
-                ? generatedCommandId
-                : command.getId();
+        CommandId commandId = generatedCommandId != null
+                              ? generatedCommandId
+                              : command.getId();
 
-        final String commandType = CommandEnvelope.of(command)
-                                                  .getTypeName()
-                                                  .getSimpleName();
+        String commandType = CommandEnvelope.of(command)
+                                            .getTypeName()
+                                            .getSimpleName();
 
-        final CommandRecord.Builder builder =
-                CommandRecord.newBuilder()
-                             .setCommandId(commandId)
-                             .setCommandType(commandType)
-                             .setCommand(command)
-                             .setTimestamp(getCurrentTime())
-                             .setStatus(ProcessingStatus.newBuilder()
-                                                        .setCode(status));
+        CommandRecord.Builder builder = CommandRecord.newBuilder()
+                                                     .setCommandId(commandId)
+                                                     .setCommandType(commandType)
+                                                     .setCommand(command)
+                                                     .setTimestamp(getCurrentTime())
+                                                     .setStatus(ProcessingStatus.newBuilder()
+                                                                                .setCode(status));
         return builder;
     }
 

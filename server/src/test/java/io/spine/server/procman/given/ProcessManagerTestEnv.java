@@ -20,6 +20,7 @@
 
 package io.spine.server.procman.given;
 
+import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -32,7 +33,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
-import io.spine.server.procman.CommandRouted;
+import io.spine.server.procman.CommandTransformed;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmAddTask;
@@ -52,7 +53,6 @@ import io.spine.validate.AnyVBuilder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -124,8 +124,8 @@ public class ProcessManagerTestEnv {
          */
         public void injectCommandBus(CommandBus commandBus) {
             try {
-                final Method method = ProcessManager.class.getDeclaredMethod("setCommandBus",
-                                                                             CommandBus.class);
+                Method method = ProcessManager.class.getDeclaredMethod("setCommandBus",
+                                                                       CommandBus.class);
                 method.setAccessible(true);
                 method.invoke(this, commandBus);
             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
@@ -154,16 +154,17 @@ public class ProcessManagerTestEnv {
         }
 
         @Assign
-        CommandRouted handle(PmStartProject command, CommandContext context) {
+        CommandTransformed handle(PmStartProject command, CommandContext context) {
             getBuilder().mergeFrom(pack(command));
 
-            final Message addTask = ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
+            Message addTask = ((PmAddTask.Builder)
+                    Sample.builderForType(PmAddTask.class))
                     .setProjectId(command.getProjectId())
                     .build();
-            final CommandRouted route = newRouterFor(command, context)
-                    .add(addTask)
-                    .routeAll();
-            return route;
+            CommandTransformed event = transform(command, context)
+                    .to(addTask)
+                    .post();
+            return event;
         }
 
         /*
@@ -212,7 +213,7 @@ public class ProcessManagerTestEnv {
      */
     public static class AddTaskDispatcher implements CommandDispatcher<Message> {
 
-        private final List<CommandEnvelope> commands = new LinkedList<>();
+        private final List<CommandEnvelope> commands = Lists.newLinkedList();
 
         @Override
         public Set<CommandClass> getMessageClasses() {

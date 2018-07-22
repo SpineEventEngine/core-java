@@ -53,7 +53,7 @@ class ProjectionEventDeliveryTest extends AbstractMessageDeliveryTest {
     @Test
     @DisplayName("dispatch events to single shard in multithreaded env")
     void dispatchToSingleShard() throws Exception {
-        final ParallelDispatcher<ProjectId, Event> dispatcher =
+        ParallelDispatcher<ProjectId, Event> dispatcher =
                 new ParallelDispatcher<ProjectId, Event>(
                         180, 819, dispatchWaitTime()) {
                     @Override
@@ -79,7 +79,7 @@ class ProjectionEventDeliveryTest extends AbstractMessageDeliveryTest {
     @Test
     @DisplayName("dispatch events to several shards in multithreaded env")
     void dispatchToSeveralShards() throws Exception {
-        final ParallelDispatcher<ProjectId, Event> dispatcher =
+        ParallelDispatcher<ProjectId, Event> dispatcher =
                 new ParallelDispatcher<ProjectId, Event>(
                         270, 1637, dispatchWaitTime()) {
                     @Override

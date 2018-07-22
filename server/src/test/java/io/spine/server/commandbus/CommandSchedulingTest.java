@@ -72,7 +72,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     @DisplayName("store scheduled command to CommandStore and return `OK`")
     void storeScheduledCommand() {
         commandBus.register(createProjectHandler);
-        final Command cmd = createProject(/*delay=*/minutes(1));
+        Command cmd = createProject(/*delay=*/minutes(1));
 
         commandBus.post(cmd, observer);
 
@@ -83,7 +83,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     @DisplayName("schedule command if delay is set")
     void scheduleIfDelayIsSet() {
         commandBus.register(createProjectHandler);
-        final Command cmd = createProject(/*delay=*/minutes(1));
+        Command cmd = createProject(/*delay=*/minutes(1));
 
         commandBus.post(cmd, observer);
 
@@ -95,7 +95,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     void notScheduleWithoutOptions() {
         commandBus.register(new CreateProjectHandler());
 
-        final Command command = createProject();
+        Command command = createProject();
         commandBus.post(command, observer);
 
         verify(scheduler, never()).schedule(createProject());
@@ -133,22 +133,23 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("in parallel if thread spawning is allowed")
         void inParallel() {
-            final String mainThreadName = Thread.currentThread().getName();
-            final StringBuilder threadNameUponScheduling = new StringBuilder(0);
-            final CountDownLatch latch = new CountDownLatch(1);
-            final CommandScheduler scheduler =
+            String mainThreadName = Thread.currentThread()
+                                          .getName();
+            StringBuilder threadNameUponScheduling = new StringBuilder(0);
+            CountDownLatch latch = new CountDownLatch(1);
+            CommandScheduler scheduler =
                     threadAwareScheduler(threadNameUponScheduling, latch);
             TestSystemGateway gateway = new TestSingleTenantSystemGateway();
             storeSingleCommandForRescheduling(gateway);
 
             // Create CommandBus specific for this test.
-            final CommandBus commandBus = CommandBus.newBuilder()
-                                                    .injectTenantIndex(tenantIndex)
-                                                    .injectSystemGateway(gateway)
-                                                    .setCommandScheduler(scheduler)
-                                                    .setThreadSpawnAllowed(true)
-                                                    .setAutoReschedule(true)
-                                                    .build();
+            CommandBus commandBus = CommandBus.newBuilder()
+                                              .injectTenantIndex(tenantIndex)
+                                              .injectSystemGateway(gateway)
+                                              .setCommandScheduler(scheduler)
+                                              .setThreadSpawnAllowed(true)
+                                              .setAutoReschedule(true)
+                                              .build();
             assertNotNull(commandBus);
 
             // Await to ensure the commands have been rescheduled in parallel.
@@ -159,11 +160,11 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
             }
 
             // Ensure the scheduler has been called for a single command,
-            final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
+            ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
             verify(scheduler, times(1)).schedule(commandCaptor.capture());
 
             // and the call has been made for a thread, different than the main thread.
-            final String actualThreadName = threadNameUponScheduling.toString();
+            String actualThreadName = threadNameUponScheduling.toString();
             assertNotNull(actualThreadName);
             assertNotEquals(mainThreadName, actualThreadName);
         }
@@ -173,29 +174,28 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("synchronously if thread spawning is not allowed")
         void synchronously() {
-            final String mainThreadName = Thread.currentThread().getName();
-            final StringBuilder threadNameUponScheduling = new StringBuilder(0);
-            final CountDownLatch latch = new CountDownLatch(1);
-            final CommandScheduler scheduler =
-                    threadAwareScheduler(threadNameUponScheduling, latch);
+            String mainThreadName = Thread.currentThread()
+                                          .getName();
+            StringBuilder threadNameUponScheduling = new StringBuilder(0);
+            CountDownLatch latch = new CountDownLatch(1);
+            CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling, latch);
             storeSingleCommandForRescheduling();
 
             // Create CommandBus specific for this test.
-            final CommandBus commandBus = CommandBus.newBuilder()
-                                                    .injectTenantIndex(tenantIndex)
-                                                    .injectSystemGateway(NoOpSystemGateway.INSTANCE)
-                                                    .setCommandScheduler(scheduler)
-                                                    .setThreadSpawnAllowed(false)
-                                                    .setAutoReschedule(true)
-                                                    .build();
+            CommandBus commandBus = CommandBus.newBuilder()
+                                              .setCommandStore(commandStore)
+                                              .setCommandScheduler(scheduler)
+                                              .setThreadSpawnAllowed(false)
+                                              .setAutoReschedule(true)
+                                              .build();
             assertNotNull(commandBus);
 
             // Ensure the scheduler has been called for a single command,
-            final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
+            ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
             verify(scheduler, times(1)).schedule(commandCaptor.capture());
 
             // and the call has been made in the main thread (as spawning is not allowed).
-            final String actualThreadName = threadNameUponScheduling.toString();
+            String actualThreadName = threadNameUponScheduling.toString();
             assertNotNull(actualThreadName);
             assertEquals(mainThreadName, actualThreadName);
         }
@@ -228,14 +228,14 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("scheduling options")
         void schedulingOptions() {
-            final Command cmd = requestFactory.command()
-                                              .create(toMessage(newUuid()));
-            final Timestamp schedulingTime = getCurrentTime();
-            final Duration delay = Durations2.minutes(5);
+            Command cmd = requestFactory.command()
+                                        .create(toMessage(newUuid()));
+            Timestamp schedulingTime = getCurrentTime();
+            Duration delay = Durations2.minutes(5);
 
-            final Command cmdUpdated = setSchedule(cmd, delay, schedulingTime);
-            final CommandContext.Schedule schedule = cmdUpdated.getContext()
-                                                               .getSchedule();
+            Command cmdUpdated = setSchedule(cmd, delay, schedulingTime);
+            CommandContext.Schedule schedule = cmdUpdated.getContext()
+                                                         .getSchedule();
 
             assertEquals(delay, schedule.getDelay());
             assertEquals(schedulingTime, cmdUpdated.getSystemProperties()
@@ -245,11 +245,11 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("scheduling time")
         void schedulingTime() {
-            final Command cmd = requestFactory.command()
-                                              .create(toMessage(newUuid()));
-            final Timestamp schedulingTime = getCurrentTime();
+            Command cmd = requestFactory.command()
+                                        .create(toMessage(newUuid()));
+            Timestamp schedulingTime = getCurrentTime();
 
-            final Command cmdUpdated = CommandScheduler.setSchedulingTime(cmd, schedulingTime);
+            Command cmdUpdated = CommandScheduler.setSchedulingTime(cmd, schedulingTime);
 
             assertEquals(schedulingTime, cmdUpdated.getSystemProperties()
                                                    .getSchedulingTime());
@@ -261,8 +261,8 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
      ********************/
 
     private static Command createScheduledCommand() {
-        final Timestamp schedulingTime = minutesAgo(3);
-        final Duration delayPrimary = Durations2.fromMinutes(5);
+        Timestamp schedulingTime = minutesAgo(3);
+        Duration delayPrimary = Durations2.fromMinutes(5);
         return setSchedule(createProject(), delayPrimary, schedulingTime);
     }
 
@@ -270,6 +270,8 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
      * Creates and stores one scheduled command.
      */
     private Command storeSingleCommandForRescheduling() {
+        Command cmdWithSchedule = createScheduledCommand();
+        commandStore.store(cmdWithSchedule, SCHEDULED);
         return storeSingleCommandForRescheduling(systemGateway);
     }
 
@@ -277,7 +279,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
      * Creates and stores one scheduled command.
      */
     private static Command storeSingleCommandForRescheduling(TestSystemGateway gateway) {
-        final Command cmdWithSchedule = createScheduledCommand();
+        Command cmdWithSchedule = createScheduledCommand();
         gateway.schedule(cmdWithSchedule);
         return cmdWithSchedule;
     }
@@ -295,8 +297,8 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
      * @return newly created instance
      */
     @SuppressWarnings("MethodMayBeStatic") // see Javadoc.
-    private CommandScheduler threadAwareScheduler(final StringBuilder targetThreadName,
-                                                  final CountDownLatch latch) {
+    private CommandScheduler threadAwareScheduler(StringBuilder targetThreadName,
+                                                  CountDownLatch latch) {
         return spy(new ExecutorCommandScheduler() {
             @Override
             public void schedule(Command command) {
@@ -309,11 +311,10 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     }
 
     private static long getDelaySeconds(Command cmd) {
-        final long delaySec = cmd
-                .getContext()
-                .getSchedule()
-                .getDelay()
-                .getSeconds();
+        long delaySec = cmd.getContext()
+                           .getSchedule()
+                           .getDelay()
+                           .getSeconds();
         return delaySec;
     }
 }

@@ -20,11 +20,11 @@
 
 package io.spine.server.storage;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 /**
  * The base interface for storages.
@@ -55,7 +55,7 @@ public interface Storage<I, M extends Message, R extends ReadRequest<I>> extends
      *
      * @param request the request to read the record
      * @return a record instance
-     *         or {@code Optional.absent()} if there is no record matching this request
+     *         or {@code Optional.empty()} if there is no record matching this request
      * @throws IllegalStateException if the storage was closed before
      */
     Optional<M> read(R request);

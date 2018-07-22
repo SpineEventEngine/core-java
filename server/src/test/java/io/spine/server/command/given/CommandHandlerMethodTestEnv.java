@@ -61,7 +61,7 @@ public class CommandHandlerMethodTestEnv {
         @Assign
         @VisibleForTesting
         public List<Message> handleTest(RefCreateProject cmd) {
-            final List<Message> result = newLinkedList();
+            List<Message> result = newLinkedList();
             result.add(projectCreated(cmd.getProjectId()));
             return result;
         }
@@ -80,7 +80,7 @@ public class CommandHandlerMethodTestEnv {
         @Assign
         @VisibleForTesting
         public List<Message> handleTest(RefCreateProject cmd, CommandContext context) {
-            final List<Message> result = newLinkedList();
+            List<Message> result = newLinkedList();
             result.add(projectCreated(cmd.getProjectId()));
             return result;
         }
@@ -189,7 +189,7 @@ public class CommandHandlerMethodTestEnv {
         }
 
         public Method getHandler() {
-            final Method[] methods = getClass().getDeclaredMethods();
+            Method[] methods = getClass().getDeclaredMethods();
             for (Method method : methods) {
                 if (method.getName()
                           .equals(HANDLER_METHOD_NAME)) {

@@ -21,13 +21,14 @@
 package io.spine.grpc;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Metadata;
 import io.grpc.Metadata.Key;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.util.Exceptions;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.grpc.Metadata.BINARY_BYTE_MARSHALLER;
@@ -60,7 +61,7 @@ public class MetadataConverter {
      */
     public static Metadata toMetadata(Error error) {
         checkNotNull(error);
-        final Metadata metadata = new Metadata();
+        Metadata metadata = new Metadata();
         metadata.put(KEY, error.toByteArray());
         return metadata;
     }
@@ -69,19 +70,19 @@ public class MetadataConverter {
      * Returns the {@link Error} extracted from the {@link Metadata}.
      *
      * @param metadata the metadata to convert
-     * @return the error extracted from the metadata or {@code Optional.absent()}
+     * @return the error extracted from the metadata or {@code Optional.empty()}
      *         if there is no error.
      */
     public static Optional<Error> toError(Metadata metadata) {
         checkNotNull(metadata);
-        final byte[] bytes = metadata.get(KEY);
+        byte[] bytes = metadata.get(KEY);
 
         if (bytes == null) {
-            return Optional.absent();
+            return Optional.empty();
         }
 
         try {
-            final Error error = Error.parseFrom(bytes);
+            Error error = Error.parseFrom(bytes);
             return Optional.of(error);
         } catch (InvalidProtocolBufferException e) {
             throw Exceptions.illegalStateWithCauseOf(e);

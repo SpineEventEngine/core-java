@@ -43,10 +43,10 @@ public class UnsupportedEventException extends EventException implements Message
     }
 
     private static String messageFormat(Message eventMsg) {
-        final EventClass eventClass = EventClass.of(eventMsg);
-        final String typeName = TypeName.of(eventMsg)
-                                        .value();
-        final String result = format(
+        EventClass eventClass = EventClass.of(eventMsg);
+        String typeName = TypeName.of(eventMsg)
+                                  .value();
+        String result = format(
                 "There is no registered handler or dispatcher for the event of class: `%s`." +
                 " Protobuf type: `%s`",
                 eventClass,
@@ -56,13 +56,15 @@ public class UnsupportedEventException extends EventException implements Message
 
     /** Creates an instance of unsupported event error. */
     private static Error unsupportedEventError(Message eventMessage) {
-        final String type = eventMessage.getDescriptorForType().getFullName();
-        final String errMsg = format("Events of the type `%s` are not supported.", type);
-        final Error.Builder error = Error.newBuilder()
-                .setType(EventValidationError.getDescriptor().getFullName())
-                .setCode(EventValidationError.UNSUPPORTED_EVENT.getNumber())
-                .putAllAttributes(eventTypeAttribute(eventMessage))
-                .setMessage(errMsg);
+        String type = eventMessage.getDescriptorForType()
+                                  .getFullName();
+        String errMsg = format("Events of the type `%s` are not supported.", type);
+        Error.Builder error = Error.newBuilder()
+                                   .setType(EventValidationError.getDescriptor()
+                                                                .getFullName())
+                                   .setCode(EventValidationError.UNSUPPORTED_EVENT.getNumber())
+                                   .putAllAttributes(eventTypeAttribute(eventMessage))
+                                   .setMessage(errMsg);
         return error.build();
     }
 }

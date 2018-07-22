@@ -20,7 +20,6 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Descriptors.Descriptor;
@@ -47,6 +46,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.client.ColumnFilters.all;
@@ -171,7 +171,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
 
             storeEntity(entity);
 
-            final Optional<E> optional = find(entity.getId());
+            Optional<E> optional = find(entity.getId());
             assertTrue(optional.isPresent());
 
             Entity<?, ?> found = optional.get();

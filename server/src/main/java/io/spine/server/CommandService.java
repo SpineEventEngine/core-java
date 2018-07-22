@@ -68,22 +68,22 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
     // as we override default implementation with `unimplemented` status.
     @Override
     public void post(Command request, StreamObserver<Ack> responseObserver) {
-        final CommandClass commandClass = CommandClass.of(request);
-        final BoundedContext boundedContext = boundedContextMap.get(commandClass);
+        CommandClass commandClass = CommandClass.of(request);
+        BoundedContext boundedContext = boundedContextMap.get(commandClass);
         if (boundedContext == null) {
             handleUnsupported(request, responseObserver);
         } else {
-            final CommandBus commandBus = boundedContext.getCommandBus();
+            CommandBus commandBus = boundedContext.getCommandBus();
             commandBus.post(request, responseObserver);
         }
     }
 
     private static void handleUnsupported(Command request,
                                           StreamObserver<Ack> responseObserver) {
-        final UnsupportedCommandException unsupported = new UnsupportedCommandException(request);
+        UnsupportedCommandException unsupported = new UnsupportedCommandException(request);
         log().error("Unsupported command posted to CommandService", unsupported);
-        final Error error = unsupported.asError();
-        final Ack response = reject(request.getId(), error);
+        Error error = unsupported.asError();
+        Ack response = reject(request.getId(), error);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
@@ -116,7 +116,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
          * @return {@code true} if the instance was added to the builder, {@code false} otherwise
          */
         public boolean contains(BoundedContext boundedContext) {
-            final boolean contains = boundedContexts.contains(boundedContext);
+            boolean contains = boundedContexts.contains(boundedContext);
             return contains;
         }
 
@@ -124,8 +124,8 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
          * Builds a new {@link CommandService}.
          */
         public CommandService build() {
-            final ImmutableMap<CommandClass, BoundedContext> map = createMap();
-            final CommandService result = new CommandService(map);
+            ImmutableMap<CommandClass, BoundedContext> map = createMap();
+            CommandService result = new CommandService(map);
             return result;
         }
 
@@ -134,8 +134,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
          * handle such commands.
          */
         private ImmutableMap<CommandClass, BoundedContext> createMap() {
-            final ImmutableMap.Builder<CommandClass, BoundedContext> builder =
-                    ImmutableMap.builder();
+            ImmutableMap.Builder<CommandClass, BoundedContext> builder = ImmutableMap.builder();
             for (BoundedContext boundedContext : boundedContexts) {
                 putIntoMap(boundedContext, builder);
             }
@@ -148,8 +147,8 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
          */
         private static void putIntoMap(BoundedContext boundedContext,
                                        ImmutableMap.Builder<CommandClass, BoundedContext> builder) {
-            final CommandBus commandBus = boundedContext.getCommandBus();
-            final Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
+            CommandBus commandBus = boundedContext.getCommandBus();
+            Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
             for (CommandClass commandClass : cmdClasses) {
                 builder.put(commandClass, boundedContext);
             }

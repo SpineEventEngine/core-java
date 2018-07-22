@@ -227,7 +227,7 @@ public class EntityColumn implements Serializable {
         checkGetter(getter);
         Method annotatedVersion = retrieveAnnotatedVersion(getter);
         String nameForQuery = nameFromGetter(getter);
-        String nameForStore = nameFromAnnotation(annotatedVersion).or(nameForQuery);
+        String nameForStore = nameFromAnnotation(annotatedVersion).orElse(nameForQuery);
         boolean nullable = mayReturnNull(getter);
         return new EntityColumn(getter, nameForQuery, nameForStore, nullable);
     }
@@ -301,8 +301,8 @@ public class EntityColumn implements Serializable {
      *         into {@link MemoizedValue}
      */
     MemoizedValue memoizeFor(Entity<?, ?> source) {
-        final Serializable value = getFor(source);
-        final MemoizedValue result = new MemoizedValue(this, value);
+        Serializable value = getFor(source);
+        MemoizedValue result = new MemoizedValue(this, value);
         return result;
     }
 
@@ -377,7 +377,7 @@ public class EntityColumn implements Serializable {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append(entityType.getSimpleName())
           .append('.')
           .append(getName());
@@ -392,8 +392,8 @@ public class EntityColumn implements Serializable {
      * @throws IllegalArgumentException in case the check fails
      */
     private void checkTypeMatches(Object value) {
-        final Class<?> columnType = wrap(getType());
-        final Class<?> valueType = wrap(value.getClass());
+        Class<?> columnType = wrap(getType());
+        Class<?> valueType = wrap(value.getClass());
         if (!columnType.isAssignableFrom(valueType)) {
             throw newIllegalArgumentException(
                     "Passed value type %s doesn't match column type %s.",
@@ -416,12 +416,12 @@ public class EntityColumn implements Serializable {
             return getter;
         }
         try {
-            final Method method = entityType.getMethod(getterMethodName);
+            Method method = entityType.getMethod(getterMethodName);
             return method;
         } catch (NoSuchMethodException e) {
-            final String errorMsg = format("Cannot find method %s.%s().",
-                                           entityType.getCanonicalName(),
-                                           getterMethodName);
+            String errorMsg = format("Cannot find method %s.%s().",
+                                     entityType.getCanonicalName(),
+                                     getterMethodName);
             throw new IllegalStateException(errorMsg, e);
         }
     }
@@ -431,7 +431,7 @@ public class EntityColumn implements Serializable {
         if (valueConverter != null) {
             return valueConverter;
         }
-        final ColumnValueConverter converter = of(getter);
+        ColumnValueConverter converter = of(getter);
         return converter;
     }
 

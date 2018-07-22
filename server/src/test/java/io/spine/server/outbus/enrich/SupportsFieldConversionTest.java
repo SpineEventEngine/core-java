@@ -36,7 +36,7 @@ class SupportsFieldConversionTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        final SupportsFieldConversion predicate =
+        SupportsFieldConversion predicate =
                 SupportsFieldConversion.of(StringValue.class, String.class);
         new NullPointerTester().testAllPublicInstanceMethods(predicate);
     }

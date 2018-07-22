@@ -42,15 +42,15 @@ final class ShardingRegistry {
 
     void register(ShardingStrategy strategy, Set<ShardedStream<?, ?, ?>> streams) {
         for (ShardedStream<?, ?, ?> stream : streams) {
-            final Entry entry = new Entry(strategy, stream);
-            final DeliveryTag<?> tag = stream.getTag();
+            Entry entry = new Entry(strategy, stream);
+            DeliveryTag<?> tag = stream.getTag();
             entries.put(tag, entry);
         }
     }
 
     void unregister(ShardedStreamConsumer streamConsumer) {
-        final DeliveryTag tag = streamConsumer.getTag();
-        final Collection<Entry> entriesForTag = entries.get(tag);
+        DeliveryTag tag = streamConsumer.getTag();
+        Collection<Entry> entriesForTag = entries.get(tag);
         for (Entry entry : entriesForTag) {
             entry.stream.close();
         }
@@ -58,14 +58,14 @@ final class ShardingRegistry {
     }
 
     <I, E extends MessageEnvelope<?, ?, ?>> Set<ShardedStream<I, ?, E>>
-    find(final DeliveryTag<E> tag, final I targetId) {
+    find(DeliveryTag<E> tag, I targetId) {
 
-        final Collection<Entry> entriesForTag = entries.get(tag);
+        Collection<Entry> entriesForTag = entries.get(tag);
 
-        final ImmutableSet.Builder<ShardedStream<I, ?, E>> builder = ImmutableSet.builder();
+        ImmutableSet.Builder<ShardedStream<I, ?, E>> builder = ImmutableSet.builder();
         for (Entry entry : entriesForTag) {
 
-            final ShardIndex shardIndex = entry.strategy.indexForTarget(targetId);
+            ShardIndex shardIndex = entry.strategy.indexForTarget(targetId);
             if(shardIndex.equals(entry.stream.getKey().getIndex())) {
                 builder.add(((ShardedStream<I, ?, E>)entry.stream));
             }

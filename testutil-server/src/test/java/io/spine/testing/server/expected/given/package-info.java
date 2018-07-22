@@ -18,19 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given.aggregate;
-
-import io.spine.server.aggregate.Aggregate;
-import io.spine.test.aggregate.user.User;
-import io.spine.test.aggregate.user.UserVBuilder;
-
 /**
- * The test environment aggregate for testing validation during aggregate state transition.
- *
- * @author Alexander Yevsyukov
+ * Test environment for the {@link io.spine.testing.server.expected} package.
  */
-public class UserAggregate extends Aggregate<String, User, UserVBuilder> {
-    private UserAggregate(String id) {
-        super(id);
-    }
-}
+
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testing.server.expected.given;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

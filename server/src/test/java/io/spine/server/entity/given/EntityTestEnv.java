@@ -43,12 +43,12 @@ public class EntityTestEnv {
     private EntityTestEnv() {
     }
 
-    public static Matcher<Long> isBetween(final Long lower, final Long higher) {
+    public static Matcher<Long> isBetween(Long lower, Long higher) {
         return new BaseMatcher<Long>() {
             @Override
             public boolean matches(Object o) {
                 assertThat(o, instanceOf(Long.class));
-                final Long number = (Long) o;
+                Long number = (Long) o;
                 return number >= lower && number <= higher;
             }
 

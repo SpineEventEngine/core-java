@@ -22,7 +22,6 @@ package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
@@ -46,6 +45,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.filter;
@@ -156,19 +156,19 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * {@linkplain EntityWithLifecycle.Predicates#isEntityVisible() visible}.
      *
      * @param id the ID of the entity to find
-     * @return the entity or {@link Optional#absent()} if there is no entity with such ID
+     * @return the entity or {@link Optional#empty()} if there is no entity with such ID
      * or this entity is not visible
      */
     @Override
     public Optional<E> find(I id) {
         Optional<EntityRecord> optional = findRecord(id);
         if (!optional.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         EntityRecord record = optional.get();
         boolean recordVisible = isEntityVisible().apply(record.getLifecycleFlags());
         if (!recordVisible) {
-            return Optional.absent();
+            return Optional.empty();
         }
         E entity = toEntity(record);
         return Optional.of(entity);
@@ -183,7 +183,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         RecordReadRequest<I> request = new RecordReadRequest<>(id);
         Optional<EntityRecord> found = storage.read(request);
         if (!found.isPresent()) {
-            return Optional.absent();
+            return Optional.empty();
         }
         EntityRecord record = found.get();
         return Optional.of(record);

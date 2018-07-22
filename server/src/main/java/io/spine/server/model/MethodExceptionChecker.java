@@ -85,9 +85,8 @@ public class MethodExceptionChecker {
     public void checkThrowsNoExceptionsBut(Class<?>... whiteList) {
         checkNotNull(whiteList);
 
-        final Collection<Class<?>> allowedExceptions = Arrays.asList(whiteList);
-        final Collection<Class<?>> exceptions =
-                obtainProhibitedExceptionsThrown(allowedExceptions);
+        Collection<Class<?>> allowedExceptions = Arrays.asList(whiteList);
+        Collection<Class<?>> exceptions = obtainProhibitedExceptionsThrown(allowedExceptions);
         if (!exceptions.isEmpty()) {
             throwCheckFailedException(exceptions, allowedExceptions);
         }
@@ -106,8 +105,8 @@ public class MethodExceptionChecker {
      */
     private Collection<Class<?>>
     obtainProhibitedExceptionsThrown(Iterable<Class<?>> allowedExceptions) {
-        final Class<?>[] thrownExceptions = method.getExceptionTypes();
-        final Collection<Class<?>> result = newLinkedList();
+        Class<?>[] thrownExceptions = method.getExceptionTypes();
+        Collection<Class<?>> result = newLinkedList();
         for (Class<?> exceptionType : thrownExceptions) {
             if (!isMemberOrDescendant(exceptionType, allowedExceptions)) {
                 result.add(exceptionType);

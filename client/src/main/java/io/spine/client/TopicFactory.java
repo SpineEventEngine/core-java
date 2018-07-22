@@ -57,8 +57,8 @@ public final class TopicFactory {
         checkNotNull(entityClass);
         checkNotNull(ids);
 
-        final Target target = composeTarget(entityClass, ids, null);
-        final Topic result = forTarget(target);
+        Target target = composeTarget(entityClass, ids, null);
+        Topic result = forTarget(target);
         return result;
     }
 
@@ -71,8 +71,8 @@ public final class TopicFactory {
     public Topic allOf(Class<? extends Message> entityClass) {
         checkNotNull(entityClass);
 
-        final Target target = composeTarget(entityClass, null, null);
-        final Topic result = forTarget(target);
+        Target target = composeTarget(entityClass, null, null);
+        Topic result = forTarget(target);
         return result;
     }
 
@@ -88,7 +88,7 @@ public final class TopicFactory {
     @Internal
     public Topic forTarget(Target target) {
         checkNotNull(target);
-        final TopicId id = Topics.generateId();
+        TopicId id = Topics.generateId();
         return Topic.newBuilder()
                     .setId(id)
                     .setContext(actorContext)

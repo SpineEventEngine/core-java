@@ -24,15 +24,24 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
-import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.InvalidEntityStateException;
 import io.spine.server.entity.VersionableEntity;
+import io.spine.testing.server.User;
+import io.spine.testing.server.entity.EntityBuilderTestEnv.TestEntity;
+import io.spine.testing.server.entity.EntityBuilderTestEnv.UserAggregate;
+import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static io.spine.testing.Verify.assertSize;
+import static io.spine.testing.server.entity.given.Given.aggregateOfClass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Alexander Yevsyukov
@@ -116,9 +125,42 @@ class EntityBuilderTest {
         assertEquals(0, entity.getVersion().getNumber());
     }
 
-    private static class TestEntity extends AbstractVersionableEntity<Long, StringValue> {
-        protected TestEntity(Long id) {
-            super(id);
+    @SuppressWarnings("CheckReturnValue") // Method called to throw exception.
+    @Test
+    @DisplayName("throw InvalidEntityStateException if entity state is invalid")
+    void throwOnInvalidState() {
+        User user = User.newBuilder()
+                        .setFirstName("|")
+                        .setLastName("|")
+                        .build();
+        try {
+            aggregateOfClass(UserAggregate.class).withId(getClass().getName())
+                                                 .withVersion(1)
+                                                 .withState(user)
+                                                 .build();
+            fail("Should have thrown InvalidEntityStateException.");
+        } catch (InvalidEntityStateException e) {
+            List<ConstraintViolation> violations = e.getError()
+                                                    .getValidationError()
+                                                    .getConstraintViolationList();
+            assertSize(user.getAllFields()
+                           .size(), violations);
         }
+    }
+
+    @Test
+    @DisplayName("update valid entity state")
+    void updateEntityState() {
+        User user = User.newBuilder()
+                        .setFirstName("Fname")
+                        .setLastName("Lname")
+                        .build();
+        UserAggregate aggregate = aggregateOfClass(UserAggregate.class)
+                .withId(getClass().getName())
+                .withVersion(1)
+                .withState(user)
+                .build();
+
+        assertEquals(user, aggregate.getState());
     }
 }

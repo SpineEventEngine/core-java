@@ -64,7 +64,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
         @Test
         @DisplayName("to single shard")
         void toSingleShard() throws Exception {
-            final ParallelDispatcher<ProjectId, Command> dispatcher =
+            ParallelDispatcher<ProjectId, Command> dispatcher =
                     new ParallelDispatcher<ProjectId, Command>(
                             42, 400, dispatchWaitTime()) {
                         @Override
@@ -90,7 +90,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
         @Test
         @DisplayName("to several shards")
         void toSeveralShards() throws Exception {
-            final ParallelDispatcher<ProjectId, Command> dispatcher =
+            ParallelDispatcher<ProjectId, Command> dispatcher =
                     new ParallelDispatcher<ProjectId, Command>(
                             59, 473, dispatchWaitTime()) {
                         @Override
@@ -121,7 +121,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
         @Test
         @DisplayName("to single shard")
         void toSingleShard() throws Exception {
-            final ParallelDispatcher<ProjectId, Event> dispatcher =
+            ParallelDispatcher<ProjectId, Event> dispatcher =
                     new ParallelDispatcher<ProjectId, Event>(
                             180, 819, dispatchWaitTime()) {
                         @Override
@@ -147,7 +147,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
         @Test
         @DisplayName("to several shards")
         void toSeveralShards() throws Exception {
-            final ParallelDispatcher<ProjectId, Event> dispatcher =
+            ParallelDispatcher<ProjectId, Event> dispatcher =
                     new ParallelDispatcher<ProjectId, Event>(
                             179, 918, dispatchWaitTime()) {
                         @Override
@@ -178,7 +178,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
         @Test
         @DisplayName("to single shard")
         void toSingleShard() throws Exception {
-            final ParallelDispatcher<ProjectId, Rejection> dispatcher =
+            ParallelDispatcher<ProjectId, Rejection> dispatcher =
                     new ParallelDispatcher<ProjectId, Rejection>(
                             30, 619, dispatchWaitTime()) {
                         @Override
@@ -204,7 +204,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
         @Test
         @DisplayName("to several shards")
         void toSeveralShards() throws Exception {
-            final ParallelDispatcher<ProjectId, Rejection> dispatcher =
+            ParallelDispatcher<ProjectId, Rejection> dispatcher =
                     new ParallelDispatcher<ProjectId, Rejection>(
                             43, 719, dispatchWaitTime()) {
                         @Override

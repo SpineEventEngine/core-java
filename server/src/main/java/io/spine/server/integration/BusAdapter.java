@@ -104,12 +104,12 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
     abstract D createDispatcher(Class<? extends Message> messageCls);
 
     void register(Class<? extends Message> messageClass) {
-        final D dispatcher = createDispatcher(messageClass);
+        D dispatcher = createDispatcher(messageClass);
         targetBus.register(dispatcher);
     }
 
     void unregister(Class<? extends Message> messageClass) {
-        final D dispatcher = createDispatcher(messageClass);
+        D dispatcher = createDispatcher(messageClass);
         targetBus.unregister(dispatcher);
     }
 
@@ -154,7 +154,7 @@ abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
         public BusAdapter<E, D> build() {
             checkNotNull(publisherHub, "PublisherHub must be set");
 
-            final BusAdapter<E, D> result = doBuild();
+            BusAdapter<E, D> result = doBuild();
             return result;
         }
     }

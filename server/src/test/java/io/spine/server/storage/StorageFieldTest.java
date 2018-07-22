@@ -42,8 +42,8 @@ class StorageFieldTest {
     @Test
     @DisplayName("declare no methods")
     void declareNoMethods() {
-        final Class<?> clazz = StorageField.class;
-        final Method[] methods = clazz.getDeclaredMethods();
+        Class<?> clazz = StorageField.class;
+        Method[] methods = clazz.getDeclaredMethods();
 
         assertEquals(0, methods.length);
     }

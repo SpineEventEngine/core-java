@@ -43,9 +43,9 @@ class DefaultCommandRouteTest {
     @Test
     @DisplayName("get ID from command message")
     void getIdFromCommand() {
-        final EntCreateProject msg = Sample.messageOfType(EntCreateProject.class);
+        EntCreateProject msg = Sample.messageOfType(EntCreateProject.class);
 
-        final Optional<?> id = DefaultCommandRoute.asOptional(msg);
+        Optional<?> id = DefaultCommandRoute.asOptional(msg);
 
         assertTrue(id.isPresent());
         assertEquals(msg.getProjectId(), id.get());
@@ -54,7 +54,7 @@ class DefaultCommandRouteTest {
     @Test
     @DisplayName("return empty Optional for command message without ID field")
     void returnEmptyForNoId() {
-        final Optional<?> id = DefaultCommandRoute.asOptional(Empty.getDefaultInstance());
+        Optional<?> id = DefaultCommandRoute.asOptional(Empty.getDefaultInstance());
 
         assertFalse(id.isPresent());
     }

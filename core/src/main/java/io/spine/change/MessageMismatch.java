@@ -51,7 +51,7 @@ public final class MessageMismatch {
     public static ValueMismatch expectedDefault(Message actual, Message newValue, int version) {
         checkNotNull(actual);
         checkNotNull(newValue);
-        final Message expectedDefault = actual.getDefaultInstanceForType();
+        Message expectedDefault = actual.getDefaultInstanceForType();
         return of(expectedDefault, actual, newValue, version);
     }
 
@@ -65,7 +65,7 @@ public final class MessageMismatch {
      */
     public static ValueMismatch expectedNotDefault(Message expected, int version) {
         checkNotNull(expected);
-        final Message defaultValue = expected.getDefaultInstanceForType();
+        Message defaultValue = expected.getDefaultInstanceForType();
         return of(expected, defaultValue, defaultValue, version);
     }
 
@@ -83,7 +83,7 @@ public final class MessageMismatch {
                                                    int version) {
         checkNotNull(expected);
         checkNotNull(newValue);
-        final Message defaultValue = expected.getDefaultInstanceForType();
+        Message defaultValue = expected.getDefaultInstanceForType();
         return of(expected, defaultValue, newValue, version);
     }
 
@@ -112,11 +112,11 @@ public final class MessageMismatch {
      */
     private static ValueMismatch of(Message expected, Message actual,
                                     Message newValue, int version) {
-        final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(pack(expected))
-                                                           .setActual(pack(actual))
-                                                           .setNewValue(pack(newValue))
-                                                           .setVersion(version);
+        ValueMismatch.Builder builder = ValueMismatch.newBuilder()
+                                                     .setExpected(pack(expected))
+                                                     .setActual(pack(actual))
+                                                     .setNewValue(pack(newValue))
+                                                     .setVersion(version);
         return builder.build();
     }
 
@@ -128,8 +128,8 @@ public final class MessageMismatch {
      */
     public static Message unpackExpected(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any any = mismatch.getExpected();
-        final Message result = unpack(any);
+        Any any = mismatch.getExpected();
+        Message result = unpack(any);
         return result;
     }
 
@@ -141,8 +141,8 @@ public final class MessageMismatch {
      */
     public static Message unpackActual(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any any = mismatch.getActual();
-        final Message result = unpack(any);
+        Any any = mismatch.getActual();
+        Message result = unpack(any);
         return result;
     }
 
@@ -154,8 +154,8 @@ public final class MessageMismatch {
      */
     public static Message unpackNewValue(ValueMismatch mismatch) {
         checkNotNull(mismatch);
-        final Any any = mismatch.getNewValue();
-        final Message result = unpack(any);
+        Any any = mismatch.getNewValue();
+        Message result = unpack(any);
         return result;
     }
 }

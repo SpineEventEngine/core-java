@@ -57,7 +57,7 @@ public abstract class HandlerMethodPredicate<C extends Message> extends MethodPr
 
     @Override
     protected boolean verifyAnnotation(Method method) {
-        final boolean isAnnotated = method.isAnnotationPresent(getAnnotationClass());
+        boolean isAnnotated = method.isAnnotationPresent(getAnnotationClass());
         return isAnnotated;
     }
 
@@ -66,18 +66,18 @@ public abstract class HandlerMethodPredicate<C extends Message> extends MethodPr
      */
     @Override
     protected boolean verifyParams(Method method) {
-        final Class<?>[] paramTypes = method.getParameterTypes();
-        final int paramCount = paramTypes.length;
-        final boolean isParamCountCorrect = (paramCount == 1) || (paramCount == 2);
+        Class<?>[] paramTypes = method.getParameterTypes();
+        int paramCount = paramTypes.length;
+        boolean isParamCountCorrect = (paramCount == 1) || (paramCount == 2);
         if (!isParamCountCorrect) {
             return false;
         }
-        final boolean isFirstParamMsg = Message.class.isAssignableFrom(paramTypes[0]);
+        boolean isFirstParamMsg = Message.class.isAssignableFrom(paramTypes[0]);
         if (paramCount == 1) {
             return isFirstParamMsg;
         } else {
-            final Class<? extends Message> contextClass = getContextClass();
-            final boolean paramsCorrect = isFirstParamMsg && contextClass.equals(paramTypes[1]);
+            Class<? extends Message> contextClass = getContextClass();
+            boolean paramsCorrect = isFirstParamMsg && contextClass.equals(paramTypes[1]);
             return paramsCorrect;
         }
     }
@@ -87,12 +87,12 @@ public abstract class HandlerMethodPredicate<C extends Message> extends MethodPr
      * {@link Message}, or {@link Iterable}.
      */
     protected static boolean returnsMessageOrIterable(Method method) {
-        final Class<?> returnType = method.getReturnType();
-        final boolean isMessage = Message.class.isAssignableFrom(returnType);
+        Class<?> returnType = method.getReturnType();
+        boolean isMessage = Message.class.isAssignableFrom(returnType);
         if (isMessage) {
             return true;
         }
-        final boolean isList = Iterable.class.isAssignableFrom(returnType);
+        boolean isList = Iterable.class.isAssignableFrom(returnType);
         return isList;
     }
 }

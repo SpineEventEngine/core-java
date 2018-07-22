@@ -55,17 +55,17 @@ class EventValidatorTest {
     @Test
     @DisplayName("validate event messages")
     void validateEventMessages() {
-        final MessageValidator messageValidator = mock(MessageValidator.class);
+        MessageValidator messageValidator = mock(MessageValidator.class);
         when(messageValidator.validate(any(Message.class)))
                 .thenReturn(newArrayList(ConstraintViolation.getDefaultInstance(),
                                          ConstraintViolation.getDefaultInstance()));
-        final Event event = eventFactory.createEvent(Sample.messageOfType(ProjectCreated.class));
+        Event event = eventFactory.createEvent(Sample.messageOfType(ProjectCreated.class));
 
-        final EventValidator eventValidator = new EventValidator(messageValidator);
+        EventValidator eventValidator = new EventValidator(messageValidator);
 
-        final Optional<MessageInvalid> error = eventValidator.validate(EventEnvelope.of(event));
+        Optional<MessageInvalid> error = eventValidator.validate(EventEnvelope.of(event));
         assertTrue(error.isPresent());
-        final Error actualError = error.get().asError();
+        Error actualError = error.get().asError();
         assertEquals(EventValidationError.getDescriptor().getFullName(), actualError.getType());
     }
 }

@@ -61,7 +61,8 @@ class ExecutorCommandSchedulerTest {
     private static final int WAIT_FOR_PROPAGATION_MS = 300;
 
     private final CommandFactory commandFactory =
-            TestActorRequestFactory.newInstance(ExecutorCommandSchedulerTest.class).command();
+            TestActorRequestFactory.newInstance(ExecutorCommandSchedulerTest.class)
+                                   .command();
 
     private CommandScheduler scheduler;
     private CommandContext context;
@@ -82,17 +83,17 @@ class ExecutorCommandSchedulerTest {
     @Test
     @DisplayName("schedule command if delay is set")
     void scheduleCmdIfDelaySet() {
-        final Command cmdPrimary =
+        Command cmdPrimary =
                 commandFactory.createBasedOnContext(createProjectMessage(), context);
-        final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
+        ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
 
         scheduler.schedule(cmdPrimary);
 
         verify(scheduler, never()).post(any(Command.class));
         verify(scheduler,
                timeout(DELAY_MS + WAIT_FOR_PROPAGATION_MS)).post(commandCaptor.capture());
-        final Command actualCmd = commandCaptor.getValue();
-        final Command expectedCmd =
+        Command actualCmd = commandCaptor.getValue();
+        Command expectedCmd =
                 CommandScheduler.setSchedulingTime(cmdPrimary, getSchedulingTime(actualCmd));
         assertEquals(expectedCmd, actualCmd);
     }
@@ -100,15 +101,15 @@ class ExecutorCommandSchedulerTest {
     @Test
     @DisplayName("not schedule command with same ID twice")
     void notScheduleCmdWithSameId() {
-        final String id = newUuid();
+        String id = newUuid();
 
-        final Command expectedCmd = commandFactory.createBasedOnContext(createProjectMessage(id),
-                                                                        context);
+        Command expectedCmd = commandFactory.createBasedOnContext(createProjectMessage(id),
+                                                                  context);
 
-        final Command extraCmd = commandFactory.createBasedOnContext(addTask(id), context)
-                                               .toBuilder()
-                                               .setId(expectedCmd.getId())
-                                               .build();
+        Command extraCmd = commandFactory.createBasedOnContext(addTask(id), context)
+                                         .toBuilder()
+                                         .setId(expectedCmd.getId())
+                                         .build();
 
         scheduler.schedule(expectedCmd);
         scheduler.schedule(extraCmd);
@@ -131,8 +132,8 @@ class ExecutorCommandSchedulerTest {
     }
 
     private static Timestamp getSchedulingTime(Command cmd) {
-        final Timestamp time = cmd.getSystemProperties()
-                                  .getSchedulingTime();
+        Timestamp time = cmd.getSystemProperties()
+                            .getSchedulingTime();
         return time;
     }
 }

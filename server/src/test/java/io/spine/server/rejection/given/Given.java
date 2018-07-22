@@ -51,54 +51,54 @@ public class Given {
     }
 
     public static Rejection invalidProjectNameRejection() {
-        final ProjectId projectId = newProjectId();
-        final ProjectRejections.InvalidProjectName invalidProjectName =
+        ProjectId projectId = newProjectId();
+        ProjectRejections.InvalidProjectName invalidProjectName =
                 ProjectRejections.InvalidProjectName.newBuilder()
                                                     .setProjectId(projectId)
                                                     .build();
-        final StringChange nameChange = StringChange.newBuilder()
-                                                    .setNewValue("Too short")
-                                                    .build();
-        final RjUpdateProjectName updateProjectName =
+        StringChange nameChange = StringChange.newBuilder()
+                                              .setNewValue("Too short")
+                                              .build();
+        RjUpdateProjectName updateProjectName =
                 RjUpdateProjectNameVBuilder.newBuilder()
                                            .setId(projectId)
                                            .setNameUpdate(nameChange)
                                            .build();
-        final TenantId generatedTenantId = TenantId.newBuilder()
-                                                   .setValue(newUuid())
-                                                   .build();
-        final TestActorRequestFactory factory =
+        TenantId generatedTenantId = TenantId.newBuilder()
+                                             .setValue(newUuid())
+                                             .build();
+        TestActorRequestFactory factory =
                 TestActorRequestFactory.newInstance(RejectionBusTest.class, generatedTenantId);
-        final Command command = factory.createCommand(updateProjectName);
+        Command command = factory.createCommand(updateProjectName);
         return Rejections.createRejection(invalidProjectName, command);
     }
 
     public static Rejection missingOwnerRejection() {
-        final ProjectId projectId = newProjectId();
-        final ProjectRejections.MissingOwner msg =
+        ProjectId projectId = newProjectId();
+        ProjectRejections.MissingOwner msg =
                 ProjectRejections.MissingOwner.newBuilder()
                                               .setProjectId(projectId)
                                               .build();
-        final Command command = io.spine.server.commandbus.Given.ACommand.withMessage(
+        Command command = io.spine.server.commandbus.Given.ACommand.withMessage(
                 Sample.messageOfType(RjRemoveOwner.class));
         return Rejections.createRejection(msg, command);
     }
 
     public static Rejection cannotModifyDeletedEntity(Class<? extends Message> commandMessage) {
-        final ProjectId projectId = newProjectId();
-        final Any idAny = AnyPacker.pack(projectId);
-        final CannotModifyDeletedEntity rejectionMsg = CannotModifyDeletedEntity.newBuilder()
-                                                                                .setEntityId(idAny)
-                                                                                .build();
-        final Command command = io.spine.server.commandbus.Given.ACommand.withMessage(
+        ProjectId projectId = newProjectId();
+        Any idAny = AnyPacker.pack(projectId);
+        CannotModifyDeletedEntity rejectionMsg = CannotModifyDeletedEntity.newBuilder()
+                                                                          .setEntityId(idAny)
+                                                                          .build();
+        Command command = io.spine.server.commandbus.Given.ACommand.withMessage(
                 Sample.messageOfType(commandMessage));
         return Rejections.createRejection(rejectionMsg, command);
     }
 
     private static ProjectId newProjectId() {
-        final ProjectId projectId = ProjectId.newBuilder()
-                                             .setId(newUuid())
-                                             .build();
+        ProjectId projectId = ProjectId.newBuilder()
+                                       .setId(newUuid())
+                                       .build();
         return projectId;
     }
 }

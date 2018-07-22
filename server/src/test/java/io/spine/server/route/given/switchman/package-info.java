@@ -22,7 +22,10 @@
  * This package provides test environment for testing rejecting a command during command routing.
  */
 
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.route.given.switchman;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -18,7 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * Test environment classes for testing {@code io.spine.server.delivery} package.
+ */
+
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.delivery.given;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

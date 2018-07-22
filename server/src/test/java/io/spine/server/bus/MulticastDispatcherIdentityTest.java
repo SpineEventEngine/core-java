@@ -46,7 +46,7 @@ class MulticastDispatcherIdentityTest {
     @Test
     @DisplayName("return dispatcher identity")
     void returnDispatcherIdentity() throws Exception {
-        final Set<String> set = MulticastDispatcher.Identity.of(new IdentityDispatcher());
+        Set<String> set = MulticastDispatcher.Identity.of(new IdentityDispatcher());
 
         assertTrue(set.contains(IdentityDispatcher.ID));
         assertEquals(1, set.size());

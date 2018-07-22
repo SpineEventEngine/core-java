@@ -59,10 +59,11 @@ public class ExecutorCommandScheduler extends CommandScheduler {
     }
 
     private static long getDelayMilliseconds(Command command) {
-        final Schedule schedule = command.getContext().getSchedule();
-        final Duration delay = schedule.getDelay();
-        final long delaySec = delay.getSeconds();
-        final long delayMillisFraction = delay.getNanos() / NANOS_IN_MILLISECOND;
+        Schedule schedule = command.getContext()
+                                   .getSchedule();
+        Duration delay = schedule.getDelay();
+        long delaySec = delay.getSeconds();
+        long delayMillisFraction = delay.getNanos() / NANOS_IN_MILLISECOND;
 
         /**
          * Maximum value of {@link Duration#getSeconds()} is
@@ -71,7 +72,7 @@ public class ExecutorCommandScheduler extends CommandScheduler {
          * {@link Long.MAX_VALUE} is +9,223,372,036,854,775,807. That's why it is safe to multiply
          * {@code delaySec * MILLIS_IN_SECOND}.
          */
-        final long absoluteMillis = delaySec * MILLIS_IN_SECOND + delayMillisFraction;
+        long absoluteMillis = delaySec * MILLIS_IN_SECOND + delayMillisFraction;
         return absoluteMillis;
     }
 

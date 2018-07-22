@@ -21,12 +21,13 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import io.spine.annotation.Internal;
 import io.spine.server.delivery.InProcessSharding;
 import io.spine.server.delivery.Sharding;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -38,8 +39,7 @@ public class ServerEnvironment {
     static final String ENV_KEY_APP_ENGINE_RUNTIME_VERSION = "com.google.appengine.runtime.version";
 
     /** If set, contains the version of AppEngine obtained from the system property. */
-    @Nullable
-    private static final String appEngineRuntimeVersion =
+    private static final @Nullable String appEngineRuntimeVersion =
             System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION);
 
     /** A sharding strategy for this server environment. */
@@ -64,7 +64,7 @@ public class ServerEnvironment {
      * {@code false} otherwise.
      */
     public boolean isAppEngine() {
-        final boolean isVersionPresent = (appEngineRuntimeVersion != null) &&
+        boolean isVersionPresent = (appEngineRuntimeVersion != null) &&
                 !appEngineRuntimeVersion.isEmpty();
         return isVersionPresent;
     }
@@ -74,7 +74,7 @@ public class ServerEnvironment {
      * or {@code null} if the program is running not on the AppEngine.
      */
     public Optional<String> appEngineVersion() {
-        return Optional.fromNullable(appEngineRuntimeVersion);
+        return Optional.ofNullable(appEngineRuntimeVersion);
     }
 
     public Sharding getSharding() {

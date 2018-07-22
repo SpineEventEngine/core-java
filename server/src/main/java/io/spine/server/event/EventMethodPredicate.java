@@ -50,9 +50,9 @@ abstract class EventMethodPredicate extends HandlerMethodPredicate<EventContext>
     protected boolean verifyParams(Method method) {
         if (super.verifyParams(method)) {
             @SuppressWarnings("unchecked") // The case is safe since super returned `true`.
-            final Class<? extends Message> firstParameter =
+            Class<? extends Message> firstParameter =
                     (Class<? extends Message>) method.getParameterTypes()[0];
-            final boolean isRejection = isRejection(firstParameter);
+            boolean isRejection = isRejection(firstParameter);
             return !isRejection;
         }
         return false;

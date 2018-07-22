@@ -97,7 +97,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
         if (enricher == null || !enricher.canBeEnriched(rejection)) {
             return rejection;
         }
-        final RejectionEnvelope enriched = enricher.enrich(rejection);
+        RejectionEnvelope enriched = enricher.enrich(rejection);
         return enriched;
     }
 
@@ -114,7 +114,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
 
     @Override
     protected RejectionEnvelope toEnvelope(Rejection message) {
-        final RejectionEnvelope result = RejectionEnvelope.of(message);
+        RejectionEnvelope result = RejectionEnvelope.of(message);
         return result;
     }
 
@@ -181,7 +181,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
         }
 
         /**
-         * Sets a custom {@link RejectionEnricher} for events posted toEve
+         * Sets a custom {@link RejectionEnricher} for events posted to
          * the {@code RejectionBus} which is being built.
          *
          * <p>If the {@code RejectionEnricher} is not set, the enrichments
@@ -219,8 +219,8 @@ public class RejectionBus extends CommandOutputBus<Rejection,
 
         @Override
         public UnhandledRejectionException handle(RejectionEnvelope envelope) {
-            final Message message = envelope.getMessage();
-            final UnhandledRejectionException exception = new UnhandledRejectionException(message);
+            Message message = envelope.getMessage();
+            UnhandledRejectionException exception = new UnhandledRejectionException(message);
             return exception;
         }
     }

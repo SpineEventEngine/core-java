@@ -21,13 +21,14 @@
 package io.spine.core;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -108,7 +109,7 @@ public final class Rejections {
                                 .setStacktrace(stacktrace)
                                 .setCommand(command);
 
-        java.util.Optional<Any> optional = message.producerId();
+        Optional<Any> optional = message.producerId();
         optional.ifPresent(builder::setProducerId);
         return builder.build();
     }
@@ -156,12 +157,11 @@ public final class Rejections {
      * Extracts the message from the passed {@code Rejection} instance.
      *
      * @param rejection a rejection to extract a message from
-     * @param <M>       a type of the rejection message
      * @return an unpacked message
      */
-    public static <M extends Message> M getMessage(Rejection rejection) {
+    public static Message getMessage(Rejection rejection) {
         checkNotNull(rejection);
-        M result = unpack(rejection.getMessage());
+        Message result = unpack(rejection.getMessage());
         return result;
     }
 
@@ -178,7 +178,7 @@ public final class Rejections {
         Any producerId = context.getProducerId();
         if (Any.getDefaultInstance()
                .equals(producerId)) {
-            return Optional.absent();
+            return Optional.empty();
         }
         I id = Identifier.unpack(producerId);
         return Optional.of(id);

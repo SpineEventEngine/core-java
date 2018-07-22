@@ -122,7 +122,7 @@ public abstract class TransactionalEntity<I,
         return tx().getBuilder();
     }
 
-    private Transaction<I, ? extends TransactionalEntity<I,S,B>, S, B> ensureTransaction() {
+    private Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> ensureTransaction() {
         if (!isTransactionInProgress()) {
             throw new IllegalStateException(getMissingTxMessage());
         }
@@ -137,7 +137,7 @@ public abstract class TransactionalEntity<I,
         return "Cannot modify entity state: transaction is not available.";
     }
 
-    Transaction<I, ? extends TransactionalEntity<I,S,B>, S, B> tx() {
+    Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> tx() {
         return ensureTransaction();
     }
 
@@ -153,7 +153,8 @@ public abstract class TransactionalEntity<I,
         return result;
     }
 
-    @SuppressWarnings("ObjectEquality") // the refs must to point to the same object; see below.
+    @SuppressWarnings({"ObjectEquality", "ReferenceEquality"}
+            /* The refs must to point to the same object; see below. */)
     void injectTransaction(Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> tx) {
         checkNotNull(tx);
 
@@ -186,7 +187,7 @@ public abstract class TransactionalEntity<I,
     }
 
     B builderFromState() {
-        final B builder = newBuilderInstance();
+        B builder = newBuilderInstance();
         builder.setOriginalState(getState());
         return builder;
     }
@@ -208,7 +209,7 @@ public abstract class TransactionalEntity<I,
      */
     @Override
     public LifecycleFlags getLifecycleFlags() {
-        if(isTransactionInProgress()) {
+        if (isTransactionInProgress()) {
             return tx().getLifecycleFlags();
         }
         return super.getLifecycleFlags();
@@ -238,10 +239,10 @@ public abstract class TransactionalEntity<I,
 
     private B newBuilderInstance() {
         @SuppressWarnings("unchecked")   // it's safe, as we rely on the definition of this class.
-        final Class<? extends TransactionalEntity<I, S, B>> cls =
+        Class<? extends TransactionalEntity<I, S, B>> cls =
                 (Class<? extends TransactionalEntity<I, S, B>>) getClass();
-        final Class<B> builderClass = TypeInfo.getBuilderClass(cls);
-        final B builder = ValidatingBuilders.newInstance(builderClass);
+        Class<B> builderClass = TypeInfo.getBuilderClass(cls);
+        B builder = ValidatingBuilders.newInstance(builderClass);
         return builder;
     }
 
@@ -297,7 +298,7 @@ public abstract class TransactionalEntity<I,
         Class<B> getBuilderClass(Class<? extends TransactionalEntity<I, S, B>> entityClass) {
             checkNotNull(entityClass);
             @SuppressWarnings("unchecked") // The type is ensured by this class declaration.
-            final Class<B> builderClass = (Class<B>)STATE_BUILDER.getArgumentIn(entityClass);
+            Class<B> builderClass = (Class<B>) STATE_BUILDER.getArgumentIn(entityClass);
             return builderClass;
         }
     }

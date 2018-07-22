@@ -20,7 +20,6 @@
 
 package io.spine.server.route;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
@@ -35,6 +34,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -96,7 +96,7 @@ class EventRoutingTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
-        final NullPointerTester nullPointerTester = new NullPointerTester()
+        NullPointerTester nullPointerTester = new NullPointerTester()
                 .setDefault(EventContext.class, EventContext.getDefaultInstance());
 
         nullPointerTester.testAllPublicInstanceMethods(eventRouting);
@@ -112,7 +112,7 @@ class EventRoutingTest {
     @Test
     @DisplayName("allow replacing default route")
     void allowReplacingDefaultRoute() {
-        final EventRoute<Long, Message> newDefault = new EventRoute<Long, Message>() {
+        EventRoute<Long, Message> newDefault = new EventRoute<Long, Message>() {
 
             private static final long serialVersionUID = 0L;
 
@@ -132,7 +132,7 @@ class EventRoutingTest {
     void setCustomRoute() {
         assertSame(eventRouting, eventRouting.route(StringValue.class, customRoute));
 
-        final Optional<EventRoute<Long, StringValue>> route = eventRouting.get(StringValue.class);
+        Optional<EventRoute<Long, StringValue>> route = eventRouting.get(StringValue.class);
 
         assertTrue(route.isPresent());
         assertSame(customRoute, route.get());
@@ -170,9 +170,9 @@ class EventRoutingTest {
 
         // An event which has `Timestamp` as its message.
         // It should go through the default route, because only `StringValue` has a custom route.
-        final Event event = eventFactory.createEvent(Time.getCurrentTime());
+        Event event = eventFactory.createEvent(Time.getCurrentTime());
 
-        final Set<Long> ids = eventRouting.apply(event.getMessage(), event.getContext());
+        Set<Long> ids = eventRouting.apply(event.getMessage(), event.getContext());
         assertEquals(DEFAULT_ROUTE, ids);
     }
 
@@ -182,10 +182,9 @@ class EventRoutingTest {
         eventRouting.route(StringValue.class, customRoute);
 
         // An event which has `StringValue` as its message, which should go the custom route.
-        final EventEnvelope event = EventEnvelope.of(
-                eventFactory.createEvent(TestValues.newUuidValue()));
+        EventEnvelope event = EventEnvelope.of(eventFactory.createEvent(TestValues.newUuidValue()));
 
-        final Set<Long> ids = eventRouting.apply(event.getMessage(), event.getEventContext());
+        Set<Long> ids = eventRouting.apply(event.getMessage(), event.getEventContext());
         assertEquals(CUSTOM_ROUTE, ids);
     }
 }

@@ -75,7 +75,7 @@ class EnricherBuilderTest {
         @Test
         @DisplayName("if all functions have been registered")
         void forAllFunctionsRegistered() {
-            final Enricher enricher = Enrichment.newEnricher();
+            Enricher enricher = Enrichment.newEnricher();
 
             assertNotNull(enricher);
         }
@@ -83,8 +83,8 @@ class EnricherBuilderTest {
         @Test
         @DisplayName("if no functions have been registered")
         void forNoFunctionsRegistered() {
-            final Enricher enricher = EventEnricher.newBuilder()
-                                                   .build();
+            Enricher enricher = EventEnricher.newBuilder()
+                                             .build();
             assertNotNull(enricher);
         }
 
@@ -95,7 +95,7 @@ class EnricherBuilderTest {
                         new Enrichment.GetProjectOwnerId())
                    .add(ProjectId.class, String.class,
                         new Enrichment.GetProjectName());
-            final Enricher enricher = builder.build();
+            Enricher enricher = builder.build();
             assertNotNull(enricher);
         }
     }

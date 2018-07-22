@@ -48,16 +48,16 @@ class MethodAccessCheckerTest {
     void passNullToleranceCheck() {
         new NullPointerTester().testAllPublicStaticMethods(MethodAccessChecker.class);
 
-        final Method method = getMethod("publicMethod");
-        final MethodAccessChecker checker = forMethod(method);
+        Method method = getMethod("publicMethod");
+        MethodAccessChecker checker = forMethod(method);
         new NullPointerTester().testAllPublicInstanceMethods(checker);
     }
 
     @Test
     @DisplayName("log warning on incorrect access modifier")
     void warnOnIncorrectAccess() {
-        final Method method = getMethod("protectedMethod");
-        final MethodAccessChecker checker = spy(forMethod(method));
+        Method method = getMethod("protectedMethod");
+        MethodAccessChecker checker = spy(forMethod(method));
         checker.checkPublic(STUB_WARNING_MESSAGE);
         checker.checkPackagePrivate(STUB_WARNING_MESSAGE);
         checker.checkPrivate(STUB_WARNING_MESSAGE);
@@ -67,25 +67,25 @@ class MethodAccessCheckerTest {
     @Test
     @DisplayName("not log warning on correct access modifier")
     void recognizeCorrectAccess() {
-        final Method publicMethod = getMethod("publicMethod");
-        final MethodAccessChecker checkerPublic = spy(forMethod(publicMethod));
+        Method publicMethod = getMethod("publicMethod");
+        MethodAccessChecker checkerPublic = spy(forMethod(publicMethod));
         checkerPublic.checkPublic(STUB_WARNING_MESSAGE);
         verify(checkerPublic, never()).warnOnWrongModifier(STUB_WARNING_MESSAGE);
 
-        final Method packagePrivateMethod = getMethod("packagePrivateMethod");
-        final MethodAccessChecker checkerPackagePrivate = spy(forMethod(packagePrivateMethod));
+        Method packagePrivateMethod = getMethod("packagePrivateMethod");
+        MethodAccessChecker checkerPackagePrivate = spy(forMethod(packagePrivateMethod));
         checkerPackagePrivate.checkPackagePrivate(STUB_WARNING_MESSAGE);
         verify(checkerPackagePrivate, never()).warnOnWrongModifier(STUB_WARNING_MESSAGE);
 
-        final Method privateMethod = getMethod("privateMethod");
-        final MethodAccessChecker checkerPrivate = spy(forMethod(privateMethod));
+        Method privateMethod = getMethod("privateMethod");
+        MethodAccessChecker checkerPrivate = spy(forMethod(privateMethod));
         checkerPrivate.checkPrivate(STUB_WARNING_MESSAGE);
         verify(checkerPrivate, never()).warnOnWrongModifier(STUB_WARNING_MESSAGE);
     }
 
     private static Method getMethod(String methodName) {
-        final Method method;
-        final Class<?> clazz = StubMethodContainer.class;
+        Method method;
+        Class<?> clazz = StubMethodContainer.class;
         try {
             method = clazz.getDeclaredMethod(methodName);
         } catch (NoSuchMethodException e) {

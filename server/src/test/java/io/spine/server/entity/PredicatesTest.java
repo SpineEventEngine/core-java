@@ -37,44 +37,38 @@ class PredicatesTest {
     @Test
     @DisplayName("consider archived entity invisible")
     void stateArchivedEntityInvisible() {
-        final LifecycleFlags status =
-                LifecycleFlags.newBuilder()
-                              .setArchived(true)
-                              .build();
+        LifecycleFlags status = LifecycleFlags.newBuilder()
+                                              .setArchived(true)
+                                              .build();
         assertFalse(isEntityVisible().apply(status));
     }
 
     @Test
     @DisplayName("consider deleted entity invisible")
     void stateDeletedEntityInvisible() {
-        final LifecycleFlags status =
-                LifecycleFlags.newBuilder()
-                              .setDeleted(true)
-                              .build();
+        LifecycleFlags status = LifecycleFlags.newBuilder()
+                                              .setDeleted(true)
+                                              .build();
         assertFalse(isEntityVisible().apply(status));
     }
 
     @Test
     @DisplayName("consider archived record invisible")
     void stateArchivedRecordInvisible() {
-        final EntityRecord record =
-                EntityRecord
-                        .newBuilder()
-                        .setLifecycleFlags(LifecycleFlags.newBuilder()
-                                                         .setArchived(true))
-                        .build();
+        EntityRecord record = EntityRecord.newBuilder()
+                                          .setLifecycleFlags(LifecycleFlags.newBuilder()
+                                                                           .setArchived(true))
+                                          .build();
         assertFalse(isRecordVisible().apply(record));
     }
 
     @Test
     @DisplayName("consider deleted record invisible")
     void stateDeletedRecordInvisible() {
-        final EntityRecord record =
-                EntityRecord
-                        .newBuilder()
-                        .setLifecycleFlags(LifecycleFlags.newBuilder()
-                                                         .setDeleted(true))
-                        .build();
+        EntityRecord record = EntityRecord.newBuilder()
+                                          .setLifecycleFlags(LifecycleFlags.newBuilder()
+                                                                           .setDeleted(true))
+                                          .build();
         assertFalse(isRecordVisible().apply(record));
     }
 

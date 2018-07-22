@@ -55,7 +55,7 @@ final class MatchesStreamQuery implements Predicate<Event> {
         }
         // Check if one of the filters matches. If so, the event matches.
         for (EventFilter filter : filterList) {
-            final Predicate<Event> filterPredicate = new MatchFilter(filter);
+            Predicate<Event> filterPredicate = new MatchFilter(filter);
             if (filterPredicate.apply(input)) {
                 return true;
             }

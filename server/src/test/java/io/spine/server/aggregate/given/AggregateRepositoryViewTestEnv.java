@@ -62,14 +62,14 @@ public class AggregateRepositoryViewTestEnv {
 
         @Assign
         StringValue handle(StringValue commandMessage) {
-            final String msg = commandMessage.getValue();
+            String msg = commandMessage.getValue();
             // Transform the command to the event (the fact in the past).
             return toMessage(msg + 'd');
         }
 
         @Apply
         void on(StringValue eventMessage) {
-            final String msg = RepoOfAggregateWithLifecycle.getMessage(eventMessage);
+            String msg = RepoOfAggregateWithLifecycle.getMessage(eventMessage);
             if (archived.name()
                         .equalsIgnoreCase(msg)) {
                 setArchived(true);
@@ -102,7 +102,7 @@ public class AggregateRepositoryViewTestEnv {
 
                     @Override
                     public Long apply(Message message, CommandContext context) {
-                        final Long result = getId((StringValue) message);
+                        Long result = getId((StringValue) message);
                         return result;
                     }
                 };

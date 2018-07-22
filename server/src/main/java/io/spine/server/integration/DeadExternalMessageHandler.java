@@ -33,8 +33,8 @@ enum DeadExternalMessageHandler implements DeadMessageHandler<ExternalMessageEnv
 
     @Override
     public UnsupportedExternalMessageException handle(ExternalMessageEnvelope envelope) {
-        final Message message = envelope.getMessage();
-        final UnsupportedExternalMessageException exception =
+        Message message = envelope.getMessage();
+        UnsupportedExternalMessageException exception =
                 new UnsupportedExternalMessageException(message);
         return exception;
     }

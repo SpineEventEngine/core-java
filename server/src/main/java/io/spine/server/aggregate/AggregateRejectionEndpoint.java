@@ -45,7 +45,7 @@ public class AggregateRejectionEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     static <I, A extends Aggregate<I, ?, ?>>
     Set<I> handle(AggregateRepository<I, A> repository, RejectionEnvelope rejection) {
-        final AggregateRejectionEndpoint<I, A> endpoint = of(repository, rejection);
+        AggregateRejectionEndpoint<I, A> endpoint = of(repository, rejection);
 
         return endpoint.handle();
     }
@@ -63,10 +63,9 @@ public class AggregateRejectionEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     protected Set<I> getTargets() {
-        final RejectionEnvelope envelope = envelope();
-        final Set<I> ids =
-                repository().getRejectionRouting()
-                            .apply(envelope.getMessage(), envelope.getMessageContext());
+        RejectionEnvelope envelope = envelope();
+        Set<I> ids = repository().getRejectionRouting()
+                                 .apply(envelope.getMessage(), envelope.getMessageContext());
         return ids;
     }
 

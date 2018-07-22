@@ -22,6 +22,7 @@ package io.spine.core;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
+import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -67,8 +68,8 @@ public final class Commands {
      * @return new command ID
      */
     public static CommandId generateId() {
-        final String value = UUID.randomUUID()
-                                 .toString();
+        String value = UUID.randomUUID()
+                           .toString();
         return CommandId.newBuilder()
                         .setUuid(value)
                         .build();
@@ -78,13 +79,56 @@ public final class Commands {
      * Extracts the message from the passed {@code Command} instance.
      *
      * @param command a command to extract a message from
-     * @param <M>     a type of the command message
      * @return an unpacked message
      */
-    public static <M extends Message> M getMessage(Command command) {
+    public static Message getMessage(Command command) {
         checkNotNull(command);
-        final M result = AnyPacker.unpack(command.getMessage());
+        return getMessage(command.getMessage());
+    }
+
+    /**
+     * Extracts the message from the passed {@code Command} instance.
+     *
+     * @param command a command to extract a message from
+     * @return an unpacked message
+     */
+    public static Message getMessage(DispatchedCommand command) {
+        checkNotNull(command);
+        return getMessage(command.getMessage());
+    }
+
+    private static Message getMessage(Any message) {
+        Message result = AnyPacker.unpack(message);
         return result;
+    }
+
+    /**
+     * Creates a {@code DispatchedCommand} using the message and context
+     * from the passed {@code Command}.
+     */
+    public static DispatchedCommand toDispatched(Command command) {
+        checkNotNull(command);
+        return toDispatched(command.getMessage(), command.getContext());
+    }
+
+    /**
+     * Creates a {@code DispatchedCommand} with the passed command message and context.
+     *
+     * @param commandMessage the message of the command, can be already packed into {@code Any}
+     * @param context the context of the message
+     * @return new instance of {@code DispatchedCommand}
+     */
+    public static DispatchedCommand toDispatched(Message commandMessage, CommandContext context) {
+        checkNotNull(commandMessage);
+        checkNotNull(context);
+        Any packed = commandMessage instanceof Any
+                ? (Any) commandMessage
+                : AnyPacker.pack(commandMessage);
+        DispatchedCommand.Builder result = DispatchedCommand
+                .newBuilder()
+                .setMessage(packed)
+                .setContext(context);
+        return result.build();
     }
 
     /**
@@ -104,7 +148,7 @@ public final class Commands {
      */
     public static TenantId getTenantId(Command command) {
         checkNotNull(command);
-        final TenantId result = getTenantId(command.getContext());
+        TenantId result = getTenantId(command.getContext());
         return result;
     }
 
@@ -148,9 +192,9 @@ public final class Commands {
 
     private static Timestamp getTimestamp(Command request) {
         checkNotNull(request);
-        final Timestamp result = request.getContext()
-                                        .getActorContext()
-                                        .getTimestamp();
+        Timestamp result = request.getContext()
+                                  .getActorContext()
+                                  .getTimestamp();
         return result;
     }
 

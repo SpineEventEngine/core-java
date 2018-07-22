@@ -48,8 +48,8 @@ public class RejectionEnvelope
         super(rejection);
         this.rejectionMessage = Rejections.getMessage(rejection);
         this.rejectionClass = RejectionClass.of(rejectionMessage);
-        final RejectionContext context = rejection.getContext();
-        final Command command = context.getCommand();
+        RejectionContext context = rejection.getContext();
+        Command command = context.getCommand();
         this.commandMessage = Commands.getMessage(command);
         this.commandContext = command.getContext();
     }
@@ -115,7 +115,7 @@ public class RejectionEnvelope
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     public void setOriginFields(EventContext.Builder builder) {
-        final RejectionContext context = getOuterObject().getContext();
+        RejectionContext context = getOuterObject().getContext();
         builder.setRejectionContext(context);
         builder.setRootCommandId(context.getCommand()
                                         .getId());
@@ -136,7 +136,7 @@ public class RejectionEnvelope
 
     @Override
     protected RejectionEnvelope enrich(Enrichment enrichment) {
-        final Rejection.Builder enrichedCopy =
+        Rejection.Builder enrichedCopy =
                 getOuterObject().toBuilder()
                                 .setContext(getMessageContext().toBuilder()
                                                                .setEnrichment(enrichment));

@@ -82,7 +82,7 @@ public final class CommandErrorHandler {
     }
 
     private void handleRejection(CommandEnvelope envelope, RuntimeException exception) {
-        final Rejection rejection = rejectWithCause(envelope.getCommand(), exception);
+        Rejection rejection = rejectWithCause(envelope.getCommand(), exception);
         rejectionBus.post(rejection);
     }
 

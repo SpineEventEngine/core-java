@@ -22,6 +22,7 @@
  * Test environment classes for the {@code io.spine.server.model} package of the
  * {@code testutil-server} module.
  */
+
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.testing.server.model.given;

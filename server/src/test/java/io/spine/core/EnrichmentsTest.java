@@ -20,7 +20,6 @@
 
 package io.spine.core;
 
-import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
@@ -32,6 +31,8 @@ import io.spine.type.TypeName;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Enrichments.getEnrichment;
@@ -67,16 +68,16 @@ class EnrichmentsTest {
      * for details.
      */
     private static EventContext givenContextEnrichedWith(Message enrichment) {
-        final String enrichmentKey = TypeName.of(enrichment)
-                                             .value();
-        final Enrichment.Builder enrichments =
+        String enrichmentKey = TypeName.of(enrichment)
+                                       .value();
+        Enrichment.Builder enrichments =
                 Enrichment.newBuilder()
                           .setContainer(Enrichment.Container.newBuilder()
                                                             .putItems(enrichmentKey,
                                                                       pack(enrichment)));
-        final EventContext context = context().toBuilder()
-                                              .setEnrichment(enrichments.build())
-                                              .build();
+        EventContext context = context().toBuilder()
+                                        .setEnrichment(enrichments.build())
+                                        .build();
         return context;
     }
 
@@ -106,7 +107,7 @@ class EnrichmentsTest {
     @Test
     @DisplayName("recognize if event enrichment is enabled")
     void recognizeEnrichmentEnabled() {
-        final EventEnvelope event = EventEnvelope.of(eventFactory.createEvent(stringValue));
+        EventEnvelope event = EventEnvelope.of(eventFactory.createEvent(stringValue));
 
         assertTrue(event.isEnrichmentEnabled());
     }
@@ -114,9 +115,7 @@ class EnrichmentsTest {
     @Test
     @DisplayName("recognize if event enrichment is disabled")
     void recognizeEnrichmentDisabled() {
-        final EventEnvelope event = EventEnvelope.of(
-                GivenEvent.withDisabledEnrichmentOf(stringValue)
-        );
+        EventEnvelope event = EventEnvelope.of(GivenEvent.withDisabledEnrichmentOf(stringValue));
 
         assertFalse(event.isEnrichmentEnabled());
     }
@@ -126,9 +125,9 @@ class EnrichmentsTest {
     @Test
     @DisplayName("obtain all event enrichments from context")
     void getAllEnrichments() {
-        final EventContext context = givenContextEnrichedWith(stringValue);
+        EventContext context = givenContextEnrichedWith(stringValue);
 
-        final Optional<Enrichment.Container> enrichments = getEnrichments(context);
+        Optional<Enrichment.Container> enrichments = getEnrichments(context);
 
         assertTrue(enrichments.isPresent());
         assertEquals(context.getEnrichment()
@@ -146,10 +145,9 @@ class EnrichmentsTest {
     @Test
     @DisplayName("obtain specific event enrichment from context")
     void obtainSpecificEnrichment() {
-        final EventContext context = givenContextEnrichedWith(stringValue);
+        EventContext context = givenContextEnrichedWith(stringValue);
 
-        final Optional<? extends StringValue> enrichment =
-                getEnrichment(stringValue.getClass(), context);
+        Optional<? extends StringValue> enrichment = getEnrichment(stringValue.getClass(), context);
 
         assertTrue(enrichment.isPresent());
         assertEquals(stringValue, enrichment.get());
@@ -164,7 +162,7 @@ class EnrichmentsTest {
     @Test
     @DisplayName("return absent if there is no specified enrichment in context")
     void returnAbsentOnEnrichmentNotFound() {
-        final EventContext context = givenContextEnrichedWith(boolValue);
+        EventContext context = givenContextEnrichedWith(boolValue);
         assertFalse(getEnrichment(StringValue.class, context).isPresent());
     }
 }

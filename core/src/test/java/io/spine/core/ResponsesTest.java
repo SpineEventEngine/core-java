@@ -54,12 +54,12 @@ class ResponsesTest {
     @Test
     @DisplayName("recognize not OK response")
     void recognizeNotOkResponse() {
-        final Status status = Status.newBuilder()
-                                    .setError(Error.getDefaultInstance())
-                                    .build();
-        final Response error = Response.newBuilder()
-                                       .setStatus(status)
-                                       .build();
+        Status status = Status.newBuilder()
+                              .setError(Error.getDefaultInstance())
+                              .build();
+        Response error = Response.newBuilder()
+                                 .setStatus(status)
+                                 .build();
         assertFalse(Responses.isOk(error));
     }
 }

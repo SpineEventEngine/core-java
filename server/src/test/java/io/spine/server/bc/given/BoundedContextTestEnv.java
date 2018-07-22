@@ -31,7 +31,7 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventSubscriber;
-import io.spine.server.procman.CommandRouted;
+import io.spine.server.procman.CommandTransformed;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.projection.Projection;
@@ -77,7 +77,7 @@ public class BoundedContextTestEnv {
 
         @Assign
         public List<BcProjectStarted> handle(BcStartProject cmd, CommandContext ctx) {
-            final BcProjectStarted message = Given.EventMessage.projectStarted(cmd.getProjectId());
+            BcProjectStarted message = Given.EventMessage.projectStarted(cmd.getProjectId());
             return newArrayList(message);
         }
 
@@ -144,16 +144,13 @@ public class BoundedContextTestEnv {
     public static class ProjectProcessManager
             extends ProcessManager<ProjectId, Empty, EmptyVBuilder> {
 
-        // a ProcessManager constructor must be public because it is used via reflection
-        @SuppressWarnings("PublicConstructorInNonPublicClass")
         public ProjectProcessManager(ProjectId id) {
             super(id);
         }
 
         @Assign
-        @SuppressWarnings({"UnusedParameters", "unused"}) // OK for test method
-        public CommandRouted handle(BcCreateProject command, CommandContext ctx) {
-            return CommandRouted.getDefaultInstance();
+        public CommandTransformed handle(BcCreateProject command, CommandContext ctx) {
+            return CommandTransformed.getDefaultInstance();
         }
 
         @SuppressWarnings("UnusedParameters") // OK for test method

@@ -57,14 +57,13 @@ final class DeadMessageFilter<T extends Message,
 
     @Override
     public Optional<Ack> accept(E envelope) {
-        @SuppressWarnings("unchecked")
-        final C cls = (C) envelope.getMessageClass();
-        final Collection<D> dispatchers = registry.getDispatchers(cls);
+        @SuppressWarnings("unchecked") C cls = (C) envelope.getMessageClass();
+        Collection<D> dispatchers = registry.getDispatchers(cls);
         if (dispatchers.isEmpty()) {
-            final MessageUnhandled report = deadMessageHandler.handle(envelope);
-            final Error error = report.asError();
-            final Any packedId = Identifier.pack(envelope.getId());
-            final Ack result = reject(packedId, error);
+            MessageUnhandled report = deadMessageHandler.handle(envelope);
+            Error error = report.asError();
+            Any packedId = Identifier.pack(envelope.getId());
+            Ack result = reject(packedId, error);
             return Optional.of(result);
         } else {
             return Optional.empty();

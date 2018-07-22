@@ -52,13 +52,13 @@ abstract class AggregateEndpoint<I,
 
     @Override
     protected void deliverNowTo(I aggregateId) {
-        final A aggregate = instanceFor(aggregateId);
-        final LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
+        A aggregate = instanceFor(aggregateId);
+        LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
 
         dispatchInTx(aggregate);
 
         // Update lifecycle flags only if the message was handled successfully and flags changed.
-        final LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();
+        LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();
         if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
             storage().writeLifecycleFlags(aggregateId, flagsAfter);
         }
@@ -68,8 +68,8 @@ abstract class AggregateEndpoint<I,
 
     @CanIgnoreReturnValue
     protected List<? extends Message> dispatchInTx(A aggregate) {
-        final List<? extends Message> eventMessages = doDispatch(aggregate, envelope());
-        final AggregateTransaction tx = startTransaction(aggregate);
+        List<? extends Message> eventMessages = doDispatch(aggregate, envelope());
+        AggregateTransaction tx = startTransaction(aggregate);
         aggregate.apply(eventMessages, envelope());
         tx.commit();
         return eventMessages;
@@ -94,7 +94,7 @@ abstract class AggregateEndpoint<I,
 
     @Override
     protected boolean isModified(A aggregate) {
-        final List<Event> events = aggregate.getUncommittedEvents();
+        List<Event> events = aggregate.getUncommittedEvents();
         return !events.isEmpty();
     }
 

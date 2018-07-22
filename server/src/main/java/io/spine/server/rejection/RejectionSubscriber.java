@@ -62,10 +62,10 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
      */
     @Override
     public Set<String> dispatch(RejectionEnvelope envelope) {
-        final Command originCommand = envelope.getOuterObject()
-                                              .getContext()
-                                              .getCommand();
-        final CommandOperation op = new CommandOperation(originCommand) {
+        Command originCommand = envelope.getOuterObject()
+                                        .getContext()
+                                        .getCommand();
+        CommandOperation op = new CommandOperation(originCommand) {
 
             @Override
             public void run() {
@@ -82,8 +82,8 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
     }
 
     private void handle(RejectionEnvelope rejection) {
-        final CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
-        final RejectionSubscriberMethod method =
+        CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
+        RejectionSubscriberMethod method =
                 thisClass.getSubscriber(rejection.getMessageClass(), commandClass);
         method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
     }
@@ -98,9 +98,9 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
     public void onError(RejectionEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
-        final MessageClass messageClass = envelope.getMessageClass();
-        final String messageId = Stringifiers.toString(envelope.getId());
-        final String errorMessage =
+        MessageClass messageClass = envelope.getMessageClass();
+        String messageId = Stringifiers.toString(envelope.getId());
+        String errorMessage =
                 format("Rejection subscriber (%s) could not handle rejection (class: %s id: %s).",
                        this, messageClass, messageId);
         log().error(errorMessage, exception);

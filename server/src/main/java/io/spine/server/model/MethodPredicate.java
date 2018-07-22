@@ -37,9 +37,9 @@ public abstract class MethodPredicate implements Predicate<Method> {
     @Override
     public boolean apply(@Nullable Method method) {
         checkNotNull(method);
-        final boolean result = verifyAnnotation(method)
-                               && verifyParams(method)
-                               && verifyReturnType(method);
+        boolean result = verifyAnnotation(method)
+                         && verifyParams(method)
+                         && verifyReturnType(method);
         return result;
     }
 

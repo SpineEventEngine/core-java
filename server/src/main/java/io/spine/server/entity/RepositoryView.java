@@ -20,10 +20,10 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 /**
  * A view on a repository.
@@ -45,7 +45,7 @@ public interface RepositoryView<I, E extends Entity<I, ?>> {
      * Finds an entity with the passed ID.
      *
      * @param id the ID of the entity to load
-     * @return the entity or {@link Optional#absent()} if there's no entity with such ID
+     * @return the entity or {@link Optional#empty()} if there's no entity with such ID
      */
     Optional<E> find(I id);
 

@@ -67,10 +67,10 @@ class DelegatingEventDispatcherTest {
     @Test
     @DisplayName("delegate `onError`")
     void delegateOnError() {
-        final TestEventFactory factory = TestEventFactory.newInstance(getClass());
-        final EventEnvelope envelope = EventEnvelope.of(factory.createEvent(newUuidValue()));
+        TestEventFactory factory = TestEventFactory.newInstance(getClass());
+        EventEnvelope envelope = EventEnvelope.of(factory.createEvent(newUuidValue()));
 
-        final RuntimeException exception = new RuntimeException("test delegating onError");
+        RuntimeException exception = new RuntimeException("test delegating onError");
         delegatingDispatcher.onError(envelope, exception);
 
         assertTrue(delegate.onErrorCalled());
@@ -80,19 +80,19 @@ class DelegatingEventDispatcherTest {
     @Test
     @DisplayName("expose external dispatcher that delegates `onError`")
     void exposeExternalDispatcher() {
-        final ExternalMessageDispatcher<String> extMessageDispatcher =
+        ExternalMessageDispatcher<String> extMessageDispatcher =
                 delegatingDispatcher.getExternalDispatcher();
 
-        final TestEventFactory factory = TestEventFactory.newInstance(getClass());
-        final StringValue eventMsg = newUuidValue();
-        final Event event = factory.createEvent(eventMsg);
-        final ExternalMessage externalMessage =
+        TestEventFactory factory = TestEventFactory.newInstance(getClass());
+        StringValue eventMsg = newUuidValue();
+        Event event = factory.createEvent(eventMsg);
+        ExternalMessage externalMessage =
                 ExternalMessages.of(event, BoundedContextNames.newName(getClass().getName()));
 
-        final ExternalMessageEnvelope externalMessageEnvelope =
+        ExternalMessageEnvelope externalMessageEnvelope =
                 ExternalMessageEnvelope.of(externalMessage, eventMsg);
 
-        final RuntimeException exception =
+        RuntimeException exception =
                 new RuntimeException("test external dispatcher delegating onError");
         extMessageDispatcher.onError(externalMessageEnvelope, exception);
 

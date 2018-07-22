@@ -19,11 +19,15 @@
  */
 
 /**
- * Test environments for the {@link io.spine.server.tuple}.
+ * Test environment for the {@link io.spine.server.tuple}.
  *
  * @author Alexander Yevsyukov
  */
+
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.tuple.given;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

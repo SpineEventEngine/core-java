@@ -44,17 +44,17 @@ public class SubscriptionRecordTestEnv {
     }
 
     public static Target target() {
-        final Target target = Targets.allOf(Project.class);
+        Target target = Targets.allOf(Project.class);
         return target;
     }
 
     public static Target target(Message targetId) {
-        final Target target = Targets.someOf(Project.class, Collections.singleton(targetId));
+        Target target = Targets.someOf(Project.class, Collections.singleton(targetId));
         return target;
     }
 
     public static Subscription subscription() {
-        final Subscription subscription = Subscription.getDefaultInstance();
+        Subscription subscription = Subscription.getDefaultInstance();
         return subscription;
     }
 }

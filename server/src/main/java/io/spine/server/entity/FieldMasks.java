@@ -33,9 +33,9 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -74,10 +74,10 @@ public class FieldMasks {
             return FieldMask.getDefaultInstance();
         }
 
-        final FieldMask.Builder result = FieldMask.newBuilder();
+        FieldMask.Builder result = FieldMask.newBuilder();
         for (int fieldNumber : fieldTags) {
-            final Descriptors.FieldDescriptor field = typeDescriptor.findFieldByNumber(fieldNumber);
-            final String fieldPath = field.getFullName();
+            Descriptors.FieldDescriptor field = typeDescriptor.findFieldByNumber(fieldNumber);
+            String fieldPath = field.getFullName();
             result.addPaths(fieldPath);
         }
 
@@ -98,27 +98,25 @@ public class FieldMasks {
      */
     @Nonnull
     public static <M extends Message, B extends Message.Builder>
-    Collection<M> applyMask(FieldMask mask,
-                            Collection<M> messages,
-                            TypeUrl type) {
+    Collection<M> applyMask(FieldMask mask, Collection<M> messages, TypeUrl type) {
         checkNotNull(mask);
         checkNotNull(messages);
         checkNotNull(type);
 
-        final List<M> filtered = new LinkedList<>();
-        final ProtocolStringList filter = mask.getPathsList();
-        final Class<B> builderClass = getBuilderForType(type);
+        List<M> filtered = new ArrayList<>();
+        ProtocolStringList filter = mask.getPathsList();
+        Class<B> builderClass = getBuilderForType(type);
 
         if (filter.isEmpty() || builderClass == null) {
             return Collections.unmodifiableCollection(messages);
         }
 
         try {
-            final Constructor<B> builderConstructor = builderClass.getDeclaredConstructor();
+            Constructor<B> builderConstructor = builderClass.getDeclaredConstructor();
             builderConstructor.setAccessible(true);
 
             for (Message wholeMessage : messages) {
-                final M message = messageForFilter(filter, builderConstructor, wholeMessage);
+                M message = messageForFilter(filter, builderConstructor, wholeMessage);
                 filtered.add(message);
             }
         } catch (NoSuchMethodException |
@@ -162,18 +160,18 @@ public class FieldMasks {
         checkNotNull(message);
         checkNotNull(type);
 
-        final ProtocolStringList filter = mask.getPathsList();
-        final Class<B> builderClass = getBuilderForType(type);
+        ProtocolStringList filter = mask.getPathsList();
+        Class<B> builderClass = getBuilderForType(type);
 
         if (builderClass == null) {
             return message;
         }
 
         try {
-            final Constructor<B> builderConstructor = builderClass.getDeclaredConstructor();
+            Constructor<B> builderConstructor = builderClass.getDeclaredConstructor();
             builderConstructor.setAccessible(true);
 
-            final M result = messageForFilter(filter, builderConstructor, message);
+            M result = messageForFilter(filter, builderConstructor, message);
             return result;
         } catch (NoSuchMethodException |
                 InvocationTargetException |
@@ -192,10 +190,10 @@ public class FieldMasks {
             throws InstantiationException,
                    IllegalAccessException,
                    InvocationTargetException {
-        final B builder = builderConstructor.newInstance();
+        B builder = builderConstructor.newInstance();
 
-        final List<Descriptors.FieldDescriptor> fields = wholeMessage.getDescriptorForType()
-                                                                     .getFields();
+        List<Descriptors.FieldDescriptor> fields = wholeMessage.getDescriptorForType()
+                                                               .getFields();
         for (Descriptors.FieldDescriptor field : fields) {
             if (filter.contains(field.getFullName())) {
                 builder.setField(field, wholeMessage.getField(field));
@@ -203,21 +201,19 @@ public class FieldMasks {
         }
         @SuppressWarnings("unchecked")
         // It's fine as the constructor is of {@code MessageCls.Builder} type.
-        final M result = (M) builder.build();
+        M result = (M) builder.build();
         return result;
     }
 
     @SuppressWarnings("unchecked") // We assume that TypeUrl.getMessageClass() works properly.
     private static @Nullable <B extends Message.Builder> Class<B>
     getBuilderForType(TypeUrl typeUrl) {
-        final Class<? extends Message> msgClass = typeUrl.getMessageClass();
+        Class<? extends Message> msgClass = typeUrl.getMessageClass();
         Class<B> builderClass;
         try {
             builderClass = (Class<B>) msgClass.getClasses()[0];
         } catch (ClassCastException e) {
-            final String message = format(
-                    TYPE_CAST_ERROR_LOGGING_PATTERN,
-                    msgClass.getCanonicalName());
+            String message = format(TYPE_CAST_ERROR_LOGGING_PATTERN, msgClass.getCanonicalName());
             log().warn(message, e);
             builderClass = null;
         }

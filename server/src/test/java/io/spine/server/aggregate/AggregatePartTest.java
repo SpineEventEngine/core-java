@@ -24,35 +24,27 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.given.AggregatePartTestEnv.AnAggregatePart;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.AnAggregateRoot;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.TaskDescriptionPart;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.TaskDescriptionRepository;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.TaskPart;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.TaskRepository;
-import io.spine.server.entity.InvalidEntityStateException;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.command.AggAddTask;
-import io.spine.test.aggregate.user.User;
 import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 import io.spine.testing.server.model.ModelTests;
-import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
-import java.util.List;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Verify.assertSize;
-import static io.spine.testing.server.entity.given.Given.aggregatePartOfClass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Illia Shepilov
@@ -86,8 +78,7 @@ class AggregatePartTest {
         prepareAggregatePart();
         taskDescriptionPart = new TaskDescriptionPart(root);
         taskRepository = new TaskRepository();
-        final TaskDescriptionRepository taskDescriptionRepository =
-                new TaskDescriptionRepository();
+        TaskDescriptionRepository taskDescriptionRepository = new TaskDescriptionRepository();
         boundedContext.register(taskRepository);
         boundedContext.register(taskDescriptionRepository);
     }
@@ -104,57 +95,13 @@ class AggregatePartTest {
     @DisplayName("return aggregate part state by class")
     void returnAggregatePartStateByClass() {
         taskRepository.store(taskPart);
-        final Task task = taskDescriptionPart.getPartState(Task.class);
+        Task task = taskDescriptionPart.getPartState(Task.class);
         assertEquals(TASK_DESCRIPTION, task.getDescription());
-    }
-
-    @SuppressWarnings("CheckReturnValue") // Method called to throw exception.
-    @Test
-    @DisplayName("throw InvalidEntityStateException if entity state is invalid")
-    void throwOnInvalidState() {
-        final User user = User.newBuilder()
-                              .setFirstName("|")
-                              .setLastName("|")
-                              .build();
-        try {
-            aggregatePartOfClass(AnAggregatePart.class)
-                    .withRoot(root)
-                    .withId(getClass().getName())
-                    .withVersion(1)
-                    .withState(user)
-                    .build();
-            fail("Should have thrown InvalidEntityStateException.");
-        } catch (InvalidEntityStateException e) {
-            List<ConstraintViolation> violations =
-                    e.getError()
-                     .getValidationError()
-                     .getConstraintViolationList();
-            assertSize(user.getAllFields()
-                           .size(), violations);
-        }
-    }
-
-    @Test
-    @DisplayName("update valid entity state")
-    void updateEntityState() {
-        User user = User.newBuilder()
-                        .setFirstName("Firstname")
-                        .setLastName("Lastname")
-                        .build();
-        AnAggregatePart part = aggregatePartOfClass(AnAggregatePart.class)
-                .withRoot(root)
-                .withId(getClass().getName())
-                .withVersion(1)
-                .withState(user)
-                .build();
-
-        assertEquals(user, part.getState());
     }
 
     private NullPointerTester createNullPointerTester() throws NoSuchMethodException {
         Constructor constructor =
-                AnAggregateRoot.class
-                        .getDeclaredConstructor(BoundedContext.class, String.class);
+                AnAggregateRoot.class.getDeclaredConstructor(BoundedContext.class, String.class);
         NullPointerTester tester = new NullPointerTester();
         tester.setDefault(Constructor.class, constructor)
               .setDefault(BoundedContext.class, boundedContext)

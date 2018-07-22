@@ -35,7 +35,7 @@ class EventClassTest {
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() throws Exception {
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(EventClass.class);
     }

@@ -20,7 +20,6 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
@@ -30,6 +29,7 @@ import io.spine.type.TypeName;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -67,14 +67,14 @@ public final class VisibilityGuard {
      */
     public void register(Repository<?, ?> repository) {
         checkNotNull(repository);
-        final EntityClass<?> entityClass = repository.entityClass();
-        final Class<? extends Message> stateClass = entityClass.getStateClass();
+        EntityClass<?> entityClass = repository.entityClass();
+        Class<? extends Message> stateClass = entityClass.getStateClass();
         checkNotAlreadyRegistered(stateClass);
         repositories.put(stateClass, new RepositoryAccess(repository));
     }
 
     private void checkNotAlreadyRegistered(Class<? extends Message> stateClass) {
-        final RepositoryAccess alreadyRegistered = repositories.get(stateClass);
+        RepositoryAccess alreadyRegistered = repositories.get(stateClass);
         if (alreadyRegistered != null) {
             throw newIllegalStateException(
                     "A repository for the state class %s already registered: %s",
@@ -87,7 +87,7 @@ public final class VisibilityGuard {
      */
     public boolean hasRepository(Class<? extends Message> stateClass) {
         checkNotNull(stateClass);
-        final boolean result = repositories.containsKey(stateClass);
+        boolean result = repositories.containsKey(stateClass);
         return result;
     }
 
@@ -95,7 +95,7 @@ public final class VisibilityGuard {
      * Obtains the repository for the passed entity state class.
      *
      * @param stateClass the class of the state of entities managed by the repository
-     * @return the repository wrapped into {@code Optional} or {@code Optional#absent()} if the
+     * @return the repository wrapped into {@code Optional} or {@code Optional#empty()} if the
      * entity state is {@linkplain Visibility#NONE not visible}
      * @throws IllegalArgumentException if the repository for the passed state class was not
      *                                  {@linkplain #register(Repository) registered} with the guard
@@ -104,7 +104,7 @@ public final class VisibilityGuard {
      */
     public Optional<Repository> getRepository(Class<? extends Message> stateClass) {
         checkNotNull(stateClass);
-        final RepositoryAccess repositoryAccess = repositories.get(stateClass);
+        RepositoryAccess repositoryAccess = repositories.get(stateClass);
         if (repositoryAccess == null) {
             throw newIllegalArgumentException(
                     "A repository for the state class (%s) was not registered in VisibilityGuard",
@@ -116,11 +116,11 @@ public final class VisibilityGuard {
     /**
      * Obtains a set of entity type names by their visibility.
      */
-    public Set<TypeName> getEntityTypes(final Visibility visibility) {
+    public Set<TypeName> getEntityTypes(Visibility visibility) {
         checkNotNull(visibility);
 
         // Filter repositories of entities with this visibility.
-        final Collection<RepositoryAccess> repos =
+        Collection<RepositoryAccess> repos =
                 filterValues(repositories,
                              input -> {
                                  checkNotNull(input);
@@ -128,16 +128,16 @@ public final class VisibilityGuard {
                              }).values();
 
         // Get type names for entities of the filtered repositories.
-        final Iterable<TypeName> entityTypes =
+        Iterable<TypeName> entityTypes =
                 transform(repos,
                           input -> {
                               checkNotNull(input);
                               @SuppressWarnings("unchecked")
                                   // Safe as it's bounded by Repository class definition.
-                              final Class<? extends Message> cls =
+                                      Class<? extends Message> cls =
                                       input.repository.entityClass()
                                                       .getStateClass();
-                              final TypeName result = TypeName.of(cls);
+                              TypeName result = TypeName.of(cls);
                               return result;
                           });
         return Sets.newHashSet(entityTypes);
@@ -164,14 +164,14 @@ public final class VisibilityGuard {
         private RepositoryAccess(Repository repository) {
             this.repository = repository;
             @SuppressWarnings("unchecked") // Safe as it's bounded by Repository class definition.
-            final Class<? extends Message> stateClass = repository.entityClass()
-                                                                  .getStateClass();
+            Class<? extends Message> stateClass = repository.entityClass()
+                                                            .getStateClass();
             this.visibility = EntityOptions.getVisibility(stateClass);
         }
 
         private Optional<Repository> get() {
             return (visibility == Visibility.NONE)
-                    ? Optional.absent()
+                    ? Optional.empty()
                     : Optional.of(repository);
         }
     }

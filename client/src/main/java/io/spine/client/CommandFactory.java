@@ -99,26 +99,6 @@ public final class CommandFactory {
     }
 
     /**
-     * Creates a new {@code Command} with the passed {@code message} and {@code context}.
-     *
-     * @param message the command message
-     * @param context the command context
-     * @return a new command instance
-     * @throws ValidationException if the passed message does not satisfy the constraints
-     *                             set for it in its Protobuf definition
-     */
-    @Internal
-    public Command createWithContext(Message message, CommandContext context)
-            throws ValidationException {
-        checkNotNull(message);
-        checkNotNull(context);
-        checkValid(message);
-
-        Command result = createCommand(message, context);
-        return result;
-    }
-
-    /**
      * Creates new {@code Command} with the passed message, using the existing context.
      *
      * <p>The produced command is created with a {@code CommandContext} instance, copied from
@@ -137,8 +117,7 @@ public final class CommandFactory {
         checkNotNull(context);
         checkValid(message);
 
-        CommandContext newContext = contextBasedOn(context);
-
+        CommandContext newContext = withCurrentTime(context);
         Command result = createCommand(message, newContext);
         return result;
     }
@@ -181,7 +160,8 @@ public final class CommandFactory {
     private CommandContext createContext(int targetVersion) {
         return createContext(actorRequestFactory.getTenantId(),
                              actorRequestFactory.getActor(),
-                             actorRequestFactory.getZoneOffset(), targetVersion);
+                             actorRequestFactory.getZoneOffset(),
+                             targetVersion);
     }
 
     /**
@@ -216,10 +196,9 @@ public final class CommandFactory {
                                         UserId userId,
                                         ZoneOffset zoneOffset,
                                         int targetVersion) {
-        CommandContext.Builder builder = newContextBuilder(tenantId, userId, zoneOffset);
-        CommandContext result = builder.setTargetVersion(targetVersion)
-                                             .build();
-        return result;
+        CommandContext.Builder result =
+                newContextBuilder(tenantId, userId, zoneOffset).setTargetVersion(targetVersion);
+        return result.build();
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder
@@ -242,15 +221,9 @@ public final class CommandFactory {
     }
 
     /**
-     * Creates a new instance of {@code CommandContext} based on the passed one.
-     *
-     * <p>The returned instance gets new {@code timestamp} set to
-     * the {@link io.spine.base.Time#getCurrentTime() current time}.
-     *
-     * @param value the instance from which to copy values
-     * @return new {@code CommandContext}
+     * Creates a copy of the passed {@code CommandContext} updated with the current time.
      */
-    private static CommandContext contextBasedOn(CommandContext value) {
+    private static CommandContext withCurrentTime(CommandContext value) {
         ActorContext.Builder withCurrentTime =
                 value.getActorContext()
                      .toBuilder()

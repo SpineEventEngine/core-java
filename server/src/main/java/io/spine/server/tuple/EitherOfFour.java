@@ -57,7 +57,7 @@ public final class EitherOfFour<A extends Message,
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     EitherOfFour<A, B, C, D> withA(A a) {
         checkNotNull(a);
-        final EitherOfFour<A, B, C, D> result = new EitherOfFour<>(a, 0);
+        EitherOfFour<A, B, C, D> result = new EitherOfFour<>(a, 0);
         return result;
     }
 
@@ -67,7 +67,7 @@ public final class EitherOfFour<A extends Message,
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     EitherOfFour<A, B, C, D> withB(B b) {
         checkNotNull(b);
-        final EitherOfFour<A, B, C, D> result = new EitherOfFour<>(b, 1);
+        EitherOfFour<A, B, C, D> result = new EitherOfFour<>(b, 1);
         return result;
     }
 
@@ -77,7 +77,7 @@ public final class EitherOfFour<A extends Message,
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     EitherOfFour<A, B, C, D> withC(C c) {
         checkNotNull(c);
-        final EitherOfFour<A, B, C, D> result = new EitherOfFour<>(c, 2);
+        EitherOfFour<A, B, C, D> result = new EitherOfFour<>(c, 2);
         return result;
     }
 
@@ -87,7 +87,7 @@ public final class EitherOfFour<A extends Message,
     public static <A extends Message, B extends Message, C extends Message, D extends Message>
     EitherOfFour<A, B, C, D> withD(D d) {
         checkNotNull(d);
-        final EitherOfFour<A, B, C, D> result = new EitherOfFour<>(d, 3);
+        EitherOfFour<A, B, C, D> result = new EitherOfFour<>(d, 3);
         return result;
     }
 

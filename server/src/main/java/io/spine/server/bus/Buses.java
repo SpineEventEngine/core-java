@@ -66,9 +66,9 @@ public class Buses {
     public static Ack reject(Message id, Error cause) {
         checkNotNull(cause);
         checkArgument(isNotDefault(cause));
-        final Status status = Status.newBuilder()
-                                    .setError(cause)
-                                    .build();
+        Status status = Status.newBuilder()
+                              .setError(cause)
+                              .build();
         return setStatus(id, status);
     }
 
@@ -82,20 +82,20 @@ public class Buses {
     public static Ack reject(Message id, Rejection cause) {
         checkNotNull(cause);
         checkArgument(isNotDefault(cause));
-        final Status status = Status.newBuilder()
-                                    .setRejection(cause)
-                                    .build();
+        Status status = Status.newBuilder()
+                              .setRejection(cause)
+                              .build();
         return setStatus(id, status);
     }
 
     private static Ack setStatus(Message id, Status status) {
         checkNotNull(id);
 
-        final Any packedId = pack(id);
-        final Ack result = Ack.newBuilder()
-                              .setMessageId(packedId)
-                              .setStatus(status)
-                              .build();
+        Any packedId = pack(id);
+        Ack result = Ack.newBuilder()
+                        .setMessageId(packedId)
+                        .setStatus(status)
+                        .build();
         return result;
     }
 }
