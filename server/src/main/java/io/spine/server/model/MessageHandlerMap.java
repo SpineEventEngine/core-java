@@ -42,7 +42,7 @@ import static com.google.common.collect.Sets.newHashSet;
  * @author Alexander Yevsyukov
  * @author Dmytro Grankin
  */
-public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M, ?>>
+public class MessageHandlerMap<M extends MessageClass, H extends AbstractHandlerMethod<M, ?>>
         implements Serializable {
 
     private static final long serialVersionUID = 0L;
@@ -55,7 +55,7 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
      * @param cls     the class to inspect
      * @param factory the factory of methods
      */
-    public MessageHandlerMap(Class<?> cls, HandlerMethod.Factory<H> factory) {
+    public MessageHandlerMap(Class<?> cls, AbstractHandlerMethod.Factory<H> factory) {
         this.map = scan(cls, factory);
     }
 
@@ -121,7 +121,7 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
         return getMethod(key);
     }
 
-    private static <M extends MessageClass, H extends HandlerMethod<M, ?>>
+    private static <M extends MessageClass, H extends AbstractHandlerMethod<M, ?>>
     ImmutableSet<M> messageClasses(Iterable<H> handlerMethods) {
         Set<M> setToSwallowDuplicates = newHashSet();
         for (H handler : handlerMethods) {
@@ -130,8 +130,8 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
         return ImmutableSet.copyOf(setToSwallowDuplicates);
     }
 
-    private static <M extends MessageClass, H extends HandlerMethod<M, ?>>
-    ImmutableMap<HandlerKey, H> scan(Class<?> declaringClass, HandlerMethod.Factory<H> factory) {
+    private static <M extends MessageClass, H extends AbstractHandlerMethod<M, ?>>
+    ImmutableMap<HandlerKey, H> scan(Class<?> declaringClass, AbstractHandlerMethod.Factory<H> factory) {
         Predicate<Method> filter = factory.getPredicate();
         Map<HandlerKey, H> tempMap = Maps.newHashMap();
         Method[] declaredMethods = declaringClass.getDeclaredMethods();

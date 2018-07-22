@@ -27,7 +27,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Utilities for working with {@linkplain HandlerMethod handler methods}.
+ * Utilities for working with {@linkplain AbstractHandlerMethod handler methods}.
  *
  * @author Alex Tymchenko
  */
@@ -39,13 +39,13 @@ public final class HandlerMethods {
     }
 
     /**
-     * Creates a predicate to remove the {@linkplain HandlerMethod handler methods}
+     * Creates a predicate to remove the {@linkplain AbstractHandlerMethod handler methods}
      * that are not marked {@linkplain ExternalAttribute#EXTERNAL external}.
      *
      * @param <M> the type of the {@code HandlerMethod} to apply this predicate to
      * @return the predicate
      */
-    public static <M extends HandlerMethod<?, ?>> Predicate<M> external() {
+    public static <M extends AbstractHandlerMethod<?, ?>> Predicate<M> external() {
         return input -> {
             M method = checkNotNull(input);
             boolean result = isExternal(method);
@@ -54,13 +54,13 @@ public final class HandlerMethods {
     }
 
     /**
-     * Creates a predicate to remove the {@linkplain HandlerMethod handler methods}
+     * Creates a predicate to remove the {@linkplain AbstractHandlerMethod handler methods}
      * that are marked {@linkplain ExternalAttribute#EXTERNAL external}.
      *
      * @param <M> the type of the {@code HandlerMethod} to apply this predicate to
      * @return the predicate
      */
-    public static <M extends HandlerMethod<?, ?>> Predicate<M> domestic() {
+    public static <M extends AbstractHandlerMethod<?, ?>> Predicate<M> domestic() {
         return input -> {
             M method = checkNotNull(input);
             boolean result = !isExternal(method);
@@ -68,13 +68,13 @@ public final class HandlerMethods {
         };
     }
 
-    private static <M extends HandlerMethod<?, ?>> boolean isExternal(M method) {
+    private static <M extends AbstractHandlerMethod<?, ?>> boolean isExternal(M method) {
         return method.getAttributes()
                      .contains(ExternalAttribute.EXTERNAL);
     }
 
     /**
-     * Ensures that the {@code external} attribute of the {@linkplain HandlerMethod method} is
+     * Ensures that the {@code external} attribute of the {@linkplain AbstractHandlerMethod method} is
      * the one expected.
      *
      * <p>{@link IllegalArgumentException} is thrown if the value does not meet the expectations.
@@ -83,7 +83,7 @@ public final class HandlerMethods {
      * @param shouldBeExternal an expected value of {@code external} attribute.
      * @see ExternalAttribute
      */
-    public static void ensureExternalMatch(HandlerMethod<?, ?> method, boolean shouldBeExternal) {
+    public static void ensureExternalMatch(AbstractHandlerMethod<?, ?> method, boolean shouldBeExternal) {
 
         checkArgument(isExternal(method) == shouldBeExternal,
                       "Mismatch of `external` value for the handler method %s. " +

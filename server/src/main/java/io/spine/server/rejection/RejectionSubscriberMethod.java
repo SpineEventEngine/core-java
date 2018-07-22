@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.RejectionContext;
 import io.spine.core.Subscribe;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 
@@ -79,7 +79,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
     }
 
     /** Returns the factory for filtering and creating rejection subscriber methods. */
-    public static HandlerMethod.Factory<RejectionSubscriberMethod> factory() {
+    public static AbstractHandlerMethod.Factory<RejectionSubscriberMethod> factory() {
         return Factory.getInstance();
     }
 
@@ -90,7 +90,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
     /**
      * The factory for filtering methods that match {@code RejectionSubscriberMethod} specification.
      */
-    private static class Factory extends HandlerMethod.Factory<RejectionSubscriberMethod> {
+    private static class Factory extends AbstractHandlerMethod.Factory<RejectionSubscriberMethod> {
 
         @Override
         public Class<RejectionSubscriberMethod> getMethodClass() {

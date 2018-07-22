@@ -27,8 +27,8 @@ import io.spine.core.CommandContext;
 import io.spine.core.Commands;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionContext;
+import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
-import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 
 import java.lang.annotation.Annotation;
@@ -48,7 +48,7 @@ import static io.spine.util.Exceptions.unsupported;
  * @author Alexander Yevsyukov
  */
 @Internal
-abstract class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionContext> {
+abstract class RejectionHandlerMethod extends AbstractHandlerMethod<RejectionClass, RejectionContext> {
 
     /** Determines the number of parameters and their types. */
     private final Kind kind;

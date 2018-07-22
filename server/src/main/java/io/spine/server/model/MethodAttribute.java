@@ -22,7 +22,7 @@ package io.spine.server.model;
 import io.spine.annotation.Internal;
 
 /**
- * Meta-data set to a {@link HandlerMethod HandlerMethod}.
+ * Meta-data set to a {@link AbstractHandlerMethod HandlerMethod}.
  *
  * <p>Typical way to add more semantics to a method is via a parameterized annotation,
  * such as {@link io.spine.core.Subscribe Subscribe}.

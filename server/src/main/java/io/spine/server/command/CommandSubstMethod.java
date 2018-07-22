@@ -24,8 +24,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.server.model.HandlerKey;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
 import io.spine.server.model.MethodPredicate;
@@ -39,41 +38,32 @@ import java.util.function.Predicate;
  * @author Alexander Yevsyukov
  */
 @Internal
-public final class CommandSubstitutionMethod
-        extends CommandingMethod<CommandClass, CommandContext> {
+public final class CommandSubstMethod
+        extends CommandAcceptingMethod
+        implements CommandingMethod<CommandClass, CommandContext> {
 
     /** The instance of the predicate to filter command transforming methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
 
-    private CommandSubstitutionMethod(Method method) {
+    private CommandSubstMethod(Method method) {
         super(method);
     }
 
-    static CommandSubstitutionMethod from(Method method) {
-        return new CommandSubstitutionMethod(method);
+    static CommandSubstMethod from(Method method) {
+        return new CommandSubstMethod(method);
     }
 
     static MethodPredicate predicate() {
         return PREDICATE;
     }
 
-    @Override
-    public CommandClass getMessageClass() {
-        return CommandClass.of(rawMessageClass());
-    }
-
-    @Override
-    public HandlerKey key() {
-        return HandlerKey.of(getMessageClass());
-    }
-
-    private static class Factory extends HandlerMethod.Factory<CommandSubstitutionMethod> {
+    private static class Factory extends AbstractHandlerMethod.Factory<CommandSubstMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
         @Override
-        public Class<CommandSubstitutionMethod> getMethodClass() {
-            return CommandSubstitutionMethod.class;
+        public Class<CommandSubstMethod> getMethodClass() {
+            return CommandSubstMethod.class;
         }
 
         @Override
@@ -85,7 +75,7 @@ public final class CommandSubstitutionMethod
         public void checkAccessModifier(Method method) {
             MethodAccessChecker checker = MethodAccessChecker.forMethod(method);
             checker.checkPackagePrivate(
-                    "Command transformation method {} should be package-private."
+                    "Command substitution method {} should be package-private."
             );
         }
 
@@ -96,7 +86,7 @@ public final class CommandSubstitutionMethod
         }
 
         @Override
-        protected CommandSubstitutionMethod createFromMethod(Method method) {
+        protected CommandSubstMethod createFromMethod(Method method) {
             return from(method);
         }
     }

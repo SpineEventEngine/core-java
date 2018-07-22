@@ -26,10 +26,8 @@ import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.type.MessageClass;
 
-import java.lang.reflect.Method;
-
 /**
- * Abstract base for methods that generate one or more command messages in response to
+ * Base interface for methods that generate one or more command messages in response to
  * an incoming message.
  *
  * @param <M> the type of the message class
@@ -38,20 +36,15 @@ import java.lang.reflect.Method;
  * @author Alexander Yevsyukov
  */
 @Internal
-public abstract class CommandingMethod<M extends MessageClass, C extends Message>
+public interface CommandingMethod<M extends MessageClass, C extends Message>
         extends HandlerMethod<M, C> {
-
-    protected CommandingMethod(Method method) {
-        super(method);
-    }
 
     /**
      * Abstract base for commanding method predicates.
      */
-    public abstract static class AbstractFilterPredicate<C extends Message>
-            extends HandlerMethodPredicate<C> {
+    abstract class AbstractFilterPredicate<C extends Message> extends HandlerMethodPredicate<C> {
 
-        protected AbstractFilterPredicate(Class<C> contextClass) {
+        AbstractFilterPredicate(Class<C> contextClass) {
             super(Command.class, contextClass);
         }
     }

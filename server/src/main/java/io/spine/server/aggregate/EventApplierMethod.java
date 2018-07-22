@@ -25,8 +25,8 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
+import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
-import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
@@ -41,7 +41,7 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  *
  * @author Alexander Yevsyukov
  */
-final class EventApplierMethod extends HandlerMethod<EventClass, Empty> {
+final class EventApplierMethod extends AbstractHandlerMethod<EventClass, Empty> {
 
     /** The instance of the predicate to filter event applier methods of an aggregate class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -74,14 +74,14 @@ final class EventApplierMethod extends HandlerMethod<EventClass, Empty> {
         return PREDICATE;
     }
 
-    public static HandlerMethod.Factory<EventApplierMethod> factory() {
+    public static AbstractHandlerMethod.Factory<EventApplierMethod> factory() {
         return Factory.getInstance();
     }
 
     /**
      * Invokes the applier method.
      *
-     * <p>The method {@linkplain HandlerMethod#invoke(Object, Message, Message) delegates}
+     * <p>The method {@linkplain AbstractHandlerMethod#invoke(Object, Message, Message) delegates}
      * the invocation passing {@linkplain Empty#getDefaultInstance() empty message}
      * as the context parameter because event appliers do not have a context parameter.
      * Such redirection is correct because {@linkplain #getParamCount()} the number of parameters}
@@ -94,7 +94,7 @@ final class EventApplierMethod extends HandlerMethod<EventClass, Empty> {
     }
 
     /** The factory for filtering methods that match {@code EventApplier} specification. */
-    private static class Factory extends HandlerMethod.Factory<EventApplierMethod> {
+    private static class Factory extends AbstractHandlerMethod.Factory<EventApplierMethod> {
 
         private static final Factory INSTANCE = new Factory();
 

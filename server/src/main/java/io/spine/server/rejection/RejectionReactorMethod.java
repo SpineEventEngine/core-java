@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.React;
 import io.spine.core.RejectionContext;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 
@@ -83,7 +83,7 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
     }
 
     /** Returns the factory for filtering and creating rejection reactor methods. */
-    public static HandlerMethod.Factory<RejectionReactorMethod> factory() {
+    public static AbstractHandlerMethod.Factory<RejectionReactorMethod> factory() {
         return Factory.getInstance();
     }
 
@@ -94,7 +94,7 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
     /**
      * The factory for filtering methods that match {@code RejectionReactorMethod} specification.
      */
-    private static class Factory extends HandlerMethod.Factory<RejectionReactorMethod> {
+    private static class Factory extends AbstractHandlerMethod.Factory<RejectionReactorMethod> {
 
         @Override
         public Class<RejectionReactorMethod> getMethodClass() {

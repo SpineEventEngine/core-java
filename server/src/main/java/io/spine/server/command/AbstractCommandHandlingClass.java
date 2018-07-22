@@ -18,35 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.command;
 
-import com.google.protobuf.Message;
-import io.spine.type.MessageClass;
+import io.spine.annotation.Internal;
+import io.spine.server.model.ModelClass;
 
 /**
- * Describes a method that accepts a message and optionally its context.
+ * Abstract base for classes providing message handling information of classes that handle commands.
  *
- * <p>Two message handlers are equivalent when they refer to the same method on the
- * same object (not class).
- *
- * @param <M> the type of the message class
- * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
- *            a context parameter is never used
+ * @param <C> the type of a command handling class
  * @author Alexander Yevsyukov
  */
-public interface HandlerMethod<M extends MessageClass, C extends Message> {
+@Internal
+public abstract class AbstractCommandHandlingClass<C>
+        extends ModelClass<C>
+        implements CommandHandlingClass {
 
-    M getMessageClass();
-
-    HandlerKey key();
-
-    /**
-     * Invokes the method to handle {@code message} with the {@code context}.
-     *
-     * @param target  the target object on which call the method
-     * @param message the message to handle
-     * @param context the context of the message
-     * @return the result of message handling
-     */
-    Object invoke(Object target, Message message, C context);
+    protected AbstractCommandHandlingClass(Class<? extends C> cls) {
+        super(cls);
+    }
 }

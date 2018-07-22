@@ -47,10 +47,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("HandlerMethod should")
 class HandlerMethodTest {
 
-    private final HandlerMethod.Factory<OneParamMethod> factory = OneParamMethod.factory();
+    private final AbstractHandlerMethod.Factory<OneParamMethod> factory = OneParamMethod.factory();
 
-    private HandlerMethod<EventClass, EventContext> twoParamMethod;
-    private HandlerMethod<EventClass, Empty> oneParamMethod;
+    private AbstractHandlerMethod<EventClass, EventContext> twoParamMethod;
+    private AbstractHandlerMethod<EventClass, Empty> oneParamMethod;
     private Object target;
 
     @BeforeEach
@@ -92,7 +92,7 @@ class HandlerMethodTest {
     @Test
     @DisplayName("obtain first parameter type of method")
     void returnFirstParamType() {
-        assertEquals(BoolValue.class, HandlerMethod.getFirstParamType(oneParamMethod.getMethod()));
+        assertEquals(BoolValue.class, AbstractHandlerMethod.getFirstParamType(oneParamMethod.getMethod()));
     }
 
     @Nested
@@ -153,7 +153,7 @@ class HandlerMethodTest {
         @Test
         @DisplayName("all fields are compared")
         void allFieldsAreCompared() {
-            HandlerMethod<EventClass, EventContext> anotherMethod =
+            AbstractHandlerMethod<EventClass, EventContext> anotherMethod =
                     new TwoParamMethod(StubHandler.getTwoParameterMethod());
 
             assertEquals(twoParamMethod, anotherMethod);

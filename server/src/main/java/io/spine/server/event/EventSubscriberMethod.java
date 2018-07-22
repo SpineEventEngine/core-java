@@ -25,8 +25,8 @@ import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
+import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
-import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 
@@ -43,7 +43,7 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  * @author Alexander Yevsyukov
  * @see Subscribe
  */
-public final class EventSubscriberMethod extends HandlerMethod<EventClass, EventContext> {
+public final class EventSubscriberMethod extends AbstractHandlerMethod<EventClass, EventContext> {
 
     /** The instance of the predicate to filter event subscriber methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -68,7 +68,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventClass, Event
     }
 
     /** Returns the factory for filtering and creating event subscriber methods. */
-    public static HandlerMethod.Factory<EventSubscriberMethod> factory() {
+    public static AbstractHandlerMethod.Factory<EventSubscriberMethod> factory() {
         return Factory.getInstance();
     }
 
@@ -86,7 +86,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventClass, Event
     /**
      * The factory for creating {@linkplain EventSubscriberMethod event subscriber} methods.
      */
-    private static class Factory extends HandlerMethod.Factory<EventSubscriberMethod> {
+    private static class Factory extends AbstractHandlerMethod.Factory<EventSubscriberMethod> {
 
         private static final Factory INSTANCE = new Factory();
 

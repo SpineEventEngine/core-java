@@ -20,18 +20,12 @@
 
 package io.spine.server.command;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.Rejection;
-import io.spine.server.entity.Entity;
-import io.spine.server.model.HandlerKey;
-import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.HandlerMethodFailedException;
+import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
@@ -39,10 +33,7 @@ import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
-
-import static com.google.common.base.Throwables.getRootCause;
 
 /**
  * The wrapper for a command handler method.
@@ -50,7 +41,7 @@ import static com.google.common.base.Throwables.getRootCause;
  * @author Alexander Yevsyukov
  */
 @Internal
-public final class CommandHandlerMethod extends HandlerMethod<CommandClass, CommandContext> {
+public final class CommandHandlerMethod extends CommandAcceptingMethod {
 
     /** The instance of the predicate to filter command handler methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -64,16 +55,6 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
         super(method);
     }
 
-    @Override
-    public CommandClass getMessageClass() {
-        return CommandClass.of(rawMessageClass());
-    }
-
-    @Override
-    public HandlerKey key() {
-        return HandlerKey.of(getMessageClass());
-    }
-
     static CommandHandlerMethod from(Method method) {
         return new CommandHandlerMethod(method);
     }
@@ -82,7 +63,7 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
         return PREDICATE;
     }
 
-    public static HandlerMethod.Factory<CommandHandlerMethod> factory() {
+    public static AbstractHandlerMethod.Factory<CommandHandlerMethod> factory() {
         return Factory.getInstance();
     }
 
@@ -102,53 +83,9 @@ public final class CommandHandlerMethod extends HandlerMethod<CommandClass, Comm
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>{@linkplain ThrowableMessage#initProducer(Any) Initializes} producer ID if the exception
-     * was caused by a thrown rejection.
-     */
-    @Override
-    protected HandlerMethodFailedException whyFailed(Object target,
-                                                     Message message,
-                                                     CommandContext context,
-                                                     Exception cause) {
-        HandlerMethodFailedException exception =
-                super.whyFailed(target, message, context, cause);
-
-        Throwable rootCause = getRootCause(exception);
-        if (rootCause instanceof ThrowableMessage) {
-            ThrowableMessage thrownMessage = (ThrowableMessage) rootCause;
-
-            Optional<Any> producerId = idOf(target);
-            producerId.ifPresent(thrownMessage::initProducer);
-        }
-
-        return exception;
-    }
-
-    /**
-     * Obtains ID of the passed object by attempting to cast it to {@link Entity} or
-     * {@link CommandHandler}.
-     *
-     * @return packed ID or empty optional if the object is of type for which we cannot get ID
-     */
-    @SuppressWarnings("ChainOfInstanceofChecks")
-    private static Optional<Any> idOf(Object target) {
-        Any producerId;
-        if (target instanceof Entity) {
-            producerId = Identifier.pack(((Entity) target).getId());
-        } else if (target instanceof CommandHandler) {
-            producerId = Identifier.pack(((CommandHandler) target).getId());
-        } else {
-            return Optional.empty();
-        }
-        return Optional.of(producerId);
-    }
-
-    /**
      * The factory of {@link CommandHandlerMethod}s.
      */
-    private static class Factory extends HandlerMethod.Factory<CommandHandlerMethod> {
+    private static class Factory extends AbstractHandlerMethod.Factory<CommandHandlerMethod> {
 
         private static final Factory INSTANCE = new Factory();
 

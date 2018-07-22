@@ -30,7 +30,7 @@ import java.util.Objects;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A key of {@link HandlerMethod}.
+ * A key of {@link AbstractHandlerMethod}.
  *
  * <p>Contains information about parameters of a handler method.
  *
@@ -65,7 +65,7 @@ public final class HandlerKey {
     }
 
     /**
-     * Obtains a {@link MessageClass}, which is handled by {@link HandlerMethod} with this key.
+     * Obtains a {@link MessageClass}, which is handled by {@link AbstractHandlerMethod} with this key.
      */
     public MessageClass getHandledMessageCls() {
         return handledMessage;

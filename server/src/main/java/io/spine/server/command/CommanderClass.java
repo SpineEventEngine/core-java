@@ -18,35 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.command;
 
-import com.google.protobuf.Message;
-import io.spine.type.MessageClass;
+import io.spine.annotation.Internal;
+import io.spine.core.CommandClass;
+import io.spine.server.model.ModelClass;
+
+import java.util.Set;
 
 /**
- * Describes a method that accepts a message and optionally its context.
+ * Provides information on message handling for a class of {@link Commander}s.
  *
- * <p>Two message handlers are equivalent when they refer to the same method on the
- * same object (not class).
- *
- * @param <M> the type of the message class
- * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
- *            a context parameter is never used
+ * @param <C> the type of commanders
  * @author Alexander Yevsyukov
  */
-public interface HandlerMethod<M extends MessageClass, C extends Message> {
+@Internal
+public final class CommanderClass<C extends Commander>
+        extends ModelClass<C>
+        implements CommandHandlingClass {
 
-    M getMessageClass();
+    private static final long serialVersionUID = 0L;
 
-    HandlerKey key();
+    private CommanderClass(Class<? extends C> value) {
+        super(value);
+    }
 
-    /**
-     * Invokes the method to handle {@code message} with the {@code context}.
-     *
-     * @param target  the target object on which call the method
-     * @param message the message to handle
-     * @param context the context of the message
-     * @return the result of message handling
-     */
-    Object invoke(Object target, Message message, C context);
+    @Override
+    public Set<CommandClass> getCommands() {
+        return null;
+    }
 }

@@ -38,7 +38,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.integration.IntegrationBus;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.projection.Projection;
@@ -492,7 +492,7 @@ public class IntegrationBusTestEnv {
 
     /**
      * A subscriber for testing of
-     * {@linkplain io.spine.server.model.HandlerMethods#ensureExternalMatch(HandlerMethod, boolean)
+     * {@linkplain io.spine.server.model.HandlerMethods#ensureExternalMatch(AbstractHandlerMethod, boolean)
      * external attribute mismatch check}.
      */
     @SuppressWarnings("unused") // OK to have unused params in this test env. class

@@ -24,7 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
 import io.spine.core.CommandContext;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testdata.Sample;
 import io.spine.validate.StringValueVBuilder;
@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("EventApplierMethod should")
 class EventApplierMethodTest {
 
-    private final HandlerMethod.Factory<EventApplierMethod> factory = EventApplierMethod.factory();
+    private final AbstractHandlerMethod.Factory<EventApplierMethod> factory = EventApplierMethod.factory();
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)

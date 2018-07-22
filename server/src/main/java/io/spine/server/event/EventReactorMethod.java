@@ -24,8 +24,8 @@ import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.React;
+import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
-import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 
@@ -43,7 +43,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Alexander Yevsyukov
  * @see React
  */
-public final class EventReactorMethod extends HandlerMethod<EventClass, EventContext> {
+public final class EventReactorMethod extends AbstractHandlerMethod<EventClass, EventContext> {
 
     private static final MethodPredicate PREDICATE = new FilterPredicate();
 
@@ -83,14 +83,14 @@ public final class EventReactorMethod extends HandlerMethod<EventClass, EventCon
         return PREDICATE;
     }
 
-    public static HandlerMethod.Factory<EventReactorMethod> factory() {
+    public static AbstractHandlerMethod.Factory<EventReactorMethod> factory() {
         return Factory.getInstance();
     }
 
     /**
      * The factory for creating {@link EventReactorMethod event reactor} methods.
      */
-    private static class Factory extends HandlerMethod.Factory<EventReactorMethod> {
+    private static class Factory extends AbstractHandlerMethod.Factory<EventReactorMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
