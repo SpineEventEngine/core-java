@@ -178,10 +178,14 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
             StringBuilder threadNameUponScheduling = new StringBuilder(0);
             CountDownLatch latch = new CountDownLatch(1);
             CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling, latch);
-            storeSingleCommandForRescheduling();
+
+            TestSystemGateway systemGateway = new TestSingleTenantSystemGateway();
+            storeSingleCommandForRescheduling(systemGateway);
 
             // Create CommandBus specific for this test.
             CommandBus commandBus = CommandBus.newBuilder()
+                                              .injectTenantIndex(tenantIndex)
+                                              .injectSystemGateway(systemGateway)
                                               .setCommandScheduler(scheduler)
                                               .setThreadSpawnAllowed(false)
                                               .setAutoReschedule(true)
