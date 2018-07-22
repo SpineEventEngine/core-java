@@ -73,6 +73,8 @@ public abstract class Bus<T extends Message,
      */
     private @Nullable FilterChain<E, ?> filterChain;
 
+    private final Deque<BusFilter<E>> emptyFilters = newLinkedList();
+
     /**
      * Registers the passed dispatcher.
      *
@@ -218,12 +220,19 @@ public abstract class Bus<T extends Message,
      */
     private BusFilter<E> filterChain() {
         if (filterChain == null) {
-            Deque<BusFilter<E>> filters = createFilterChain();
+            Deque<BusFilter<E>> filters = newLinkedList();
+            Deque<BusFilter<E>> tail = filterChainTail();
+            filters.addAll(tail);
+
             BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(),
                                                                  registry());
             BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
+
             filters.push(deadMsgFilter);
             filters.push(validatingFilter);
+            Deque<BusFilter<E>> head = filterChainHead();
+            head.forEach(filters::push);
+
             filterChain = new FilterChain<>(filters);
         }
         return filterChain;
@@ -257,7 +266,11 @@ public abstract class Bus<T extends Message,
      *
      * @return a deque of the bus custom filters
      */
-    protected abstract Deque<BusFilter<E>> createFilterChain();
+    protected abstract Deque<BusFilter<E>> filterChainTail();
+
+    protected Deque<BusFilter<E>> filterChainHead() {
+        return emptyFilters;
+    }
 
     /**
      * Filters the given messages.

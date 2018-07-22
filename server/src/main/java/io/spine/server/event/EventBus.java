@@ -167,7 +167,7 @@ public class EventBus
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
     @Override
-    protected Deque<BusFilter<EventEnvelope>> createFilterChain() {
+    protected Deque<BusFilter<EventEnvelope>> filterChainTail() {
         return filterChain;
     }
 

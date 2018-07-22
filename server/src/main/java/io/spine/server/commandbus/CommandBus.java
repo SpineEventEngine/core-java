@@ -55,6 +55,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
+import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.core.Rejections.causedByRejection;
 import static io.spine.core.Rejections.toRejection;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -187,11 +188,17 @@ public class CommandBus extends Bus<Command,
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a protected factory method
     @Override
-    protected Deque<BusFilter<CommandEnvelope>> createFilterChain() {
-        BusFilter<CommandEnvelope> tap = new CommandReceivedTap(systemGateway);
-        filterChain.push(tap);
+    protected Deque<BusFilter<CommandEnvelope>> filterChainTail() {
         filterChain.push(scheduler);
         return filterChain;
+    }
+
+    @Override
+    protected Deque<BusFilter<CommandEnvelope>> filterChainHead() {
+        BusFilter<CommandEnvelope> tap = new CommandReceivedTap(systemGateway);
+        Deque<BusFilter<CommandEnvelope>> result = newLinkedList();
+        result.push(tap);
+        return result;
     }
 
     @Override

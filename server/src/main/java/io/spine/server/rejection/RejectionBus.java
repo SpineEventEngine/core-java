@@ -108,7 +108,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
     @Override
-    protected Deque<BusFilter<RejectionEnvelope>> createFilterChain() {
+    protected Deque<BusFilter<RejectionEnvelope>> filterChainTail() {
         return filterChain;
     }
 

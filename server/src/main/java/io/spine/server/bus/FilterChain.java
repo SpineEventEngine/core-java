@@ -30,6 +30,8 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
 
 /**
  * A {@link BusFilter} representing a chain of other bus filters.
@@ -84,6 +86,15 @@ final class FilterChain<E extends MessageEnvelope<?, ?, ?>, F extends BusFilter<
             F filter = filters.next();
             filter.close();
         }
+    }
+
+    @Override
+    public String toString() {
+        String filters = chain.stream()
+                              .map(BusFilter::getClass)
+                              .map(Class::getSimpleName)
+                              .collect(joining(", "));
+        return format("%s[%s]", FilterChain.class.getName(), filters);
     }
 
     private void checkNotClosed() {

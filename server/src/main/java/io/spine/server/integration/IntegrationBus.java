@@ -190,7 +190,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     }
 
     @Override
-    protected Deque<BusFilter<ExternalMessageEnvelope>> createFilterChain() {
+    protected Deque<BusFilter<ExternalMessageEnvelope>> filterChainTail() {
         return newLinkedList();
     }
 
