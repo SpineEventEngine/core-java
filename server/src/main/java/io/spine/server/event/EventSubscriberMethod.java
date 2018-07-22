@@ -46,7 +46,7 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
 public final class EventSubscriberMethod extends AbstractHandlerMethod<EventClass, EventContext> {
 
     /** The instance of the predicate to filter event subscriber methods of a class. */
-    private static final MethodPredicate PREDICATE = new FilterPredicate();
+    private static final MethodPredicate PREDICATE = new Filter();
 
     /** Creates a new instance. */
     private EventSubscriberMethod(Method method) {
@@ -121,9 +121,9 @@ public final class EventSubscriberMethod extends AbstractHandlerMethod<EventClas
      *
      * <p>Please see {@link Subscribe} annotation for more information.
      */
-    private static class FilterPredicate extends EventMethodPredicate {
+    private static class Filter extends EventMethodPredicate {
 
-        private FilterPredicate() {
+        private Filter() {
             super(Subscribe.class);
         }
 

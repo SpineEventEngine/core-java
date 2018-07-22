@@ -43,7 +43,7 @@ public final class CommandSubstMethod
         implements CommandingMethod<CommandClass, CommandContext> {
 
     /** The instance of the predicate to filter command transforming methods of a class. */
-    private static final MethodPredicate PREDICATE = new FilterPredicate();
+    private static final MethodPredicate PREDICATE = new Filter();
 
     private CommandSubstMethod(Method method) {
         super(method);
@@ -94,10 +94,10 @@ public final class CommandSubstMethod
     /**
      * Filters command transforming methods.
      */
-    private static final class FilterPredicate
-            extends CommandingMethod.AbstractFilterPredicate<CommandContext> {
+    private static final class Filter
+            extends AbstractPredicate<CommandContext> {
 
-        private FilterPredicate() {
+        private Filter() {
             super(CommandContext.class);
         }
 

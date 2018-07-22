@@ -45,7 +45,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public final class EventReactorMethod extends AbstractHandlerMethod<EventClass, EventContext> {
 
-    private static final MethodPredicate PREDICATE = new FilterPredicate();
+    private static final MethodPredicate PREDICATE = new Filter();
 
     private EventReactorMethod(Method method) {
         super(method);
@@ -123,9 +123,9 @@ public final class EventReactorMethod extends AbstractHandlerMethod<EventClass, 
     /**
      * The predicate that filters event reactor methods.
      */
-    private static class FilterPredicate extends EventMethodPredicate {
+    private static class Filter extends EventMethodPredicate {
 
-        private FilterPredicate() {
+        private Filter() {
             super(React.class);
         }
 

@@ -43,7 +43,7 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
 final class EventApplier extends AbstractHandlerMethod<EventClass, Empty> {
 
     /** The instance of the predicate to filter event applier methods of an aggregate class. */
-    private static final MethodPredicate PREDICATE = new FilterPredicate();
+    private static final MethodPredicate PREDICATE = new Filter();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -126,12 +126,12 @@ final class EventApplier extends AbstractHandlerMethod<EventClass, Empty> {
     /**
      * The predicate for filtering event applier methods.
      */
-    private static class FilterPredicate extends HandlerMethodPredicate<Empty> {
+    private static class Filter extends HandlerMethodPredicate<Empty> {
 
         private static final int NUMBER_OF_PARAMS = 1;
         private static final int EVENT_PARAM_INDEX = 0;
 
-        private FilterPredicate() {
+        private Filter() {
             super(Apply.class, Empty.class);
         }
 

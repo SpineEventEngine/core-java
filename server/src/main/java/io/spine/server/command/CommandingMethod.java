@@ -42,9 +42,9 @@ public interface CommandingMethod<M extends MessageClass, C extends Message>
     /**
      * Abstract base for commanding method predicates.
      */
-    abstract class AbstractFilterPredicate<C extends Message> extends HandlerMethodPredicate<C> {
+    abstract class AbstractPredicate<C extends Message> extends HandlerMethodPredicate<C> {
 
-        AbstractFilterPredicate(Class<C> contextClass) {
+        AbstractPredicate(Class<C> contextClass) {
             super(Command.class, contextClass);
         }
     }

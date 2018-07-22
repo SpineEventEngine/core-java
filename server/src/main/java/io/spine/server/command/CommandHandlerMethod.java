@@ -44,7 +44,7 @@ import java.util.function.Predicate;
 public final class CommandHandlerMethod extends CommandAcceptingMethod {
 
     /** The instance of the predicate to filter command handler methods of a class. */
-    private static final MethodPredicate PREDICATE = new FilterPredicate();
+    private static final MethodPredicate PREDICATE = new Filter();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -133,9 +133,9 @@ public final class CommandHandlerMethod extends CommandAcceptingMethod {
      *
      * <p>See {@link Assign} annotation for more info about such methods.
      */
-    private static class FilterPredicate extends HandlerMethodPredicate<CommandContext> {
+    private static class Filter extends HandlerMethodPredicate<CommandContext> {
 
-        private FilterPredicate() {
+        private Filter() {
             super(Assign.class, CommandContext.class);
         }
 
