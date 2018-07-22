@@ -77,11 +77,11 @@ public class Model {
      * <p>If the passed class was not added to the model before, it would be added as the result of
      * this method call.
      *
-     * @throws DuplicateCommandHandlerError if there is the aggregate class handles one or more
-     *         commands that are handled by another class, which was added to the model before
-     *         calling this method
+     * @throws DuplicateCommandHandlerError if the aggregate class handles one or more
+     *         commands which are already known to the model as handled by another class
      */
-    public AggregateClass<?> asAggregateClass(Class<? extends Aggregate> cls) {
+    public AggregateClass<?> asAggregateClass(Class<? extends Aggregate> cls)
+            throws DuplicateCommandHandlerError {
         checkNotNull(cls);
         ModelClass<?> modelClass = classes.get(cls, () -> new AggregateClass<>(cls), true);
         return (AggregateClass<?>) modelClass;
@@ -96,7 +96,8 @@ public class Model {
      * @throws DuplicateCommandHandlerError if the given aggregate part class handles one or
      *         more commands which are already known to the model as handled by another class
      */
-    public AggregatePartClass<?> asAggregatePartClass(Class<? extends AggregatePart> cls) {
+    public AggregatePartClass<?> asAggregatePartClass(Class<? extends AggregatePart> cls)
+            throws DuplicateCommandHandlerError {
         checkNotNull(cls);
         ModelClass<?> modelClass = classes.get(cls, () -> new AggregatePartClass<>(cls), true);
         return (AggregatePartClass<?>) modelClass;
@@ -108,9 +109,8 @@ public class Model {
      * <p>If the passed class was not added to the model before, it would be added as the result of
      * this method call.
      *
-     * @throws DuplicateCommandHandlerError if there is the passed process manager class handles one
-     *         or more commands that are handled by another class, which was added to the model
-     *         before calling this method
+     * @throws DuplicateCommandHandlerError if the passed process manager class handles one
+     *         or more commands already known to the model as handled by another class
      */
     public ProcessManagerClass<?> asProcessManagerClass(Class<? extends ProcessManager> cls)
         throws DuplicateCommandHandlerError {
@@ -149,9 +149,8 @@ public class Model {
      * <p>If the passed class was not added to the model before, it would be added as the result of
      * this method call.
      *
-     * @throws DuplicateCommandHandlerError if there is the passed command handler class handles one
-     *         or more commands that are handled by another class, which was added to the model
-     *         before calling this method
+     * @throws DuplicateCommandHandlerError if the passed command handler class handles one
+     *         or more commands which are already known to the model as handled by another class
      */
     public CommandHandlerClass asCommandHandlerClass(Class<? extends CommandHandler> cls)
             throws DuplicateCommandHandlerError {
