@@ -29,8 +29,8 @@ import io.spine.server.model.ModelClass;
 
 import java.util.Set;
 
-import static io.spine.server.model.HandlerMethods.domestic;
-import static io.spine.server.model.HandlerMethods.external;
+import static io.spine.server.model.HandlerMethod.domestic;
+import static io.spine.server.model.HandlerMethod.external;
 
 /**
  * Provides type information on a {@link RejectionSubscriber} class.

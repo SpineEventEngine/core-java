@@ -138,6 +138,7 @@ public abstract class AbstractHandlerMethod<M extends MessageClass, C extends Me
     }
 
     /** Returns the set of method attributes configured for this method. */
+    @Override
     public Set<MethodAttribute<?>> getAttributes() {
         return attributes;
     }

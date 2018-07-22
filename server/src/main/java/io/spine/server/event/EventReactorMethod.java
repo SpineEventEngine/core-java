@@ -33,7 +33,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
+import static io.spine.server.model.HandlerMethod.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 import static io.spine.util.Exceptions.newIllegalStateException;
 

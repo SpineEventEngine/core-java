@@ -30,8 +30,8 @@ import io.spine.server.model.MessageHandlerMap;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.model.HandlerMethods.domestic;
-import static io.spine.server.model.HandlerMethods.external;
+import static io.spine.server.model.HandlerMethod.domestic;
+import static io.spine.server.model.HandlerMethod.external;
 
 /**
  * Provides type information on a projection class.

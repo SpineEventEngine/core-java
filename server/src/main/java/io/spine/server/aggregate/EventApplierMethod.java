@@ -21,7 +21,6 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
@@ -84,13 +83,13 @@ final class EventApplierMethod extends AbstractHandlerMethod<EventClass, Empty> 
      * <p>The method {@linkplain AbstractHandlerMethod#invoke(Object, Message, Message) delegates}
      * the invocation passing {@linkplain Empty#getDefaultInstance() empty message}
      * as the context parameter because event appliers do not have a context parameter.
-     * Such redirection is correct because {@linkplain #getParamCount()} the number of parameters}
+     *
+     * <p>Such redirection is correct because {@linkplain #getParamCount()} the number of parameters}
      * is set to one during instance construction.
      */
-    @CanIgnoreReturnValue
-    public Object invoke(Aggregate aggregate, Message message) {
-        // Make this method visible to Aggregate class.
-        return invoke(aggregate, message, Empty.getDefaultInstance());
+    @SuppressWarnings("CheckReturnValue") // since method appliers do not return values
+    void invoke(Aggregate aggregate, Message message) {
+        invoke(aggregate, message, Empty.getDefaultInstance());
     }
 
     /** The factory for filtering methods that match {@code EventApplier} specification. */

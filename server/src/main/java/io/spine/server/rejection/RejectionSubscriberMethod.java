@@ -32,7 +32,7 @@ import io.spine.server.model.MethodPredicate;
 import java.lang.reflect.Method;
 import java.util.function.Predicate;
 
-import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
+import static io.spine.server.model.HandlerMethod.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**

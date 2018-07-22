@@ -35,8 +35,8 @@ import io.spine.server.rejection.RejectionReactorMethod;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.model.HandlerMethods.domestic;
-import static io.spine.server.model.HandlerMethods.external;
+import static io.spine.server.model.HandlerMethod.domestic;
+import static io.spine.server.model.HandlerMethod.external;
 
 /**
  * Provides message handling information on a process manager class.
