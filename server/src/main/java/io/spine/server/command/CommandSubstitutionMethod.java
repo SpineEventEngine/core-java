@@ -39,17 +39,18 @@ import java.util.function.Predicate;
  * @author Alexander Yevsyukov
  */
 @Internal
-public final class CommandTransformer extends CommandingMethod<CommandClass, CommandContext> {
+public final class CommandSubstitutionMethod
+        extends CommandingMethod<CommandClass, CommandContext> {
 
     /** The instance of the predicate to filter command transforming methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
 
-    private CommandTransformer(Method method) {
+    private CommandSubstitutionMethod(Method method) {
         super(method);
     }
 
-    static CommandTransformer from(Method method) {
-        return new CommandTransformer(method);
+    static CommandSubstitutionMethod from(Method method) {
+        return new CommandSubstitutionMethod(method);
     }
 
     static MethodPredicate predicate() {
@@ -66,13 +67,13 @@ public final class CommandTransformer extends CommandingMethod<CommandClass, Com
         return HandlerKey.of(getMessageClass());
     }
 
-    private static class Factory extends HandlerMethod.Factory<CommandTransformer> {
+    private static class Factory extends HandlerMethod.Factory<CommandSubstitutionMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
         @Override
-        public Class<CommandTransformer> getMethodClass() {
-            return CommandTransformer.class;
+        public Class<CommandSubstitutionMethod> getMethodClass() {
+            return CommandSubstitutionMethod.class;
         }
 
         @Override
@@ -95,7 +96,7 @@ public final class CommandTransformer extends CommandingMethod<CommandClass, Com
         }
 
         @Override
-        protected CommandTransformer createFromMethod(Method method) {
+        protected CommandSubstitutionMethod createFromMethod(Method method) {
             return from(method);
         }
     }
