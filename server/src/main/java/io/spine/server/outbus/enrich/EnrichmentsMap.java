@@ -20,7 +20,6 @@
 
 package io.spine.server.outbus.enrich;
 
-import com.google.common.base.Function;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableCollection;
@@ -32,11 +31,8 @@ import io.spine.option.OptionsProto;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -44,6 +40,8 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Sets.newHashSet;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static io.spine.io.PropertyFiles.loadAllProperties;
 
@@ -164,7 +162,7 @@ class EnrichmentsMap {
         private static Set<String> getBoundFields(String enrichmentType) {
             Descriptor enrichmentDescriptor = TypeName.of(enrichmentType)
                                                       .getMessageDescriptor();
-            Set<String> result = new HashSet<>();
+            Set<String> result = newHashSet();
             for (FieldDescriptor field : enrichmentDescriptor.getFields()) {
                 String extension = field.getOptions()
                                         .getExtension(OptionsProto.by);
@@ -175,7 +173,7 @@ class EnrichmentsMap {
         }
 
         private static Collection<String> parseFieldNames(String qualifiers) {
-            Collection<String> result = new LinkedList<>();
+            Collection<String> result = newLinkedList();
             String[] fieldNames = pipeSeparatorPattern.split(qualifiers);
             for (String singleFieldName : fieldNames) {
                 String normalizedFieldName = singleFieldName.trim();

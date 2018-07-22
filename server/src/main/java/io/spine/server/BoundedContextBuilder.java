@@ -42,9 +42,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.function.BiFunction;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -59,7 +58,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"}) // OK for this central piece.
 @CanIgnoreReturnValue
 public final class BoundedContextBuilder {
 
@@ -274,7 +273,6 @@ public final class BoundedContextBuilder {
         storage.ifPresent(system::setStorageFactorySupplier);
         Optional<? extends TenantIndex> tenantIndex = getTenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
-        SystemBoundedContext result = system.buildPartial(SystemBoundedContext::newInstance);
         BiFunction<BoundedContextBuilder, SystemGateway, SystemBoundedContext> instanceFactory =
                 (builder, systemGateway) -> SystemBoundedContext.newInstance(builder);
         NoOpSystemGateway systemGateway = NoOpSystemGateway.INSTANCE;

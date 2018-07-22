@@ -74,8 +74,7 @@ public final class DefaultSystemGateway implements SystemGateway {
 
     @Override
     public CommandIndex commandIndex() {
-        Optional<Repository> repository = system.findRepository(ScheduledCommandRecord.class)
-                                                .toJavaUtil();
+        Optional<Repository> repository = system.findRepository(ScheduledCommandRecord.class);
         checkState(repository.isPresent(),
                    "%s is not registered in system bounded context %s.",
                    ScheduledCommandRepository.class.getSimpleName(), system.getName());

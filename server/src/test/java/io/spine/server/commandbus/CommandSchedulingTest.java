@@ -25,7 +25,6 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import io.spine.system.server.NoOpSystemGateway;
 import io.spine.testing.Tests;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.time.Durations2;
@@ -183,7 +182,6 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
 
             // Create CommandBus specific for this test.
             CommandBus commandBus = CommandBus.newBuilder()
-                                              .setCommandStore(commandStore)
                                               .setCommandScheduler(scheduler)
                                               .setThreadSpawnAllowed(false)
                                               .setAutoReschedule(true)
@@ -270,8 +268,6 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
      * Creates and stores one scheduled command.
      */
     private Command storeSingleCommandForRescheduling() {
-        Command cmdWithSchedule = createScheduledCommand();
-        commandStore.store(cmdWithSchedule, SCHEDULED);
         return storeSingleCommandForRescheduling(systemGateway);
     }
 

@@ -27,7 +27,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.procman.CommandRouted;
+import io.spine.server.procman.CommandTransformed;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.system.server.CommandAcknowledged;
@@ -130,7 +130,7 @@ public final class CommandLifecycleTestEnv {
         }
 
         @Assign
-        CommandRouted handle(SelectCompanyName command, CommandContext context)
+        CommandTransformed handle(SelectCompanyName command, CommandContext context)
                 throws CompanyNameNotProposed {
             int index = command.getIndex();
             List<String> proposedNames = getBuilder().getProposedName();
@@ -143,9 +143,9 @@ public final class CommandLifecycleTestEnv {
                     .setId(getBuilder().getId())
                     .setFinalName(finalName)
                     .build();
-            return newRouterFor(command, context)
-                    .add(establishCommand)
-                    .routeAll();
+            return transform(command, context)
+                    .to(establishCommand)
+                    .post();
         }
     }
 

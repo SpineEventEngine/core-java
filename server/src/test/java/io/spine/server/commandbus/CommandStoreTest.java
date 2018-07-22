@@ -33,12 +33,13 @@ import io.spine.server.commandbus.given.CommandStoreTestEnv;
 import io.spine.server.commandbus.given.CommandStoreTestEnv.CommandStoreTestAssets;
 import io.spine.server.commandbus.given.CommandStoreTestEnv.TestRejection;
 import io.spine.server.commandbus.given.CommandStoreTestEnv.ThrowingDispatcher;
+import io.spine.server.commandstore.CommandStore;
 import io.spine.server.tenant.TenantAwareFunction;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.time.testing.TimeTests;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -65,6 +66,9 @@ import static org.mockito.Mockito.verify;
         "unused" /* JUnit nested classes considered unused in abstract test class */})
 @Disabled
 abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
+
+    // Unused. Declared in order to avoid compile-time errors.
+    private final CommandStore commandStore = null;
 
     CommandStoreTest(boolean multitenant) {
         super(multitenant);

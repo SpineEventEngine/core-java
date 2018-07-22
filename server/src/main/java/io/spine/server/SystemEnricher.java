@@ -67,8 +67,7 @@ final class SystemEnricher {
     }
 
     private static Command findCommand(CommandLifecycleRepository repository, CommandId id) {
-        Optional<CommandLifecycleAggregate> commandLifecycle = repository.find(id)
-                                                                         .toJavaUtil();
+        Optional<CommandLifecycleAggregate> commandLifecycle = repository.find(id);
         Command command = commandLifecycle.map(Aggregate::getState)
                                           .map(CommandLifecycle::getCommand)
                                           .orElse(Command.getDefaultInstance());

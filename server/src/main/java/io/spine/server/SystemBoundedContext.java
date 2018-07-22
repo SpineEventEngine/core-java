@@ -78,7 +78,6 @@ final class SystemBoundedContext extends BoundedContext {
     private static BoundedContextBuilder prepareEnricher(BoundedContextBuilder builder,
                                                          CommandLifecycleRepository repository) {
         EventBus.Builder busBuilder = builder.getEventBus()
-                                             .toJavaUtil()
                                              .orElseGet(EventBus::newBuilder);
         EventEnricher enricher = SystemEnricher.create(repository);
         EventBus.Builder builderWithEnricher = busBuilder.setEnricher(enricher);

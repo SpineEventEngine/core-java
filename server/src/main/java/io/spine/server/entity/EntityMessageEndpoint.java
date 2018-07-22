@@ -221,7 +221,7 @@ public abstract class EntityMessageEndpoint<I,
      *                </ol>
      * @throws IllegalStateException always
      */
-    protected void onUnhandledCommand(Entity<R, ?> entity, CommandEnvelope cmd, String format) {
+    protected void onUnhandledCommand(Entity<I, ?> entity, CommandEnvelope cmd, String format) {
         String entityId = Stringifiers.toString(entity.getId());
         String entityClass = entity.getClass().getName();
         String commandId = Stringifiers.toString(cmd.getId());

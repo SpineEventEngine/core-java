@@ -46,7 +46,7 @@ public final class ScheduledCommand
 
     @Subscribe
     public void on(CommandScheduled event, EventContext context) {
-        Optional<Command> command = Enrichments.getEnrichment(Command.class, context).toJavaUtil();
+        Optional<Command> command = Enrichments.getEnrichment(Command.class, context);
         checkState(command.isPresent(), "Command enrichment must be present.");
         Command commandWithSchedule = withSchedule(command.get(), event.getSchedule());
         getBuilder().setId(event.getId())
