@@ -19,8 +19,9 @@
  */
 package io.spine.server.model;
 
-import com.google.common.base.Predicate;
 import io.spine.annotation.Internal;
+
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -34,7 +35,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class HandlerMethods {
 
     /** Prevents instantiation of this utility class. */
-    private HandlerMethods() {}
+    private HandlerMethods() {
+    }
 
     /**
      * Creates a predicate to remove the {@linkplain HandlerMethod handler methods}
@@ -43,7 +45,7 @@ public final class HandlerMethods {
      * @param <M> the type of the {@code HandlerMethod} to apply this predicate to
      * @return the predicate
      */
-    public static <M extends HandlerMethod<?, ?>> Predicate<M> externalPredicate() {
+    public static <M extends HandlerMethod<?, ?>> Predicate<M> external() {
         return input -> {
             M method = checkNotNull(input);
             boolean result = isExternal(method);
@@ -58,7 +60,7 @@ public final class HandlerMethods {
      * @param <M> the type of the {@code HandlerMethod} to apply this predicate to
      * @return the predicate
      */
-    public static <M extends HandlerMethod<?, ?>> Predicate<M> domesticPredicate() {
+    public static <M extends HandlerMethod<?, ?>> Predicate<M> domestic() {
         return input -> {
             M method = checkNotNull(input);
             boolean result = !isExternal(method);

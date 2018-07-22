@@ -24,11 +24,13 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.RejectionClass;
-import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
 
 import java.util.Set;
+
+import static io.spine.server.model.HandlerMethods.domestic;
+import static io.spine.server.model.HandlerMethods.external;
 
 /**
  * Provides type information on a {@link RejectionSubscriber} class.
@@ -51,10 +53,8 @@ public final class RejectionSubscriberClass<S extends RejectionSubscriber> exten
         super(cls);
         rejectionSubscriptions = new MessageHandlerMap<>(cls, RejectionSubscriberMethod.factory());
 
-        this.domesticSubscriptions = rejectionSubscriptions.getMessageClasses(
-                HandlerMethods.<RejectionSubscriberMethod>domesticPredicate());
-        this.externalSubscriptions = rejectionSubscriptions.getMessageClasses(
-                HandlerMethods.<RejectionSubscriberMethod>externalPredicate());
+        this.domesticSubscriptions = rejectionSubscriptions.getMessageClasses(domestic());
+        this.externalSubscriptions = rejectionSubscriptions.getMessageClasses(external());
     }
 
     /**

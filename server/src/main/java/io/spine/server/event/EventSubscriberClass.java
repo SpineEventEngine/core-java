@@ -23,13 +23,14 @@ package io.spine.server.event;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
-import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.model.HandlerMethods.domestic;
+import static io.spine.server.model.HandlerMethods.external;
 
 /**
  * Provides type information on an {@link EventSubscriber} class.
@@ -51,10 +52,8 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
         super(cls);
         this.eventSubscriptions = new MessageHandlerMap<>(cls, EventSubscriberMethod.factory());
 
-        this.domesticSubscriptions = this.eventSubscriptions.getMessageClasses(
-                HandlerMethods.<EventSubscriberMethod>domesticPredicate());
-        this.externalSubscriptions = this.eventSubscriptions.getMessageClasses(
-                HandlerMethods.<EventSubscriberMethod>externalPredicate());
+        this.domesticSubscriptions = eventSubscriptions.getMessageClasses(domestic());
+        this.externalSubscriptions = eventSubscriptions.getMessageClasses(external());
     }
 
     /**

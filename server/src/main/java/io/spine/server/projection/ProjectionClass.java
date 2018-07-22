@@ -25,12 +25,13 @@ import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
 import io.spine.server.entity.EntityClass;
 import io.spine.server.event.EventSubscriberMethod;
-import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.model.HandlerMethods.domestic;
+import static io.spine.server.model.HandlerMethods.external;
 
 /**
  * Provides type information on a projection class.
@@ -52,10 +53,8 @@ public final class ProjectionClass<P extends Projection> extends EntityClass<P> 
         super(cls);
         this.eventSubscriptions = new MessageHandlerMap<>(cls, EventSubscriberMethod.factory());
 
-        this.domesticSubscriptions = this.eventSubscriptions.getMessageClasses(
-                HandlerMethods.<EventSubscriberMethod>domesticPredicate());
-        this.externalSubscriptions = this.eventSubscriptions.getMessageClasses(
-                HandlerMethods.<EventSubscriberMethod>externalPredicate());
+        this.domesticSubscriptions = eventSubscriptions.getMessageClasses(domestic());
+        this.externalSubscriptions = eventSubscriptions.getMessageClasses(external());
     }
 
     public static <P extends Projection> ProjectionClass<P> of(Class<P> cls) {

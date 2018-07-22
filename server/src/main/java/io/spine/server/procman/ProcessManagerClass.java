@@ -29,13 +29,14 @@ import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.entity.EntityClass;
 import io.spine.server.event.EventReactorMethod;
-import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.rejection.RejectionReactorMethod;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.model.HandlerMethods.domestic;
+import static io.spine.server.model.HandlerMethods.external;
 
 /**
  * Provides message handling information on a process manager class.
@@ -67,15 +68,11 @@ public final class ProcessManagerClass<P extends ProcessManager>
         this.eventReactors =  new MessageHandlerMap<>(cls, EventReactorMethod.factory());
         this.rejectionReactors =  new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
 
-        this.domesticEventReactions = this.eventReactors.getMessageClasses(
-                HandlerMethods.<EventReactorMethod>domesticPredicate());
-        this.externalEventReactions = this.eventReactors.getMessageClasses(
-                HandlerMethods.<EventReactorMethod>externalPredicate());
+        this.domesticEventReactions = eventReactors.getMessageClasses(domestic());
+        this.externalEventReactions = eventReactors.getMessageClasses(external());
 
-        this.domesticRejectionReactions = this.rejectionReactors.getMessageClasses(
-                HandlerMethods.<RejectionReactorMethod>domesticPredicate());
-        this.externalRejectionReactions = this.rejectionReactors.getMessageClasses(
-                HandlerMethods.<RejectionReactorMethod>externalPredicate());
+        this.domesticRejectionReactions = rejectionReactors.getMessageClasses(domestic());
+        this.externalRejectionReactions = rejectionReactors.getMessageClasses(external());
     }
 
     public static <P extends ProcessManager> ProcessManagerClass<P> of(Class<P> cls) {
