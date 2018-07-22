@@ -31,10 +31,15 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  */
 @Internal
-public interface CommandHandlingClass {
+public interface CommandHandlingClass<H extends CommandAcceptingMethod> {
 
     /**
      * Obtains classes of commands handled by the class.
      */
     Set<CommandClass> getCommands();
+
+    /**
+     * Obtains the handler method for the passed command class.
+     */
+    H getHandler(CommandClass commandClass);
 }

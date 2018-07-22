@@ -73,7 +73,7 @@ abstract class RejectionHandlerMethod extends AbstractHandlerMethod<RejectionCla
         if (kind == Kind.COMMAND_AWARE || kind == Kind.COMMAND_MESSAGE_AWARE) {
             @SuppressWarnings("unchecked") // RejectionFilterPredicate ensures that
             Class<? extends Message> rawCommandClass =
-                    (Class<? extends Message>) getMethod().getParameterTypes()[1];
+                    (Class<? extends Message>) getRawMethod().getParameterTypes()[1];
             return HandlerKey.of(getMessageClass(), CommandClass.of(rawCommandClass));
         } else {
             return HandlerKey.of(getMessageClass());
@@ -124,7 +124,7 @@ abstract class RejectionHandlerMethod extends AbstractHandlerMethod<RejectionCla
         CommandContext commandContext = command.getContext();
         try {
             Object output;
-            Method method = getMethod();
+            Method method = getRawMethod();
             Message commandMessage;
             switch (kind) {
                 case REJECTION_MESSAGE_AWARE:

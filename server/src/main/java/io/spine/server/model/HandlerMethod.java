@@ -23,6 +23,7 @@ package io.spine.server.model;
 import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 
+import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -49,6 +50,8 @@ public interface HandlerMethod<M extends MessageClass, C extends Message> {
     HandlerKey key();
 
     Set<MethodAttribute<?>> getAttributes();
+
+    Method getRawMethod();
 
     /**
      * Invokes the method to handle {@code message} with the {@code context}.

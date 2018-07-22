@@ -69,7 +69,7 @@ class AbstractHandlerMethodTest {
     @Test
     @DisplayName("return method")
     void returnMethod() {
-        assertEquals(StubHandler.getTwoParameterMethod(), twoParamMethod.getMethod());
+        assertEquals(StubHandler.getTwoParameterMethod(), twoParamMethod.getRawMethod());
     }
 
     @Nested
@@ -92,7 +92,7 @@ class AbstractHandlerMethodTest {
     @Test
     @DisplayName("obtain first parameter type of method")
     void returnFirstParamType() {
-        assertEquals(BoolValue.class, AbstractHandlerMethod.getFirstParamType(oneParamMethod.getMethod()));
+        assertEquals(BoolValue.class, AbstractHandlerMethod.getFirstParamType(oneParamMethod.getRawMethod()));
     }
 
     @Nested
@@ -177,6 +177,6 @@ class AbstractHandlerMethodTest {
     @DisplayName("be normally created from method throwing runtime exception")
     void acceptMethodThrowingRuntime() {
         OneParamMethod method = factory.create(StubHandler.getMethodWithRuntimeException());
-        assertEquals(StubHandler.getMethodWithRuntimeException(), method.getMethod());
+        assertEquals(StubHandler.getMethodWithRuntimeException(), method.getRawMethod());
     }
 }

@@ -25,9 +25,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
-import io.spine.server.command.CommandHandlerMethod;
-import io.spine.server.command.CommandHandlingClass;
-import io.spine.server.entity.EntityClass;
+import io.spine.server.entity.CommandHandlingEntityClass;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.rejection.RejectionReactorMethod;
@@ -47,12 +45,10 @@ import static io.spine.server.model.HandlerMethod.external;
 @Internal
 @SuppressWarnings("ReturnOfCollectionOrArrayField") // returning an immutable impl.
 public final class ProcessManagerClass<P extends ProcessManager>
-        extends EntityClass<P>
-        implements CommandHandlingClass {
+        extends CommandHandlingEntityClass<P> {
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<CommandClass, CommandHandlerMethod> commands;
     private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactors;
     private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactors;
 
@@ -64,7 +60,6 @@ public final class ProcessManagerClass<P extends ProcessManager>
 
     private ProcessManagerClass(Class<? extends P> cls) {
         super(cls);
-        this.commands = new MessageHandlerMap<>(cls, CommandHandlerMethod.factory());
         this.eventReactors =  new MessageHandlerMap<>(cls, EventReactorMethod.factory());
         this.rejectionReactors =  new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
 
@@ -78,14 +73,6 @@ public final class ProcessManagerClass<P extends ProcessManager>
     public static <P extends ProcessManager> ProcessManagerClass<P> of(Class<P> cls) {
         checkNotNull(cls);
         return new ProcessManagerClass<>(cls);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<CommandClass> getCommands() {
-        return commands.getMessageClasses();
     }
 
     Set<EventClass> getEventReactions() {
@@ -102,10 +89,6 @@ public final class ProcessManagerClass<P extends ProcessManager>
 
     Set<RejectionClass> getExternalRejectionReactions() {
         return externalRejectionReactions;
-    }
-
-    CommandHandlerMethod getHandler(CommandClass commandClass) {
-        return commands.getMethod(commandClass);
     }
 
     EventReactorMethod getReactor(EventClass eventClass) {

@@ -49,6 +49,10 @@ public final class CommandSubstMethod
         return new CommandSubstMethod(method);
     }
 
+    static AbstractHandlerMethod.Factory<CommandSubstMethod> factory() {
+        return Factory.INSTANCE;
+    }
+
     private static class Factory extends AbstractHandlerMethod.Factory<CommandSubstMethod> {
 
         private static final Factory INSTANCE = new Factory();

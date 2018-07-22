@@ -18,32 +18,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command;
+package io.spine.server.entity;
 
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
+import io.spine.server.command.CommandHandlerMethod;
+import io.spine.server.command.CommandHandlingClass;
+import io.spine.server.model.MessageHandlerMap;
 
 import java.util.Set;
 
 /**
- * Provides information on message handling for a class of {@link Commander}s.
+ * Abstract base for entity classes that handle commands.
  *
- * @param <C> the type of commanders
  * @author Alexander Yevsyukov
  */
 @Internal
-public final class CommanderClass<C extends Commander>
-        extends AbstractCommandHandlingClass<C, CommandSubstMethod> {
+public abstract class CommandHandlingEntityClass<E extends Entity>
+        extends EntityClass<E>
+        implements CommandHandlingClass {
 
     private static final long serialVersionUID = 0L;
+    private final MessageHandlerMap<CommandClass, CommandHandlerMethod> commands;
 
-    private CommanderClass(Class<? extends C> value) {
-        super(value, CommandSubstMethod.factory());
+    protected CommandHandlingEntityClass(Class<? extends E> cls) {
+        super(cls);
+        this.commands = new MessageHandlerMap<>(cls, CommandHandlerMethod.factory());
     }
 
     @Override
     public Set<CommandClass> getCommands() {
-        //TODO:2018-07-22:alexander.yevsyukov: Implement
-        return null;
+        return commands.getMessageClasses();
+    }
+
+    @Override
+    public CommandHandlerMethod getHandler(CommandClass commandClass) {
+        return commands.getMethod(commandClass);
     }
 }

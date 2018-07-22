@@ -111,8 +111,11 @@ public abstract class AbstractHandlerMethod<M extends MessageClass, C extends Me
         return result;
     }
 
-    /** Returns the handling method. */
-    protected Method getMethod() {
+    /**
+     * Returns the handling method.
+     */
+    @Override
+    public Method getRawMethod() {
         return method;
     }
 

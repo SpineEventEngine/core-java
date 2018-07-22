@@ -25,9 +25,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
-import io.spine.server.command.CommandHandlerMethod;
-import io.spine.server.command.CommandHandlingClass;
-import io.spine.server.entity.EntityClass;
+import io.spine.server.entity.CommandHandlingEntityClass;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.rejection.RejectionReactorMethod;
@@ -46,13 +44,10 @@ import static io.spine.server.model.HandlerMethod.external;
  */
 @Internal
 @SuppressWarnings("ReturnOfCollectionOrArrayField") // impl. is immutable
-public class AggregateClass<A extends Aggregate>
-        extends EntityClass<A>
-        implements CommandHandlingClass {
+public class AggregateClass<A extends Aggregate> extends CommandHandlingEntityClass<A> {
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<CommandClass, CommandHandlerMethod> commands;
     private final MessageHandlerMap<EventClass, EventApplier> stateEvents;
     private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactions;
     private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactions;
@@ -65,7 +60,6 @@ public class AggregateClass<A extends Aggregate>
     /** Creates new instance. */
     public AggregateClass(Class<? extends A> cls) {
         super(checkNotNull(cls));
-        this.commands = new MessageHandlerMap<>(cls, CommandHandlerMethod.factory());
         this.stateEvents = new MessageHandlerMap<>(cls, EventApplier.factory());
         this.eventReactions = new MessageHandlerMap<>(cls, EventReactorMethod.factory());
         this.rejectionReactions = new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
@@ -75,14 +69,6 @@ public class AggregateClass<A extends Aggregate>
 
         this.domesticRejectionReactions = rejectionReactions.getMessageClasses(domestic());
         this.externalRejectionReactions = rejectionReactions.getMessageClasses(external());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Set<CommandClass> getCommands() {
-        return commands.getMessageClasses();
     }
 
     Set<EventClass> getEventReactions() {
@@ -99,10 +85,6 @@ public class AggregateClass<A extends Aggregate>
 
     Set<RejectionClass> getExternalRejectionReactions() {
         return externalRejectionReactions;
-    }
-
-    CommandHandlerMethod getHandler(CommandClass commandClass) {
-        return commands.getMethod(commandClass);
     }
 
     EventApplier getApplier(EventClass eventClass) {

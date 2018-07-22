@@ -21,7 +21,12 @@
 package io.spine.server.command;
 
 import io.spine.annotation.Internal;
+import io.spine.core.CommandClass;
+import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
+
+import java.util.Set;
 
 /**
  * Abstract base for classes providing message handling information of classes that handle commands.
@@ -30,11 +35,29 @@ import io.spine.server.model.ModelClass;
  * @author Alexander Yevsyukov
  */
 @Internal
-public abstract class AbstractCommandHandlingClass<C>
+public abstract class AbstractCommandHandlingClass<C, H extends CommandAcceptingMethod>
         extends ModelClass<C>
         implements CommandHandlingClass {
 
-    protected AbstractCommandHandlingClass(Class<? extends C> cls) {
+    private static final long serialVersionUID = 0L;
+
+    private final MessageHandlerMap<CommandClass, H> commands;
+
+    protected AbstractCommandHandlingClass(Class<? extends C> cls,
+                                           AbstractHandlerMethod.Factory<H> factory) {
         super(cls);
+        this.commands = new MessageHandlerMap<>(cls, factory);
+    }
+
+    /** {@inheritDoc} */
+    @Override
+    public Set<CommandClass> getCommands() {
+        return commands.getMessageClasses();
+    }
+
+    /** Obtains the handler method for the passed command class. */
+    @Override
+    public H getHandler(CommandClass commandClass) {
+        return commands.getMethod(commandClass);
     }
 }
