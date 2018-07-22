@@ -268,7 +268,7 @@ public abstract class AbstractHandlerMethod<M extends MessageClass, C extends Me
      *
      * @param <H> the type of the handler method objects to create
      */
-    public abstract static class Factory<H extends AbstractHandlerMethod> {
+    public abstract static class Factory<H extends HandlerMethod> {
 
         /** Returns the class of the method wrapper. */
         public abstract Class<H> getMethodClass();
@@ -285,7 +285,7 @@ public abstract class AbstractHandlerMethod<M extends MessageClass, C extends Me
         public abstract void checkAccessModifier(Method method);
 
         /**
-         * Creates a {@linkplain AbstractHandlerMethod wrapper} from the method.
+         * Creates a {@linkplain HandlerMethod handler method} from a raw method.
          *
          * <p>Performs various checks before wrapper creation, e.g. method access modifier or
          * whether method throws any prohibited exceptions.
