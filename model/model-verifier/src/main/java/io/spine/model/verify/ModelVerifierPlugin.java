@@ -53,7 +53,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
     @Override
     public void apply(Project project) {
         log().debug("Applying Spine model verifier plugin.");
-        final Path rawModelStorage = rawModelPath(project);
+        Path rawModelStorage = rawModelPath(project);
         // Ensure right environment (`main` scope sources with the `java` plugin)
         if (project.getTasks()
                    .findByPath(CLASSES.getValue()) != null) {
@@ -71,8 +71,8 @@ public final class ModelVerifierPlugin extends SpinePlugin {
     }
 
     private static Path rawModelPath(Project project) {
-        final Path rootDir = project.getRootDir().toPath();
-        final Path result = rootDir.resolve(RELATIVE_RAW_MODEL_PATH);
+        Path rootDir = project.getRootDir().toPath();
+        Path result = rootDir.resolve(RELATIVE_RAW_MODEL_PATH);
         return result;
     }
 
@@ -87,7 +87,7 @@ public final class ModelVerifierPlugin extends SpinePlugin {
      * @param project the Gradle project to process the model upon
      */
     private static void verifyModel(CommandHandlers model, Project project) {
-        final ModelVerifier verifier = new ModelVerifier(project);
+        ModelVerifier verifier = new ModelVerifier(project);
         verifier.verify(model);
     }
 
@@ -121,12 +121,12 @@ public final class ModelVerifierPlugin extends SpinePlugin {
         @Override
         public void execute(Task task) {
             if (!exists(rawModelPath)) {
-                final Logger log = parent.log();
+                Logger log = parent.log();
                 log.warn("No Spine model definition found under {}. Completing the task.",
                          rawModelPath);
                 return;
             }
-            final CommandHandlers model;
+            CommandHandlers model;
             try (InputStream in = newInputStream(rawModelPath, StandardOpenOption.READ)) {
                 model = CommandHandlers.parseFrom(in);
             } catch (IOException e) {

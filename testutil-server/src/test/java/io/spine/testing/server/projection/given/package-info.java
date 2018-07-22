@@ -19,13 +19,12 @@
  */
 
 /**
- * Test environment classes for the {@code io.spine.server.model} package of the
- * {@code testutil-server} module.
+ * Test environment for the {@link io.spine.testing.server.projection} package.
  */
 
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.testing.server.model.given;
+package io.spine.testing.server.projection.given;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 

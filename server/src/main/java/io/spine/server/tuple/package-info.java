@@ -52,7 +52,7 @@
  * {@link com.google.protobuf.Message Message} class.
  *
  * <p>Types from {@code <B>} through {@code <E>} can be either {@code Message} or
- * {@link com.google.common.base.Optional Optional}. See sections below for details.
+ * {@link java.util.Optional Optional}. See sections below for details.
  *
  * <h2>Basic Tuples</h2>
  *
@@ -64,7 +64,7 @@
  *    <li>{@link io.spine.server.tuple.Quintet Quintet&lt;A, B, C, D, E&gt;}
  * </ul>
  *
- * <p>Basic tuple classes allow {@link com.google.common.base.Optional Optional} starting from
+ * <p>Basic tuple classes allow {@link java.util.Optional Optional} starting from
  * the second generic argument.
  *
  * <h2>Alternatives</h2>
