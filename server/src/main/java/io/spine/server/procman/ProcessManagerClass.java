@@ -27,6 +27,7 @@ import io.spine.core.RejectionClass;
 import io.spine.server.entity.CommandHandlingEntityClass;
 import io.spine.server.event.EventReactorMethod;
 import io.spine.server.event.ReactorClass;
+import io.spine.server.event.ReactorClassDelegate;
 import io.spine.server.rejection.RejectionReactorMethod;
 
 import java.util.Set;
@@ -40,18 +41,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 @Internal
-@SuppressWarnings("ReturnOfCollectionOrArrayField") // returning an immutable impl.
 public final class ProcessManagerClass<P extends ProcessManager>
         extends CommandHandlingEntityClass<P>
         implements ReactorClass {
 
     private static final long serialVersionUID = 0L;
 
-    private final ReactorClass.Delegate<P> delegate;
+    private final ReactorClassDelegate<P> delegate;
 
     private ProcessManagerClass(Class<P> cls) {
         super(cls);
-        this.delegate = new ReactorClass.Delegate<>(cls);
+        this.delegate = new ReactorClassDelegate<>(cls);
     }
 
     public static <P extends ProcessManager> ProcessManagerClass<P> of(Class<P> cls) {

@@ -20,19 +20,13 @@
 
 package io.spine.server.event;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
-import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.model.ModelClass;
 import io.spine.server.rejection.RejectionReactorMethod;
 
 import java.util.Set;
-
-import static io.spine.server.model.HandlerMethod.domestic;
-import static io.spine.server.model.HandlerMethod.external;
 
 /**
  * Provides message handling information on a class that reacts on messages.
@@ -43,82 +37,52 @@ import static io.spine.server.model.HandlerMethod.external;
 public interface ReactorClass {
 
     /**
-     * Obtains set of event classes to which the class reacts.
+     * Obtains a set of event classes to which this class reacts.
      *
      * <p>The returned set contains only event classes of the {@code BoundedContext}
      * to which the class belongs.
      *
-     * <p>For reaction on external events, please see {@link #getExternalEventReactions()}.
+     * <p>For reactions on external events, please see {@link #getExternalEventReactions()}.
      */
     Set<EventClass> getEventReactions();
 
+    /**
+     * Obtains a set of external events to which this class reacts.
+     *
+     * <p>External events are those that are delivered to the {@code BoundedContext}
+     * to which this class belongs from outside.
+     *
+     * <p>For reactions on domestic events, please see {@link #getEventReactions()}.
+     */
     Set<EventClass> getExternalEventReactions();
 
+    /**
+     * Obtains a set of rejection classes to which this class reacts.
+     *
+     * <p>The returned set contains only rejection classes of the {@code BoundedContext}
+     * to which the class belongs.
+     *
+     * <p>For reactions on external rejections, please see {@link #getExternalRejectionReactions()}.
+     */
     Set<RejectionClass> getRejectionReactions();
 
+    /**
+     * Obtains a set of external rejections to which this class reacts.
+     *
+     * <p>External rejections are those that are delivered to the {@code BoundedContext}
+     * to which this class belongs from outside.
+     *
+     * <p>For reactions on domestic rejections, please see {@link #getRejectionReactions()}.
+     */
     Set<RejectionClass> getExternalRejectionReactions();
 
+    /**
+     * Obtains the method that reacts on the passed event class.
+     */
     EventReactorMethod getReactor(EventClass eventClass);
 
-    RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls);
-
     /**
-     * The helper class for holding messaging information on behalf of another model class.
-     *
-     * @param <T> the type of the raw class for obtaining messaging information
+     * Obtains the method that reacts on the passed projection class.
      */
-    final class Delegate<T> extends ModelClass<T> implements ReactorClass {
-
-        private static final long serialVersionUID = 0L;
-
-        private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactions;
-        private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactions;
-
-        private final ImmutableSet<EventClass> domesticEventReactions;
-        private final ImmutableSet<EventClass> externalEventReactions;
-        private final ImmutableSet<RejectionClass> domesticRejectionReactions;
-        private final ImmutableSet<RejectionClass> externalRejectionReactions;
-
-        public Delegate(Class<T> cls) {
-            super(cls);
-            this.eventReactions = new MessageHandlerMap<>(cls, EventReactorMethod.factory());
-            this.rejectionReactions = new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
-
-            this.domesticEventReactions = eventReactions.getMessageClasses(domestic());
-            this.externalEventReactions = eventReactions.getMessageClasses(external());
-
-            this.domesticRejectionReactions = rejectionReactions.getMessageClasses(domestic());
-            this.externalRejectionReactions = rejectionReactions.getMessageClasses(external());
-        }
-
-        @Override
-        public Set<EventClass> getEventReactions() {
-            return domesticEventReactions;
-        }
-
-        @Override
-        public Set<EventClass> getExternalEventReactions() {
-            return externalEventReactions;
-        }
-
-        @Override
-        public Set<RejectionClass> getRejectionReactions() {
-            return domesticRejectionReactions;
-        }
-
-        @Override
-        public Set<RejectionClass> getExternalRejectionReactions() {
-            return externalRejectionReactions;
-        }
-
-        @Override
-        public EventReactorMethod getReactor(EventClass eventClass) {
-            return eventReactions.getMethod(eventClass);
-        }
-
-        @Override
-        public RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls) {
-            return rejectionReactions.getMethod(rejCls, cmdCls);
-        }
-    }
+    RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls);
 }
