@@ -28,11 +28,13 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
+import io.spine.base.ThrowableMessage;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
+import io.spine.core.Rejection;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
@@ -52,6 +54,11 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Throwables.getRootCause;
+import static io.spine.core.Rejections.causedByRejection;
+import static io.spine.core.Rejections.toRejection;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.commandbus.Log.log;
 import static java.lang.String.format;
 
 /**
@@ -216,13 +223,19 @@ public class CommandBus extends Bus<Command,
 
     @Override
     protected void dispatch(CommandEnvelope envelope) {
-        CommandDispatcher<?> dispatcher = getDispatcher(envelope);
+        final CommandDispatcher<?> dispatcher = getDispatcher(envelope);
         onDispatchCommand(envelope);
         try {
             dispatcher.dispatch(envelope);
         } catch (RuntimeException e) {
-            String errorMessage = format("Error dispatching command %s", envelope.getTypeName());
-            Log.log().error(errorMessage, e);
+            Throwable cause = getRootCause(e);
+            if (causedByRejection(e)) {
+                ThrowableMessage throwableMessage = (ThrowableMessage) cause;
+                Rejection rejection = toRejection(throwableMessage, envelope.getCommand());
+                Class<?> rejectionClass = unpack(rejection.getMessage()).getClass();
+                log().trace("Posting rejection {} to RejectionBus.", rejectionClass.getName());
+                rejectionBus().post(rejection);
+            }
         }
     }
 

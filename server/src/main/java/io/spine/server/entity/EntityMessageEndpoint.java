@@ -21,7 +21,6 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.ActorMessageEnvelope;
@@ -35,7 +34,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -88,34 +86,17 @@ public abstract class EntityMessageEndpoint<I,
      */
     @SuppressWarnings("unchecked")
     private T dispatch() {
-        T targets = reportErrors(this::getTargets);
+        T targets = getTargets();
         if (targets instanceof Set) {
-            Set<I> handlingEntities = (Set<I>) targets;
-            return (T) (dispatchToMany(handlingEntities));
+            Set<I> handlingAggregates = (Set<I>) targets;
+            return (T)(dispatchToMany(handlingAggregates));
         }
-        reportErrors(() -> {
-            I id = (I) targets;
-            dispatchToOne(id);
-        });
-        return targets;
-    }
-
-    @CanIgnoreReturnValue
-    private <R> R reportErrors(Supplier<R> operation) {
         try {
-            return operation.get();
+            dispatchToOne((I)targets);
         } catch (RuntimeException exception) {
             onError(envelope(), exception);
-            throw exception;
         }
-    }
-
-    @SuppressWarnings("ReturnOfNull") // Value is never used.
-    private void reportErrors(Runnable operation) {
-        reportErrors(() -> {
-           operation.run();
-           return null;
-        });
+        return targets;
     }
 
     /**
