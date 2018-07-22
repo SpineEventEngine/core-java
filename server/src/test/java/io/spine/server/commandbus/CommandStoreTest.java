@@ -75,6 +75,7 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
     }
 
     @Nested
+    @Disabled
     @DisplayName("set command status to")
     class SetCommandStatusTo {
 
@@ -229,6 +230,7 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
     }
 
     @Nested
+    @Disabled
     @DisplayName("store")
     class Store {
 
