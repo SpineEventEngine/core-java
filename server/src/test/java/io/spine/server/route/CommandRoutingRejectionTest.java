@@ -20,7 +20,6 @@
 
 package io.spine.server.route;
 
-import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.Command;
@@ -46,7 +45,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.google.common.collect.Lists.newLinkedList;
-
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static org.junit.jupiter.api.Assertions.assertEquals;

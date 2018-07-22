@@ -21,7 +21,6 @@
 package io.spine.server;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.system.server.DefaultSystemGateway;
 import io.spine.system.server.SystemGateway;
 
 /**

@@ -20,8 +20,8 @@
 
 package io.spine.server.procman;
 
-import io.spine.core.Command;
 import io.spine.annotation.Internal;
+import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 

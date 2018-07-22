@@ -21,8 +21,8 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
-import io.spine.core.Command;
 import io.spine.annotation.Internal;
+import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 
 import java.util.List;

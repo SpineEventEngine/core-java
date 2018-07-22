@@ -26,8 +26,6 @@ import io.spine.protobuf.MessageFieldException;
 
 import java.util.Optional;
 
-import java.util.Optional;
-
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 

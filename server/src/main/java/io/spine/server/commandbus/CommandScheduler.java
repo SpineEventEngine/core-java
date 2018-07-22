@@ -41,7 +41,6 @@ import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Commands.isScheduled;
 import static io.spine.server.bus.Buses.acknowledge;
 import static java.util.Optional.empty;
-import static java.util.Optional.of;
 
 /**
  * Schedules commands delivering them to the target according to the scheduling options.
