@@ -78,7 +78,7 @@ final class ModelVerifier {
         Logger log = log();
         model.clear();
         for (String commandHandlingClass : spineModel.getCommandHandlingTypesList()) {
-            final Class<?> cls;
+            Class<?> cls;
             try {
                 log.debug("Trying to load class \'{}\'", commandHandlingClass);
                 cls = getModelClass(commandHandlingClass);
@@ -124,15 +124,14 @@ final class ModelVerifier {
     }
 
     private static URLClassLoader createClassLoaderForProject(Project project) {
-        final Collection<JavaCompile> tasks = allJavaCompile(project);
-        final URL[] compiledCodePath = extractDestinationDirs(tasks);
+        Collection<JavaCompile> tasks = allJavaCompile(project);
+        URL[] compiledCodePath = extractDestinationDirs(tasks);
         log().debug("Initializing ClassLoader for URLs: {}", deepToString(compiledCodePath));
         try {
             ClassLoader projectClassloader = project.getBuildscript()
                                                     .getClassLoader();
             @SuppressWarnings("ClassLoaderInstantiation") // Caught exception.
-            final URLClassLoader result =
-                    new URLClassLoader(compiledCodePath, projectClassloader);
+            URLClassLoader result = new URLClassLoader(compiledCodePath, projectClassloader);
             return result;
         } catch (SecurityException e) {
             throw new IllegalStateException("Cannot analyze project source code.", e);
@@ -140,7 +139,7 @@ final class ModelVerifier {
     }
 
     private static Collection<JavaCompile> allJavaCompile(Project project) {
-        final Collection<JavaCompile> tasks = newLinkedList();
+        Collection<JavaCompile> tasks = newLinkedList();
         ProjectHierarchy.applyToAll(project.getRootProject(),
                                     p -> tasks.addAll(javaCompile(p)));
         return tasks;
@@ -152,8 +151,8 @@ final class ModelVerifier {
     }
 
     private static URL[] extractDestinationDirs(Collection<JavaCompile> tasks) {
-        final Collection<URL> urls = transform(tasks, GetDestinationDir.FUNCTION);
-        final URL[] result = urls.toArray(EMPTY_URL_ARRAY);
+        Collection<URL> urls = transform(tasks, GetDestinationDir.FUNCTION);
+        URL[] result = urls.toArray(EMPTY_URL_ARRAY);
         return result;
     }
 
@@ -167,13 +166,13 @@ final class ModelVerifier {
         @Override
         public @Nullable URL apply(@Nullable JavaCompile task) {
             checkNotNull(task);
-            final File destDir = task.getDestinationDir();
+            File destDir = task.getDestinationDir();
             if (destDir == null) {
                 return null;
             }
-            final URI destUri = destDir.toURI();
+            URI destUri = destDir.toURI();
             try {
-                final URL destUrl = destUri.toURL();
+                URL destUrl = destUri.toURL();
                 return destUrl;
             } catch (MalformedURLException e) {
                 throw new IllegalArgumentException(format(
