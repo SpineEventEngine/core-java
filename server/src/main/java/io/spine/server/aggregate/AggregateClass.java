@@ -53,7 +53,7 @@ public class AggregateClass<A extends Aggregate>
     private static final long serialVersionUID = 0L;
 
     private final MessageHandlerMap<CommandClass, CommandHandlerMethod> commands;
-    private final MessageHandlerMap<EventClass, EventApplierMethod> stateEvents;
+    private final MessageHandlerMap<EventClass, EventApplier> stateEvents;
     private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactions;
     private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactions;
 
@@ -66,7 +66,7 @@ public class AggregateClass<A extends Aggregate>
     public AggregateClass(Class<? extends A> cls) {
         super(checkNotNull(cls));
         this.commands = new MessageHandlerMap<>(cls, CommandHandlerMethod.factory());
-        this.stateEvents = new MessageHandlerMap<>(cls, EventApplierMethod.factory());
+        this.stateEvents = new MessageHandlerMap<>(cls, EventApplier.factory());
         this.eventReactions = new MessageHandlerMap<>(cls, EventReactorMethod.factory());
         this.rejectionReactions = new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
 
@@ -105,7 +105,7 @@ public class AggregateClass<A extends Aggregate>
         return commands.getMethod(commandClass);
     }
 
-    EventApplierMethod getApplier(EventClass eventClass) {
+    EventApplier getApplier(EventClass eventClass) {
         return stateEvents.getMethod(eventClass);
     }
 

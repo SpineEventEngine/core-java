@@ -44,9 +44,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
 @DisplayName("EventApplierMethod should")
-class EventApplierMethodTest {
+class EventApplierTest {
 
-    private final AbstractHandlerMethod.Factory<EventApplierMethod> factory = EventApplierMethod.factory();
+    private final AbstractHandlerMethod.Factory<EventApplier> factory = EventApplier.factory();
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
@@ -54,7 +54,7 @@ class EventApplierMethodTest {
         new NullPointerTester()
                 .setDefault(CommandContext.class, CommandContext.getDefaultInstance())
                 .setDefault(Any.class, Any.getDefaultInstance())
-                .testAllPublicStaticMethods(EventApplierMethod.class);
+                .testAllPublicStaticMethods(EventApplier.class);
     }
 
     @Nested
@@ -70,13 +70,13 @@ class EventApplierMethodTest {
         @Test
         @DisplayName("method class")
         void methodClass() {
-            assertEquals(EventApplierMethod.class, factory.getMethodClass());
+            assertEquals(EventApplier.class, factory.getMethodClass());
         }
 
         @Test
         @DisplayName("method predicate")
         void methodPredicate() {
-            assertEquals(EventApplierMethod.predicate(), factory.getPredicate());
+            assertEquals(EventApplier.predicate(), factory.getPredicate());
         }
     }
 
@@ -85,16 +85,16 @@ class EventApplierMethodTest {
     void beCreatedFromFactory() {
         Method method = new ValidApplier().getMethod();
 
-        EventApplierMethod actual = factory.create(method);
+        EventApplier actual = factory.create(method);
 
-        assertEquals(EventApplierMethod.from(method), actual);
+        assertEquals(EventApplier.from(method), actual);
     }
 
     @Test
     @DisplayName("allow invocation")
     void invokeApplierMethod() {
         ValidApplier applierObject = new ValidApplier();
-        EventApplierMethod applier = EventApplierMethod.from(applierObject.getMethod());
+        EventApplier applier = EventApplier.from(applierObject.getMethod());
         RefProjectCreated event = Sample.messageOfType(RefProjectCreated.class);
 
         applier.invoke(applierObject, event);
@@ -131,8 +131,8 @@ class EventApplierMethodTest {
         }
 
         private void assertIsEventApplier(Method applier) {
-            assertTrue(EventApplierMethod.predicate()
-                                         .test(applier));
+            assertTrue(EventApplier.predicate()
+                                   .test(applier));
         }
     }
 
@@ -181,8 +181,8 @@ class EventApplierMethodTest {
         }
 
         private void assertIsNotEventApplier(Method applier) {
-            assertFalse(EventApplierMethod.predicate()
-                                          .test(applier));
+            assertFalse(EventApplier.predicate()
+                                    .test(applier));
         }
     }
 

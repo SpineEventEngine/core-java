@@ -40,7 +40,7 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  *
  * @author Alexander Yevsyukov
  */
-final class EventApplierMethod extends AbstractHandlerMethod<EventClass, Empty> {
+final class EventApplier extends AbstractHandlerMethod<EventClass, Empty> {
 
     /** The instance of the predicate to filter event applier methods of an aggregate class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -50,7 +50,7 @@ final class EventApplierMethod extends AbstractHandlerMethod<EventClass, Empty> 
      *
      * @param method subscriber method
      */
-    private EventApplierMethod(Method method) {
+    private EventApplier(Method method) {
         super(method);
     }
 
@@ -64,8 +64,8 @@ final class EventApplierMethod extends AbstractHandlerMethod<EventClass, Empty> 
         return HandlerKey.of(getMessageClass());
     }
 
-    static EventApplierMethod from(Method method) {
-        return new EventApplierMethod(method);
+    static EventApplier from(Method method) {
+        return new EventApplier(method);
     }
 
     @VisibleForTesting
@@ -73,7 +73,7 @@ final class EventApplierMethod extends AbstractHandlerMethod<EventClass, Empty> 
         return PREDICATE;
     }
 
-    public static AbstractHandlerMethod.Factory<EventApplierMethod> factory() {
+    public static AbstractHandlerMethod.Factory<EventApplier> factory() {
         return Factory.getInstance();
     }
 
@@ -93,7 +93,7 @@ final class EventApplierMethod extends AbstractHandlerMethod<EventClass, Empty> 
     }
 
     /** The factory for filtering methods that match {@code EventApplier} specification. */
-    private static class Factory extends AbstractHandlerMethod.Factory<EventApplierMethod> {
+    private static class Factory extends AbstractHandlerMethod.Factory<EventApplier> {
 
         private static final Factory INSTANCE = new Factory();
 
@@ -102,8 +102,8 @@ final class EventApplierMethod extends AbstractHandlerMethod<EventClass, Empty> 
         }
 
         @Override
-        public Class<EventApplierMethod> getMethodClass() {
-            return EventApplierMethod.class;
+        public Class<EventApplier> getMethodClass() {
+            return EventApplier.class;
         }
 
         @Override
@@ -118,7 +118,7 @@ final class EventApplierMethod extends AbstractHandlerMethod<EventClass, Empty> 
         }
 
         @Override
-        protected EventApplierMethod createFromMethod(Method method) {
+        protected EventApplier createFromMethod(Method method) {
             return from(method);
         }
     }
