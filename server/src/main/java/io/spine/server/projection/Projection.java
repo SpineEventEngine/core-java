@@ -27,8 +27,9 @@ import io.spine.core.EventContext;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.EventPlayers;
 import io.spine.server.entity.TransactionalEntity;
-import io.spine.server.event.EventSubscriberMethod;
+import io.spine.server.event.model.EventSubscriberMethod;
 import io.spine.server.model.Model;
+import io.spine.server.projection.model.ProjectionClass;
 import io.spine.validate.ValidatingBuilder;
 
 /**

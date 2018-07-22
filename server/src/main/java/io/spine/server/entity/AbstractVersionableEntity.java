@@ -91,7 +91,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * of the instance.
      */
     @Override
-    protected void init() {
+    public void init() {
         super.init();
         setState(getDefaultState());
         setVersion(Versions.zero());

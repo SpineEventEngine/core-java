@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.server.model.Model;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
@@ -111,7 +112,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * behaviour of instances of your entity classes.
      */
     @SuppressWarnings("NoopMethodInAbstractClass") // by design
-    protected void init() {
+    public void init() {
         // Do nothing.
     }
 

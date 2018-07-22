@@ -19,7 +19,7 @@
  */
 package io.spine.server.delivery;
 
-import io.spine.server.entity.EntityClass;
+import io.spine.server.entity.model.EntityClass;
 
 import java.io.Serializable;
 import java.util.Objects;

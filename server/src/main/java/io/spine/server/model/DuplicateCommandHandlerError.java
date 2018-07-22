@@ -22,7 +22,8 @@ package io.spine.server.model;
 
 import com.google.common.base.Joiner;
 import io.spine.core.CommandClass;
-import io.spine.server.command.CommandHandlingClass;
+import io.spine.server.command.model.CommandHandlerMethod;
+import io.spine.server.command.model.CommandHandlingClass;
 
 import java.util.Map;
 import java.util.Set;
@@ -32,7 +33,7 @@ import static java.lang.String.format;
 
 /**
  * An error thrown on attempt to add a class which declares a
- * {@linkplain io.spine.server.command.CommandHandlerMethod method} that handles a command which is
+ * {@linkplain CommandHandlerMethod method} that handles a command which is
  * already handled by a class already added to the {@link Model}.
  *
  * @author Alexander Yevsyukov

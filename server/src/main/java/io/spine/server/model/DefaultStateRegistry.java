@@ -22,7 +22,7 @@ package io.spine.server.model;
 
 import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityClass;
+import io.spine.server.entity.model.EntityClass;
 
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;

@@ -31,6 +31,7 @@ import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.projection.given.ProjectionTestEnv.TestProjection;
+import io.spine.server.projection.model.ProjectionClass;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.BeforeEach;
