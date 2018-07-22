@@ -29,13 +29,14 @@ import io.spine.server.command.CommandHandlerMethod;
 import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.entity.EntityClass;
 import io.spine.server.event.EventReactorMethod;
-import io.spine.server.model.HandlerMethods;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.rejection.RejectionReactorMethod;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.model.HandlerMethods.domesticPredicate;
+import static io.spine.server.model.HandlerMethods.externalPredicate;
 
 /**
  * Provides message handling information on an aggregate class.
@@ -69,15 +70,11 @@ public class AggregateClass<A extends Aggregate>
         this.eventReactions = new MessageHandlerMap<>(cls, EventReactorMethod.factory());
         this.rejectionReactions = new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
 
-        this.domesticEventReactions = this.eventReactions.getMessageClasses(
-                HandlerMethods.<EventReactorMethod>domesticPredicate());
-        this.externalEventReactions = this.eventReactions.getMessageClasses(
-                HandlerMethods.<EventReactorMethod>externalPredicate());
+        this.domesticEventReactions = eventReactions.getMessageClasses(domesticPredicate());
+        this.externalEventReactions = eventReactions.getMessageClasses(externalPredicate());
 
-        this.domesticRejectionReactions = this.rejectionReactions.getMessageClasses(
-                HandlerMethods.<RejectionReactorMethod>domesticPredicate());
-        this.externalRejectionReactions = this.rejectionReactions.getMessageClasses(
-                HandlerMethods.<RejectionReactorMethod>externalPredicate());
+        this.domesticRejectionReactions = rejectionReactions.getMessageClasses(domesticPredicate());
+        this.externalRejectionReactions = rejectionReactions.getMessageClasses(externalPredicate());
     }
 
     /**
