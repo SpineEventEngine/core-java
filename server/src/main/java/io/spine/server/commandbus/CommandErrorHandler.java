@@ -20,6 +20,7 @@
 
 package io.spine.server.commandbus;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
@@ -32,12 +33,14 @@ import io.spine.string.Stringifiers;
 import io.spine.system.server.MarkCommandAsErrored;
 import io.spine.system.server.MarkCommandAsRejected;
 import io.spine.system.server.SystemGateway;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Commands.rejectWithCause;
 import static io.spine.core.Rejections.causedByRejection;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 
 /**
@@ -68,21 +71,25 @@ public final class CommandErrorHandler {
      * a {@linkplain io.spine.base.ThrowableMessage command rejection}, the {@link Rejection} is
      * {@linkplain RejectionBus#post(Rejection) posted} to the {@code RejectionBus}. Otherwise,
      * the given {@code exception} is thrown.
+     *
+     * @return the result of the error handing
      */
-    public void handleError(CommandEnvelope envelope, RuntimeException exception) {
+    @CanIgnoreReturnValue
+    public HandledError handleError(CommandEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
         if (causedByRejection(exception)) {
-            handleRejection(envelope, exception);
+            return handleRejection(envelope, exception);
         } else {
-            handleRuntime(envelope, exception);
+            return handleRuntime(envelope, exception);
         }
     }
 
-    private void handleRejection(CommandEnvelope envelope, RuntimeException exception) {
+    private HandledError handleRejection(CommandEnvelope envelope, RuntimeException exception) {
         Rejection rejection = rejectWithCause(envelope.getCommand(), exception);
         rejectionBus.post(rejection);
         markRejected(envelope, rejection);
+        return HandledError.forRejection();
     }
 
     private void markRejected(CommandEnvelope command, Rejection rejection) {
@@ -95,14 +102,14 @@ public final class CommandErrorHandler {
         postSystem(systemCommand);
     }
 
-    private void handleRuntime(CommandEnvelope envelope, RuntimeException exception) {
+    private HandledError handleRuntime(CommandEnvelope envelope, RuntimeException exception) {
         log().error(format("Error dispatching command (class: %s id: %s).",
                            envelope.getMessage().getClass(),
                            Stringifiers.toString(envelope.getId())),
                     exception);
         Error error = Errors.causeOf(exception);
         markErrored(envelope, error);
-        throw exception;
+        return HandledError.forRuntime(exception);
     }
 
     private void markErrored(CommandEnvelope command, Error error) {
@@ -117,6 +124,31 @@ public final class CommandErrorHandler {
 
     private void postSystem(Message systemCommand) {
         systemGateway.postCommand(systemCommand);
+    }
+
+    public static final class HandledError {
+
+        private static final HandledError EMPTY = new HandledError(null);
+
+        private final @Nullable RuntimeException exception;
+
+        private HandledError(@Nullable RuntimeException exception) {
+            this.exception = exception;
+        }
+
+        private static HandledError forRejection() {
+            return EMPTY;
+        }
+
+        private static HandledError forRuntime(RuntimeException exception) {
+            return new HandledError(exception);
+        }
+
+        public void rethrowIfRuntime() {
+            if (exception != null) {
+                throw illegalStateWithCauseOf(exception);
+            }
+        }
     }
 
     /**

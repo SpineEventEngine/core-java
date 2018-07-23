@@ -226,15 +226,7 @@ public class CommandBus extends Bus<Command,
         try {
             dispatcher.dispatch(envelope);
         } catch (RuntimeException exception) {
-            onError(envelope, exception);
-        }
-    }
-
-    private void onError(CommandEnvelope envelope, RuntimeException exception) {
-        try {
             errorHandler.handleError(envelope, exception);
-        } catch (RuntimeException e) {
-            // Ignore exceptions.
         }
     }
 
