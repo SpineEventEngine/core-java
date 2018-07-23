@@ -40,12 +40,6 @@ final class ChainBuilder<E extends MessageEnvelope<?, ?, ?>> {
     private final Deque<BusFilter<E>> filters = new ConcurrentLinkedDeque<>();
 
     /**
-     * Prevents direct instantiation.
-     */
-    ChainBuilder() {
-    }
-
-    /**
      * Appends the given {@link BusFilter} to the tail of the built chain.
      */
     ChainBuilder<E> append(BusFilter<E> filter) {
