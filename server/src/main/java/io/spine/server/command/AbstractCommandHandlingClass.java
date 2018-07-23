@@ -49,7 +49,6 @@ public abstract class AbstractCommandHandlingClass<C, H extends CommandAccepting
         this.commands = new MessageHandlerMap<>(cls, factory);
     }
 
-    /** {@inheritDoc} */
     @Override
     public Set<CommandClass> getCommands() {
         return commands.getMessageClasses();

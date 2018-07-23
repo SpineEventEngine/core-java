@@ -94,6 +94,22 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * <p>Logs the error into the {@linkplain #log() log}.
+     */
+    @Override
+    public void onError(CommandEnvelope envelope, RuntimeException exception) {
+        checkNotNull(envelope);
+        checkNotNull(exception);
+        MessageClass messageClass = envelope.getMessageClass();
+        String messageId = Stringifiers.toString(envelope.getId());
+        String errorMessage =
+                format("Error handling command (class: %s id: %s).", messageClass, messageId);
+        log().error(errorMessage, exception);
+    }
+
+    /**
      * Indicates whether some another command handler is "equal to" this one.
      *
      * <p>Two command handlers are equal if they handle the same set of commands.
@@ -119,21 +135,5 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
     @Override
     public int hashCode() {
         return getId().hashCode();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Logs the error into the {@linkplain #log() log}.
-     */
-    @Override
-    public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
-        checkNotNull(exception);
-        MessageClass messageClass = envelope.getMessageClass();
-        String messageId = Stringifiers.toString(envelope.getId());
-        String errorMessage =
-                format("Error handling command (class: %s id: %s).", messageClass, messageId);
-        log().error(errorMessage, exception);
     }
 }
