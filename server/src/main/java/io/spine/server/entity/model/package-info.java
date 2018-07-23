@@ -21,10 +21,12 @@
 /**
  * This package provides model classes and interfaces for {@link io.spine.server.entity}.
  */
+@Internal
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.entity.model;
 
 import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.annotation.Internal;
 
 import javax.annotation.ParametersAreNonnullByDefault;
