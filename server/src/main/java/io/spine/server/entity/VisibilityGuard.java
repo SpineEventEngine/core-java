@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.option.EntityOptions;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.type.TypeName;
 
 import java.util.Collection;

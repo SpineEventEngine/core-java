@@ -20,6 +20,7 @@
 
 package io.spine.server.aggregate;
 
+import io.spine.server.aggregate.model.AggregatePartClass;
 import io.spine.server.model.Model;
 
 /**

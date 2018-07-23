@@ -36,7 +36,6 @@ import io.spine.server.bc.given.BoundedContextTestEnv.SecretProjectRepository;
 import io.spine.server.bc.given.BoundedContextTestEnv.TestEventSubscriber;
 import io.spine.server.bc.given.Given;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventStore;
@@ -53,10 +52,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
-import java.util.Map;
-
-import static com.google.common.collect.Maps.newConcurrentMap;
 import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -67,13 +62,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Tests of {@link BoundedContext}.
@@ -95,54 +88,11 @@ import static org.mockito.Mockito.when;
 @DisplayName("BoundedContext should")
 class BoundedContextTest {
 
-    private static final String DEFAULT_STATES_FIELD_NAME = "defaultStates";
-    private static final String DEFAULT_STATE_REGISTRY_FULL_CLASS_NAME =
-            "io.spine.server.model.DefaultStateRegistry$Singleton";
-    private static final String DEFAULT_STATE_REGISTRY_SINGLETON_FIELD_NAME = "value";
-
     private final TestEventSubscriber subscriber = new TestEventSubscriber();
 
     private BoundedContext boundedContext;
 
     private boolean handlersRegistered = false;
-
-    private static Object getObjectFromNestedEnumField(String fullClassName, String fieldName) {
-        Object result = null;
-        try {
-            Class<?> aClass = Class.forName(fullClassName);
-            Object enumConstant = aClass.getEnumConstants()[0];
-            Field field = aClass.getDeclaredField(fieldName);
-            field.setAccessible(true);
-            result = field.get(enumConstant);
-        } catch (ClassNotFoundException e) {
-            failMissingClass(fullClassName);
-        } catch (NoSuchFieldException e) {
-            failMissingField(fieldName);
-        } catch (IllegalAccessException e) {
-            fail(e.getMessage());
-        }
-        assertNotNull(result);
-        return result;
-    }
-
-    private static void failMissingClass(String fullClassName) {
-        fail("Class " + fullClassName + " not found.");
-    }
-
-    private static void failMissingField(String fieldName) {
-        fail("Field " + fieldName + " should exist.");
-    }
-
-    private static void injectField(Object target, String fieldName, Object valueToInject) {
-        try {
-            Field defaultStates = target.getClass()
-                                        .getDeclaredField(fieldName);
-            defaultStates.setAccessible(true);
-            defaultStates.set(target, valueToInject);
-        } catch (NoSuchFieldException | IllegalAccessException ignored) {
-            failMissingField(fieldName);
-        }
-    }
 
     @BeforeEach
     void setUp() {
@@ -444,42 +394,5 @@ class BoundedContextTest {
 
         assertFalse(boundedContext.findRepository(SecretProject.class)
                                   .isPresent());
-    }
-
-    /**
-     * This test checks, whether {@code BoundedContext} properly handles the issues upon repository
-     * registration.
-     *
-     * <p>In particular, we intentionally break an interaction between {@code Model}
-     * and a {@code BoundedContext} on attempt to ensure there is an entity default state present
-     * for the given repository instance.
-     *
-     * <p>The expected behavior of {@code BoundedContext} instance is to fail fast in case such
-     * a default state is absent.
-     *
-     * <p>In real-life this use case can never happen given the current implementation of
-     * {@code Model} and {@code BoundedContext}. However, previously such an issue was caught.
-     * Therefore this test case ensures it's never happening again.
-     */
-    @Test
-    @DisplayName("throw NPE when registering repository and default state is null")
-    void throwOnRegisterWithNullDefaultState() {
-        ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        Map mockMap = mock(Map.class);
-        when(mockMap.get(any())).thenReturn(null);
-        Object defaultStateRegistry =
-                getObjectFromNestedEnumField(
-                        DEFAULT_STATE_REGISTRY_FULL_CLASS_NAME,
-                        DEFAULT_STATE_REGISTRY_SINGLETON_FIELD_NAME
-                );
-        injectField(defaultStateRegistry, DEFAULT_STATES_FIELD_NAME, mockMap);
-
-        try {
-            assertThrows(NullPointerException.class, () -> boundedContext.register(repository));
-        } finally {
-            // Reassign default state registry to real map to prevent failing other tests.
-            Map<Class<? extends Entity>, Message> defaultState = newConcurrentMap();
-            injectField(defaultStateRegistry, DEFAULT_STATES_FIELD_NAME, defaultState);
-        }
     }
 }

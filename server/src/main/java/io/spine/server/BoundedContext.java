@@ -39,7 +39,6 @@ import io.spine.server.event.EventFactory;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
-import io.spine.server.model.Model;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
@@ -169,10 +168,6 @@ public abstract class BoundedContext
      */
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkNotNull(repository);
-        Message defaultState = Model.getInstance()
-                                    .getDefaultState(repository.getEntityClass());
-        checkNotNull(defaultState);
-
         repository.setBoundedContext(this);
         guard.register(repository);
         repository.onRegistered();

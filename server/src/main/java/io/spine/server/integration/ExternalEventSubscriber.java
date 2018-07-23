@@ -26,7 +26,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.event.EventSubscriber;
-import io.spine.server.event.EventSubscriberClass;
+import io.spine.server.event.model.EventSubscriberClass;
 import io.spine.server.model.Model;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;

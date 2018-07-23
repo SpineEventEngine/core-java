@@ -139,13 +139,11 @@ public class AggregateTest {
 
     private static TestAggregate newAggregate(ProjectId id) {
         TestAggregate result = new TestAggregate(id);
-        result.init();
         return result;
     }
 
     private static AmishAggregate newAmishAggregate(ProjectId id) {
         AmishAggregate result = new AmishAggregate(id);
-        result.init();
         return result;
     }
 

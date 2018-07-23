@@ -32,6 +32,7 @@ import io.spine.server.storage.StorageFactory;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  * Abstract base for repositories storing information about tenants.
@@ -105,7 +106,7 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
                                    : null;
         Set<TenantId> result = index != null
                                ? ImmutableSet.copyOf(index)
-                               : ImmutableSet.<TenantId>of();
+                               : ImmutableSet.of();
         cache.addAll(result);
         return result;
     }
@@ -116,8 +117,13 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
      * @param <T> the type of the data associated with the tenant ID
      */
     public static class Entity<T extends Message> extends AbstractEntity<TenantId, T> {
+
         protected Entity(TenantId id) {
             super(id);
+        }
+
+        protected Entity(TenantId id, Function<TenantId, T> defaultState) {
+            super(id, defaultState);
         }
     }
 }

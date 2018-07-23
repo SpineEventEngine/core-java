@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.model.EntityStateClass;
 import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ConstraintViolations.ExceptionFactory;

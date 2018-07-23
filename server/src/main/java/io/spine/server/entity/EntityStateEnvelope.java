@@ -29,6 +29,7 @@ import io.spine.core.EventContext;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.Version;
+import io.spine.server.entity.model.EntityStateClass;
 import io.spine.string.Stringifiers;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

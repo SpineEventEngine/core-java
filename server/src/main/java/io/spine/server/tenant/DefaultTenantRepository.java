@@ -34,13 +34,9 @@ final class DefaultTenantRepository
       extends TenantRepository<Timestamp, DefaultTenantRepository.Entity> {
 
     public static class Entity extends TenantRepository.Entity<Timestamp> {
-        protected Entity(TenantId id) {
-            super(id);
-        }
 
-        @Override
-        public Timestamp getDefaultState() {
-            return Time.getCurrentTime();
+        protected Entity(TenantId id) {
+            super(id, (i) -> Time.getCurrentTime());
         }
     }
 }

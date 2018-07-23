@@ -27,7 +27,7 @@ import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.model.Model;
 import io.spine.server.rejection.RejectionSubscriber;
-import io.spine.server.rejection.RejectionSubscriberClass;
+import io.spine.server.rejection.model.RejectionSubscriberClass;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 import org.slf4j.Logger;

@@ -23,9 +23,9 @@ package io.spine.testing.server.aggregate;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.server.aggregate.AggregatePart;
-import io.spine.server.aggregate.AggregatePartClass;
 import io.spine.server.aggregate.AggregateRoot;
-import io.spine.server.entity.EntityClass;
+import io.spine.server.aggregate.model.AggregatePartClass;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.testing.server.entity.EntityBuilder;
 
 import java.lang.reflect.Constructor;

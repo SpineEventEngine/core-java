@@ -20,6 +20,8 @@
 
 package io.spine.server.entity;
 
+import io.spine.server.entity.model.EntityClass;
+
 import java.util.Objects;
 
 /**
