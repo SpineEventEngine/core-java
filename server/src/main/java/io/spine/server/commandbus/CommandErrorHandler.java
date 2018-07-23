@@ -33,6 +33,7 @@ import io.spine.string.Stringifiers;
 import io.spine.system.server.MarkCommandAsErrored;
 import io.spine.system.server.MarkCommandAsRejected;
 import io.spine.system.server.SystemGateway;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,6 @@ import org.slf4j.LoggerFactory;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Commands.rejectWithCause;
 import static io.spine.core.Rejections.causedByRejection;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;
 
 /**
@@ -126,11 +126,20 @@ public final class CommandErrorHandler {
         systemGateway.postCommand(systemCommand);
     }
 
+    /**
+     * A result of an error handling.
+     */
     public static final class HandledError {
 
         private static final HandledError EMPTY = new HandledError(null);
 
-        private final @Nullable RuntimeException exception;
+        /**
+         * The handled {@link RuntimeException}.
+         *
+         * <p>If the handled error was caused by a {@link Rejection}, this field is equal
+         * to {@code null}. Otherwise the field is non-null.
+         */
+        private final @MonotonicNonNull RuntimeException exception;
 
         private HandledError(@Nullable RuntimeException exception) {
             this.exception = exception;
@@ -144,9 +153,14 @@ public final class CommandErrorHandler {
             return new HandledError(exception);
         }
 
+        /**
+         * Rethrows the handled exception if it was <b>not</b> caused by a {@link Rejection}.
+         *
+         * <p>If the exception was caused by a {@link Rejection}, preforms no action.
+         */
         public void rethrowIfRuntime() {
             if (exception != null) {
-                throw illegalStateWithCauseOf(exception);
+                throw exception;
             }
         }
     }
