@@ -26,7 +26,6 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.testing.Tests;
-import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.time.Durations2;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -60,9 +59,6 @@ import static org.mockito.Mockito.verify;
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("Command scheduling mechanism should")
 class CommandSchedulingTest extends AbstractCommandBusTestSuite {
-
-    private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(CommandSchedulingTest.class);
 
     CommandSchedulingTest() {
         super(true);
@@ -109,9 +105,8 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         Timestamp schedulingTime = minutesAgo(3);
         Duration delayPrimary = Durations2.fromMinutes(5);
         Duration newDelayExpected = Durations2.fromMinutes(2); // = 5 - 3
-        List<Command> commandsPrimary = newArrayList(createProject(),
-                                                     addTask(),
-                                                     startProject());
+        List<Command> commandsPrimary =
+                newArrayList(createProject(), addTask(), startProject());
         storeAsScheduled(commandsPrimary, delayPrimary, schedulingTime);
 
         commandBus.rescheduleCommands();
@@ -142,12 +137,13 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
             storeSingleCommandForRescheduling();
 
             // Create CommandBus specific for this test.
-            CommandBus commandBus = CommandBus.newBuilder()
-                                              .setCommandStore(commandStore)
-                                              .setCommandScheduler(scheduler)
-                                              .setThreadSpawnAllowed(true)
-                                              .setAutoReschedule(true)
-                                              .build();
+            CommandBus commandBus = CommandBus
+                    .newBuilder()
+                    .setCommandStore(commandStore)
+                    .setCommandScheduler(scheduler)
+                    .setThreadSpawnAllowed(true)
+                    .setAutoReschedule(true)
+                    .build();
             assertNotNull(commandBus);
 
             // Await to ensure the commands have been rescheduled in parallel.
@@ -180,12 +176,13 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
             storeSingleCommandForRescheduling();
 
             // Create CommandBus specific for this test.
-            CommandBus commandBus = CommandBus.newBuilder()
-                                              .setCommandStore(commandStore)
-                                              .setCommandScheduler(scheduler)
-                                              .setThreadSpawnAllowed(false)
-                                              .setAutoReschedule(true)
-                                              .build();
+            CommandBus commandBus = CommandBus
+                    .newBuilder()
+                    .setCommandStore(commandStore)
+                    .setCommandScheduler(scheduler)
+                    .setThreadSpawnAllowed(false)
+                    .setAutoReschedule(true)
+                    .build();
             assertNotNull(commandBus);
 
             // Ensure the scheduler has been called for a single command,
@@ -196,6 +193,31 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
             String actualThreadName = threadNameUponScheduling.toString();
             assertNotNull(actualThreadName);
             assertEquals(mainThreadName, actualThreadName);
+        }
+
+        /**
+         * Creates a new thread-aware scheduler spied by Mockito.
+         *
+         * <p>The method is not {@code static} to allow Mockito spy on the created anonymous class
+         * instance.
+         *
+         * @param targetThreadName the builder of the thread name that will be created upon command
+         *                         scheduling
+         * @param latch            the instance of the {@code CountDownLatch} to await the execution
+         *                         finishing
+         * @return newly created instance
+         */
+        private CommandScheduler threadAwareScheduler(StringBuilder targetThreadName,
+                                                      CountDownLatch latch) {
+            return spy(new ExecutorCommandScheduler() {
+                @Override
+                public void schedule(Command command) {
+                    super.schedule(command);
+                    targetThreadName.append(Thread.currentThread()
+                                                  .getName());
+                    latch.countDown();
+                }
+            });
         }
     }
 
@@ -271,32 +293,6 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         Command cmdWithSchedule = createScheduledCommand();
         commandStore.store(cmdWithSchedule, SCHEDULED);
         return cmdWithSchedule;
-    }
-
-    /**
-     * Creates a new thread-aware scheduler spied by Mockito.
-     *
-     * <p>The method is not {@code static} to allow Mockito spy on the created anonymous class
-     * instance.
-     *
-     * @param targetThreadName the builder of the thread name that will be created upon command
-     *                         scheduling
-     * @param latch            the instance of the {@code CountDownLatch} to await the execution
-     *                         finishing
-     * @return newly created instance
-     */
-    @SuppressWarnings("MethodMayBeStatic") // see Javadoc.
-    private CommandScheduler threadAwareScheduler(StringBuilder targetThreadName,
-                                                  CountDownLatch latch) {
-        return spy(new ExecutorCommandScheduler() {
-            @Override
-            public void schedule(Command command) {
-                super.schedule(command);
-                targetThreadName.append(Thread.currentThread()
-                                              .getName());
-                latch.countDown();
-            }
-        });
     }
 
     private static long getDelaySeconds(Command cmd) {

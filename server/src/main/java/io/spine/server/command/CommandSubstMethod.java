@@ -20,70 +20,46 @@
 
 package io.spine.server.command;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.ThrowableMessage;
+import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.core.Rejection;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.function.Predicate;
 
 /**
- * The wrapper for a command handler method.
+ * A method that produces one or more command messages in response to an incoming command.
  *
  * @author Alexander Yevsyukov
  */
 @Internal
-public final class CommandHandlerMethod extends CommandAcceptingMethod {
+public final class CommandSubstMethod
+        extends CommandAcceptingMethod
+        implements CommandingMethod<CommandClass, CommandContext> {
 
-    /**
-     * Creates a new instance to wrap {@code method} on {@code target}.
-     *
-     * @param method subscriber method
-     */
-    private CommandHandlerMethod(Method method) {
+    private CommandSubstMethod(Method method) {
         super(method);
     }
 
-    static CommandHandlerMethod from(Method method) {
-        return new CommandHandlerMethod(method);
+    static CommandSubstMethod from(Method method) {
+        return new CommandSubstMethod(method);
     }
 
-    public static AbstractHandlerMethod.Factory<CommandHandlerMethod> factory() {
+    static AbstractHandlerMethod.Factory<CommandSubstMethod> factory() {
         return Factory.INSTANCE;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return the list of event messages
-     */
-    @Override
-    public List<? extends Message> invoke(Object target, Message message, CommandContext context) {
-        Object handlingResult = super.invoke(target, message, context);
-        List<? extends Message> events = toList(handlingResult);
-        //TODO:2018-07-22:alexander.yevsyukov: Have the below check once ProcessManagers stop violating the contract of `@Assign`.
-        // see: https://github.com/SpineEventEngine/core-java/issues/773
-        // checkState(!events.isEmpty(), "Command handling method did not produce events");
-        return events;
-    }
-
-    /**
-     * The factory of {@link CommandHandlerMethod}s.
-     */
-    private static class Factory extends AbstractHandlerMethod.Factory<CommandHandlerMethod> {
+    private static class Factory extends AbstractHandlerMethod.Factory<CommandSubstMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
         @Override
-        public Class<CommandHandlerMethod> getMethodClass() {
-            return CommandHandlerMethod.class;
+        public Class<CommandSubstMethod> getMethodClass() {
+            return CommandSubstMethod.class;
         }
 
         @Override
@@ -94,39 +70,32 @@ public final class CommandHandlerMethod extends CommandAcceptingMethod {
         @Override
         public void checkAccessModifier(Method method) {
             MethodAccessChecker checker = MethodAccessChecker.forMethod(method);
-            checker.checkPackagePrivate("Command handler method {} should be package-private.");
+            checker.checkPackagePrivate(
+                    "Command substitution method {} should be package-private."
+            );
         }
 
-        /**
-         * {@inheritDoc}
-         *
-         * <p>For the {@link CommandHandlerMethod}, the {@link ThrowableMessage} checked exception
-         * type is allowed, because the mechanism of {@linkplain Rejection
-         * command rejections} is based on this type.
-         */
         @Override
         protected void checkThrownExceptions(Method method) {
             MethodExceptionChecker checker = MethodExceptionChecker.forMethod(method);
-            checker.checkThrowsNoExceptionsBut(RuntimeException.class, ThrowableMessage.class);
+            checker.checkThrowsNoExceptionsBut(ThrowableMessage.class);
         }
 
         @Override
-        protected CommandHandlerMethod doCreate(Method method) {
+        protected CommandSubstMethod doCreate(Method method) {
             return from(method);
         }
     }
 
     /**
-     * The predicate that filters command handling methods.
-     *
-     * <p>See {@link Assign} annotation for more info about such methods.
+     * Filters command substitution methods.
      */
-    private static class Filter extends HandlerMethodPredicate<CommandContext> {
+    private static final class Filter extends AbstractPredicate<CommandContext> {
 
         private static final Filter INSTANCE = new Filter();
 
         private Filter() {
-            super(Assign.class, CommandContext.class);
+            super(CommandContext.class);
         }
 
         @Override

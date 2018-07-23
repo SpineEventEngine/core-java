@@ -59,7 +59,6 @@ import java.util.List;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static io.spine.server.command.CommandHandlerMethod.from;
-import static io.spine.server.command.CommandHandlerMethod.predicate;
 import static io.spine.server.model.given.Given.CommandMessage.createProject;
 import static io.spine.server.model.given.Given.CommandMessage.startProject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -299,6 +298,9 @@ class CommandHandlerMethodTest {
     }
 
     private static void assertIsCommandHandler(Method handler, boolean isHandler) {
-        assertEquals(isHandler, predicate().apply(handler));
+        assertEquals(isHandler,
+                     CommandHandlerMethod.factory()
+                                         .getPredicate()
+                                         .test(handler));
     }
 }

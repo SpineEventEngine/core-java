@@ -20,7 +20,6 @@
 
 package io.spine.server.event.given;
 
-import com.google.common.base.Function;
 import com.google.protobuf.AbstractMessage;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -46,6 +45,8 @@ import io.spine.testing.core.given.GivenUserId;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.time.ZoneOffset;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.newUuid;

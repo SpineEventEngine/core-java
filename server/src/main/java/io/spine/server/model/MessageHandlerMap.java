@@ -20,7 +20,6 @@
 
 package io.spine.server.model;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
@@ -30,6 +29,7 @@ import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
@@ -40,6 +40,7 @@ import static com.google.common.collect.Sets.newHashSet;
  * @param <M> the type of messages
  * @param <H> the type of handler methods
  * @author Alexander Yevsyukov
+ * @author Dmytro Grankin
  */
 public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M, ?>>
         implements Serializable {
@@ -54,7 +55,7 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
      * @param cls     the class to inspect
      * @param factory the factory of methods
      */
-    public MessageHandlerMap(Class<?> cls, HandlerMethod.Factory<H> factory) {
+    public MessageHandlerMap(Class<?> cls, AbstractHandlerMethod.Factory<H> factory) {
         this.map = scan(cls, factory);
     }
 
@@ -71,7 +72,7 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
      * @param predicate a predicate for handler methods to filter the corresponding message classes
      */
     public ImmutableSet<M> getMessageClasses(Predicate<H> predicate) {
-        Map<HandlerKey, H> filtered = Maps.filterValues(map, predicate);
+        Map<HandlerKey, H> filtered = Maps.filterValues(map, predicate::test);
         return messageClasses(filtered.values());
     }
 
@@ -130,22 +131,24 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
     }
 
     private static <M extends MessageClass, H extends HandlerMethod<M, ?>>
-    ImmutableMap<HandlerKey, H> scan(Class<?> declaringClass, HandlerMethod.Factory<H> factory) {
+    ImmutableMap<HandlerKey, H> scan(Class<?> declaringClass,
+                                     AbstractHandlerMethod.Factory<H> factory) {
         Predicate<Method> filter = factory.getPredicate();
         Map<HandlerKey, H> tempMap = Maps.newHashMap();
         Method[] declaredMethods = declaringClass.getDeclaredMethods();
         for (Method method : declaredMethods) {
-            if (filter.apply(method)) {
+            if (filter.test(method)) {
                 H handler = factory.create(method);
                 HandlerKey handlerKey = handler.key();
                 if (tempMap.containsKey(handlerKey)) {
                     Method alreadyPresent = tempMap.get(handlerKey)
-                                                   .getMethod();
+                                                   .getRawMethod();
                     throw new DuplicateHandlerMethodError(
                             declaringClass,
                             handlerKey,
                             alreadyPresent.getName(),
-                            method.getName());
+                            method.getName()
+                    );
                 }
                 tempMap.put(handlerKey, handler);
             }

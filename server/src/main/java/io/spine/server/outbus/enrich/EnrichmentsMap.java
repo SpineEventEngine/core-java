@@ -20,7 +20,6 @@
 
 package io.spine.server.outbus.enrich;
 
-import com.google.common.base.Function;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableCollection;
@@ -32,7 +31,6 @@ import io.spine.option.OptionsProto;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.HashSet;

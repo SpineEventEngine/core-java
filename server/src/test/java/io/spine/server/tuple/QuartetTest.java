@@ -103,20 +103,21 @@ class QuartetTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        new EqualsTester().addEqualityGroup(Quartet.of(monkey, donkey, goat, bear),
-                                            Quartet.of(monkey, donkey, goat, bear))
+        new EqualsTester()
+                .addEqualityGroup(Quartet.of(monkey, donkey, goat, bear),
+                                  Quartet.of(monkey, donkey, goat, bear))
 
-                          .addEqualityGroup(Quartet.of(bear, donkey, monkey, goat))
+                .addEqualityGroup(Quartet.of(bear, donkey, monkey, goat))
 
-                          .addEqualityGroup(Quartet.withNullable(monkey, donkey, goat, bear))
-                          .addEqualityGroup(Quartet.withNullable(monkey, donkey, goat, null))
+                .addEqualityGroup(Quartet.withNullable(monkey, donkey, goat, bear))
+                .addEqualityGroup(Quartet.withNullable(monkey, donkey, goat, null))
 
-                          .addEqualityGroup(Quartet.withNullable2(monkey, donkey, goat, bear))
-                          .addEqualityGroup(Quartet.withNullable2(monkey, donkey, null, null))
+                .addEqualityGroup(Quartet.withNullable2(monkey, donkey, goat, bear))
+                .addEqualityGroup(Quartet.withNullable2(monkey, donkey, null, null))
 
-                          .addEqualityGroup(Quartet.withNullable3(monkey, donkey, goat, bear))
-                          .addEqualityGroup(Quartet.withNullable3(monkey, null, null, null))
-                          .testEquals();
+                .addEqualityGroup(Quartet.withNullable3(monkey, donkey, goat, bear))
+                .addEqualityGroup(Quartet.withNullable3(monkey, null, null, null))
+                .testEquals();
     }
 
     @Test

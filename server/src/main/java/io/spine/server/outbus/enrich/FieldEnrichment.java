@@ -20,8 +20,9 @@
 
 package io.spine.server.outbus.enrich;
 
-import com.google.common.base.Function;
 import com.google.protobuf.Message;
+
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

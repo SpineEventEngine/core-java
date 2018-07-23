@@ -20,20 +20,20 @@
 
 package io.spine.server.event;
 
-import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.React;
+import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
-import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.function.Predicate;
 
-import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
+import static io.spine.server.model.HandlerMethod.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -43,9 +43,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Alexander Yevsyukov
  * @see React
  */
-public final class EventReactorMethod extends HandlerMethod<EventClass, EventContext> {
-
-    private static final MethodPredicate PREDICATE = new FilterPredicate();
+public final class EventReactorMethod extends AbstractHandlerMethod<EventClass, EventContext> {
 
     private EventReactorMethod(Method method) {
         super(method);
@@ -79,24 +77,16 @@ public final class EventReactorMethod extends HandlerMethod<EventClass, EventCon
         return new EventReactorMethod(method);
     }
 
-    static MethodPredicate predicate() {
-        return PREDICATE;
-    }
-
-    public static HandlerMethod.Factory<EventReactorMethod> factory() {
-        return Factory.getInstance();
+    public static AbstractHandlerMethod.Factory<EventReactorMethod> factory() {
+        return Factory.INSTANCE;
     }
 
     /**
      * The factory for creating {@link EventReactorMethod event reactor} methods.
      */
-    private static class Factory extends HandlerMethod.Factory<EventReactorMethod> {
+    private static class Factory extends AbstractHandlerMethod.Factory<EventReactorMethod> {
 
         private static final Factory INSTANCE = new Factory();
-
-        private static Factory getInstance() {
-            return INSTANCE;
-        }
 
         @Override
         public Class<EventReactorMethod> getMethodClass() {
@@ -105,7 +95,7 @@ public final class EventReactorMethod extends HandlerMethod<EventClass, EventCon
 
         @Override
         public Predicate<Method> getPredicate() {
-            return predicate();
+            return Filter.INSTANCE;
         }
 
         @Override
@@ -115,7 +105,7 @@ public final class EventReactorMethod extends HandlerMethod<EventClass, EventCon
         }
 
         @Override
-        protected EventReactorMethod createFromMethod(Method method) {
+        protected EventReactorMethod doCreate(Method method) {
             return from(method);
         }
     }
@@ -123,9 +113,11 @@ public final class EventReactorMethod extends HandlerMethod<EventClass, EventCon
     /**
      * The predicate that filters event reactor methods.
      */
-    private static class FilterPredicate extends EventMethodPredicate {
+    private static class Filter extends EventMethodPredicate {
 
-        private FilterPredicate() {
+        private static final MethodPredicate INSTANCE = new Filter();
+
+        private Filter() {
             super(React.class);
         }
 

@@ -18,23 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server;
+package io.spine.server.command;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import io.spine.annotation.Internal;
+import io.spine.core.CommandClass;
 
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+import java.util.Set;
 
 /**
+ * Provides information on message handling for a class of {@link Commander}s.
+ *
+ * @param <C> the type of commanders
  * @author Alexander Yevsyukov
  */
-@DisplayName("TestEventClasses utility should")
-class TestEventClassesTest {
+@Internal
+public final class CommanderClass<C extends Commander>
+        extends AbstractCommandHandlingClass<C, CommandSubstMethod> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(TestEventClasses.class);
+    private static final long serialVersionUID = 0L;
+
+    private CommanderClass(Class<? extends C> value) {
+        super(value, CommandSubstMethod.factory());
+    }
+
+    @Override
+    public Set<CommandClass> getCommands() {
+        //TODO:2018-07-22:alexander.yevsyukov: Implement
+        return null;
     }
 }

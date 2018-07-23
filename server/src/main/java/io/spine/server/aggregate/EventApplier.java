@@ -21,18 +21,17 @@
 package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
+import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
-import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
+import java.util.function.Predicate;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 
@@ -41,17 +40,14 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  *
  * @author Alexander Yevsyukov
  */
-final class EventApplierMethod extends HandlerMethod<EventClass, Empty> {
-
-    /** The instance of the predicate to filter event applier methods of an aggregate class. */
-    private static final MethodPredicate PREDICATE = new FilterPredicate();
+final class EventApplier extends AbstractHandlerMethod<EventClass, Empty> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    private EventApplierMethod(Method method) {
+    private EventApplier(Method method) {
         super(method);
     }
 
@@ -65,51 +61,47 @@ final class EventApplierMethod extends HandlerMethod<EventClass, Empty> {
         return HandlerKey.of(getMessageClass());
     }
 
-    static EventApplierMethod from(Method method) {
-        return new EventApplierMethod(method);
+    static EventApplier from(Method method) {
+        return new EventApplier(method);
     }
 
     @VisibleForTesting
-    static MethodPredicate predicate() {
-        return PREDICATE;
+    static Predicate<Method> predicate() {
+        return factory().getPredicate();
     }
 
-    public static HandlerMethod.Factory<EventApplierMethod> factory() {
-        return Factory.getInstance();
+    public static AbstractHandlerMethod.Factory<EventApplier> factory() {
+        return Factory.INSTANCE;
     }
 
     /**
      * Invokes the applier method.
      *
-     * <p>The method {@linkplain HandlerMethod#invoke(Object, Message, Message) delegates}
+     * <p>The method {@linkplain AbstractHandlerMethod#invoke(Object, Message, Message) delegates}
      * the invocation passing {@linkplain Empty#getDefaultInstance() empty message}
      * as the context parameter because event appliers do not have a context parameter.
-     * Such redirection is correct because {@linkplain #getParamCount()} the number of parameters}
+     *
+     * <p>Such redirection is correct because {@linkplain #getParamCount()} the number of parameters}
      * is set to one during instance construction.
      */
-    @CanIgnoreReturnValue
-    public Object invoke(Aggregate aggregate, Message message) {
-        // Make this method visible to Aggregate class.
-        return invoke(aggregate, message, Empty.getDefaultInstance());
+    @SuppressWarnings("CheckReturnValue") // since method appliers do not return values
+    void invoke(Aggregate aggregate, Message message) {
+        invoke(aggregate, message, Empty.getDefaultInstance());
     }
 
     /** The factory for filtering methods that match {@code EventApplier} specification. */
-    private static class Factory extends HandlerMethod.Factory<EventApplierMethod> {
+    private static class Factory extends AbstractHandlerMethod.Factory<EventApplier> {
 
         private static final Factory INSTANCE = new Factory();
 
-        private static Factory getInstance() {
-            return INSTANCE;
-        }
-
         @Override
-        public Class<EventApplierMethod> getMethodClass() {
-            return EventApplierMethod.class;
+        public Class<EventApplier> getMethodClass() {
+            return EventApplier.class;
         }
 
         @Override
         public Predicate<Method> getPredicate() {
-            return predicate();
+            return Filter.INSTANCE;
         }
 
         @Override
@@ -119,7 +111,7 @@ final class EventApplierMethod extends HandlerMethod<EventClass, Empty> {
         }
 
         @Override
-        protected EventApplierMethod createFromMethod(Method method) {
+        protected EventApplier doCreate(Method method) {
             return from(method);
         }
     }
@@ -127,12 +119,14 @@ final class EventApplierMethod extends HandlerMethod<EventClass, Empty> {
     /**
      * The predicate for filtering event applier methods.
      */
-    private static class FilterPredicate extends HandlerMethodPredicate<Empty> {
+    private static class Filter extends HandlerMethodPredicate<Empty> {
+
+        private static final MethodPredicate INSTANCE = new Filter();
 
         private static final int NUMBER_OF_PARAMS = 1;
         private static final int EVENT_PARAM_INDEX = 0;
 
-        private FilterPredicate() {
+        private Filter() {
             super(Apply.class, Empty.class);
         }
 

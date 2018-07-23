@@ -31,14 +31,12 @@ import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.integration.IntegrationEvent;
-import io.spine.server.integration.IntegrationEventContext;
 import io.spine.validate.ValidationException;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.validate.Validate.checkValid;
 
 /**
@@ -119,45 +117,34 @@ public class EventFactory {
      * @param context      the event context
      * @return created event instance
      */
-    private static Event createEvent(EventId id, Message messageOrAny, EventContext context) {
+    static Event createEvent(EventId id, Message messageOrAny, EventContext context) {
         checkNotNull(messageOrAny);
         checkNotNull(context);
         Any packed = pack(messageOrAny);
-        Event result = Event.newBuilder()
-                            .setId(id)
-                            .setMessage(packed)
-                            .setContext(context)
-                            .build();
+        Event result = Event
+                .newBuilder()
+                .setId(id)
+                .setMessage(packed)
+                .setContext(context)
+                .build();
         return result;
     }
 
     /**
      * Creates an event based on the passed integration event.
      */
-    public static Event toEvent(IntegrationEvent integrationEvent) {
-        IntegrationEventContext sourceContext = integrationEvent.getContext();
-        EventContext context = toEventContext(sourceContext);
-        Event result = createEvent(sourceContext.getEventId(),
-                                   integrationEvent.getMessage(),
-                                   context);
-        return result;
+    public static Event toEvent(IntegrationEvent ie) {
+        return IntegrationEventConverter.getInstance()
+                                        .convert(ie);
     }
 
-    private static EventContext toEventContext(IntegrationEventContext value) {
-        Timestamp timestamp = value.getTimestamp();
-        Any producerId = toAny(value.getBoundedContextName());
-        return EventContext.newBuilder()
-                           .setTimestamp(timestamp)
-                           .setProducerId(producerId)
-                           .build();
-    }
-
-    @SuppressWarnings("CheckReturnValue") // calling builder    
+    @SuppressWarnings("CheckReturnValue") // calling builder
     private EventContext createContext(@Nullable Version version) {
         Timestamp timestamp = getCurrentTime();
-        EventContext.Builder builder = EventContext.newBuilder()
-                                                   .setTimestamp(timestamp)
-                                                   .setProducerId(producerId);
+        EventContext.Builder builder = EventContext
+                .newBuilder()
+                .setTimestamp(timestamp)
+                .setProducerId(producerId);
         origin.setOriginFields(builder);
         if (version != null) {
             builder.setVersion(version);

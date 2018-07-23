@@ -18,33 +18,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server;
+package io.spine.server.entity;
 
-import com.google.errorprone.annotations.CheckReturnValue;
-import com.google.protobuf.Message;
-import io.spine.core.RejectionClass;
+import io.spine.annotation.Internal;
+import io.spine.core.CommandClass;
+import io.spine.server.command.CommandHandlerMethod;
+import io.spine.server.command.CommandHandlingClass;
+import io.spine.server.model.MessageHandlerMap;
 
-import java.util.Collection;
-
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.Set;
 
 /**
- * Utilities for working with rejection classes.
+ * Abstract base for entity classes that handle commands.
  *
  * @author Alexander Yevsyukov
  */
-@CheckReturnValue
-public class TestRejectionClasses {
+@Internal
+public abstract class CommandHandlingEntityClass<E extends Entity>
+        extends EntityClass<E>
+        implements CommandHandlingClass {
 
-    /** Prevents instantiation of this utility class. */
-    private TestRejectionClasses() {
+    private static final long serialVersionUID = 0L;
+    private final MessageHandlerMap<CommandClass, CommandHandlerMethod> commands;
+
+    protected CommandHandlingEntityClass(Class<? extends E> cls) {
+        super(cls);
+        this.commands = new MessageHandlerMap<>(cls, CommandHandlerMethod.factory());
     }
 
-    @SafeVarargs
-    public static void assertContains(Collection<RejectionClass> expected,
-                                      Class<? extends Message>... rejectionClass) {
-        for (Class<? extends Message> cls : rejectionClass) {
-            assertTrue(expected.contains(RejectionClass.of(cls)));
-        }
+    @Override
+    public Set<CommandClass> getCommands() {
+        return commands.getMessageClasses();
+    }
+
+    @Override
+    public CommandHandlerMethod getHandler(CommandClass commandClass) {
+        return commands.getMethod(commandClass);
     }
 }

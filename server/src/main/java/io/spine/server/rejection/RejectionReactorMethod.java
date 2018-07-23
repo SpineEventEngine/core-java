@@ -20,19 +20,18 @@
 package io.spine.server.rejection;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.React;
 import io.spine.core.RejectionContext;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
-import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.function.Predicate;
 
-import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
+import static io.spine.server.model.HandlerMethod.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
@@ -44,9 +43,6 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  */
 @Internal
 public class RejectionReactorMethod extends RejectionHandlerMethod {
-
-    /** The instance of the predicate to filter rejection reactor methods of a class. */
-    private static final MethodPredicate PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -83,18 +79,16 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
     }
 
     /** Returns the factory for filtering and creating rejection reactor methods. */
-    public static HandlerMethod.Factory<RejectionReactorMethod> factory() {
-        return Factory.getInstance();
-    }
-
-    static MethodPredicate predicate() {
-        return PREDICATE;
+    public static AbstractHandlerMethod.Factory<RejectionReactorMethod> factory() {
+        return Factory.INSTANCE;
     }
 
     /**
      * The factory for filtering methods that match {@code RejectionReactorMethod} specification.
      */
-    private static class Factory extends HandlerMethod.Factory<RejectionReactorMethod> {
+    private static class Factory extends AbstractHandlerMethod.Factory<RejectionReactorMethod> {
+
+        private static final Factory INSTANCE = new Factory();
 
         @Override
         public Class<RejectionReactorMethod> getMethodClass() {
@@ -103,7 +97,7 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
 
         @Override
         public Predicate<Method> getPredicate() {
-            return predicate();
+            return Filter.INSTANCE;
         }
 
         @Override
@@ -113,19 +107,9 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
         }
 
         @Override
-        protected RejectionReactorMethod createFromMethod(Method method) {
+        protected RejectionReactorMethod doCreate(Method method) {
             RejectionReactorMethod result = new RejectionReactorMethod(method);
             return result;
-        }
-
-        private enum Singleton {
-            INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final Factory value = new Factory();
-        }
-
-        private static Factory getInstance() {
-            return Singleton.INSTANCE.value;
         }
     }
 
@@ -134,9 +118,11 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
      *
      * <p>Please see {@link React} annotation for more information.
      */
-    private static class FilterPredicate extends RejectionFilterPredicate {
+    private static class Filter extends AbstractPredicate {
 
-        private FilterPredicate() {
+        private static final Filter INSTANCE = new Filter();
+
+        private Filter() {
             super(React.class);
         }
 

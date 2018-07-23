@@ -21,7 +21,7 @@
 package io.spine.server.command.dispatch;
 
 import io.spine.core.MessageEnvelope;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.AbstractHandlerMethod;
 
 /**
  * {@link Dispatch Dispatches} instantiated using this factory send off a
@@ -29,7 +29,7 @@ import io.spine.server.model.HandlerMethod;
  *
  * @author Mykhailo Drachuk
  */
-public abstract class MessageDispatchFactory<E extends MessageEnvelope, M extends HandlerMethod> {
+public abstract class MessageDispatchFactory<E extends MessageEnvelope, M extends AbstractHandlerMethod> {
 
     private final E envelope;
 

@@ -61,7 +61,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
@@ -82,6 +81,7 @@ import static io.spine.testing.Verify.assertIteratorsEqual;
 import static io.spine.testing.Verify.assertSize;
 import static io.spine.testing.server.entity.given.GivenLifecycleFlags.archived;
 import static io.spine.validate.Validate.isDefault;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -306,7 +306,7 @@ public abstract class RecordStorageTest<I, S extends RecordStorage<I>>
                            .map(recordWithColumns -> recordWithColumns != null
                                                      ? recordWithColumns.getRecord()
                                                      : null)
-                           .collect(Collectors.toList());
+                           .collect(toList());
 
             assertEquals(expected.size(), actual.size());
             assertTrue(actual.containsAll(expected));

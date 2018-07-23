@@ -25,9 +25,9 @@ import com.google.protobuf.Value;
 import io.spine.base.Error;
 import io.spine.core.EventClass;
 import io.spine.core.EventValidationError;
+import io.spine.core.MessageInvalid;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ConstraintViolations.ExceptionFactory;
-import io.spine.core.MessageInvalid;
 
 import java.util.Map;
 

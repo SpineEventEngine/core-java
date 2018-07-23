@@ -20,19 +20,19 @@
 package io.spine.server.rejection;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.RejectionContext;
 import io.spine.core.Subscribe;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
+import java.util.function.Predicate;
 
-import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
+import static io.spine.server.model.HandlerMethod.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
@@ -44,9 +44,6 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  */
 @Internal
 public class RejectionSubscriberMethod extends RejectionHandlerMethod {
-
-    /** The instance of the predicate to filter rejection subscriber methods of a class. */
-    private static final MethodPredicate PREDICATE = new FilterPredicate();
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -79,18 +76,14 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
     }
 
     /** Returns the factory for filtering and creating rejection subscriber methods. */
-    public static HandlerMethod.Factory<RejectionSubscriberMethod> factory() {
+    public static AbstractHandlerMethod.Factory<RejectionSubscriberMethod> factory() {
         return Factory.getInstance();
-    }
-
-    static MethodPredicate predicate() {
-        return PREDICATE;
     }
 
     /**
      * The factory for filtering methods that match {@code RejectionSubscriberMethod} specification.
      */
-    private static class Factory extends HandlerMethod.Factory<RejectionSubscriberMethod> {
+    private static class Factory extends AbstractHandlerMethod.Factory<RejectionSubscriberMethod> {
 
         @Override
         public Class<RejectionSubscriberMethod> getMethodClass() {
@@ -99,7 +92,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
 
         @Override
         public Predicate<Method> getPredicate() {
-            return predicate();
+            return Filter.INSTANCE;
         }
 
         @Override
@@ -109,7 +102,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
         }
 
         @Override
-        protected RejectionSubscriberMethod createFromMethod(Method method) {
+        protected RejectionSubscriberMethod doCreate(Method method) {
             RejectionSubscriberMethod result = new RejectionSubscriberMethod(method);
             return result;
         }
@@ -121,7 +114,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
         }
 
         private static Factory getInstance() {
-            return Factory.Singleton.INSTANCE.value;
+            return Singleton.INSTANCE.value;
         }
     }
 
@@ -130,9 +123,11 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
      *
      * <p>Please see {@link Subscribe} annotation for more information.
      */
-    private static class FilterPredicate extends RejectionFilterPredicate {
+    private static class Filter extends AbstractPredicate {
 
-        private FilterPredicate() {
+        private static final MethodPredicate INSTANCE = new Filter();
+
+        private Filter() {
             super(Subscribe.class);
         }
 

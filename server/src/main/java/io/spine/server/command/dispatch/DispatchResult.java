@@ -26,9 +26,13 @@ import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
-import io.spine.server.model.HandlerMethod;
+import io.spine.server.event.EventFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.stream.Collectors.toList;
 
 /**
  * The events emitted as a result of message dispatch.
@@ -40,8 +44,8 @@ import java.util.List;
  */
 public final class DispatchResult {
 
-    private final List<? extends Message> messages;
     private final MessageEnvelope origin;
+    private final List<? extends Message> messages;
 
     /**
      * @param messages messages which were emitted by the dispatch
@@ -49,21 +53,28 @@ public final class DispatchResult {
      * @param <E>      {@link MessageEnvelope} dispatched message type
      */
     <E extends MessageEnvelope> DispatchResult(List<? extends Message> messages, E origin) {
+        checkNotNull(messages);
         this.messages = ImmutableList.copyOf(messages);
-        this.origin = origin;
+        this.origin = checkNotNull(origin);
     }
 
     /**
-     * @return dispatch result representation as a list of domain events
+     * @return dispatch result representation as a list of domain event messages
      */
     public List<? extends Message> asMessages() {
         return ImmutableList.copyOf(this.messages);
     }
 
     /**
-     * @return dispatch result representation as a list of Spine events
+     * @return dispatch result representation as a list of events
      */
-    public List<Event> asEvents(Any producerId, Version version) {
-        return HandlerMethod.toEvents(producerId, version, messages, origin);
+    public List<Event> asEvents(Any producerId, @Nullable Version version) {
+        checkNotNull(producerId);
+        EventFactory eventFactory = EventFactory.on(origin, producerId);
+        List<Event> result =
+                messages.stream()
+                        .map(eventMessage -> eventFactory.createEvent(eventMessage, version))
+                        .collect(toList());
+        return result;
     }
 }

@@ -20,18 +20,14 @@
 
 package io.spine.server.model;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.CommandClass;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateClass;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.AggregatePartClass;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.command.CommandHandlerClass;
-import io.spine.server.command.CommandHandlingClass;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityClass;
 import io.spine.server.event.EventSubscriber;
@@ -43,11 +39,7 @@ import io.spine.server.projection.ProjectionClass;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.server.rejection.RejectionSubscriberClass;
 
-import java.util.Map;
-import java.util.Set;
-
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Sets.intersection;
 
 /**
  * Stores information of message handling classes.
@@ -58,11 +50,8 @@ import static com.google.common.collect.Sets.intersection;
 @Internal
 public class Model {
 
-    /**
-     * A map from a {@linkplain #nameOf(Class) a class name} to an extended class information
-     * instance.
-     */
-    private final Map<String, ModelClass<?>> classes = Maps.newConcurrentMap();
+    /** Maps a raw Java class to a {@code ModelClass}. */
+    private final ClassMap classes = new ClassMap();
 
     public static Model getInstance() {
         return Singleton.INSTANCE.value;
@@ -88,18 +77,13 @@ public class Model {
      * <p>If the passed class was not added to the model before, it would be added as the result of
      * this method call.
      *
-     * @throws DuplicateCommandHandlerError if there is the aggregate class handles one or more
-     *         commands that are handled by another class, which was added to the model before
-     *         calling this method
+     * @throws DuplicateCommandHandlerError if the aggregate class handles one or more
+     *         commands which are already known to the model as handled by another class
      */
-    public AggregateClass<?> asAggregateClass(Class<? extends Aggregate> cls) {
+    public AggregateClass<?> asAggregateClass(Class<? extends Aggregate> cls)
+            throws DuplicateCommandHandlerError {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(nameOf(cls));
-        if (modelClass == null) {
-            modelClass = new AggregateClass<>(cls);
-            checkDuplicates((CommandHandlingClass) modelClass);
-            classes.put(nameOf(cls), modelClass);
-        }
+        ModelClass<?> modelClass = classes.get(cls, () -> new AggregateClass<>(cls));
         return (AggregateClass<?>) modelClass;
     }
 
@@ -112,14 +96,10 @@ public class Model {
      * @throws DuplicateCommandHandlerError if the given aggregate part class handles one or
      *         more commands which are already known to the model as handled by another class
      */
-    public AggregatePartClass<?> asAggregatePartClass(Class<? extends AggregatePart> cls) {
+    public AggregatePartClass<?> asAggregatePartClass(Class<? extends AggregatePart> cls)
+            throws DuplicateCommandHandlerError {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(nameOf(cls));
-        if (modelClass == null) {
-            modelClass = new AggregatePartClass<>(cls);
-            checkDuplicates((CommandHandlingClass) modelClass);
-            classes.put(nameOf(cls), modelClass);
-        }
+        ModelClass<?> modelClass = classes.get(cls, () -> new AggregatePartClass<>(cls));
         return (AggregatePartClass<?>) modelClass;
     }
 
@@ -129,19 +109,13 @@ public class Model {
      * <p>If the passed class was not added to the model before, it would be added as the result of
      * this method call.
      *
-     * @throws DuplicateCommandHandlerError if there is the passed process manager class handles one
-     *         or more commands that are handled by another class, which was added to the model
-     *         before calling this method
+     * @throws DuplicateCommandHandlerError if the passed process manager class handles one
+     *         or more commands already known to the model as handled by another class
      */
     public ProcessManagerClass<?> asProcessManagerClass(Class<? extends ProcessManager> cls)
         throws DuplicateCommandHandlerError {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(nameOf(cls));
-        if (modelClass == null) {
-            modelClass = ProcessManagerClass.of(cls);
-            checkDuplicates((CommandHandlingClass) modelClass);
-            classes.put(nameOf(cls), modelClass);
-        }
+        ModelClass<?> modelClass = classes.get(cls, () -> ProcessManagerClass.of(cls));
         return (ProcessManagerClass<?>) modelClass;
     }
 
@@ -153,11 +127,7 @@ public class Model {
      */
     public ProjectionClass<?> asProjectionClass(Class<? extends Projection> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(nameOf(cls));
-        if (modelClass == null) {
-            modelClass = ProjectionClass.of(cls);
-            classes.put(nameOf(cls), modelClass);
-        }
+        ModelClass<?> modelClass = classes.get(cls, () -> ProjectionClass.of(cls));
         return (ProjectionClass<?>) modelClass;
     }
 
@@ -169,11 +139,7 @@ public class Model {
      */
     public EventSubscriberClass<?> asEventSubscriberClass(Class<? extends EventSubscriber> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(nameOf(cls));
-        if (modelClass == null) {
-            modelClass = EventSubscriberClass.of(cls);
-            classes.put(nameOf(cls), modelClass);
-        }
+        ModelClass<?> modelClass = classes.get(cls, () -> EventSubscriberClass.of(cls));
         return (EventSubscriberClass<?>) modelClass;
     }
 
@@ -183,19 +149,13 @@ public class Model {
      * <p>If the passed class was not added to the model before, it would be added as the result of
      * this method call.
      *
-     * @throws DuplicateCommandHandlerError if there is the passed command handler class handles one
-     *         or more commands that are handled by another class, which was added to the model
-     *         before calling this method
+     * @throws DuplicateCommandHandlerError if the passed command handler class handles one
+     *         or more commands which are already known to the model as handled by another class
      */
     public CommandHandlerClass asCommandHandlerClass(Class<? extends CommandHandler> cls)
             throws DuplicateCommandHandlerError {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(nameOf(cls));
-        if (modelClass == null) {
-            modelClass = CommandHandlerClass.of(cls);
-            checkDuplicates((CommandHandlingClass) modelClass);
-            classes.put(nameOf(cls), modelClass);
-        }
+        ModelClass<?> modelClass = classes.get(cls, () -> CommandHandlerClass.of(cls));
         return (CommandHandlerClass<?>) modelClass;
     }
 
@@ -208,34 +168,8 @@ public class Model {
     public
     RejectionSubscriberClass<?> asRejectionSubscriber(Class<? extends RejectionSubscriber> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(nameOf(cls));
-        if (modelClass == null) {
-            modelClass = RejectionSubscriberClass.of(cls);
-            classes.put(nameOf(cls), modelClass);
-        }
+        ModelClass<?> modelClass = classes.get(cls, () -> RejectionSubscriberClass.of(cls));
         return (RejectionSubscriberClass<?>) modelClass;
-    }
-
-    private void checkDuplicates(CommandHandlingClass candidate)
-        throws DuplicateCommandHandlerError {
-        Set<CommandClass> candidateCommands = candidate.getCommands();
-        ImmutableMap.Builder<Set<CommandClass>, CommandHandlingClass> map = ImmutableMap.builder();
-
-        for (ModelClass<?> modelClass : classes.values()) {
-            if (modelClass instanceof CommandHandlingClass) {
-                CommandHandlingClass commandHandler = (CommandHandlingClass) modelClass;
-                Set<CommandClass> commandClasses = commandHandler.getCommands();
-                Set<CommandClass> intersection = intersection(commandClasses, candidateCommands);
-                if (intersection.size() > 0) {
-                    map.put(intersection, commandHandler);
-                }
-            }
-        }
-
-        ImmutableMap<Set<CommandClass>, CommandHandlingClass> currentHandlers = map.build();
-        if (!currentHandlers.isEmpty()) {
-            throw new DuplicateCommandHandlerError(candidate, currentHandlers);
-        }
     }
 
     /**
@@ -246,11 +180,7 @@ public class Model {
      */
     public EntityClass<?> asEntityClass(Class<? extends Entity> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(nameOf(cls));
-        if (modelClass == null) {
-            modelClass = new EntityClass<>(cls);
-            classes.put(nameOf(cls), modelClass);
-        }
+        ModelClass<?> modelClass = classes.get(cls, () -> new EntityClass<>(cls));
         return (EntityClass<?>) modelClass;
     }
 
@@ -264,18 +194,6 @@ public class Model {
         DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
         Message result = registry.get(cls);
         return result;
-    }
-
-    /**
-     * Returns a unique identifying name of the given class.
-     *
-     * <p>The returned value is guaranteed to be unique per class and non-null.
-     *
-     * @param cls the {@link Class} to identity
-     * @return a non-null class name
-     */
-    private static String nameOf(Class<?> cls) {
-        return cls.getName();
     }
 
     private enum Singleton {
