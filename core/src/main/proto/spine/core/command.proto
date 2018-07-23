@@ -156,32 +156,6 @@ enum CommandValidationError {
     DUPLICATE = 6;
 }
 
-// This enumeration defines possible statuses of command processing.
-enum CommandStatus {
-    option deprecated = true; // TODO:2018-07-05:dmytro.dashenkov: Delete this type.
-
-    // Reserved value.
-    UNDEFINED = 0;
-
-    // The command has been received by backend and stored.
-    RECEIVED = 1;
-
-    // The command has been received by backend and stored,
-    // but will be delivered to the target later.
-    SCHEDULED = 2;
-
-    // The command has been successfully handled.
-    // Expect one or more events produced in as the result of handling this command.
-    OK = 3; // We name this status with such a short text (e.g. instead of `HANDLED`)
-            // so that an abnormal command status is more visible in diagnostic messages.
-
-    // There was an exception or another kind of technical error during command processing.
-    ERROR = 4;
-
-    // A command was rejected during processing. No events were generated.
-    REJECTED = 5;
-}
-
 // Data from a `Command` which is accessible from the end user code to which
 // the command was dispatched.
 message DispatchedCommand {
