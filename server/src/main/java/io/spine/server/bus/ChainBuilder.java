@@ -27,7 +27,6 @@ import java.util.Deque;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newLinkedList;
 
 /**
  * A builder for a chain of {@linkplain BusFilter bus filters}.
@@ -38,7 +37,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 @CanIgnoreReturnValue
 final class ChainBuilder<E extends MessageEnvelope<?, ?, ?>> {
 
-    private final Deque<BusFilter<E>> filters = newLinkedList();
+    private final Deque<BusFilter<E>> filters = new ConcurrentLinkedDeque<>();
 
     /**
      * Prevents direct instantiation.
