@@ -52,6 +52,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.SystemBoundedContexts.systemOf;
 import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
+import static io.spine.system.server.given.CommandLifecycleTestEnv.TestProcman.FAULTY_NAME;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -85,7 +86,7 @@ class CommandLifecycleTest {
         context.register(new TestProcmanRepository());
     }
 
-    @DisplayName("produce system events when command is")
+    @DisplayName("produce system events when command")
     @Nested
     class ProduceEvents {
 
@@ -102,29 +103,27 @@ class CommandLifecycleTest {
         }
 
         @Test
-        @DisplayName("processed successfully")
+        @DisplayName("is processed successfully")
         void successful() {
             EstablishCompany successfulCommand = EstablishCompany
                     .newBuilder()
                     .setId(id)
                     .setFinalName("Good company name")
                     .build();
-            postCommand(successfulCommand);
-            CommandReceived received = checkReceived(successfulCommand);
-            CommandId commandId = received.getId();
+            CommandId commandId = postCommand(successfulCommand);
+            checkReceived(successfulCommand);
             checkAcknowledged(commandId);
             checkDispatched(commandId);
             checkHandled(commandId);
         }
 
         @Test
-        @DisplayName("filtered out")
+        @DisplayName("is filtered out")
         void invalid() {
             Command invalidCommand = buildInvalidCommand();
-            postBuiltCommand(invalidCommand);
+            CommandId actualId = postBuiltCommand(invalidCommand);
 
-            CommandReceived received = checkReceived(unpack(invalidCommand.getMessage()));
-            CommandId actualId = received.getId();
+            checkReceived(unpack(invalidCommand.getMessage()));
             CommandId expectedId = invalidCommand.getId();
             assertEquals(expectedId, actualId);
 
@@ -133,22 +132,53 @@ class CommandLifecycleTest {
         }
 
         @Test
-        @DisplayName("rejected by handler")
+        @DisplayName("is rejected by handler")
         void rejected() {
             EstablishCompany rejectedCommand = EstablishCompany
                     .newBuilder()
                     .setId(id)
                     .setFinalName(TestAggregate.TAKEN_NAME)
                     .build();
-            postCommand(rejectedCommand);
-
-            CommandReceived received = checkReceived(rejectedCommand);
-            CommandId commandId = received.getId();
+            CommandId commandId = postCommand(rejectedCommand);
+            checkReceived(rejectedCommand);
 
             eventWatcher.nextEvent(CommandAcknowledged.class);
             eventWatcher.nextEvent(CommandDispatched.class);
 
             checkRejected(commandId, Rejections.CompanyNameAlreadyTaken.class);
+        }
+
+        @Test
+        @DisplayName("causes a runtime exception")
+        void errored() {
+            StartCompanyEstablishing start = StartCompanyEstablishing
+                    .newBuilder()
+                    .setId(id)
+                    .build();
+            CommandId startId = postCommand(start);
+
+            eventWatcher.assertEventCount(4);
+
+            checkReceived(start);
+            checkAcknowledged(startId);
+            checkDispatched(startId);
+            checkHandled(startId);
+
+            eventWatcher.forgetEvents();
+
+            ProposeCompanyName propose = ProposeCompanyName
+                    .newBuilder()
+                    .setId(id)
+                    .setName(FAULTY_NAME)
+                    .build();
+            CommandId proposeId = postCommand(propose);
+
+            eventWatcher.assertEventCount(4);
+
+            checkReceived(propose);
+            checkAcknowledged(proposeId);
+            checkDispatched(proposeId);
+            checkErrored(proposeId);
         }
 
         private Command buildInvalidCommand() {
@@ -180,12 +210,10 @@ class CommandLifecycleTest {
             return command;
         }
 
-        @CanIgnoreReturnValue
-        private CommandReceived checkReceived(Message expectedCommand) {
+        private void checkReceived(Message expectedCommand) {
             CommandReceived received = eventWatcher.nextEvent(CommandReceived.class);
             Message actualCommand = unpack(received.getPayload().getMessage());
             assertEquals(expectedCommand, actualCommand);
-            return received;
         }
 
         private void checkAcknowledged(CommandId commandId) {
@@ -207,6 +235,7 @@ class CommandLifecycleTest {
             assertEquals(id, actualReceiver);
         }
 
+        @CanIgnoreReturnValue
         private Error checkErrored(CommandId commandId) {
             CommandErrored errored = eventWatcher.nextEvent(CommandErrored.class);
             assertEquals(commandId, errored.getId());
@@ -224,13 +253,14 @@ class CommandLifecycleTest {
         }
     }
 
-    private void postCommand(Message commandMessage) {
+    private CommandId postCommand(Message commandMessage) {
         Command command = requestFactory.createCommand(commandMessage);
-        postBuiltCommand(command);
+        return postBuiltCommand(command);
     }
 
-    private void postBuiltCommand(Command command) {
+    private CommandId postBuiltCommand(Command command) {
         CommandBus commandBus = context.getCommandBus();
         commandBus.post(command, noOpObserver());
+        return command.getId();
     }
 }

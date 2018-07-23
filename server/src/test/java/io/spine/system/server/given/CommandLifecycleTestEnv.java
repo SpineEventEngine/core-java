@@ -52,6 +52,7 @@ import io.spine.system.server.StartCompanyEstablishing;
 import java.util.Collection;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Collections.emptyList;
 
 /**
@@ -115,6 +116,8 @@ public final class CommandLifecycleTestEnv {
             super(id);
         }
 
+        public static final String FAULTY_NAME = "This name is exceptionally faulty";
+
         @Assign
         List<Message> handle(StartCompanyEstablishing command) {
             getBuilder().setId(command.getId());
@@ -124,7 +127,9 @@ public final class CommandLifecycleTestEnv {
 
         @Assign
         List<Message> handle(ProposeCompanyName command) {
-            getBuilder().addProposedName(command.getName());
+            String name = command.getName();
+            checkArgument(!name.equals(FAULTY_NAME));
+            getBuilder().addProposedName(name);
 
             return emptyList();
         }
