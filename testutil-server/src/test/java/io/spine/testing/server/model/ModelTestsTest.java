@@ -20,7 +20,7 @@
 
 package io.spine.testing.server.model;
 
-import io.spine.server.command.CommandHandlerClass;
+import io.spine.server.command.model.CommandHandlerClass;
 import io.spine.server.model.Model;
 import io.spine.testing.server.model.given.ModelTestsTestEnv.DuplicatedCommandHandler;
 import io.spine.testing.server.model.given.ModelTestsTestEnv.TestCommandHandler;

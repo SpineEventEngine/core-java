@@ -25,6 +25,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Version;
+import io.spine.server.aggregate.model.EventApplier;
 import io.spine.server.entity.Transaction;
 import io.spine.validate.ValidatingBuilder;
 

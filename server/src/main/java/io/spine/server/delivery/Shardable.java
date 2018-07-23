@@ -20,7 +20,7 @@
 package io.spine.server.delivery;
 
 import io.spine.core.BoundedContextName;
-import io.spine.server.entity.EntityClass;
+import io.spine.server.entity.model.EntityClass;
 
 /**
  * A contract for all message destinations, which require the messages sent to them

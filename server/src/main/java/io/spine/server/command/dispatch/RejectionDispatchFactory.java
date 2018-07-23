@@ -22,7 +22,7 @@ package io.spine.server.command.dispatch;
 
 import com.google.protobuf.Message;
 import io.spine.core.RejectionEnvelope;
-import io.spine.server.rejection.RejectionReactorMethod;
+import io.spine.server.rejection.model.RejectionReactorMethod;
 
 import java.util.List;
 

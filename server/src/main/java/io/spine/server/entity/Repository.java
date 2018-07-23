@@ -38,6 +38,7 @@ import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.server.model.Model;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;

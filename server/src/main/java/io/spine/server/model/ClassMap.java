@@ -23,7 +23,7 @@ package io.spine.server.model;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.spine.core.CommandClass;
-import io.spine.server.command.CommandHandlingClass;
+import io.spine.server.command.model.CommandHandlingClass;
 
 import java.util.Map;
 import java.util.Set;

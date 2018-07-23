@@ -25,6 +25,8 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.command.dispatch.Dispatch;
 import io.spine.server.command.dispatch.DispatchResult;
+import io.spine.server.command.model.CommandHandlerClass;
+import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.model.Model;

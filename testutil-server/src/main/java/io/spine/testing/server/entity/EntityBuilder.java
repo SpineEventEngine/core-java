@@ -28,7 +28,7 @@ import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.entity.AbstractVersionableEntity;
-import io.spine.server.entity.EntityClass;
+import io.spine.server.entity.model.EntityClass;
 import io.spine.testing.ReflectiveBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

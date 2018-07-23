@@ -20,7 +20,7 @@
 
 package io.spine.server.model;
 
-import io.spine.server.command.CommandHandlerMethod;
+import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.model.given.MessageHandlerMapTestEnv.HandlerWithDuplicatingMethods;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
