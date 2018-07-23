@@ -29,10 +29,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
-import static java.lang.String.format;
 import static java.util.concurrent.Executors.newFixedThreadPool;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The helper class used to dispatch numerous messages of a certain kind to the entities,
@@ -104,10 +101,10 @@ public abstract class ParallelDispatcher<I extends Message, M extends Message> {
             throws InterruptedException {
         boundedContext.register(repository);
 
-        int numberOfShards = ((Shardable) repository).getShardingStrategy()
-                                                     .getNumberOfShards();
         getStats().assertIdCount(0);
 
+        int numberOfShards = ((Shardable) repository).getShardingStrategy()
+                                                     .getNumberOfShards();
         ExecutorService executorService = newFixedThreadPool(threadCount);
         ImmutableList.Builder<Callable<Object>> builder = ImmutableList.builder();
 
@@ -122,10 +119,7 @@ public abstract class ParallelDispatcher<I extends Message, M extends Message> {
         List<Callable<Object>> commandPostingJobs = builder.build();
         executorService.invokeAll(commandPostingJobs);
 
-        executorService.shutdown();
-        boolean executed = executorService.awaitTermination(dispatchWaitTime, MILLISECONDS);
-        assertTrue(executed,
-                   format("Executor failed to terminate in %s millis.", dispatchWaitTime));
+        Thread.sleep(dispatchWaitTime);
 
         verifyStats(messageCount, numberOfShards);
     }
