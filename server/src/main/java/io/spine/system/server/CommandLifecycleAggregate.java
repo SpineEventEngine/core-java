@@ -179,7 +179,7 @@ public final class CommandLifecycleAggregate
 
     @Apply
     private void on(CommandHandled event) {
-        setProcessingStatus(Responses.statusOk(), event.getWhen());
+        setStatus(Responses.statusOk(), event.getWhen());
         getBuilder().setReceiver(event.getReceiver());
     }
 
@@ -189,7 +189,7 @@ public final class CommandLifecycleAggregate
                 .newBuilder()
                 .setError(event.getError())
                 .build();
-        setProcessingStatus(status, event.getWhen());
+        setStatus(status, event.getWhen());
     }
 
     @Apply
@@ -198,7 +198,7 @@ public final class CommandLifecycleAggregate
                 .newBuilder()
                 .setRejection(event.getRejection())
                 .build();
-        setProcessingStatus(status, event.getWhen());
+        setStatus(status, event.getWhen());
     }
 
     private Command updateSchedule(Schedule schedule) {
@@ -214,7 +214,7 @@ public final class CommandLifecycleAggregate
         return updatedCommand;
     }
 
-    private void setProcessingStatus(Status status, Timestamp whenProcessed) {
+    private void setStatus(Status status, Timestamp whenProcessed) {
         CommandStatus commandStatus = getBuilder().getStatus()
                                                   .toBuilder()
                                                   .setWhenProcessed(whenProcessed)
