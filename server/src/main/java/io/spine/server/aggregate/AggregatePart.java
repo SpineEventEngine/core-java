@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
 import io.spine.reflect.GenericTypeIndex;
+import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.model.Model;
 import io.spine.validate.ValidatingBuilder;
 
@@ -97,7 +98,7 @@ public abstract class AggregatePart<I,
     /**
      * Enumeration of generic type parameters of this class.
      */
-    enum GenericParameter implements GenericTypeIndex<AggregatePart> {
+    public enum GenericParameter implements GenericTypeIndex<AggregatePart> {
 
         /** The index of the generic type {@code <I>}. */
         ID(0),

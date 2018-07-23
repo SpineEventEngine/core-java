@@ -22,7 +22,7 @@ package io.spine.server.command.dispatch;
 
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
-import io.spine.server.command.CommandHandlerMethod;
+import io.spine.server.command.model.CommandHandlerMethod;
 
 import java.util.List;
 

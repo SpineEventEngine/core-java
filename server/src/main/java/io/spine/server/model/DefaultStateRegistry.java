@@ -22,7 +22,7 @@ package io.spine.server.model;
 
 import com.google.protobuf.Message;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.EntityClass;
+import io.spine.server.entity.model.EntityClass;
 
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -37,6 +37,12 @@ import static com.google.common.collect.Maps.newConcurrentMap;
  * @author Dmitry Ganzha
  */
 class DefaultStateRegistry {
+
+    private static final DefaultStateRegistry INSTANCE = new DefaultStateRegistry();
+
+    static DefaultStateRegistry getInstance() {
+        return INSTANCE;
+    }
 
     /**
      * The lock for DefaultStateRegistry's accessor methods.
@@ -59,7 +65,7 @@ class DefaultStateRegistry {
      * @param entityClass the class to check
      * @return {@code true} if there is a state for the passed class, {@code false} otherwise
      */
-    boolean contains(Class<? extends Entity> entityClass) {
+    private boolean contains(Class<? extends Entity> entityClass) {
         lock.readLock().lock();
         try {
             boolean result = defaultStates.containsKey(entityClass);
@@ -104,15 +110,5 @@ class DefaultStateRegistry {
         } finally {
             lock.readLock().unlock();
         }
-    }
-
-    static DefaultStateRegistry getInstance() {
-        return Singleton.INSTANCE.value;
-    }
-
-    private enum Singleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final DefaultStateRegistry value = new DefaultStateRegistry();
     }
 }

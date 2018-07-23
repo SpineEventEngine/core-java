@@ -34,6 +34,7 @@ import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidTwoParams
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.ValidButPrivate;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.ValidOneParam;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.ValidTwoParams;
+import io.spine.server.event.model.EventSubscriberMethod;
 import io.spine.server.model.given.Given;
 import io.spine.test.reflect.event.RefProjectCreated;
 import org.junit.jupiter.api.DisplayName;

@@ -25,7 +25,7 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.RejectionEnvelope;
-import io.spine.server.entity.EntityClass;
+import io.spine.server.entity.model.EntityClass;
 
 import java.util.Objects;
 

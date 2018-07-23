@@ -22,7 +22,7 @@ package io.spine.server.command.dispatch;
 
 import com.google.protobuf.Message;
 import io.spine.core.EventEnvelope;
-import io.spine.server.event.EventReactorMethod;
+import io.spine.server.event.model.EventReactorMethod;
 
 import java.util.List;
 

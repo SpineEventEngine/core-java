@@ -86,15 +86,6 @@ public class TestAggregate
         super(id);
     }
 
-    /**
-     * Overrides to expose the method to the test.
-     */
-    @VisibleForTesting
-    @Override
-    public void init() {
-        super.init();
-    }
-
     @Assign
     AggProjectCreated handle(AggCreateProject cmd, CommandContext ctx) {
         isCreateProjectCommandHandled = true;
