@@ -114,11 +114,8 @@ message CommandErrored {
     // The runtime error.
     spine.base.Error error = 2 [(valid) = true];
 
-    // The receiver of the command.
-    CommandReceiver receiver = 3;
-
     // The time when the event occuered.
-    google.protobuf.Timestamp when = 4 [(required) = true];
+    google.protobuf.Timestamp when = 3 [(required) = true];
 }
 
 // An event emitted if the handler rejects the command.
@@ -131,9 +128,6 @@ message CommandRejected {
     // The command rejection.
     spine.core.Rejection rejection = 2;
 
-    // The receiver of the command.
-    CommandReceiver receiver = 3 [(valid) = true];
-
     // The time when the event occuered.
-    google.protobuf.Timestamp when = 4 [(required) = true];
+    google.protobuf.Timestamp when = 3 [(required) = true];
 }

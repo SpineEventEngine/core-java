@@ -20,11 +20,18 @@
 
 package io.spine.server.commandbus;
 
+import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
+import io.spine.base.Errors;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
 import io.spine.core.Rejection;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.string.Stringifiers;
+import io.spine.system.server.MarkCommandAsErrored;
+import io.spine.system.server.MarkCommandAsRejected;
+import io.spine.system.server.SystemGateway;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,20 +54,11 @@ import static java.lang.String.format;
 public final class CommandErrorHandler {
 
     private final RejectionBus rejectionBus;
+    private final SystemGateway systemGateway;
 
-    private CommandErrorHandler(RejectionBus rejectionBus) {
-        this.rejectionBus = rejectionBus;
-    }
-
-    /**
-     * Creates new instance of {@code CommandErrorHandler} with the given {@link RejectionBus}.
-     *
-     * @param rejectionBus the {@link RejectionBus} to post the command rejections into
-     * @return a new instance of {@code CommandErrorHandler}
-     */
-    public static CommandErrorHandler with(RejectionBus rejectionBus) {
-        checkNotNull(rejectionBus);
-        return new CommandErrorHandler(rejectionBus);
+    private CommandErrorHandler(Builder builder) {
+        this.rejectionBus = builder.rejectionBus;
+        this.systemGateway = builder.systemGateway;
     }
 
     /**
@@ -84,15 +82,86 @@ public final class CommandErrorHandler {
     private void handleRejection(CommandEnvelope envelope, RuntimeException exception) {
         Rejection rejection = rejectWithCause(envelope.getCommand(), exception);
         rejectionBus.post(rejection);
+        markRejected(envelope, rejection);
     }
 
-    private static void handleRuntime(CommandEnvelope envelope, RuntimeException exception) {
+    private void markRejected(CommandEnvelope command, Rejection rejection) {
+        CommandId commandId = command.getId();
+        MarkCommandAsRejected systemCommand = MarkCommandAsRejected
+                .newBuilder()
+                .setId(commandId)
+                .setRejection(rejection)
+                .build();
+        postSystem(systemCommand);
+    }
+
+    private void handleRuntime(CommandEnvelope envelope, RuntimeException exception) {
         log().error(format("Error dispatching command (class: %s id: %s).",
                            envelope.getMessage().getClass(),
                            Stringifiers.toString(envelope.getId())),
                     exception);
+        Error error = Errors.causeOf(exception);
+        markErrored(envelope, error);
         throw exception;
     }
+
+    private void markErrored(CommandEnvelope command, Error error) {
+        CommandId commandId = command.getId();
+        MarkCommandAsErrored systemCommand = MarkCommandAsErrored
+                .newBuilder()
+                .setId(commandId)
+                .setError(error)
+                .build();
+        postSystem(systemCommand);
+    }
+
+    private void postSystem(Message systemCommand) {
+        systemGateway.postCommand(systemCommand);
+    }
+
+    /**
+     * Creates a new instance of {@code Builder} for {@code CommandErrorHandler} instances.
+     *
+     * @return new instance of {@code Builder}
+     */
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    /**
+     * A builder for the {@code CommandErrorHandler} instances.
+     */
+    public static final class Builder {
+
+        private RejectionBus rejectionBus;
+        private SystemGateway systemGateway;
+
+        /**
+         * Prevents direct instantiation.
+         */
+        private Builder() {
+        }
+
+        public Builder setRejectionBus(RejectionBus rejectionBus) {
+            this.rejectionBus = checkNotNull(rejectionBus);
+            return this;
+        }
+
+        public Builder setSystemGateway(SystemGateway systemGateway) {
+            this.systemGateway = checkNotNull(systemGateway);
+            return this;
+        }
+
+        /**
+         * Creates a new instance of {@code CommandErrorHandler}.
+         *
+         * @return new instance of {@code CommandErrorHandler}
+         */
+        public CommandErrorHandler build() {
+            return new CommandErrorHandler(this);
+        }
+    }
+
 
     private static Logger log() {
         return LogSingleton.INSTANCE.value;

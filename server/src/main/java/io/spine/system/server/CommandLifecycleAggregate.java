@@ -120,7 +120,6 @@ public final class CommandLifecycleAggregate
         return CommandErrored.newBuilder()
                              .setId(command.getId())
                              .setError(command.getError())
-                             .setReceiver(command.getReceiver())
                              .setWhen(when)
                              .build();
     }
@@ -131,7 +130,6 @@ public final class CommandLifecycleAggregate
         return CommandRejected.newBuilder()
                               .setId(command.getId())
                               .setRejection(command.getRejection())
-                              .setReceiver(command.getReceiver())
                               .setWhen(when)
                               .build();
     }
@@ -192,7 +190,6 @@ public final class CommandLifecycleAggregate
                 .setError(event.getError())
                 .build();
         setProcessingStatus(status, event.getWhen());
-        getBuilder().setReceiver(event.getReceiver());
     }
 
     @Apply
@@ -202,7 +199,6 @@ public final class CommandLifecycleAggregate
                 .setRejection(event.getRejection())
                 .build();
         setProcessingStatus(status, event.getWhen());
-        getBuilder().setReceiver(event.getReceiver());
     }
 
     private Command updateSchedule(Schedule schedule) {

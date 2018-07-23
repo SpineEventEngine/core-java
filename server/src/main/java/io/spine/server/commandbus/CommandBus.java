@@ -28,13 +28,11 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
-import io.spine.base.ThrowableMessage;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
-import io.spine.core.Rejection;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.ServerEnvironment;
@@ -56,12 +54,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.core.Rejections.causedByRejection;
-import static io.spine.core.Rejections.toRejection;
-import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.commandbus.Log.log;
 import static java.lang.String.format;
 
 /**
@@ -83,6 +76,7 @@ public class CommandBus extends Bus<Command,
     private final Log log;
     private final SystemGateway systemGateway;
     private final TenantIndex tenantIndex;
+    private final CommandErrorHandler errorHandler;
 
     /**
      * Is {@code true}, if the {@code BoundedContext} (to which this {@code CommandBus} belongs)
@@ -128,6 +122,10 @@ public class CommandBus extends Bus<Command,
         this.systemGateway = builder.systemGateway;
         this.tenantIndex = builder.tenantIndex;
         this.deadCommandHandler = new DeadCommandHandler();
+        this.errorHandler = CommandErrorHandler.newBuilder()
+                                               .setRejectionBus(rejectionBus)
+                                               .setSystemGateway(systemGateway)
+                                               .build();
     }
 
     /**
@@ -227,16 +225,16 @@ public class CommandBus extends Bus<Command,
         onDispatchCommand(envelope);
         try {
             dispatcher.dispatch(envelope);
+        } catch (RuntimeException exception) {
+            onError(envelope, exception);
+        }
+    }
+
+    private void onError(CommandEnvelope envelope, RuntimeException exception) {
+        try {
+            errorHandler.handleError(envelope, exception);
         } catch (RuntimeException e) {
-            Throwable cause = getRootCause(e);
-            if (causedByRejection(e)) {
-                ThrowableMessage throwableMessage = (ThrowableMessage) cause;
-                Rejection rejection = toRejection(throwableMessage, envelope.getCommand());
-                Class<?> rejectionClass = unpack(rejection.getMessage())
-                                                          .getClass();
-                log().trace("Posting rejection {} to RejectionBus.", rejectionClass.getName());
-                rejectionBus().post(rejection);
-            }
+            // Ignore exceptions.
         }
     }
 

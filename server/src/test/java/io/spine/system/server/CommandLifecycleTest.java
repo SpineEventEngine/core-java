@@ -217,10 +217,6 @@ class CommandLifecycleTest {
                                    Class<? extends Message> expectedRejectionClass) {
             CommandRejected rejected = eventWatcher.nextEvent(CommandRejected.class);
             assertEquals(commandId, rejected.getId());
-            CompanyId receiver = Identifier.unpack(rejected.getReceiver()
-                                                           .getEntityId()
-                                                           .getId());
-            assertEquals(id, receiver);
             Rejection rejection = rejected.getRejection();
             TypeUrl rejectionType = TypeUrl.ofEnclosed(rejection.getMessage());
             TypeUrl expectedType = TypeUrl.of(expectedRejectionClass);

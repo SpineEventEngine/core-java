@@ -52,6 +52,10 @@ message CommandLifecycle {
     spine.core.Command command = 2;
 
     // The receiver of the command.
+    //
+    // This field is set only after the command is successfully handled. Otherwise, the receiver is
+    // considered unknown.
+    //
     CommandReceiver receiver = 3;
 
     // The current status of the command.

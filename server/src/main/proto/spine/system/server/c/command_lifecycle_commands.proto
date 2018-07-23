@@ -112,13 +112,6 @@ message MarkCommandAsErrored {
 
     // The runtime error.
     spine.base.Error error = 2 [(required) = true];
-
-    // The receiver of the command.
-    //
-    // This field may be irrelevant if the command processing errored before the receiver was
-    // determined, e.g. during validation.
-    //
-    CommandReceiver receiver = 3;
 }
 
 // A comand to mark a command as rejected.
@@ -132,7 +125,4 @@ message MarkCommandAsRejected {
 
     // The command rejection.
     spine.core.Rejection rejection = 2 [(valid) = true];
-
-    // The receiver of the command.
-    CommandReceiver receiver = 3 [(valid) = true];
 }
