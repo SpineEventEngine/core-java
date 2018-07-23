@@ -188,7 +188,6 @@ abstract class AbstractCommandBusTestSuite {
         InMemoryStorageFactory storageFactory =
                 InMemoryStorageFactory.newInstance(newName(cls.getSimpleName()), multitenant);
         tenantIndex = TenantAwareTest.createTenantIndex(multitenant, storageFactory);
-        commandStore = spy(new CommandStore(storageFactory, tenantIndex));
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
         rejectionBus = spy(RejectionBus.newBuilder()
