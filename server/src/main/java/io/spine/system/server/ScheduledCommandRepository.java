@@ -22,6 +22,12 @@ package io.spine.system.server;
 
 import io.spine.core.CommandId;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.route.EventRouting;
+
+import java.util.Optional;
+import java.util.Set;
+
+import static com.google.common.collect.ImmutableSet.of;
 
 /**
  * A repository for {@link ScheduledCommand}s.
@@ -30,4 +36,20 @@ import io.spine.server.projection.ProjectionRepository;
  */
 public final class ScheduledCommandRepository
         extends ProjectionRepository<CommandId, ScheduledCommand, ScheduledCommandRecord> {
+
+    @Override
+    public void onRegistered() {
+        super.onRegistered();
+        EventRouting<CommandId> routing = getEventRouting();
+        routing.route(CommandDispatched.class,
+                      (message, context) -> routeToExisting(message));
+    }
+
+    private Set<CommandId> routeToExisting(CommandDispatched event) {
+        CommandId id = event.getId();
+        Optional<ScheduledCommand> existing = find(id);
+        return existing.isPresent()
+               ? of(id)
+               : of();
+    }
 }

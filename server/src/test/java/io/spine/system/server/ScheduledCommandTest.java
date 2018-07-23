@@ -110,7 +110,30 @@ class ScheduledCommandTest {
         assertFalse(deletedCommand.getLifecycleFlags().getArchived());
     }
 
+    @Test
+    @DisplayName("not be created for a non-scheduled command")
+    void skipped() {
+        Command command = createCommand();
+        post(command);
+
+        CommandId commandId = command.getId();
+
+        Optional<ScheduledCommand> found = repository.find(commandId);
+        assertFalse(found.isPresent());
+
+        Iterator<ScheduledCommand> foundDeleted = findAllDeleted(commandId);
+        assertFalse(foundDeleted.hasNext());
+    }
+
     private ScheduledCommand findDeleted(CommandId id) {
+        Iterator<ScheduledCommand> commands = findAllDeleted(id);
+        assertTrue(commands.hasNext());
+        ScheduledCommand result = commands.next();
+        assertFalse(commands.hasNext());
+        return result;
+    }
+
+    private Iterator<ScheduledCommand> findAllDeleted(CommandId id) {
         EntityFilters filters = requestFactory.query()
                                               .select(ScheduledCommandRecord.class)
                                               .byId(id)
@@ -120,10 +143,7 @@ class ScheduledCommandTest {
                                               .getFilters();
         Iterator<ScheduledCommand> commands = repository.find(filters,
                                                               FieldMask.getDefaultInstance());
-        assertTrue(commands.hasNext());
-        ScheduledCommand result = commands.next();
-        assertFalse(commands.hasNext());
-        return result;
+        return commands;
     }
 
     private void checkScheduled(Command scheduled) {
