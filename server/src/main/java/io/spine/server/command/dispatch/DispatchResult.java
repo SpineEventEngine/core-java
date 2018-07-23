@@ -26,8 +26,6 @@ import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
-import io.spine.server.model.HandlerMethod;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import io.spine.server.event.EventFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
