@@ -30,7 +30,7 @@ import io.spine.core.Versions;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.testing.ReflectiveBuilder;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.lang.reflect.Constructor;
 
@@ -54,19 +54,19 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
      *
      * <p>Is null until {@link #setResultClass(Class)} is called.
      */
-    private @Nullable EntityClass<E> entityClass;
+    private @MonotonicNonNull EntityClass<E> entityClass;
 
     /** The ID of the entity. If not set, a value default to the type will be used. */
-    private @Nullable I id;
+    private @MonotonicNonNull I id;
 
     /** The entity state. If not set, a default instance will be used. */
-    private @Nullable S state;
+    private @MonotonicNonNull S state;
 
     /** The entity version. Or zero if not set. */
     private int version;
 
-    /** The entity timestamp or default {@code Timestamp} if not set. */
-    private @Nullable Timestamp whenModified;
+    /** The entity timestamp or {@code null} if not set. */
+    private @MonotonicNonNull Timestamp whenModified;
 
     /**
      * Creates new instance of the builder.
@@ -127,7 +127,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
     public E build() {
         I id = id();
         E result = createEntity(id);
-        S state = state(result);
+        S state = state();
         Timestamp timestamp = timestamp();
 
         Version version = Versions.newVersion(this.version, timestamp);
@@ -151,10 +151,14 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
     /**
      * Returns state if it was set or the default value if it was not.
      */
-    protected S state(E result) {
-        return this.state != null
-               ? this.state
-               : result.getDefaultState();
+    protected S state() {
+        if (state != null) {
+            return state;
+        }
+        checkNotNull(entityClass, "Entity class is not set");
+        @SuppressWarnings("unchecked") // The cast is preserved by generic params of this class.
+        S result = (S) entityClass.getDefaultState();
+        return result;
     }
 
     /**

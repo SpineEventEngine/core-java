@@ -391,14 +391,6 @@ public class AggregateTest {
     class HaveState {
 
         @Test
-        @DisplayName("default on creation")
-        void defaultOnCreation() {
-            Project state = aggregate.getState();
-
-            assertEquals(aggregate.getDefaultState(), state);
-        }
-
-        @Test
         @DisplayName("updated when command is handled")
         void updatedUponCommandHandled() {
             dispatchCommand(aggregate, env(createProject));

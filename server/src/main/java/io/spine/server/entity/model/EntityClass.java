@@ -21,14 +21,13 @@
 package io.spine.server.entity.model;
 
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.protobuf.Messages;
 import io.spine.server.entity.Entity;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
 import io.spine.type.TypeUrl;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -53,15 +52,17 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /** The class of the entity state. */
     private final Class<? extends Message> stateClass;
 
+    /** The default state of entities of this class. */
+    private transient @MonotonicNonNull Message defaultState;
+
     /** Type of the entity state. */
     private final TypeUrl entityStateType;
 
     /** The constructor for entities of this class. */
-    @SuppressWarnings("TransientFieldNotInitialized") // Lazily initialized via accessor method.
-    private transient @Nullable Constructor<E> entityConstructor;
+    private transient @MonotonicNonNull Constructor<E> entityConstructor;
 
     /** Creates new instance of the model class for the passed class of entities. */
-    public EntityClass(Class<? extends E> cls) {
+    public EntityClass(Class<E> cls) {
         super(cls);
         checkNotNull((Class<? extends Entity>) cls);
         Class<?> idClass = Entity.GenericParameter.ID.getArgumentIn(cls);
@@ -108,21 +109,20 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     }
 
     /**
-     * Creates default state by entity class.
-     *
-     * @return default state
+     * Obtains the default state for this class of entities.
      */
-    @Internal
-    public static Message createDefaultState(Class<? extends Entity> entityClass) {
-        Class<? extends Message> stateClass = getStateClass(entityClass);
-        Message result = Messages.newInstance(stateClass);
-        return result;
+    public synchronized Message getDefaultState() {
+        if (defaultState == null) {
+            Class<? extends Message> stateClass = getStateClass();
+            defaultState = Messages.newInstance(stateClass);
+        }
+        return defaultState;
     }
 
     /**
      * Obtains constructor for the entities of this class.
      */
-    public Constructor<E> getConstructor() {
+    public synchronized Constructor<E> getConstructor() {
         if (entityConstructor == null) {
             entityConstructor = findConstructor();
         }
@@ -213,7 +213,6 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
 
     @Override
     public int hashCode() {
-
         return Objects.hash(super.hashCode(), idClass, stateClass, entityStateType);
     }
 }

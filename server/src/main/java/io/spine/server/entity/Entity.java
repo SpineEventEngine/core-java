@@ -44,21 +44,9 @@ public interface Entity<I, S extends Message> {
     I getId();
 
     /**
-     * Obtains the entity state.
-     *
-     * <p>This method returns the current state of the entity or,
-     * if the entity does not have state yet, the value produced by {@link #getDefaultState()}.
-     *
-     * @return the current state of default state value
+     * Obtains the state of the entity.
      */
     S getState();
-
-    /**
-     * Obtains the default entity state.
-     *
-     * @return an empty instance of the entity state
-     */
-    S getDefaultState();
 
     /**
      * Enumeration of generic type parameters of this interface.

@@ -20,7 +20,6 @@
 
 package io.spine.server.model;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregatePart;
@@ -182,18 +181,6 @@ public class Model {
         checkNotNull(cls);
         ModelClass<?> modelClass = classes.get(cls, () -> new EntityClass<>(cls));
         return (EntityClass<?>) modelClass;
-    }
-
-    /**
-     * Obtains the default entity state by entity class.
-     *
-     * @return default entity state
-     */
-    public Message getDefaultState(Class<? extends Entity> cls) {
-        checkNotNull(cls);
-        DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
-        Message result = registry.get(cls);
-        return result;
     }
 
     private enum Singleton {

@@ -47,7 +47,7 @@ public final class ProjectionClass<P extends Projection> extends EntityClass<P> 
     private final ImmutableSet<EventClass> domesticSubscriptions;
     private final ImmutableSet<EventClass> externalSubscriptions;
 
-    private ProjectionClass(Class<? extends P> cls) {
+    private ProjectionClass(Class<P> cls) {
         super(cls);
         this.eventSubscriptions = new MessageHandlerMap<>(cls, EventSubscriberMethod.factory());
 

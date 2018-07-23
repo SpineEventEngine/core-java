@@ -59,7 +59,13 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /** Cached version of string ID. */
     private volatile @MonotonicNonNull String stringId;
 
-    /** The state of the entity. */
+    /**
+     * The state of the entity.
+     *
+     * <p>Lazily initialized to the {@linkplain #getDefaultState() default state},
+     * if {@linkplain #getState() accessed} before {@linkplain #setState(Message)}
+     * initialization}.
+     */
     private volatile @MonotonicNonNull S state;
 
     /**
@@ -87,8 +93,16 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         return id;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>If the state of the entity was not initialized, it is set to
+     * {@linkplain #getDefaultState() default value} and returned.
+     *
+     * @return the current state or default state value
+     */
     @Override
-    public S getState() {
+    public synchronized S getState() {
         if (state == null) {
             state = getDefaultState();
         }
@@ -121,15 +135,12 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     /**
-     * {@inheritDoc}
+     * Obtains the default state of the entity.
      */
-    @Override
-    public final S getDefaultState() {
-        Class<? extends Entity> entityClass = getClass();
+    protected final S getDefaultState() {
         @SuppressWarnings("unchecked")
         // cast is safe because this type of messages is saved to the map
-        S result = (S) Model.getInstance()
-                            .getDefaultState(entityClass);
+        S result = (S) thisClass().getDefaultState();
         return result;
     }
 

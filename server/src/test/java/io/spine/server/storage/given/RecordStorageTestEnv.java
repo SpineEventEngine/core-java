@@ -48,9 +48,8 @@ public class RecordStorageTestEnv {
     }
 
     @SuppressWarnings("unused") // Reflective access
-    public static class TestCounterEntity<I> extends TransactionalEntity<I,
-            Project,
-            ProjectVBuilder> {
+    public static class TestCounterEntity<I>
+            extends TransactionalEntity<I, Project, ProjectVBuilder> {
 
         private int counter = 0;
 
