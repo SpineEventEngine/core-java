@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
@@ -67,7 +66,6 @@ import io.spine.test.aggregate.rejection.Rejections;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.time.testing.TimeTests;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -78,9 +76,9 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Throwables.getRootCause;
-import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.CommandEnvelope.of;
 import static io.spine.core.Events.getRootCommandId;
@@ -116,9 +114,9 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @author Alexander Litus
  * @author Alexander Yevsyukkov
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass",
+@SuppressWarnings({
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
-        "DuplicateStringLiteralInspection" /* Common test display names */})
+})
 @DisplayName("Aggregate should")
 public class AggregateTest {
 
@@ -496,16 +494,11 @@ public class AggregateTest {
         }
 
         private Collection<EventClass> getEventClasses(Collection<Event> events) {
-            return transform(events, new Function<Event, EventClass>() {
-                @Override // return null because an exception won't be propagated in this case
-                public @Nullable EventClass apply(@Nullable Event record) {
-                    if (record == null) {
-                        return null;
-                    }
-                    Message eventMessage = unpack(record.getMessage());
-                    return EventClass.of(eventMessage);
-                }
-            });
+            List<EventClass> result =
+                    events.stream()
+                          .map(EventClass::of)
+                          .collect(Collectors.toList());
+            return result;
         }
 
     }
