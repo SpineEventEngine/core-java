@@ -20,17 +20,17 @@
 
 package io.spine.server.model.given;
 
-import com.google.common.base.Predicate;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
-import io.spine.server.model.HandlerMethod;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.function.Predicate;
 
 /**
  * @author Alexander Litus
@@ -119,7 +119,7 @@ public class HandlerMethodTestEnv {
         }
     }
 
-    public static class TwoParamMethod extends HandlerMethod<EventClass, EventContext> {
+    public static class TwoParamMethod extends AbstractHandlerMethod<EventClass, EventContext> {
 
         public TwoParamMethod(Method method) {
             super(method);
@@ -136,7 +136,7 @@ public class HandlerMethodTestEnv {
         }
     }
 
-    public static class OneParamMethod extends HandlerMethod<EventClass, Empty> {
+    public static class OneParamMethod extends AbstractHandlerMethod<EventClass, Empty> {
 
         public OneParamMethod(Method method) {
             super(method);
@@ -151,7 +151,7 @@ public class HandlerMethodTestEnv {
             return EventClass.of(rawMessageClass());
         }
 
-        private static class Factory extends HandlerMethod.Factory<OneParamMethod> {
+        private static class Factory extends AbstractHandlerMethod.Factory<OneParamMethod> {
 
             private static final Factory INSTANCE = new Factory();
 
@@ -175,7 +175,7 @@ public class HandlerMethodTestEnv {
             }
 
             @Override
-            protected OneParamMethod createFromMethod(Method method) {
+            protected OneParamMethod doCreate(Method method) {
                 return new OneParamMethod(method);
             }
         }

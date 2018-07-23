@@ -19,9 +19,8 @@
  */
 
 /**
- * Test environment for the {@link io.spine.testing.server.blackbox} package.
+ * This package provides test environment for black-box testing of server-side code.
  */
-
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.testing.server.blackbox.given;

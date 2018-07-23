@@ -216,6 +216,8 @@ class RejectionSubscriberMethodTest {
 
     private static void assertIsRejectionSubscriber(Method subscriber, boolean isSubscriber) {
         assertEquals(isSubscriber,
-                     RejectionSubscriberMethod.predicate().apply(subscriber));
+                     RejectionSubscriberMethod.factory()
+                                              .getPredicate()
+                                              .test(subscriber));
     }
 }

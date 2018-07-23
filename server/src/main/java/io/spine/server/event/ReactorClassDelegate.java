@@ -18,77 +18,81 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate;
+package io.spine.server.event;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
-import io.spine.server.entity.CommandHandlingEntityClass;
-import io.spine.server.event.EventReactorMethod;
-import io.spine.server.event.ReactorClass;
-import io.spine.server.event.ReactorClassDelegate;
 import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.model.ModelClass;
 import io.spine.server.rejection.RejectionReactorMethod;
 
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.model.HandlerMethod.domestic;
+import static io.spine.server.model.HandlerMethod.external;
 
 /**
- * Provides message handling information on an aggregate class.
+ * The helper class for holding messaging information on behalf of another model class.
  *
- * @param <A> the type of aggregates
+ * @param <T> the type of the raw class for obtaining messaging information
+ * @author Alex Tymchenko
  * @author Alexander Yevsyukov
  */
 @Internal
-public class AggregateClass<A extends Aggregate>
-        extends CommandHandlingEntityClass<A>
-        implements ReactorClass {
+public final class ReactorClassDelegate<T> extends ModelClass<T> implements ReactorClass {
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EventApplier> stateEvents;
-    private final ReactorClassDelegate<A> delegate;
+    private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactions;
+    private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactions;
 
-    /** Creates new instance. */
-    public AggregateClass(Class<A> cls) {
-        super(checkNotNull(cls));
-        this.stateEvents = new MessageHandlerMap<>(cls, EventApplier.factory());
-        this.delegate = new ReactorClassDelegate<>(cls);
+    private final ImmutableSet<EventClass> domesticEventReactions;
+    private final ImmutableSet<EventClass> externalEventReactions;
+    private final ImmutableSet<RejectionClass> domesticRejectionReactions;
+    private final ImmutableSet<RejectionClass> externalRejectionReactions;
+
+    public ReactorClassDelegate(Class<T> cls) {
+        super(cls);
+        this.eventReactions = new MessageHandlerMap<>(cls, EventReactorMethod.factory());
+        this.rejectionReactions = new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
+
+        this.domesticEventReactions = eventReactions.getMessageClasses(domestic());
+        this.externalEventReactions = eventReactions.getMessageClasses(external());
+
+        this.domesticRejectionReactions = rejectionReactions.getMessageClasses(domestic());
+        this.externalRejectionReactions = rejectionReactions.getMessageClasses(external());
     }
 
     @Override
     public Set<EventClass> getEventReactions() {
-        return delegate.getEventReactions();
+        return domesticEventReactions;
     }
 
     @Override
     public Set<EventClass> getExternalEventReactions() {
-        return delegate.getExternalEventReactions();
+        return externalEventReactions;
     }
 
     @Override
     public Set<RejectionClass> getRejectionReactions() {
-        return delegate.getRejectionReactions();
+        return domesticRejectionReactions;
     }
 
     @Override
     public Set<RejectionClass> getExternalRejectionReactions() {
-        return delegate.getExternalRejectionReactions();
+        return externalRejectionReactions;
     }
 
     @Override
     public EventReactorMethod getReactor(EventClass eventClass) {
-        return delegate.getReactor(eventClass);
+        return eventReactions.getMethod(eventClass);
     }
 
     @Override
     public RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls) {
-        return delegate.getReactor(rejCls, cmdCls);
-    }
-
-    EventApplier getApplier(EventClass eventClass) {
-        return stateEvents.getMethod(eventClass);
+        return rejectionReactions.getMethod(rejCls, cmdCls);
     }
 }

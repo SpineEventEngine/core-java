@@ -31,6 +31,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
+import io.spine.core.EventClass;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.Given;
@@ -71,6 +72,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -95,9 +97,8 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.reassig
 import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
-import static io.spine.testing.server.TestCommandClasses.assertContains;
-import static io.spine.testing.server.TestEventClasses.assertContains;
-import static io.spine.testing.server.TestEventClasses.getEventClasses;
+import static io.spine.testing.server.Assertions.assertCommandClasses;
+import static io.spine.testing.server.Assertions.assertEventClasses;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchRejection;
 import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
@@ -109,14 +110,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author Alexander Litus
  * @author Alexander Yevsyukkov
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass",
+@SuppressWarnings({
         "InnerClassMayBeStatic", "ClassCanBeStatic" /* JUnit nested classes cannot be static. */,
-        "DuplicateStringLiteralInspection" /* Common test display names */})
+})
 @DisplayName("Aggregate should")
 public class AggregateTest {
 
@@ -197,11 +199,11 @@ public class AggregateTest {
 
             assertEquals(4, commandClasses.size());
 
-            assertContains(commandClasses,
-                           AggCreateProject.class,
-                           AggAddTask.class,
-                           AggStartProject.class,
-                           ImportEvents.class);
+            assertCommandClasses(commandClasses,
+                                 AggCreateProject.class,
+                                 AggAddTask.class,
+                                 AggStartProject.class,
+                                 ImportEvents.class);
         }
 
         @Test
@@ -476,8 +478,8 @@ public class AggregateTest {
 
             List<Event> events = aggregate().getUncommittedEvents();
 
-            assertContains(getEventClasses(events),
-                           AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class);
+            assertEventClasses(getEventClasses(events),
+                               AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class);
         }
 
         @Test
@@ -489,9 +491,18 @@ public class AggregateTest {
 
             List<Event> events = aggregate().commitEvents();
 
-            assertContains(getEventClasses(events),
-                           AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class);
+            assertEventClasses(getEventClasses(events),
+                               AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class);
         }
+
+        private Collection<EventClass> getEventClasses(Collection<Event> events) {
+            List<EventClass> result =
+                    events.stream()
+                          .map(EventClass::of)
+                          .collect(toList());
+            return result;
+        }
+
     }
 
     @Nested

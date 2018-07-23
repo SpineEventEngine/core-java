@@ -27,8 +27,8 @@ import io.spine.core.CommandContext;
 import io.spine.core.Commands;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionContext;
+import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
-import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 
 import java.lang.annotation.Annotation;
@@ -48,7 +48,7 @@ import static io.spine.util.Exceptions.unsupported;
  * @author Alexander Yevsyukov
  */
 @Internal
-class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionContext> {
+abstract class RejectionHandlerMethod extends AbstractHandlerMethod<RejectionClass, RejectionContext> {
 
     /** Determines the number of parameters and their types. */
     private final Kind kind;
@@ -72,7 +72,8 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionCont
     public HandlerKey key() {
         if (kind == Kind.COMMAND_AWARE || kind == Kind.COMMAND_MESSAGE_AWARE) {
             @SuppressWarnings("unchecked") // RejectionFilterPredicate ensures that
-            Class<? extends Message> rawCommandClass = (Class<? extends Message>) getMethod().getParameterTypes()[1];
+            Class<? extends Message> rawCommandClass =
+                    (Class<? extends Message>) getRawMethod().getParameterTypes()[1];
             return HandlerKey.of(getMessageClass(), CommandClass.of(rawCommandClass));
         } else {
             return HandlerKey.of(getMessageClass());
@@ -123,7 +124,7 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionCont
         CommandContext commandContext = command.getContext();
         try {
             Object output;
-            Method method = getMethod();
+            Method method = getRawMethod();
             Message commandMessage;
             switch (kind) {
                 case REJECTION_MESSAGE_AWARE:
@@ -265,10 +266,10 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionCont
     /**
      * The abstract base for predicates allowing to filter rejection handler methods.
      */
-    protected abstract static class RejectionFilterPredicate
+    protected abstract static class AbstractPredicate
             extends HandlerMethodPredicate<CommandContext> {
 
-        RejectionFilterPredicate(Class<? extends Annotation> annotationClass) {
+        AbstractPredicate(Class<? extends Annotation> annotationClass) {
             super(annotationClass, CommandContext.class);
         }
 
@@ -284,7 +285,8 @@ class RejectionHandlerMethod extends HandlerMethod<RejectionClass, RejectionCont
             boolean firstParamIsMessage = Message.class.isAssignableFrom(paramTypes[0]);
             @SuppressWarnings("unchecked")  // checked above.
             boolean firstParamCorrect =
-                    firstParamIsMessage && isRejection((Class<? extends Message>) paramTypes[0]);
+                    firstParamIsMessage
+                            && isRejection((Class<? extends Message>) paramTypes[0]);
             if (!firstParamCorrect) {
                 return false;
             }

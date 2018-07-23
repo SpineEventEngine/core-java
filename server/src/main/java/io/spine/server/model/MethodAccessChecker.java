@@ -153,6 +153,6 @@ public class MethodAccessChecker {
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(HandlerMethod.class);
+        private final Logger value = LoggerFactory.getLogger(AbstractHandlerMethod.class);
     }
 }

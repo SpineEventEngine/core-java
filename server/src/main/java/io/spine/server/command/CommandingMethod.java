@@ -18,23 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server;
+package io.spine.server.command;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
+import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
+import io.spine.server.model.HandlerMethod;
+import io.spine.server.model.HandlerMethodPredicate;
+import io.spine.type.MessageClass;
 
 /**
+ * Base interface for methods that generate one or more command messages in response to
+ * an incoming message.
+ *
+ * @param <M> the type of the message class
+ * @param <C> the type of the message context
+ *
  * @author Alexander Yevsyukov
  */
-@DisplayName("TestCommandClasses utility should")
-class TestCommandClassesTest {
+@Internal
+public interface CommandingMethod<M extends MessageClass, C extends Message>
+        extends HandlerMethod<M, C> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(TestCommandClasses.class);
+    /**
+     * Abstract base for commanding method predicates.
+     */
+    abstract class AbstractPredicate<C extends Message> extends HandlerMethodPredicate<C> {
+
+        AbstractPredicate(Class<C> contextClass) {
+            super(Command.class, contextClass);
+        }
     }
 }

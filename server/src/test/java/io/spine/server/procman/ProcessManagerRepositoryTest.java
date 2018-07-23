@@ -83,9 +83,9 @@ import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.Give
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.projectStarted;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.startProject;
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.taskAdded;
-import static io.spine.testing.server.TestCommandClasses.assertContains;
-import static io.spine.testing.server.TestEventClasses.assertContains;
-import static io.spine.testing.server.TestRejectionClasses.assertContains;
+import static io.spine.testing.server.Assertions.assertCommandClasses;
+import static io.spine.testing.server.Assertions.assertEventClasses;
+import static io.spine.testing.server.Assertions.assertRejectionClasses;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -397,8 +397,10 @@ class ProcessManagerRepositoryTest
         void command() {
             Set<CommandClass> commandClasses = repository().getCommandClasses();
 
-            assertContains(commandClasses,
-                           PmCreateProject.class, PmCreateProject.class, PmStartProject.class);
+            assertCommandClasses(
+                    commandClasses,
+                    PmCreateProject.class, PmCreateProject.class, PmStartProject.class
+            );
         }
 
         @Test
@@ -406,8 +408,10 @@ class ProcessManagerRepositoryTest
         void event() {
             Set<EventClass> eventClasses = repository().getMessageClasses();
 
-            assertContains(eventClasses,
-                           PmProjectCreated.class, PmTaskAdded.class, PmProjectStarted.class);
+            assertEventClasses(
+                    eventClasses,
+                    PmProjectCreated.class, PmTaskAdded.class, PmProjectStarted.class
+            );
         }
 
         @Test
@@ -415,8 +419,10 @@ class ProcessManagerRepositoryTest
         void rejection() {
             Set<RejectionClass> rejectionClasses = repository().getRejectionClasses();
 
-            assertContains(rejectionClasses,
-                           EntityAlreadyArchived.class, EntityAlreadyDeleted.class);
+            assertRejectionClasses(
+                    rejectionClasses,
+                    EntityAlreadyArchived.class, EntityAlreadyDeleted.class
+            );
         }
     }
 

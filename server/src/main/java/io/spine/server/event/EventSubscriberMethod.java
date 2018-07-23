@@ -20,21 +20,21 @@
 
 package io.spine.server.event;
 
-import com.google.common.base.Predicate;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
+import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
-import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 
 import java.lang.reflect.Method;
+import java.util.function.Predicate;
 
 import static io.spine.core.Rejections.isRejection;
-import static io.spine.server.model.HandlerMethods.ensureExternalMatch;
+import static io.spine.server.model.HandlerMethod.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
@@ -43,10 +43,7 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  * @author Alexander Yevsyukov
  * @see Subscribe
  */
-public final class EventSubscriberMethod extends HandlerMethod<EventClass, EventContext> {
-
-    /** The instance of the predicate to filter event subscriber methods of a class. */
-    private static final MethodPredicate PREDICATE = new FilterPredicate();
+public final class EventSubscriberMethod extends AbstractHandlerMethod<EventClass, EventContext> {
 
     /** Creates a new instance. */
     private EventSubscriberMethod(Method method) {
@@ -68,7 +65,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventClass, Event
     }
 
     /** Returns the factory for filtering and creating event subscriber methods. */
-    public static HandlerMethod.Factory<EventSubscriberMethod> factory() {
+    public static AbstractHandlerMethod.Factory<EventSubscriberMethod> factory() {
         return Factory.getInstance();
     }
 
@@ -79,14 +76,10 @@ public final class EventSubscriberMethod extends HandlerMethod<EventClass, Event
         return super.invoke(target, message, context);
     }
 
-    static MethodPredicate predicate() {
-        return PREDICATE;
-    }
-
     /**
      * The factory for creating {@linkplain EventSubscriberMethod event subscriber} methods.
      */
-    private static class Factory extends HandlerMethod.Factory<EventSubscriberMethod> {
+    private static class Factory extends AbstractHandlerMethod.Factory<EventSubscriberMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
@@ -101,7 +94,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventClass, Event
 
         @Override
         public Predicate<Method> getPredicate() {
-            return predicate();
+            return Filter.INSTANCE;
         }
 
         @Override
@@ -111,7 +104,7 @@ public final class EventSubscriberMethod extends HandlerMethod<EventClass, Event
         }
 
         @Override
-        protected EventSubscriberMethod createFromMethod(Method method) {
+        protected EventSubscriberMethod doCreate(Method method) {
             return from(method);
         }
     }
@@ -121,9 +114,11 @@ public final class EventSubscriberMethod extends HandlerMethod<EventClass, Event
      *
      * <p>Please see {@link Subscribe} annotation for more information.
      */
-    private static class FilterPredicate extends EventMethodPredicate {
+    private static class Filter extends EventMethodPredicate {
 
-        private FilterPredicate() {
+        private static final MethodPredicate INSTANCE = new Filter();
+
+        private Filter() {
             super(Subscribe.class);
         }
 

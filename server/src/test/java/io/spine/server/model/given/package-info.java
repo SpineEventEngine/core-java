@@ -21,7 +21,6 @@
 /**
  * Test environment classes for tests of the {@code io.spine.server.model} package.
  */
-
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.model.given;

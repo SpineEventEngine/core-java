@@ -37,7 +37,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -52,6 +51,7 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static io.spine.server.event.EEntity.CREATED_TIME_COLUMN;
 import static io.spine.server.event.EEntity.TYPE_COLUMN;
 import static io.spine.server.event.EEntity.comparator;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
@@ -108,7 +108,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
     void store(Iterable<Event> events) {
         Iterable<EEntity> entities = StreamSupport.stream(events.spliterator(), false)
                                                   .map(EventToEEntity.instance())
-                                                  .collect(Collectors.toList());
+                                                  .collect(toList());
         store(newArrayList(entities));
     }
 
