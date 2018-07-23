@@ -29,7 +29,10 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 
+import static java.lang.String.format;
 import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * The helper class used to dispatch numerous messages of a certain kind to the entities,
@@ -89,6 +92,16 @@ public abstract class ParallelDispatcher<I extends Message, M extends Message> {
     public void dispatchMessagesTo(Repository<I, ?> repository) throws Exception {
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .build();
+        try {
+            doDispatch(boundedContext, repository);
+        } finally {
+            repository.close();
+            boundedContext.close();
+        }
+    }
+
+    private void doDispatch(BoundedContext boundedContext, Repository<I, ?> repository)
+            throws InterruptedException {
         boundedContext.register(repository);
 
         int numberOfShards = ((Shardable) repository).getShardingStrategy()
@@ -109,13 +122,12 @@ public abstract class ParallelDispatcher<I extends Message, M extends Message> {
         List<Callable<Object>> commandPostingJobs = builder.build();
         executorService.invokeAll(commandPostingJobs);
 
-        Thread.sleep(dispatchWaitTime);
         executorService.shutdown();
+        boolean executed = executorService.awaitTermination(dispatchWaitTime, MILLISECONDS);
+        assertTrue(executed,
+                   format("Executor failed to terminate in %s millis.", dispatchWaitTime));
 
         verifyStats(messageCount, numberOfShards);
-
-        repository.close();
-        boundedContext.close();
     }
 
     private void verifyStats(int totalMessages, int numberOfShards) {
