@@ -31,6 +31,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -69,16 +70,23 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     /**
-     * Obtains the ID of the entity.
+     * Creates a new instance with the passed ID and default entity state obtained
+     * from the passed function.
+     *
+     * @param id the ID of the new entity
+     * @param defaultState the function to obtain new entity state
      */
+    protected AbstractEntity(I id, Function<I, S> defaultState) {
+        this(id);
+        checkNotNull(defaultState);
+        setState(defaultState.apply(id));
+    }
+
     @Override
     public I getId() {
         return id;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public S getState() {
         if (state == null) {
@@ -106,17 +114,6 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     /**
-     * Sets the object into the default state.
-     *
-     * <p>Default implementation does nothing. Override to customize initialization
-     * behaviour of instances of your entity classes.
-     */
-    @SuppressWarnings("NoopMethodInAbstractClass") // by design
-    public void init() {
-        // Do nothing.
-    }
-
-    /**
      * Sets the entity state to the passed value.
      */
     void setState(S newState) {
@@ -127,7 +124,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * {@inheritDoc}
      */
     @Override
-    public S getDefaultState() {
+    public final S getDefaultState() {
         Class<? extends Entity> entityClass = getClass();
         @SuppressWarnings("unchecked")
         // cast is safe because this type of messages is saved to the map

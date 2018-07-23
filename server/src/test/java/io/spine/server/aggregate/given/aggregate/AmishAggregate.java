@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
@@ -52,15 +51,6 @@ public class AmishAggregate extends Aggregate<ProjectId, Project, ProjectVBuilde
 
     public AmishAggregate(ProjectId id) {
         super(id);
-    }
-
-    /**
-     * Overrides to expose the method to the text.
-     */
-    @VisibleForTesting
-    @Override
-    public void init() {
-        super.init();
     }
 
     @Assign

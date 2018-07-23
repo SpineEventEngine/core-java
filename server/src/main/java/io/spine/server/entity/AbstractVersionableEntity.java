@@ -66,6 +66,12 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     /**
      * Creates a new instance.
      *
+     * <p>Upon construction the entity has:
+     * <ul>
+     *     <li>The version number is set to zero.
+     *     <li>{@linkplain #getLifecycleFlags() Lifecycle flag} are cleared.
+     * </ul>
+     *
      * @param id the ID for the new instance
      * @throws IllegalArgumentException if the ID is not of one of the
      *         {@linkplain Entity supported types}
@@ -73,32 +79,10 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     protected AbstractVersionableEntity(I id) {
         super(id);
         setVersion(Versions.zero());
-        setVisible();
+        clearLifecycleFlags();
     }
 
-    /**
-     * Sets the object into the default state.
-     *
-     * <p>Results of this method call are:
-     * <ul>
-     *   <li>The state object is set to the value produced by {@link #getDefaultState()}.
-     *   <li>The version number is set to zero.
-     *   <li>The {@link #lifecycleFlags} field is set to the default instance.
-     * </ul>
-     *
-     * <p>This method cannot be called from within {@code Entity} constructor because
-     * the call to {@link #getDefaultState()} relies on completed initialization
-     * of the instance.
-     */
-    @Override
-    public void init() {
-        super.init();
-        setState(getDefaultState());
-        setVersion(Versions.zero());
-        setVisible();
-    }
-
-    private void setVisible() {
+    private void clearLifecycleFlags() {
         setLifecycleFlags(LifecycleFlags.getDefaultInstance());
         lifecycleFlagsChanged = false;
     }

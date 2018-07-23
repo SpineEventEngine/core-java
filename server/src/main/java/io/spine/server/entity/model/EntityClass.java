@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.protobuf.Messages;
-import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.Entity;
 import io.spine.server.model.ModelClass;
 import io.spine.server.model.ModelError;
@@ -81,10 +80,6 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
         E result;
         try {
             result = ctor.newInstance(constructorArgument);
-            if (result instanceof AbstractEntity) {
-                AbstractEntity abstractEntity = (AbstractEntity) result;
-                abstractEntity.init();
-            }
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new IllegalStateException(e);
         }
