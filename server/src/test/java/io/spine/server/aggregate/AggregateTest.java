@@ -76,7 +76,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newArrayList;
@@ -103,6 +102,7 @@ import static io.spine.testing.server.Assertions.assertEventClasses;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchRejection;
 import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
+import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -497,7 +497,7 @@ public class AggregateTest {
             List<EventClass> result =
                     events.stream()
                           .map(EventClass::of)
-                          .collect(Collectors.toList());
+                          .collect(toList());
             return result;
         }
 
