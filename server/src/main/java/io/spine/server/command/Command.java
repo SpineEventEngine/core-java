@@ -39,7 +39,7 @@ import java.lang.annotation.Target;
  *     <ul>
  *        <li>a {@linkplain com.google.protobuf.Message command message}
  *        <li>an {@linkplain com.google.protobuf.Message event message}
- *        <li>a {@link com.google.protobuf.Message rejection message}
+ *        <li>a {@linkplain com.google.protobuf.Message rejection message}
  *     </ul>
  * </ul>
  *

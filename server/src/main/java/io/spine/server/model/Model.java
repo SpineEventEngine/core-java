@@ -83,7 +83,7 @@ public class Model {
     public AggregateClass<?> asAggregateClass(Class<? extends Aggregate> cls)
             throws DuplicateCommandHandlerError {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> new AggregateClass<>(cls), true);
+        ModelClass<?> modelClass = classes.get(cls, () -> new AggregateClass<>(cls));
         return (AggregateClass<?>) modelClass;
     }
 
@@ -99,7 +99,7 @@ public class Model {
     public AggregatePartClass<?> asAggregatePartClass(Class<? extends AggregatePart> cls)
             throws DuplicateCommandHandlerError {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> new AggregatePartClass<>(cls), true);
+        ModelClass<?> modelClass = classes.get(cls, () -> new AggregatePartClass<>(cls));
         return (AggregatePartClass<?>) modelClass;
     }
 
@@ -115,7 +115,7 @@ public class Model {
     public ProcessManagerClass<?> asProcessManagerClass(Class<? extends ProcessManager> cls)
         throws DuplicateCommandHandlerError {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> ProcessManagerClass.of(cls), true);
+        ModelClass<?> modelClass = classes.get(cls, () -> ProcessManagerClass.of(cls));
         return (ProcessManagerClass<?>) modelClass;
     }
 
@@ -127,7 +127,7 @@ public class Model {
      */
     public ProjectionClass<?> asProjectionClass(Class<? extends Projection> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> ProjectionClass.of(cls), false);
+        ModelClass<?> modelClass = classes.get(cls, () -> ProjectionClass.of(cls));
         return (ProjectionClass<?>) modelClass;
     }
 
@@ -139,7 +139,7 @@ public class Model {
      */
     public EventSubscriberClass<?> asEventSubscriberClass(Class<? extends EventSubscriber> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> EventSubscriberClass.of(cls), false);
+        ModelClass<?> modelClass = classes.get(cls, () -> EventSubscriberClass.of(cls));
         return (EventSubscriberClass<?>) modelClass;
     }
 
@@ -155,7 +155,7 @@ public class Model {
     public CommandHandlerClass asCommandHandlerClass(Class<? extends CommandHandler> cls)
             throws DuplicateCommandHandlerError {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> CommandHandlerClass.of(cls), true);
+        ModelClass<?> modelClass = classes.get(cls, () -> CommandHandlerClass.of(cls));
         return (CommandHandlerClass<?>) modelClass;
     }
 
@@ -168,7 +168,7 @@ public class Model {
     public
     RejectionSubscriberClass<?> asRejectionSubscriber(Class<? extends RejectionSubscriber> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> RejectionSubscriberClass.of(cls), false);
+        ModelClass<?> modelClass = classes.get(cls, () -> RejectionSubscriberClass.of(cls));
         return (RejectionSubscriberClass<?>) modelClass;
     }
 
@@ -180,7 +180,7 @@ public class Model {
      */
     public EntityClass<?> asEntityClass(Class<? extends Entity> cls) {
         checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> new EntityClass<>(cls), false);
+        ModelClass<?> modelClass = classes.get(cls, () -> new EntityClass<>(cls));
         return (EntityClass<?>) modelClass;
     }
 

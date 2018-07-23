@@ -63,17 +63,16 @@ final class ClassMap {
      *
      * @param rawClass raw class for which to obtain a model class
      * @param supplier a supplier of a model class
-     * @param commandHandler if {@code true} the passed raw class handles commands
      * @return the instance of the model class corresponding to the raw class
      * @throws DuplicateCommandHandlerError
      *         if the passed class handles commands that are already handled
      */
-    ModelClass<?> get(Class<?> rawClass, Supplier<ModelClass<?>> supplier, boolean commandHandler) {
+    ModelClass<?> get(Class<?> rawClass, Supplier<ModelClass<?>> supplier) {
         String key = nameOf(rawClass);
         ModelClass<?> modelClass = classes.get(key);
         if (modelClass == null) {
             modelClass = supplier.get();
-            if (commandHandler) {
+            if (modelClass instanceof CommandHandlingClass) {
                 checkDuplicates((CommandHandlingClass<?>) modelClass);
             }
             classes.put(key, modelClass);

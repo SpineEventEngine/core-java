@@ -38,6 +38,8 @@ import java.util.Optional;
 import static com.google.common.base.Throwables.getRootCause;
 
 /**
+ * An abstract base for methods that accept a command message and optionally its context.
+ *
  * @author Alexander Yevsyukov
  */
 public abstract class CommandAcceptingMethod

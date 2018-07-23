@@ -30,9 +30,9 @@ import io.spine.server.event.EventFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.stream.Collectors.toList;
 
 /**
  * The events emitted as a result of message dispatch.
@@ -74,7 +74,7 @@ public final class DispatchResult {
         List<Event> result =
                 messages.stream()
                         .map(eventMessage -> eventFactory.createEvent(eventMessage, version))
-                        .collect(Collectors.toList());
+                        .collect(toList());
         return result;
     }
 }
