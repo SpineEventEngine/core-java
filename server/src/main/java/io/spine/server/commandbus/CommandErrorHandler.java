@@ -103,13 +103,17 @@ public final class CommandErrorHandler {
     }
 
     private HandledError handleRuntime(CommandEnvelope envelope, RuntimeException exception) {
-        log().error(format("Error dispatching command (class: %s id: %s).",
-                           envelope.getMessage().getClass(),
-                           Stringifiers.toString(envelope.getId())),
-                    exception);
-        Error error = Errors.causeOf(exception);
-        markErrored(envelope, error);
-        return HandledError.forRuntime(exception);
+        if (isPreProcessed(exception)) {
+            return HandledError.forPreProcessed();
+        } else {
+            log().error(format("Error dispatching command (class: %s id: %s).",
+                               envelope.getMessage().getClass(),
+                               Stringifiers.toString(envelope.getId())),
+                        exception);
+            Error error = Errors.causeOf(exception);
+            markErrored(envelope, error);
+            return HandledError.forRuntime(exception);
+        }
     }
 
     private void markErrored(CommandEnvelope command, Error error) {
@@ -124,6 +128,10 @@ public final class CommandErrorHandler {
 
     private void postSystem(Message systemCommand) {
         systemGateway.postCommand(systemCommand);
+    }
+
+    private static boolean isPreProcessed(RuntimeException exception) {
+        return exception instanceof CommandDispatchingException;
     }
 
     /**
@@ -149,6 +157,10 @@ public final class CommandErrorHandler {
             return EMPTY;
         }
 
+        private static HandledError forPreProcessed() {
+            return EMPTY;
+        }
+
         private static HandledError forRuntime(RuntimeException exception) {
             return new HandledError(exception);
         }
@@ -160,7 +172,7 @@ public final class CommandErrorHandler {
          */
         public void rethrowIfRuntime() {
             if (exception != null) {
-                throw exception;
+                throw new CommandDispatchingException(exception);
             }
         }
     }
