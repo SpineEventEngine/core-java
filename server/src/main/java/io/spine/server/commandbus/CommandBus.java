@@ -31,6 +31,7 @@ import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
+import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
 import io.spine.core.TenantId;
@@ -239,9 +240,12 @@ public class CommandBus extends Bus<Command,
     }
 
     void onScheduled(CommandEnvelope envelope) {
+        CommandContext context = envelope.getCommandContext();
+        CommandContext.Schedule schedule = context.getSchedule();
         ScheduleCommand systemCommand = ScheduleCommand
                 .newBuilder()
                 .setId(envelope.getId())
+                .setSchedule(schedule)
                 .build();
         postSystem(systemCommand, envelope.getTenantId());
     }

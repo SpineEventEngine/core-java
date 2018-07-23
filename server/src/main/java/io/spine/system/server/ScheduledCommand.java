@@ -23,7 +23,6 @@ package io.spine.system.server;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
-import io.spine.core.Enrichments;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
@@ -31,6 +30,7 @@ import io.spine.server.projection.Projection;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.core.Enrichments.getEnrichment;
 
 /**
  * Information about a scheduled command.
@@ -46,9 +46,10 @@ public final class ScheduledCommand
 
     @Subscribe
     public void on(CommandScheduled event, EventContext context) {
-        Optional<Command> command = Enrichments.getEnrichment(Command.class, context);
+        Optional<CommandEnrichment> command = getEnrichment(CommandEnrichment.class, context);
         checkState(command.isPresent(), "Command enrichment must be present.");
-        Command commandWithSchedule = withSchedule(command.get(), event.getSchedule());
+        Command commandWithSchedule = withSchedule(command.get().getCommand(),
+                                                   event.getSchedule());
         getBuilder().setId(event.getId())
                     .setCommand(commandWithSchedule)
                     .setSchedulingTime(event.getWhen());
