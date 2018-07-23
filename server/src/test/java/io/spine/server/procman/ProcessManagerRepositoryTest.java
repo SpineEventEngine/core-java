@@ -87,6 +87,8 @@ import static io.spine.testing.server.TestCommandClasses.assertContains;
 import static io.spine.testing.server.TestEventClasses.assertContains;
 import static io.spine.testing.server.TestRejectionClasses.assertContains;
 import static java.lang.String.format;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -381,7 +383,9 @@ class ProcessManagerRepositoryTest
         Command unknownCommand =
                 requestFactory.createCommand(Int32Value.getDefaultInstance());
         CommandEnvelope request = CommandEnvelope.of(unknownCommand);
-        assertThrows(IllegalArgumentException.class, () -> repository().dispatchCommand(request));
+        Throwable exception = assertThrows(RuntimeException.class,
+                                           () -> repository().dispatchCommand(request));
+        assertThat(exception.getCause(), instanceOf(IllegalArgumentException.class));
     }
 
     @Nested
