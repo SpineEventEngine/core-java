@@ -20,16 +20,19 @@
 
 package io.spine.system.server;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Duration;
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.util.Durations;
-import io.spine.client.CommandFactory;
+import io.spine.client.EntityFilters;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
 import io.spine.core.CommandId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
 import io.spine.system.server.given.CommandLifecycleTestEnv.TestAggregateRepository;
 import io.spine.system.server.given.ScheduledCommandTestEnv.TestCommandScheduler;
@@ -38,11 +41,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Iterator;
 import java.util.Optional;
 
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.client.ColumnFilters.eq;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.SystemBoundedContexts.systemOf;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.validate.Validate.isDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -54,11 +60,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("ScheduledCommand should")
 class ScheduledCommandTest {
 
-    private static final CommandFactory commandFactory =
-            TestActorRequestFactory.newInstance(ScheduledCommandTest.class)
-                                   .command();
+    private static final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(ScheduledCommandTest.class);
 
-    private Repository<CommandId, ScheduledCommand> repository;
+    private RecordBasedRepository<CommandId, ScheduledCommand, ScheduledCommandRecord> repository;
     private BoundedContext context;
     private TestCommandScheduler scheduler;
 
@@ -76,19 +81,53 @@ class ScheduledCommandTest {
         Optional<Repository> found = system.findRepository(ScheduledCommandRecord.class);
         assertTrue(found.isPresent());
         @SuppressWarnings("unchecked") // @Internal API. OK for tests.
-        Repository<CommandId, ScheduledCommand> repository = found.get();
+        RecordBasedRepository<CommandId, ScheduledCommand, ScheduledCommandRecord> repository =
+                (RecordBasedRepository<CommandId, ScheduledCommand, ScheduledCommandRecord>)
+                        found.get();
         this.repository = repository;
     }
 
     @Test
     @DisplayName("be created when a command is scheduled")
     void created() {
-        Command raw = createCommand();
-        Schedule schedule = createSchedule(5_000);
-        Command scheduled = schedule(raw, schedule);
-        post(scheduled);
+        Command scheduled = createAndSchedule();
+        checkScheduled(scheduled);
+    }
 
-        Optional<ScheduledCommand> found = repository.find(raw.getId());
+    @Test
+    @DisplayName("be deleted when a command is dispatched")
+    void deleted() {
+        Command scheduled = createAndSchedule();
+        checkScheduled(scheduled);
+
+        scheduler.postScheduled();
+
+        Optional<ScheduledCommand> command = repository.find(scheduled.getId());
+        assertFalse(command.isPresent());
+
+        ScheduledCommand deletedCommand = findDeleted(scheduled.getId());
+        assertTrue(deletedCommand.getLifecycleFlags().getDeleted());
+        assertFalse(deletedCommand.getLifecycleFlags().getArchived());
+    }
+
+    private ScheduledCommand findDeleted(CommandId id) {
+        EntityFilters filters = requestFactory.query()
+                                              .select(ScheduledCommandRecord.class)
+                                              .byId(id)
+                                              .where(eq(deleted.name(), true))
+                                              .build()
+                                              .getTarget()
+                                              .getFilters();
+        Iterator<ScheduledCommand> commands = repository.find(filters,
+                                                              FieldMask.getDefaultInstance());
+        assertTrue(commands.hasNext());
+        ScheduledCommand result = commands.next();
+        assertFalse(commands.hasNext());
+        return result;
+    }
+
+    private void checkScheduled(Command scheduled) {
+        Optional<ScheduledCommand> found = repository.find(scheduled.getId());
         assertTrue(found.isPresent());
         ScheduledCommandRecord scheduledCommand = found.get().getState();
 
@@ -96,6 +135,15 @@ class ScheduledCommandTest {
         Command savedCommand = scheduledCommand.getCommand();
         assertEquals(scheduled, savedCommand);
         scheduler.assertScheduled(savedCommand);
+    }
+
+    @CanIgnoreReturnValue
+    private Command createAndSchedule() {
+        Command raw = createCommand();
+        Schedule schedule = createSchedule(5_000);
+        Command scheduled = schedule(raw, schedule);
+        post(scheduled);
+        return scheduled;
     }
 
     private static Schedule createSchedule(long delayMillis) {
@@ -125,7 +173,8 @@ class ScheduledCommandTest {
 
     private static Command createCommand() {
         Message commandMessage = createCommandMessage();
-        Command command = commandFactory.create(commandMessage);
+        Command command = requestFactory.command()
+                                        .create(commandMessage);
         return command;
     }
 

@@ -67,5 +67,10 @@ public class ScheduledCommandTestEnv {
                                       "%n expected command:%n%s%nActually scheduled:%n%s",
                               command, scheduledCommands));
         }
+
+        public void postScheduled() {
+            scheduledCommands.forEach(this::post);
+            scheduledCommands.clear();
+        }
     }
 }
