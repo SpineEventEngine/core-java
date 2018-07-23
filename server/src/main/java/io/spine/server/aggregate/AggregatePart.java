@@ -22,7 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
 import io.spine.reflect.GenericTypeIndex;
-import io.spine.server.aggregate.model.AggregateClass;
+import io.spine.server.aggregate.model.AggregatePartClass;
 import io.spine.server.model.Model;
 import io.spine.validate.ValidatingBuilder;
 
@@ -72,10 +72,18 @@ public abstract class AggregatePart<I,
     }
 
     /**
+     * Obtains model class for this aggregate part.
+     */
+    @Override
+    protected AggregatePartClass<?> thisClass() {
+        return (AggregatePartClass<?>) super.thisClass();
+    }
+
+    /**
      * Obtains the model class as {@link Model#asAggregatePartClass(Class) AggregatePartClass}.
      */
     @Override
-    protected final AggregateClass<?> getModelClass() {
+    protected final AggregatePartClass<?> getModelClass() {
         return Model.getInstance()
                     .asAggregatePartClass(getClass());
     }
