@@ -24,14 +24,18 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.Error;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
+import io.spine.core.CommandValidationError;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.CommandIndex;
+import io.spine.system.server.MarkCommandAsErrored;
+import io.spine.system.server.SystemGateway;
 import io.spine.time.Durations2;
 import io.spine.time.Timestamps2;
 
@@ -50,12 +54,12 @@ class Rescheduler {
 
     private final CommandBus bus;
     private final TenantIndex tenantIndex;
-    private final CommandIndex commandIndex;
+    private final SystemGateway systemGateway;
 
     private Rescheduler(Builder builder) {
         this.bus = builder.bus;
         this.tenantIndex = builder.tenantIndex;
-        this.commandIndex = builder.commandIndex;
+        this.systemGateway = builder.systemGateway;
     }
 
     void rescheduleCommands() {
@@ -98,6 +102,7 @@ class Rescheduler {
     }
 
     private void doReschedule() {
+        CommandIndex commandIndex = systemGateway.commandIndex();
         Iterator<Command> iterator = commandIndex.scheduledCommands();
         iterator.forEachRemaining(this::reschedule);
     }
@@ -136,11 +141,26 @@ class Rescheduler {
      */
     private void onScheduledCommandExpired(Command command) {
         CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
+        onExpired(commandEnvelope);
         Message msg = commandEnvelope.getMessage();
         CommandId id = commandEnvelope.getId();
 
-        // TODO:2018-07-17:dmytro.dashenkov: Post MarkCommandAsErrored.
         log().errorExpiredCommand(msg, id);
+    }
+
+    private void onExpired(CommandEnvelope command) {
+        CommandId commandId = command.getId();
+        Error error = Error
+                .newBuilder()
+                .setMessage("Command expired.")
+                .setCode(CommandValidationError.EXPIRED_VALUE)
+                .build();
+        MarkCommandAsErrored systemCommand = MarkCommandAsErrored
+                .newBuilder()
+                .setId(commandId)
+                .setError(error)
+                .build();
+        systemGateway.postCommand(systemCommand, command.getTenantId());
     }
 
     /**
@@ -159,7 +179,7 @@ class Rescheduler {
 
         private CommandBus bus;
         private TenantIndex tenantIndex;
-        private CommandIndex commandIndex;
+        private SystemGateway systemGateway;
 
         /**
          * Prevents direct instantiation.
@@ -177,8 +197,8 @@ class Rescheduler {
             return this;
         }
 
-        Builder setCommandIndex(CommandIndex commandIndex) {
-            this.commandIndex = commandIndex;
+        Builder setSystemGateway(SystemGateway systemGateway) {
+            this.systemGateway = systemGateway;
             return this;
         }
 

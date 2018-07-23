@@ -556,7 +556,7 @@ public class CommandBus extends Bus<Command,
             return Rescheduler.newBuilder()
                               .setBus(bus)
                               .setTenantIndex(tenantIndex)
-                              .setCommandIndex(systemGateway.commandIndex())
+                              .setSystemGateway(systemGateway)
                               .build();
         }
     }
