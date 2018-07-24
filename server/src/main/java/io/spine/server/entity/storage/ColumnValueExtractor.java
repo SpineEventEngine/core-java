@@ -52,13 +52,6 @@ import static java.lang.String.format;
 @Internal
 public class ColumnValueExtractor {
 
-    private static final String SPINE_PACKAGE = "io.spine.";
-    private static final String NON_PUBLIC_CLASS_WARNING =
-            "Passed entity class %s is not public. Storage fields won't be extracted.";
-    private static final String NON_PUBLIC_INTERNAL_CLASS_WARNING =
-            "Passed entity class %s is probably a Spine internal non-public entity. " +
-                    "Storage fields won't be extracted.";
-
     private final Entity entity;
     private final Collection<EntityColumn> entityColumns;
 
@@ -100,46 +93,6 @@ public class ColumnValueExtractor {
      * @see EntityColumn.MemoizedValue
      */
     Map<String, EntityColumn.MemoizedValue> extractColumnValues() {
-        checkNotNull(entityColumns);
-        checkNotNull(entity);
-
-        Class<? extends Entity> entityClass = entity.getClass();
-        if (!canExtractColumns(entityClass)) {
-            return Collections.emptyMap();
-        }
-
-        Map<String, EntityColumn.MemoizedValue> values = readColumnValues();
-        return values;
-    }
-
-    /**
-     * Checks if the given {@link Entity entity class} is public.
-     *
-     * <p>Outputs a message to the log if the class is non-public.
-     *
-     * @param entityClass {@link Entity entity class} to check
-     * @return {@code true} if class is public and {@code false} otherwise
-     */
-    private boolean canExtractColumns(Class<? extends Entity> entityClass) {
-        checkNotNull(entityClass);
-
-        int modifiers = entityClass.getModifiers();
-        if (!Modifier.isPublic(modifiers)) {
-            logNonPublicClass(entityClass);
-            return false;
-        }
-        return true;
-    }
-
-    /**
-     * Extracts {@linkplain EntityColumn.MemoizedValue memoized values} for the given {@linkplain EntityColumn columns}
-     * of the given {@link Entity}.
-     *
-     * @return a {@code Map} of the column {@linkplain EntityColumn#getStoredName()
-     *         names for storing} to their {@linkplain EntityColumn.MemoizedValue memoized values}
-     * @see EntityColumn.MemoizedValue
-     */
-    private Map<String, EntityColumn.MemoizedValue> readColumnValues() {
         Map<String, EntityColumn.MemoizedValue> values = new HashMap<>(entityColumns.size());
         for (EntityColumn column : entityColumns) {
             String name = column.getStoredName();
@@ -147,29 +100,5 @@ public class ColumnValueExtractor {
             values.put(name, value);
         }
         return values;
-    }
-
-    /**
-     * Writes the non-public {@code Entity} class warning into the log unless the passed class
-     * represents one of the Spine internal {@link Entity} implementations.
-     */
-    private static void logNonPublicClass(Class<? extends Entity> cls) {
-        String className = cls.getCanonicalName();
-        boolean internal = className.startsWith(SPINE_PACKAGE);
-        if (internal) {
-            log().trace(format(NON_PUBLIC_INTERNAL_CLASS_WARNING, className));
-        } else {
-            log().warn(format(NON_PUBLIC_CLASS_WARNING, className));
-        }
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(Columns.class);
     }
 }
