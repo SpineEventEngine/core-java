@@ -140,12 +140,4 @@ class PmTransactionTest
         entity.getBuilder()
               .setShouldThrow(toThrow);
     }
-
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Test case common to ancestor.
-    @Disabled // The behavior is changed. The version should be auto incremented.
-    @Test
-    @DisplayName("advance version from event")
-    @Override
-    protected void advanceVersionFromEvent() {
-    }
 }
