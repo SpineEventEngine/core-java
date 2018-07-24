@@ -33,6 +33,7 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Events;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
@@ -63,6 +64,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.validate.Validate.isNotDefault;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Abstract base for aggregates.
@@ -311,8 +313,15 @@ public abstract class Aggregate<I,
      */
     void apply(List<Event> events, MessageEnvelope origin) {
         ImmutableList<Event> eventsToApply = prepareEvents(events, origin);
-        play(eventsToApply);
+        play(notRejections(eventsToApply));
         uncommittedEvents.addAll(eventsToApply);
+    }
+
+    private static List<Event> notRejections(Collection<Event> events) {
+        List<Event> result = events.stream()
+                                    .filter(event -> !Events.isRejection(event))
+                                    .collect(toList());
+        return result;
     }
 
     private ImmutableList<Event> prepareEvents(Collection<Event> originalEvents,
