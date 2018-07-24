@@ -51,7 +51,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * @author Dmytro Dashenkov
  * @see EntityQuery for the matching contract
  */
-final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> {
+final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWithColumns> {
 
     private final Collection<I> acceptedIds;
     private final QueryParameters queryParams;
@@ -63,7 +63,10 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
     }
 
     @Override
-    public boolean test(EntityRecordWithColumns input) {
+    public boolean test(@Nullable EntityRecordWithColumns input) {
+        if (input == null) {
+            return false;
+        }
         boolean result = idMatches(input) && columnValuesMatch(input);
         return result;
     }
