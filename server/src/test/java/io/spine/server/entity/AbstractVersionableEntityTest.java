@@ -70,7 +70,7 @@ class AbstractVersionableEntityTest {
     }
 
     private static class AvEntity extends AbstractVersionableEntity<Long, StringValue> {
-        protected AvEntity(Long id) {
+        private AvEntity(Long id) {
             super(id);
         }
     }
