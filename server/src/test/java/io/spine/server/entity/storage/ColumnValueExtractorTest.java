@@ -83,8 +83,8 @@ class ColumnValueExtractorTest {
             Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
             assertSize(1, columnValues);
-            assertEquals(entity.getInt(), columnValues.get("int")
-                                                      .getValue());
+            assertEquals(entity.getIntValue(), columnValues.get("intValue")
+                                                           .getValue());
         }
     }
 
@@ -136,7 +136,7 @@ class ColumnValueExtractorTest {
         }
 
         @Column
-        public int getInt() {
+        public int getIntValue() {
             return 42;
         }
     }
