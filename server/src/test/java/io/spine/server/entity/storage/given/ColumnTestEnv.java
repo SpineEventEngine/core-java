@@ -21,13 +21,16 @@
 package io.spine.server.entity.storage.given;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.StringValue;
 import io.spine.core.Version;
+import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.Enumerated;
+import io.spine.validate.StringValueVBuilder;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
@@ -58,11 +61,12 @@ public class ColumnTestEnv {
     }
 
     @SuppressWarnings("unused") // Reflective access
-    public static class TestEntity extends AbstractVersionableEntity<String, Any> {
+    public static class TestEntity
+            extends AbstractVersionableEntity<Long, StringValue> {
 
         private int mutableState = 0;
 
-        public TestEntity(String id) {
+        public TestEntity(Long id) {
             super(id);
         }
 
@@ -120,6 +124,13 @@ public class ColumnTestEnv {
         @Column
         public static String getStatic() {
             return "";
+        }
+    }
+
+    public static class TestAggregate extends Aggregate<Long, StringValue, StringValueVBuilder> {
+
+        protected TestAggregate(Long id) {
+            super(id);
         }
     }
 

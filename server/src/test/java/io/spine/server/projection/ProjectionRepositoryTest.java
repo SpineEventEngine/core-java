@@ -175,6 +175,13 @@ class ProjectionRepositoryTest
         TestProjection.clearMessageDeliveryHistory();
     }
 
+    @Override
+    protected TestProjection entity(ProjectId id1) {
+        return Given.projectionOfClass(repository.getEntityClass())
+                    .withId(id1)
+                    .build();
+    }
+
     /**
      * Closes the BoundedContest and shuts down the gRPC service.
      *

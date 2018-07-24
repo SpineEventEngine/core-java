@@ -34,7 +34,6 @@ import io.spine.client.EntityIdFilter;
 import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.storage.RecordStorage;
 import io.spine.testing.Tests;
-import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.testing.server.tenant.TenantAwareTest;
 import org.junit.jupiter.api.AfterEach;
@@ -77,8 +76,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
         "DuplicateStringLiteralInspection" /* Common test display names. */,
         "unused" /* JUnit nested classes considered unused in abstract class. */})
 public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEntity<I, S>,
-        I,
-        S extends Message>
+                                                I,
+                                                S extends Message>
         extends TenantAwareTest {
 
     @SuppressWarnings("ProtectedField") // we use the reference in the derived test cases.
@@ -207,13 +206,8 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         void entitiesByQuery() {
             I id1 = createId(271);
             I id2 = createId(314);
-            Class<E> entityClass = repository.getEntityClass();
-            E entity1 = Given.entityOfClass(entityClass)
-                             .withId(id1)
-                             .build();
-            E entity2 = Given.entityOfClass(entityClass)
-                             .withId(id2)
-                             .build();
+            E entity1 = entity(id1);
+            E entity2 = entity(id2);
             repository.store(entity1);
             repository.store(entity2);
 
@@ -300,6 +294,8 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             assertSize(0, found);
         }
     }
+
+    protected abstract E entity(I id1);
 
     @Test
     @DisplayName("create entity on `loadOrCreate` if not found")

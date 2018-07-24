@@ -21,8 +21,8 @@
 package io.spine.server.model;
 
 import io.spine.server.entity.TestEntity;
+import io.spine.server.entity.TestEntity.TestEntityBuilder;
 import io.spine.server.model.given.DefaultStateRegistryTestEnv.TimerSnapshot;
-import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -93,8 +93,8 @@ class DefaultStateRegistryTest {
         Collection<Callable<Object>> tasks = newArrayListWithExpectedSize(numberOfEntities);
         for (int i = 0; i < numberOfEntities; i++) {
             tasks.add(callable(() -> {
-                TestEntity testEntity = Given.entityOfClass(TestEntity.class)
-                                             .build();
+                TestEntity testEntity = new TestEntityBuilder().setResultClass(TestEntity.class)
+                                                               .build();
                 testEntity.getDefaultState();
             }));
         }

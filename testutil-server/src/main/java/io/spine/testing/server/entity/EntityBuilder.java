@@ -46,7 +46,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @author Alexander Yevsyukov
  */
 @VisibleForTesting
-public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S extends Message>
+public abstract class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S extends Message>
         extends ReflectiveBuilder<E> {
 
     /**
@@ -135,9 +135,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
         return result;
     }
 
-    protected void setState(E result, S state, Version version) {
-        result.updateState(state, version);
-    }
+    protected abstract void setState(E result, S state, Version version);
 
     /**
      * Returns ID if it was previously set or default value if it was not.

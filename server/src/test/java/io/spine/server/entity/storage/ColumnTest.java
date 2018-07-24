@@ -21,7 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.testing.EqualsTester;
-import com.google.protobuf.Any;
+import com.google.protobuf.StringValue;
 import io.spine.core.Version;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityWithLifecycle;
@@ -31,6 +31,7 @@ import io.spine.server.entity.storage.given.ColumnTestEnv.BrokenTestEntity;
 import io.spine.server.entity.storage.given.ColumnTestEnv.EntityRedefiningColumnAnnotation;
 import io.spine.server.entity.storage.given.ColumnTestEnv.EntityWithCustomColumnNameForStoring;
 import io.spine.server.entity.storage.given.ColumnTestEnv.EntityWithDefaultColumnNameForStoring;
+import io.spine.server.entity.storage.given.ColumnTestEnv.TestAggregate;
 import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
 import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.DisplayName;
@@ -100,13 +101,12 @@ class ColumnTest {
     @Test
     @DisplayName("invoke getter")
     void invokeGetter() {
-        String entityId = "entity-id";
         int version = 2;
         EntityColumn column = forMethod("getVersion", VersionableEntity.class);
-        TestEntity entity = Given.entityOfClass(TestEntity.class)
-                                 .withId(entityId)
-                                 .withVersion(version)
-                                 .build();
+        TestAggregate entity = Given.aggregateOfClass(TestAggregate.class)
+                                    .withId(1L)
+                                    .withVersion(version)
+                                    .build();
         Version actualVersion = (Version) column.getFor(entity);
         assertEquals(version, actualVersion.getNumber());
     }
@@ -127,7 +127,7 @@ class ColumnTest {
     @DisplayName("memoize value at point in time")
     void memoizeValue() {
         EntityColumn mutableColumn = forMethod("getMutableState", TestEntity.class);
-        TestEntity entity = new TestEntity("");
+        TestEntity entity = new TestEntity(1L);
         int initialState = 1;
         int changedState = 42;
         entity.setMutableState(initialState);
@@ -212,14 +212,15 @@ class ColumnTest {
     void checkNonNullable() {
         EntityColumn column = forMethod("getNotNull", TestEntity.class);
 
-        assertThrows(NullPointerException.class, () -> column.getFor(new TestEntity("")));
+        assertThrows(NullPointerException.class,
+                     () -> column.getFor(new TestEntity(1L)));
     }
 
     @Test
     @DisplayName("allow null values if getter is nullable")
     void allowNullForNullable() {
         EntityColumn column = forMethod("getNull", TestEntity.class);
-        Object value = column.getFor(new TestEntity(""));
+        Object value = column.getFor(new TestEntity(1L));
         assertNull(value);
     }
 
@@ -238,7 +239,8 @@ class ColumnTest {
         @DisplayName("which is null")
         void whichIsNull() {
             EntityColumn nullableColumn = forMethod("getNull", TestEntity.class);
-            MemoizedValue memoizedNull = nullableColumn.memoizeFor(new TestEntity(""));
+            MemoizedValue memoizedNull =
+                    nullableColumn.memoizeFor(new TestEntity(1L));
             assertTrue(memoizedNull.isNull());
             assertNull(memoizedNull.getValue());
         }
@@ -247,7 +249,8 @@ class ColumnTest {
         @DisplayName("referencing column itself")
         void referencingColumn() {
             EntityColumn column = forMethod("getMutableState", TestEntity.class);
-            Entity<String, Any> entity = new TestEntity("");
+            Entity<Long, StringValue> entity =
+                    new TestEntity(1L);
             MemoizedValue memoizedValue = column.memoizeFor(entity);
             assertSame(column, memoizedValue.getSourceColumn());
         }
@@ -256,7 +259,7 @@ class ColumnTest {
         @DisplayName("of ordinal enum type")
         void ofOrdinalEnumType() {
             EntityColumn column = forMethod("getEnumOrdinal", TestEntity.class);
-            TestEntity entity = new TestEntity("");
+            TestEntity entity = new TestEntity(1L);
             MemoizedValue actualValue = column.memoizeFor(entity);
             int expectedValue = entity.getEnumOrdinal()
                                       .ordinal();
@@ -267,7 +270,7 @@ class ColumnTest {
         @DisplayName("of string enum type")
         void ofStringEnumType() {
             EntityColumn column = forMethod("getEnumString", TestEntity.class);
-            TestEntity entity = new TestEntity("");
+            TestEntity entity = new TestEntity(1L);
             MemoizedValue actualValue = column.memoizeFor(entity);
             String expectedValue = entity.getEnumOrdinal()
                                          .name();

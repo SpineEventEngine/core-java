@@ -165,6 +165,13 @@ class ProcessManagerRepositoryTest
         super.tearDown();
     }
 
+    @Override
+    protected TestProcessManager entity(ProjectId id1) {
+        return Given.processManagerOfClass(repository.getEntityClass())
+                    .withId(id1)
+                    .build();
+    }
+
     private ProcessManagerRepository<ProjectId, TestProcessManager, Project> repository() {
         return (ProcessManagerRepository<ProjectId, TestProcessManager, Project>) repository;
     }

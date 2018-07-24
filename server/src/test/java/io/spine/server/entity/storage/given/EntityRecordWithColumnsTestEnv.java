@@ -21,9 +21,11 @@
 package io.spine.server.entity.storage.given;
 
 import com.google.protobuf.Any;
+import io.spine.core.Version;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.test.entity.Project;
+import io.spine.testing.server.entity.EntityBuilder;
 
 /**
  * @author Dmytro Dashenkov
@@ -45,6 +47,14 @@ public class EntityRecordWithColumnsTestEnv {
     public static class EntityWithoutColumns extends AbstractEntity<String, Any> {
         public EntityWithoutColumns(String id) {
             super(id);
+        }
+    }
+
+    public static class TestEntityBuilder extends EntityBuilder<TestEntity, String, Project> {
+
+        @Override
+        protected void setState(TestEntity result, Project state, Version version) {
+            // NoOp.
         }
     }
 }
