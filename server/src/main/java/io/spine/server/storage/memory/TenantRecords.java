@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -34,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.filterValues;
@@ -85,7 +85,8 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
 
     Map<I, EntityRecord> readAllRecords() {
         Map<I, EntityRecordWithColumns> filtered = filtered();
-        Map<I, EntityRecord> records = transformValues(filtered, EntityRecordUnpacker.INSTANCE);
+        Map<I, EntityRecord> records =
+                transformValues(filtered, EntityRecordUnpacker.INSTANCE::apply);
         ImmutableMap<I, EntityRecord> result = ImmutableMap.copyOf(records);
         return result;
     }
@@ -93,9 +94,10 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
     Map<I, EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
         Map<I, EntityRecordWithColumns> filtered =
                 filterValues(records, new EntityQueryMatcher<>(query));
-        Map<I, EntityRecord> records = transformValues(filtered, EntityRecordUnpacker.INSTANCE);
+        Map<I, EntityRecord> records =
+                transformValues(filtered, EntityRecordUnpacker.INSTANCE::apply);
         Function<EntityRecord, EntityRecord> fieldMaskApplier = new FieldMaskApplier(fieldMask);
-        Map<I, EntityRecord> maskedRecords = transformValues(records, fieldMaskApplier);
+        Map<I, EntityRecord> maskedRecords = transformValues(records, fieldMaskApplier::apply);
         ImmutableMap<I, EntityRecord> result = ImmutableMap.copyOf(maskedRecords);
         return result;
     }
@@ -148,9 +150,10 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
             Message stateAsMessage = unpack(recordState);
             Message processedState = applyMask(fieldMask, stateAsMessage, type);
             Any packedState = pack(processedState);
-            EntityRecord resultingRecord = EntityRecord.newBuilder()
-                                                       .setState(packedState)
-                                                       .build();
+            EntityRecord resultingRecord = EntityRecord
+                    .newBuilder()
+                    .setState(packedState)
+                    .build();
             result.put(id, resultingRecord);
         }
 
@@ -185,9 +188,10 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
             TypeUrl typeUrl = TypeUrl.ofEnclosed(packedState);
             Message maskedState = applyMask(fieldMask, state, typeUrl);
             Any repackedState = pack(maskedState);
-            EntityRecord result = EntityRecord.newBuilder(input)
-                                              .setState(repackedState)
-                                              .build();
+            EntityRecord result = EntityRecord
+                    .newBuilder(input)
+                    .setState(repackedState)
+                    .build();
             return result;
         }
     }
