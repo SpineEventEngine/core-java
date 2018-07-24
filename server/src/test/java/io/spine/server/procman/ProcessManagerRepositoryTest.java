@@ -166,9 +166,9 @@ class ProcessManagerRepositoryTest
     }
 
     @Override
-    protected TestProcessManager entity(ProjectId id1) {
+    protected TestProcessManager entity(ProjectId id) {
         return Given.processManagerOfClass(repository.getEntityClass())
-                    .withId(id1)
+                    .withId(id)
                     .build();
     }
 

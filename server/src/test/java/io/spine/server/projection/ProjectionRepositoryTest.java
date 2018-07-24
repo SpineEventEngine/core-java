@@ -176,9 +176,9 @@ class ProjectionRepositoryTest
     }
 
     @Override
-    protected TestProjection entity(ProjectId id1) {
+    protected TestProjection entity(ProjectId id) {
         return Given.projectionOfClass(repository.getEntityClass())
-                    .withId(id1)
+                    .withId(id)
                     .build();
     }
 
