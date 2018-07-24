@@ -304,7 +304,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
 
         TransactionalEntity<ProjectId, ?, ?> activeEntity = newEntity(activeId);
         TransactionalEntity<ProjectId, ?, ?> archivedEntity = newEntity(archivedId);
-        archive(activeEntity);
+        archive(archivedEntity);
 
         TransactionalEntity<ProjectId, ?, ?> deletedEntity = newEntity(deletedId);
         delete(deletedEntity);
