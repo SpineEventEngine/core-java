@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.base.ThrowableMessage;
 import io.spine.server.model.given.MethodExceptionCheckerTestEnv.StubMethodContainer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -57,15 +58,11 @@ class MethodExceptionCheckerTest {
     class PassCheck {
 
         @Test
-        @DisplayName("no checked exceptions are thrown by method")
+        @DisplayName("no exceptions are thrown by method")
         void forNoCheckedThrown() {
             Method methodNoExceptions = getMethod("methodNoExceptions");
             MethodExceptionChecker noExceptionsChecker = forMethod(methodNoExceptions);
-            noExceptionsChecker.checkThrowsNoCheckedExceptions();
-
-            Method methodRuntimeExceptions = getMethod("methodRuntimeException");
-            MethodExceptionChecker runtimeExceptionsChecker = forMethod(methodRuntimeExceptions);
-            runtimeExceptionsChecker.checkThrowsNoCheckedExceptions();
+            noExceptionsChecker.checkDeclaresNoExceptionsThrown();
         }
 
         @Test
@@ -81,7 +78,7 @@ class MethodExceptionCheckerTest {
         void forAllowedDescendantsThrown() {
             Method methodDescendantException = getMethod("methodDescendantException");
             MethodExceptionChecker checker = forMethod(methodDescendantException);
-            checker.checkThrowsNoExceptionsBut(RuntimeException.class);
+            checker.checkThrowsNoExceptionsBut(ThrowableMessage.class);
         }
     }
 
@@ -94,7 +91,15 @@ class MethodExceptionCheckerTest {
         void forCheckedThrown() {
             Method methodCheckedException = getMethod("methodCheckedException");
             MethodExceptionChecker checker = forMethod(methodCheckedException);
-            assertThrows(IllegalStateException.class, checker::checkThrowsNoCheckedExceptions);
+            assertThrows(IllegalStateException.class, checker::checkDeclaresNoExceptionsThrown);
+        }
+
+        @Test
+        @DisplayName("runtime exceptions are thrown by method")
+        void forRuntimeThrown() {
+            Method methodRuntimeException = getMethod("methodRuntimeException");
+            MethodExceptionChecker checker = forMethod(methodRuntimeException);
+            assertThrows(IllegalStateException.class, checker::checkDeclaresNoExceptionsThrown);
         }
 
         @Test

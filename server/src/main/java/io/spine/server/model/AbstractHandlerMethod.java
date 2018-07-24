@@ -318,7 +318,7 @@ public abstract class AbstractHandlerMethod<M extends MessageClass, C extends Me
          */
         protected void checkThrownExceptions(Method method) {
             MethodExceptionChecker checker = forMethod(method);
-            checker.checkThrowsNoCheckedExceptions();
+            checker.checkDeclaresNoExceptionsThrown();
         }
     }
 }
