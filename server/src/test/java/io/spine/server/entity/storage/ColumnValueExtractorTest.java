@@ -71,9 +71,8 @@ class ColumnValueExtractorTest {
             Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
             assertSize(3, columnValues);
-            assertEquals(entity.getSomeMessage(),
-                         columnValues.get("someMessage")
-                                     .getValue());
+            assertEquals(entity.getSomeMessage(), columnValues.get("someMessage")
+                                                              .getValue());
         }
 
         @SuppressWarnings("unchecked") // Okay for test.
@@ -84,9 +83,8 @@ class ColumnValueExtractorTest {
             Map<String, EntityColumn.MemoizedValue> columnValues = extractColumnValues(entity);
 
             assertSize(1, columnValues);
-            assertEquals(entity.getInt(),
-                         columnValues.get("int")
-                                     .getValue());
+            assertEquals(entity.getInt(), columnValues.get("int")
+                                                      .getValue());
         }
     }
 
