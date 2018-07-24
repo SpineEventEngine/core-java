@@ -40,6 +40,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
+import static io.spine.validate.Validate.isDefault;
 
 /**
  * Utility class for working with {@link Event} objects.
@@ -192,6 +193,20 @@ public final class Events {
         checkNotNull(id);
         checkNotEmptyOrBlank(id.getValue(), "event ID");
         return id;
+    }
+
+    /**
+     * Checks whether or not the given event is a rejection event.
+     *
+     * @param event the event to check
+     * @return {@code true} if the given event is a rejection, {@code false} otherwise
+     */
+    public static boolean isRejection(Event event) {
+        checkNotNull(event);
+        EventContext context = event.getContext();
+        boolean result = context.hasRejection()
+                      || !isDefault(context.getRejection());
+        return result;
     }
 
     /**

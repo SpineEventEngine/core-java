@@ -59,6 +59,7 @@ import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -82,6 +83,8 @@ public class EventsTest {
     private static final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(EventsTest.class);
 
+    private EventFactory eventFactory;
+
     private Event event;
     private EventContext context;
 
@@ -95,8 +98,8 @@ public class EventsTest {
         TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(getClass());
         CommandEnvelope cmd = requestFactory.generateEnvelope();
         StringValue producerId = toMessage(getClass().getSimpleName());
-        EventFactory eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
-        event = eventFactory.createEvent(Time.getCurrentTime(), Tests.nullRef());
+        eventFactory = EventFactory.on(cmd, Identifier.pack(producerId));
+        event = eventFactory.createEvent(Time.getCurrentTime(), null);
         context = event.getContext();
     }
 
@@ -387,6 +390,24 @@ public class EventsTest {
     @DisplayName("throw NullPointerException when getting tenant ID of null event")
     void notAcceptNullEvent() {
         assertThrows(NullPointerException.class, () -> Events.getTenantId(Tests.nullRef()));
+    }
+
+    @Test
+    @DisplayName("tell if an Event is a rejection event")
+    void tellWhenRejection() {
+        RejectionEventContext rejectionContext = RejectionEventContext
+                .newBuilder()
+                .setStacktrace("at package.name.Class.method(Class.java:42)")
+                .build();
+        Event event =
+                eventFactory.createRejectionEvent(Time.getCurrentTime(), null, rejectionContext);
+        assertTrue(Events.isRejection(event));
+    }
+
+    @Test
+    @DisplayName("tell if an Event is NOT a rejection event")
+    void tellWhenNotRejection() {
+        assertFalse(Events.isRejection(event));
     }
 
     private EventContext.Builder contextWithoutOrigin() {
