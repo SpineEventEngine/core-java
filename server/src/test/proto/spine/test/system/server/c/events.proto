@@ -39,6 +39,16 @@ message PersonCreated {
     spine.people.PersonName name = 2;
 }
 
+message PersonCreationStarted {
+
+    PersonId id = 1;
+}
+
+message PersonCreationCompleted {
+
+    PersonId id = 1;
+}
+
 message PersonNameCreated {
 
     PersonId id = 1;

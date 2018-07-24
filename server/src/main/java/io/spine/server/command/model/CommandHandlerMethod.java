@@ -34,6 +34,8 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static com.google.common.base.Preconditions.checkState;
+
 /**
  * The wrapper for a command handler method.
  *
@@ -62,14 +64,13 @@ public final class CommandHandlerMethod extends CommandAcceptingMethod {
      * {@inheritDoc}
      *
      * @return the list of event messages
+     * @throws IllegalStateException if the invoked method does not produce any events
      */
     @Override
     public List<? extends Message> invoke(Object target, Message message, CommandContext context) {
         Object handlingResult = super.invoke(target, message, context);
         List<? extends Message> events = toList(handlingResult);
-        //TODO:2018-07-22:alexander.yevsyukov: Have the below check once ProcessManagers stop violating the contract of `@Assign`.
-        // see: https://github.com/SpineEventEngine/core-java/issues/773
-        // checkState(!events.isEmpty(), "Command handling method did not produce events");
+        checkState(!events.isEmpty(), "Command handling method did not produce events");
         return events;
     }
 
