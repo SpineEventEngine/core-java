@@ -42,6 +42,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.util.Collections.emptyList;
 
 public class CommandHandlerMethodTestEnv {
 
@@ -171,6 +172,20 @@ public class CommandHandlerMethodTestEnv {
         @Apply
         void event(RefProjectCreated evt) {
             // Do nothing.
+        }
+    }
+
+    public static class HandlerReturnsEmptyList extends TestCommandHandler {
+        @Assign
+        List<Message> handleTest(RefCreateProject cmd) {
+            return emptyList();
+        }
+    }
+
+    public static class HandlerReturnsEmpty extends TestCommandHandler {
+        @Assign
+        Empty handleTest(RefCreateProject cmd) {
+            return Empty.getDefaultInstance();
         }
     }
 
