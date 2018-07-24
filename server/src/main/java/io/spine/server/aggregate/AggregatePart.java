@@ -130,10 +130,5 @@ public abstract class AggregatePart<I,
         public int getIndex() {
             return this.index;
         }
-
-        @Override
-        public Class<?> getArgumentIn(Class<? extends AggregatePart> cls) {
-            return Default.getArgument(this, cls);
-        }
     }
 }

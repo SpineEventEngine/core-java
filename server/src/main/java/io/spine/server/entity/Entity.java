@@ -72,11 +72,6 @@ public interface Entity<I, S extends Message> {
         }
 
         @Override
-        public Class<?> getArgumentIn(Class<? extends Entity> entityClass) {
-            return Default.getArgument(this, entityClass);
-        }
-
-        @Override
         public int getIndex() {
             return index;
         }
