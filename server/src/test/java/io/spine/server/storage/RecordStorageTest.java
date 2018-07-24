@@ -199,7 +199,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         storage.write(idWrong1, recordWrong1);
         storage.write(idWrong2, recordWrong2);
 
-        Iterator<EntityRecord> readRecords = storage.readAll(query, FieldMask.getDefaultInstance());
+        Iterator<EntityRecord> readRecords = storage.readAll(query);
         assertSingleRecord(fineRecord, readRecords);
     }
 
@@ -261,8 +261,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         EntityQuery<ProjectId> query = from(filters, storage);
 
         // Perform the query
-        Iterator<EntityRecord> readRecords =
-                storage.readAll(query, FieldMask.getDefaultInstance());
+        Iterator<EntityRecord> readRecords = storage.readAll(query);
         // Check results
         assertSingleRecord(fineRecord, readRecords);
     }
@@ -291,7 +290,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .addFilter(all(eq(archived.toString(), true)))
                 .build();
         EntityQuery<ProjectId> query = from(filters, storage);
-        Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
+        Iterator<EntityRecord> read = storage.readAll(query);
         assertSingleRecord(archivedRecord, read);
     }
 
@@ -327,7 +326,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .setIdFilter(idFilter)
                 .build();
         EntityQuery<ProjectId> query = from(filters, storage).withLifecycleFlags(storage);
-        Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
+        Iterator<EntityRecord> read = storage.readAll(query);
         assertSingleRecord(stayingRecord, read);
     }
 
@@ -416,7 +415,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .build();
         RecordStorage<ProjectId> storage = getStorage();
         EntityQuery<ProjectId> query = from(filters, storage).withLifecycleFlags(storage);
-        Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
+        Iterator<EntityRecord> read = storage.readAll(query);
         List<EntityRecord> readRecords = newArrayList(read);
         assertEquals(1, readRecords.size());
         EntityRecord readRecord = readRecords.get(0);
@@ -479,7 +478,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         storage.write(idMatching, recordRight);
         storage.write(idWrong, recordWrong);
 
-        Iterator<EntityRecord> readRecords = storage.readAll(query, FieldMask.getDefaultInstance());
+        Iterator<EntityRecord> readRecords = storage.readAll(query);
         assertSingleRecord(fineRecord, readRecords);
     }
 

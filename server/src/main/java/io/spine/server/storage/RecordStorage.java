@@ -288,6 +288,21 @@ public abstract class RecordStorage<I>
     }
 
     /**
+     * Reads all the records matching the given {@link EntityQuery} and applies the given
+     * {@link FieldMask} to the resulting record states.
+     *
+     * <p>By default, if the query does not specify the {@linkplain LifecycleFlags}, but the entity
+     * supports them, all the resulting records are active. Otherwise the records obey
+     * the constraints provided by the query.
+     *
+     * @param  query     the query to execute
+     * @return the matching records mapped upon their IDs
+     */
+    public Iterator<EntityRecord> readAll(EntityQuery<I> query) {
+        return readAll(query, FieldMask.getDefaultInstance());
+    }
+
+    /**
      * Returns a {@code Collection} of {@linkplain Column columns} of the {@link Entity} managed
      * by this storage.
      *
