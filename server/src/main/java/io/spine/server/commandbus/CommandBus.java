@@ -123,10 +123,7 @@ public class CommandBus extends Bus<Command,
         this.systemGateway = builder.systemGateway;
         this.tenantIndex = builder.tenantIndex;
         this.deadCommandHandler = new DeadCommandHandler();
-        this.errorHandler = CommandErrorHandler.newBuilder()
-                                               .setRejectionBus(rejectionBus)
-                                               .setSystemGateway(systemGateway)
-                                               .build();
+        this.errorHandler = CommandErrorHandler.with(systemGateway);
     }
 
     /**

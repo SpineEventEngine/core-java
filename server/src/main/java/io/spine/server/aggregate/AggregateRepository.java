@@ -49,7 +49,6 @@ import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.model.Model;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
-import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
@@ -185,12 +184,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         registerExtMessageDispatcher(boundedContext, extEventDispatcher, extEventClasses);
         registerExtMessageDispatcher(boundedContext, extRejectionDispatcher, extRejectionClasses);
 
-        RejectionBus rejectionBus = boundedContext.getRejectionBus();
         SystemGateway systemGateway = boundedContext.getSystemGateway();
-        this.commandErrorHandler = CommandErrorHandler.newBuilder()
-                                                      .setRejectionBus(rejectionBus)
-                                                      .setSystemGateway(systemGateway)
-                                                      .build();
+        this.commandErrorHandler = CommandErrorHandler.with(systemGateway);
         ServerEnvironment.getInstance()
                          .getSharding()
                          .register(this);
@@ -334,7 +329,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
         commandErrorHandler.handleError(envelope, exception)
-                           .rethrowIfRuntime();
+                           .rethrow();
     }
 
     @Override

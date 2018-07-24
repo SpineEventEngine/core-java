@@ -27,11 +27,8 @@ import io.spine.base.Error;
 import io.spine.base.Errors;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
-import io.spine.core.Rejection;
-import io.spine.server.rejection.RejectionBus;
 import io.spine.string.Stringifiers;
 import io.spine.system.server.MarkCommandAsErrored;
-import io.spine.system.server.MarkCommandAsRejected;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,8 +36,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Commands.rejectWithCause;
-import static io.spine.core.Rejections.causedByRejection;
 import static java.lang.String.format;
 
 /**
@@ -56,21 +51,25 @@ import static java.lang.String.format;
 @Internal
 public final class CommandErrorHandler {
 
-    private final RejectionBus rejectionBus;
     private final SystemGateway systemGateway;
 
-    private CommandErrorHandler(Builder builder) {
-        this.rejectionBus = builder.rejectionBus;
-        this.systemGateway = builder.systemGateway;
+    private CommandErrorHandler(SystemGateway systemGateway) {
+        this.systemGateway = systemGateway;
+    }
+
+    /**
+     * Creates a new {@code CommandErrorHandler} with the given {@link SystemGateway}.
+     *
+     * @param systemGateway {@link SystemGateway} to post system commands into
+     * @return new instance of {@code CommandErrorHandler}
+     */
+    public static CommandErrorHandler with(SystemGateway systemGateway) {
+        checkNotNull(systemGateway);
+        return new CommandErrorHandler(systemGateway);
     }
 
     /**
      * Handles an error occurred during dispatching of a command.
-     *
-     * <p>If the given {@code exception} has been caused by
-     * a {@linkplain io.spine.base.ThrowableMessage command rejection}, the {@link Rejection} is
-     * {@linkplain RejectionBus#post(Rejection) posted} to the {@code RejectionBus}. Otherwise,
-     * the given {@code exception} is thrown.
      *
      * @return the result of the error handing
      */
@@ -78,31 +77,6 @@ public final class CommandErrorHandler {
     public HandledError handleError(CommandEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
-        if (causedByRejection(exception)) {
-            return handleRejection(envelope, exception);
-        } else {
-            return handleRuntime(envelope, exception);
-        }
-    }
-
-    private HandledError handleRejection(CommandEnvelope envelope, RuntimeException exception) {
-        Rejection rejection = rejectWithCause(envelope.getCommand(), exception);
-        rejectionBus.post(rejection);
-        markRejected(envelope, rejection);
-        return HandledError.forRejection();
-    }
-
-    private void markRejected(CommandEnvelope command, Rejection rejection) {
-        CommandId commandId = command.getId();
-        MarkCommandAsRejected systemCommand = MarkCommandAsRejected
-                .newBuilder()
-                .setId(commandId)
-                .setRejection(rejection)
-                .build();
-        postSystem(systemCommand);
-    }
-
-    private HandledError handleRuntime(CommandEnvelope envelope, RuntimeException exception) {
         if (isPreProcessed(exception)) {
             return HandledError.forPreProcessed();
         } else {
@@ -143,18 +117,11 @@ public final class CommandErrorHandler {
 
         /**
          * The handled {@link RuntimeException}.
-         *
-         * <p>If the handled error was caused by a {@link Rejection}, this field is equal
-         * to {@code null}. Otherwise the field is non-null.
          */
         private final @MonotonicNonNull RuntimeException exception;
 
         private HandledError(@Nullable RuntimeException exception) {
             this.exception = exception;
-        }
-
-        private static HandledError forRejection() {
-            return EMPTY;
         }
 
         private static HandledError forPreProcessed() {
@@ -166,60 +133,17 @@ public final class CommandErrorHandler {
         }
 
         /**
-         * Rethrows the handled exception if it was <b>not</b> caused by a {@link Rejection}.
+         * Rethrows the handled exception.
          *
-         * <p>If the exception was caused by a {@link Rejection}, preforms no action.
+         * <p>Performs no action if this {@code Exception} has already been rethrown by
+         * a {@code CommandErrorHandler}.
          */
-        public void rethrowIfRuntime() {
+        public void rethrow() {
             if (exception != null) {
                 throw new CommandDispatchingException(exception);
             }
         }
     }
-
-    /**
-     * Creates a new instance of {@code Builder} for {@code CommandErrorHandler} instances.
-     *
-     * @return new instance of {@code Builder}
-     */
-    public static Builder newBuilder() {
-        return new Builder();
-    }
-
-    /**
-     * A builder for the {@code CommandErrorHandler} instances.
-     */
-    public static final class Builder {
-
-        private RejectionBus rejectionBus;
-        private SystemGateway systemGateway;
-
-        /**
-         * Prevents direct instantiation.
-         */
-        private Builder() {
-        }
-
-        public Builder setRejectionBus(RejectionBus rejectionBus) {
-            this.rejectionBus = checkNotNull(rejectionBus);
-            return this;
-        }
-
-        public Builder setSystemGateway(SystemGateway systemGateway) {
-            this.systemGateway = checkNotNull(systemGateway);
-            return this;
-        }
-
-        /**
-         * Creates a new instance of {@code CommandErrorHandler}.
-         *
-         * @return new instance of {@code CommandErrorHandler}
-         */
-        public CommandErrorHandler build() {
-            return new CommandErrorHandler(this);
-        }
-    }
-
 
     private static Logger log() {
         return LogSingleton.INSTANCE.value;

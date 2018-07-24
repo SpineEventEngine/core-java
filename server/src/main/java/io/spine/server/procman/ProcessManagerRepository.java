@@ -195,11 +195,7 @@ public abstract class ProcessManagerRepository<I,
                             "and do not react upon any rejections or events.", this);
         }
         SystemGateway systemGateway = boundedContext.getSystemGateway();
-        this.commandErrorHandler = CommandErrorHandler
-                .newBuilder()
-                .setRejectionBus(rejectionBus)
-                .setSystemGateway(systemGateway)
-                .build();
+        this.commandErrorHandler = CommandErrorHandler.with(systemGateway);
         ServerEnvironment.getInstance()
                          .getSharding()
                          .register(this);
@@ -343,7 +339,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
         commandErrorHandler.handleError(envelope, exception)
-                           .rethrowIfRuntime();
+                           .rethrow();
     }
 
     @Override
