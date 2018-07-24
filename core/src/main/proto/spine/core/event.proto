@@ -70,10 +70,9 @@ message EventId {
 // The event context contains attributes common for all events.
 // It can also contain additional attributes added by the code handling the event.
 //
-// There are two kinds of events:
-//
-// - genuine events - represent a normal reaction of an entity to a command or another event;
-// - rejection events - represent conditions in business, which do not allow to execute a command.
+// There is a special case of an event - a rejection event.
+// A rejection event represents erroneous conditions in business, which do not allow to execute
+// a command. The event is a rejection event iff the `EventContext.rejection` field is present.
 //
 // See `EventContext.kind` to detemine the event kind.
 //
@@ -130,17 +129,11 @@ message EventContext {
     // in which the event is being processed.
     bool external = 8 [(internal) = true];
 
-    oneof kind {
-
-        // A context of the associated rejection event.
-        //
-        // Iff the accociated event is not a rejection event, this field is empty.
-        //
-        RejectionEventContext rejection = 10;
-
-        // Signuifies that the associated event is a genuine event, not a rejection event.
-        google.protobuf.Empty genuine_event = 11;
-    }
+    // The context of the associated rejection event.
+    //
+    // Iff the accociated event is a rejection event, this field is present.
+    //
+    RejectionEventContext rejection = 10;
 }
 
 // Meta-information about a rejection event.

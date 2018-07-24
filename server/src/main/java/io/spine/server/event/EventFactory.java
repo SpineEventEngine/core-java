@@ -21,7 +21,6 @@
 package io.spine.server.event;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
@@ -156,7 +155,6 @@ public class EventFactory {
 
     private EventContext createContext(@Nullable Version version) {
         EventContext result = buildContext(version)
-                .setGenuineEvent(Empty.getDefaultInstance())
                 .build();
         return result;
     }

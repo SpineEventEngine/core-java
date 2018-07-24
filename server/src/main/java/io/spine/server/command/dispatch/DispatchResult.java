@@ -161,7 +161,7 @@ public final class DispatchResult {
     }
 
     /**
-     * Converts an event message into an genuine {@link Event}.
+     * Converts an event message into an {@link Event}.
      */
     private final class EventToEvent extends ToEvent {
 
