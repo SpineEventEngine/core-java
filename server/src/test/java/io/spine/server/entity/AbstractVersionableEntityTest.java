@@ -41,7 +41,7 @@ class AbstractVersionableEntityTest {
     @SuppressWarnings("MagicNumber")
     @Test
     @DisplayName("support equality")
-    void supportEquality() throws Exception {
+    void supportEquality() {
         AvEntity entity = new AvEntity(88L);
         AvEntity another = new AvEntity(88L);
         another.updateState(entity.getState(), entity.getVersion());

@@ -304,7 +304,7 @@ public abstract class RecordStorage<I>
      */
     @Internal
     public Map<String, EntityColumn> entityLifecycleColumns() {
-        HashMap<String, EntityColumn> lifecycleColumns = new HashMap<>();
+        Map<String, EntityColumn> lifecycleColumns = new HashMap<>();
         for (LifecycleFlagField field : LifecycleFlagField.values()) {
             String name = field.name();
             EntityColumn column = entityColumnCache().findColumn(name);

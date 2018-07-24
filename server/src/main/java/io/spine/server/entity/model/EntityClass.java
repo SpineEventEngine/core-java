@@ -42,6 +42,7 @@ import static java.lang.String.format;
  * @param <E> the type of entities
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("SynchronizeOnThis") // Double-check idiom for lazy init.
 public class EntityClass<E extends Entity> extends ModelClass<E> {
 
     private static final long serialVersionUID = 0L;
@@ -53,21 +54,19 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     private final Class<? extends Message> stateClass;
 
     /** The default state of entities of this class. */
-    private transient @MonotonicNonNull Message defaultState;
+    private transient volatile @MonotonicNonNull Message defaultState;
 
     /** Type of the entity state. */
     private final TypeUrl entityStateType;
 
     /** The constructor for entities of this class. */
-    private transient @MonotonicNonNull Constructor<E> entityConstructor;
+    private transient volatile @MonotonicNonNull Constructor<E> entityConstructor;
 
     /** Creates new instance of the model class for the passed class of entities. */
     public EntityClass(Class<E> cls) {
         super(cls);
         checkNotNull((Class<? extends Entity>) cls);
-        Class<?> idClass = Entity.GenericParameter.ID.getArgumentIn(cls);
-        checkIdClass(idClass);
-        this.idClass = idClass;
+        this.idClass = getIdClass(cls);
         this.stateClass = getStateClass(cls);
         this.entityStateType = TypeUrl.of(stateClass);
     }
@@ -96,6 +95,33 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     }
 
     /**
+     * Obtains the class of identifiers from the passed entity class.
+     *
+     * <p>Checks that this class of identifiers obtained from the passed entity class
+     * is supported by the framework.
+     *
+     * <p>The type of entity identifiers ({@code <I>}) cannot be bound because
+     * it can be {@code Long}, {@code String}, {@code Integer}, and class implementing
+     * {@code Message}.
+     *
+     * <p>We perform the check to to detect possible programming error
+     * in declarations of entity and repository classes <em>until</em> we have
+     * compile-time model check.
+     *
+     * @throws ModelError if unsupported ID class passed
+     */
+    private static <I> Class<I> getIdClass(Class<? extends Entity> cls) {
+        @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
+        Class<I> idClass = (Class<I>) Entity.GenericParameter.ID.getArgumentIn(cls);
+        try {
+            Identifier.checkSupported(idClass);
+        } catch (IllegalArgumentException e) {
+            throw new ModelError(e);
+        }
+        return idClass;
+    }
+
+    /**
      * Retrieves the state class of the passed entity class.
      *
      * <p>Though this method is {@code public}, it is <em>not</em> considered a part of the
@@ -111,22 +137,36 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     /**
      * Obtains the default state for this class of entities.
      */
-    public synchronized Message getDefaultState() {
-        if (defaultState == null) {
-            Class<? extends Message> stateClass = getStateClass();
-            defaultState = Messages.newInstance(stateClass);
+    public Message getDefaultState() {
+        Message result = defaultState;
+        if (result == null) {
+            synchronized (this) {
+                result = defaultState;
+                if (result == null) {
+                    Class<? extends Message> stateClass = getStateClass();
+                    defaultState = Messages.newInstance(stateClass);
+                    result = defaultState;
+                }
+            }
         }
-        return defaultState;
+        return result;
     }
 
     /**
      * Obtains constructor for the entities of this class.
      */
-    public synchronized Constructor<E> getConstructor() {
-        if (entityConstructor == null) {
-            entityConstructor = findConstructor();
+    public Constructor<E> getConstructor() {
+        Constructor<E> result = entityConstructor;
+        if (result == null) {
+            synchronized (this) {
+                result = entityConstructor;
+                if (result == null) {
+                    entityConstructor = findConstructor();
+                    result = entityConstructor;
+                }
+            }
         }
-        return entityConstructor;
+        return result;
     }
 
     /**
@@ -150,27 +190,6 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
             throw noSuchConstructor(entityClass.getName(), idClass.getName());
         }
         return result;
-    }
-
-    /**
-     * Checks that this class of identifiers is supported by the framework.
-     *
-     * <p>The type of entity identifiers ({@code <I>}) cannot be bound because
-     * it can be {@code Long}, {@code String}, {@code Integer}, and class implementing
-     * {@code Message}.
-     *
-     * <p>We perform the check to to detect possible programming error
-     * in declarations of entity and repository classes <em>until</em> we have
-     * compile-time model check.
-     *
-     * @throws ModelError if unsupported ID class passed
-     */
-    private static <I> void checkIdClass(Class<I> idClass) throws ModelError {
-        try {
-            Identifier.checkSupported(idClass);
-        } catch (IllegalArgumentException e) {
-            throw new ModelError(e);
-        }
     }
 
     /**

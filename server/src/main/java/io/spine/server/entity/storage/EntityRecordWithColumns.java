@@ -98,8 +98,8 @@ public final class EntityRecordWithColumns implements Serializable {
                                                  Entity entity,
                                                  RecordStorage<?> storage) {
         Collection<EntityColumn> entityColumns = storage.entityColumns();
-        Map<String, EntityColumn.MemoizedValue> columns = extractColumnValues(entity,
-                                                                              entityColumns);
+        Map<String, EntityColumn.MemoizedValue> columns =
+                extractColumnValues(entity, entityColumns);
         return of(record, columns);
     }
 

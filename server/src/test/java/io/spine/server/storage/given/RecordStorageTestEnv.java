@@ -25,12 +25,12 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Time;
 import io.spine.core.Version;
 import io.spine.server.entity.EntityWithLifecycle;
-import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.server.entity.storage.Enumerated;
 import io.spine.test.storage.Project;
+import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.ProjectVBuilder;
 
 import static io.spine.server.entity.TestTransaction.injectState;
@@ -48,12 +48,12 @@ public class RecordStorageTestEnv {
     }
 
     @SuppressWarnings("unused") // Reflective access
-    public static class TestCounterEntity<I>
-            extends TransactionalEntity<I, Project, ProjectVBuilder> {
+    public static class TestCounterEntity
+            extends TransactionalEntity<ProjectId, Project, ProjectVBuilder> {
 
         private int counter = 0;
 
-        public TestCounterEntity(I id) {
+        public TestCounterEntity(ProjectId id) {
             super(id);
         }
 
@@ -120,14 +120,6 @@ public class RecordStorageTestEnv {
                                       .setStatus(status)
                                       .build();
             injectState(this, newState, getCounterVersion());
-        }
-
-        public void archive() {
-            TestTransaction.archive(this);
-        }
-
-        public void delete() {
-            TestTransaction.delete(this);
         }
     }
 

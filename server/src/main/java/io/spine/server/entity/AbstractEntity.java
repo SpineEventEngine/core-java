@@ -43,6 +43,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  * @author Dmitry Ganzha
  */
+@SuppressWarnings("SynchronizeOnThis") /* This class uses double-check idiom for lazy init of some
+    fields. See Effective Java 2nd Ed. Item #71. */
 public abstract class AbstractEntity<I, S extends Message> implements Entity<I, S> {
 
     /**
@@ -102,21 +104,35 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * @return the current state or default state value
      */
     @Override
-    public synchronized S getState() {
-        if (state == null) {
-            state = getDefaultState();
+    public S getState() {
+        S result = state;
+        if (result == null) {
+            synchronized (this) {
+                result = state;
+                if (result == null) {
+                    state = getDefaultState();
+                    result = state;
+                }
+            }
         }
-        return state;
+        return result;
     }
 
     /**
      * Obtains model class for this entity.
      */
     protected EntityClass<?> thisClass() {
-        if (thisClass == null) {
-            thisClass = getModelClass();
+        EntityClass<?> result = thisClass;
+        if (result == null) {
+            synchronized (this) {
+                result = thisClass;
+                if (result == null) {
+                    thisClass = getModelClass();
+                    result = thisClass;
+                }
+            }
         }
-        return thisClass;
+        return result;
     }
 
     /**
@@ -195,7 +211,6 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      *
      * @return string form of the entity ID
      */
-    @SuppressWarnings("SynchronizeOnThis") // See Effective Java 2nd Ed. Item #71.
     public String stringId() {
         String result = stringId;
         if (result == null) {
