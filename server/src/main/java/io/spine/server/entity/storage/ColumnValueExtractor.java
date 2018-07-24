@@ -49,8 +49,7 @@ import static java.lang.String.format;
  * @see Columns
  * @see EntityColumn
  */
-@Internal
-public class ColumnValueExtractor {
+class ColumnValueExtractor {
 
     private final Entity entity;
     private final Collection<EntityColumn> entityColumns;
