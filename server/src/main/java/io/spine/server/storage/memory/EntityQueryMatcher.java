@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import io.spine.base.Identifier;
@@ -33,15 +34,16 @@ import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.entity.storage.QueryParameters;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.server.storage.OperatorEvaluator.eval;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static java.util.stream.Collectors.toSet;
 
 /**
  * A {@link Predicate} on the {@link EntityRecordWithColumns} matching it upon the given
@@ -53,12 +55,18 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  */
 final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWithColumns> {
 
-    private final Collection<I> acceptedIds;
+    private final Set<Any> acceptedIds;
     private final QueryParameters queryParams;
 
     EntityQueryMatcher(EntityQuery<I> query) {
         checkNotNull(query);
-        this.acceptedIds = query.getIds();
+        // Pack IDs from the query for faster search using packed IDs from loaded records.
+        Set<I> ids = query.getIds();
+        this.acceptedIds = ids.isEmpty()
+                           ? ImmutableSet.of()
+                           : ids.stream()
+                                .map(Identifier::pack)
+                                .collect(toSet());
         this.queryParams = query.getParameters();
     }
 
@@ -75,8 +83,7 @@ final class EntityQueryMatcher<I> implements Predicate<@Nullable EntityRecordWit
         if (!acceptedIds.isEmpty()) {
             Any packedId = record.getRecord()
                                  .getEntityId();
-            I entityId = Identifier.unpack(packedId);
-            boolean idMatches = acceptedIds.contains(entityId);
+            boolean idMatches = acceptedIds.contains(packedId);
             return idMatches;
         }
         return true;
