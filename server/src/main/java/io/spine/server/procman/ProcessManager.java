@@ -176,16 +176,6 @@ public abstract class ProcessManager<I,
     }
 
     /**
-     * Transforms the provided {@link DispatchResult dispatch result} into a list of events.
-     *
-     * @param  dispatchResult a result of handling a message by the process manager
-     * @return list of events
-     */
-    private List<Event> toEvents(DispatchResult dispatchResult) {
-        return dispatchResult.asEvents(getProducerId(), getVersion());
-    }
-
-    /**
      * Creates a new empty command sequence for posting two or more commands in response to
      * an incoming command.
      *

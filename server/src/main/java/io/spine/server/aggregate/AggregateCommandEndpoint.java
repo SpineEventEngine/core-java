@@ -20,10 +20,10 @@
 
 package io.spine.server.aggregate;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
 
 import java.util.List;
 
@@ -56,11 +56,11 @@ public class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected List<? extends Message> doDispatch(A aggregate, CommandEnvelope envelope) {
+    protected List<Event> doDispatch(A aggregate, CommandEnvelope envelope) {
         I id = aggregate.getId();
         Command command = envelope.getCommand();
         repository().onDispatchCommand(id, command);
-        List<? extends Message> result = aggregate.dispatchCommand(envelope);
+        List<Event> result = aggregate.dispatchCommand(envelope);
         repository().onCommandHandled(id, command);
         return result;
     }

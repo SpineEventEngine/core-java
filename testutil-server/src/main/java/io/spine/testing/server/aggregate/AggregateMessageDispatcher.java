@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Events;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateCommandEndpoint;
@@ -34,6 +35,7 @@ import io.spine.server.aggregate.AggregateRepository;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -119,7 +121,10 @@ public class AggregateMessageDispatcher {
         List<? extends Message> dispatch(A aggregate, RejectionEnvelope envelope) {
             TestAggregateRejectionEndpoint<I, A> endpoint =
                     new TestAggregateRejectionEndpoint<>(envelope);
-            List<? extends Message> result = endpoint.dispatchInTx(aggregate);
+            List<? extends Message> result = endpoint.dispatchInTx(aggregate)
+                                                     .stream()
+                                                     .map(Events::getMessage)
+                                                     .collect(toList());
             return result;
         }
     }
@@ -146,7 +151,10 @@ public class AggregateMessageDispatcher {
         List<? extends Message> dispatch(A aggregate, EventEnvelope envelope) {
             TestAggregateEventEndpoint<I, A> endpoint =
                     new TestAggregateEventEndpoint<>(envelope);
-            List<? extends Message> result = endpoint.dispatchInTx(aggregate);
+            List<? extends Message> result = endpoint.dispatchInTx(aggregate)
+                                                     .stream()
+                                                     .map(Events::getMessage)
+                                                     .collect(toList());
             return result;
         }
     }
@@ -172,7 +180,10 @@ public class AggregateMessageDispatcher {
         List<? extends Message> dispatch(A aggregate, CommandEnvelope envelope) {
             TestAggregateCommandEndpoint<I, A> endpoint =
                     new TestAggregateCommandEndpoint<>(envelope);
-            List<? extends Message> result = endpoint.dispatchInTx(aggregate);
+            List<? extends Message> result = endpoint.dispatchInTx(aggregate)
+                                                     .stream()
+                                                     .map(Events::getMessage)
+                                                     .collect(toList());
             return result;
         }
     }

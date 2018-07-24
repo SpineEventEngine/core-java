@@ -21,7 +21,6 @@
 package io.spine.server.aggregate;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.Event;
 import io.spine.server.entity.EntityLifecycleMonitor;
@@ -67,12 +66,12 @@ abstract class AggregateEndpoint<I,
     }
 
     @CanIgnoreReturnValue
-    protected List<? extends Message> dispatchInTx(A aggregate) {
-        List<? extends Message> eventMessages = doDispatch(aggregate, envelope());
+    protected List<Event> dispatchInTx(A aggregate) {
+        List<Event> events = doDispatch(aggregate, envelope());
         AggregateTransaction tx = startTransaction(aggregate);
-        aggregate.apply(eventMessages, envelope());
+        aggregate.apply(events, envelope());
         tx.commit();
-        return eventMessages;
+        return events;
     }
 
     protected A instanceFor(I aggregateId) {

@@ -20,8 +20,8 @@
 
 package io.spine.server.aggregate;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.core.Event;
 import io.spine.core.RejectionEnvelope;
 
 import java.util.List;
@@ -70,7 +70,7 @@ public class AggregateRejectionEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected List<? extends Message> doDispatch(A aggregate, RejectionEnvelope envelope) {
+    protected List<Event> doDispatch(A aggregate, RejectionEnvelope envelope) {
         return aggregate.reactOn(envelope);
     }
 

@@ -21,6 +21,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -46,17 +47,18 @@ import io.spine.server.command.dispatch.DispatchResult;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.EventPlayers;
-import io.spine.server.event.EventFactory;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.model.Model;
 import io.spine.server.rejection.model.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.stream.Stream;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newArrayListWithCapacity;
+import static com.google.common.collect.ImmutableList.toImmutableList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
@@ -211,13 +213,13 @@ public abstract class Aggregate<I,
      * @return a list of event messages that the aggregate produces by handling the command
      */
     @Override
-    protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
+    protected List<Event> dispatchCommand(CommandEnvelope command) {
         idempotencyGuard.check(command);
         CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         Dispatch<CommandEnvelope> dispatch = Dispatch.of(command)
                                                      .to(this, method);
         DispatchResult dispatchResult = dispatch.perform();
-        return dispatchResult.asMessages();
+        return toEvents(dispatchResult);
     }
 
     /**
@@ -230,13 +232,13 @@ public abstract class Aggregate<I,
      * @return a list of event messages that the aggregate produces in reaction to the event or
      *         an empty list if the aggregate state does not change in reaction to the event
      */
-    List<? extends Message> reactOn(EventEnvelope event) {
+    List<Event> reactOn(EventEnvelope event) {
         EventClass eventClass = event.getMessageClass();
         EventReactorMethod method = thisClass().getReactor(eventClass);
         Dispatch<EventEnvelope> dispatch = Dispatch.of(event)
                                                    .to(this, method);
         DispatchResult dispatchResult = dispatch.perform();
-        return dispatchResult.asMessages();
+        return toEvents(dispatchResult);
     }
 
     /**
@@ -250,14 +252,14 @@ public abstract class Aggregate<I,
      *         the rejection, or an empty list if the aggregate state does not change in
      *         response to this rejection
      */
-    List<? extends Message> reactOn(RejectionEnvelope rejection) {
+    List<Event> reactOn(RejectionEnvelope rejection) {
         CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
         RejectionClass rejectionClass = rejection.getMessageClass();
         RejectionReactorMethod method = thisClass().getReactor(rejectionClass, commandClass);
         Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection)
                                                        .to(this, method);
         DispatchResult dispatchResult = dispatch.perform();
-        return dispatchResult.asMessages();
+        return toEvents(dispatchResult);
     }
 
     /**
@@ -301,42 +303,66 @@ public abstract class Aggregate<I,
     }
 
     /**
-     * Applies event messages.
+     * Applies events to this {@code Aggregate}.
      *
-     * @param eventMessages the event messages or events to apply
-     * @param origin        the envelope of a message which caused the events
+     * @param events the events to apply
+     * @param origin the envelope of a message which caused the events
      * @see #ensureEventMessage(Message)
      */
-    void apply(Iterable<? extends Message> eventMessages, MessageEnvelope origin) {
-        List<? extends Message> messages = newArrayList(eventMessages);
-        EventFactory eventFactory = EventFactory.on(origin, getProducerId());
+    void apply(List<Event> events, MessageEnvelope origin) {
+        ImmutableList<Event> eventsToApply = prepareEvents(events, origin);
+        play(eventsToApply);
+        uncommittedEvents.addAll(eventsToApply);
+    }
 
-        List<Event> events = newArrayListWithCapacity(messages.size());
+    private ImmutableList<Event> prepareEvents(Collection<Event> originalEvents,
+                                               MessageEnvelope origin) {
+        Version currentVersion = getVersion();
 
-        Version projectedEventVersion = getVersion();
+        Stream<Version> versions = Stream.iterate(currentVersion, Versions::increment)
+                                         .skip(1) // Skip current version
+                                         .limit(originalEvents.size());
+        Stream<Event> events = originalEvents.stream();
+        ImmutableList<Event> eventsToApply = Streams.zip(events, versions,
+                                                         prepareEventFunction(origin))
+                                                    .collect(toImmutableList());
+        return eventsToApply;
+    }
 
-        for (Message eventOrMessage : messages) {
-            /* Applying each message would increment the entity version.
-               Therefore, we should simulate this behaviour. */
-            projectedEventVersion = Versions.increment(projectedEventVersion);
-            Message eventMessage = ensureEventMessage(eventOrMessage);
+    private static BiFunction<Event, Version, Event> prepareEventFunction(MessageEnvelope origin) {
+        return (event, version) -> prepareEvent(event, origin, version);
+    }
 
-            Event event;
-            if (eventOrMessage instanceof Event) {
-                /* If we get instances of Event, it means we are dealing with an import command,
-                   which contains these events in the body. So we deal with a command envelope.
-                */
-                CommandEnvelope ce = (CommandEnvelope)origin;
-                event = importEvent((Event) eventOrMessage,
-                                    ce.getCommandContext(),
-                                    projectedEventVersion);
-            } else {
-                event = eventFactory.createEvent(eventMessage, projectedEventVersion);
-            }
-            events.add(event);
-        }
-        play(events);
-        uncommittedEvents.addAll(events);
+    private static Event prepareEvent(Event event,
+                                      MessageEnvelope origin,
+                                      Version projectedVersion) {
+        Message eventMessage = getMessage(event);
+
+        Event eventToApply = eventMessage instanceof Event
+                             ? importEvent(eventMessage, origin, projectedVersion)
+                             : substituteVersion(event, projectedVersion);
+        return eventToApply;
+    }
+
+    private static Event substituteVersion(Event original, Version newVersion) {
+        EventContext newContext = original.getContext()
+                                          .toBuilder()
+                                          .setVersion(newVersion)
+                                          .build();
+        Event result = original.toBuilder()
+                               .setContext(newContext)
+                               .build();
+        return result;
+    }
+
+    private static Event importEvent(Message eventMessage,
+                                     MessageEnvelope origin,
+                                     Version projectedVersion) {
+        CommandEnvelope commandEnvelope = (CommandEnvelope) origin;
+        Event messageAsEvent = (Event) eventMessage;
+        return importEvent(messageAsEvent,
+                           commandEnvelope.getCommandContext(),
+                           projectedVersion);
     }
 
     /**

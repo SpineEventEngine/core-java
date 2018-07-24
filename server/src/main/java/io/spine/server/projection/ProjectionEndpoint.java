@@ -22,9 +22,9 @@ package io.spine.server.projection;
 
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.delivery.Delivery;
@@ -97,7 +97,7 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
 
     @CanIgnoreReturnValue
     @Override
-    protected List<? extends Message> doDispatch(P projection, EventEnvelope event) {
+    protected List<Event> doDispatch(P projection, EventEnvelope event) {
         projection.play(event.getOuterObject());
         return ImmutableList.of();
     }
