@@ -87,8 +87,8 @@ public abstract class AbstractRecordStorateTest<I, S extends RecordStorage<I>>
     private static EntityRecordWithColumns withRecordAndNoFields(EntityRecord record) {
         return argThat(
                 argument -> argument.getRecord()
-                                           .equals(record)
-                && !argument.hasColumns()
+                                    .equals(record)
+                        && !argument.hasColumns()
         );
     }
 
