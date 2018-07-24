@@ -116,9 +116,10 @@ public class RecordStorageTestEnv {
         }
 
         public void assignStatus(Project.Status status) {
-            Project newState = Project.newBuilder(getState())
-                                      .setStatus(status)
-                                      .build();
+            Project newState = Project
+                    .newBuilder(getState())
+                    .setStatus(status)
+                    .build();
             injectState(this, newState, getCounterVersion());
         }
     }
