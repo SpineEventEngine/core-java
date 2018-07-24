@@ -47,6 +47,9 @@ import io.spine.test.procman.command.PmDeleteProcess;
 import io.spine.test.procman.command.PmDoNothing;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
+import io.spine.test.procman.event.PmDidNothing;
+import io.spine.test.procman.event.PmProcessArchived;
+import io.spine.test.procman.event.PmProcessDeleted;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
@@ -56,7 +59,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.List;
 
 import static io.spine.protobuf.AnyPacker.pack;
-import static java.util.Collections.emptyList;
 
 /**
  * @author Alexander Yevsyukov
@@ -175,23 +177,38 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         @Assign
-        Empty handle(PmArchiveProcess command) {
+        PmProcessArchived handle(PmArchiveProcess command) {
             keep(command);
             setArchived(true);
-            return withNothing();
+
+            PmProcessArchived event = ((PmProcessArchived.Builder)
+                    Sample.builderForType(PmProcessArchived.class))
+                    .setProjectId(command.getProjectId())
+                    .build();
+            return event;
         }
 
         @Assign
-        Empty handle(PmDeleteProcess command) {
+        PmProcessDeleted handle(PmDeleteProcess command) {
             keep(command);
             setDeleted(true);
-            return withNothing();
+
+            PmProcessDeleted event = ((PmProcessDeleted.Builder)
+                    Sample.builderForType(PmProcessDeleted.class))
+                    .setProjectId(command.getProjectId())
+                    .build();
+            return event;
         }
 
         @Assign
-        List<Message> handle(PmDoNothing command, CommandContext ignored) {
+        PmDidNothing handle(PmDoNothing command, CommandContext ignored) {
             keep(command);
-            return emptyList();
+
+            PmDidNothing event = ((PmDidNothing.Builder)
+                    Sample.builderForType(PmDidNothing.class))
+                    .setProjectId(command.getProjectId())
+                    .build();
+            return event;
         }
 
         @Assign
