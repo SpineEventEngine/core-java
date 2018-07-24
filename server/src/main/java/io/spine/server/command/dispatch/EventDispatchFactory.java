@@ -65,9 +65,12 @@ public final class EventDispatchFactory extends MessageDispatchFactory<EventEnve
         }
 
         @Override
-        protected List<? extends Message> dispatch() {
+        protected DispatchResult dispatch() {
             EventEnvelope event = envelope();
-            return method.invoke(context, event.getMessage(), event.getEventContext());
+            List<? extends Message> events = method.invoke(context, event.getMessage(),
+                                                           event.getEventContext());
+            DispatchResult result = DispatchResult.ofEvents(events, envelope());
+            return result;
         }
     }
 }

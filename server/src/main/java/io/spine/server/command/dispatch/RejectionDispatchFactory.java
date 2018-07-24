@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -65,9 +65,11 @@ public final class RejectionDispatchFactory extends MessageDispatchFactory<Rejec
         }
 
         @Override
-        protected List<? extends Message> dispatch() {
+        protected DispatchResult dispatch() {
             RejectionEnvelope rejection = envelope();
-            return method.invoke(context, rejection.getMessage(), rejection.getRejectionContext());
+            List<? extends Message> events = method.invoke(context, rejection.getMessage(),
+                                                           rejection.getRejectionContext());
+            return DispatchResult.ofEvents(events, envelope());
         }
     }
 }

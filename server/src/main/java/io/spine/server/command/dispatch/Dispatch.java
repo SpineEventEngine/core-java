@@ -20,13 +20,14 @@
 
 package io.spine.server.command.dispatch;
 
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.RejectionEnvelope;
 
-import java.util.List;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -36,6 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>Target and method of dispatch are specified by the {@code Dispatch} inheritors.
  *
  * @author Mykhailo Drachuk
+ * @author Dmytro Dashenkov
  */
 public abstract class Dispatch<E extends MessageEnvelope> {
 
@@ -48,7 +50,7 @@ public abstract class Dispatch<E extends MessageEnvelope> {
     /**
      * Dispatches an envelope to the target in a manner specified by inheritor.
      */
-    protected abstract List<? extends Message> dispatch();
+    protected abstract DispatchResult dispatch();
 
     /**
      * @return a {@link MessageEnvelope message envelope} which is handled by
@@ -64,10 +66,8 @@ public abstract class Dispatch<E extends MessageEnvelope> {
      * @return the events emitted after dispatching a message
      */
     public DispatchResult perform() {
-        List<? extends Message> messages = dispatch();
-        List<? extends Message> filtered = Filtering.of(messages)
-                                                    .perform();
-        return new DispatchResult(filtered, envelope);
+        DispatchResult result = dispatch().filter(NonEmpty.PREDICATE);
+        return result;
     }
 
     /**
@@ -98,5 +98,26 @@ public abstract class Dispatch<E extends MessageEnvelope> {
     public static RejectionDispatchFactory of(RejectionEnvelope rejection) {
         checkNotNull(rejection);
         return new RejectionDispatchFactory(rejection);
+    }
+
+    /**
+     * A predicate checking that message is not {@linkplain Empty empty}.
+     */
+    private enum NonEmpty implements Predicate<Message> {
+
+        PREDICATE;
+
+        private static final Empty EMPTY = Empty.getDefaultInstance();
+
+        /**
+         * Checks that message is not {@linkplain Empty empty}.
+         *
+         * @param message the message being checked
+         * @return {@code true} if the message is not empty, {@code false} otherwise
+         */
+        @Override
+        public boolean test(Message message) {
+            return !message.equals(EMPTY);
+        }
     }
 }

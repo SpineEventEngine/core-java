@@ -20,21 +20,28 @@
 
 package io.spine.server.command.dispatch;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.RejectionEventContext;
 import io.spine.server.command.model.CommandHandlerMethod;
+import io.spine.server.model.HandlerMethodFailedException;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.getRootCause;
+import static com.google.common.base.Throwables.getStackTraceAsString;
 
 /**
  * A {@link MessageDispatchFactory message dispatch factory} that deals
  * with {@link CommandEnvelope command envelopes}.
  *
  * @author Mykhailo Drachuk
+ * @author Dmytro Dashenkov
  */
-public final class CommandDispatchFactory extends MessageDispatchFactory<CommandEnvelope, 
+public final class CommandDispatchFactory extends MessageDispatchFactory<CommandEnvelope,
                                                                          CommandHandlerMethod> {
     CommandDispatchFactory(CommandEnvelope command) {
         super(command);
@@ -66,9 +73,48 @@ public final class CommandDispatchFactory extends MessageDispatchFactory<Command
         }
 
         @Override
-        protected List<? extends Message> dispatch() {
+        protected DispatchResult dispatch() {
+            try {
+                return invoke();
+            } catch (HandlerMethodFailedException exception) {
+                return forRejection(exception);
+            }
+        }
+
+        private DispatchResult invoke() {
             CommandEnvelope command = envelope();
-            return method.invoke(context, command.getMessage(), command.getCommandContext());
+            List<? extends Message> events = method.invoke(context, command.getMessage(),
+                                                           command.getCommandContext());
+            return DispatchResult.ofEvents(events, command);
+        }
+
+        private DispatchResult forRejection(HandlerMethodFailedException exception) {
+            ThrowableMessage throwableMessage = rejectionFrom(exception);
+            Message rejection = throwableMessage.getMessageThrown();
+            RejectionEventContext context = rejectionContextFrom(throwableMessage);
+            return DispatchResult.ofRejection(rejection, envelope(), context);
+        }
+
+        private static ThrowableMessage rejectionFrom(HandlerMethodFailedException exception)
+                throws HandlerMethodFailedException {
+            Throwable cause = getRootCause(exception);
+            if (cause instanceof ThrowableMessage) {
+                return (ThrowableMessage) cause;
+            } else {
+                throw exception;
+            }
+        }
+
+        private RejectionEventContext rejectionContextFrom(Throwable throwable) {
+            Any commandMessage = envelope().getCommand()
+                                           .getMessage();
+            String stacktrace = getStackTraceAsString(throwable);
+            RejectionEventContext context = RejectionEventContext
+                    .newBuilder()
+                    .setCommandMessage(commandMessage)
+                    .setStacktrace(stacktrace)
+                    .build();
+            return context;
         }
     }
 }

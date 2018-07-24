@@ -21,6 +21,7 @@
 package io.spine.server.event;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
@@ -28,6 +29,7 @@ import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.Events;
 import io.spine.core.MessageEnvelope;
+import io.spine.core.RejectionEventContext;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.integration.IntegrationEvent;
@@ -86,11 +88,23 @@ public class EventFactory {
      */
     public Event createEvent(Message messageOrAny,
                              @Nullable Version version) throws ValidationException {
+        EventContext context = createContext(version);
+        return doCreateEvent(messageOrAny, context);
+    }
+
+    public Event createRejectionEvent(Message messageOrAny,
+                                      @Nullable Version version,
+                                      RejectionEventContext rejectionContext)
+            throws ValidationException {
+        EventContext context = createContext(version, rejectionContext);
+        return doCreateEvent(messageOrAny, context);
+    }
+
+    private static Event doCreateEvent(Message messageOrAny, EventContext context) {
         checkNotNull(messageOrAny);
         validate(messageOrAny);     // we must validate it now before emitting the next ID.
 
         EventId eventId = Events.generateId();
-        EventContext context = createContext(version);
         Event result = createEvent(eventId, messageOrAny, context);
         return result;
     }
@@ -134,12 +148,29 @@ public class EventFactory {
      * Creates an event based on the passed integration event.
      */
     public static Event toEvent(IntegrationEvent ie) {
-        return IntegrationEventConverter.getInstance()
-                                        .convert(ie);
+        Event event = IntegrationEventConverter.getInstance()
+                                               .convert(ie);
+        checkNotNull(event);
+        return event;
+    }
+
+    private EventContext createContext(@Nullable Version version) {
+        EventContext result = buildContext(version)
+                .setGenuineEvent(Empty.getDefaultInstance())
+                .build();
+        return result;
+    }
+
+    private EventContext createContext(@Nullable Version version,
+                                       RejectionEventContext rejectionContext) {
+        EventContext result = buildContext(version)
+                .setRejection(rejectionContext)
+                .build();
+        return result;
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder
-    private EventContext createContext(@Nullable Version version) {
+    private EventContext.Builder buildContext(@Nullable Version version) {
         Timestamp timestamp = getCurrentTime();
         EventContext.Builder builder = EventContext
                 .newBuilder()
@@ -149,6 +180,6 @@ public class EventFactory {
         if (version != null) {
             builder.setVersion(version);
         }
-        return builder.build();
+        return builder;
     }
 }
