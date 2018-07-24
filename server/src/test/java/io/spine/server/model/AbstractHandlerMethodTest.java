@@ -166,17 +166,22 @@ class AbstractHandlerMethodTest {
         assertNotEquals(System.identityHashCode(twoParamMethod), twoParamMethod.hashCode());
     }
 
-    @Test
-    @DisplayName("not be created from method throwing checked exception")
-    void rejectMethodThrowingChecked() {
-        assertThrows(IllegalStateException.class,
-                     () -> factory.create(StubHandler.getMethodWithCheckedException()));
-    }
+    @Nested
+    @DisplayName("not be created from method throwing")
+    class RejectMethodThrowing {
 
-    @Test
-    @DisplayName("be normally created from method throwing runtime exception")
-    void acceptMethodThrowingRuntime() {
-        OneParamMethod method = factory.create(StubHandler.getMethodWithRuntimeException());
-        assertEquals(StubHandler.getMethodWithRuntimeException(), method.getRawMethod());
+        @Test
+        @DisplayName("checked exception")
+        void checkedException() {
+            assertThrows(IllegalStateException.class,
+                         () -> factory.create(StubHandler.getMethodWithCheckedException()));
+        }
+
+        @Test
+        @DisplayName("runtime exception")
+        void runtimeException() {
+            OneParamMethod method = factory.create(StubHandler.getMethodWithRuntimeException());
+            assertEquals(StubHandler.getMethodWithRuntimeException(), method.getRawMethod());
+        }
     }
 }
