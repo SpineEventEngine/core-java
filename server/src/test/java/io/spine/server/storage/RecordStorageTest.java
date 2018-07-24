@@ -302,20 +302,19 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
         ProjectId archivedId = newId();
         ProjectId deletedId = newId();
 
-        TransactionalEntity<ProjectId, ?, ?> activeEntity = newEntity(activeId);
+        TransactionalEntity<ProjectId, ?, ?> stayingEntity = newEntity(activeId);
         TransactionalEntity<ProjectId, ?, ?> archivedEntity = newEntity(archivedId);
-        archive(archivedEntity);
-
         TransactionalEntity<ProjectId, ?, ?> deletedEntity = newEntity(deletedId);
+        archive(archivedEntity);
         delete(deletedEntity);
 
-        EntityRecord activeRecord = newStorageRecord(activeId, activeEntity.getState());
+        EntityRecord stayingRecord = newStorageRecord(activeId, stayingEntity.getState());
         EntityRecord archivedRecord = newStorageRecord(archivedId, archivedEntity.getState());
         EntityRecord deletedRecord = newStorageRecord(deletedId, deletedEntity.getState());
 
         RecordStorage<ProjectId> storage = getStorage();
         storage.write(deletedId, create(deletedRecord, deletedEntity, storage));
-        storage.write(activeId, create(activeRecord, activeEntity, storage));
+        storage.write(activeId, create(stayingRecord, stayingEntity, storage));
         storage.write(archivedId, create(archivedRecord, archivedEntity, storage));
         EntityIdFilter idFilter = EntityIdFilter
                 .newBuilder()
@@ -329,7 +328,7 @@ public abstract class RecordStorageTest<S extends RecordStorage<ProjectId>>
                 .build();
         EntityQuery<ProjectId> query = from(filters, storage).withLifecycleFlags(storage);
         Iterator<EntityRecord> read = storage.readAll(query, FieldMask.getDefaultInstance());
-        assertSingleRecord(activeRecord, read);
+        assertSingleRecord(stayingRecord, read);
     }
 
     @Test
