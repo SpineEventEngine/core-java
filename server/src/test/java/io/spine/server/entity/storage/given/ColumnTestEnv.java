@@ -62,11 +62,11 @@ public class ColumnTestEnv {
 
     @SuppressWarnings("unused") // Reflective access
     public static class TestEntity
-            extends AbstractVersionableEntity<Long, StringValue> {
+            extends AbstractVersionableEntity<String, StringValue> {
 
         private int mutableState = 0;
 
-        public TestEntity(Long id) {
+        public TestEntity(String id) {
             super(id);
         }
 

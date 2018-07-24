@@ -45,7 +45,7 @@ class ColumnMemoizedValueTest {
     @DisplayName("be serializable")
     void beSerializable() {
         EntityColumn column = findColumn(TestEntity.class, MUTABLE_STATE_COLUMN);
-        TestEntity entity = new TestEntity(1L);
+        TestEntity entity = new TestEntity("my-id");
         entity.setMutableState(42);
         MemoizedValue value = column.memoizeFor(entity);
 
@@ -68,7 +68,7 @@ class ColumnMemoizedValueTest {
         EntityColumn columnB = findColumn(TestEntity.class, ARCHIVED_COLUMN);
         EntityColumn columnC = mock(EntityColumn.class);
 
-        TestEntity entity = new TestEntity(1L);
+        TestEntity entity = new TestEntity("ID");
 
         MemoizedValue valueA1 = columnA.memoizeFor(entity);
         MemoizedValue valueA2 = columnA.memoizeFor(entity);
