@@ -21,7 +21,7 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.testing.EqualsTester;
-import com.google.protobuf.StringValue;
+import com.google.protobuf.Any;
 import io.spine.core.Version;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityWithLifecycle;
@@ -212,8 +212,7 @@ class ColumnTest {
     void checkNonNullable() {
         EntityColumn column = forMethod("getNotNull", TestEntity.class);
 
-        assertThrows(NullPointerException.class,
-                     () -> column.getFor(new TestEntity("")));
+        assertThrows(NullPointerException.class, () -> column.getFor(new TestEntity("")));
     }
 
     @Test
@@ -239,8 +238,7 @@ class ColumnTest {
         @DisplayName("which is null")
         void whichIsNull() {
             EntityColumn nullableColumn = forMethod("getNull", TestEntity.class);
-            MemoizedValue memoizedNull =
-                    nullableColumn.memoizeFor(new TestEntity(""));
+            MemoizedValue memoizedNull = nullableColumn.memoizeFor(new TestEntity(""));
             assertTrue(memoizedNull.isNull());
             assertNull(memoizedNull.getValue());
         }
@@ -249,7 +247,7 @@ class ColumnTest {
         @DisplayName("referencing column itself")
         void referencingColumn() {
             EntityColumn column = forMethod("getMutableState", TestEntity.class);
-            Entity<String, StringValue> entity = new TestEntity("");
+            Entity<String, Any> entity = new TestEntity("");
             MemoizedValue memoizedValue = column.memoizeFor(entity);
             assertSame(column, memoizedValue.getSourceColumn());
         }

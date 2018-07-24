@@ -295,7 +295,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         }
     }
 
-    protected abstract E entity(I id1);
+    protected abstract E entity(I id);
 
     @Test
     @DisplayName("create entity on `loadOrCreate` if not found")
