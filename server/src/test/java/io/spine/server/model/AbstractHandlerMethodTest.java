@@ -180,8 +180,8 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("runtime exception")
         void runtimeException() {
-            OneParamMethod method = factory.create(StubHandler.getMethodWithRuntimeException());
-            assertEquals(StubHandler.getMethodWithRuntimeException(), method.getRawMethod());
+            assertThrows(IllegalStateException.class,
+                         () -> factory.create(StubHandler.getMethodWithRuntimeException()));
         }
     }
 }
