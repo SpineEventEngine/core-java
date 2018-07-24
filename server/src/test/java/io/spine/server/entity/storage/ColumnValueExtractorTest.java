@@ -75,7 +75,6 @@ class ColumnValueExtractorTest {
                                                               .getValue());
         }
 
-        @SuppressWarnings("unchecked") // Okay for test.
         @Test
         @DisplayName("non-public entity")
         void nonPublicEntity() {
