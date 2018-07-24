@@ -20,7 +20,6 @@
 
 package io.spine.server.storage.memory;
 
-import com.google.common.base.Predicate;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import io.spine.base.Identifier;
@@ -37,6 +36,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.TypeConverter.toObject;
@@ -63,23 +63,18 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
     }
 
     @Override
-    public boolean apply(@Nullable EntityRecordWithColumns input) {
-        if (input == null) {
-            return false;
-        }
+    public boolean test(EntityRecordWithColumns input) {
         boolean result = idMatches(input) && columnValuesMatch(input);
         return result;
     }
 
     private boolean idMatches(EntityRecordWithColumns record) {
         if (!acceptedIds.isEmpty()) {
-            Any entityId = record.getRecord()
-                                       .getEntityId();
-            I genericId = Identifier.unpack(entityId);
-            boolean idMatches = acceptedIds.contains(genericId);
-            if (!idMatches) {
-                return false;
-            }
+            Any packedId = record.getRecord()
+                                 .getEntityId();
+            I entityId = Identifier.unpack(packedId);
+            boolean idMatches = acceptedIds.contains(entityId);
+            return idMatches;
         }
         return true;
     }
