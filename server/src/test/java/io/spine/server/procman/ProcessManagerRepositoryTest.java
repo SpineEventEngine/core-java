@@ -117,10 +117,7 @@ class ProcessManagerRepositoryTest
     }
 
     @Override
-    protected TestProcessManager createEntity() {
-        ProjectId id = ProjectId.newBuilder()
-                                .setId(newUuid())
-                                .build();
+    protected TestProcessManager createEntity(ProjectId id) {
         TestProcessManager result = Given.processManagerOfClass(TestProcessManager.class)
                                          .withId(id)
                                          .build();
@@ -163,13 +160,6 @@ class ProcessManagerRepositoryTest
     protected void tearDown() throws Exception {
         boundedContext.close();
         super.tearDown();
-    }
-
-    @Override
-    protected TestProcessManager entity(ProjectId id) {
-        return Given.processManagerOfClass(repository.getEntityClass())
-                    .withId(id)
-                    .build();
     }
 
     private ProcessManagerRepository<ProjectId, TestProcessManager, Project> repository() {

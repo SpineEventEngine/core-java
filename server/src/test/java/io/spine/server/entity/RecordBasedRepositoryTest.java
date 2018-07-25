@@ -91,7 +91,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
 
     protected abstract RecordBasedRepository<I, E, S> createRepository();
 
-    protected abstract E createEntity();
+    protected abstract E createEntity(I id);
 
     protected abstract List<E> createEntities(int count);
 
@@ -166,7 +166,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         @Test
         @DisplayName("single entity by ID")
         void singleEntityById() {
-            E entity = createEntity();
+            E entity = createEntity(createId(985));
 
             storeEntity(entity);
 
@@ -206,8 +206,8 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         void entitiesByQuery() {
             I id1 = createId(271);
             I id2 = createId(314);
-            E entity1 = entity(id1);
-            E entity2 = entity(id2);
+            E entity1 = createEntity(id1);
+            E entity2 = createEntity(id2);
             repository.store(entity1);
             repository.store(entity2);
 
@@ -295,8 +295,6 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         }
     }
 
-    protected abstract E entity(I id);
-
     @Test
     @DisplayName("create entity on `loadOrCreate` if not found")
     void loadOrCreateEntity() {
@@ -321,7 +319,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             ids.add(entities.get(i)
                             .getId());
         }
-        Entity<I, S> sideEntity = createEntity();
+        Entity<I, S> sideEntity = createEntity(createId(375));
         ids.add(sideEntity.getId());
 
         Collection<E> found = newArrayList(loadMany(ids));
@@ -339,7 +337,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         @Test
         @DisplayName("archived")
         void archived() {
-            E entity = createEntity();
+            E entity = createEntity(createId(821));
             I id = entity.getId();
 
             storeEntity(entity);
@@ -359,7 +357,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         @Test
         @DisplayName("deleted")
         void deleted() {
-            E entity = createEntity();
+            E entity = createEntity(createId(822));
             I id = entity.getId();
 
             storeEntity(entity);
