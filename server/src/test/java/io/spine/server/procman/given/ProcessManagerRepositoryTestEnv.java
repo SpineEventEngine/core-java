@@ -47,9 +47,6 @@ import io.spine.test.procman.command.PmDeleteProcess;
 import io.spine.test.procman.command.PmDoNothing;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.command.PmThrowEntityAlreadyArchived;
-import io.spine.test.procman.event.PmDidNothing;
-import io.spine.test.procman.event.PmProcessArchived;
-import io.spine.test.procman.event.PmProcessDeleted;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
@@ -177,38 +174,23 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         @Assign
-        PmProcessArchived handle(PmArchiveProcess command) {
+        Empty handle(PmArchiveProcess command) {
             keep(command);
             setArchived(true);
-
-            PmProcessArchived event = ((PmProcessArchived.Builder)
-                    Sample.builderForType(PmProcessArchived.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
-            return event;
+            return withNothing();
         }
 
         @Assign
-        PmProcessDeleted handle(PmDeleteProcess command) {
+        Empty handle(PmDeleteProcess command) {
             keep(command);
             setDeleted(true);
-
-            PmProcessDeleted event = ((PmProcessDeleted.Builder)
-                    Sample.builderForType(PmProcessDeleted.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
-            return event;
+            return withNothing();
         }
 
         @Assign
-        PmDidNothing handle(PmDoNothing command, CommandContext ignored) {
+        Empty handle(PmDoNothing command, CommandContext ignored) {
             keep(command);
-
-            PmDidNothing event = ((PmDidNothing.Builder)
-                    Sample.builderForType(PmDidNothing.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
-            return event;
+            return withNothing();
         }
 
         @Assign

@@ -56,8 +56,6 @@ import io.spine.system.server.HidePerson;
 import io.spine.system.server.Person;
 import io.spine.system.server.PersonCreated;
 import io.spine.system.server.PersonCreation;
-import io.spine.system.server.PersonCreationCompleted;
-import io.spine.system.server.PersonCreationStarted;
 import io.spine.system.server.PersonCreationVBuilder;
 import io.spine.system.server.PersonDetails;
 import io.spine.system.server.PersonDetailsVBuilder;
@@ -278,26 +276,16 @@ public final class EntityHistoryTestEnv {
         }
 
         @Assign
-        PersonCreationStarted handle(StartPersonCreation command) {
+        Empty handle(StartPersonCreation command) {
             getBuilder().setId(command.getId());
-
-            PersonCreationStarted event = PersonCreationStarted
-                    .newBuilder()
-                    .setId(command.getId())
-                    .build();
-            return event;
+            return Empty.getDefaultInstance();
         }
 
         @Assign
-        PersonCreationCompleted handle(CompletePersonCreation command) {
+        Empty handle(CompletePersonCreation command) {
             getBuilder().setId(command.getId())
                         .setCreated(true);
-
-            PersonCreationCompleted event = PersonCreationCompleted
-                    .newBuilder()
-                    .setId(command.getId())
-                    .build();
-            return event;
+            return Empty.getDefaultInstance();
         }
 
         @React
