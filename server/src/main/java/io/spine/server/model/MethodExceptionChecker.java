@@ -63,15 +63,12 @@ public class MethodExceptionChecker {
     }
 
     /**
-     * Ensures that contained {@link Method} does not declare any thrown checked exceptions.
-     *
-     * <p>{@link RuntimeException} and its descendants can still be declared and thrown from
-     * the method.
+     * Ensures that contained {@link Method} does not declare any thrown exceptions.
      *
      * @throws IllegalStateException if the check fails
      */
-    public void checkThrowsNoCheckedExceptions() {
-        checkThrowsNoExceptionsBut(RuntimeException.class);
+    public void checkDeclaresNoExceptionsThrown() {
+        checkThrowsNoExceptionsBut();
     }
 
     /**

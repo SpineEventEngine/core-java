@@ -47,3 +47,16 @@ message PmNotificationSent {
 message PmProjectStarted {
     ProjectId project_id = 1;
 }
+
+// A response for a `PmDoNothing` command, which does not modify a process manager state.
+message PmDidNothing {
+    ProjectId project_id = 1;
+}
+
+message PmProcessArchived {
+    ProjectId project_id = 1;
+}
+
+message PmProcessDeleted {
+    ProjectId project_id = 1;
+}

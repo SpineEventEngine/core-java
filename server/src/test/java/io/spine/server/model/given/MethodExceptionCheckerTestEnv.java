@@ -20,6 +20,10 @@
 
 package io.spine.server.model.given;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.GeneratedMessageV3;
+import io.spine.base.ThrowableMessage;
+
 import java.io.IOException;
 
 /**
@@ -49,8 +53,17 @@ public class MethodExceptionCheckerTestEnv {
             throw new IOException("Test custom exception");
         }
 
-        private static void methodDescendantException() throws IllegalStateException {
-            throw new IllegalStateException("Test descendant exception");
+        private static void methodDescendantException() throws DescendantThrowableMessage {
+            throw new DescendantThrowableMessage(Any.getDefaultInstance());
+        }
+    }
+
+    private static class DescendantThrowableMessage extends ThrowableMessage {
+
+        private static final long serialVersionUID = 0L;
+
+        DescendantThrowableMessage(GeneratedMessageV3 message) {
+            super(message);
         }
     }
 }
