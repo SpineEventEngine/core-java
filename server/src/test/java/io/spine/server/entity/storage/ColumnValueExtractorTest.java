@@ -128,7 +128,6 @@ class ColumnValueExtractorTest {
         return columnValueExtractor.extractColumnValues();
     }
 
-    @SuppressWarnings("unused") // Reflective access.
     private static class PrivateEntity extends AbstractEntity<String, Any> {
         protected PrivateEntity(String id) {
             super(id);
