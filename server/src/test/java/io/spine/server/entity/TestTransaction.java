@@ -31,8 +31,8 @@ import io.spine.core.Version;
  */
 public class TestTransaction {
 
+    /** Prevents instantiation from outside. */
     private TestTransaction() {
-        // Prevent instantiation.
     }
 
     /**

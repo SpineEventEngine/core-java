@@ -29,6 +29,8 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.CommandHandler;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.HandlerReturnsEmpty;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.HandlerReturnsEmptyList;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerNoAnnotation;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerNoParams;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerOneNotMsgParam;
@@ -135,6 +137,33 @@ class CommandHandlerMethodTest {
             assertEquals(1, events.size());
             RefProjectCreated event = (RefProjectCreated) events.get(0);
             assertEquals(cmd.getProjectId(), event.getProjectId());
+        }
+    }
+
+    @Nested
+    @DisplayName("throw ISE when invoked method produces")
+    class ThrowWhenProduces {
+
+        @Test
+        @DisplayName("no events")
+        void noEvents() {
+            HandlerReturnsEmptyList handlerObject = new HandlerReturnsEmptyList();
+            CommandHandlerMethod handler = from(handlerObject.getHandler());
+            RefCreateProject cmd = createProject();
+
+            assertThrows(IllegalStateException.class,
+                         () -> handler.invoke(handlerObject, cmd, emptyContext));
+        }
+
+        @Test
+        @DisplayName("`Empty` event")
+        void emptyEvent() {
+            HandlerReturnsEmpty handlerObject = new HandlerReturnsEmpty();
+            CommandHandlerMethod handler = from(handlerObject.getHandler());
+            RefCreateProject cmd = createProject();
+
+            assertThrows(IllegalStateException.class,
+                         () -> handler.invoke(handlerObject, cmd, emptyContext));
         }
     }
 

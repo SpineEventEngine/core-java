@@ -189,12 +189,6 @@ class ProcessManagerTest {
         return events;
     }
 
-    @Test
-    @DisplayName("have default state initially")
-    void haveDefaultStateInitially() {
-        assertEquals(processManager.getDefaultState(), processManager.getState());
-    }
-
     @Nested
     @DisplayName("dispatch")
     class Dispatch {

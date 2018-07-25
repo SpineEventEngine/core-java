@@ -270,11 +270,6 @@ public abstract class TransactionalEntity<I,
         public int getIndex() {
             return this.index;
         }
-
-        @Override
-        public Class<?> getArgumentIn(Class<? extends TransactionalEntity> cls) {
-            return Default.getArgument(this, cls);
-        }
     }
 
     /**
