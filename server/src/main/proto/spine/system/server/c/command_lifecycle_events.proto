@@ -60,7 +60,7 @@ message CommandAcknowledged {
     // The ID of the command.
     spine.core.CommandId id = 1;
 
-    // The time when the event occuered.
+    // The time when the event occurred.
     google.protobuf.Timestamp when = 2 [(required) = true];
 }
 
@@ -75,7 +75,7 @@ message CommandScheduled {
     // The schedule to execute the command.
     spine.core.CommandContext.Schedule schedule = 2 [(valid) = true];
 
-    // The time when the event occuered.
+    // The time when the event occurred.
     google.protobuf.Timestamp when = 3 [(required) = true];
 }
 
@@ -86,7 +86,7 @@ message CommandDispatched {
     // The ID of the command.
     spine.core.CommandId id = 1;
 
-    // The time when the event occuered.
+    // The time when the event occurred.
     google.protobuf.Timestamp when = 2 [(required) = true];
 }
 
@@ -100,7 +100,7 @@ message CommandHandled {
     // The receiver of the command.
     CommandReceiver receiver = 2 [(valid) = true];
 
-    // The time when the event occuered.
+    // The time when the event occurred.
     google.protobuf.Timestamp when = 3 [(required) = true];
 }
 
@@ -114,7 +114,7 @@ message CommandErrored {
     // The runtime error.
     spine.base.Error error = 2 [(valid) = true];
 
-    // The time when the event occuered.
+    // The time when the event occurred.
     google.protobuf.Timestamp when = 3 [(required) = true];
 }
 
@@ -128,6 +128,6 @@ message CommandRejected {
     // The command rejection.
     spine.core.Rejection rejection = 2;
 
-    // The time when the event occuered.
+    // The time when the event occurred.
     google.protobuf.Timestamp when = 3 [(required) = true];
 }
