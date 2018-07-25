@@ -334,7 +334,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
         commandErrorHandler.handleError(envelope, exception)
-                           .rethrowIfRuntime();
+                           .rethrow();
     }
 
     @Override

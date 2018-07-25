@@ -135,10 +135,16 @@ public final class CommandErrorHandler {
     }
 
     /**
-     * A result of an error handling.
+     * A wrapper for a handled error.
+     *
+     * <p>{@linkplain #rethrow() Rethrows} the encountered {@link RuntimeException} if it is not
+     * caused by a {@link Rejection} or has already been rethrown by a {@code CommandErrorHandler}.
      */
     public static final class HandledError {
 
+        /**
+         * The instance of {@code HandledError} with {@code null} exception.
+         */
         private static final HandledError EMPTY = new HandledError(null);
 
         /**
@@ -166,11 +172,12 @@ public final class CommandErrorHandler {
         }
 
         /**
-         * Rethrows the handled exception if it was <b>not</b> caused by a {@link Rejection}.
+         * Rethrows the handled exception if it was <b>not</b> caused by a {@link Rejection} or
+         * rethrown earlier.
          *
-         * <p>If the exception was caused by a {@link Rejection}, preforms no action.
+         * <p>Otherwise, preforms no action.
          */
-        public void rethrowIfRuntime() {
+        public void rethrow() {
             if (exception != null) {
                 throw new CommandDispatchingException(exception);
             }
