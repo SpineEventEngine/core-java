@@ -129,7 +129,7 @@ class ColumnValueExtractorTest {
     }
 
     private static class PrivateEntity extends AbstractEntity<String, Any> {
-        protected PrivateEntity(String id) {
+        PrivateEntity(String id) {
             super(id);
         }
 
