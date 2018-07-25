@@ -21,7 +21,6 @@
 package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Any;
@@ -64,6 +63,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -267,7 +267,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     @Override
     public Iterator<E> iterator(Predicate<E> filter) {
         Iterator<E> unfiltered = new EntityIterator<>(this);
-        Iterator<E> filtered = Iterators.filter(unfiltered, filter);
+        Iterator<E> filtered = Iterators.filter(unfiltered, filter::test);
         return filtered;
     }
 

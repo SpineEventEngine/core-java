@@ -20,7 +20,6 @@
 
 package io.spine.server.procman;
 
-import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
@@ -64,6 +63,7 @@ import io.spine.server.route.RejectionProducers;
 import io.spine.server.route.RejectionRouting;
 
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
@@ -126,7 +126,7 @@ public abstract class ProcessManagerRepository<I,
      * Creates a new instance with the event routing by the first message field.
      */
     protected ProcessManagerRepository() {
-        super(EventProducers.<I>fromFirstMessageField());
+        super(EventProducers.fromFirstMessageField());
     }
 
     /** Obtains class information of process managers managed by this repository. */
@@ -462,7 +462,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
         Iterable<ShardedStreamConsumer<?, ?>> result =
-                ImmutableList.<ShardedStreamConsumer<?, ?>>of(
+                ImmutableList.of(
                         getCommandEndpointDelivery().getConsumer(),
                         getEventEndpointDelivery().getConsumer(),
                         getRejectionEndpointDelivery().getConsumer());

@@ -19,7 +19,6 @@
  */
 package io.spine.server.delivery.given;
 
-import com.google.common.base.Function;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.BoundedContextName;
@@ -48,6 +47,8 @@ import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.validate.StringValueVBuilder;
+
+import java.util.function.Function;
 
 import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;

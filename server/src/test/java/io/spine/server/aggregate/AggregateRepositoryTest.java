@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.FloatValue;
@@ -361,7 +360,7 @@ public class AggregateRepositoryTest {
         op.execute();
 
         Iterator<ProjectAggregate> iterator =
-                repository().iterator(Predicates.alwaysTrue());
+                repository().iterator(aggregate -> true);
 
         // This should iterate through all and fail.
         assertThrows(IllegalStateException.class, () -> Lists.newArrayList(iterator));
