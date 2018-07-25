@@ -263,6 +263,9 @@ class CommandAckMonitorTest {
         return Buses.reject(commandId, rejection);
     }
 
+    /**
+     * A {@link SystemGateway} which memoizes the posted system commands.
+     */
     private static final class MemoizingGateway implements SystemGateway {
 
         private final List<Message> commands = newLinkedList();
@@ -272,11 +275,25 @@ class CommandAckMonitorTest {
             commands.add(systemCommand);
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Always returns an empty iterator for the sake of tests.
+         *
+         * @return an empty {@link java.util.Iterator Iterator}
+         */
         @Override
         public CommandIndex commandIndex() {
             return Collections::emptyIterator;
         }
 
+        /**
+         * Obtains the single posted system command.
+         *
+         * <p>Fails if the were no commands posted or if there were more then one commands.
+         *
+         * @return the single posted command message
+         */
         private Message singleCommand() {
             assertEquals(1, commands.size());
             return commands.get(0);
