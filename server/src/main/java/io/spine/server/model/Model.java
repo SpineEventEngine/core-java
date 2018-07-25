@@ -26,7 +26,9 @@ import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.aggregate.model.AggregatePartClass;
 import io.spine.server.command.CommandHandler;
+import io.spine.server.command.Commander;
 import io.spine.server.command.model.CommandHandlerClass;
+import io.spine.server.command.model.CommanderClass;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.EventSubscriber;
@@ -100,6 +102,13 @@ public class Model {
         checkNotNull(cls);
         ModelClass<?> modelClass = classes.get(cls, () -> new AggregatePartClass<>(cls));
         return (AggregatePartClass<?>) modelClass;
+    }
+
+    public CommanderClass<?> asCommanderClass(Class<? extends Commander> cls)
+            throws DuplicateCommandHandlerError {
+        checkNotNull(cls);
+        ModelClass<?> modelClass = classes.get(cls, () -> CommanderClass.of(cls));
+        return (CommanderClass<?>) modelClass;
     }
 
     /**

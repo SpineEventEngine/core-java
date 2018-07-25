@@ -20,12 +20,14 @@
 
 package io.spine.server.command;
 
-import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
+import io.spine.server.command.model.CommandSubstMethod;
+import io.spine.server.command.model.CommanderClass;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
+import io.spine.server.model.Model;
 
 import java.util.Set;
 
@@ -45,6 +47,8 @@ import java.util.Set;
  */
 public abstract class Commander extends AbstractCommandDispatcher {
 
+    private final CommanderClass<?> thisClass = Model.getInstance()
+                                                     .asCommanderClass(getClass());
     private final CommandBus commandBus;
 
     protected Commander(CommandBus commandBus, EventBus eventBus) {
@@ -54,15 +58,17 @@ public abstract class Commander extends AbstractCommandDispatcher {
 
     @Override
     public Set<CommandClass> getMessageClasses() {
-        //TODO:2018-07-20:alexander.yevsyukov: This should be obtained by inspecting methods in the model class.
-        return Sets.newHashSet();
+        return thisClass.getCommands();
     }
 
     @CanIgnoreReturnValue
     @Override
     public String dispatch(CommandEnvelope envelope) {
+        CommandSubstMethod method = thisClass.getHandler(envelope.getMessageClass());
         //TODO:2018-07-20:alexander.yevsyukov: Dispatch the envelope to the method.
         // Post resulting events of command transformations to the EventBus.
+//        Dispatch<CommandEnvelope> dispatch = Dispatch.of(envelope)
+//                                                     .to(this, method);
         return getId();
     }
 }

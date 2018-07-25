@@ -23,6 +23,8 @@ package io.spine.server.command.model;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.model.ModelClass;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Provides message handling information on a command handler class.
  *
@@ -39,6 +41,7 @@ public final class CommandHandlerClass<C extends CommandHandler>
     }
 
     public static ModelClass<?> of(Class<? extends CommandHandler> cls) {
+        checkNotNull(cls);
         return new CommandHandlerClass<>(cls);
     }
 }

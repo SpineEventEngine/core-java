@@ -34,8 +34,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Mykhailo Drachuk
  */
-public final class CommandDispatchFactory extends MessageDispatchFactory<CommandEnvelope, 
-                                                                         CommandHandlerMethod> {
+public final class CommandDispatchFactory
+        extends MessageDispatchFactory<CommandEnvelope, CommandHandlerMethod> {
+
     CommandDispatchFactory(CommandEnvelope command) {
         super(command);
     }
