@@ -32,9 +32,6 @@ import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmTaskAdded;
 import io.spine.validate.ConstraintViolation;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -55,34 +52,44 @@ class PmTransactionTest
                                                  .build();
 
     @Override
-    protected Transaction<ProjectId,
+    protected Transaction<
+            ProjectId,
             ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
             Project,
-            PatchedProjectBuilder>
+            PatchedProjectBuilder
+            >
     createTx(ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity) {
         return new PmTransaction<>(entity);
     }
 
     @Override
-    protected Transaction<ProjectId,
+    protected Transaction<
+            ProjectId,
             ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
             Project,
-            PatchedProjectBuilder> createTxWithState(
-            ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity, Project state,
-            Version version) {
+            PatchedProjectBuilder
+            >
+    createTxWithState(ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
+                      Project state,
+                      Version version) {
         return new PmTransaction<>(entity, state, version);
     }
 
     @Override
-    protected Transaction<ProjectId, ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
-            Project, PatchedProjectBuilder>
-    createTxWithListener(ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
-                         TransactionListener<ProjectId,
-                                             ProcessManager<ProjectId,
-                                                            Project,
-                                                            PatchedProjectBuilder>,
-                                             Project,
-                                             PatchedProjectBuilder> listener) {
+    protected Transaction<
+            ProjectId,
+            ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
+            Project,
+            PatchedProjectBuilder
+            >
+    createTxWithListener(
+            ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
+            TransactionListener<
+                    ProjectId,
+                    ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
+                    Project,
+                    PatchedProjectBuilder
+                    > listener) {
         PmTransaction<ProjectId, Project, PatchedProjectBuilder> transaction =
                 new PmTransaction<>(entity);
         transaction.setListener(listener);
@@ -139,13 +146,5 @@ class PmTransactionTest
             RuntimeException toThrow) {
         entity.getBuilder()
               .setShouldThrow(toThrow);
-    }
-
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Test case common to ancestor.
-    @Disabled // The behavior is changed. The version should be auto incremented.
-    @Test
-    @DisplayName("advance version from event")
-    @Override
-    protected void advanceVersionFromEvent() {
     }
 }

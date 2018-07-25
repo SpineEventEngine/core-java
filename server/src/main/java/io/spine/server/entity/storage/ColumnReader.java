@@ -20,7 +20,6 @@
 
 package io.spine.server.entity.storage;
 
-import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 
 import java.beans.BeanInfo;
@@ -50,8 +49,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @see Columns
  * @see EntityColumn
  */
-@Internal
-public class ColumnReader {
+class ColumnReader {
 
     private final Class<? extends Entity> entityClass;
 

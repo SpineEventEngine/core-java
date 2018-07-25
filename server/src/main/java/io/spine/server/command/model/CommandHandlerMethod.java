@@ -129,7 +129,7 @@ public final class CommandHandlerMethod extends CommandAcceptingMethod {
         @Override
         protected void checkThrownExceptions(Method method) {
             MethodExceptionChecker checker = MethodExceptionChecker.forMethod(method);
-            checker.checkThrowsNoExceptionsBut(RuntimeException.class, ThrowableMessage.class);
+            checker.checkThrowsNoExceptionsBut(ThrowableMessage.class);
         }
 
         @Override

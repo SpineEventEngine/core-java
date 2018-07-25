@@ -75,8 +75,8 @@ class EntityQueryMatcherTest {
 
         EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
 
-        assertFalse(matcher.apply(null));
-        assertTrue(matcher.apply(of(EntityRecord.getDefaultInstance())));
+        assertFalse(matcher.test(null));
+        assertTrue(matcher.test(of(EntityRecord.getDefaultInstance())));
     }
 
     @Test
@@ -97,8 +97,8 @@ class EntityQueryMatcherTest {
                                                .build();
         EntityRecordWithColumns matchingRecord = of(matching);
         EntityRecordWithColumns nonMatchingRecord = of(nonMatching);
-        assertTrue(matcher.apply(matchingRecord));
-        assertFalse(matcher.apply(nonMatchingRecord));
+        assertTrue(matcher.test(matchingRecord));
+        assertFalse(matcher.test(nonMatchingRecord));
     }
 
     @SuppressWarnings({"unchecked",           // Mocks <-> reflection issues
@@ -141,8 +141,8 @@ class EntityQueryMatcherTest {
         EntityRecordWithColumns nonMatchingRecord = of(nonMatching);
         EntityRecordWithColumns matchingRecord = createRecord(matching, matchingColumns);
 
-        assertTrue(matcher.apply(matchingRecord));
-        assertFalse(matcher.apply(nonMatchingRecord));
+        assertTrue(matcher.test(matchingRecord));
+        assertFalse(matcher.test(nonMatchingRecord));
     }
 
     @Test
@@ -174,7 +174,7 @@ class EntityQueryMatcherTest {
         EntityQuery<?> query = createQuery(emptySet(), parameters);
 
         EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
-        assertTrue(matcher.apply(recordWithColumns));
+        assertTrue(matcher.test(recordWithColumns));
     }
 
     @Test
@@ -195,7 +195,7 @@ class EntityQueryMatcherTest {
                                           .setEntityId(Any.getDefaultInstance())
                                           .build();
         EntityRecordWithColumns recordWithColumns = of(record);
-        assertFalse(matcher.apply(recordWithColumns));
+        assertFalse(matcher.test(recordWithColumns));
     }
 
     private static QueryParameters defaultQueryParameters() {

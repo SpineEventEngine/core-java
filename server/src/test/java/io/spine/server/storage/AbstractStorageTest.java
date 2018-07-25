@@ -133,7 +133,7 @@ public abstract class AbstractStorageTest<I,
 
     /** Closes the storage and fails the test if any exception occurs. */
     @SuppressWarnings("CallToPrintStackTrace")
-    protected void closeAndFailIfException(AbstractStorage<I, M, R> storage) {
+    private void closeAndFailIfException(AbstractStorage<I, M, R> storage) {
         try {
             storage.close();
         } catch (Exception e) {
@@ -144,7 +144,7 @@ public abstract class AbstractStorageTest<I,
 
     /** Writes a record, reads it and asserts it is the same as the expected one. */
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We do check.
-    protected void writeAndReadRecordTest(I id) {
+    private void writeAndReadRecordTest(I id) {
         M expected = writeRecord(id);
 
         R readRequest = newReadRequest(id);
@@ -171,7 +171,7 @@ public abstract class AbstractStorageTest<I,
     }
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // This is the purpose of the method.
-    protected void assertResultForMissingId(Optional<M> record) {
+    private void assertResultForMissingId(Optional<M> record) {
         assertFalse(record.isPresent());
     }
 

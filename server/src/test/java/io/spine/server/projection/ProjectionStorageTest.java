@@ -47,7 +47,6 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.server.projection.given.ProjectionStorageTestEnv.givenProject;
 import static io.spine.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
@@ -68,7 +67,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 @SuppressWarnings("unused") // JUnit nested classes considered unused in abstract class.
 public abstract class ProjectionStorageTest
-        extends RecordStorageTest<ProjectId, ProjectionStorage<ProjectId>> {
+        extends RecordStorageTest<ProjectionStorage<ProjectId>> {
 
     private ProjectionStorage<ProjectId> storage;
 
@@ -110,13 +109,6 @@ public abstract class ProjectionStorageTest
     @Override
     protected EntityRecord newStorageRecord() {
         return newEntityStorageRecord();
-    }
-
-    @Override
-    protected ProjectId newId() {
-        return ProjectId.newBuilder()
-                        .setId(newUuid())
-                        .build();
     }
 
     @BeforeEach
@@ -215,6 +207,27 @@ public abstract class ProjectionStorageTest
                 assertMatchesMask(state, fieldMask);
             }
         }
+
+        private List<ProjectId> fillStorage(int count) {
+            List<ProjectId> ids = new LinkedList<>();
+
+            for (int i = 0; i < count; i++) {
+                ProjectId id = newId();
+                Project state = givenProject(id, format("project-%d", i));
+                Any packedState = AnyPacker.pack(state);
+
+                EntityRecord rawRecord = EntityRecord
+                        .newBuilder()
+                        .setState(packedState)
+                        .setVersion(GivenVersion.withNumber(1))
+                        .build();
+                EntityRecordWithColumns record = withLifecycleColumns(rawRecord);
+                storage.write(id, record);
+                ids.add(id);
+            }
+
+            return ids;
+        }
     }
 
     @Test
@@ -242,35 +255,13 @@ public abstract class ProjectionStorageTest
             writeAndReadLastEventTimeTest(time1);
             writeAndReadLastEventTimeTest(time2);
         }
-    }
 
-    @SuppressWarnings("ConstantConditions") // Converter nullability issues
-    private List<ProjectId> fillStorage(int count) {
-        List<ProjectId> ids = new LinkedList<>();
+        private void writeAndReadLastEventTimeTest(Timestamp expected) {
+            storage.writeLastHandledEventTime(expected);
 
-        for (int i = 0; i < count; i++) {
-            ProjectId id = newId();
-            Project state = givenProject(id, format("project-%d", i));
-            Any packedState = AnyPacker.pack(state);
+            Timestamp actual = storage.readLastHandledEventTime();
 
-            EntityRecord rawRecord = EntityRecord
-                    .newBuilder()
-                    .setState(packedState)
-                    .setVersion(GivenVersion.withNumber(1))
-                    .build();
-            EntityRecordWithColumns record = withLifecycleColumns(rawRecord);
-            storage.write(id, record);
-            ids.add(id);
+            assertEquals(expected, actual);
         }
-
-        return ids;
-    }
-
-    private void writeAndReadLastEventTimeTest(Timestamp expected) {
-        storage.writeLastHandledEventTime(expected);
-
-        Timestamp actual = storage.readLastHandledEventTime();
-
-        assertEquals(expected, actual);
     }
 }

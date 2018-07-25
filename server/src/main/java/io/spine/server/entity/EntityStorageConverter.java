@@ -32,6 +32,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 
@@ -88,9 +89,10 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
     protected EntityRecord doForward(E entity) {
         Any entityId = Identifier.pack(entity.getId());
         Any stateAny = pack(entity.getState());
-        EntityRecord.Builder builder = EntityRecord.newBuilder()
-                                                   .setEntityId(entityId)
-                                                   .setState(stateAny);
+        EntityRecord.Builder builder = EntityRecord
+                .newBuilder()
+                .setEntityId(entityId)
+                .setState(stateAny);
         updateBuilder(builder, entity);
         return builder.build();
     }
@@ -113,13 +115,10 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
     protected E doBackward(EntityRecord entityRecord) {
         S unpacked = unpack(entityRecord.getState());
         S state = FieldMasks.applyMask(getFieldMask(), unpacked, entityStateType);
-
         I id = Identifier.unpack(entityRecord.getEntityId());
         E entity = entityFactory.create(id);
-
-        if (entity != null) {
-            injectState(entity, state, entityRecord);
-        }
+        checkState(entity != null, "EntityFactory produced null entity.");
+        injectState(entity, state, entityRecord);
         return entity;
     }
 
