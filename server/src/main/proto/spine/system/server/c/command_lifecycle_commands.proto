@@ -37,7 +37,7 @@ import "spine/core/rejection.proto";
 import "spine/client/entities.proto";
 import "spine/system/server/command_lifecycle.proto";
 
-// A comand to receive a new command.
+// A system comand to mark a domain command as received.
 //
 message MarkCommandAsReceived {
 
@@ -48,7 +48,7 @@ message MarkCommandAsReceived {
     spine.core.Command payload = 2 [(required) = true];
 }
 
-// A comand to mark a command as acknowledged.
+// A system comand to mark a domain command as acknowledged.
 //
 message MarkCommandAsAcknowledged {
 
@@ -56,9 +56,12 @@ message MarkCommandAsAcknowledged {
     spine.core.CommandId id = 1;
 }
 
-// A command to schedule a command.
+// A system command to schedule a domain command.
 //
-// The command schedule configuration should be obtained from the command directly.
+// After handling this command, the domain command is considered scheduled.
+//
+// See `spine.system.server.ScheduledCommandRecord` projection for the scheduled command
+// representation.
 //
 message ScheduleCommand {
 
@@ -69,7 +72,7 @@ message ScheduleCommand {
     spine.core.CommandContext.Schedule schedule = 2 [(valid) = true];
 }
 
-// A comand to dispatch a command to a handler.
+// A system comand to mark a domain command as dispatched.
 //
 message MarkCommandAsDispatched {
 
@@ -77,7 +80,7 @@ message MarkCommandAsDispatched {
     spine.core.CommandId id = 1;
 }
 
-// A comand to mark a command as handled.
+// A system comand to mark a domain command as handled.
 //
 // Posted only after a successful command handling.
 //
@@ -90,9 +93,9 @@ message MarkCommandAsHandled {
     CommandReceiver receiver = 2 [(valid) = true];
 }
 
-// A comand to mark a command as handled.
+// A system comand to mark a domain command as handled.
 //
-// Posted if the command handler has failed with a runtime error.
+// Posted if command processing caused a runtime error at any point.
 //
 message MarkCommandAsErrored {
 
@@ -103,7 +106,7 @@ message MarkCommandAsErrored {
     spine.base.Error error = 2 [(required) = true];
 }
 
-// A comand to mark a command as rejected.
+// A system comand to mark a domain command as rejected.
 //
 // Posted if the command handler has rejected the command.
 //
