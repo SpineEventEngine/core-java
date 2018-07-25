@@ -23,7 +23,6 @@ package io.spine.server.entity.storage;
 import io.spine.server.entity.Entity;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,10 +34,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>Each {@code ColumnValueExtractor} instance is created for the specific {@link Entity} and
  * the specific set of {@linkplain EntityColumn columns}.
- *
- * <p>This class does not process {@link Entity} classes that are non-public or cannot be subjected
- * to column extraction for some other reason. For them, {@linkplain Collections#emptyMap() empty map}
- * will be returned instead of column values.
  *
  * @author Dmytro Kuzmin
  * @see Columns
@@ -58,15 +53,17 @@ class ColumnValueExtractor {
      * Creates an instance of {@link ColumnValueExtractor} for the given {@link Entity} and
      * {@link Collection} of {@linkplain EntityColumn entity columns}.
      *
-     * <p>This instance can be further used to {@linkplain ColumnValueExtractor#extractColumnValues() extract}
-     * column values from the given {@link Entity}.
+     * <p>This instance can be further used to
+     * {@linkplain ColumnValueExtractor#extractColumnValues() extract} column values from the given
+     * {@link Entity}.
      *
      * <p>This method accepts an {@linkplain Collection#isEmpty() empty} collection of columns as an
      * argument, but no values will be extracted in this case.
      *
-     * @param entity        {@link Entity} for which to create the {@code ColumnValueExtractor}
-     * @param entityColumns list of {@linkplain EntityColumn entity columns} to extract from the {@link Entity}
-     * @return new instance of the {@code ColumnValueExtractor}
+     * @param entity        the {@link Entity} for which to create the {@code ColumnValueExtractor}
+     * @param entityColumns the list of {@linkplain EntityColumn entity columns} to extract from the
+     *                      {@link Entity}
+     * @return the new instance of the {@code ColumnValueExtractor}
      */
     static ColumnValueExtractor create(Entity entity, Collection<EntityColumn> entityColumns) {
         checkNotNull(entity);
@@ -76,11 +73,8 @@ class ColumnValueExtractor {
     }
 
     /**
-     * Extracts the {@linkplain EntityColumn column} values for the processed {@link Entity} using specified
-     * {@linkplain EntityColumn entity columns}.
-     *
-     * <p>This method will return {@linkplain Collections#emptyMap() empty map} for {@link Entity} classes
-     * that are non-public or cannot be subjected to column extraction for some other reason.
+     * Extracts the {@linkplain EntityColumn column} values for the processed {@link Entity} using
+     * specified {@linkplain EntityColumn entity columns}.
      *
      * @return a {@code Map} of the column {@linkplain EntityColumn#getStoredName()
      *         names for storing} to their {@linkplain EntityColumn.MemoizedValue memoized values}
