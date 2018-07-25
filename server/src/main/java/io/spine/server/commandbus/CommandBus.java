@@ -24,14 +24,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
-import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
 import io.spine.core.TenantId;
@@ -43,8 +41,6 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.MarkCommandAsDispatched;
-import io.spine.system.server.ScheduleCommand;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -78,6 +74,7 @@ public class CommandBus extends Bus<Command,
     private final SystemGateway systemGateway;
     private final TenantIndex tenantIndex;
     private final CommandErrorHandler errorHandler;
+    private final CommandFlowWatcher flowWatcher;
 
     /**
      * Is {@code true}, if the {@code BoundedContext} (to which this {@code CommandBus} belongs)
@@ -127,6 +124,7 @@ public class CommandBus extends Bus<Command,
                                                .setRejectionBus(rejectionBus)
                                                .setSystemGateway(systemGateway)
                                                .build();
+        this.flowWatcher = builder.flowWatcher;
     }
 
     /**
@@ -223,31 +221,12 @@ public class CommandBus extends Bus<Command,
     @Override
     protected void dispatch(CommandEnvelope envelope) {
         CommandDispatcher<?> dispatcher = getDispatcher(envelope);
-        onDispatchCommand(envelope);
+        flowWatcher.onDispatchCommand(envelope);
         try {
             dispatcher.dispatch(envelope);
         } catch (RuntimeException exception) {
             errorHandler.handleError(envelope, exception);
         }
-    }
-
-    private void onDispatchCommand(CommandEnvelope command) {
-        MarkCommandAsDispatched systemCommand = MarkCommandAsDispatched
-                .newBuilder()
-                .setId(command.getId())
-                .build();
-        postSystem(systemCommand, command.getTenantId());
-    }
-
-    void onScheduled(CommandEnvelope envelope) {
-        CommandContext context = envelope.getCommandContext();
-        CommandContext.Schedule schedule = context.getSchedule();
-        ScheduleCommand systemCommand = ScheduleCommand
-                .newBuilder()
-                .setId(envelope.getId())
-                .setSchedule(schedule)
-                .build();
-        postSystem(systemCommand, envelope.getTenantId());
     }
 
     /**
@@ -308,10 +287,6 @@ public class CommandBus extends Bus<Command,
             throw noDispatcherFound(commandEnvelope);
         }
         return dispatcher.get();
-    }
-
-    private void postSystem(Message systemCommand, TenantId tenantId) {
-        systemGateway.postCommand(systemCommand, tenantId);
     }
 
     /**
@@ -380,6 +355,8 @@ public class CommandBus extends Bus<Command,
         private SystemGateway systemGateway;
 
         private TenantIndex tenantIndex;
+
+        private CommandFlowWatcher flowWatcher;
 
         /**
          * Checks whether the manual {@link Thread} spawning is allowed within
@@ -531,6 +508,9 @@ public class CommandBus extends Bus<Command,
             if (autoReschedule) {
                 commandBus.rescheduleCommands();
             }
+            flowWatcher = new CommandFlowWatcher(systemGateway);
+            commandScheduler.setFlowWatcher(flowWatcher);
+
             return commandBus;
         }
 

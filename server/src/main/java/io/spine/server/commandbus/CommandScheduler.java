@@ -58,6 +58,8 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
     private @Nullable Rescheduler rescheduler;
 
+    private @Nullable CommandFlowWatcher flowWatcher;
+
     protected CommandScheduler() {
     }
 
@@ -77,9 +79,12 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         this.rescheduler = rescheduler;
     }
 
-    private Rescheduler rescheduler() {
-        checkState(rescheduler != null, "Rescheduler is not initialized");
-        return rescheduler;
+    /**
+     * Assigns the {@code CommandFlowWatcher} to the scheduler during {@code CommandBus}
+     * {@linkplain CommandBus.Builder#build() construction}.
+     */
+    void setFlowWatcher(CommandFlowWatcher flowWatcher) {
+        this.flowWatcher = flowWatcher;
     }
 
     @Override
@@ -115,7 +120,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         rememberAsScheduled(commandUpdated);
 
         CommandEnvelope updatedCommandEnvelope = CommandEnvelope.of(commandUpdated);
-        commandBus().onScheduled(updatedCommandEnvelope);
+        flowWatcher().onScheduled(updatedCommandEnvelope);
     }
 
     /**
@@ -125,8 +130,18 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      * {@linkplain #setCommandBus(CommandBus) set} prior to calling this method
      */
     protected CommandBus commandBus() {
-        checkState(commandBus != null, "CommandBus is not set");
+        checkState(commandBus != null, "CommandBus is not set.");
         return commandBus;
+    }
+
+    private Rescheduler rescheduler() {
+        checkState(rescheduler != null, "Rescheduler is not initialized.");
+        return rescheduler;
+    }
+
+    private CommandFlowWatcher flowWatcher() {
+        checkState(flowWatcher != null, "CommandFlowWatcher is not initialized.");
+        return flowWatcher;
     }
 
     /**
