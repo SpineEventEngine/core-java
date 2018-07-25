@@ -56,7 +56,7 @@ final class SystemEnricher {
         checkNotNull(commandRepository);
         EventEnricher enricher = EventEnricher.newBuilder()
                                               .add(CommandId.class, Command.class,
-                                                   commandLookup(commandRepository)::apply)
+                                                   commandLookup(commandRepository))
                                               .build();
         return enricher;
     }

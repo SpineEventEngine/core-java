@@ -254,9 +254,7 @@ public final class BoundedContextBuilder {
 
     private BoundedContext buildDefault(SystemBoundedContext system) {
         BiFunction<BoundedContextBuilder, SystemGateway, DomainBoundedContext> instanceFactory =
-                (builder, systemGateway) -> DomainBoundedContext.newInstance(builder,
-                                                                             system,
-                                                                             systemGateway);
+                DomainBoundedContext::newInstance;
         SystemGateway systemGateway = new DefaultSystemGateway(system);
         BoundedContext result = buildPartial(instanceFactory, systemGateway);
         return result;
@@ -273,6 +271,7 @@ public final class BoundedContextBuilder {
         storage.ifPresent(system::setStorageFactorySupplier);
         Optional<? extends TenantIndex> tenantIndex = getTenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
+
         BiFunction<BoundedContextBuilder, SystemGateway, SystemBoundedContext> instanceFactory =
                 (builder, systemGateway) -> SystemBoundedContext.newInstance(builder);
         NoOpSystemGateway systemGateway = NoOpSystemGateway.INSTANCE;

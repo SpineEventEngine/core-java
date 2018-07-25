@@ -20,7 +20,6 @@
 
 package io.spine.server;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.spine.system.server.SystemGateway;
 
 /**
@@ -43,32 +42,23 @@ import io.spine.system.server.SystemGateway;
  */
 final class DomainBoundedContext extends BoundedContext {
 
-    private final SystemBoundedContext system;
     private final SystemGateway systemGateway;
 
     private DomainBoundedContext(BoundedContextBuilder builder,
-                                 SystemBoundedContext system,
                                  SystemGateway gateway) {
         super(builder);
-        this.system = system;
         this.systemGateway = gateway;
     }
 
     static DomainBoundedContext newInstance(BoundedContextBuilder builder,
-                                            SystemBoundedContext system,
                                             SystemGateway gateway) {
-        DomainBoundedContext result = new DomainBoundedContext(builder, system, gateway);
+        DomainBoundedContext result = new DomainBoundedContext(builder, gateway);
         result.init();
         return result;
     }
 
     private void init() {
         getStand().onCreated(this);
-    }
-
-    @VisibleForTesting
-    BoundedContext system() {
-        return system;
     }
 
     @Override

@@ -83,6 +83,10 @@ public final class DefaultSystemGateway implements SystemGateway {
         return DomainCommandIndex.atopOf(commandRepository);
     }
 
+    BoundedContext target() {
+        return system;
+    }
+
     private ActorRequestFactory buildRequestFactory(@Nullable TenantId tenantId) {
         if (tenantId == null || isDefault(tenantId)) {
             return system.isMultitenant()

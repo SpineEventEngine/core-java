@@ -18,12 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.system.server;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import io.spine.server.BoundedContext;
 
 /**
- * A test utility for working with {@link SystemBoundedContext}s.
+ * A test utility for working with system {@link BoundedContext}s.
  *
  * @author Dmytro Dashenkov
  */
@@ -39,8 +39,7 @@ public final class SystemBoundedContexts {
      * Extracts the {@code System} bounded context from the given bounded context.
      */
     public static BoundedContext systemOf(BoundedContext context) {
-        checkArgument(context instanceof DomainBoundedContext);
-        DomainBoundedContext defaultContext = (DomainBoundedContext) context;
-        return defaultContext.system();
+        DefaultSystemGateway gateway = (DefaultSystemGateway) context.getSystemGateway();
+        return gateway.target();
     }
 }
