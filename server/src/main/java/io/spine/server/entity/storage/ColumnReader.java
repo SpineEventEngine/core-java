@@ -20,7 +20,6 @@
 
 package io.spine.server.entity.storage;
 
-import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 
 import java.beans.BeanInfo;
