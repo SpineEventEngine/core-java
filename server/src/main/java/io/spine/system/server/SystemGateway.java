@@ -44,7 +44,26 @@ public interface SystemGateway {
         postCommand(systemCommand, null);
     }
 
+    /**
+     * Posts a system command for the given tenant.
+     *
+     * <p>If the {@code tenantId} is {@code null} or
+     * {@linkplain io.spine.validate.Validate#isDefault(Message) default}, posts the command for
+     * the {@linkplain io.spine.server.tenant.TenantFunction current tenant} in multitenant
+     * environment or the default tenant in a single-tenant environment.
+     *
+     * @param systemCommand the system command to post
+     * @param tenantId      the ID of the tenant to post the command for
+     */
     void postCommand(Message systemCommand, @Nullable TenantId tenantId);
 
+    /**
+     * Obtains a {@link CommandIndex} over the commands of the associated domain bounded context.
+     *
+     * <p>The system bounded context keeps track of all the domain commands. {@link CommandIndex} is
+     * a view on the data about domain commands managed by the system bounded context.
+     *
+     * @return the index over the domain commands
+     */
     CommandIndex commandIndex();
 }
