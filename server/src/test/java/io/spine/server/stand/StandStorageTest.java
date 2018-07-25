@@ -41,9 +41,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -196,7 +196,7 @@ public abstract class StandStorageTest
         private List<AggregateStateId> fill(StandStorage storage,
                                             int count,
                                             Supplier<AggregateStateId<ProjectId>> idSupplier) {
-            List<AggregateStateId> ids = new LinkedList<>();
+            List<AggregateStateId> ids = new ArrayList<>(count);
 
             for (int i = 0; i < count; i++) {
                 AggregateStateId genericId = idSupplier.get();
