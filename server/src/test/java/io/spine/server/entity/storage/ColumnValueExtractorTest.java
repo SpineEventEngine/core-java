@@ -128,6 +128,7 @@ class ColumnValueExtractorTest {
         return columnValueExtractor.extractColumnValues();
     }
 
+    @SuppressWarnings("WeakerAccess") // Entity column should be public.
     private static class PrivateEntity extends AbstractEntity<String, Any> {
         PrivateEntity(String id) {
             super(id);
