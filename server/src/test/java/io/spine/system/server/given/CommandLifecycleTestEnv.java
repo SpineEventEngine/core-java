@@ -21,6 +21,7 @@
 package io.spine.system.server.given;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
@@ -53,7 +54,6 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Collections.emptyList;
 
 /**
  * The environment for the {@link io.spine.system.server.CommandLifecycleAggregate CommandLifecycle}
@@ -119,19 +119,19 @@ public final class CommandLifecycleTestEnv {
         public static final String FAULTY_NAME = "This name is exceptionally faulty";
 
         @Assign
-        List<Message> handle(StartCompanyEstablishing command) {
+        Empty handle(StartCompanyEstablishing command) {
             getBuilder().setId(command.getId());
 
-            return emptyList();
+            return Empty.getDefaultInstance();
         }
 
         @Assign
-        List<Message> handle(ProposeCompanyName command) {
+        Empty handle(ProposeCompanyName command) {
             String name = command.getName();
             checkArgument(!name.equals(FAULTY_NAME));
             getBuilder().addProposedName(name);
 
-            return emptyList();
+            return Empty.getDefaultInstance();
         }
 
         @Assign

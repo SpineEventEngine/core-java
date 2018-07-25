@@ -42,6 +42,7 @@ import io.spine.system.server.given.CommandLifecycleTestEnv.TestProcmanRepositor
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -148,6 +149,8 @@ class CommandLifecycleTest {
             checkRejected(commandId, Rejections.CompanyNameAlreadyTaken.class);
         }
 
+        // TODO:2018-07-25:dmytro.dashenkov: Re-enable.
+        @Disabled("google.protobuf.Empty is temporally impossible to return from @Assign")
         @Test
         @DisplayName("causes a runtime exception")
         void errored() {
