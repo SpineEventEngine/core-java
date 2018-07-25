@@ -29,22 +29,16 @@ import io.spine.core.Rejection;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
+import io.spine.server.MemoizingGateway;
 import io.spine.server.bus.Buses;
-import io.spine.system.server.CommandIndex;
 import io.spine.system.server.MarkCommandAsAcknowledged;
 import io.spine.system.server.MarkCommandAsErrored;
 import io.spine.system.server.NoOpSystemGateway;
-import io.spine.system.server.SystemGateway;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-import java.util.List;
-
-import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
@@ -141,7 +135,7 @@ class CommandAckMonitorTest {
             Ack ack = okAck(commandId);
             monitor.onNext(ack);
 
-            Message actualCommand = gateway.singleCommand();
+            Message actualCommand = gateway.oneCommand();
             assertThat(actualCommand, instanceOf(MarkCommandAsAcknowledged.class));
             MarkCommandAsAcknowledged markAsAcknowledged = (MarkCommandAsAcknowledged) actualCommand;
             assertEquals(commandId, markAsAcknowledged.getId());
@@ -153,7 +147,7 @@ class CommandAckMonitorTest {
             Ack ack = errorAck(commandId);
             monitor.onNext(ack);
 
-            Message actualCommand = gateway.singleCommand();
+            Message actualCommand = gateway.oneCommand();
             assertThat(actualCommand, instanceOf(MarkCommandAsErrored.class));
             MarkCommandAsErrored markCommandAsErrored = (MarkCommandAsErrored) actualCommand;
             assertEquals(commandId, markCommandAsErrored.getId());
@@ -261,42 +255,5 @@ class CommandAckMonitorTest {
                 .setMessage(pack(getCurrentTime()))
                 .build();
         return Buses.reject(commandId, rejection);
-    }
-
-    /**
-     * A {@link SystemGateway} which memoizes the posted system commands.
-     */
-    private static final class MemoizingGateway implements SystemGateway {
-
-        private final List<Message> commands = newLinkedList();
-
-        @Override
-        public void postCommand(Message systemCommand, @Nullable TenantId tenantId) {
-            commands.add(systemCommand);
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * <p>Always returns an empty iterator for the sake of tests.
-         *
-         * @return an empty {@link java.util.Iterator Iterator}
-         */
-        @Override
-        public CommandIndex commandIndex() {
-            return Collections::emptyIterator;
-        }
-
-        /**
-         * Obtains the single posted system command.
-         *
-         * <p>Fails if the were no commands posted or if there were more then one commands.
-         *
-         * @return the single posted command message
-         */
-        private Message singleCommand() {
-            assertEquals(1, commands.size());
-            return commands.get(0);
-        }
     }
 }
