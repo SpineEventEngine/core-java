@@ -105,6 +105,8 @@ public class EntityTestEnv {
         }
     }
 
+    // TODO:2018-07-25:vladyslav.lubenskyi: https://github.com/SpineEventEngine/core-java/issues/788
+    // Figure out a way not to use Aggregate here.
     public static class TestAggregate extends Aggregate<String, StringValue, StringValueVBuilder> {
 
         protected TestAggregate(String id) {
