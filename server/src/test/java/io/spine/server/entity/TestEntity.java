@@ -55,7 +55,7 @@ public class TestEntity extends AbstractVersionableEntity<String, Project> {
                                                    .withId(entity.getId())
                                                    .withState(entity.getState())
                                                    .withVersion(entity.getVersion()
-                                                    .getNumber())
+                                                   .getNumber())
                                                    .build();
         return result;
     }
