@@ -40,6 +40,7 @@ import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.stand.AggregateStateId;
 import io.spine.server.stand.StandStorage;
 import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
@@ -65,17 +66,24 @@ public abstract class RecordStorage<I>
         implements StorageWithLifecycleFlags<I, EntityRecord, RecordReadRequest<I>>,
                    BulkStorageOperationsMixin<I, EntityRecord> {
 
-    private final EntityColumnCache entityColumnCache;
+    /**
+     * The cache for entity columns.
+     *
+     * <p>Is {@code null} for instances that do not support entity columns.
+     * @see RecordStorage(boolean)
+     */
+    private final @MonotonicNonNull EntityColumnCache entityColumnCache;
 
     /**
-     * Creates an instance of {@link RecordStorage} which doesn't support the {@link EntityColumnCache}.
+     * Creates an instance of {@link RecordStorage} which does not support
+     * the {@link EntityColumnCache}.
      *
-     * <p>This creation method should only be used for the {@link RecordStorage} descendants, that are
-     * containers for the other {@link RecordStorage} instance, which actually supports
+     * <p>This creation method should only be used for the {@link RecordStorage} descendants,
+     * that are containers for the other {@link RecordStorage} instance, which actually supports
      * {@link EntityColumnCache}, for example: {@link ProjectionStorage}, {@link StandStorage}.
      *
-     * <p>Instances created by this constructor should override {@link RecordStorage#entityColumnCache()}
-     * method.
+     * <p>Instances created by this constructor should override
+     * {@link RecordStorage#entityColumnCache()} method.
      */
     protected RecordStorage(boolean multitenant) {
         super(multitenant);
@@ -280,6 +288,21 @@ public abstract class RecordStorage<I>
     }
 
     /**
+     * Reads all the records matching the given {@link EntityQuery} and applies the given
+     * {@link FieldMask} to the resulting record states.
+     *
+     * <p>By default, if the query does not specify the {@linkplain LifecycleFlags}, but the entity
+     * supports them, all the resulting records are active. Otherwise the records obey
+     * the constraints provided by the query.
+     *
+     * @param  query     the query to execute
+     * @return the matching records mapped upon their IDs
+     */
+    public Iterator<EntityRecord> readAll(EntityQuery<I> query) {
+        return readAll(query, FieldMask.getDefaultInstance());
+    }
+
+    /**
      * Returns a {@code Collection} of {@linkplain Column columns} of the {@link Entity} managed
      * by this storage.
      *
@@ -294,17 +317,19 @@ public abstract class RecordStorage<I>
 
     /**
      * Returns a {@code Map} of {@linkplain EntityColumn columns} corresponded to the
-     * {@link LifecycleFlagField lifecycle storage fields} of the {@link Entity} class managed by this storage.
+     * {@link LifecycleFlagField lifecycle storage fields} of the {@link Entity} class managed
+     * by this storage.
      *
      * @return a {@code Map} of managed {@link Entity} lifecycle columns
-     * @throws IllegalArgumentException if a lifecycle field is not present in the managed {@link Entity} class
+     * @throws IllegalArgumentException if a lifecycle field is not present
+     *         in the managed {@link Entity} class
      * @see EntityColumn
      * @see Columns
      * @see LifecycleFlagField
      */
     @Internal
     public Map<String, EntityColumn> entityLifecycleColumns() {
-        HashMap<String, EntityColumn> lifecycleColumns = new HashMap<>();
+        Map<String, EntityColumn> lifecycleColumns = new HashMap<>();
         for (LifecycleFlagField field : LifecycleFlagField.values()) {
             String name = field.name();
             EntityColumn column = entityColumnCache().findColumn(name);
@@ -313,12 +338,20 @@ public abstract class RecordStorage<I>
         return lifecycleColumns;
     }
 
+    /**
+     * Obtains the entity column cache.
+     *
+     * @throws IllegalStateException if the storage {@linkplain RecordStorage(boolean)
+     * does not support} the cache
+     */
     @Internal
     public EntityColumnCache entityColumnCache() {
         if (entityColumnCache == null) {
-            throw new IllegalStateException("Entity column cache not initialized for this storage.");
+            throw newIllegalStateException(
+                    "Entity column cache is not initialized for the storage %s.",
+                    this
+            );
         }
-
         return entityColumnCache;
     }
 
@@ -338,8 +371,8 @@ public abstract class RecordStorage<I>
     protected abstract Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids);
 
     /** @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable) */
-    protected abstract Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids,
-                                                                            FieldMask fieldMask);
+    protected abstract
+    Iterator<@Nullable EntityRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask);
 
     /** @see BulkStorageOperationsMixin#readAll() */
     protected abstract Iterator<EntityRecord> readAllRecords();
@@ -350,8 +383,8 @@ public abstract class RecordStorage<I>
     /**
      * @see #readAll(EntityQuery, FieldMask)
      */
-    protected abstract Iterator<EntityRecord> readAllRecords(EntityQuery<I> query,
-                                                             FieldMask fieldMask);
+    protected abstract
+    Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask);
 
     /**
      * Writes a record and the associated {@link EntityColumn} values into the storage.
