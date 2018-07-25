@@ -86,7 +86,7 @@ class EntityHistoryTest {
     private BoundedContext context;
     private BoundedContext system;
 
-    private CommandWatcher commandWatcher;
+    private CommandMemoizingTap commandMemoizingTap;
 
     @BeforeEach
     void setUp() {
@@ -94,9 +94,9 @@ class EntityHistoryTest {
                 .newBuilder()
                 .setValue(EntityHistoryTest.class.getSimpleName())
                 .build();
-        commandWatcher = new CommandWatcher();
+        commandMemoizingTap = new CommandMemoizingTap();
         CommandBus.Builder commandBus = CommandBus.newBuilder()
-                .appendFilter(commandWatcher);
+                .appendFilter(commandMemoizingTap);
         context = BoundedContext
                 .newBuilder()
                 .setName(contextName)
@@ -417,7 +417,7 @@ class EntityHistoryTest {
 
     private <M extends Message> M findCommand(DispatchedCommand dispatchedCommand) {
         CommandId commandId = dispatchedCommand.getCommand();
-        Optional<M> found = commandWatcher.find(commandId);
+        Optional<M> found = commandMemoizingTap.find(commandId);
         assertTrue(found.isPresent());
         return found.get();
     }

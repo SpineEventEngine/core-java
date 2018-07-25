@@ -37,7 +37,7 @@ import static com.google.common.collect.Maps.newHashMap;
  *
  * @author Dmytro Dashenkov
  */
-final class CommandWatcher implements BusFilter<CommandEnvelope> {
+final class CommandMemoizingTap implements BusFilter<CommandEnvelope> {
 
     private final Map<CommandId, Message> commandMessages = newHashMap();
 
