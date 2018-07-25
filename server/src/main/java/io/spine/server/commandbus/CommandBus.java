@@ -204,7 +204,7 @@ public class CommandBus extends Bus<Command,
                                                   StreamObserver<Ack> source) {
         StreamObserver<Ack> wrappedSource = super.wrappedObserver(commands, source);
         TenantId tenant = tenantOf(commands);
-        StreamObserver<Ack> result = CommandAcknowledgementMonitor
+        StreamObserver<Ack> result = CommandAckMonitor
                 .newBuilder()
                 .setDelegate(wrappedSource)
                 .setTenantId(tenant)

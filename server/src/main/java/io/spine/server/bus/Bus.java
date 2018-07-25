@@ -163,10 +163,15 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * Transforms the given {@link StreamObserver}.
+     * Preprocesses the given {@link StreamObserver} before it receives the outcome of
+     * a {@link #post(Iterable, StreamObserver)} operation.
      *
      * <p>By default, returns the given {@code observer}. Override this method in order to change
      * the behaviour.
+     *
+     * <p>A typical implementation obtains the output from the base method
+     * (via {@code super.wrappedObserver(messages, source)}), creates a new {@link StreamObserver},
+     * which performs some custom logic and delegates its calls to the obtained observer instance.
      *
      * @param messages the messages to create an observer for
      * @param source   the source {@link StreamObserver} to be transformed
