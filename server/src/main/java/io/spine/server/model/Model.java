@@ -103,6 +103,46 @@ public class Model {
     }
 
     /**
+     * Obtains an instance of a command handler class information.
+     *
+     * <p>If the passed class was not added to the model before, it would be added as the result of
+     * this method call.
+     *
+     * @throws DuplicateCommandHandlerError if the passed command handler class handles one
+     *         or more commands which are already known to the model as handled by another class
+     */
+    public CommandHandlerClass asCommandHandlerClass(Class<? extends CommandHandler> cls)
+            throws DuplicateCommandHandlerError {
+        checkNotNull(cls);
+        ModelClass<?> modelClass = classes.get(cls, () -> CommandHandlerClass.of(cls));
+        return (CommandHandlerClass<?>) modelClass;
+    }
+
+    /**
+     * Obtains an instance of an entity class information.
+     *
+     * <p>If the passed class was not added to the model before, it would be added as the result of
+     * this method call.
+     */
+    public EntityClass<?> asEntityClass(Class<? extends Entity> cls) {
+        checkNotNull(cls);
+        ModelClass<?> modelClass = classes.get(cls, () -> new EntityClass<>(cls));
+        return (EntityClass<?>) modelClass;
+    }
+
+    /**
+     * Obtains an instance of event subscriber class information.
+     *
+     * <p>If the passed class was not added to the model before, it would be added as the result of
+     * this method call.
+     */
+    public EventSubscriberClass<?> asEventSubscriberClass(Class<? extends EventSubscriber> cls) {
+        checkNotNull(cls);
+        ModelClass<?> modelClass = classes.get(cls, () -> EventSubscriberClass.of(cls));
+        return (EventSubscriberClass<?>) modelClass;
+    }
+
+    /**
      * Obtains an instance of a process manager class information.
      *
      * <p>If the passed class was not added to the model before, it would be added as the result of
@@ -131,34 +171,6 @@ public class Model {
     }
 
     /**
-     * Obtains an instance of event subscriber class information.
-     *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
-     * this method call.
-     */
-    public EventSubscriberClass<?> asEventSubscriberClass(Class<? extends EventSubscriber> cls) {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> EventSubscriberClass.of(cls));
-        return (EventSubscriberClass<?>) modelClass;
-    }
-
-    /**
-     * Obtains an instance of a command handler class information.
-     *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
-     * this method call.
-     *
-     * @throws DuplicateCommandHandlerError if the passed command handler class handles one
-     *         or more commands which are already known to the model as handled by another class
-     */
-    public CommandHandlerClass asCommandHandlerClass(Class<? extends CommandHandler> cls)
-            throws DuplicateCommandHandlerError {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> CommandHandlerClass.of(cls));
-        return (CommandHandlerClass<?>) modelClass;
-    }
-
-    /**
      * Obtains an instance of a rejection subscriber class information.
      *
      * <p>If the passed class was not added to the model before, it would be added as the result of
@@ -169,18 +181,6 @@ public class Model {
         checkNotNull(cls);
         ModelClass<?> modelClass = classes.get(cls, () -> RejectionSubscriberClass.of(cls));
         return (RejectionSubscriberClass<?>) modelClass;
-    }
-
-    /**
-     * Obtains an instance of an entity class information.
-     *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
-     * this method call.
-     */
-    public EntityClass<?> asEntityClass(Class<? extends Entity> cls) {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> new EntityClass<>(cls));
-        return (EntityClass<?>) modelClass;
     }
 
     private enum Singleton {

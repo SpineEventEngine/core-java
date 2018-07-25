@@ -30,13 +30,15 @@ import io.spine.server.event.EventBus;
 import java.util.Set;
 
 /**
- * The abstract base for classes that post one or more command in response to an incoming one.
+ * The abstract base for classes that post one or more command in response to an incoming message.
  *
  * <p>Example of use case scenarios:
  * <ul>
  *     <li>Converting a command into another (e.g. because of command API changes).
  *     <li>Splitting a command which holds data for a bigger aggregate into several commands
  *     set to corresponding aggregate parts.
+ *     <li>Issuing a command in response to an event.
+ *     <li>Posting a command to handle a rejection using a command posted on behalf of another user.
  * </ul>
  *
  * @author Alexander Yevsyukov
