@@ -39,7 +39,7 @@ import "spine/system/server/command_lifecycle.proto";
 
 // A comand to receive a new command.
 //
-message ReceiveCommand {
+message MarkCommandAsReceived {
 
     // The ID of the command.
     spine.core.CommandId id = 1;
@@ -48,9 +48,9 @@ message ReceiveCommand {
     spine.core.Command payload = 2 [(required) = true];
 }
 
-// A comand to acknowledge a command.
+// A comand to mark a command as acknowledged.
 //
-message AcknowledgeCommand {
+message MarkCommandAsAcknowledged {
 
     // The ID of the command.
     spine.core.CommandId id = 1;
@@ -82,7 +82,7 @@ message RescheduleCommand {
 
 // A comand to dispatch a command to a handler.
 //
-message DispatchCommand {
+message MarkCommandAsDispatched {
 
     // The ID of the command.
     spine.core.CommandId id = 1;

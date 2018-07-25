@@ -28,7 +28,7 @@ import io.spine.core.Ack;
 import io.spine.core.CommandId;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
-import io.spine.system.server.AcknowledgeCommand;
+import io.spine.system.server.MarkCommandAsAcknowledged;
 import io.spine.system.server.MarkCommandAsErrored;
 import io.spine.system.server.SystemGateway;
 
@@ -63,7 +63,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
     /**
      * {@inheritDoc}
      *
-     * <p>Posts either {@link AcknowledgeCommand} or {@link MarkCommandAsErrored} system command
+     * <p>Posts either {@link MarkCommandAsAcknowledged} or {@link MarkCommandAsErrored} system command
      * depending on the value of the given {@code Ack}.
      *
      * @param value
@@ -100,9 +100,9 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
     private static Message systemCommandFor(Status status, CommandId commandId) {
         switch (status.getStatusCase()) {
             case OK:
-                return AcknowledgeCommand.newBuilder()
-                                         .setId(commandId)
-                                         .build();
+                return MarkCommandAsAcknowledged.newBuilder()
+                                                .setId(commandId)
+                                                .build();
             case ERROR:
                 return MarkCommandAsErrored.newBuilder()
                                            .setId(commandId)

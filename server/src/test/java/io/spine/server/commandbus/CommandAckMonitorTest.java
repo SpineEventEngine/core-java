@@ -30,8 +30,8 @@ import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.Buses;
-import io.spine.system.server.AcknowledgeCommand;
 import io.spine.system.server.CommandIndex;
+import io.spine.system.server.MarkCommandAsAcknowledged;
 import io.spine.system.server.MarkCommandAsErrored;
 import io.spine.system.server.NoOpSystemGateway;
 import io.spine.system.server.SystemGateway;
@@ -142,9 +142,9 @@ class CommandAckMonitorTest {
             monitor.onNext(ack);
 
             Message actualCommand = gateway.singleCommand();
-            assertThat(actualCommand, instanceOf(AcknowledgeCommand.class));
-            AcknowledgeCommand acknowledgeCommand = (AcknowledgeCommand) actualCommand;
-            assertEquals(commandId, acknowledgeCommand.getId());
+            assertThat(actualCommand, instanceOf(MarkCommandAsAcknowledged.class));
+            MarkCommandAsAcknowledged markAsAcknowledged = (MarkCommandAsAcknowledged) actualCommand;
+            assertEquals(commandId, markAsAcknowledged.getId());
         }
 
         @Test

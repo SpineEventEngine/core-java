@@ -43,7 +43,7 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.DispatchCommand;
+import io.spine.system.server.MarkCommandAsDispatched;
 import io.spine.system.server.ScheduleCommand;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -232,7 +232,7 @@ public class CommandBus extends Bus<Command,
     }
 
     private void onDispatchCommand(CommandEnvelope command) {
-        DispatchCommand systemCommand = DispatchCommand
+        MarkCommandAsDispatched systemCommand = MarkCommandAsDispatched
                 .newBuilder()
                 .setId(command.getId())
                 .build();

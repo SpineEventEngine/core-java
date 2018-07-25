@@ -67,7 +67,7 @@ public final class CommandLifecycleAggregate
     }
 
     @Assign
-    CommandReceived handle(ReceiveCommand command) {
+    CommandReceived handle(MarkCommandAsReceived command) {
         Timestamp when = getCurrentTime();
         return CommandReceived.newBuilder()
                               .setId(command.getId())
@@ -77,7 +77,7 @@ public final class CommandLifecycleAggregate
     }
 
     @Assign
-    CommandAcknowledged handle(AcknowledgeCommand command) {
+    CommandAcknowledged handle(MarkCommandAsAcknowledged command) {
         Timestamp when = getCurrentTime();
         return CommandAcknowledged.newBuilder()
                                   .setId(command.getId())
@@ -96,7 +96,7 @@ public final class CommandLifecycleAggregate
     }
 
     @Assign
-    CommandDispatched handle(DispatchCommand command) {
+    CommandDispatched handle(MarkCommandAsDispatched command) {
         Timestamp when = getCurrentTime();
         return CommandDispatched.newBuilder()
                                 .setId(command.getId())
