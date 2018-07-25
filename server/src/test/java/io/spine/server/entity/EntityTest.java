@@ -247,7 +247,7 @@ class EntityTest {
         @Test
         @DisplayName("same entities are equal")
         void equalToSame() {
-            TestAggregate another = TestAggregate.withStateOf(aggregateWithState);
+            TestAggregate another = TestAggregate.copyOf(aggregateWithState);
 
             assertEquals(aggregateWithState, another);
         }

@@ -112,7 +112,7 @@ public class EntityTestEnv {
             super(id);
         }
 
-        public static TestAggregate withStateOf(TestAggregate entity) {
+        public static TestAggregate copyOf(TestAggregate entity) {
             TestAggregate result = Given.aggregateOfClass(TestAggregate.class)
                                         .withId(entity.getId())
                                         .withState(entity.getState())
