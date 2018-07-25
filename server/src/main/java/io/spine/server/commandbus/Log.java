@@ -22,7 +22,6 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
-import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandId;
 import io.spine.type.TypeName;
 import org.slf4j.Logger;
@@ -42,32 +41,6 @@ public class Log {
     /** The logger instance used by {@code CommandBus}. */
     static Logger log() {
         return LogSingleton.INSTANCE.value;
-    }
-
-    public void errorHandling(Exception exception, Message commandMessage, CommandId commandId) {
-        String msg = formatMessageTypeAndId(
-                "Exception while handling command `%s` (ID: `%s`).",
-                commandMessage,
-                commandId);
-        log().error(msg, exception);
-    }
-
-    public void rejectedWith(ThrowableMessage rej, Message commandMessage, CommandId commandId) {
-        String msg = formatMessageTypeAndId(
-                "The command `%s` (ID: `%s`) was rejected.",
-                commandMessage,
-                commandId);
-        log().warn(msg, rej);
-    }
-
-    public void errorHandlingUnknown(Throwable throwable,
-                                     Message commandMessage,
-                                     CommandId commandId) {
-        String msg = formatMessageTypeAndId(
-                "Throwable encountered when handling command `%s` (ID: `%s`).",
-                commandMessage,
-                commandId);
-        log().error(msg, throwable);
     }
 
     void errorExpiredCommand(Message commandMsg, CommandId id) {
