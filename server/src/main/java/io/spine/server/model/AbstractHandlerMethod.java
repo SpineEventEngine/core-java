@@ -166,8 +166,9 @@ public abstract class AbstractHandlerMethod<M extends MessageClass, C extends Me
         }
 
         // Allow reacting methods to return `Empty` instead of empty `List`. Do not store such
-        // events. Command Handling methods will not be able to use this trick because we check
-        // for non-empty result of such methods.
+        // events. Command Handling methods except those of `ProcessManager`s will not be able to
+        // use this trick because we check for non-empty result of such methods. `ProcessManager`
+        // command handlers are allowed to return `Empty` but not empty event `List`.
         if (output instanceof Empty) {
             return emptyList();
         }
