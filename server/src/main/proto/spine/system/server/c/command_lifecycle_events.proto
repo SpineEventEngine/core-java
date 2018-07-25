@@ -49,7 +49,7 @@ message CommandReceived {
     // The command.
     spine.core.Command payload = 2 [(required) = true];
 
-    // The time when the event occuered.
+    // The time when the event occurred.
     google.protobuf.Timestamp when = 3 [(required) = true];
 }
 

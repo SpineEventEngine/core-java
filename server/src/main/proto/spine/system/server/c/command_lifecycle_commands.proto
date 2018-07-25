@@ -58,7 +58,7 @@ message MarkCommandAsAcknowledged {
 
 // A command to schedule a command.
 //
-// The command schedule configuration schould be obtained from the command directly.
+// The command schedule configuration should be obtained from the command directly.
 //
 message ScheduleCommand {
 
