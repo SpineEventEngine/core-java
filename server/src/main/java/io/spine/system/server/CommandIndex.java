@@ -26,7 +26,7 @@ import io.spine.core.Command;
 import java.util.Iterator;
 
 /**
- * An index of all commands in a bounded context.
+ * An index over all commands in a bounded context.
  *
  * @author Dmytro Dashenkov
  */

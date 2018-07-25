@@ -29,6 +29,11 @@ import java.util.Iterator;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * An index over the commands in a domain bounded context.
+ *
+ * <p>A system bounded context tracks the data about {@linkplain CommandLifecycleAggregate commands}
+ * of the associated domain bounded context. This index represents a view on that data.
+ *
  * @author Dmytro Dashenkov
  */
 final class DomainCommandIndex implements CommandIndex {
@@ -39,7 +44,15 @@ final class DomainCommandIndex implements CommandIndex {
         this.repository = repository;
     }
 
-    static CommandIndex atopOf(ScheduledCommandRepository repository) {
+    /**
+     * Creates a new {@code DomainCommandIndex} with the given {@link ScheduledCommandRepository}.
+     *
+     * <p>The repository is used by the instance to obtain {@link #scheduledCommands()}.
+     *
+     * @param repository the {@link ScheduledCommand} projection repository
+     * @return new instance of {@code DomainCommandIndex}
+     */
+    static DomainCommandIndex atopOf(ScheduledCommandRepository repository) {
         checkNotNull(repository);
         return new DomainCommandIndex(repository);
     }
