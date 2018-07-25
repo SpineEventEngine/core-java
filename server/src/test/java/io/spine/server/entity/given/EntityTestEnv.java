@@ -105,7 +105,6 @@ public class EntityTestEnv {
         }
     }
 
-
     public static class TestAggregate extends Aggregate<String, StringValue, StringValueVBuilder> {
 
         protected TestAggregate(String id) {
