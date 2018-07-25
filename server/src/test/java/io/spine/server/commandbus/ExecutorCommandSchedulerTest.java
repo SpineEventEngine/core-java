@@ -25,6 +25,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.client.CommandFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.system.server.NoOpSystemGateway;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenCommandContext;
 import org.junit.jupiter.api.AfterEach;
@@ -73,6 +74,8 @@ class ExecutorCommandSchedulerTest {
         context = GivenCommandContext.withScheduledDelayOf(DELAY);
 
         scheduler.setCommandBus(mock(CommandBus.class));
+        CommandFlowWatcher flowWatcher = new CommandFlowWatcher(NoOpSystemGateway.INSTANCE);
+        scheduler.setFlowWatcher(flowWatcher);
     }
 
     @AfterEach

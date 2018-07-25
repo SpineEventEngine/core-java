@@ -499,18 +499,17 @@ public class CommandBus extends Bus<Command,
                 rejectionBus = RejectionBus.newBuilder()
                                            .build();
             }
+            flowWatcher = new CommandFlowWatcher(systemGateway);
 
             CommandBus commandBus = createCommandBus();
 
             commandScheduler.setCommandBus(commandBus);
             Rescheduler rescheduler = createRescheduler(commandBus);
             commandScheduler.setRescheduler(rescheduler);
+            commandScheduler.setFlowWatcher(flowWatcher);
             if (autoReschedule) {
                 commandBus.rescheduleCommands();
             }
-            flowWatcher = new CommandFlowWatcher(systemGateway);
-            commandScheduler.setFlowWatcher(flowWatcher);
-
             return commandBus;
         }
 
