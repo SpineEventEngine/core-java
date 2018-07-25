@@ -42,7 +42,7 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
     private static final long serialVersionUID = 0L;
     private final MessageHandlerMap<CommandClass, CommandHandlerMethod> commands;
 
-    protected CommandHandlingEntityClass(Class<? extends E> cls) {
+    protected CommandHandlingEntityClass(Class<E> cls) {
         super(cls);
         this.commands = new MessageHandlerMap<>(cls, CommandHandlerMethod.factory());
     }

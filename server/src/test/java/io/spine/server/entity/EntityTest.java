@@ -151,6 +151,12 @@ class EntityTest {
     }
 
     @Test
+    @DisplayName("have default state after construction")
+    void defaultState() {
+        assertEquals(entityNew.getDefaultState(), entityNew.getState());
+    }
+
+    @Test
     @DisplayName("have state")
     void haveState() {
         Version ver = Versions.newVersion(3, getCurrentTime());
@@ -396,7 +402,7 @@ class EntityTest {
 
             another.setArchived(true);
 
-            assertFalse(entityNew.equals(another));
+            assertNotEquals(entityNew, another);
         }
 
         @Test

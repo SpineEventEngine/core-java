@@ -20,7 +20,6 @@
 
 package io.spine.server.model;
 
-import com.google.protobuf.Message;
 import io.spine.server.model.given.ModelTestEnv.MAggregate;
 import io.spine.server.model.given.ModelTestEnv.MCommandHandler;
 import io.spine.server.model.given.ModelTestEnv.MProcessManager;
@@ -30,7 +29,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -80,13 +78,6 @@ class ModelTest {
             assertContainsClassName(error, MAggregate.class);
             assertContainsClassName(error, MProcessManager.class);
         }
-    }
-
-    @Test
-    @DisplayName("return default state for entity class")
-    void getDefaultState() {
-        Message defaultState = model.getDefaultState(MAggregate.class);
-        assertNotNull(defaultState, "Default state cannot be null for the entity class.");
     }
 
     private static void assertContainsClassName(DuplicateCommandHandlerError error, Class<?> cls) {

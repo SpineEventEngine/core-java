@@ -43,7 +43,8 @@ class InMemoryProjectionStorageTest extends ProjectionStorageTest {
                                ProjectId.class);
         InMemoryProjectionStorage<ProjectId> storage =
                 InMemoryProjectionStorage.newInstance(
-                        InMemoryRecordStorage.newInstance(spec, false, cls));
+                        InMemoryRecordStorage.newInstance(spec, false, cls)
+                );
         return storage;
     }
 }

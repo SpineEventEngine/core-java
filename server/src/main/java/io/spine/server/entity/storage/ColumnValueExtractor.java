@@ -132,8 +132,8 @@ public class ColumnValueExtractor {
     }
 
     /**
-     * Extracts {@linkplain EntityColumn.MemoizedValue memoized values} for the given {@linkplain EntityColumn columns}
-     * of the given {@link Entity}.
+     * Extracts {@linkplain EntityColumn.MemoizedValue memoized values} for the given
+     * {@linkplain EntityColumn columns} of the given {@link Entity}.
      *
      * @return a {@code Map} of the column {@linkplain EntityColumn#getStoredName()
      *         names for storing} to their {@linkplain EntityColumn.MemoizedValue memoized values}

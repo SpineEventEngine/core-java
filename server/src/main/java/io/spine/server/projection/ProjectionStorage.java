@@ -22,6 +22,7 @@ package io.spine.server.projection;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityColumnCache;
@@ -51,8 +52,9 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
         super(multitenant);
     }
 
+    @Internal
     @Override
-    public EntityColumnCache entityColumnCache() {
+    public final EntityColumnCache entityColumnCache() {
         return recordStorage().entityColumnCache();
     }
 

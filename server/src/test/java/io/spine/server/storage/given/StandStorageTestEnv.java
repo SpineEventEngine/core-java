@@ -18,30 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.memory;
+package io.spine.server.storage.given;
 
-import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
-import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.function.Function;
+import io.spine.server.entity.TransactionalEntity;
+import io.spine.test.storage.Project;
+import io.spine.test.storage.ProjectId;
+import io.spine.test.storage.ProjectVBuilder;
 
 /**
- * The {@link Function} converting the {@link EntityRecordWithColumns} into {@link EntityRecord}.
- *
- * <p>The {@code null} input is always converted to {@code null}.
- *
- * @author Dmytro Dashenkov
+ * Test environment for {@link io.spine.server.stand.StandStorageTest StandStorageTest}.
  */
-enum EntityRecordUnpacker implements Function<EntityRecordWithColumns, EntityRecord> {
+public class StandStorageTestEnv {
 
-    INSTANCE;
+    public static class StandingEntity
+            extends TransactionalEntity<ProjectId, Project, ProjectVBuilder> {
 
-    @Override
-    public @Nullable EntityRecord apply(@Nullable EntityRecordWithColumns input) {
-        if (input == null) {
-            return null;
+        public StandingEntity(ProjectId id) {
+            super(id);
         }
-        return input.getRecord();
     }
 }

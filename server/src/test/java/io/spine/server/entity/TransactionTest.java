@@ -381,9 +381,13 @@ public abstract class TransactionTest<I,
         assertThrows(InvalidEntityStateException.class, tx::commit);
     }
 
-    @Test
-    @DisplayName("advance version from event")
-    protected void advanceVersionFromEvent() {
+    /**
+     * Call this method in derived transaction tests if corresponding transaction
+     * carries version number into an entity.
+     *
+     * @implNote This method uses package-private API of the {@link Transaction} class.
+     */
+    protected final void advanceVersionFromEvent() {
         E entity = createEntity();
         Transaction<I, E, S, B> tx = createTx(entity);
         assertEquals(entity.getVersion(), tx.getVersion());
