@@ -21,11 +21,11 @@
 package io.spine.server.rejection.given;
 
 import io.spine.core.CommandContext;
-import io.spine.core.Rejection;
+import io.spine.core.Event;
 import io.spine.core.Subscribe;
 import io.spine.test.rejection.ProjectRejections;
 
-import static io.spine.core.Rejections.getMessage;
+import static io.spine.core.Events.getMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -44,10 +44,8 @@ public class ContextAwareSubscriber extends VerifiableSubscriber {
     }
 
     @Override
-    public void verifyGot(Rejection rejection) {
-        assertEquals(getMessage(rejection), this.rejection);
-        assertEquals(rejection.getContext()
-                              .getCommand()
-                              .getContext(), context);
+    public void verifyGot(Event event) {
+        assertEquals(getMessage(event), rejection);
+        assertEquals(event.getContext().getCommandContext(), context);
     }
 }

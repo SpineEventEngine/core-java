@@ -20,13 +20,14 @@
 
 package io.spine.server.rejection.given;
 
-import io.spine.core.Commands;
-import io.spine.core.Rejection;
+import com.google.protobuf.Any;
+import io.spine.core.Event;
 import io.spine.core.Subscribe;
 import io.spine.test.rejection.ProjectRejections;
 import io.spine.test.rejection.command.RjRemoveOwner;
 
-import static io.spine.core.Rejections.getMessage;
+import static io.spine.core.Events.getMessage;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -45,8 +46,11 @@ public class CommandMessageAwareSubscriber extends VerifiableSubscriber {
     }
 
     @Override
-    public void verifyGot(Rejection rejection) {
-        assertEquals(getMessage(rejection), this.rejection);
-        assertEquals(Commands.getMessage(rejection.getContext().getCommand()), command);
+    public void verifyGot(Event event) {
+        assertEquals(getMessage(event), rejection);
+        Any commandMessage = event.getContext()
+                                  .getRejection()
+                                  .getCommandMessage();
+        assertEquals(unpack(commandMessage), command);
     }
 }

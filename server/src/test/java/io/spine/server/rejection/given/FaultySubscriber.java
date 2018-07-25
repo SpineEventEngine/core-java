@@ -20,7 +20,7 @@
 package io.spine.server.rejection.given;
 
 import io.spine.core.CommandContext;
-import io.spine.core.Rejection;
+import io.spine.core.Event;
 import io.spine.core.Subscribe;
 import io.spine.test.rejection.ProjectRejections;
 
@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @author Alexander Yevsyukov
  */
 public class FaultySubscriber extends VerifiableSubscriber {
+
     @SuppressWarnings("unused") // It's fine for a faulty subscriber.
     @Subscribe
     public void on(ProjectRejections.InvalidProjectName rejection, CommandContext context) {
@@ -43,7 +44,7 @@ public class FaultySubscriber extends VerifiableSubscriber {
     }
 
     @Override
-    public void verifyGot(Rejection ignored) {
+    public void verifyGot(Event event) {
         fail("FaultySubscriber");
     }
 }

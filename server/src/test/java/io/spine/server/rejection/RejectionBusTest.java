@@ -26,6 +26,7 @@ import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.server.event.EventDispatcher;
 import io.spine.server.rejection.given.BareDispatcher;
 import io.spine.server.rejection.given.CommandAwareSubscriber;
 import io.spine.server.rejection.given.CommandMessageAwareSubscriber;
@@ -326,7 +327,7 @@ public class RejectionBusTest {
     @Test
     @DisplayName("not support subscriber methods with wrong parameter sequence")
     void rejectWrongArgSequence() {
-        RejectionDispatcher<?> subscriber = new InvalidOrderSubscriber();
+        EventDispatcher<?> subscriber = new InvalidOrderSubscriber();
 
         // In Bus ->  No message types are forwarded by this dispatcher.
         assertThrows(IllegalArgumentException.class,

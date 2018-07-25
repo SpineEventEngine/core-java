@@ -116,12 +116,12 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    @DisplayName("propagate rejections to rejection bus")
+    @DisplayName("propagate rejections to event bus")
     void propagateRejections() {
         FaultyHandler faultyHandler = new FaultyHandler(eventBus);
         commandBus.register(faultyHandler);
         MemoizingRejectionSubscriber rejectionSubscriber = new MemoizingRejectionSubscriber();
-        rejectionBus.register(rejectionSubscriber);
+        eventBus.register(rejectionSubscriber);
 
         Command addTaskCommand = clearTenantId(addTask());
         MemoizingObserver<Ack> observer = memoizingObserver();

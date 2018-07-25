@@ -21,7 +21,7 @@
 package io.spine.server.rejection.given;
 
 import io.spine.core.CommandContext;
-import io.spine.core.Rejection;
+import io.spine.core.Event;
 import io.spine.core.Subscribe;
 import io.spine.test.rejection.ProjectRejections;
 import io.spine.test.rejection.command.RjRemoveOwner;
@@ -43,7 +43,7 @@ public class InvalidOrderSubscriber extends VerifiableSubscriber {
     }
 
     @Override
-    public void verifyGot(Rejection rejection) {
+    public void verifyGot(Event event) {
         fail("InvalidOrderSubscriber");
     }
 }

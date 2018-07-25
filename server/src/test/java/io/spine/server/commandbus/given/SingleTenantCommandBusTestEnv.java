@@ -24,8 +24,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.Rejection;
-import io.spine.core.Rejections;
+import io.spine.core.Event;
 import io.spine.core.Subscribe;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
@@ -44,6 +43,7 @@ import io.spine.test.reflect.ReflectRejections;
 import java.util.ArrayList;
 import java.util.List;
 
+import static io.spine.core.Events.getMessage;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.Collections.unmodifiableList;
@@ -95,8 +95,8 @@ public class SingleTenantCommandBusTestEnv {
         }
 
         @Override
-        public void verifyGot(Rejection rejection) {
-            assertEquals(Rejections.getMessage(rejection), this.rejection);
+        public void verifyGot(Event event) {
+            assertEquals(getMessage(event), this.rejection);
         }
     }
 

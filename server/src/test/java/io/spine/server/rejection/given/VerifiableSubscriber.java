@@ -19,16 +19,16 @@
  */
 package io.spine.server.rejection.given;
 
-import io.spine.core.Rejection;
-import io.spine.server.rejection.RejectionSubscriber;
+import io.spine.core.Event;
+import io.spine.server.event.EventSubscriber;
 
 /**
- * A test rejection subscriber, which allows to verify the interactions performed with it.
+ * A test event subscriber, which allows to verify the interactions performed with it.
  *
  * @author Alex Tymchenko
  * @author Alexander Yevsyukov
  */
-public abstract class VerifiableSubscriber extends RejectionSubscriber {
+public abstract class VerifiableSubscriber extends EventSubscriber {
 
     private boolean methodCalled = false;
 
@@ -40,5 +40,5 @@ public abstract class VerifiableSubscriber extends RejectionSubscriber {
         return methodCalled;
     }
 
-    public abstract void verifyGot(Rejection rejection);
+    public abstract void verifyGot(Event event);
 }
