@@ -175,5 +175,4 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
             return new CommandAckMonitor(this);
         }
     }
-
 }
