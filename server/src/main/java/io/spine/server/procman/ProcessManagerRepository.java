@@ -23,6 +23,7 @@ package io.spine.server.procman;
 import com.google.common.base.Supplier;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
@@ -53,7 +54,6 @@ import io.spine.server.event.EventBus;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
-import io.spine.server.model.Model;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
@@ -68,6 +68,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
+import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -134,11 +135,10 @@ public abstract class ProcessManagerRepository<I,
         return (ProcessManagerClass<P>) entityClass();
     }
 
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    @Internal
     @Override
     protected final ProcessManagerClass<P> getModelClass(Class<P> cls) {
-        return (ProcessManagerClass<P>) Model.getInstance()
-                                             .asProcessManagerClass(cls);
+        return asProcessManagerClass(cls);
     }
 
     @Override
@@ -491,8 +491,7 @@ public abstract class ProcessManagerRepository<I,
 
         @Override
         public Set<ExternalMessageClass> getMessageClasses() {
-            ProcessManagerClass<?> pmClass = Model.getInstance()
-                                                  .asProcessManagerClass(getEntityClass());
+            ProcessManagerClass<?> pmClass = asProcessManagerClass(getEntityClass());
             Set<EventClass> eventClasses = pmClass.getExternalEventReactions();
             return ExternalMessageClass.fromEventClasses(eventClasses);
         }

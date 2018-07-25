@@ -39,7 +39,6 @@ import io.spine.option.EntityOption;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.model.Model;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
@@ -71,6 +70,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.base.Identifier.pack;
 import static io.spine.server.entity.Repository.GenericParameter.ENTITY;
+import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
@@ -136,10 +136,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * Obtains a model class for the passed entity class value.
      */
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    @Internal
     protected EntityClass<E> getModelClass(Class<E> cls) {
-        return (EntityClass<E>) Model.getInstance()
-                                     .asEntityClass(cls);
+        return asEntityClass(cls);
     }
 
     /** Returns the class of IDs used by this repository. */

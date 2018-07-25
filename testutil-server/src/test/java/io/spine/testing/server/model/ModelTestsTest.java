@@ -28,6 +28,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -39,10 +40,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @DisplayName("ModelTests utility should")
 class ModelTestsTest {
 
-    private final Model model = Model.getInstance();
+    private final Model model = Model.getInstance(TestCommandHandler.class);
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         // The model should not be polluted by the previously executed tests.
         model.clear();
     }
@@ -57,14 +58,14 @@ class ModelTestsTest {
     @DisplayName("clear model")
     void clearModel() {
         // This adds a command handler for `com.google.protobuf.Timestamp`.
-        CommandHandlerClass cls1 = model.asCommandHandlerClass(TestCommandHandler.class);
+        CommandHandlerClass cls1 = asCommandHandlerClass(TestCommandHandler.class);
         assertNotNull(cls1);
 
         ModelTests.clearModel();
 
         // This should pass as we cleared the model,
         // i.e. there is no registered command handler for `com.google.protobuf.Timestamp`.
-        CommandHandlerClass cls2 = model.asCommandHandlerClass(DuplicatedCommandHandler.class);
+        CommandHandlerClass cls2 = asCommandHandlerClass(DuplicatedCommandHandler.class);
         assertNotNull(cls2);
         assertNotEquals(cls1, cls2);
     }

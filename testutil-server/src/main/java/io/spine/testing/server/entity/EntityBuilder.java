@@ -36,6 +36,7 @@ import java.lang.reflect.Constructor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.server.entity.model.EntityClass.asEntityClass;
 
 /**
  * Utility class for building entities for tests.
@@ -80,12 +81,12 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
     @Override
     public EntityBuilder<E, I, S> setResultClass(Class<E> entityClass) {
         super.setResultClass(entityClass);
-        this.entityClass = createModelClass(entityClass);
+        this.entityClass = getModelClass(entityClass);
         return this;
     }
 
-    protected EntityClass<E> createModelClass(Class<E> entityClass) {
-        return new EntityClass<>(entityClass);
+    protected EntityClass<E> getModelClass(Class<E> entityClass) {
+        return asEntityClass(entityClass);
     }
 
     public EntityBuilder<E, I, S> withId(I id) {

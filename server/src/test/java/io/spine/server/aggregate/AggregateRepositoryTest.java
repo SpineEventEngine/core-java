@@ -48,7 +48,6 @@ import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReact
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingRepository;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.model.HandlerMethodFailedException;
-import io.spine.server.model.Model;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProjectWithChildren;
@@ -78,6 +77,7 @@ import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.reposit
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.requestFactory;
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetBoundedContext;
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetRepository;
+import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -126,9 +126,8 @@ public class AggregateRepositoryTest {
         @DisplayName("command classes handled by aggregate")
         void aggregateCommandClasses() {
             Set<CommandClass> aggregateCommands =
-                    Model.getInstance()
-                         .asAggregateClass(ProjectAggregate.class)
-                         .getCommands();
+                    asAggregateClass(ProjectAggregate.class)
+                            .getCommands();
             Set<CommandClass> exposedByRepository = repository().getMessageClasses();
 
             assertTrue(exposedByRepository.containsAll(aggregateCommands));

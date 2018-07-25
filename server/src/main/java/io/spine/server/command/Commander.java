@@ -27,9 +27,10 @@ import io.spine.server.command.model.CommandSubstMethod;
 import io.spine.server.command.model.CommanderClass;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
-import io.spine.server.model.Model;
 
 import java.util.Set;
+
+import static io.spine.server.command.model.CommanderClass.asCommanderClass;
 
 /**
  * The abstract base for classes that post one or more command in response to an incoming message.
@@ -47,8 +48,7 @@ import java.util.Set;
  */
 public abstract class Commander extends AbstractCommandDispatcher {
 
-    private final CommanderClass<?> thisClass = Model.getInstance()
-                                                     .asCommanderClass(getClass());
+    private final CommanderClass<?> thisClass = asCommanderClass(getClass());
     private final CommandBus commandBus;
 
     protected Commander(CommandBus commandBus, EventBus eventBus) {

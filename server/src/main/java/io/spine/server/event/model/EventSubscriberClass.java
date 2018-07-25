@@ -55,11 +55,14 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
     }
 
     /**
-     * Creates new instance for the passed class value.
+     * Creates new instance for the passed raw class.
      */
-    public static <S extends EventSubscriber> EventSubscriberClass<S> of(Class<S> cls) {
+    public static <S extends EventSubscriber>
+    EventSubscriberClass<S> asEventSubscriberClass(Class<S> cls) {
         checkNotNull(cls);
-        return new EventSubscriberClass<>(cls);
+        EventSubscriberClass<S> result = (EventSubscriberClass<S>)
+                get(cls, EventSubscriberClass.class, () -> new EventSubscriberClass<>(cls));
+        return result;
     }
 
     public Set<EventClass> getEventSubscriptions() {

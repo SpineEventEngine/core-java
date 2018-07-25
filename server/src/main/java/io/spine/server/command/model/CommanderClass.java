@@ -22,6 +22,8 @@ package io.spine.server.command.model;
 
 import io.spine.server.command.Commander;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Provides information on message handling for a class of {@link Commander}s.
  *
@@ -33,12 +35,16 @@ public final class CommanderClass<C extends Commander>
 
     private static final long serialVersionUID = 0L;
 
-    private CommanderClass(Class<? extends C> value) {
+    private CommanderClass(Class<C> value) {
         //TODO:2018-07-25:alexander.yevsyukov: A commander may have not only Subst methods!
         super(value, CommandSubstMethod.factory());
     }
 
-    public static <C extends Commander> CommanderClass<C> of(Class<? extends C> cls) {
-        return new CommanderClass<>(cls);
+    public static <C extends Commander>
+    CommanderClass<C> asCommanderClass(Class<C> cls) {
+        checkNotNull(cls);
+        CommanderClass<C> result = (CommanderClass<C>)
+                get(cls, CommanderClass.class, () -> new CommanderClass<>(cls));
+        return result;
     }
 }
