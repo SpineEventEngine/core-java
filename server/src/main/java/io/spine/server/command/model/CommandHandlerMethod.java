@@ -90,6 +90,10 @@ public final class CommandHandlerMethod extends CommandAcceptingMethod {
      */
     private static void
     checkResultNonEmpty(List<? extends Message> events, Object handlingResult, Object target) {
+
+        //TODO:2018-07-25:dmytro.kuzmin: Prohibit returning `Empty` from `ProcessManager` in favor
+        // of "Expect<...>" construction.
+        // See https://github.com/SpineEventEngine/core-java/issues/790.
         boolean procmanReturnedEmpty =
                 handlingResult instanceof Empty && target instanceof ProcessManager;
         checkState(!events.isEmpty() || procmanReturnedEmpty,
