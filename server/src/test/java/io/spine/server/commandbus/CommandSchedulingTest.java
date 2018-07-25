@@ -291,14 +291,14 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     }
 
     /**
-     * Creates and stores one scheduled command.
+     * Creates and stores a single scheduled command.
      */
     private Command storeSingleCommandForRescheduling() {
         return storeSingleCommandForRescheduling(systemGateway);
     }
 
     /**
-     * Creates and stores one scheduled command.
+     * Creates and stores a single scheduled command.
      */
     private static Command storeSingleCommandForRescheduling(TestSystemGateway gateway) {
         Command cmdWithSchedule = createScheduledCommand();
