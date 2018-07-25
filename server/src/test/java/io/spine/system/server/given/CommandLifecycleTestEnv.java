@@ -69,7 +69,7 @@ public final class CommandLifecycleTestEnv {
     private CommandLifecycleTestEnv() {
     }
 
-    public static class CommandLifecycleWatcher extends AbstractEventWatcher {
+    public static class CommandLifecycleWatcher extends AbstractEventAccumulator {
 
         @Override
         protected Collection<Class<? extends Message>> getEventClasses() {

@@ -85,7 +85,7 @@ public final class EntityHistoryTestEnv {
     private EntityHistoryTestEnv() {
     }
 
-    public static class HistoryEventWatcher extends AbstractEventWatcher {
+    public static class HistoryEventWatcher extends AbstractEventAccumulator {
 
         @Override
         public Collection<Class<? extends Message>> getEventClasses() {
