@@ -117,10 +117,7 @@ class ProcessManagerRepositoryTest
     }
 
     @Override
-    protected TestProcessManager createEntity() {
-        ProjectId id = ProjectId.newBuilder()
-                                .setId(newUuid())
-                                .build();
+    protected TestProcessManager createEntity(ProjectId id) {
         TestProcessManager result = Given.processManagerOfClass(TestProcessManager.class)
                                          .withId(id)
                                          .build();

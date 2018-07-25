@@ -25,6 +25,7 @@ import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.server.entity.given.EntityTestEnv.BareBonesEntity;
 import io.spine.server.entity.given.EntityTestEnv.EntityWithMessageId;
+import io.spine.server.entity.given.EntityTestEnv.TestAggregate;
 import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdInteger;
 import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdLong;
 import io.spine.server.entity.given.EntityTestEnv.TestEntityWithIdMessage;
@@ -69,12 +70,14 @@ class EntityTest {
     private Project state = Sample.messageOfType(Project.class);
     private TestEntity entityNew;
     private TestEntity entityWithState;
+    private TestAggregate aggregateWithState;
 
     @BeforeEach
     void setUp() {
         state = Sample.messageOfType(Project.class);
         entityNew = TestEntity.newInstance(newUuid());
         entityWithState = TestEntity.withState();
+        aggregateWithState = TestAggregate.withState();
     }
 
     @SuppressWarnings("ResultOfObjectAllocationIgnored") // Because we expect the exception.
@@ -250,9 +253,9 @@ class EntityTest {
         @Test
         @DisplayName("same entities are equal")
         void equalToSame() {
-            TestEntity another = TestEntity.withStateOf(entityWithState);
+            TestAggregate another = TestAggregate.copyOf(aggregateWithState);
 
-            assertEquals(entityWithState, another);
+            assertEquals(aggregateWithState, another);
         }
 
         @SuppressWarnings("EqualsWithItself") // Is the purpose of this method.

@@ -24,11 +24,11 @@ import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.TestEntity;
+import io.spine.server.entity.TestEntity.TestEntityBuilder;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.storage.given.EntityRecordWithColumnsTestEnv.EntityWithoutColumns;
-import io.spine.server.entity.storage.given.EntityRecordWithColumnsTestEnv.TestEntity;
 import io.spine.testdata.Sample;
-import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -82,9 +82,9 @@ class EntityRecordWithColumnsTest {
     @DisplayName("be serializable")
     void beSerializable() {
         EntityRecord record = Sample.messageOfType(EntityRecord.class);
-        VersionableEntity<?, ?> entity = Given.entityOfClass(TestEntity.class)
-                                              .withVersion(1)
-                                              .build();
+        VersionableEntity<?, ?> entity = new TestEntityBuilder().setResultClass(TestEntity.class)
+                                                                .withVersion(1)
+                                                                .build();
         String columnName = version.name();
         EntityColumn column = findColumn(VersionableEntity.class, columnName);
         MemoizedValue value = column.memoizeFor(entity);
