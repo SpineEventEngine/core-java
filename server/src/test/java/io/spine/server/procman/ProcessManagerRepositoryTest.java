@@ -371,7 +371,7 @@ class ProcessManagerRepositoryTest
 
     @Test
     @DisplayName("allow process manager have unmodified state after command handling")
-    void notModifyStateIfDoNothing() {
+    void allowUnmodifiedStateAfterCommand() {
         testDispatchCommand(doNothing());
     }
 
