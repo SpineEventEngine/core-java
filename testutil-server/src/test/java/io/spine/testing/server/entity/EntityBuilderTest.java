@@ -28,6 +28,7 @@ import io.spine.server.entity.InvalidEntityStateException;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.testing.server.User;
 import io.spine.testing.server.entity.EntityBuilderTestEnv.TestEntity;
+import io.spine.testing.server.entity.EntityBuilderTestEnv.TestEntityBuilder;
 import io.spine.testing.server.entity.EntityBuilderTestEnv.UserAggregate;
 import io.spine.validate.ConstraintViolation;
 import org.junit.jupiter.api.DisplayName;
@@ -56,7 +57,7 @@ class EntityBuilderTest {
      * Convenience method that mimics the way tests would call creation of an entity.
      */
     private static EntityBuilder<TestEntity, Long, StringValue> givenEntity() {
-        EntityBuilder<TestEntity, Long, StringValue> builder = new EntityBuilder<>();
+        EntityBuilder<TestEntity, Long, StringValue> builder = new TestEntityBuilder();
         return builder.setResultClass(TestEntity.class);
     }
 
@@ -109,9 +110,6 @@ class EntityBuilderTest {
 
         assertEquals(TestEntity.class, entity.getClass());
         assertEquals(id, entity.getId());
-        assertEquals(state, entity.getState());
-        assertEquals(version, entity.getVersion().getNumber());
-        assertEquals(timestamp, entity.getVersion().getTimestamp());
     }
 
     @Test
