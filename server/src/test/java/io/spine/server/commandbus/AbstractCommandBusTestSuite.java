@@ -308,6 +308,11 @@ abstract class AbstractCommandBusTestSuite {
         void schedule(Command command);
     }
 
+    /**
+     * A multitenant {@link TestSystemGateway}.
+     *
+     * <p>Stores scheduled commands on behalf of {@link CommandIndex} for each tenant separately.
+     */
     protected class TestMultitenantSystemGateway implements TestSystemGateway {
 
         private final Multimap<TenantId, Command> scheduledCommands = HashMultimap.create();
@@ -339,6 +344,12 @@ abstract class AbstractCommandBusTestSuite {
         }
     }
 
+    /**
+     * A single-tenant {@link TestSystemGateway}.
+     *
+     * <p>All the {@linkplain #schedule(Command) scheduled} commands are considered to belong to
+     * the single (default) tenant.
+     */
     protected static class TestSingleTenantSystemGateway implements TestSystemGateway {
 
         private final List<Command> scheduledCommands = newLinkedList();
