@@ -24,6 +24,7 @@ import io.grpc.Server;
 import io.grpc.ServerServiceDefinition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -135,6 +136,7 @@ class GrpcContainerTest {
     }
 
     @Test
+    @Disabled
     @DisplayName("stop properly upon application shutdown")
     void stopUponAppShutdown()
             throws NoSuchFieldException, IllegalAccessException, IOException {

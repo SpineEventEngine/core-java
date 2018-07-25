@@ -265,11 +265,6 @@ public abstract class ShardedStream<I, M extends Message, E extends MessageEnvel
         public int getIndex() {
             return this.index;
         }
-
-        @Override
-        public Class<?> getArgumentIn(Class<? extends ShardedStream> cls) {
-            return Default.getArgument(this, cls);
-        }
     }
 
     /**

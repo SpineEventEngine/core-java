@@ -33,7 +33,6 @@ import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.event.PrjProjectCreated;
 import io.spine.test.projection.event.PrjTaskAdded;
 import io.spine.validate.ConstraintViolation;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -144,21 +143,6 @@ class ProjectionTransactionTest
             RuntimeException toThrow) {
         entity.getBuilder()
               .setShouldThrow(toThrow);
-    }
-
-    /**
-     * This test is ignored as the expected behavior has been changed for the projection
-     * transactions.
-     *
-     * <p>{@linkplain #incrementVersionOnEvent() Another test method} is created to test the new
-     * behavior. Please refer to it for more details.
-     */
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Same display names to ancestor.
-    @Disabled
-    @Test
-    @DisplayName("advance version from event")
-    @Override
-    public void advanceVersionFromEvent() {
     }
 
     /**

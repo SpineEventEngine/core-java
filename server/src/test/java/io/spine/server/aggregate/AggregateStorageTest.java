@@ -125,7 +125,11 @@ public abstract class AggregateStorageTest
 
     @Override
     protected ProjectId newId() {
-        return Sample.messageOfType(ProjectId.class);
+        ProjectId id = ProjectId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
+        return id;
     }
 
     @Override

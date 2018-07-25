@@ -428,11 +428,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         public int getIndex() {
             return this.index;
         }
-
-        @Override
-        public Class<?> getArgumentIn(Class<? extends Repository> cls) {
-            return Default.getArgument(this, cls);
-        }
     }
 
     /**

@@ -20,6 +20,7 @@
 package io.spine.server.stand;
 
 import com.google.protobuf.FieldMask;
+import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityColumnCache;
@@ -63,11 +64,11 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
      * @return the state records which {@link com.google.protobuf.Any#getTypeUrl() Any.getTypeUrl()}
      * equals the argument value
      */
-    public abstract Iterator<EntityRecord> readAllByType(TypeUrl type,
-                                                                    FieldMask fieldMask);
+    public abstract Iterator<EntityRecord> readAllByType(TypeUrl type, FieldMask fieldMask);
 
+    @Internal
     @Override
-    public EntityColumnCache entityColumnCache() {
+    public final EntityColumnCache entityColumnCache() {
         return recordStorage().entityColumnCache();
     }
 
@@ -86,15 +87,14 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
      * @see #readAll(FieldMask)
      */
     @Override
-    public Iterator<EntityRecord> readAll(EntityQuery<AggregateStateId> query,
-                                          FieldMask fieldMask) {
+    public Iterator<EntityRecord>
+    readAll(EntityQuery<AggregateStateId> query, FieldMask fieldMask) {
         return readAll(fieldMask);
     }
 
     @Override
-    protected Iterator<EntityRecord> readAllRecords(
-            EntityQuery<AggregateStateId> query,
-            FieldMask fieldMask) {
+    protected Iterator<EntityRecord>
+    readAllRecords(EntityQuery<AggregateStateId> query, FieldMask fieldMask) {
         throw new IllegalStateException("Call #readAll(EntityQuery, FieldMask) instead.");
     }
 
