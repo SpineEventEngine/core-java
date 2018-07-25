@@ -53,9 +53,7 @@ message ProposeCompanyName {
 }
 
 message SelectCompanyName {
-    option (rejections) = "CompanyNameAlreadyTaken,CompanyNameNotProposed";
+    option (rejections) = "CompanyNameAlreadyTaken";
 
     CompanyId id = 1;
-
-    uint32 index = 2;
 }

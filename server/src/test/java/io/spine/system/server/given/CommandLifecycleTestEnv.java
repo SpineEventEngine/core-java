@@ -43,7 +43,6 @@ import io.spine.system.server.CompanyEstablishing;
 import io.spine.system.server.CompanyEstablishingVBuilder;
 import io.spine.system.server.CompanyId;
 import io.spine.system.server.CompanyNameAlreadyTaken;
-import io.spine.system.server.CompanyNameNotProposed;
 import io.spine.system.server.CompanyVBuilder;
 import io.spine.system.server.EstablishCompany;
 import io.spine.system.server.ProposeCompanyName;
@@ -135,14 +134,11 @@ public final class CommandLifecycleTestEnv {
         }
 
         @Assign
-        CommandTransformed handle(SelectCompanyName command, CommandContext context)
-                throws CompanyNameNotProposed {
-            int index = command.getIndex();
+        CommandTransformed handle(SelectCompanyName command, CommandContext context) {
             List<String> proposedNames = getBuilder().getProposedName();
-            if (index < 0 || index > proposedNames.size()) {
-                throw new CompanyNameNotProposed(getId(), index);
-            }
-            String finalName = proposedNames.get(index);
+            String finalName = proposedNames.stream()
+                                            .findAny()
+                                            .orElse("");
             EstablishCompany establishCommand = EstablishCompany
                     .newBuilder()
                     .setId(getBuilder().getId())
