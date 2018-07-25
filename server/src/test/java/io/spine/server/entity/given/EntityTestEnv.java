@@ -22,14 +22,18 @@ package io.spine.server.entity.given;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
+import io.spine.testing.server.entity.given.Given;
+import io.spine.validate.StringValueVBuilder;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
+import static io.spine.base.Identifier.newUuid;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 
@@ -98,6 +102,37 @@ public class EntityTestEnv {
 
         public EntityWithMessageId() {
             super(Sample.messageOfType(ProjectId.class));
+        }
+    }
+
+
+    public static class TestAggregate extends Aggregate<String, StringValue, StringValueVBuilder> {
+
+        protected TestAggregate(String id) {
+            super(id);
+        }
+
+        public static TestAggregate withStateOf(TestAggregate entity) {
+            TestAggregate result = Given.aggregateOfClass(TestAggregate.class)
+                                        .withId(entity.getId())
+                                        .withState(entity.getState())
+                                        .modifiedOn(entity.whenModified())
+                                        .withVersion(entity.getVersion()
+                                                           .getNumber())
+                                        .build();
+            return result;
+        }
+
+        public static TestAggregate withState() {
+            StringValue state = StringValue.newBuilder()
+                                           .setValue("state")
+                                           .build();
+            TestAggregate result = Given.aggregateOfClass(TestAggregate.class)
+                                        .withId(newUuid())
+                                        .withState(state)
+                                        .withVersion(3)
+                                        .build();
+            return result;
         }
     }
 }
