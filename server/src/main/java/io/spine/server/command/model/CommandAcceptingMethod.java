@@ -47,7 +47,7 @@ import static com.google.common.base.Throwables.getRootCause;
 public abstract class CommandAcceptingMethod<T, R extends MethodResult>
         extends AbstractHandlerMethod<T, CommandClass, CommandContext, R> {
 
-    protected CommandAcceptingMethod(Method method) {
+    CommandAcceptingMethod(Method method) {
         super(method);
     }
 
