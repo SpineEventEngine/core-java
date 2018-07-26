@@ -23,7 +23,7 @@ package io.spine.server.command;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.server.command.model.CommandSubstMethod;
+import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
@@ -64,7 +64,7 @@ public abstract class Commander extends AbstractCommandDispatcher {
     @CanIgnoreReturnValue
     @Override
     public String dispatch(CommandEnvelope envelope) {
-        CommandSubstMethod method = thisClass.getHandler(envelope.getMessageClass());
+        CommandSubstituteMethod method = thisClass.getHandler(envelope.getMessageClass());
         //TODO:2018-07-20:alexander.yevsyukov: Dispatch the envelope to the method.
         // Post resulting events of command transformations to the EventBus.
 //        Dispatch<CommandEnvelope> dispatch = Dispatch.of(envelope)

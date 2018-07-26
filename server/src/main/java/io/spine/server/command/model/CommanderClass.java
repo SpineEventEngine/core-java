@@ -31,13 +31,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 public final class CommanderClass<C extends Commander>
-        extends AbstractCommandHandlingClass<C, CommandSubstMethod> {
+        extends AbstractCommandHandlingClass<C, CommandSubstituteMethod> {
 
     private static final long serialVersionUID = 0L;
 
     private CommanderClass(Class<C> value) {
         //TODO:2018-07-25:alexander.yevsyukov: A commander may have not only Subst methods!
-        super(value, CommandSubstMethod.factory());
+        super(value, CommandSubstituteMethod.factory());
     }
 
     public static <C extends Commander>
