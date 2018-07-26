@@ -48,7 +48,7 @@ public final class CommandSubstituteMethod
     }
 
     @Override
-    protected Result toResult(Object rawMethodOutput, Object target) {
+    protected Result toResult(Object target, Object rawMethodOutput) {
         Result result = new Result(rawMethodOutput);
         return result;
     }
@@ -120,7 +120,7 @@ public final class CommandSubstituteMethod
 
         private Result(Object rawMethodOutput) {
             super(rawMethodOutput);
-            List<Message> messages = MethodResult.toMessages(rawMethodOutput);
+            List<Message> messages = toMessages(rawMethodOutput);
             setMessages(messages);
         }
     }

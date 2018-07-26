@@ -20,13 +20,11 @@
 
 package io.spine.server.model;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.server.event.EventFactory;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
@@ -40,18 +38,27 @@ import static java.util.stream.Collectors.toList;
  */
 public abstract class EventsResult extends MethodResult<Message> {
 
-    protected EventsResult(@Nullable Object output) {
-        super(output);
+    private final EventProducer producer;
+
+    /**
+     * Creates a new results object.
+     *
+     * @param producer the object on behalf of which to produce events
+     * @param output   raw method output, cannot be {@code null}
+     */
+    protected EventsResult(EventProducer producer, Object output) {
+        super(checkNotNull(output));
+        this.producer = checkNotNull(producer);
     }
 
     /**
      * Transforms the messages of the result into a list of events.
      */
     public
-    List<Event> createEvents(MessageEnvelope origin, Any producerId, @Nullable Version version) {
-        checkNotNull(producerId);
-        EventFactory eventFactory = EventFactory.on(origin, producerId);
+    List<Event> produceEvents(MessageEnvelope origin) {
+        EventFactory eventFactory = EventFactory.on(origin, producer.getProducerId());
         List<? extends Message> messages = asMessages();
+        Version version = producer.getVersion();
         List<Event> result =
                 messages.stream()
                         .map(eventMessage -> eventFactory.createEvent(eventMessage, version))

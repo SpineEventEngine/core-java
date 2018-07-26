@@ -25,6 +25,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.React;
 import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.EventProducer;
 import io.spine.server.model.HandlerKey;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
@@ -72,8 +73,8 @@ public final class EventReactorMethod
     }
 
     @Override
-    protected ReactorMethodResult toResult(Object rawMethodOutput, Object target) {
-        return new ReactorMethodResult(rawMethodOutput);
+    protected ReactorMethodResult toResult(Object target, Object rawMethodOutput) {
+        return new ReactorMethodResult((EventProducer) target, rawMethodOutput);
     }
 
     static EventReactorMethod from(Method method) {

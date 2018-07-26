@@ -18,21 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.rejection;
 
-import com.google.protobuf.Message;
-
-import java.util.List;
+import io.spine.server.model.EventProducer;
 
 /**
- * A reactor method may not return a result in response to an incoming message. When so,
- * the raw method should return {@link com.google.protobuf.Empty Empty}.
+ * All objects that react on rejections produce events.
+ *
+ * @author Alexander Yevsyukov
  */
-public final class ReactorMethodResult extends EventsResult {
-
-    public ReactorMethodResult(EventProducer producer, Object rawMethodOutput) {
-        super(producer, rawMethodOutput);
-        List<Message> messages = toMessages(rawMethodOutput);
-        setMessagesFilteringEmpty(messages);
-    }
+public interface RejectionReactor extends EventProducer {
 }

@@ -27,6 +27,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.Rejection;
 import io.spine.server.command.Assign;
 import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.EventProducer;
 import io.spine.server.model.EventsResult;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
@@ -67,8 +68,8 @@ public final class CommandHandlerMethod extends CommandAcceptingMethod<CommandHa
      * Transforms the passed raw method output into a list of event messages.
      */
     @Override
-    protected Result toResult(Object rawMethodOutput, Object target) {
-        Result result = new Result(rawMethodOutput, target);
+    protected Result toResult(Object target, Object rawMethodOutput) {
+        Result result = new Result((EventProducer) target, rawMethodOutput);
         return result;
     }
 
@@ -139,11 +140,11 @@ public final class CommandHandlerMethod extends CommandAcceptingMethod<CommandHa
      */
     public static final class Result extends EventsResult {
 
-        private Result(Object rawMethodResult, Object target) {
-            super(rawMethodResult);
+        private Result(EventProducer producer, Object rawMethodResult) {
+            super(producer, rawMethodResult);
             List<Message> events = toMessages(rawMethodResult);
             List<Message> withoutEmpty = filterEmpty(events);
-            checkResultNonEmpty(withoutEmpty, rawMethodResult, target);
+            checkResultNonEmpty(withoutEmpty, rawMethodResult, producer);
             setMessages(withoutEmpty);
         }
 

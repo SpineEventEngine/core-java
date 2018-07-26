@@ -79,7 +79,7 @@ public final class EventSubscriberMethod
     }
 
     @Override
-    protected MethodResult<Empty> toResult(Object rawMethodOutput, Object target) {
+    protected MethodResult<Empty> toResult(Object target, Object rawMethodOutput) {
         return MethodResult.empty();
     }
 

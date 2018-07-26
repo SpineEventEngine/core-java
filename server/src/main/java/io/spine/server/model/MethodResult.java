@@ -98,7 +98,7 @@ public abstract class MethodResult<V extends Message> {
      * @return the list of event messages or an empty list if {@code null} is passed
      */
     @SuppressWarnings({"unchecked", "ChainOfInstanceofChecks"})
-    public static List<Message> toMessages(@Nullable Object output) {
+    protected static List<Message> toMessages(@Nullable Object output) {
         if (output == null) {
             return emptyList();
         }

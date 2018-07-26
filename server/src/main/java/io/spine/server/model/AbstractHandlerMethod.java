@@ -161,7 +161,7 @@ class AbstractHandlerMethod<M extends MessageClass, C extends Message, R extends
             Object rawOutput = (paramCount == 1)
                             ? method.invoke(target, message)
                             : method.invoke(target, message, context);
-            R result = toResult(rawOutput, target);
+            R result = toResult(target, rawOutput);
             return result;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
             throw whyFailed(target, message, context, e);
@@ -171,7 +171,7 @@ class AbstractHandlerMethod<M extends MessageClass, C extends Message, R extends
     /**
      * Converts the output of the raw method call to the result object.
      */
-    protected abstract R toResult(Object rawMethodOutput, Object target);
+    protected abstract R toResult(Object target, Object rawMethodOutput);
 
     /**
      * Creates an exception containing information on the failure of the handler method invocation.

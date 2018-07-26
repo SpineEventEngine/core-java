@@ -133,7 +133,7 @@ public class HandlerMethodTestEnv {
         }
 
         @Override
-        protected MethodResult<Empty> toResult(Object rawMethodOutput, Object target) {
+        protected MethodResult<Empty> toResult(Object target, Object rawMethodOutput) {
             return MethodResult.empty();
         }
 
@@ -151,7 +151,7 @@ public class HandlerMethodTestEnv {
         }
 
         @Override
-        protected MethodResult<Empty> toResult(Object rawMethodOutput, Object target) {
+        protected MethodResult<Empty> toResult(Object target, Object rawMethodOutput) {
             return MethodResult.empty();
         }
 

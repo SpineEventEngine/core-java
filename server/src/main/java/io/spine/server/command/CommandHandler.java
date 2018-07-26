@@ -89,7 +89,7 @@ public abstract class CommandHandler extends AbstractCommandDispatcher implement
     public String dispatch(CommandEnvelope envelope) {
         CommandHandlerMethod method = thisClass.getHandler(envelope.getMessageClass());
         Result result = method.invoke(this, envelope.getMessage(), envelope.getCommandContext());
-        List<Event> events = result.createEvents(envelope, getProducerId(), null);
+        List<Event> events = result.produceEvents(envelope);
         postEvents(events);
         return getId();
     }

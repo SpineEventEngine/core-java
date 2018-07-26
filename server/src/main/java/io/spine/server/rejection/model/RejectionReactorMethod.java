@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.core.React;
 import io.spine.core.RejectionContext;
 import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.EventProducer;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.ReactorMethodResult;
 
@@ -70,13 +71,13 @@ public class RejectionReactorMethod extends RejectionHandlerMethod<ReactorMethod
         ensureExternalMatch(context.getExternal());
 
         Object output = doInvoke(target, rejectionMessage, context);
-        ReactorMethodResult result = toResult(output, target);
+        ReactorMethodResult result = toResult(target, output);
         return result;
     }
 
     @Override
-    protected ReactorMethodResult toResult(Object rawMethodOutput, Object target) {
-        return new ReactorMethodResult(rawMethodOutput);
+    protected ReactorMethodResult toResult(Object target, Object rawMethodOutput) {
+        return new ReactorMethodResult((EventProducer) target, rawMethodOutput);
     }
 
     /** Returns the factory for filtering and creating rejection reactor methods. */
