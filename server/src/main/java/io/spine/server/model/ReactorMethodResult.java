@@ -27,6 +27,8 @@ import java.util.List;
 /**
  * A reactor method may not return a result in response to an incoming message. When so,
  * the raw method should return {@link com.google.protobuf.Empty Empty}.
+ *
+ * @author Alexander Yevsyukov
  */
 public final class ReactorMethodResult extends EventsResult {
 
