@@ -81,16 +81,17 @@ public interface HandlerMethod<M extends MessageClass, C extends Message> {
      * Ensures that the {@code external} attribute of the {@linkplain HandlerMethod method} is
      * the one expected.
      *
-     * <p>{@link IllegalArgumentException} is thrown if the value does not meet the expectations.
+     * <p>This method is for checking that an {@code external} attribute of a message context
+     * matches the one set for the handler method.
      *
-     * @param method           the method to check
-     * @param shouldBeExternal an expected value of {@code external} attribute.
+     * @param expectedValue an expected value of the {@code external} attribute
      * @see ExternalAttribute
+     * @throws IllegalArgumentException is thrown if the value does not meet the expectation.
      */
-    static void ensureExternalMatch(HandlerMethod<?, ?> method, boolean shouldBeExternal) {
-        checkArgument(isExternal(method) == shouldBeExternal,
+    default void ensureExternalMatch(boolean expectedValue) {
+        checkArgument(isExternal(this) == expectedValue,
                       "Mismatch of `external` value for the handler method %s. " +
-                              "Expected `external` = %s, but got the other way around.", method,
-                      shouldBeExternal);
+                              "Expected `external` = %s, but got the other way around.", this,
+                      expectedValue);
     }
 }

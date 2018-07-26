@@ -30,7 +30,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static io.spine.server.model.HandlerMethod.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
@@ -69,7 +68,7 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
     public List<? extends Message> invoke(Object target,
                                           Message rejectionMessage,
                                           RejectionContext context) {
-        ensureExternalMatch(this, context.getExternal());
+        ensureExternalMatch(context.getExternal());
 
         Object output = doInvoke(target, rejectionMessage, context);
         List<? extends Message> eventMessages = toList(output);

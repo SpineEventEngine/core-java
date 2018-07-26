@@ -31,7 +31,6 @@ import io.spine.server.model.MethodPredicate;
 import java.lang.reflect.Method;
 import java.util.function.Predicate;
 
-import static io.spine.server.model.HandlerMethod.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
@@ -67,7 +66,7 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
     @CanIgnoreReturnValue
     @Override
     public Object invoke(Object target, Message rejectionMessage, RejectionContext context) {
-        ensureExternalMatch(this, context.getExternal());
+        ensureExternalMatch(context.getExternal());
 
         Object result = doInvoke(target, rejectionMessage, context);
         return result;

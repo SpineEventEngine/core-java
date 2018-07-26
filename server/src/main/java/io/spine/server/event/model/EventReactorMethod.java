@@ -33,7 +33,6 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static io.spine.server.model.HandlerMethod.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -66,7 +65,7 @@ public final class EventReactorMethod extends AbstractHandlerMethod<EventClass, 
      */
     @Override
     public List<? extends Message> invoke(Object target, Message message, EventContext context) {
-        ensureExternalMatch(this, context.getExternal());
+        ensureExternalMatch(context.getExternal());
 
         Object handlingResult = super.invoke(target, message, context);
         List<? extends Message> eventMessages = toList(handlingResult);

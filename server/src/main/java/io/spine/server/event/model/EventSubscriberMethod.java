@@ -34,7 +34,6 @@ import java.lang.reflect.Method;
 import java.util.function.Predicate;
 
 import static io.spine.core.Rejections.isRejection;
-import static io.spine.server.model.HandlerMethod.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
@@ -72,7 +71,7 @@ public final class EventSubscriberMethod extends AbstractHandlerMethod<EventClas
     @CanIgnoreReturnValue // since event subscriber methods do not return values
     @Override
     public Object invoke(Object target, Message message, EventContext context) {
-        ensureExternalMatch(this, context.getExternal());
+        ensureExternalMatch(context.getExternal());
         return super.invoke(target, message, context);
     }
 
