@@ -18,15 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.system.server;
 
+import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.event.EventEnricher;
-import io.spine.system.server.CommandLifecycle;
-import io.spine.system.server.CommandLifecycleAggregate;
-import io.spine.system.server.CommandLifecycleRepository;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -34,11 +32,12 @@ import java.util.function.Function;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A factory of {@link EventEnricher} instances for the {@link SystemBoundedContext}.
+ * A factory of {@link EventEnricher} instances for the system bounded context.
  *
  * @author Dmytro Dashenkov
  */
-final class SystemEnricher {
+@Internal
+public final class SystemEnricher {
 
     /**
      * Prevents the utility class instantiation.
@@ -52,7 +51,7 @@ final class SystemEnricher {
      * @param commandRepository repository to find enrichment values in
      * @return new {@link EventEnricher}
      */
-    static EventEnricher create(CommandLifecycleRepository commandRepository) {
+    public static EventEnricher create(CommandLifecycleRepository commandRepository) {
         checkNotNull(commandRepository);
         EventEnricher enricher = EventEnricher.newBuilder()
                                               .add(CommandId.class, Command.class,
