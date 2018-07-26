@@ -20,14 +20,10 @@
 
 package io.spine.server.event.model;
 
-import com.google.protobuf.Message;
 import io.spine.core.EventContext;
 import io.spine.server.model.HandlerMethodPredicate;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-
-import static io.spine.core.Rejections.isRejection;
 
 /**
  * Abstract base for methods that accept an event message as the first parameter, and
@@ -39,22 +35,5 @@ abstract class EventMethodPredicate extends HandlerMethodPredicate<EventContext>
 
     EventMethodPredicate(Class<? extends Annotation> annotationClass) {
         super(annotationClass, EventContext.class);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Filters out methods that accept rejection messages as the first parameter.
-     */
-    @Override
-    protected boolean verifyParams(Method method) {
-        if (super.verifyParams(method)) {
-            @SuppressWarnings("unchecked") // The case is safe since super returned `true`.
-            Class<? extends Message> firstParameter =
-                    (Class<? extends Message>) method.getParameterTypes()[0];
-            boolean isRejection = isRejection(firstParameter);
-            return !isRejection;
-        }
-        return false;
     }
 }
