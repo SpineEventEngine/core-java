@@ -63,12 +63,22 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     private transient volatile @MonotonicNonNull Constructor<E> entityConstructor;
 
     /** Creates new instance of the model class for the passed class of entities. */
-    public EntityClass(Class<E> cls) {
+    protected EntityClass(Class<E> cls) {
         super(cls);
         checkNotNull((Class<? extends Entity>) cls);
         this.idClass = getIdClass(cls);
         this.stateClass = getStateClass(cls);
         this.entityStateType = TypeUrl.of(stateClass);
+    }
+
+    /**
+     * Obtains an entity class for the passed raw class.
+     */
+    public static <E extends Entity> EntityClass<E> asEntityClass(Class<E> cls) {
+        checkNotNull(cls);
+        EntityClass<E> result = (EntityClass<E>)
+                get(cls, EntityClass.class, () -> new EntityClass<>(cls));
+        return result;
     }
 
     /**

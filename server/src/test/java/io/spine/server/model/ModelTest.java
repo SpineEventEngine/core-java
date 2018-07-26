@@ -29,6 +29,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
+import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -42,7 +45,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @DisplayName("Model should")
 class ModelTest {
 
-    private final Model model = Model.getInstance();
+    private final Model model = Model.getInstance(MCommandHandler.class);
 
     @BeforeEach
     void setUp() {
@@ -54,8 +57,8 @@ class ModelTest {
     @DisplayName("check for duplicated command handlers in command handler class")
     void checkDuplicateCmdHandler() {
         try {
-            model.asAggregateClass(MAggregate.class);
-            model.asCommandHandlerClass(MCommandHandler.class);
+            asAggregateClass(MAggregate.class);
+            asCommandHandlerClass(MCommandHandler.class);
             failErrorNotThrown();
         } catch (DuplicateCommandHandlerError error) {
             assertContainsClassName(error, RefCreateProject.class);
@@ -69,8 +72,8 @@ class ModelTest {
     @DisplayName("check for duplicated command handlers in process manager class")
     void checkDuplicateInProcman() {
         try {
-            model.asAggregateClass(MAggregate.class);
-            model.asProcessManagerClass(MProcessManager.class);
+            asAggregateClass(MAggregate.class);
+            asProcessManagerClass(MProcessManager.class);
             failErrorNotThrown();
         } catch (DuplicateCommandHandlerError error) {
             assertContainsClassName(error, RefCreateProject.class);

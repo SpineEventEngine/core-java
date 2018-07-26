@@ -27,7 +27,6 @@ import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.event.model.EventSubscriberClass;
-import io.spine.server.model.Model;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 import org.slf4j.Logger;
@@ -39,6 +38,7 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Events.isExternal;
+import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
@@ -64,8 +64,7 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
 
     @Override
     public Set<ExternalMessageClass> getMessageClasses() {
-        EventSubscriberClass<?> subscriberClass = Model.getInstance()
-                                                       .asEventSubscriberClass(delegate.getClass());
+        EventSubscriberClass<?> subscriberClass = asEventSubscriberClass(delegate.getClass());
         Set<EventClass> extSubscriptions = subscriberClass.getExternalEventSubscriptions();
         return ExternalMessageClass.fromEventClasses(extSubscriptions);
     }
