@@ -23,7 +23,7 @@ package io.spine.server.rejection;
 import io.spine.server.model.EventProducer;
 
 /**
- * All objects that react on rejections produce events.
+ * Objects that react on rejections may produce events.
  *
  * @author Alexander Yevsyukov
  */
