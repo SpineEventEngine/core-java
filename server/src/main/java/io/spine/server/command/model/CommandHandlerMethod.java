@@ -20,23 +20,18 @@
 
 package io.spine.server.command.model;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandContext;
-import io.spine.core.Event;
-import io.spine.core.MessageEnvelope;
 import io.spine.core.Rejection;
-import io.spine.core.Version;
 import io.spine.server.command.Assign;
 import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.EventsResult;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
-import io.spine.server.model.MethodResult;
 import io.spine.server.procman.ProcessManager;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -142,7 +137,7 @@ public final class CommandHandlerMethod extends CommandAcceptingMethod<CommandHa
     /**
      * The result of a command handler method execution.
      */
-    public static final class Result extends MethodResult<Message> {
+    public static final class Result extends EventsResult {
 
         private Result(Object rawMethodResult, Object target) {
             super(rawMethodResult);
@@ -150,12 +145,6 @@ public final class CommandHandlerMethod extends CommandAcceptingMethod<CommandHa
             List<Message> withoutEmpty = filterEmpty(events);
             checkResultNonEmpty(withoutEmpty, rawMethodResult, target);
             setMessages(withoutEmpty);
-        }
-
-        @Override
-        public
-        List<Event> asEvents(MessageEnvelope origin, Any producerId, @Nullable Version version) {
-            return super.asEvents(origin, producerId, version);
         }
 
         /**

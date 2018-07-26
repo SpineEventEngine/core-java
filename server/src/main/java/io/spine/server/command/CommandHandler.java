@@ -23,11 +23,13 @@ package io.spine.server.command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
+import io.spine.core.Version;
 import io.spine.server.command.model.CommandHandlerClass;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandHandlerMethod.Result;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
+import io.spine.server.model.EventProducer;
 
 import java.util.List;
 import java.util.Set;
@@ -61,7 +63,7 @@ import static io.spine.server.command.model.CommandHandlerClass.asCommandHandler
  * @see io.spine.server.aggregate.Aggregate Aggregate
  * @see CommandDispatcher
  */
-public abstract class CommandHandler extends AbstractCommandDispatcher {
+public abstract class CommandHandler extends AbstractCommandDispatcher implements EventProducer {
 
     private final CommandHandlerClass<?> thisClass = asCommandHandlerClass(getClass());
 
@@ -87,7 +89,7 @@ public abstract class CommandHandler extends AbstractCommandDispatcher {
     public String dispatch(CommandEnvelope envelope) {
         CommandHandlerMethod method = thisClass.getHandler(envelope.getMessageClass());
         Result result = method.invoke(this, envelope.getMessage(), envelope.getCommandContext());
-        List<Event> events = result.asEvents(envelope, producerId(), null);
+        List<Event> events = result.createEvents(envelope, getProducerId(), null);
         postEvents(events);
         return getId();
     }
@@ -96,5 +98,13 @@ public abstract class CommandHandler extends AbstractCommandDispatcher {
     @Override
     public Set<CommandClass> getMessageClasses() {
         return thisClass.getCommands();
+    }
+
+    /**
+     * Always returns {@linkplain Version#getDefaultInstance() empty} version.
+     */
+    @Override
+    public Version getVersion() {
+        return Version.getDefaultInstance();
     }
 }

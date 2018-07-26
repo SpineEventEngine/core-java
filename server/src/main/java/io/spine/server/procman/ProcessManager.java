@@ -142,7 +142,7 @@ public abstract class ProcessManager<I,
         CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         CommandHandlerMethod.Result result =
                 method.invoke(this, command.getMessage(), command.getCommandContext());
-        List<Event> events = result.asEvents(command, getProducerId(), getVersion());
+        List<Event> events = result.createEvents(command, getProducerId(), getVersion());
         return events;
     }
 
@@ -157,7 +157,7 @@ public abstract class ProcessManager<I,
         EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
         ReactorMethodResult methodResult =
                 method.invoke(this, event.getMessage(), event.getEventContext());
-        List<Event> result = methodResult.asEvents(event, getProducerId(), getVersion());
+        List<Event> result = methodResult.createEvents(event, getProducerId(), getVersion());
         return result;
     }
 
@@ -174,7 +174,7 @@ public abstract class ProcessManager<I,
                 thisClass().getReactor(rejection.getMessageClass(), commandClass);
         ReactorMethodResult methodResult =
                 method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
-        List<Event> result = methodResult.asEvents(rejection, getProducerId(), getVersion());
+        List<Event> result = methodResult.createEvents(rejection, getProducerId(), getVersion());
         return result;
     }
 

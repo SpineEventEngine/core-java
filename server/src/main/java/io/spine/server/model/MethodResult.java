@@ -21,13 +21,8 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.core.Event;
-import io.spine.core.MessageEnvelope;
-import io.spine.core.Version;
-import io.spine.server.event.EventFactory;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -130,21 +125,6 @@ public abstract class MethodResult<V extends Message> {
 
         // Another type of result is single event message (as Message).
         List<Message> result = singletonList((Message) output);
-        return result;
-    }
-
-    /**
-     * Transforms the messages of the result into a list of events.
-     */
-    protected
-    List<Event> asEvents(MessageEnvelope origin, Any producerId, @Nullable Version version) {
-        checkNotNull(producerId);
-        EventFactory eventFactory = EventFactory.on(origin, producerId);
-        List<? extends Message> messages = asMessages();
-        List<Event> result =
-                messages.stream()
-                        .map(eventMessage -> eventFactory.createEvent(eventMessage, version))
-                        .collect(toList());
         return result;
     }
 

@@ -20,21 +20,27 @@
 
 package io.spine.server.model;
 
-import com.google.protobuf.Message;
+import com.google.protobuf.Any;
+import io.spine.core.Version;
 
-import java.util.List;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Optional;
 
 /**
- * A reactor method may not return a result in response to an incoming message. When so,
- * the raw method should return {@link com.google.protobuf.Empty Empty}.
+ * An object with identity which produces events.
+ *
+ * @author Alexander Yevsyukov
  */
-public final class ReactorMethodResult extends EventsResult {
+public interface EventProducer {
 
-    public ReactorMethodResult(Object rawMethodOutput) {
-        super(checkNotNull(rawMethodOutput));
-        List<Message> messages = toMessages(rawMethodOutput);
-        setMessagesFilteringEmpty(messages);
-    }
+    /**
+     * The object identity packed into {@link Any}.
+     */
+    Any getProducerId();
+
+    /**
+     * The version of the object to be put into events.
+     *
+     * <p>If {@linkplain Optional#empty() empty}, no version will be added to generated events.
+     */
+    Version getVersion();
 }

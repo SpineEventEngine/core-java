@@ -20,21 +20,42 @@
 
 package io.spine.server.model;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.core.Event;
+import io.spine.core.MessageEnvelope;
+import io.spine.core.Version;
+import io.spine.server.event.EventFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.stream.Collectors.toList;
 
 /**
- * A reactor method may not return a result in response to an incoming message. When so,
- * the raw method should return {@link com.google.protobuf.Empty Empty}.
+ * Abstract base for method results that generate events.
+ *
+ * @author Alexander Yevsyukov
  */
-public final class ReactorMethodResult extends EventsResult {
+public abstract class EventsResult extends MethodResult<Message> {
 
-    public ReactorMethodResult(Object rawMethodOutput) {
-        super(checkNotNull(rawMethodOutput));
-        List<Message> messages = toMessages(rawMethodOutput);
-        setMessagesFilteringEmpty(messages);
+    protected EventsResult(@Nullable Object output) {
+        super(output);
+    }
+
+    /**
+     * Transforms the messages of the result into a list of events.
+     */
+    public
+    List<Event> createEvents(MessageEnvelope origin, Any producerId, @Nullable Version version) {
+        checkNotNull(producerId);
+        EventFactory eventFactory = EventFactory.on(origin, producerId);
+        List<? extends Message> messages = asMessages();
+        List<Event> result =
+                messages.stream()
+                        .map(eventMessage -> eventFactory.createEvent(eventMessage, version))
+                        .collect(toList());
+        return result;
     }
 }
