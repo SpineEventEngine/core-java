@@ -25,10 +25,8 @@ import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
 import java.util.Set;
-import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Describes a method that accepts a message and optionally its context.
@@ -64,41 +62,19 @@ public interface HandlerMethod<M extends MessageClass, C extends Message> {
     Object invoke(Object target, Message message, C context);
 
     /**
-     * Creates a predicate to remove the {@linkplain HandlerMethod handler methods}
-     * that are not marked {@linkplain ExternalAttribute#EXTERNAL external}.
-     *
-     * @param <M> the type of the {@code HandlerMethod} to apply this predicate to
-     * @return the predicate
-     */
-    static <M extends HandlerMethod<?, ?>> Predicate<M> external() {
-        return input -> {
-            M method = checkNotNull(input);
-            boolean result = isExternal(method);
-            return result;
-        };
-    }
-
-    /**
-     * Creates a predicate to remove the {@linkplain HandlerMethod handler methods}
-     * that are marked {@linkplain ExternalAttribute#EXTERNAL external}.
-     *
-     * @param <M> the type of the {@code HandlerMethod} to apply this predicate to
-     * @return the predicate
-     */
-    static <M extends HandlerMethod<?, ?>> Predicate<M> domestic() {
-        return input -> {
-            M method = checkNotNull(input);
-            boolean result = !isExternal(method);
-            return result;
-        };
-    }
-
-    /**
-     * Verifies if the passed method is external.
+     * Verifies if the passed method is {@linkplain ExternalAttribute#EXTERNAL external}.
      */
     static <M extends HandlerMethod<?, ?>> boolean isExternal(M method) {
         return method.getAttributes()
                      .contains(ExternalAttribute.EXTERNAL);
+    }
+
+    /**
+     * Verifies if the passed method is domestic, that is not marked as
+     * {@linkplain ExternalAttribute#EXTERNAL external}).
+     */
+    static <M extends HandlerMethod<?, ?>> boolean isDomestic(M method) {
+        return !isExternal(method);
     }
 
     /**

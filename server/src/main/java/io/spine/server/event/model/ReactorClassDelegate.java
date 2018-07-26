@@ -24,14 +24,12 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
+import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
 import io.spine.server.rejection.model.RejectionReactorMethod;
 
 import java.util.Set;
-
-import static io.spine.server.model.HandlerMethod.domestic;
-import static io.spine.server.model.HandlerMethod.external;
 
 /**
  * The helper class for holding messaging information on behalf of another model class.
@@ -55,13 +53,14 @@ public final class ReactorClassDelegate<T> extends ModelClass<T> implements Reac
     public ReactorClassDelegate(Class<T> cls) {
         super(cls);
         this.eventReactions = new MessageHandlerMap<>(cls, EventReactorMethod.factory());
+        this.domesticEventReactions = eventReactions.getMessageClasses(HandlerMethod::isDomestic);
+        this.externalEventReactions = eventReactions.getMessageClasses(HandlerMethod::isExternal);
+
         this.rejectionReactions = new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
-
-        this.domesticEventReactions = eventReactions.getMessageClasses(domestic());
-        this.externalEventReactions = eventReactions.getMessageClasses(external());
-
-        this.domesticRejectionReactions = rejectionReactions.getMessageClasses(domestic());
-        this.externalRejectionReactions = rejectionReactions.getMessageClasses(external());
+        this.domesticRejectionReactions =
+                rejectionReactions.getMessageClasses(HandlerMethod::isDomestic);
+        this.externalRejectionReactions =
+                rejectionReactions.getMessageClasses(HandlerMethod::isExternal);
     }
 
     @Override
