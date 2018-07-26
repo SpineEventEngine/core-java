@@ -35,8 +35,7 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
 import io.spine.core.MessageEnvelope;
-import io.spine.core.RejectionClass;
-import io.spine.core.RejectionEnvelope;
+import io.spine.core.RejectionEventContext;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
@@ -50,7 +49,6 @@ import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.EventPlayers;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.model.Model;
-import io.spine.server.rejection.model.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.Collection;
@@ -62,6 +60,8 @@ import java.util.stream.Stream;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.validate.Validate.isDefault;
 import static io.spine.validate.Validate.isNotDefault;
 import static java.util.stream.Collectors.toList;
 
@@ -235,32 +235,23 @@ public abstract class Aggregate<I,
      */
     List<Event> reactOn(EventEnvelope event) {
         EventClass eventClass = event.getMessageClass();
-        EventReactorMethod method = thisClass().getReactor(eventClass);
+        CommandClass commandClass = commandClass(event);
+        EventReactorMethod method = thisClass().getReactor(eventClass, commandClass);
         Dispatch<EventEnvelope> dispatch = Dispatch.of(event)
                                                    .to(this, method);
         DispatchResult dispatchResult = dispatch.perform();
         return toEvents(dispatchResult);
     }
 
-    /**
-     * Dispatches the rejection to which the aggregate reacts.
-     *
-     * <p>Reacting on a rejection may result in emitting event messages. All the
-     * {@linkplain Empty empty} messages are filtered out from the result.
-     *
-     * @param  rejection the envelope with the rejection
-     * @return a list of event messages that the aggregate produces in reaction to
-     *         the rejection, or an empty list if the aggregate state does not change in
-     *         response to this rejection
-     */
-    List<Event> reactOn(RejectionEnvelope rejection) {
-        CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
-        RejectionClass rejectionClass = rejection.getMessageClass();
-        RejectionReactorMethod method = thisClass().getReactor(rejectionClass, commandClass);
-        Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection)
-                                                       .to(this, method);
-        DispatchResult dispatchResult = dispatch.perform();
-        return toEvents(dispatchResult);
+    private static CommandClass commandClass(EventEnvelope event) {
+        RejectionEventContext rejectionContext = event.getEventContext()
+                                                      .getRejection();
+        if (isDefault(rejectionContext)) {
+            Any commandMessage = rejectionContext.getCommandMessage();
+            return CommandClass.of(commandMessage);
+        } else {
+            return CommandClass.of(Empty.class);
+        }
     }
 
     /**
@@ -406,7 +397,7 @@ public abstract class Aggregate<I,
      * @param snapshot the snapshot with the state to restore
      */
     void restore(Snapshot snapshot) {
-        S stateToRestore = AnyPacker.unpack(snapshot.getState());
+        S stateToRestore = unpack(snapshot.getState());
         Version versionFromSnapshot = snapshot.getVersion();
         setInitialState(stateToRestore, versionFromSnapshot);
     }

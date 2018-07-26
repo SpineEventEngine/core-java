@@ -29,7 +29,6 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateCommandEndpoint;
 import io.spine.server.aggregate.AggregateEventEndpoint;
-import io.spine.server.aggregate.AggregateRejectionEndpoint;
 import io.spine.server.aggregate.AggregateRepository;
 
 import java.util.List;
@@ -93,40 +92,7 @@ public class AggregateMessageDispatcher {
     @CanIgnoreReturnValue
     public static List<? extends Message> dispatchRejection(Aggregate<?, ?, ?> aggregate,
                                                             RejectionEnvelope envelope) {
-        checkNotNull(envelope);
-
-        List<? extends Message> eventMessages =
-                TestAggregateRejectionEndpoint.dispatch(aggregate, envelope);
-        return eventMessages;
-    }
-
-    /**
-     * A test-only implementation of an {@link AggregateRejectionEndpoint}, that dispatches
-     * rejections to an instance of {@code Aggregate} and returns the list of events.
-     *
-     * @param <I> the type of {@code Aggregate} identifier
-     * @param <A> the type of {@code Aggregate}
-     */
-    private static class TestAggregateRejectionEndpoint<I, A extends Aggregate<I, ?, ?>>
-            extends AggregateRejectionEndpoint<I, A> {
-
-        @SuppressWarnings("ConstantConditions")     /*  {@code null} is supplied to the ctor,
-                                                        since in the workflow of this test endpoint
-                                                        the repository is not used. */
-        private TestAggregateRejectionEndpoint(RejectionEnvelope envelope) {
-            super(mockRepository(), envelope);
-        }
-
-        private static <I, A extends Aggregate<I, ?, ?>>
-        List<? extends Message> dispatch(A aggregate, RejectionEnvelope envelope) {
-            TestAggregateRejectionEndpoint<I, A> endpoint =
-                    new TestAggregateRejectionEndpoint<>(envelope);
-            List<? extends Message> result = endpoint.dispatchInTx(aggregate)
-                                                     .stream()
-                                                     .map(Events::getMessage)
-                                                     .collect(toList());
-            return result;
-        }
+        throw new UnsupportedOperationException("Method dispatchRejection is not implemented!");
     }
 
     /**

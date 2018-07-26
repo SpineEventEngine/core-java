@@ -31,8 +31,6 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.core.RejectionClass;
-import io.spine.core.RejectionEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.Bus;
@@ -55,7 +53,6 @@ import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.model.Model;
 import io.spine.server.procman.model.ProcessManagerClass;
-import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
@@ -85,7 +82,6 @@ public abstract class ProcessManagerRepository<I,
                                                S extends Message>
                 extends EventDispatchingRepository<I, P, S>
                 implements CommandDispatcherDelegate<I>,
-                           RejectionDispatcherDelegate<I>,
                            Shardable {
 
     /** The command routing schema used by this repository. */
@@ -104,12 +100,6 @@ public abstract class ProcessManagerRepository<I,
     private final Supplier<PmEventDelivery<I, P>> eventDeliverySupplier =
             memoize(() -> {
                 PmEventDelivery<I, P> result = new PmEventDelivery<>(this);
-                return result;
-            });
-
-    private final Supplier<PmRejectionDelivery<I, P>> rejectionDeliverySupplier =
-            memoize(() -> {
-                PmRejectionDelivery<I, P> result = new PmRejectionDelivery<>(this);
                 return result;
             });
 
@@ -246,32 +236,6 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
-     * Obtains a set of rejection classes on which process managers of
-     * this repository are subscribed.
-     *
-     * @return a set of rejection classes or empty set if process managers
-     * are not subscribed to rejections
-     */
-    @Override
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
-    public Set<RejectionClass> getRejectionClasses() {
-        return processManagerClass().getRejectionReactions();
-    }
-
-    /**
-     * Obtains a set of external rejection classes on which process managers of
-     * this repository are subscribed.
-     *
-     * @return a set of external rejection classes or empty set if process managers
-     * are not subscribed to external rejections
-     */
-    @Override
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
-    public Set<RejectionClass> getExternalRejectionClasses() {
-        return processManagerClass().getExternalRejectionReactions();
-    }
-
-    /**
      * Obtains command routing schema used by this repository.
      */
     protected final CommandRouting<I> getCommandRouting() {
@@ -315,26 +279,10 @@ public abstract class ProcessManagerRepository<I,
         return result;
     }
 
-    /**
-     * Dispatches the rejection to one or more subscribing process managers.
-     *
-     * @param rejection the rejection to dispatch
-     * @return IDs of process managers who successfully consumed the rejection
-     */
-    @Override
-    public Set<I> dispatchRejection(RejectionEnvelope rejection) {
-        return PmRejectionEndpoint.handle(this, rejection);
-    }
-
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
         commandErrorHandler.handleError(envelope, exception)
                            .rethrow();
-    }
-
-    @Override
-    public void onError(RejectionEnvelope envelope, RuntimeException exception) {
-        logError("Rejection dispatching caused error (class: %s, id: %s", envelope, exception);
     }
 
     @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.
@@ -415,22 +363,6 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
-     * Defines a strategy of rejection delivery applied to the instances managed by this repository.
-     *
-     * <p>By default uses direct delivery.
-     *
-     * <p>Descendants may override this method to redefine the strategy. In particular,
-     * it is possible to postpone dispatching of a certain rejection to a particular process manager
-     * instance at runtime.
-     *
-     * @return delivery strategy for rejections
-     */
-    @SPI
-    protected PmRejectionDelivery<I, P> getRejectionEndpointDelivery() {
-        return rejectionDeliverySupplier.get();
-    }
-
-    /**
      * Defines a strategy of command delivery applied to the instances managed by this repository.
      *
      * <p>By default uses direct delivery.
@@ -459,10 +391,10 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
         Iterable<ShardedStreamConsumer<?, ?>> result =
-                ImmutableList.<ShardedStreamConsumer<?, ?>>of(
+                ImmutableList.of(
                         getCommandEndpointDelivery().getConsumer(),
-                        getEventEndpointDelivery().getConsumer(),
-                        getRejectionEndpointDelivery().getConsumer());
+                        getEventEndpointDelivery().getConsumer()
+                );
         return result;
     }
 

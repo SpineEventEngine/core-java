@@ -271,11 +271,6 @@ public class IntegrationBusTestEnv {
             extends ProcessManagerRepository<ProjectId, ProjectWizard, Project> {
 
         @Override
-        public void onError(RejectionEnvelope envelope, RuntimeException exception) {
-            throw illegalStateWithCauseOf(exception);
-        }
-
-        @Override
         public void onError(CommandEnvelope envelope, RuntimeException exception) {
             throw illegalStateWithCauseOf(exception);
         }
@@ -329,11 +324,6 @@ public class IntegrationBusTestEnv {
 
         @Override
         public void onError(EventEnvelope envelope, RuntimeException exception) {
-            throw illegalStateWithCauseOf(exception);
-        }
-
-        @Override
-        public void onError(RejectionEnvelope envelope, RuntimeException exception) {
             throw illegalStateWithCauseOf(exception);
         }
     }

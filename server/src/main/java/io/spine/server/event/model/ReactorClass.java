@@ -20,10 +20,9 @@
 
 package io.spine.server.event.model;
 
+import com.google.protobuf.Empty;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
-import io.spine.core.RejectionClass;
-import io.spine.server.rejection.model.RejectionReactorMethod;
 
 import java.util.Set;
 
@@ -55,32 +54,15 @@ public interface ReactorClass {
     Set<EventClass> getExternalEventReactions();
 
     /**
-     * Obtains a set of rejection classes to which this class reacts.
-     *
-     * <p>The returned set contains only rejection classes of the {@code BoundedContext}
-     * to which the class belongs.
-     *
-     * <p>For reactions on external rejections, please see {@link #getExternalRejectionReactions()}.
+     * Obtains the method that reacts on the passed projection class.
      */
-    Set<RejectionClass> getRejectionReactions();
-
-    /**
-     * Obtains a set of external rejections to which this class reacts.
-     *
-     * <p>External rejections are those that are delivered to the {@code BoundedContext}
-     * to which this class belongs from outside.
-     *
-     * <p>For reactions on domestic rejections, please see {@link #getRejectionReactions()}.
-     */
-    Set<RejectionClass> getExternalRejectionReactions();
+    EventReactorMethod getReactor(EventClass eventClass, CommandClass commandClass);
 
     /**
      * Obtains the method that reacts on the passed event class.
      */
-    EventReactorMethod getReactor(EventClass eventClass);
-
-    /**
-     * Obtains the method that reacts on the passed projection class.
-     */
-    RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls);
+    default EventReactorMethod getReactor(EventClass eventClass) {
+        CommandClass emptyCommand = CommandClass.of(Empty.class);
+        return getReactor(eventClass, emptyCommand);
+    }
 }

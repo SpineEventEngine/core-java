@@ -28,7 +28,6 @@ import io.spine.core.RejectionEnvelope;
 import io.spine.server.entity.Repository;
 import io.spine.server.procman.PmCommandEndpoint;
 import io.spine.server.procman.PmEventEndpoint;
-import io.spine.server.procman.PmRejectionEndpoint;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 
@@ -82,9 +81,7 @@ public class ProcessManagerDispatcher {
      */
     @SuppressWarnings("CheckReturnValue") // OK to ignore events in this test utility.
     public static void dispatch(ProcessManager<?, ?, ?> pm, RejectionEnvelope rejection) {
-        checkNotNull(pm);
-        checkNotNull(rejection);
-        TestPmRejectionEndpoint.dispatch(pm, rejection);
+        throw new UnsupportedOperationException("Method dispatch is not implemented!");
     }
 
     /**
@@ -134,31 +131,6 @@ public class ProcessManagerDispatcher {
             TestPmEventEndpoint<I, P, S> endpoint = new TestPmEventEndpoint<>(envelope);
             List<Event> events = endpoint.dispatchInTx(manager);
             return events;
-        }
-    }
-
-    /**
-     * A test-only implementation of an {@link PmRejectionEndpoint}, that dispatches
-     * rejection to an instance of {@code ProcessManager} and returns the list of events.
-     *
-     * @param <I> the type of {@code ProcessManager} identifier
-     * @param <P> the type of {@code ProcessManager}
-     * @param <S> the type of {@code ProcessManager} state object
-     */
-    private static class TestPmRejectionEndpoint<I,
-                                                 P extends ProcessManager<I, S, ?>,
-                                                 S extends Message>
-            extends PmRejectionEndpoint<I, P> {
-
-        private TestPmRejectionEndpoint(RejectionEnvelope envelope) {
-            super(mockRepository(), envelope);
-        }
-
-        private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
-        List<Event> dispatch(P manager, RejectionEnvelope envelope) {
-            TestPmRejectionEndpoint<I, P, S> endpoint = new TestPmRejectionEndpoint<>(envelope);
-            List<Event> messages = endpoint.dispatchInTx(manager);
-            return messages;
         }
     }
 

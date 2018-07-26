@@ -28,8 +28,6 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.core.RejectionClass;
-import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
@@ -48,7 +46,6 @@ import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.model.Model;
-import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
@@ -95,7 +92,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
         implements CommandDispatcher<I>,
                    EventDispatcherDelegate<I>,
-                   RejectionDispatcherDelegate<I>,
                    Shardable {
 
     /** The default number of events to be stored before a next snapshot is made. */
@@ -117,9 +113,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     private final Supplier<AggregateEventDelivery<I, A>> eventDeliverySupplier =
             memoize(() -> new AggregateEventDelivery<>(this));
-
-    private final Supplier<AggregateRejectionDelivery<I, A>> rejectionDeliverySupplier =
-            memoize(() -> new AggregateRejectionDelivery<>(this));
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -322,30 +315,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         logError("Error reacting on event (class: %s id: %s).", envelope, exception);
     }
 
-    @Override
-    public Set<RejectionClass> getRejectionClasses() {
-        return aggregateClass().getRejectionReactions();
-    }
-
-    @Override
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
-    public Set<RejectionClass> getExternalRejectionClasses() {
-        return aggregateClass().getExternalRejectionReactions();
-    }
-
-    @Override
-    public Set<I> dispatchRejection(RejectionEnvelope envelope) {
-        checkNotNull(envelope);
-        return AggregateRejectionEndpoint.handle(this, envelope);
-    }
-
-    @Override
-    public void onError(RejectionEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
-        checkNotNull(exception);
-        logError("Error reacting on rejection (class %s, id: %s)", envelope, exception);
-    }
-
     /**
      * Obtains command routing instance used by this repository.
      */
@@ -545,23 +514,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Defines a strategy of rejection delivery applied to the instances managed by this repository.
-     *
-     * <p>By default uses direct delivery.
-     *
-     * <p>Descendants may override this method to redefine the strategy. In particular,
-     * it is possible to postpone dispatching of a certain rejection to a particular aggregate
-     * instance at runtime.
-     *
-     * @return delivery strategy for rejections
-     */
-    @SPI
-    protected AggregateDelivery<I, A, RejectionEnvelope, ?, ?>
-    getRejectionEndpointDelivery() {
-        return rejectionDeliverySupplier.get();
-    }
-
-    /**
      * Defines a strategy of command delivery applied to the instances managed by this repository.
      *
      * <p>By default uses direct delivery.
@@ -598,8 +550,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         Iterable<ShardedStreamConsumer<?, ?>> result =
                 ImmutableList.of(
                         getCommandEndpointDelivery().getConsumer(),
-                        getEventEndpointDelivery().getConsumer(),
-                        getRejectionEndpointDelivery().getConsumer()
+                        getEventEndpointDelivery().getConsumer()
                 );
         return result;
     }

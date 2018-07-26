@@ -22,13 +22,11 @@ package io.spine.server.procman.model;
 
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
-import io.spine.core.RejectionClass;
 import io.spine.server.entity.model.CommandHandlingEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactorClass;
 import io.spine.server.event.model.ReactorClassDelegate;
 import io.spine.server.procman.ProcessManager;
-import io.spine.server.rejection.model.RejectionReactorMethod;
 
 import java.util.Set;
 
@@ -69,22 +67,7 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     @Override
-    public Set<RejectionClass> getRejectionReactions() {
-        return delegate.getRejectionReactions();
-    }
-
-    @Override
-    public Set<RejectionClass> getExternalRejectionReactions() {
-        return delegate.getExternalRejectionReactions();
-    }
-
-    @Override
-    public EventReactorMethod getReactor(EventClass eventClass) {
-        return delegate.getReactor(eventClass);
-    }
-
-    @Override
-    public RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls) {
-        return delegate.getReactor(rejCls, cmdCls);
+    public EventReactorMethod getReactor(EventClass eventClass, CommandClass commandClass) {
+        return delegate.getReactor(eventClass, commandClass);
     }
 }
