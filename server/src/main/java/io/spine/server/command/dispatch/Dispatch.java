@@ -20,6 +20,7 @@
 
 package io.spine.server.command.dispatch;
 
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
@@ -29,6 +30,7 @@ import io.spine.core.RejectionEnvelope;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.stream.Collectors.toList;
 
 /**
  * An abstract {@link MessageEnvelope message envelope} dispatch.
@@ -65,9 +67,24 @@ public abstract class Dispatch<E extends MessageEnvelope> {
      */
     public DispatchResult perform() {
         List<? extends Message> messages = dispatch();
-        List<? extends Message> filtered = Filtering.of(messages)
-                                                    .perform();
-        return new DispatchResult(filtered, envelope);
+        List<? extends Message> filtered = filterEmpty(messages);
+        return createResult(filtered);
+    }
+
+    /**
+     * Filters the list removing instances of {@link Empty}.
+     */
+    private static List<? extends Message> filterEmpty(List<? extends Message> messages) {
+        List<? extends Message> result =
+                messages.stream()
+                        .filter((m) -> !Empty.getDefaultInstance()
+                                             .equals(m))
+                        .collect(toList());
+        return result;
+    }
+
+    private DispatchResult createResult(List<? extends Message> messages) {
+        return new DispatchResult(messages, envelope);
     }
 
     /**
