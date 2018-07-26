@@ -53,12 +53,6 @@ public abstract class MethodResult<V extends Message> {
         this.messages = ImmutableList.copyOf(messages);
     }
 
-    protected final void setMessagesFilteringEmpty(List<V> messages) {
-        checkNotNull(messages);
-        List<V> filtered = filterEmpty(messages);
-        setMessages(filtered);
-    }
-
     protected @Nullable Object getRawMethodOutput() {
         return rawMethodOutput;
     }

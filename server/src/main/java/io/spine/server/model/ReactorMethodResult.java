@@ -35,6 +35,7 @@ public final class ReactorMethodResult extends EventsResult {
     public ReactorMethodResult(EventProducer producer, Object rawMethodOutput) {
         super(producer, rawMethodOutput);
         List<Message> messages = toMessages(rawMethodOutput);
-        setMessagesFilteringEmpty(messages);
+        List<Message> filtered = filterEmpty(messages);
+        setMessages(filtered);
     }
 }
