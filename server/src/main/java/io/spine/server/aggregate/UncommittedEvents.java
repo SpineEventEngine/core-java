@@ -40,7 +40,8 @@ import static com.google.common.collect.ImmutableList.copyOf;
  */
 final class UncommittedEvents {
 
-    private static final UncommittedEvents EMPTY = new UncommittedEvents(ImmutableList.of(), false);
+    private static final UncommittedEvents EMPTY =
+            new UncommittedEvents(ImmutableList.of(), false);
 
     private final ImmutableList<Event> events;
     private final boolean rejection;
