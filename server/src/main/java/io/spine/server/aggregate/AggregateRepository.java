@@ -258,27 +258,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         // ignore result of `commitEvents()` because we obtain them in the block before the call. 
     @Override
     protected void store(A aggregate) {
-        I id = aggregate.getId();
-        int snapshotTrigger = getSnapshotTrigger();
-        AggregateStorage<I> storage = aggregateStorage();
-        int eventCount = storage.readEventCountAfterLastSnapshot(id);
-        Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents();
-        for (Event event : uncommittedEvents) {
-            storage.writeEvent(id, event);
-            ++eventCount;
-            if (eventCount >= snapshotTrigger) {
-                Snapshot snapshot = aggregate.toShapshot();
-                aggregate.clearRecentHistory();
-                storage.writeSnapshot(id, snapshot);
-                eventCount = 0;
-            }
-        }
-        aggregate.commitEvents();
-        storage.writeEventCountAfterLastSnapshot(id, eventCount);
-
-        if (aggregate.lifecycleFlagsChanged()) {
-            storage.writeLifecycleFlags(aggregate.getId(), aggregate.getLifecycleFlags());
-        }
+        Write<I> operation = Write.<I>operation()
+                                  .into(this)
+                                  .write(aggregate)
+                                  .prepare();
+        operation.perform();
     }
 
     /**
