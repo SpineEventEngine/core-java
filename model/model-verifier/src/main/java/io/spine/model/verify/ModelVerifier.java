@@ -21,7 +21,6 @@
 package io.spine.model.verify;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
 import io.spine.model.CommandHandlers;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.CommandHandler;
@@ -40,9 +39,10 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
@@ -154,7 +154,9 @@ final class ModelVerifier {
     }
 
     private static URL[] extractDestinationDirs(Collection<JavaCompile> tasks) {
-        Collection<URL> urls = transform(tasks, GetDestinationDir.FUNCTION);
+        Collection<URL> urls = tasks.stream()
+                                    .map(GetDestinationDir.FUNCTION)
+                                    .collect(Collectors.toList());
         URL[] result = urls.toArray(EMPTY_URL_ARRAY);
         return result;
     }
