@@ -31,6 +31,7 @@ import io.spine.server.entity.Entity;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethodFailedException;
+import io.spine.server.model.MethodResult;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
@@ -40,10 +41,11 @@ import static com.google.common.base.Throwables.getRootCause;
 /**
  * An abstract base for methods that accept a command message and optionally its context.
  *
+ * @param <R> the type of the result object returned by the method
  * @author Alexander Yevsyukov
  */
-public abstract class CommandAcceptingMethod
-        extends AbstractHandlerMethod<CommandClass, CommandContext> {
+public abstract class CommandAcceptingMethod<R extends MethodResult>
+        extends AbstractHandlerMethod<CommandClass, CommandContext, R> {
 
     protected CommandAcceptingMethod(Method method) {
         super(method);

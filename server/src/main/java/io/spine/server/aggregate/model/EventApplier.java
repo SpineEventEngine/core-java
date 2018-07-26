@@ -31,6 +31,7 @@ import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
+import io.spine.server.model.MethodResult;
 
 import java.lang.reflect.Method;
 import java.util.function.Predicate;
@@ -42,7 +43,8 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  *
  * @author Alexander Yevsyukov
  */
-public final class EventApplier extends AbstractHandlerMethod<EventClass, Empty> {
+public final class EventApplier
+        extends AbstractHandlerMethod<EventClass, Empty, MethodResult<Empty>> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -89,6 +91,11 @@ public final class EventApplier extends AbstractHandlerMethod<EventClass, Empty>
     @SuppressWarnings("CheckReturnValue") // since method appliers do not return values
     public void invoke(Aggregate aggregate, Message message) {
         invoke(aggregate, message, Empty.getDefaultInstance());
+    }
+
+    @Override
+    protected MethodResult<Empty> toResult(Object rawMethodOutput, Object target) {
+        return MethodResult.empty();
     }
 
     /** The factory for filtering methods that match {@code EventApplier} specification. */
@@ -151,4 +158,5 @@ public final class EventApplier extends AbstractHandlerMethod<EventClass, Empty>
             return isVoid;
         }
     }
+
 }

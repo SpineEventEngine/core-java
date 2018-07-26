@@ -25,9 +25,9 @@ import io.spine.core.React;
 import io.spine.core.RejectionContext;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
+import io.spine.server.model.ReactorMethodResult;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.function.Predicate;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
@@ -39,7 +39,7 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  * @author Dmytro Dashenkov
  * @author Alexander Yevsyukov
  */
-public class RejectionReactorMethod extends RejectionHandlerMethod {
+public class RejectionReactorMethod extends RejectionHandlerMethod<ReactorMethodResult> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -65,14 +65,18 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
      *         messages were produced
      */
     @Override
-    public List<? extends Message> invoke(Object target,
-                                          Message rejectionMessage,
-                                          RejectionContext context) {
+    public
+    ReactorMethodResult invoke(Object target, Message rejectionMessage, RejectionContext context) {
         ensureExternalMatch(context.getExternal());
 
         Object output = doInvoke(target, rejectionMessage, context);
-        List<? extends Message> eventMessages = toList(output);
-        return eventMessages;
+        ReactorMethodResult result = toResult(output, target);
+        return result;
+    }
+
+    @Override
+    protected ReactorMethodResult toResult(Object rawMethodOutput, Object target) {
+        return new ReactorMethodResult(rawMethodOutput);
     }
 
     /** Returns the factory for filtering and creating rejection reactor methods. */

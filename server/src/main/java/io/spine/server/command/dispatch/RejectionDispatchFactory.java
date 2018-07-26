@@ -22,6 +22,7 @@ package io.spine.server.command.dispatch;
 
 import com.google.protobuf.Message;
 import io.spine.core.RejectionEnvelope;
+import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.rejection.model.RejectionReactorMethod;
 
 import java.util.List;
@@ -67,7 +68,9 @@ public final class RejectionDispatchFactory extends MessageDispatchFactory<Rejec
         @Override
         protected List<? extends Message> dispatch() {
             RejectionEnvelope rejection = envelope();
-            return method.invoke(context, rejection.getMessage(), rejection.getRejectionContext());
+            ReactorMethodResult result =
+                    method.invoke(context, rejection.getMessage(), rejection.getRejectionContext());
+            return result.asMessages();
         }
     }
 }

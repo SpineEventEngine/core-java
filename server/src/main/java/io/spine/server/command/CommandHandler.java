@@ -23,10 +23,9 @@ package io.spine.server.command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.server.command.dispatch.Dispatch;
-import io.spine.server.command.dispatch.DispatchResult;
 import io.spine.server.command.model.CommandHandlerClass;
 import io.spine.server.command.model.CommandHandlerMethod;
+import io.spine.server.command.model.CommandHandlerMethod.Result;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
 
@@ -87,10 +86,8 @@ public abstract class CommandHandler extends AbstractCommandDispatcher {
     @Override
     public String dispatch(CommandEnvelope envelope) {
         CommandHandlerMethod method = thisClass.getHandler(envelope.getMessageClass());
-        Dispatch<CommandEnvelope> dispatch = Dispatch.of(envelope)
-                                                     .to(this, method);
-        DispatchResult dispatchResult = dispatch.perform();
-        List<Event> events = dispatchResult.asEvents(producerId(), null);
+        Result result = method.invoke(this, envelope.getMessage(), envelope.getCommandContext());
+        List<Event> events = result.asEvents(envelope, producerId(), null);
         postEvents(events);
         return getId();
     }

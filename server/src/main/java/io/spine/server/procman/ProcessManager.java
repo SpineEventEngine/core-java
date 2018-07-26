@@ -30,12 +30,12 @@ import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.command.CommandHandlingEntity;
-import io.spine.server.command.dispatch.Dispatch;
 import io.spine.server.command.dispatch.DispatchResult;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandSequence;
 import io.spine.server.event.model.EventReactorMethod;
+import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.rejection.model.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
@@ -141,9 +141,10 @@ public abstract class ProcessManager<I,
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope command) {
         CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
-        Dispatch<CommandEnvelope> dispatch = Dispatch.of(command).to(this, method);
-        DispatchResult dispatchResult = dispatch.perform();
-        return toEvents(dispatchResult);
+        CommandHandlerMethod.Result result =
+                method.invoke(this, command.getMessage(), command.getCommandContext());
+        List<Event> events = result.asEvents(command, getProducerId(), getVersion());
+        return events;
     }
 
     /**
@@ -155,9 +156,10 @@ public abstract class ProcessManager<I,
      */
     List<Event> dispatchEvent(EventEnvelope event) {
         EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
-        Dispatch<EventEnvelope> dispatch = Dispatch.of(event).to(this, method);
-        DispatchResult dispatchResult = dispatch.perform();
-        return toEvents(dispatchResult);
+        ReactorMethodResult methodResult =
+                method.invoke(this, event.getMessage(), event.getEventContext());
+        List<Event> result = methodResult.asEvents(event, getProducerId(), getVersion());
+        return result;
     }
 
     /**
@@ -169,11 +171,12 @@ public abstract class ProcessManager<I,
      */
     List<Event> dispatchRejection(RejectionEnvelope rejection) {
         CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
-        RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
-                                                               commandClass);
-        Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection).to(this, method);
-        DispatchResult dispatchResult = dispatch.perform();
-        return toEvents(dispatchResult);
+        RejectionReactorMethod method =
+                thisClass().getReactor(rejection.getMessageClass(), commandClass);
+        ReactorMethodResult methodResult =
+                method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
+        List<Event> result = methodResult.asEvents(rejection, getProducerId(), getVersion());
+        return result;
     }
 
     /**

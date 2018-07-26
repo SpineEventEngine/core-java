@@ -31,17 +31,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 /**
  * Describes a method that accepts a message and optionally its context.
  *
- * <p>Two message handlers are equivalent when they refer to the same method on the
- * same object (not class).
- *
- * @param <M> the type of the message class
+ * @param <M> the type of the incoming message class
  * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
  *            a context parameter is never used
  *            
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-public interface HandlerMethod<M extends MessageClass, C extends Message> {
+public interface HandlerMethod<M extends MessageClass, C extends Message, R extends MethodResult> {
 
     M getMessageClass();
 
@@ -59,22 +56,21 @@ public interface HandlerMethod<M extends MessageClass, C extends Message> {
      * @param context the context of the message
      * @return the result of message handling
      */
-    Object invoke(Object target, Message message, C context);
+    R invoke(Object target, Message message, C context);
 
     /**
      * Verifies if the passed method is {@linkplain ExternalAttribute#EXTERNAL external}.
      */
-    static <M extends HandlerMethod<?, ?>> boolean isExternal(M method) {
-        return method.getAttributes()
-                     .contains(ExternalAttribute.EXTERNAL);
+    default boolean isExternal() {
+        return getAttributes().contains(ExternalAttribute.EXTERNAL);
     }
 
     /**
      * Verifies if the passed method is domestic, that is not marked as
      * {@linkplain ExternalAttribute#EXTERNAL external}).
      */
-    static <M extends HandlerMethod<?, ?>> boolean isDomestic(M method) {
-        return !isExternal(method);
+    default boolean isDomestic() {
+        return !isExternal();
     }
 
     /**
@@ -89,7 +85,7 @@ public interface HandlerMethod<M extends MessageClass, C extends Message> {
      * @throws IllegalArgumentException is thrown if the value does not meet the expectation.
      */
     default void ensureExternalMatch(boolean expectedValue) {
-        checkArgument(isExternal(this) == expectedValue,
+        checkArgument(isExternal() == expectedValue,
                       "Mismatch of `external` value for the handler method %s. " +
                               "Expected `external` = %s, but got the other way around.", this,
                       expectedValue);

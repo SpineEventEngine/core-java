@@ -23,6 +23,7 @@ package io.spine.server.command.dispatch;
 import com.google.protobuf.Message;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.model.EventReactorMethod;
+import io.spine.server.model.ReactorMethodResult;
 
 import java.util.List;
 
@@ -67,7 +68,9 @@ public final class EventDispatchFactory extends MessageDispatchFactory<EventEnve
         @Override
         protected List<? extends Message> dispatch() {
             EventEnvelope event = envelope();
-            return method.invoke(context, event.getMessage(), event.getEventContext());
+            ReactorMethodResult result =
+                    method.invoke(context, event.getMessage(), event.getEventContext());
+            return result.asMessages();
         }
     }
 }

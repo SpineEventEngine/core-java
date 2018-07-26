@@ -49,8 +49,8 @@ class AbstractHandlerMethodTest {
 
     private final AbstractHandlerMethod.Factory<OneParamMethod> factory = OneParamMethod.factory();
 
-    private AbstractHandlerMethod<EventClass, EventContext> twoParamMethod;
-    private AbstractHandlerMethod<EventClass, Empty> oneParamMethod;
+    private AbstractHandlerMethod<EventClass, EventContext, MethodResult<Empty>> twoParamMethod;
+    private AbstractHandlerMethod<EventClass, Empty, MethodResult<Empty>> oneParamMethod;
     private Object target;
 
     @BeforeEach
@@ -153,7 +153,7 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("all fields are compared")
         void allFieldsAreCompared() {
-            AbstractHandlerMethod<EventClass, EventContext> anotherMethod =
+            AbstractHandlerMethod<EventClass, EventContext, MethodResult<Empty>> anotherMethod =
                     new TwoParamMethod(StubHandler.getTwoParameterMethod());
 
             assertEquals(twoParamMethod, anotherMethod);

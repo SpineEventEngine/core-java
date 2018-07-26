@@ -69,7 +69,9 @@ public final class CommandDispatchFactory
         @Override
         protected List<? extends Message> dispatch() {
             CommandEnvelope command = envelope();
-            return method.invoke(context, command.getMessage(), command.getCommandContext());
+            CommandHandlerMethod.Result result =
+                    method.invoke(context, command.getMessage(), command.getCommandContext());
+            return result.asMessages();
         }
     }
 }

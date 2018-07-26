@@ -19,6 +19,7 @@
  */
 package io.spine.server.rejection.model;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
@@ -29,6 +30,7 @@ import io.spine.core.RejectionContext;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethodPredicate;
+import io.spine.server.model.MethodResult;
 import io.spine.server.rejection.RejectionSubscriber;
 
 import java.lang.annotation.Annotation;
@@ -47,7 +49,8 @@ import static io.spine.util.Exceptions.unsupported;
  * @author Dmytro Dashenkov
  * @author Alexander Yevsyukov
  */
-abstract class RejectionHandlerMethod extends AbstractHandlerMethod<RejectionClass, RejectionContext> {
+abstract class RejectionHandlerMethod<R extends MethodResult>
+        extends AbstractHandlerMethod<RejectionClass, RejectionContext, R> {
 
     /** Determines the number of parameters and their types. */
     private final Kind kind;
@@ -115,6 +118,7 @@ abstract class RejectionHandlerMethod extends AbstractHandlerMethod<RejectionCla
      * @return the result of the invocation
      */
     @SuppressWarnings("OverlyLongMethod")
+    @CanIgnoreReturnValue
     Object doInvoke(Object target, Message rejectionMsg, RejectionContext context) {
         checkNotNull(target);
         checkNotNull(rejectionMsg);

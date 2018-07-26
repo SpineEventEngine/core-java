@@ -20,17 +20,23 @@
 
 package io.spine.server.command.model;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandContext;
+import io.spine.core.Event;
+import io.spine.core.MessageEnvelope;
 import io.spine.core.Rejection;
+import io.spine.core.Version;
 import io.spine.server.command.Assign;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
+import io.spine.server.model.MethodResult;
 import io.spine.server.procman.ProcessManager;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -43,7 +49,7 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * @author Alexander Yevsyukov
  */
-public final class CommandHandlerMethod extends CommandAcceptingMethod {
+public final class CommandHandlerMethod extends CommandAcceptingMethod<CommandHandlerMethod.Result> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -63,41 +69,12 @@ public final class CommandHandlerMethod extends CommandAcceptingMethod {
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @return the list of event messages
-     * @throws IllegalStateException if the invoked method does not produce any events
+     * Transforms the passed raw method output into a list of event messages.
      */
     @Override
-    public List<? extends Message> invoke(Object target, Message message, CommandContext context) {
-        Object handlingResult = super.invoke(target, message, context);
-        List<? extends Message> events = toList(handlingResult);
-        checkResultNonEmpty(events, handlingResult, target);
-        return events;
-    }
-
-    /**
-     * Checks that the command handling method did not produce an empty event list as the result of
-     * its invocation.
-     *
-     * <p>The only allowed exception to this are {@link ProcessManager} instances returning
-     * {@link Empty} from their command handler methods.
-     *
-     * @param events         the events produced as the result of the command handling
-     * @param handlingResult the result of the command handler method invocation
-     * @param target         the target on which the method was executed
-     * @throws IllegalStateException if the command handling method did not produce any events
-     */
-    private static void
-    checkResultNonEmpty(List<? extends Message> events, Object handlingResult, Object target) {
-
-        //TODO:2018-07-25:dmytro.kuzmin: Prohibit returning `Empty` from `ProcessManager` in favor
-        // of "Expected<...>" construction.
-        // See https://github.com/SpineEventEngine/core-java/issues/790.
-        boolean procmanReturnedEmpty =
-                handlingResult instanceof Empty && target instanceof ProcessManager;
-        checkState(!events.isEmpty() || procmanReturnedEmpty,
-                   "Command handling method did not produce events");
+    protected Result toResult(Object rawMethodOutput, Object target) {
+        Result result = new Result(rawMethodOutput, target);
+        return result;
     }
 
     /**
@@ -159,6 +136,50 @@ public final class CommandHandlerMethod extends CommandAcceptingMethod {
         protected boolean verifyReturnType(Method method) {
             boolean result = returnsMessageOrIterable(method);
             return result;
+        }
+    }
+
+    /**
+     * The result of a command handler method execution.
+     */
+    public static final class Result extends MethodResult<Message> {
+
+        private Result(Object rawMethodResult, Object target) {
+            super(rawMethodResult);
+            List<Message> events = toMessages(rawMethodResult);
+            List<Message> withoutEmpty = filterEmpty(events);
+            checkResultNonEmpty(withoutEmpty, rawMethodResult, target);
+            setMessages(withoutEmpty);
+        }
+
+        @Override
+        public
+        List<Event> asEvents(MessageEnvelope origin, Any producerId, @Nullable Version version) {
+            return super.asEvents(origin, producerId, version);
+        }
+
+        /**
+         * Checks that the command handling method did not produce an empty event list as
+         * the result of its invocation.
+         *
+         * <p>The only allowed exception to this are {@link ProcessManager} instances returning
+         * {@link Empty} from their command handler methods.
+         *
+         * @param events         the events produced as the result of the command handling
+         * @param handlingResult the result of the command handler method invocation
+         * @param target         the target on which the method was executed
+         * @throws IllegalStateException if the command handling method did not produce any events
+         */
+        private static void
+        checkResultNonEmpty(List<? extends Message> events, Object handlingResult, Object target) {
+
+            //TODO:2018-07-25:dmytro.kuzmin: Prohibit returning `Empty` from `ProcessManager` in favor
+            // of "Expected<...>" construction.
+            // See https://github.com/SpineEventEngine/core-java/issues/790.
+            boolean procmanReturnedEmpty =
+                    handlingResult instanceof Empty && target instanceof ProcessManager;
+            checkState(!events.isEmpty() || procmanReturnedEmpty,
+                       "Command handling method did not produce events");
         }
     }
 }

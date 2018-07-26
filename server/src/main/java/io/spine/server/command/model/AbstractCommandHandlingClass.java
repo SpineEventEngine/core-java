@@ -33,7 +33,7 @@ import java.util.Set;
  * @param <C> the type of a command handling class
  * @author Alexander Yevsyukov
  */
-public abstract class AbstractCommandHandlingClass<C, H extends CommandAcceptingMethod>
+public abstract class AbstractCommandHandlingClass<C, H extends CommandAcceptingMethod<?>>
         extends ModelClass<C>
         implements CommandHandlingClass {
 

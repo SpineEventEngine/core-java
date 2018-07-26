@@ -42,7 +42,7 @@ import static com.google.common.collect.Sets.newHashSet;
  * @author Alexander Yevsyukov
  * @author Dmytro Grankin
  */
-public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M, ?>>
+public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M, ?, ?>>
         implements Serializable {
 
     private static final long serialVersionUID = 0L;
@@ -121,7 +121,7 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
         return getMethod(key);
     }
 
-    private static <M extends MessageClass, H extends HandlerMethod<M, ?>>
+    private static <M extends MessageClass, H extends HandlerMethod<M, ?, ?>>
     ImmutableSet<M> messageClasses(Iterable<H> handlerMethods) {
         Set<M> setToSwallowDuplicates = newHashSet();
         for (H handler : handlerMethods) {
@@ -130,7 +130,7 @@ public class MessageHandlerMap<M extends MessageClass, H extends HandlerMethod<M
         return ImmutableSet.copyOf(setToSwallowDuplicates);
     }
 
-    private static <M extends MessageClass, H extends HandlerMethod<M, ?>>
+    private static <M extends MessageClass, H extends HandlerMethod<M, ?, ?>>
     ImmutableMap<HandlerKey, H> scan(Class<?> declaringClass,
                                      AbstractHandlerMethod.Factory<H> factory) {
         Predicate<Method> filter = factory.getPredicate();

@@ -40,13 +40,12 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.aggregate.model.EventApplier;
 import io.spine.server.command.CommandHandlingEntity;
-import io.spine.server.command.dispatch.Dispatch;
-import io.spine.server.command.dispatch.DispatchResult;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.EventPlayers;
 import io.spine.server.event.EventFactory;
 import io.spine.server.event.model.EventReactorMethod;
+import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.rejection.model.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
@@ -210,10 +209,9 @@ public abstract class Aggregate<I,
     protected List<? extends Message> dispatchCommand(CommandEnvelope command) {
         idempotencyGuard.check(command);
         CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
-        Dispatch<CommandEnvelope> dispatch = Dispatch.of(command)
-                                                     .to(this, method);
-        DispatchResult dispatchResult = dispatch.perform();
-        return dispatchResult.asMessages();
+        CommandHandlerMethod.Result result =
+                method.invoke(this, command.getMessage(), command.getCommandContext());
+        return result.asMessages();
     }
 
     /**
@@ -228,10 +226,9 @@ public abstract class Aggregate<I,
      */
     List<? extends Message> reactOn(EventEnvelope event) {
         EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
-        Dispatch<EventEnvelope> dispatch = Dispatch.of(event)
-                                                   .to(this, method);
-        DispatchResult dispatchResult = dispatch.perform();
-        return dispatchResult.asMessages();
+        ReactorMethodResult result =
+                method.invoke(this, event.getMessage(), event.getEventContext());
+        return result.asMessages();
     }
 
     /**
@@ -247,12 +244,11 @@ public abstract class Aggregate<I,
      */
     List<? extends Message> reactOn(RejectionEnvelope rejection) {
         CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
-        RejectionReactorMethod method = thisClass().getReactor(rejection.getMessageClass(),
-                                                               commandClass);
-        Dispatch<RejectionEnvelope> dispatch = Dispatch.of(rejection)
-                                                       .to(this, method);
-        DispatchResult dispatchResult = dispatch.perform();
-        return dispatchResult.asMessages();
+        RejectionReactorMethod method =
+                thisClass().getReactor(rejection.getMessageClass(), commandClass);
+        ReactorMethodResult result =
+                method.invoke(this, rejection.getMessage(), rejection.getMessageContext());
+        return result.asMessages();
     }
 
     /**

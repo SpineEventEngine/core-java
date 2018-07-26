@@ -30,7 +30,6 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.CommandHandler;
-import io.spine.server.command.given.CommandHandlerMethodTestEnv;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.HandlerReturnsEmpty;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.HandlerReturnsEmptyList;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerNoAnnotation;
@@ -120,7 +119,8 @@ class CommandHandlerMethodTest {
             CommandHandlerMethod handler = from(handlerObject.getHandler());
             RefCreateProject cmd = createProject();
 
-            List<? extends Message> events = handler.invoke(handlerObject, cmd, emptyContext);
+            CommandHandlerMethod.Result result = handler.invoke(handlerObject, cmd, emptyContext);
+            List<? extends Message> events = result.asMessages();
 
             verify(handlerObject, times(1))
                     .handleTest(cmd, emptyContext);
@@ -137,7 +137,8 @@ class CommandHandlerMethodTest {
             CommandHandlerMethod handler = from(handlerObject.getHandler());
             RefCreateProject cmd = createProject();
 
-            List<? extends Message> events = handler.invoke(handlerObject, cmd, emptyContext);
+            CommandHandlerMethod.Result result = handler.invoke(handlerObject, cmd, emptyContext);
+            List<? extends Message> events = result.asMessages();
 
             verify(handlerObject, times(1)).handleTest(cmd);
             assertEquals(1, events.size());

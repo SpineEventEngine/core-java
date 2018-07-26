@@ -19,9 +19,7 @@
  */
 package io.spine.server.model;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -29,15 +27,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.model.MethodExceptionChecker.forMethod;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 
 /**
  * An abstract base for wrappers over methods handling messages.
@@ -51,8 +46,9 @@ import static java.util.Collections.singletonList;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public abstract class AbstractHandlerMethod<M extends MessageClass, C extends Message>
-        implements HandlerMethod<M, C> {
+public abstract
+class AbstractHandlerMethod<M extends MessageClass, C extends Message, R extends MethodResult>
+        implements HandlerMethod<M, C, R> {
 
     /** The method to be called. */
     private final Method method;
@@ -153,61 +149,29 @@ public abstract class AbstractHandlerMethod<M extends MessageClass, C extends Me
     }
 
     /**
-     * Casts a handling result to a list of event messages.
-     *
-     * @param output the command handler method return value.
-     *               Could be a {@link Message}, a list of messages, or {@code null}.
-     * @return the list of event messages or an empty list if {@code null} is passed
-     */
-    @SuppressWarnings({"unchecked", "ChainOfInstanceofChecks"})
-    protected static List<? extends Message> toList(@Nullable Object output) {
-        if (output == null) {
-            return emptyList();
-        }
-
-        // Allow reacting methods to return `Empty` instead of empty `List`. Do not store such
-        // events. Command Handling methods except those of `ProcessManager`s will not be able to
-        // use this trick because we check for non-empty result of such methods. `ProcessManager`
-        // command handlers are allowed to return `Empty` but not empty event `List`.
-        if (output instanceof Empty) {
-            return emptyList();
-        }
-
-        if (output instanceof List) {
-            // Cast to the list of messages as it is the one of the return types
-            // we expect by methods we call.
-            List<? extends Message> result = (List<? extends Message>) output;
-            return result;
-        }
-
-        // If it's not a list it could be another `Iterable`.
-        if (output instanceof Iterable) {
-            return ImmutableList.copyOf((Iterable<? extends Message>) output);
-        }
-
-        // Another type of result is single event message (as Message).
-        List<Message> result = singletonList((Message) output);
-        return result;
-    }
-
-    /**
      * {@inheritDoc}
      */
     @Override
-    public Object invoke(Object target, Message message, C context) {
+    public R invoke(Object target, Message message, C context) {
         checkNotNull(target);
         checkNotNull(message);
         checkNotNull(context);
         try {
             int paramCount = getParamCount();
-            Object result = (paramCount == 1)
+            Object rawOutput = (paramCount == 1)
                             ? method.invoke(target, message)
                             : method.invoke(target, message, context);
+            R result = toResult(rawOutput, target);
             return result;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
             throw whyFailed(target, message, context, e);
         }
     }
+
+    /**
+     * Converts the output of the raw method call to the result object.
+     */
+    protected abstract R toResult(Object rawMethodOutput, Object target);
 
     /**
      * Creates an exception containing information on the failure of the handler method invocation.
