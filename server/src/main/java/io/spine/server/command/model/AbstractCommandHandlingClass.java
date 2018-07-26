@@ -41,8 +41,8 @@ public abstract class AbstractCommandHandlingClass<C, H extends CommandAccepting
 
     private final MessageHandlerMap<CommandClass, H> commands;
 
-    protected AbstractCommandHandlingClass(Class<? extends C> cls,
-                                           AbstractHandlerMethod.Factory<H> factory) {
+    AbstractCommandHandlingClass(Class<? extends C> cls,
+                                 AbstractHandlerMethod.Factory<H> factory) {
         super(cls);
         this.commands = new MessageHandlerMap<>(cls, factory);
     }

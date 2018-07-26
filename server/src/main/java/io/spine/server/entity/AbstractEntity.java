@@ -22,8 +22,8 @@ package io.spine.server.entity;
 
 import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.model.Model;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
@@ -136,11 +136,11 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     /**
-     * Obtains the model class for this entity from the {@link io.spine.server.model.Model Model}.
+     * Obtains the model class.
      */
+    @Internal
     protected EntityClass<?> getModelClass() {
-        return Model.getInstance()
-                    .asEntityClass(getClass());
+        return EntityClass.asEntityClass(getClass());
     }
 
     /**
