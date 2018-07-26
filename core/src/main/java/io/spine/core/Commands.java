@@ -21,7 +21,6 @@
 package io.spine.core;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
@@ -37,6 +36,7 @@ import io.spine.time.Timestamps2;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
