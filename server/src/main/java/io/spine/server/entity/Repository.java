@@ -498,21 +498,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         }
 
         /**
-         * Posts the {@link ChangeEntityState} system command and the commands related to
-         * the lifecycle flags.
-         */
-        public void onStateChanged(EntityRecordChange change,
-                                   Set<? extends Message> messageIds) {
-            Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
-
-            postIfChanged(change, dispatchedMessageIds);
-            postIfArchived(change, dispatchedMessageIds);
-            postIfDeleted(change, dispatchedMessageIds);
-            postIfExtracted(change, dispatchedMessageIds);
-            postIfRestored(change, dispatchedMessageIds);
-        }
-
-        /**
          * Posts the {@link DispatchCommandToHandler} system command.
          */
         public void onDispatchCommand(Command command) {
@@ -563,6 +548,21 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                     .setEventId(event.getId())
                     .build();
             postSystem(systemCommand);
+        }
+
+        /**
+         * Posts the {@link ChangeEntityState} system command and the commands related to
+         * the lifecycle flags.
+         */
+        void onStateChanged(EntityRecordChange change,
+                            Set<? extends Message> messageIds) {
+            Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
+
+            postIfChanged(change, dispatchedMessageIds);
+            postIfArchived(change, dispatchedMessageIds);
+            postIfDeleted(change, dispatchedMessageIds);
+            postIfExtracted(change, dispatchedMessageIds);
+            postIfRestored(change, dispatchedMessageIds);
         }
 
         private void postIfChanged(EntityRecordChange change,
