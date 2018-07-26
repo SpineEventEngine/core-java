@@ -47,7 +47,6 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
-import io.spine.server.model.Model;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
@@ -68,6 +67,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
+import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -237,10 +237,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
     protected AggregateClass<A> getModelClass(Class<A> cls) {
-        return (AggregateClass<A>) Model.getInstance()
-                                        .asAggregateClass(cls);
+        return asAggregateClass(cls);
     }
 
     @Override

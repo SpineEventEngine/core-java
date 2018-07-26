@@ -61,22 +61,53 @@ final class ClassMap {
      * <p>If the passed class handles commands, verifies that it does not handle commands for which
      * there are already handlers registered in the model.
      *
-     * @param rawClass raw class for which to obtain a model class
+     * @param rawClass
+     *        raw class for which to obtain a model class
+     * @param requestedClass
+     *        the class of the model class to obtain.
+     *        If the class already available in the map is a super-class of the passed one,
+     *        it will be replaced with the new class obtained from the supplier.
      * @param supplier a supplier of a model class
      * @return the instance of the model class corresponding to the raw class
      * @throws DuplicateCommandHandlerError
      *         if the passed class handles commands that are already handled
      */
-    ModelClass<?> get(Class<?> rawClass, Supplier<ModelClass<?>> supplier) {
+    <T, M extends ModelClass>
+    ModelClass<T> get(Class<? extends T> rawClass,
+                      Class<M> requestedClass,
+                      Supplier<ModelClass<T>> supplier) {
         String key = nameOf(rawClass);
-        ModelClass<?> modelClass = classes.get(key);
+        @SuppressWarnings("unchecked")
+            /* The cast is protected by generic parameters of this method.
+               We store the model class with the correct type, getting it from the supplier
+               passed to this method. */
+        ModelClass<T> modelClass = (ModelClass<T>) classes.get(key);
         if (modelClass == null) {
-            modelClass = supplier.get();
-            if (modelClass instanceof CommandHandlingClass) {
-                checkDuplicates((CommandHandlingClass<?>) modelClass);
-            }
-            classes.put(key, modelClass);
+            return setEntry(key, supplier);
         }
+
+        Class<? extends ModelClass> currentClass = modelClass.getClass();
+        if (currentClass.equals(requestedClass)) {
+            return modelClass;
+        }
+
+        /* The classes are not equal. If the current entry is a super-class of the passed
+           requested model class, replace the entry with this sub-class because it provides more
+           model information about the raw class. */
+        if (currentClass.isAssignableFrom(requestedClass)) {
+            return setEntry(key, supplier);
+        }
+
+        return modelClass;
+    }
+
+    private <T> ModelClass<T> setEntry(String key, Supplier<ModelClass<T>> supplier) {
+        ModelClass<T> modelClass;
+        modelClass = supplier.get();
+        if (modelClass instanceof CommandHandlingClass) {
+            checkDuplicates((CommandHandlingClass<?>) modelClass);
+        }
+        classes.put(key, modelClass);
         return modelClass;
     }
 

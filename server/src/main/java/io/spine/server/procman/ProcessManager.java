@@ -22,6 +22,7 @@ package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -35,7 +36,6 @@ import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandSequence;
 import io.spine.server.event.model.EventReactorMethod;
-import io.spine.server.model.Model;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.rejection.model.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
@@ -44,6 +44,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine
@@ -90,10 +91,10 @@ public abstract class ProcessManager<I,
         super(id);
     }
 
+    @Internal
     @Override
     protected ProcessManagerClass<?> getModelClass() {
-        return Model.getInstance()
-                    .asProcessManagerClass(getClass());
+        return asProcessManagerClass(getClass());
     }
 
     @Override

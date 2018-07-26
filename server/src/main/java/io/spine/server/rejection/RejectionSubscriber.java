@@ -25,7 +25,6 @@ import io.spine.core.CommandClass;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.logging.Logging;
-import io.spine.server.model.Model;
 import io.spine.server.rejection.model.RejectionSubscriberClass;
 import io.spine.server.rejection.model.RejectionSubscriberMethod;
 import io.spine.server.tenant.CommandOperation;
@@ -37,6 +36,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.rejection.model.RejectionSubscriberClass.asRejectionSubscriber;
 import static java.lang.String.format;
 
 /**
@@ -49,8 +49,7 @@ import static java.lang.String.format;
  */
 public class RejectionSubscriber implements RejectionDispatcher<String> {
 
-    private final RejectionSubscriberClass<?> thisClass = Model.getInstance()
-                                                               .asRejectionSubscriber(getClass());
+    private final RejectionSubscriberClass<?> thisClass = asRejectionSubscriber(getClass());
 
     /** Lazily initialized logger. */
     private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());

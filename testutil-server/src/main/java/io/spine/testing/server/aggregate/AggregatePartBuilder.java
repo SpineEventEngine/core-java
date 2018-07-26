@@ -30,6 +30,8 @@ import io.spine.testing.server.entity.EntityBuilder;
 
 import java.lang.reflect.Constructor;
 
+import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePartClass;
+
 /**
  * Utility class for building {@code AggregatePart}s for tests.
  *
@@ -65,8 +67,8 @@ public class AggregatePartBuilder<A extends AggregatePart<I, S, ?, R>,
     }
 
     @Override
-    protected EntityClass<A> createModelClass(Class<A> entityClass) {
-        return new AggregatePartClass<>(entityClass);
+    protected EntityClass<A> getModelClass(Class<A> entityClass) {
+        return asAggregatePartClass(entityClass);
     }
 
     @Override
