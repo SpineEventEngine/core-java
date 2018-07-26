@@ -79,7 +79,10 @@ public abstract class MethodResult<V extends Message> {
     }
 
     /**
-     * Obtains a method results with represents no returned value.
+     * Returns result of a method which returns nothing.
+     *
+     * <p>Such a result could be obtained if a handling method returns {@code void},
+     * or {@code Empty}, if the contract requires returning a {@code Message}.
      */
     public static MethodResult<Empty> empty() {
         return EmptyResult.INSTANCE;

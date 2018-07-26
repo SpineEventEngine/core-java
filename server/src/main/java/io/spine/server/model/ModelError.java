@@ -29,12 +29,8 @@ public class ModelError extends Error {
 
     private static final long serialVersionUID = 0L;
 
-    public ModelError(String message) {
+    ModelError(String message) {
         super(message);
-    }
-
-    public ModelError(String message, Throwable cause) {
-        super(message, cause);
     }
 
     public ModelError(Throwable cause) {
