@@ -71,7 +71,7 @@ public abstract class MethodResult<V extends Message> {
     /**
      * Filters the list removing instances of {@link Empty}.
      */
-    public static <M extends Message> List<M> filterEmpty(List<M> messages) {
+    protected static <M extends Message> List<M> filterEmpty(List<M> messages) {
         List<M> result =
                 messages.stream()
                         .filter((m) -> !Empty.getDefaultInstance()

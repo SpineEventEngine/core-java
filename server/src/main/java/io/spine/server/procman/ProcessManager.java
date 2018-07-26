@@ -30,7 +30,6 @@ import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.command.CommandHandlingEntity;
-import io.spine.server.command.dispatch.DispatchResult;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandSequence;
@@ -177,16 +176,6 @@ public abstract class ProcessManager<I,
                 method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
         List<Event> result = methodResult.asEvents(rejection, getProducerId(), getVersion());
         return result;
-    }
-
-    /**
-     * Transforms the provided {@link DispatchResult dispatch result} into a list of events.
-     *
-     * @param  dispatchResult a result of handling a message by the process manager
-     * @return list of events
-     */
-    private List<Event> toEvents(DispatchResult dispatchResult) {
-        return dispatchResult.asEvents(getProducerId(), getVersion());
     }
 
     /**
