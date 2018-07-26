@@ -20,7 +20,6 @@
 
 package io.spine.client;
 
-import com.google.common.base.Function;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -38,8 +37,9 @@ import org.junit.jupiter.api.Test;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import static com.google.common.collect.Collections2.transform;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
@@ -122,7 +122,9 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             EntityIdFilter idFilter = entityFilters.getIdFilter();
             Collection<EntityId> idValues = idFilter.getIdsList();
             Function<EntityId, Integer> transformer = new EntityIdUnpacker<>(int.class);
-            Collection<Integer> intIdValues = transform(idValues, transformer);
+            Collection<Integer> intIdValues = idValues.stream()
+                                                      .map(transformer)
+                                                      .collect(Collectors.toList());
 
             assertSize(2, idValues);
             assertThat(intIdValues, containsInAnyOrder(id1, id2));
@@ -310,8 +312,9 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             EntityIdFilter idFilter = entityFilters.getIdFilter();
             Collection<EntityId> idValues = idFilter.getIdsList();
             Function<EntityId, Integer> transformer = new EntityIdUnpacker<>(int.class);
-            Collection<Integer> intIdValues = transform(idValues, transformer);
-
+            Collection<Integer> intIdValues = idValues.stream()
+                                                      .map(transformer)
+                                                      .collect(Collectors.toList());
             assertSize(2, idValues);
             assertThat(intIdValues, containsInAnyOrder(id1, id2));
 
@@ -387,7 +390,9 @@ class QueryBuilderTest extends ActorRequestFactoryTest {
             assertSize(messageIds.length, entityIds);
             Function<EntityId, ProjectId> transformer =
                     new EntityIdUnpacker<>(ProjectId.class);
-            Iterable<? extends Message> actualValues = transform(entityIds, transformer);
+            Iterable<? extends Message> actualValues = entityIds.stream()
+                                                                .map(transformer)
+                                                                .collect(Collectors.toList());
             assertThat(actualValues, containsInAnyOrder(messageIds));
         }
 
