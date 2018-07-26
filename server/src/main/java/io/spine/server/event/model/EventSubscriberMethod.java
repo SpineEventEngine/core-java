@@ -33,7 +33,6 @@ import io.spine.server.model.MethodPredicate;
 import java.lang.reflect.Method;
 import java.util.function.Predicate;
 
-import static io.spine.core.Rejections.isRejection;
 import static io.spine.server.model.HandlerMethod.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 
@@ -120,23 +119,6 @@ public final class EventSubscriberMethod extends AbstractHandlerMethod<EventClas
 
         private Filter() {
             super(Subscribe.class);
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * <p>Filters out methods that accept rejection messages as the first parameter.
-         */
-        @Override
-        protected boolean verifyParams(Method method) {
-            if (super.verifyParams(method)) {
-                @SuppressWarnings("unchecked") // The case is safe since super returned `true`.
-                Class<? extends Message> firstParameter =
-                        (Class<? extends Message>) method.getParameterTypes()[0];
-                boolean isRejection = isRejection(firstParameter);
-                return !isRejection;
-            }
-            return false;
         }
 
         @Override
