@@ -40,7 +40,7 @@ import java.util.function.Predicate;
  * @author Alexander Yevsyukov
  */
 public final class CommandSubstituteMethod
-        extends CommandAcceptingMethod<Result>
+        extends CommandAcceptingMethod<Object, Result>
         implements CommandingMethod<CommandClass, CommandContext, Result> {
 
     private CommandSubstituteMethod(Method method) {
@@ -61,7 +61,8 @@ public final class CommandSubstituteMethod
         return Factory.INSTANCE;
     }
 
-    private static class Factory extends AbstractHandlerMethod.Factory<CommandSubstituteMethod> {
+    private static class Factory
+            extends AbstractHandlerMethod.Factory<CommandSubstituteMethod> {
 
         private static final Factory INSTANCE = new Factory();
 

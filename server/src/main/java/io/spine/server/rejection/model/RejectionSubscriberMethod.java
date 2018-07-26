@@ -42,7 +42,8 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  * @author Dmytro Dashenkov
  * @author Alexander Yevsyukov
  */
-public final class RejectionSubscriberMethod extends RejectionHandlerMethod<MethodResult<Empty>> {
+public final class RejectionSubscriberMethod
+        extends RejectionHandlerMethod<Object, MethodResult<Empty>> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.

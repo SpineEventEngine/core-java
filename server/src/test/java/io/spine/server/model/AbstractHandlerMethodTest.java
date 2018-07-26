@@ -33,6 +33,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.server.model.AbstractHandlerMethod.getFirstParamType;
 import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -49,8 +50,8 @@ class AbstractHandlerMethodTest {
 
     private final AbstractHandlerMethod.Factory<OneParamMethod> factory = OneParamMethod.factory();
 
-    private AbstractHandlerMethod<EventClass, EventContext, MethodResult<Empty>> twoParamMethod;
-    private AbstractHandlerMethod<EventClass, Empty, MethodResult<Empty>> oneParamMethod;
+    private AbstractHandlerMethod<Object, EventClass, EventContext, MethodResult<Empty>> twoParamMethod;
+    private AbstractHandlerMethod<Object, EventClass, Empty, MethodResult<Empty>> oneParamMethod;
     private Object target;
 
     @BeforeEach
@@ -92,7 +93,7 @@ class AbstractHandlerMethodTest {
     @Test
     @DisplayName("obtain first parameter type of method")
     void returnFirstParamType() {
-        assertEquals(BoolValue.class, AbstractHandlerMethod.getFirstParamType(oneParamMethod.getRawMethod()));
+        assertEquals(BoolValue.class, getFirstParamType(oneParamMethod.getRawMethod()));
     }
 
     @Nested
@@ -153,8 +154,8 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("all fields are compared")
         void allFieldsAreCompared() {
-            AbstractHandlerMethod<EventClass, EventContext, MethodResult<Empty>> anotherMethod =
-                    new TwoParamMethod(StubHandler.getTwoParameterMethod());
+            AbstractHandlerMethod<Object, EventClass, EventContext, MethodResult<Empty>>
+                    anotherMethod = new TwoParamMethod(StubHandler.getTwoParameterMethod());
 
             assertEquals(twoParamMethod, anotherMethod);
         }

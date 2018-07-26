@@ -28,6 +28,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
+import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
@@ -44,7 +45,7 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  * @author Alexander Yevsyukov
  */
 public final class EventApplier
-        extends AbstractHandlerMethod<EventClass, Empty, MethodResult<Empty>> {
+        extends AbstractHandlerMethod<Aggregate, EventClass, Empty, MethodResult<Empty>> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -81,7 +82,7 @@ public final class EventApplier
     /**
      * Invokes the applier method.
      *
-     * <p>The method {@linkplain AbstractHandlerMethod#invoke(Object, Message, Message) delegates}
+     * <p>The method {@linkplain HandlerMethod#invoke(Object, Message, Message) delegates}
      * the invocation passing {@linkplain Empty#getDefaultInstance() empty message}
      * as the context parameter because event appliers do not have a context parameter.
      *
@@ -94,7 +95,7 @@ public final class EventApplier
     }
 
     @Override
-    protected MethodResult<Empty> toResult(Object target, Object rawMethodOutput) {
+    protected MethodResult<Empty> toResult(Aggregate target, Object rawMethodOutput) {
         return MethodResult.empty();
     }
 

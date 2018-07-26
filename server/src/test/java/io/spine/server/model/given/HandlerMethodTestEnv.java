@@ -121,7 +121,7 @@ public class HandlerMethodTestEnv {
     }
 
     public static class TwoParamMethod
-        extends AbstractHandlerMethod<EventClass, EventContext, MethodResult<Empty>> {
+        extends AbstractHandlerMethod<Object, EventClass, EventContext, MethodResult<Empty>> {
 
         public TwoParamMethod(Method method) {
             super(method);
@@ -144,7 +144,7 @@ public class HandlerMethodTestEnv {
     }
 
     public static class OneParamMethod
-            extends AbstractHandlerMethod<EventClass, Empty, MethodResult<Empty>> {
+            extends AbstractHandlerMethod<Object, EventClass, Empty, MethodResult<Empty>> {
 
         public OneParamMethod(Method method) {
             super(method);

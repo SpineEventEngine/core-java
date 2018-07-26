@@ -45,7 +45,7 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  * @see Subscribe
  */
 public final class EventSubscriberMethod
-        extends AbstractHandlerMethod<EventClass, EventContext, MethodResult<Empty>> {
+        extends AbstractHandlerMethod<Object, EventClass, EventContext, MethodResult<Empty>> {
 
     /** Creates a new instance. */
     private EventSubscriberMethod(Method method) {

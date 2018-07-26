@@ -31,14 +31,19 @@ import static com.google.common.base.Preconditions.checkArgument;
 /**
  * Describes a method that accepts a message and optionally its context.
  *
+ * @param <T> the type of the target object
  * @param <M> the type of the incoming message class
  * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
  *            a context parameter is never used
+ * @param <R> the type of the method result object
  *            
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-public interface HandlerMethod<M extends MessageClass, C extends Message, R extends MethodResult> {
+public interface HandlerMethod<T,
+                               M extends MessageClass,
+                               C extends Message,
+                               R extends MethodResult> {
 
     M getMessageClass();
 
@@ -56,7 +61,7 @@ public interface HandlerMethod<M extends MessageClass, C extends Message, R exte
      * @param context the context of the message
      * @return the result of message handling
      */
-    R invoke(Object target, Message message, C context);
+    R invoke(T target, Message message, C context);
 
     /**
      * Verifies if the passed method is {@linkplain ExternalAttribute#EXTERNAL external}.

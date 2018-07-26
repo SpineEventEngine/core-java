@@ -18,34 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+package io.spine.server.event;
 
-import com.google.protobuf.Message;
-import io.spine.server.command.Command;
-import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.HandlerMethodPredicate;
-import io.spine.server.model.MethodResult;
-import io.spine.type.MessageClass;
+import io.spine.server.model.EventProducer;
 
 /**
- * Base interface for methods that generate one or more command messages in response to
- * an incoming message.
- *
- * @param <M> the type of the message class
- * @param <C> the type of the message context
+ * Objects reacting on events may produce events.
  *
  * @author Alexander Yevsyukov
  */
-public interface CommandingMethod<M extends MessageClass, C extends Message, R extends MethodResult>
-        extends HandlerMethod<Object, M, C, R> {
-
-    /**
-     * Abstract base for commanding method predicates.
-     */
-    abstract class AbstractPredicate<C extends Message> extends HandlerMethodPredicate<C> {
-
-        AbstractPredicate(Class<C> contextClass) {
-            super(Command.class, contextClass);
-        }
-    }
+public interface EventReactor extends EventProducer {
 }

@@ -44,8 +44,8 @@ import static com.google.common.base.Throwables.getRootCause;
  * @param <R> the type of the result object returned by the method
  * @author Alexander Yevsyukov
  */
-public abstract class CommandAcceptingMethod<R extends MethodResult>
-        extends AbstractHandlerMethod<CommandClass, CommandContext, R> {
+public abstract class CommandAcceptingMethod<T, R extends MethodResult>
+        extends AbstractHandlerMethod<T, CommandClass, CommandContext, R> {
 
     protected CommandAcceptingMethod(Method method) {
         super(method);

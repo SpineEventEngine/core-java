@@ -45,7 +45,8 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * @author Alexander Yevsyukov
  */
-public final class CommandHandlerMethod extends CommandAcceptingMethod<CommandHandlerMethod.Result> {
+public final class CommandHandlerMethod
+        extends CommandAcceptingMethod<EventProducer, CommandHandlerMethod.Result> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -68,8 +69,8 @@ public final class CommandHandlerMethod extends CommandAcceptingMethod<CommandHa
      * Transforms the passed raw method output into a list of event messages.
      */
     @Override
-    protected Result toResult(Object target, Object rawMethodOutput) {
-        Result result = new Result((EventProducer) target, rawMethodOutput);
+    protected Result toResult(EventProducer target, Object rawMethodOutput) {
+        Result result = new Result(target, rawMethodOutput);
         return result;
     }
 

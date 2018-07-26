@@ -24,8 +24,8 @@ import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.React;
+import io.spine.server.event.EventReactor;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.EventProducer;
 import io.spine.server.model.HandlerKey;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
@@ -44,7 +44,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @see React
  */
 public final class EventReactorMethod
-        extends AbstractHandlerMethod<EventClass, EventContext, ReactorMethodResult> {
+        extends AbstractHandlerMethod<EventReactor, EventClass, EventContext, ReactorMethodResult> {
 
     private EventReactorMethod(Method method) {
         super(method);
@@ -66,15 +66,15 @@ public final class EventReactorMethod
      * @return the list of event messages (or an empty list if the reactor method returns nothing)
      */
     @Override
-    public ReactorMethodResult invoke(Object target, Message message, EventContext context) {
+    public ReactorMethodResult invoke(EventReactor target, Message message, EventContext context) {
         ensureExternalMatch(context.getExternal());
         ReactorMethodResult result = super.invoke(target, message, context);
         return result;
     }
 
     @Override
-    protected ReactorMethodResult toResult(Object target, Object rawMethodOutput) {
-        return new ReactorMethodResult((EventProducer) target, rawMethodOutput);
+    protected ReactorMethodResult toResult(EventReactor target, Object rawMethodOutput) {
+        return new ReactorMethodResult(target, rawMethodOutput);
     }
 
     static EventReactorMethod from(Method method) {

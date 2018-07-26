@@ -47,8 +47,8 @@ import static io.spine.server.model.MethodExceptionChecker.forMethod;
  * @author Alexander Yevsyukov
  */
 public abstract
-class AbstractHandlerMethod<M extends MessageClass, C extends Message, R extends MethodResult>
-        implements HandlerMethod<M, C, R> {
+class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R extends MethodResult>
+        implements HandlerMethod<T, M, C, R> {
 
     /** The method to be called. */
     private final Method method;
@@ -152,7 +152,7 @@ class AbstractHandlerMethod<M extends MessageClass, C extends Message, R extends
      * {@inheritDoc}
      */
     @Override
-    public R invoke(Object target, Message message, C context) {
+    public R invoke(T target, Message message, C context) {
         checkNotNull(target);
         checkNotNull(message);
         checkNotNull(context);
@@ -171,7 +171,7 @@ class AbstractHandlerMethod<M extends MessageClass, C extends Message, R extends
     /**
      * Converts the output of the raw method call to the result object.
      */
-    protected abstract R toResult(Object target, Object rawMethodOutput);
+    protected abstract R toResult(T target, Object rawMethodOutput);
 
     /**
      * Creates an exception containing information on the failure of the handler method invocation.
