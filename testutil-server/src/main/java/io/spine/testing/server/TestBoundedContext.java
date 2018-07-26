@@ -19,7 +19,6 @@
  */
 package io.spine.testing.server;
 
-import com.google.common.base.Supplier;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.core.BoundedContextName;
 import io.spine.core.CommandEnvelope;
@@ -29,6 +28,8 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
+
+import java.util.function.Supplier;
 
 /**
  * A bounded context used for unit testing.
