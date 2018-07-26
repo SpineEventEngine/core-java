@@ -143,8 +143,8 @@ public final class CommandHandlerMethod
 
         private Result(EventProducer producer, Object rawMethodResult) {
             super(producer, rawMethodResult);
-            List<Message> events = toMessages(rawMethodResult);
-            List<Message> withoutEmpty = filterEmpty(events);
+            List<Message> eventMessages = toMessages(rawMethodResult);
+            List<Message> withoutEmpty = filterEmpty(eventMessages);
             checkResultNonEmpty(withoutEmpty, rawMethodResult, producer);
             setMessages(withoutEmpty);
         }
