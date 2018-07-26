@@ -55,9 +55,14 @@ public final class ProjectionClass<P extends Projection> extends EntityClass<P> 
         this.externalSubscriptions = eventSubscriptions.getMessageClasses(external());
     }
 
-    public static <P extends Projection> ProjectionClass<P> of(Class<P> cls) {
+    /**
+     * Obtains a model class for the passed raw class.
+     */
+    public static <P extends Projection> ProjectionClass<P> asProjectionClass(Class<P> cls) {
         checkNotNull(cls);
-        return new ProjectionClass<>(cls);
+        ProjectionClass<P> result = (ProjectionClass<P>)
+                get(cls, ProjectionClass.class, () -> new ProjectionClass<>(cls));
+        return result;
     }
 
     public Set<EventClass> getEventSubscriptions() {

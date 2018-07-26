@@ -35,29 +35,29 @@ import java.util.function.Predicate;
  *
  * @author Alexander Yevsyukov
  */
-public final class CommandSubstMethod
+public final class CommandSubstituteMethod
         extends CommandAcceptingMethod
         implements CommandingMethod<CommandClass, CommandContext> {
 
-    private CommandSubstMethod(Method method) {
+    private CommandSubstituteMethod(Method method) {
         super(method);
     }
 
-    static CommandSubstMethod from(Method method) {
-        return new CommandSubstMethod(method);
+    static CommandSubstituteMethod from(Method method) {
+        return new CommandSubstituteMethod(method);
     }
 
-    static AbstractHandlerMethod.Factory<CommandSubstMethod> factory() {
+    static AbstractHandlerMethod.Factory<CommandSubstituteMethod> factory() {
         return Factory.INSTANCE;
     }
 
-    private static class Factory extends AbstractHandlerMethod.Factory<CommandSubstMethod> {
+    private static class Factory extends AbstractHandlerMethod.Factory<CommandSubstituteMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
         @Override
-        public Class<CommandSubstMethod> getMethodClass() {
-            return CommandSubstMethod.class;
+        public Class<CommandSubstituteMethod> getMethodClass() {
+            return CommandSubstituteMethod.class;
         }
 
         @Override
@@ -80,7 +80,7 @@ public final class CommandSubstMethod
         }
 
         @Override
-        protected CommandSubstMethod doCreate(Method method) {
+        protected CommandSubstituteMethod doCreate(Method method) {
             return from(method);
         }
     }
