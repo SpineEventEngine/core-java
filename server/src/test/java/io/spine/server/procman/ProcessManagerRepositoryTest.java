@@ -33,7 +33,6 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Rejection;
-import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.given.GivenEvent;
@@ -85,7 +84,6 @@ import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.Give
 import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.taskAdded;
 import static io.spine.testing.server.Assertions.assertCommandClasses;
 import static io.spine.testing.server.Assertions.assertEventClasses;
-import static io.spine.testing.server.Assertions.assertRejectionClasses;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -410,17 +408,7 @@ class ProcessManagerRepositoryTest
 
             assertEventClasses(
                     eventClasses,
-                    PmProjectCreated.class, PmTaskAdded.class, PmProjectStarted.class
-            );
-        }
-
-        @Test
-        @DisplayName("rejections")
-        void rejection() {
-            Set<RejectionClass> rejectionClasses = repository().getRejectionClasses();
-
-            assertRejectionClasses(
-                    rejectionClasses,
+                    PmProjectCreated.class, PmTaskAdded.class, PmProjectStarted.class,
                     EntityAlreadyArchived.class, EntityAlreadyDeleted.class
             );
         }

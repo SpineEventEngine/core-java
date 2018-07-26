@@ -54,7 +54,7 @@ abstract class AggregateEndpoint<I,
         A aggregate = instanceFor(aggregateId);
         LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
 
-        dispatchInTx(aggregate);
+        List<Event> produced = dispatchInTx(aggregate);
 
         // Update lifecycle flags only if the message was handled successfully and flags changed.
         LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();
@@ -63,6 +63,7 @@ abstract class AggregateEndpoint<I,
         }
 
         store(aggregate);
+        repository().postEvents(produced);
     }
 
     @CanIgnoreReturnValue
@@ -93,8 +94,8 @@ abstract class AggregateEndpoint<I,
 
     @Override
     protected boolean isModified(A aggregate) {
-        List<Event> events = aggregate.getUncommittedEvents();
-        return !events.isEmpty();
+        UncommittedEvents events = aggregate.getUncommittedEvents();
+        return events.nonEmpty();
     }
 
     @Override

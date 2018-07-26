@@ -22,10 +22,10 @@ package io.spine.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
@@ -60,7 +60,6 @@ import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.validate.Validate.isNotDefault;
@@ -141,7 +140,7 @@ public abstract class Aggregate<I,
      *
      * @see #commitEvents()
      */
-    private final List<Event> uncommittedEvents = newLinkedList();
+    private UncommittedEvents uncommittedEvents = UncommittedEvents.ofNone();
 
     /** A guard for ensuring idempotency of messages dispatched by this aggregate. */
     private IdempotencyGuard idempotencyGuard;
@@ -309,12 +308,12 @@ public abstract class Aggregate<I,
      *
      * @param events the events to apply
      * @param origin the envelope of a message which caused the events
-     * @see #ensureEventMessage(Message)
      */
     void apply(List<Event> events, MessageEnvelope origin) {
-        ImmutableList<Event> eventsToApply = prepareEvents(events, origin);
-        play(notRejections(eventsToApply));
-        uncommittedEvents.addAll(eventsToApply);
+        ImmutableList<Event> versionedEvents = prepareEvents(events, origin);
+        List<Event> eventsToApply = notRejections(versionedEvents);
+        play(eventsToApply);
+        uncommittedEvents = uncommittedEvents.append(versionedEvents);
     }
 
     private static List<Event> notRejections(Collection<Event> events) {
@@ -396,30 +395,6 @@ public abstract class Aggregate<I,
     }
 
     /**
-     * Ensures that an event applier gets an instance of an event message,
-     * not {@link Event}.
-     *
-     * <p>Instances of {@code Event} may be passed to an applier during
-     * importing events or processing integration events. This may happen because
-     * corresponding command handling method returned either {@code List<Event>}
-     * or {@code Event}.
-     *
-     * @param  eventOrMsg an event message or {@code Event}
-     * @return the passed instance or an event message extracted from the passed
-     *         {@code Event} instance
-     */
-    private static Message ensureEventMessage(Message eventOrMsg) {
-        Message eventMsg;
-        if (eventOrMsg instanceof Event) {
-            Event event = (Event) eventOrMsg;
-            eventMsg = getMessage(event);
-        } else {
-            eventMsg = eventOrMsg;
-        }
-        return eventMsg;
-    }
-
-    /**
      * Restores the state and version from the passed snapshot.
      *
      * <p>If this method is called during a {@linkplain #play(AggregateStateRecord) replay}
@@ -441,17 +416,8 @@ public abstract class Aggregate<I,
      *
      * @return immutable view of all uncommitted events
      */
-    List<Event> getUncommittedEvents() {
-        return ImmutableList.copyOf(uncommittedEvents);
-    }
-
-    /**
-     * Obtains the number of uncommitted events.
-     */
-    @Internal
-    @VisibleForTesting
-    protected int uncommittedEventsCount() {
-        return uncommittedEvents.size();
+    UncommittedEvents getUncommittedEvents() {
+        return uncommittedEvents;
     }
 
     /**
@@ -459,9 +425,10 @@ public abstract class Aggregate<I,
      *
      * @return the list of events
      */
+    @CanIgnoreReturnValue
     List<Event> commitEvents() {
-        List<Event> result = ImmutableList.copyOf(uncommittedEvents);
-        uncommittedEvents.clear();
+        List<Event> result = uncommittedEvents.list();
+        uncommittedEvents = UncommittedEvents.ofNone();
         remember(result);
         return result;
     }

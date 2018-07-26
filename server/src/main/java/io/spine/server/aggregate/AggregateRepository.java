@@ -48,7 +48,6 @@ import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.model.Model;
-import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
@@ -60,7 +59,6 @@ import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.system.server.SystemGateway;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -153,25 +151,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         Set<CommandClass> commandClasses = getMessageClasses();
 
-        DelegatingEventDispatcher<I> eventDispatcher;
-        eventDispatcher = DelegatingEventDispatcher.of(this);
+        DelegatingEventDispatcher<I> eventDispatcher = DelegatingEventDispatcher.of(this);
         Set<EventClass> eventClasses = eventDispatcher.getMessageClasses();
 
         ExternalMessageDispatcher<I> extEventDispatcher;
         extEventDispatcher = eventDispatcher.getExternalDispatcher();
         Set<ExternalMessageClass> extEventClasses = extEventDispatcher.getMessageClasses();
 
-        DelegatingRejectionDispatcher<I> rejectionDispatcher;
-        rejectionDispatcher = DelegatingRejectionDispatcher.of(this);
-        Set<RejectionClass> rejectionClasses = rejectionDispatcher.getMessageClasses();
-
-        ExternalMessageDispatcher<I> extRejectionDispatcher;
-        extRejectionDispatcher = rejectionDispatcher.getExternalDispatcher();
-        Set<ExternalMessageClass> extRejectionClasses =
-                extRejectionDispatcher.getMessageClasses();
-
-        if (commandClasses.isEmpty() && eventClasses.isEmpty() && rejectionClasses.isEmpty()
-                && extEventClasses.isEmpty() && extRejectionClasses.isEmpty()) {
+        if (commandClasses.isEmpty() && eventClasses.isEmpty() && extEventClasses.isEmpty()) {
             throw newIllegalStateException(
                     "Aggregates of the repository %s neither handle commands" +
                             " nor react on events or rejections.", this);
@@ -179,10 +166,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
         registerInCommandBus(boundedContext, commandClasses);
         registerInEventBus(boundedContext, eventDispatcher, eventClasses);
-        registerInRejectionBus(boundedContext, rejectionDispatcher, rejectionClasses);
 
         registerExtMessageDispatcher(boundedContext, extEventDispatcher, extEventClasses);
-        registerExtMessageDispatcher(boundedContext, extRejectionDispatcher, extRejectionClasses);
 
         SystemGateway systemGateway = boundedContext.getSystemGateway();
         this.commandErrorHandler = CommandErrorHandler.with(systemGateway);
@@ -197,15 +182,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         if (!extEventClasses.isEmpty()) {
             boundedContext.getIntegrationBus()
                           .register(extEventDispatcher);
-        }
-    }
-
-    private void registerInRejectionBus(BoundedContext boundedContext,
-                                        DelegatingRejectionDispatcher<I> rejectionDispatcher,
-                                        Set<RejectionClass> rejectionClasses) {
-        if (!rejectionClasses.isEmpty()) {
-            boundedContext.getRejectionBus()
-                          .register(rejectionDispatcher);
         }
     }
 
@@ -394,7 +370,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Posts passed events to {@link EventBus}.
      */
-    private void postEvents(Iterable<Event> events) {
+    void postEvents(Iterable<Event> events) {
         getEventBus().post(events);
     }
 
@@ -516,10 +492,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @param aggregate the updated aggregate
      */
     void onModifiedAggregate(TenantId tenantId, A aggregate) {
-        List<Event> events = aggregate.getUncommittedEvents();
         store(aggregate);
         updateStand(tenantId, aggregate);
-        postEvents(events);
     }
 
     /**

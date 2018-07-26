@@ -153,7 +153,8 @@ public class AggregateRepositoryTest {
             ProjectId id = Sample.messageOfType(ProjectId.class);
             ProjectAggregate expected = GivenAggregate.withUncommittedEvents(id);
 
-            repository().setSnapshotTrigger(expected.uncommittedEventsCount());
+            UncommittedEvents events = ((Aggregate<?, ?, ?>) expected).getUncommittedEvents();
+            repository().setSnapshotTrigger(events.list().size());
             repository().store(expected);
 
             ProjectAggregate actual = assertFound(id);
@@ -192,7 +193,8 @@ public class AggregateRepositoryTest {
         void whenNeededToStore() {
             ProjectAggregate aggregate = GivenAggregate.withUncommittedEvents();
             // This should make the repository write the snapshot.
-            repository().setSnapshotTrigger(aggregate.uncommittedEventsCount());
+            UncommittedEvents events = ((Aggregate<?, ?, ?>) aggregate).getUncommittedEvents();
+            repository().setSnapshotTrigger(events.list().size());
 
             repository().store(aggregate);
             AggregateStateRecord record = readRecord(aggregate);

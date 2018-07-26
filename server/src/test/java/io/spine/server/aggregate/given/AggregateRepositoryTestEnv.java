@@ -214,11 +214,6 @@ public class AggregateRepositoryTestEnv {
             super(id);
         }
 
-        @Override
-        public int uncommittedEventsCount() {
-            return super.uncommittedEventsCount();
-        }
-
         @Assign
         AggProjectCreated handle(AggCreateProject msg) {
             return AggProjectCreated.newBuilder()

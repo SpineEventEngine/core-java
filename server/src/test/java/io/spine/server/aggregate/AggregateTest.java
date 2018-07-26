@@ -102,6 +102,7 @@ import static io.spine.testing.server.Assertions.assertEventClasses;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchRejection;
 import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -110,7 +111,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static java.util.stream.Collectors.toList;
 
 /**
  * @author Alexander Litus
@@ -297,7 +297,7 @@ public class AggregateTest {
 
         // Get the first event since the command handler produces only one event message.
         Aggregate<?, ?, ?> agg = this.aggregate;
-        List<Event> uncommittedEvents = agg.getUncommittedEvents();
+        List<Event> uncommittedEvents = agg.getUncommittedEvents().list();
         Event event = uncommittedEvents.get(0);
 
         assertEquals(this.aggregate.getVersion(), event.getContext()
@@ -474,7 +474,7 @@ public class AggregateTest {
                                        command(addTask),
                                        command(startProject));
 
-            List<Event> events = aggregate().getUncommittedEvents();
+            List<Event> events = aggregate().getUncommittedEvents().list();
 
             assertEventClasses(getEventClasses(events),
                                AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class);
@@ -510,9 +510,9 @@ public class AggregateTest {
         @Test
         @DisplayName("which are uncommitted")
         void uncommitedByDefault() {
-            List<Event> events = aggregate().getUncommittedEvents();
+            UncommittedEvents events = aggregate().getUncommittedEvents();
 
-            assertTrue(events.isEmpty());
+            assertFalse(events.nonEmpty());
         }
 
         @Test

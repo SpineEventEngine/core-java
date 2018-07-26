@@ -55,8 +55,6 @@ import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.model.Model;
 import io.spine.server.procman.model.ProcessManagerClass;
-import io.spine.server.rejection.DelegatingRejectionDispatcher;
-import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
@@ -173,23 +171,15 @@ public abstract class ProcessManagerRepository<I,
         super.onRegistered();
 
         BoundedContext boundedContext = getBoundedContext();
-        DelegatingRejectionDispatcher<I> rejDispatcher =
-                DelegatingRejectionDispatcher.of(this);
-
         boolean handlesCommands = register(boundedContext.getCommandBus(),
                                            DelegatingCommandDispatcher.of(this));
-        RejectionBus rejectionBus = boundedContext.getRejectionBus();
-        boolean handlesDomesticRejections = register(rejectionBus, rejDispatcher);
-        boolean handlesExternalRejections = register(boundedContext.getIntegrationBus(),
-                                                     rejDispatcher.getExternalDispatcher());
         boolean handlesDomesticEvents = !getMessageClasses().isEmpty();
         boolean handlesExternalEvents = !getExternalEventDispatcher().getMessageClasses()
                                                                      .isEmpty();
 
         boolean subscribesToEvents = handlesDomesticEvents || handlesExternalEvents;
-        boolean reactsUponRejections = handlesDomesticRejections || handlesExternalRejections;
 
-        if (!handlesCommands && !subscribesToEvents && !reactsUponRejections) {
+        if (!handlesCommands && !subscribesToEvents) {
             throw newIllegalStateException(
                     "Process managers of the repository %s have no command handlers, " +
                             "and do not react upon any rejections or events.", this);

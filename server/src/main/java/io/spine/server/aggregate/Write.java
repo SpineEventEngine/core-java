@@ -49,8 +49,8 @@ final class Write<I> {
     void perform() {
         I id = aggregate.getId();
         int eventCount = storage.readEventCountAfterLastSnapshot(id);
-        Iterable<Event> uncommittedEvents = aggregate.getUncommittedEvents();
-        for (Event event : uncommittedEvents) {
+        UncommittedEvents uncommittedEvents = aggregate.getUncommittedEvents();
+        for (Event event : uncommittedEvents.list()) {
             eventCount = writeEvent(event, eventCount);
         }
         commit(eventCount);
