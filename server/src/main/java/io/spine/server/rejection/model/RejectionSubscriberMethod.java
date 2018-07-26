@@ -72,6 +72,13 @@ public final class RejectionSubscriberMethod
         return MethodResult.empty();
     }
 
+    /**
+     * @implNote This method is never called because
+     * {@link #invoke(Object, Message, RejectionContext) invoke()} overriden in this class
+     * does not call
+     * {@linkplain io.spine.server.model.HandlerMethod#invoke(Object, Message, Message)
+     * the parent method} (which invokes {@code toResult()}).
+     */
     @Override
     protected MethodResult<Empty> toResult(Object target, Object rawMethodOutput) {
         return MethodResult.empty();

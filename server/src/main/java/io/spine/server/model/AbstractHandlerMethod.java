@@ -148,9 +148,6 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
         return ImmutableSet.of(externalAttribute);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public R invoke(T target, Message message, C context) {
         checkNotNull(target);
@@ -182,10 +179,8 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
      * @param cause   exception instance thrown by the invoked method
      * @return the exception thrown during the invocation
      */
-    protected HandlerMethodFailedException whyFailed(Object target,
-                                                     Message message,
-                                                     C context,
-                                                     Exception cause) {
+    protected HandlerMethodFailedException
+    whyFailed(Object target, Message message, C context, Exception cause) {
         return new HandlerMethodFailedException(target, message, context, cause);
     }
 
