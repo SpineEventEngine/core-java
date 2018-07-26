@@ -20,29 +20,35 @@
 
 package io.spine.server.command;
 
-import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
+import io.spine.server.command.model.CommandSubstituteMethod;
+import io.spine.server.command.model.CommanderClass;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 
 import java.util.Set;
 
+import static io.spine.server.command.model.CommanderClass.asCommanderClass;
+
 /**
- * The abstract base for classes that post one or more command in response to an incoming one.
+ * The abstract base for classes that post one or more command in response to an incoming message.
  *
  * <p>Example of use case scenarios:
  * <ul>
  *     <li>Converting a command into another (e.g. because of command API changes).
  *     <li>Splitting a command which holds data for a bigger aggregate into several commands
  *     set to corresponding aggregate parts.
+ *     <li>Issuing a command in response to an event.
+ *     <li>Posting a command to handle a rejection using a command posted on behalf of another user.
  * </ul>
  *
  * @author Alexander Yevsyukov
  */
 public abstract class Commander extends AbstractCommandDispatcher {
 
+    private final CommanderClass<?> thisClass = asCommanderClass(getClass());
     private final CommandBus commandBus;
 
     protected Commander(CommandBus commandBus, EventBus eventBus) {
@@ -52,15 +58,17 @@ public abstract class Commander extends AbstractCommandDispatcher {
 
     @Override
     public Set<CommandClass> getMessageClasses() {
-        //TODO:2018-07-20:alexander.yevsyukov: This should be obtained by inspecting methods in the model class.
-        return Sets.newHashSet();
+        return thisClass.getCommands();
     }
 
     @CanIgnoreReturnValue
     @Override
     public String dispatch(CommandEnvelope envelope) {
+        CommandSubstituteMethod method = thisClass.getHandler(envelope.getMessageClass());
         //TODO:2018-07-20:alexander.yevsyukov: Dispatch the envelope to the method.
         // Post resulting events of command transformations to the EventBus.
+//        Dispatch<CommandEnvelope> dispatch = Dispatch.of(envelope)
+//                                                     .to(this, method);
         return getId();
     }
 }

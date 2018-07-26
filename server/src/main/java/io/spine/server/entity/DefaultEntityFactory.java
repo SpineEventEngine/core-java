@@ -24,6 +24,8 @@ import io.spine.server.entity.model.EntityClass;
 
 import java.util.Objects;
 
+import static io.spine.server.entity.model.EntityClass.asEntityClass;
+
 /**
  * Default factory that creates entities by invoking constructor that
  * accepts a single ID parameter.
@@ -39,7 +41,7 @@ class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements EntityF
     private final EntityClass<E> entityClass;
 
     DefaultEntityFactory(Class<E> entityClass) {
-        this.entityClass = new EntityClass<>(entityClass);
+        this.entityClass = asEntityClass(entityClass);
     }
 
     @Override

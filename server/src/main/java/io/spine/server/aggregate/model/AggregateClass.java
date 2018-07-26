@@ -51,10 +51,20 @@ public class AggregateClass<A extends Aggregate>
     private final ReactorClassDelegate<A> delegate;
 
     /** Creates new instance. */
-    public AggregateClass(Class<A> cls) {
+    protected AggregateClass(Class<A> cls) {
         super(checkNotNull(cls));
         this.stateEvents = new MessageHandlerMap<>(cls, EventApplier.factory());
         this.delegate = new ReactorClassDelegate<>(cls);
+    }
+
+    /**
+     * Obtains an aggregate class for the passed raw class.
+     */
+    public static <A extends Aggregate> AggregateClass<A> asAggregateClass(Class<A> cls) {
+        checkNotNull(cls);
+        AggregateClass<A> result = (AggregateClass<A>)
+                get(cls, AggregateClass.class, () -> new AggregateClass<>(cls));
+        return result;
     }
 
     @Override

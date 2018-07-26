@@ -21,6 +21,7 @@
 package io.spine.server.projection;
 
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -28,9 +29,10 @@ import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.EventPlayers;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.model.EventSubscriberMethod;
-import io.spine.server.model.Model;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.validate.ValidatingBuilder;
+
+import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 
 /**
  * {@link Projection} holds a structural representation of data extracted from a stream of events.
@@ -66,10 +68,10 @@ public abstract class Projection<I,
         return (ProjectionClass<?>) super.thisClass();
     }
 
+    @Internal
     @Override
     protected ProjectionClass<?> getModelClass() {
-        return Model.getInstance()
-                    .asProjectionClass(getClass());
+        return asProjectionClass(getClass());
     }
 
     /**

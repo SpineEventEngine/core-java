@@ -20,10 +20,9 @@
 
 package io.spine.server.command.model;
 
-import io.spine.core.CommandClass;
 import io.spine.server.command.Commander;
 
-import java.util.Set;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Provides information on message handling for a class of {@link Commander}s.
@@ -32,17 +31,20 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  */
 public final class CommanderClass<C extends Commander>
-        extends AbstractCommandHandlingClass<C, CommandSubstMethod> {
+        extends AbstractCommandHandlingClass<C, CommandSubstituteMethod> {
 
     private static final long serialVersionUID = 0L;
 
-    private CommanderClass(Class<? extends C> value) {
-        super(value, CommandSubstMethod.factory());
+    private CommanderClass(Class<C> value) {
+        //TODO:2018-07-25:alexander.yevsyukov: A commander may have not only Subst methods!
+        super(value, CommandSubstituteMethod.factory());
     }
 
-    @Override
-    public Set<CommandClass> getCommands() {
-        //TODO:2018-07-22:alexander.yevsyukov: Implement
-        return null;
+    public static <C extends Commander>
+    CommanderClass<C> asCommanderClass(Class<C> cls) {
+        checkNotNull(cls);
+        CommanderClass<C> result = (CommanderClass<C>)
+                get(cls, CommanderClass.class, () -> new CommanderClass<>(cls));
+        return result;
     }
 }

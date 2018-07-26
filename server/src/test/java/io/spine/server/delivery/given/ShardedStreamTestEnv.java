@@ -19,7 +19,6 @@
  */
 package io.spine.server.delivery.given;
 
-import com.google.common.base.Function;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.BoundedContextName;
@@ -37,7 +36,6 @@ import io.spine.server.delivery.ShardedStreamConsumer;
 import io.spine.server.delivery.ShardingKey;
 import io.spine.server.integration.ChannelId;
 import io.spine.server.integration.ExternalMessage;
-import io.spine.server.model.Model;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemorySubscriber;
@@ -50,7 +48,10 @@ import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.validate.StringValueVBuilder;
 
+import java.util.function.Function;
+
 import static io.spine.core.BoundedContextNames.newName;
+import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -77,9 +78,8 @@ public class ShardedStreamTestEnv {
     private static final CommandShardedStream<TaskId> tasksShardOne;
 
     static {
-        Model model = Model.getInstance();
-        projectAggregateClass = model.asAggregateClass(ProjectAggregate.class);
-        taskAggregateClass = model.asAggregateClass(TaskAggregate.class);
+        projectAggregateClass = asAggregateClass(ProjectAggregate.class);
+        taskAggregateClass = asAggregateClass(TaskAggregate.class);
         projectRepo = new ProjectAggregateRepository();
         projectsShardZeroKey = shardingKeyOf(projectAggregateClass, 0);
         projectsShardOneKey = shardingKeyOf(projectAggregateClass, 1);
