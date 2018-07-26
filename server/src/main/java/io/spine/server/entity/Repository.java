@@ -473,6 +473,10 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * <p>An instance of {@code Lifecycle} posts the system commands related to the entity
      * lifecycle.
+     *
+     * <p>This class contains {@code public} classes, however it's {@code protected} itself.
+     * The methods are required in the {@code Repository} subclasses, which are located in other
+     * packages.
      */
     @Internal
     @SuppressWarnings("OverlyCoupledClass") // Posts system events.
