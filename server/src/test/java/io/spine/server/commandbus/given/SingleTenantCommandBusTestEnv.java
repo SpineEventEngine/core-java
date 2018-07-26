@@ -24,13 +24,10 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
-import io.spine.core.Event;
-import io.spine.core.Subscribe;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
-import io.spine.server.rejection.given.VerifiableSubscriber;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdRemoveTask;
 import io.spine.test.command.FirstCmdCreateProject;
@@ -38,16 +35,13 @@ import io.spine.test.command.SecondCmdStartProject;
 import io.spine.test.command.event.CmdTaskAdded;
 import io.spine.test.reflect.InvalidProjectName;
 import io.spine.test.reflect.ProjectId;
-import io.spine.test.reflect.ReflectRejections;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static io.spine.core.Events.getMessage;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.Collections.unmodifiableList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SingleTenantCommandBusTestEnv {
 
@@ -81,22 +75,6 @@ public class SingleTenantCommandBusTestEnv {
 
         public InvalidProjectName getThrowable() {
             return rejection;
-        }
-    }
-
-    public static class MemoizingRejectionSubscriber extends VerifiableSubscriber {
-
-        private ReflectRejections.InvalidProjectName rejection;
-
-        @Subscribe
-        public void on(ReflectRejections.InvalidProjectName rejection) {
-            triggerCall();
-            this.rejection = rejection;
-        }
-
-        @Override
-        public void verifyGot(Event event) {
-            assertEquals(getMessage(event), this.rejection);
         }
     }
 
