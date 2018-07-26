@@ -20,13 +20,14 @@
 
 package io.spine.core;
 
-import com.google.common.base.Predicate;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import io.spine.core.given.GivenEvent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.function.Predicate;
 
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
@@ -67,19 +68,19 @@ class EventPredicatesTest {
         @Test
         @DisplayName("in `IsAfter` predicate")
         void inIsAfter() {
-            assertFalse(EventPredicates.isAfter(secondsAgo(5)).apply(null));
+            assertFalse(EventPredicates.isAfter(secondsAgo(5)).test(null));
         }
 
         @Test
         @DisplayName("in `IsBefore` predicate")
         void inIsBefore() {
-            assertFalse(EventPredicates.isBefore(secondsAgo(5)).apply(null));
+            assertFalse(EventPredicates.isBefore(secondsAgo(5)).test(null));
         }
 
         @Test
         @DisplayName("in `IsBetween` predicate")
         void inIsBetween() {
-            assertFalse(EventPredicates.isBetween(secondsAgo(5), secondsAgo(1)).apply(null));
+            assertFalse(EventPredicates.isBetween(secondsAgo(5), secondsAgo(1)).test(null));
         }
     }
 
@@ -91,24 +92,24 @@ class EventPredicatesTest {
         @DisplayName("`IsAfter` predicate")
         void isAfter() {
             Predicate<Event> predicate = EventPredicates.isAfter(minutesAgo(100));
-            assertTrue(predicate.apply(GivenEvent.occurredMinutesAgo(20)));
-            assertFalse(predicate.apply(GivenEvent.occurredMinutesAgo(360)));
+            assertTrue(predicate.test(GivenEvent.occurredMinutesAgo(20)));
+            assertFalse(predicate.test(GivenEvent.occurredMinutesAgo(360)));
         }
 
         @Test
         @DisplayName("`isBefore` predicate")
         void isBefore() {
             Predicate<Event> predicate = EventPredicates.isBefore(minutesAgo(100));
-            assertFalse(predicate.apply(GivenEvent.occurredMinutesAgo(20)));
-            assertTrue(predicate.apply(GivenEvent.occurredMinutesAgo(360)));
+            assertFalse(predicate.test(GivenEvent.occurredMinutesAgo(20)));
+            assertTrue(predicate.test(GivenEvent.occurredMinutesAgo(360)));
         }
 
         @Test
         @DisplayName("`isBetween` predicate")
         void isBetween() {
             Event event = GivenEvent.occurredMinutesAgo(5);
-            assertTrue(EventPredicates.isBetween(minutesAgo(10), minutesAgo(1)).apply(event));
-            assertFalse(EventPredicates.isBetween(minutesAgo(2), minutesAgo(1)).apply(event));
+            assertTrue(EventPredicates.isBetween(minutesAgo(10), minutesAgo(1)).test(event));
+            assertFalse(EventPredicates.isBetween(minutesAgo(2), minutesAgo(1)).test(event));
         }
     }
 
