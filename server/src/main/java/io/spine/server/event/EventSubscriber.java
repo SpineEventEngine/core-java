@@ -27,7 +27,6 @@ import io.spine.logging.Logging;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.event.model.EventSubscriberClass;
 import io.spine.server.event.model.EventSubscriberMethod;
-import io.spine.server.model.Model;
 import io.spine.server.tenant.EventOperation;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
@@ -37,6 +36,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
 import static java.lang.String.format;
 
 /**
@@ -51,8 +51,7 @@ import static java.lang.String.format;
  */
 public abstract class EventSubscriber implements EventDispatcher<String> {
 
-    private final EventSubscriberClass<?> thisClass = Model.getInstance()
-                                                           .asEventSubscriberClass(getClass());
+    private final EventSubscriberClass<?> thisClass = asEventSubscriberClass(getClass());
     /** Lazily initialized logger. */
     private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
 

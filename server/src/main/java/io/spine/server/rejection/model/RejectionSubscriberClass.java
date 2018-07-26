@@ -29,6 +29,7 @@ import io.spine.server.rejection.RejectionSubscriber;
 
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.model.HandlerMethod.domestic;
 import static io.spine.server.model.HandlerMethod.external;
 
@@ -56,10 +57,14 @@ public final class RejectionSubscriberClass<S extends RejectionSubscriber> exten
     }
 
     /**
-     * Creates new instance for the passed class value.
+     * Obtains a model class for the passed raw class.
      */
-    public static <S extends RejectionSubscriber> RejectionSubscriberClass<S> of(Class<S> cls) {
-        return new RejectionSubscriberClass<>(cls);
+    public static <S extends RejectionSubscriber>
+    RejectionSubscriberClass<S> asRejectionSubscriber(Class<S> cls) {
+        checkNotNull(cls);
+        RejectionSubscriberClass<S> result = (RejectionSubscriberClass<S>)
+                get(cls, RejectionSubscriberClass.class, () -> new RejectionSubscriberClass<>(cls));
+        return result;
     }
 
     public Set<RejectionClass> getRejectionSubscriptions() {

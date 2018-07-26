@@ -27,7 +27,6 @@ import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
-import io.spine.server.model.Model;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.projection.model.ProjectionClass;
@@ -35,6 +34,9 @@ import io.spine.server.stand.StandStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
+
+import static io.spine.server.entity.model.EntityClass.asEntityClass;
+import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 
 /**
  * A factory for in-memory storages.
@@ -96,8 +98,7 @@ public class InMemoryStorageFactory implements StorageFactory {
     @Override
     public <I> RecordStorage<I>
     createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
-        EntityClass<?> modelClass = Model.getInstance()
-                                         .asEntityClass(entityClass);
+        EntityClass<?> modelClass = asEntityClass(entityClass);
         Class<? extends Message> stateClass = modelClass.getStateClass();
         TypeUrl typeUrl = TypeUrl.of(stateClass);
         @SuppressWarnings("unchecked") // The cast is protected by generic params of the method.
@@ -109,8 +110,7 @@ public class InMemoryStorageFactory implements StorageFactory {
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(
             Class<? extends Projection<I, ?, ?>> projectionClass) {
-        ProjectionClass<?> modelClass = Model.getInstance()
-                                             .asProjectionClass(projectionClass);
+        ProjectionClass<?> modelClass = asProjectionClass(projectionClass);
         Class<? extends Message> stateClass = modelClass.getStateClass();
         @SuppressWarnings("unchecked") // The cast is protected by generic parameters of the method.
         Class<I> idClass = (Class<I>) modelClass.getIdClass();

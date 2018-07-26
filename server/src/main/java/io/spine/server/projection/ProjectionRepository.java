@@ -45,7 +45,6 @@ import io.spine.server.event.EventStreamQuery;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
-import io.spine.server.model.Model;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
@@ -61,6 +60,7 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.option.EntityOption.Kind.PROJECTION;
+import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -110,11 +110,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return (ProjectionClass<P>) entityClass();
     }
 
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    @Internal
     @Override
     protected final ProjectionClass<P> getModelClass(Class<P> cls) {
-        return (ProjectionClass<P>) Model.getInstance()
-                                         .asProjectionClass(cls);
+        return asProjectionClass(cls);
     }
 
     @Override

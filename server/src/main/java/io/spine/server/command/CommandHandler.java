@@ -29,10 +29,11 @@ import io.spine.server.command.model.CommandHandlerClass;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
-import io.spine.server.model.Model;
 
 import java.util.List;
 import java.util.Set;
+
+import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
 
 /**
  * The abstract base for non-aggregate classes that expose command handling methods
@@ -63,8 +64,7 @@ import java.util.Set;
  */
 public abstract class CommandHandler extends AbstractCommandDispatcher {
 
-    private final CommandHandlerClass<?> thisClass = Model.getInstance()
-                                                          .asCommandHandlerClass(getClass());
+    private final CommandHandlerClass<?> thisClass = asCommandHandlerClass(getClass());
 
     /**
      * Creates a new instance of the command handler.

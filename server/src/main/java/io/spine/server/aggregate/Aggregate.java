@@ -47,7 +47,6 @@ import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.EventPlayers;
 import io.spine.server.event.EventFactory;
 import io.spine.server.event.model.EventReactorMethod;
-import io.spine.server.model.Model;
 import io.spine.server.rejection.model.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 
@@ -59,6 +58,7 @@ import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
+import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -179,13 +179,10 @@ public abstract class Aggregate<I,
         return (AggregateClass<?>)super.thisClass();
     }
 
-    /**
-     * Obtains the model class as {@link Model#asAggregateClass(Class) AggregateClass}.
-     */
+    @Internal
     @Override
     protected AggregateClass<?> getModelClass() {
-        return Model.getInstance()
-                    .asAggregateClass(getClass());
+        return asAggregateClass(getClass());
     }
 
     /**

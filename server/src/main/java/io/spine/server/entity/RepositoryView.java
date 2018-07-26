@@ -20,10 +20,9 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.Predicate;
-
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 /**
  * A view on a repository.
@@ -53,7 +52,7 @@ public interface RepositoryView<I, E extends Entity<I, ?>> {
      * Returns an iterator over the entities exposed by the view
      * that match the passed filter.
      *
-     * @param filter the {@linkplain Predicate#apply(Object) filtering} predicate
+     * @param filter the {@linkplain Predicate#test(Object)} filtering} predicate
      * @return new iterator
      */
     Iterator<E> iterator(Predicate<E> filter);
