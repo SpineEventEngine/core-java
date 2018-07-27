@@ -20,10 +20,11 @@
 
 package io.spine.server.outbus.enrich.given;
 
-import com.google.common.base.Function;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.function.Function;
 
 /**
  * Naïve implementation of string to ZoneOffset conversion for the enrichment tests purposes.

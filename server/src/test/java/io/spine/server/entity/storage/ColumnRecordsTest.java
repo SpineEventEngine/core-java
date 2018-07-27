@@ -20,7 +20,6 @@
 
 package io.spine.server.entity.storage;
 
-import com.google.common.base.Function;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.given.ColumnRecordsTestEnv.CollectAnyColumnType;
@@ -32,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static io.spine.server.entity.storage.given.ColumnRecordsTestEnv.MOCK_COLUMNS_COUNT;
 import static io.spine.server.entity.storage.given.ColumnRecordsTestEnv.getNonNullColumnValues;

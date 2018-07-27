@@ -21,8 +21,6 @@
 package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import io.spine.client.ColumnFilter;
@@ -37,11 +35,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterators.filter;
-import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.gt;
@@ -93,10 +94,18 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         Iterator<EEntity> entities = find(filters, FieldMask.getDefaultInstance());
         // A predicate on the Event message and EventContext fields.
         Predicate<EEntity> detailedLookupFilter = createEntityFilter(query);
-        Iterator<EEntity> filtered = filter(entities, detailedLookupFilter);
+        Spliterator<EEntity> entitySpliterator =
+                Spliterators.spliteratorUnknownSize(entities, Spliterator.ORDERED);
+        Iterator<EEntity> filtered = StreamSupport.stream(entitySpliterator, false)
+                                                  .filter(detailedLookupFilter)
+                                                  .collect(Collectors.toList())
+                                                  .iterator();
         List<EEntity> entityList = newArrayList(filtered);
         entityList.sort(comparator());
-        Iterator<Event> result = transform(entityList.iterator(), getEvent());
+        Iterator<Event> result = entityList.stream()
+                                           .map(getEvent())
+                                           .collect(Collectors.toList())
+                                           .iterator();
         return result;
     }
 
@@ -136,14 +145,10 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         EntityFilters.Builder builder = EntityFilters.newBuilder();
 
         Optional<CompositeColumnFilter> timeFilter = timeFilter(query);
-        if (timeFilter.isPresent()) {
-            builder.addFilter(timeFilter.get());
-        }
+        timeFilter.ifPresent(builder::addFilter);
 
         Optional<CompositeColumnFilter> typeFilter = typeFilter(query);
-        if (typeFilter.isPresent()) {
-            builder.addFilter(typeFilter.get());
-        }
+        typeFilter.ifPresent(builder::addFilter);
 
         return builder.build();
     }
@@ -208,12 +213,12 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         }
 
         @Override
-        public boolean apply(@Nullable EEntity input) {
+        public boolean test(@Nullable EEntity input) {
             if (input == null) {
                 return false;
             }
             Event event = input.getState();
-            boolean result = filter.apply(event);
+            boolean result = filter.test(event);
             return result;
         }
     }

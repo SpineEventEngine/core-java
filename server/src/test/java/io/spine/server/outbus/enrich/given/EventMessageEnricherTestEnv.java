@@ -20,7 +20,6 @@
 
 package io.spine.server.outbus.enrich.given;
 
-import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.core.CommandContext;
@@ -33,6 +32,8 @@ import io.spine.test.event.ProjectId;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneOffset;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.function.Function;
 
 /**
  * @author Alexander Yevsyukov

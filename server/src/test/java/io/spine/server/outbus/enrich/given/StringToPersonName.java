@@ -20,13 +20,13 @@
 
 package io.spine.server.outbus.enrich.given;
 
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import io.spine.people.PersonName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
+import java.util.function.Function;
 
 import static com.google.common.collect.Lists.newArrayList;
 
