@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.filterValues;
@@ -55,7 +56,10 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
 
     private final Map<I, EntityRecordWithColumns> records = newConcurrentMap();
     private final Map<I, EntityRecordWithColumns> filtered =
-            filterValues(records, isRecordWithColumnsVisible());
+            records.entrySet()
+                   .stream()
+                   .filter(entry -> isRecordWithColumnsVisible().test(entry.getValue()))
+                   .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
     @Override
     public Iterator<I> index() {

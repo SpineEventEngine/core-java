@@ -164,12 +164,12 @@ class EnricherBuilderTest {
     @Test
     @DisplayName("assure that function performs same transition")
     void assureSameTransition() {
-        assertTrue(SameTransition.asFor(fieldEnrichment).apply(fieldEnrichment));
+        assertTrue(SameTransition.asFor(fieldEnrichment).test(fieldEnrichment));
     }
 
     @Test
     @DisplayName("return false if input to SameTransition predicate is null")
     void assureNotSameForNull() {
-        assertFalse(SameTransition.asFor(fieldEnrichment).apply(null));
+        assertFalse(SameTransition.asFor(fieldEnrichment).test(null));
     }
 }

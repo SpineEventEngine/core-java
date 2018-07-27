@@ -29,9 +29,9 @@ import io.spine.type.TypeName;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Collections2.filter;
 
 /**
  * Performs enrichment operation of an enrichable message.
@@ -51,7 +51,9 @@ final class Action<M extends EnrichableMessageEnvelope<?, ?, C>, C extends Messa
                                                        .value();
         Collection<EnrichmentFunction<?, ?, ?>> functionsPerClass =
                 parent.getFunctions(sourceClass);
-        this.availableFunctions = filter(functionsPerClass, EnrichmentFunction.activeOnly());
+        this.availableFunctions = functionsPerClass.stream()
+                                                   .filter(EnrichmentFunction.activeOnly())
+                                                   .collect(Collectors.toList());
     }
 
     M perform() {
