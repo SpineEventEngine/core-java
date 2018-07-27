@@ -20,6 +20,7 @@
 
 package io.spine.server.commandstore;
 
+import com.google.common.collect.Streams;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
@@ -30,11 +31,8 @@ import io.spine.server.commandbus.ProcessingStatus;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static io.spine.base.Identifier.EMPTY_ID;
 import static io.spine.base.Time.getCurrentTime;
@@ -118,11 +116,9 @@ class Records {
 
     /** Converts {@code CommandStorageRecord}s to {@code Command}s. */
     static Iterator<Command> toCommandIterator(Iterator<CommandRecord> records) {
-        final Spliterator<CommandRecord> recordSpliterator =
-                Spliterators.spliteratorUnknownSize(records, Spliterator.ORDERED);
-        return StreamSupport.stream(recordSpliterator, false)
-                            .map(TO_COMMAND)
-                            .collect(Collectors.toList())
-                            .iterator();
+        return Streams.stream(records)
+                      .map(TO_COMMAND)
+                      .collect(Collectors.toList())
+                      .iterator();
     }
 }

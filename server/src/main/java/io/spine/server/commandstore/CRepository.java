@@ -21,6 +21,7 @@
 package io.spine.server.commandstore;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Streams;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
@@ -34,12 +35,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static io.spine.core.CommandStatus.RECEIVED;
 
@@ -114,12 +112,10 @@ class CRepository extends DefaultRecordBasedRepository<CommandId, CEntity, Comma
     Iterator<CommandRecord> iterator(CommandStatus status) {
         checkNotClosed();
         Iterator<CEntity> filteredEntities = iterator(new MatchesStatus(status));
-        final Spliterator<CEntity> entitySpliterator = Spliterators.spliteratorUnknownSize(
-                filteredEntities, Spliterator.ORDERED);
-        Iterator<CommandRecord> transformed = StreamSupport.stream(entitySpliterator, false)
-                                                           .map(getRecordFunc())
-                                                           .collect(Collectors.toList())
-                                                           .iterator();
+        Iterator<CommandRecord> transformed = Streams.stream(filteredEntities)
+                                                     .map(getRecordFunc())
+                                                     .collect(Collectors.toList())
+                                                     .iterator();
         return transformed;
     }
 

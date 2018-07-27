@@ -21,6 +21,7 @@
 package io.spine.server.outbus.enrich;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.Streams;
 import com.google.protobuf.Message;
 import io.spine.server.event.EventBus;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -29,7 +30,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -169,10 +169,9 @@ abstract class EnrichmentFunction<S, T, C extends Message> {
     static Optional<EnrichmentFunction<?, ?, ?>>
     firstThat(Iterable<EnrichmentFunction<?, ?, ?>> functions,
               Predicate<? super EnrichmentFunction<?, ?, ?>> predicate) {
-        Optional<EnrichmentFunction<?, ?, ?>> optional =
-                StreamSupport.stream(functions.spliterator(), false)
-                             .filter(predicate)
-                             .findFirst();
+        Optional<EnrichmentFunction<?, ?, ?>> optional = Streams.stream(functions)
+                                                                .filter(predicate)
+                                                                .findFirst();
         return optional;
     }
 }

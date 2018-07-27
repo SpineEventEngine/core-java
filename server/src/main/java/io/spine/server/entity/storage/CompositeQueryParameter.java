@@ -26,12 +26,12 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Streams;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter.CompositeOperator;
 
 import java.io.Serializable;
 import java.util.function.Predicate;
-import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -92,8 +92,8 @@ public final class CompositeQueryParameter implements Serializable {
     }
 
     private static boolean containsLifecycle(Iterable<EntityColumn> columns) {
-        boolean result = StreamSupport.stream(columns.spliterator(), false)
-                                      .anyMatch(isLifecycleColumn);
+        boolean result = Streams.stream(columns)
+                                .anyMatch(isLifecycleColumn);
         return result;
     }
 

@@ -21,6 +21,7 @@
 package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Streams;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import io.spine.client.ColumnFilter;
@@ -35,12 +36,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Spliterator;
-import java.util.Spliterators;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
@@ -94,12 +92,10 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         Iterator<EEntity> entities = find(filters, FieldMask.getDefaultInstance());
         // A predicate on the Event message and EventContext fields.
         Predicate<EEntity> detailedLookupFilter = createEntityFilter(query);
-        Spliterator<EEntity> entitySpliterator =
-                Spliterators.spliteratorUnknownSize(entities, Spliterator.ORDERED);
-        Iterator<EEntity> filtered = StreamSupport.stream(entitySpliterator, false)
-                                                  .filter(detailedLookupFilter)
-                                                  .collect(Collectors.toList())
-                                                  .iterator();
+        Iterator<EEntity> filtered = Streams.stream(entities)
+                                            .filter(detailedLookupFilter)
+                                            .collect(Collectors.toList())
+                                            .iterator();
         List<EEntity> entityList = newArrayList(filtered);
         entityList.sort(comparator());
         Iterator<Event> result = entityList.stream()
@@ -115,9 +111,9 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
     }
 
     void store(Iterable<Event> events) {
-        Iterable<EEntity> entities = StreamSupport.stream(events.spliterator(), false)
-                                                  .map(EventToEEntity.instance())
-                                                  .collect(toList());
+        Iterable<EEntity> entities = Streams.stream(events)
+                                            .map(EventToEEntity.instance())
+                                            .collect(toList());
         store(newArrayList(entities));
     }
 
