@@ -23,11 +23,9 @@ package io.spine.server;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.TenantId;
-import io.spine.system.server.CommandIndex;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -46,18 +44,6 @@ public final class MemoizingGateway implements SystemGateway {
     public void postCommand(Message systemCommand, @Nullable TenantId tenantId) {
         commands.add(systemCommand);
         this.tenantId = tenantId;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Always returns an empty iterator for the sake of tests.
-     *
-     * @return an empty {@link java.util.Iterator Iterator}
-     */
-    @Override
-    public CommandIndex commandIndex() {
-        return Collections::emptyIterator;
     }
 
     /**

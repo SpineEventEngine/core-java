@@ -91,7 +91,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     void postPreviouslyScheduled() {
         CommandBus spy = spy(commandBus);
         spy.register(createProjectHandler);
-        Command command = storeSingleCommandForRescheduling();
+        Command command = createScheduledCommand();
 
         spy.postPreviouslyScheduled(command);
 
@@ -101,7 +101,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("reject previously scheduled command if no endpoint is found")
     void rejectPreviouslyScheduledWithoutEndpoint() {
-        Command command = storeSingleCommandForRescheduling();
+        Command command = createScheduledCommand();
         assertThrows(IllegalStateException.class,
                      () -> commandBus.postPreviouslyScheduled(command));
     }
@@ -141,29 +141,9 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         }
     }
 
-    /*
-     * Utility methods
-     ********************/
-
     private static Command createScheduledCommand() {
         Timestamp schedulingTime = minutesAgo(3);
         Duration delayPrimary = Durations2.fromMinutes(5);
         return setSchedule(createProject(), delayPrimary, schedulingTime);
-    }
-
-    /**
-     * Creates and stores a single scheduled command.
-     */
-    private Command storeSingleCommandForRescheduling() {
-        return storeSingleCommandForRescheduling(systemGateway);
-    }
-
-    /**
-     * Creates and stores a single scheduled command.
-     */
-    private static Command storeSingleCommandForRescheduling(TestSystemGateway gateway) {
-        Command cmdWithSchedule = createScheduledCommand();
-        gateway.schedule(cmdWithSchedule);
-        return cmdWithSchedule;
     }
 }

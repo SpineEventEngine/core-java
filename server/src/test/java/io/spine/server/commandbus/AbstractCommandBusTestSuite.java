@@ -20,12 +20,6 @@
 
 package io.spine.server.commandbus;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Duration;
-import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import io.spine.base.Error;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Ack;
@@ -43,34 +37,27 @@ import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-import io.spine.server.tenant.TenantFunction;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.CommandIndex;
+import io.spine.system.server.NoOpSystemGateway;
 import io.spine.system.server.SystemGateway;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.event.CmdProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.testing.server.tenant.TenantAwareTest;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.util.Collection;
 import java.util.List;
 
-import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
-import static io.spine.core.Commands.getTenantId;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.commandbus.CommandScheduler.setSchedule;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.testing.Verify.assertContainsAll;
 import static io.spine.testing.Verify.assertSize;
@@ -104,7 +91,7 @@ abstract class AbstractCommandBusTestSuite {
     protected CreateProjectHandler createProjectHandler;
     protected MemoizingObserver<Ack> observer;
     protected TenantIndex tenantIndex;
-    protected TestSystemGateway systemGateway;
+    protected SystemGateway systemGateway;
 
     /**
      * A public constructor for derived test cases.
@@ -192,9 +179,7 @@ abstract class AbstractCommandBusTestSuite {
         log = spy(new Log());
         rejectionBus = spy(RejectionBus.newBuilder()
                                        .build());
-        systemGateway = multitenant
-                        ? new TestMultitenantSystemGateway()
-                        : new TestSingleTenantSystemGateway();
+        systemGateway = NoOpSystemGateway.INSTANCE;
         commandBus = CommandBus
                 .newBuilder()
                 .setMultitenant(this.multitenant)
@@ -262,13 +247,6 @@ abstract class AbstractCommandBusTestSuite {
         assertEquals(cmd.getId(), commandId);
     }
 
-    void storeAsScheduled(Iterable<Command> commands, Duration delay, Timestamp schedulingTime) {
-        for (Command cmd : commands) {
-            Command cmdWithSchedule = setSchedule(cmd, delay, schedulingTime);
-            systemGateway.schedule(cmdWithSchedule);
-        }
-    }
-
     /**
      * A sample command handler that tells whether a handler was invoked.
      */
@@ -288,82 +266,6 @@ abstract class AbstractCommandBusTestSuite {
 
         boolean wasHandlerInvoked() {
             return handlerInvoked;
-        }
-    }
-
-    /**
-     * A configurable {@link SystemGateway} for tests.
-     */
-    protected interface TestSystemGateway extends SystemGateway {
-
-        /**
-         * Schedules the given {@code command}.
-         *
-         * <p>The given command will be accessed by {@link CommandIndex#scheduledCommands()}
-         * from this {@link SystemGateway}.
-         */
-        void schedule(Command command);
-    }
-
-    /**
-     * A multitenant {@link TestSystemGateway}.
-     *
-     * <p>Stores scheduled commands on behalf of {@link CommandIndex} for each tenant separately.
-     */
-    protected class TestMultitenantSystemGateway implements TestSystemGateway {
-
-        private final Multimap<TenantId, Command> scheduledCommands = HashMultimap.create();
-
-        @Override
-        public void postCommand(Message systemCommand, @Nullable TenantId tenantId) {
-            // NoOp.
-        }
-
-        @Override
-        public CommandIndex commandIndex() {
-            return () -> {
-                TenantId tenantId = new TenantFunction<TenantId>(true) {
-                    @Override
-                    @CanIgnoreReturnValue
-                    public @Nullable TenantId apply(@Nullable TenantId input) {
-                        return input;
-                    }
-                }.execute();
-                Collection<Command> commands = scheduledCommands.get(tenantId);
-                return copyOf(commands).iterator();
-            };
-        }
-
-        @Override
-        public void schedule(Command command) {
-            scheduledCommands.put(getTenantId(command), command);
-            tenantIndex.keep(getTenantId(command));
-        }
-    }
-
-    /**
-     * A single-tenant {@link TestSystemGateway}.
-     *
-     * <p>All the {@linkplain #schedule(Command) scheduled} commands are considered to belong to
-     * the single (default) tenant.
-     */
-    protected static class TestSingleTenantSystemGateway implements TestSystemGateway {
-
-        private final List<Command> scheduledCommands = newLinkedList();
-
-        @Override
-        public void postCommand(Message systemCommand, @Nullable TenantId tenantId) {
-            // NoOp.
-        }
-
-        @Override
-        public CommandIndex commandIndex() {
-            return () -> copyOf(scheduledCommands).iterator();
-        }
-
-        @Override
-        public void schedule(Command command) {
-            scheduledCommands.add(command);
         }
     }
 }

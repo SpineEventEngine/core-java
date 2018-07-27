@@ -28,14 +28,10 @@ import io.spine.core.Command;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
-import io.spine.server.entity.Repository;
 import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Optional;
-
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.validate.Validate.isDefault;
 
@@ -70,17 +66,6 @@ public final class DefaultSystemGateway implements SystemGateway {
         Command command = commandFactory.create(systemCommand);
         system.getCommandBus()
               .post(command, noOpObserver());
-    }
-
-    @Override
-    public CommandIndex commandIndex() {
-        Optional<Repository> repository = system.findRepository(ScheduledCommandRecord.class);
-        checkState(repository.isPresent(),
-                   "%s is not registered in system bounded context %s.",
-                   ScheduledCommandRepository.class.getSimpleName(), system.getName());
-        ScheduledCommandRepository commandRepository =
-                (ScheduledCommandRepository) repository.get();
-        return DomainCommandIndex.atopOf(commandRepository);
     }
 
     BoundedContext target() {

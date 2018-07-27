@@ -20,7 +20,6 @@
 
 package io.spine.server.entity;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
@@ -128,7 +127,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     protected final EntityClass<E> entityClass() {
         if (entityClass == null) {
-            @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
+            @SuppressWarnings("unchecked") // The type is ensured by the declaration o8f this class.
             Class<E> cast = (Class<E>) ENTITY.getArgumentIn(getClass());
             entityClass = getModelClass(cast);
         }
@@ -484,8 +483,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
         private final EntityHistoryId id;
 
-        @VisibleForTesting
-        protected Lifecycle(I id) {
+        private Lifecycle(I id) {
             this.id = historyId(id);
         }
 

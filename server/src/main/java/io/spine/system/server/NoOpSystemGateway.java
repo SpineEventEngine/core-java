@@ -22,12 +22,7 @@ package io.spine.system.server;
 
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.Command;
 import io.spine.core.TenantId;
-
-import java.util.Iterator;
-
-import static java.util.Collections.emptyIterator;
 
 /**
  * An implementation of {@link SystemGateway} which never performs an operation.
@@ -47,23 +42,5 @@ public enum NoOpSystemGateway implements SystemGateway {
     @Override
     public void postCommand(Message systemCommand, TenantId tenantId) {
         // NOP.
-    }
-
-    @Override
-    public CommandIndex commandIndex() {
-        return NoOpCommandIndex.INSTANCE;
-    }
-
-    /**
-     * A {@link CommandIndex} which always returns empty {@code Iterator} on any request.
-     */
-    private enum  NoOpCommandIndex implements CommandIndex {
-
-        INSTANCE;
-
-        @Override
-        public Iterator<Command> scheduledCommands() {
-            return emptyIterator();
-        }
     }
 }
