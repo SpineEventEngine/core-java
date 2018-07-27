@@ -21,7 +21,6 @@
 package io.spine.server.storage;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Supplier;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.Environment;
 import io.spine.core.BoundedContextName;
@@ -29,6 +28,7 @@ import io.spine.server.storage.memory.InMemoryStorageFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
