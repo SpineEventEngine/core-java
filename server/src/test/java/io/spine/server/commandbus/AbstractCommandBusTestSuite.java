@@ -84,7 +84,6 @@ abstract class AbstractCommandBusTestSuite {
     protected ActorRequestFactory requestFactory;
 
     protected CommandBus commandBus;
-    protected Log log;
     protected EventBus eventBus;
     protected RejectionBus rejectionBus;
     protected ExecutorCommandScheduler scheduler;
@@ -176,7 +175,6 @@ abstract class AbstractCommandBusTestSuite {
                 InMemoryStorageFactory.newInstance(newName(cls.getSimpleName()), multitenant);
         tenantIndex = TenantAwareTest.createTenantIndex(multitenant, storageFactory);
         scheduler = spy(new ExecutorCommandScheduler());
-        log = spy(new Log());
         rejectionBus = spy(RejectionBus.newBuilder()
                                        .build());
         systemGateway = NoOpSystemGateway.INSTANCE;

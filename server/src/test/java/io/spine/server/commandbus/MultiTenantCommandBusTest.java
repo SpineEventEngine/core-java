@@ -105,12 +105,6 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         }
     }
 
-    @Test
-    @DisplayName("have log")
-    void haveLog() {
-        assertNotNull(Log.log());
-    }
-
     @Nested
     @DisplayName("when closed, shutdown")
     class ShutdownWhenClosed {
