@@ -19,8 +19,6 @@
  */
 package io.spine.server.stand;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
@@ -33,6 +31,7 @@ import io.spine.client.EntityIdFilter;
 import io.spine.client.Query;
 import io.spine.client.Target;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.RecordReadRequest;
 import io.spine.type.TypeUrl;
@@ -41,13 +40,15 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Predicates.notNull;
 
 /**
- * Processes the queries targeting {@link io.spine.server.aggregate.Aggregate Aggregate} state.
+ * Processes the queries targeting {@link Aggregate Aggregate} state.
  *
  * @author Alex Tymchenko
  */
@@ -112,9 +113,10 @@ class AggregateQueryProcessor implements QueryProcessor {
         }
 
         EntityIdFilter idFilter = filters.getIdFilter();
-        Collection<AggregateStateId> stateIds = Collections2.transform(idFilter.getIdsList(),
-                                                                       stateIdTransformer);
-
+        Collection<AggregateStateId> stateIds = idFilter.getIdsList()
+                                                        .stream()
+                                                        .map(stateIdTransformer)
+                                                        .collect(Collectors.toList());
         Iterator<EntityRecord> result = stateIds.size() == 1
                                         ? readOne(stateIds.iterator()
                                                           .next(), fieldMask)
@@ -144,7 +146,7 @@ class AggregateQueryProcessor implements QueryProcessor {
         Iterator<EntityRecord> bulkReadResults = applyFieldMask
                                                  ? standStorage.readMultiple(stateIds, fieldMask)
                                                  : standStorage.readMultiple(stateIds);
-        Iterator<EntityRecord> result = Iterators.filter(bulkReadResults, notNull());
+        Iterator<EntityRecord> result = Iterators.filter(bulkReadResults, Objects::nonNull);
         return result;
     }
 }

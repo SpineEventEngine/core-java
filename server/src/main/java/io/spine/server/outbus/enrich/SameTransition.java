@@ -20,8 +20,9 @@
 
 package io.spine.server.outbus.enrich;
 
-import com.google.common.base.Predicate;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -48,7 +49,7 @@ final class SameTransition implements Predicate<EnrichmentFunction> {
     }
 
     @Override
-    public boolean apply(@Nullable EnrichmentFunction input) {
+    public boolean test(@Nullable EnrichmentFunction input) {
         if (input == null) {
             return false;
         }

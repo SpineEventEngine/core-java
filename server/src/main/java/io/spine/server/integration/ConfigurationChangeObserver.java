@@ -19,7 +19,6 @@
  */
 package io.spine.server.integration;
 
-import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
@@ -30,6 +29,7 @@ import io.spine.type.TypeUrl;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

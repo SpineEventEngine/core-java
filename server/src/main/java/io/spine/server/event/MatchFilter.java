@@ -20,7 +20,6 @@
 
 package io.spine.server.event;
 
-import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.FieldFilter;
@@ -35,6 +34,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import static io.spine.protobuf.AnyPacker.unpackFunc;
 import static java.util.stream.Collectors.toList;
@@ -90,7 +90,7 @@ class MatchFilter implements Predicate<Event> {
 
     @SuppressWarnings("MethodWithMoreThanThreeNegations") // OK as we want traceability of exits.
     @Override
-    public boolean apply(@Nullable Event event) {
+    public boolean test(@Nullable Event event) {
         if (event == null) {
             return false;
         }

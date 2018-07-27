@@ -20,7 +20,7 @@
 
 package io.spine.server.bus;
 
-import com.google.common.base.Function;
+import com.google.common.collect.Streams;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
@@ -33,11 +33,12 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.isEmpty;
-import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.validate.Validate.isNotDefault;
 import static java.util.Collections.singleton;
@@ -144,7 +145,9 @@ public abstract class Bus<T extends Message,
         Iterable<T> filteredMessages = filter(messages, observer);
         if (!isEmpty(filteredMessages)) {
             store(filteredMessages);
-            Iterable<E> envelopes = transform(filteredMessages, toEnvelope());
+            Iterable<E> envelopes = Streams.stream(filteredMessages)
+                                           .map(toEnvelope())
+                                           .collect(Collectors.toList());
             doPost(envelopes, observer);
         }
         observer.onCompleted();

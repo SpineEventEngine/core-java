@@ -20,11 +20,11 @@
 
 package io.spine.server.event;
 
-import com.google.common.base.Predicate;
 import io.spine.core.Event;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -48,7 +48,7 @@ final class MatchesStreamQuery implements Predicate<Event> {
     }
 
     @Override
-    public boolean apply(@Nullable Event input) {
+    public boolean test(@Nullable Event input) {
         checkNotNull(input);
         if (filterList.isEmpty()) {
             return true; // No filters specified.
@@ -56,7 +56,7 @@ final class MatchesStreamQuery implements Predicate<Event> {
         // Check if one of the filters matches. If so, the event matches.
         for (EventFilter filter : filterList) {
             Predicate<Event> filterPredicate = new MatchFilter(filter);
-            if (filterPredicate.apply(input)) {
+            if (filterPredicate.test(input)) {
                 return true;
             }
         }

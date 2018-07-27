@@ -167,7 +167,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             return Optional.empty();
         }
         EntityRecord record = optional.get();
-        boolean recordVisible = isEntityVisible().apply(record.getLifecycleFlags());
+        boolean recordVisible = isEntityVisible().test(record.getLifecycleFlags());
         if (!recordVisible) {
             return Optional.empty();
         }

@@ -19,7 +19,6 @@
  */
 package io.spine.server.delivery;
 
-import com.google.common.base.Function;
 import com.google.common.testing.EqualsTester;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.BoundedContextName;
@@ -35,6 +34,8 @@ import io.spine.testing.server.model.ModelTests;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.function.Function;
 
 import static io.spine.server.delivery.given.ShardedStreamTestEnv.anotherProjectsShardOne;
 import static io.spine.server.delivery.given.ShardedStreamTestEnv.anotherProjectsShardZero;

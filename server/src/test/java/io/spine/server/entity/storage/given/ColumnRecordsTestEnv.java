@@ -20,7 +20,6 @@
 
 package io.spine.server.entity.storage.given;
 
-import com.google.common.base.Function;
 import io.spine.server.entity.storage.ColumnType;
 import io.spine.server.entity.storage.EntityColumn;
 import io.spine.testing.Tests;
@@ -31,6 +30,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
