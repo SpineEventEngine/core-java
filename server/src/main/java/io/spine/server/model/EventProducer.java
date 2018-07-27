@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -18,34 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.dispatch;
+package io.spine.server.model;
 
-import io.spine.core.MessageEnvelope;
-import io.spine.server.model.AbstractHandlerMethod;
+import com.google.protobuf.Any;
+import io.spine.core.Version;
+
+import java.util.Optional;
 
 /**
- * {@link Dispatch Dispatches} instantiated using this factory send off a
- * {@link MessageEnvelope message envelope} {@link #to to a specified target method}.
+ * An object with identity which produces events.
  *
- * @author Mykhailo Drachuk
+ * @author Alexander Yevsyukov
  */
-public abstract class MessageDispatchFactory<E extends MessageEnvelope, M extends AbstractHandlerMethod> {
-
-    private final E envelope;
-
-    MessageDispatchFactory(E envelope) {
-        this.envelope = envelope;
-    }
+public interface EventProducer {
 
     /**
-     * @param context an object instance the method belongs to
-     * @param method  handler method that processes the message and emits the events
-     * @return a new dispatch which deals with a message by invoking the target method
-     * in the provided context.
+     * The object identity packed into {@link Any}.
      */
-    public abstract Dispatch<E> to(Object context, M method);
+    Any getProducerId();
 
-    protected E envelope() {
-        return envelope;
-    }
+    /**
+     * The version of the object to be put into events.
+     *
+     * <p>If {@linkplain Optional#empty() empty}, no version will be added to generated events.
+     */
+    Version getVersion();
 }

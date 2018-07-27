@@ -20,7 +20,6 @@
 
 package io.spine.model.verify;
 
-import com.google.common.base.Function;
 import com.google.common.io.Files;
 import io.spine.model.CommandHandlers;
 import io.spine.model.verify.ModelVerifier.GetDestinationDir;
@@ -42,6 +41,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.function.Function;
 
 import static io.spine.model.verify.given.ModelVerifierTestEnv.actualProject;
 import static io.spine.tools.gradle.TaskName.COMPILE_JAVA;

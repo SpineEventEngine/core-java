@@ -24,14 +24,13 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.core.EventClass;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.model.EventSubscriberMethod;
+import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.projection.Projection;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.model.HandlerMethod.domestic;
-import static io.spine.server.model.HandlerMethod.external;
 
 /**
  * Provides type information on a projection class.
@@ -51,8 +50,10 @@ public final class ProjectionClass<P extends Projection> extends EntityClass<P> 
         super(cls);
         this.eventSubscriptions = new MessageHandlerMap<>(cls, EventSubscriberMethod.factory());
 
-        this.domesticSubscriptions = eventSubscriptions.getMessageClasses(domestic());
-        this.externalSubscriptions = eventSubscriptions.getMessageClasses(external());
+        this.domesticSubscriptions =
+                eventSubscriptions.getMessageClasses(HandlerMethod::isDomestic);
+        this.externalSubscriptions =
+                eventSubscriptions.getMessageClasses(HandlerMethod::isExternal);
     }
 
     /**

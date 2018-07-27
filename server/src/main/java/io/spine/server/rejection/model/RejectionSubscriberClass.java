@@ -23,6 +23,7 @@ package io.spine.server.rejection.model;
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.CommandClass;
 import io.spine.core.RejectionClass;
+import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
 import io.spine.server.rejection.RejectionSubscriber;
@@ -30,8 +31,6 @@ import io.spine.server.rejection.RejectionSubscriber;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.model.HandlerMethod.domestic;
-import static io.spine.server.model.HandlerMethod.external;
 
 /**
  * Provides type information on a {@link RejectionSubscriber} class.
@@ -51,9 +50,10 @@ public final class RejectionSubscriberClass<S extends RejectionSubscriber> exten
     private RejectionSubscriberClass(Class<? extends S> cls) {
         super(cls);
         rejectionSubscriptions = new MessageHandlerMap<>(cls, RejectionSubscriberMethod.factory());
-
-        this.domesticSubscriptions = rejectionSubscriptions.getMessageClasses(domestic());
-        this.externalSubscriptions = rejectionSubscriptions.getMessageClasses(external());
+        this.domesticSubscriptions =
+                rejectionSubscriptions.getMessageClasses(HandlerMethod::isDomestic);
+        this.externalSubscriptions =
+                rejectionSubscriptions.getMessageClasses(HandlerMethod::isExternal);
     }
 
     /**

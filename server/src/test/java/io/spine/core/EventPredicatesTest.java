@@ -68,19 +68,19 @@ class EventPredicatesTest {
         @Test
         @DisplayName("in `IsAfter` predicate")
         void inIsAfter() {
-            assertFalse(EventPredicates.isAfter(secondsAgo(5)).apply(null));
+            assertFalse(EventPredicates.isAfter(secondsAgo(5)).test(null));
         }
 
         @Test
         @DisplayName("in `IsBefore` predicate")
         void inIsBefore() {
-            assertFalse(EventPredicates.isBefore(secondsAgo(5)).apply(null));
+            assertFalse(EventPredicates.isBefore(secondsAgo(5)).test(null));
         }
 
         @Test
         @DisplayName("in `IsBetween` predicate")
         void inIsBetween() {
-            assertFalse(EventPredicates.isBetween(secondsAgo(5), secondsAgo(1)).apply(null));
+            assertFalse(EventPredicates.isBetween(secondsAgo(5), secondsAgo(1)).test(null));
         }
     }
 
@@ -108,8 +108,8 @@ class EventPredicatesTest {
         @DisplayName("`isBetween` predicate")
         void isBetween() {
             Event event = GivenEvent.occurredMinutesAgo(5);
-            assertTrue(EventPredicates.isBetween(minutesAgo(10), minutesAgo(1)).apply(event));
-            assertFalse(EventPredicates.isBetween(minutesAgo(2), minutesAgo(1)).apply(event));
+            assertTrue(EventPredicates.isBetween(minutesAgo(10), minutesAgo(1)).test(event));
+            assertFalse(EventPredicates.isBetween(minutesAgo(2), minutesAgo(1)).test(event));
         }
     }
 

@@ -24,16 +24,16 @@ import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.React;
+import io.spine.server.event.EventReactor;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
+import io.spine.server.model.ReactorMethodResult;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.function.Predicate;
 
-import static io.spine.server.model.HandlerMethod.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -43,7 +43,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Alexander Yevsyukov
  * @see React
  */
-public final class EventReactorMethod extends AbstractHandlerMethod<EventClass, EventContext> {
+public final class EventReactorMethod
+        extends AbstractHandlerMethod<EventReactor, EventClass, EventContext, ReactorMethodResult> {
 
     private EventReactorMethod(Method method) {
         super(method);
@@ -65,12 +66,15 @@ public final class EventReactorMethod extends AbstractHandlerMethod<EventClass, 
      * @return the list of event messages (or an empty list if the reactor method returns nothing)
      */
     @Override
-    public List<? extends Message> invoke(Object target, Message message, EventContext context) {
-        ensureExternalMatch(this, context.getExternal());
+    public ReactorMethodResult invoke(EventReactor target, Message message, EventContext context) {
+        ensureExternalMatch(context.getExternal());
+        ReactorMethodResult result = super.invoke(target, message, context);
+        return result;
+    }
 
-        Object handlingResult = super.invoke(target, message, context);
-        List<? extends Message> eventMessages = toList(handlingResult);
-        return eventMessages;
+    @Override
+    protected ReactorMethodResult toResult(EventReactor target, Object rawMethodOutput) {
+        return new ReactorMethodResult(target, rawMethodOutput);
     }
 
     static EventReactorMethod from(Method method) {

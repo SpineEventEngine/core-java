@@ -27,6 +27,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
+import io.spine.server.model.MethodResult;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -119,7 +120,8 @@ public class HandlerMethodTestEnv {
         }
     }
 
-    public static class TwoParamMethod extends AbstractHandlerMethod<EventClass, EventContext> {
+    public static class TwoParamMethod
+        extends AbstractHandlerMethod<Object, EventClass, EventContext, MethodResult<Empty>> {
 
         public TwoParamMethod(Method method) {
             super(method);
@@ -131,15 +133,26 @@ public class HandlerMethodTestEnv {
         }
 
         @Override
+        protected MethodResult<Empty> toResult(Object target, Object rawMethodOutput) {
+            return MethodResult.empty();
+        }
+
+        @Override
         public HandlerKey key() {
             throw new IllegalStateException("The method is not a target of the test.");
         }
     }
 
-    public static class OneParamMethod extends AbstractHandlerMethod<EventClass, Empty> {
+    public static class OneParamMethod
+            extends AbstractHandlerMethod<Object, EventClass, Empty, MethodResult<Empty>> {
 
         public OneParamMethod(Method method) {
             super(method);
+        }
+
+        @Override
+        protected MethodResult<Empty> toResult(Object target, Object rawMethodOutput) {
+            return MethodResult.empty();
         }
 
         public static Factory factory() {
