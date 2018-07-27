@@ -52,6 +52,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -338,11 +339,11 @@ public class CommandBus extends Bus<Command,
         }
 
         public Optional<CommandScheduler> getCommandScheduler() {
-            return Optional.ofNullable(commandScheduler);
+            return ofNullable(commandScheduler);
         }
 
         public Optional<RejectionBus> getRejectionBus() {
-            return Optional.ofNullable(rejectionBus);
+            return ofNullable(rejectionBus);
         }
 
         @CanIgnoreReturnValue
@@ -383,6 +384,14 @@ public class CommandBus extends Bus<Command,
         public Builder injectTenantIndex(TenantIndex index) {
             this.tenantIndex = checkNotNull(index);
             return this;
+        }
+
+        Optional<SystemGateway> getSystemGateway() {
+            return ofNullable(systemGateway);
+        }
+
+        Optional<TenantIndex> getTenantIndex() {
+            return ofNullable(tenantIndex);
         }
 
         /**

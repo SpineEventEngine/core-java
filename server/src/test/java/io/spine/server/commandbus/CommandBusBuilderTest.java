@@ -34,11 +34,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.testing.server.tenant.TenantAwareTest.createTenantIndex;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -148,6 +151,26 @@ class CommandBusBuilderTest
                                 .isMultitenant());
             assertFalse(builder().setMultitenant(false)
                                  .isMultitenant());
+        }
+
+        @Test
+        @DisplayName("system gateway")
+        void gateway() {
+            SystemGateway systemGateway = mock(SystemGateway.class);
+            CommandBus.Builder builder = builder().injectSystemGateway(systemGateway);
+            Optional<SystemGateway> actual = builder.getSystemGateway();
+            assertTrue(actual.isPresent());
+            assertSame(systemGateway, actual.get());
+        }
+
+        @Test
+        @DisplayName("tenant index")
+        void tenantIndex() {
+            TenantIndex index = mock(TenantIndex.class);
+            CommandBus.Builder builder = builder().injectTenantIndex(index);
+            Optional<TenantIndex> actual = builder.getTenantIndex();
+            assertTrue(actual.isPresent());
+            assertSame(index, actual.get());
         }
     }
 }
