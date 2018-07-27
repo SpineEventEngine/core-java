@@ -19,7 +19,6 @@
  */
 package io.spine.server;
 
-import com.google.common.base.Suppliers;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Experimental;
@@ -53,6 +52,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -112,7 +112,8 @@ public abstract class BoundedContext
         super();
         this.name = builder.getName();
         this.multitenant = builder.isMultitenant();
-        this.storageFactory = Suppliers.memoize(builder.buildStorageFactorySupplier());
+        this.storageFactory = memoize(() -> builder.buildStorageFactorySupplier()
+                                                   .get());
         this.commandBus = builder.buildCommandBus();
         this.eventBus = builder.buildEventBus();
         this.stand = builder.buildStand();
