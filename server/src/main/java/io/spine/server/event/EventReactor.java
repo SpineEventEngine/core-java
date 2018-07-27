@@ -23,7 +23,9 @@ package io.spine.server.event;
 import io.spine.server.model.EventProducer;
 
 /**
- * Objects reacting on events may produce events.
+ * A event reactor declares methods that receive events and may generate other events in response.
+ *
+ * <p>This means that a reactor does <em>not</em> have to <em>always</em> generate an event.
  *
  * @author Alexander Yevsyukov
  */

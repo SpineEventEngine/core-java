@@ -23,7 +23,9 @@ package io.spine.server.rejection;
 import io.spine.server.model.EventProducer;
 
 /**
- * Objects that react on rejections may produce events.
+ * A rejection reactor declares methods that receive rejections and may generate events in response.
+ *
+ * <p>This means that a reactor does <em>not</em> have to <em>always</em> generate an event.
  *
  * @author Alexander Yevsyukov
  */
