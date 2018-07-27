@@ -28,7 +28,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -53,7 +52,7 @@ abstract class EnrichmentFunction<S, T, C extends Message> {
      * We are having the generified class to be able to bound the types of messages and the
      * translation function when building the {@link Enricher}.
      *
-     * @see Enricher.AbstractBuilder#add(Class, Class, Function)
+     * @see Enricher.AbstractBuilder#add(Class, Class, java.util.function.Function)
      */
 
     private final Class<S> sourceClass;
