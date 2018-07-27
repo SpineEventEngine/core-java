@@ -144,32 +144,32 @@ public final class CommandHandlerMethod
         private Result(EventProducer producer, Object rawMethodResult) {
             super(producer, rawMethodResult);
             List<Message> eventMessages = toMessages(rawMethodResult);
-            List<Message> withoutEmpty = filterEmpty(eventMessages);
-            checkResultNonEmpty(withoutEmpty, rawMethodResult, producer);
-            setMessages(withoutEmpty);
+            List<Message> filtered = filterEmpty(eventMessages);
+            ensureNotEmptyIfNotProcessManager(filtered, rawMethodResult, producer);
+            setMessages(filtered);
         }
 
         /**
-         * Checks that the command handling method did not produce an empty event list as
-         * the result of its invocation.
+         * Ensures that a command handler method produces one or more event messages.
          *
          * <p>The only allowed exception to this are {@link ProcessManager} instances returning
          * {@link Empty} from their command handler methods.
          *
-         * @param events         the events produced as the result of the command handling
+         * @param eventMessages  the events produced as the result of the command handling
          * @param handlingResult the result of the command handler method invocation
          * @param target         the target on which the method was executed
          * @throws IllegalStateException if the command handling method did not produce any events
          */
-        private static void
-        checkResultNonEmpty(List<? extends Message> events, Object handlingResult, Object target) {
+        private static void ensureNotEmptyIfNotProcessManager(List<? extends Message> eventMessages,
+                                                              Object handlingResult,
+                                                              Object target) {
 
             //TODO:2018-07-25:dmytro.kuzmin: Prohibit returning `Empty` from `ProcessManager` in favor
             // of "Expected<...>" construction.
             // See https://github.com/SpineEventEngine/core-java/issues/790.
             boolean procmanReturnedEmpty =
                     handlingResult instanceof Empty && target instanceof ProcessManager;
-            checkState(!events.isEmpty() || procmanReturnedEmpty,
+            checkState(!eventMessages.isEmpty() || procmanReturnedEmpty,
                        "Command handling method did not produce events");
         }
     }
