@@ -73,7 +73,7 @@ public final class RejectionSubscriberMethod
     }
 
     /**
-     * @implNote This method is never called because
+     * This method is never called because
      * {@link #invoke(Object, Message, RejectionContext) invoke()} overridden in this class
      * does not call
      * {@linkplain io.spine.server.model.HandlerMethod#invoke(Object, Message, Message)

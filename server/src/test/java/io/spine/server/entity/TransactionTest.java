@@ -385,7 +385,7 @@ public abstract class TransactionTest<I,
      * Call this method in derived transaction tests if corresponding transaction
      * carries version number into an entity.
      *
-     * @implNote This method uses package-private API of the {@link Transaction} class.
+     * <p>This method uses package-private API of the {@link Transaction} class.
      */
     protected final void advanceVersionFromEvent() {
         E entity = createEntity();
