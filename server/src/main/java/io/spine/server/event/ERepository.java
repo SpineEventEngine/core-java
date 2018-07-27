@@ -94,13 +94,13 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         Predicate<EEntity> detailedLookupFilter = createEntityFilter(query);
         Iterator<EEntity> filtered = Streams.stream(entities)
                                             .filter(detailedLookupFilter)
-                                            .collect(Collectors.toList())
+                                            .collect(toList())
                                             .iterator();
         List<EEntity> entityList = newArrayList(filtered);
         entityList.sort(comparator());
         Iterator<Event> result = entityList.stream()
                                            .map(getEvent())
-                                           .collect(Collectors.toList())
+                                           .collect(toList())
                                            .iterator();
         return result;
     }
