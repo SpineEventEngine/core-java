@@ -20,7 +20,6 @@
 
 package io.spine.server.outbus.enrich;
 
-import com.google.common.base.Function;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
@@ -34,6 +33,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.function.Function;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -163,12 +164,12 @@ class EnricherBuilderTest {
     @Test
     @DisplayName("assure that function performs same transition")
     void assureSameTransition() {
-        assertTrue(SameTransition.asFor(fieldEnrichment).apply(fieldEnrichment));
+        assertTrue(SameTransition.asFor(fieldEnrichment).test(fieldEnrichment));
     }
 
     @Test
     @DisplayName("return false if input to SameTransition predicate is null")
     void assureNotSameForNull() {
-        assertFalse(SameTransition.asFor(fieldEnrichment).apply(null));
+        assertFalse(SameTransition.asFor(fieldEnrichment).test(null));
     }
 }

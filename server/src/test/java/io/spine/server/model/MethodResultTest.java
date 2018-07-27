@@ -18,34 +18,44 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+package io.spine.server.model;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.server.command.Command;
-import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.HandlerMethodPredicate;
-import io.spine.server.model.MethodResult;
-import io.spine.type.MessageClass;
+import io.spine.base.Time;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
- * Base interface for methods that generate one or more command messages in response to
- * an incoming message.
- *
- * @param <M> the type of the message class
- * @param <C> the type of the message context
- *
  * @author Alexander Yevsyukov
  */
-public interface CommandingMethod<M extends MessageClass, C extends Message, R extends MethodResult>
-        extends HandlerMethod<Object, M, C, R> {
+@DisplayName("MethodResult should")
+class MethodResultTest {
+
+    @Test
+    @DisplayName("throw ISE on repeated setting of messages")
+    void repeatedSetMessages() {
+        assertThrows(
+                IllegalStateException.class,
+                () -> new FailingDoubleSetResult(null)
+        );
+    }
 
     /**
-     * Abstract base for commanding method predicates.
+     * A {@code MethodResult} which should throw {@code IllegalStateException} on constructor
+     * because it attempts to {@linkplain #setMessages(List) set messages} twice.
      */
-    abstract class AbstractPredicate<C extends Message> extends HandlerMethodPredicate<C> {
+    private static final class FailingDoubleSetResult extends MethodResult<Message> {
 
-        AbstractPredicate(Class<C> contextClass) {
-            super(Command.class, contextClass);
+        private FailingDoubleSetResult(@Nullable Object output) {
+            super(output);
+            setMessages(ImmutableList.of(Time.getCurrentTime()));
+            setMessages(ImmutableList.of(Time.getCurrentTime()));
         }
     }
 }

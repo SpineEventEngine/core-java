@@ -25,7 +25,6 @@ import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.model.Model;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.server.rejection.model.RejectionSubscriberClass;
 import io.spine.string.Stringifiers;
@@ -39,6 +38,7 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Rejections.isExternal;
+import static io.spine.server.rejection.model.RejectionSubscriberClass.asRejectionSubscriber;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
@@ -64,9 +64,7 @@ final class ExternalRejectionSubscriber implements ExternalMessageDispatcher<Str
 
     @Override
     public Set<ExternalMessageClass> getMessageClasses() {
-        RejectionSubscriberClass<?> subscriberClass = Model.getInstance()
-                                                           .asRejectionSubscriber(
-                                                                   delegate.getClass());
+        RejectionSubscriberClass<?> subscriberClass = asRejectionSubscriber(delegate.getClass());
         Set<RejectionClass> extSubscriptions = subscriberClass.getExternalRejectionSubscriptions();
         return ExternalMessageClass.fromRejectionClasses(extSubscriptions);
     }

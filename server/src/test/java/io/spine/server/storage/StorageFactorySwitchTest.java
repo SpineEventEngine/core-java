@@ -20,7 +20,6 @@
 
 package io.spine.server.storage;
 
-import com.google.common.base.Supplier;
 import io.spine.base.Environment;
 import io.spine.core.BoundedContextName;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
@@ -30,6 +29,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.function.Supplier;
 
 import static io.spine.core.BoundedContextNames.newName;
 import static org.junit.jupiter.api.Assertions.assertEquals;

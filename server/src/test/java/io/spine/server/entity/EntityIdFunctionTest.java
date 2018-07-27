@@ -20,11 +20,12 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.Function;
 import com.google.protobuf.StringValue;
 import io.spine.client.EntityId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.function.Function;
 
 import static io.spine.protobuf.TypeConverter.toAny;
 import static org.junit.jupiter.api.Assertions.assertEquals;

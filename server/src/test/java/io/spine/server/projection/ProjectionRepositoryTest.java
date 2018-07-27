@@ -65,7 +65,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.testing.server.Assertions.assertEventClasses;
 import static java.lang.String.format;
@@ -129,12 +128,10 @@ class ProjectionRepositoryTest
     }
 
     @Override
-    protected TestProjection createEntity() {
+    protected TestProjection createEntity(ProjectId id) {
         TestProjection projection =
                 Given.projectionOfClass(TestProjection.class)
-                     .withId(ProjectId.newBuilder()
-                                      .setId(newUuid())
-                                      .build())
+                     .withId(id)
                      .build();
         return projection;
     }

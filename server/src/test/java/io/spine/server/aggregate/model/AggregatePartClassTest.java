@@ -31,6 +31,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePartClass;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -42,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class AggregatePartClassTest {
 
     private final AggregatePartClass<AnAggregatePart> partClass =
-            new AggregatePartClass<>(AnAggregatePart.class);
+            asAggregatePartClass(AnAggregatePart.class);
     private AnAggregateRoot root;
 
     @BeforeEach
@@ -63,7 +64,7 @@ class AggregatePartClassTest {
     @DisplayName("throw exception when aggregate part does not have appropriate constructor")
     void throwOnNoProperCtorAvailable() {
         AggregatePartClass<WrongAggregatePart> wrongPartClass =
-                new AggregatePartClass<>(WrongAggregatePart.class);
+                asAggregatePartClass(WrongAggregatePart.class);
         assertThrows(ModelError.class, wrongPartClass::getConstructor);
     }
 

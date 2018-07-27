@@ -19,15 +19,15 @@
  */
 package io.spine.server.delivery;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Streams;
 import io.spine.core.BoundedContextName;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.transport.TransportFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Set;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -126,9 +126,10 @@ public class InProcessSharding implements Sharding {
                 BoundedContextName bcName,
                 ShardingKey shardingKey) {
         TransportBindFn fn = new TransportBindFn(bcName, shardingKey, transportFactory);
-        ImmutableSet<ShardedStream<?, ?, ?>> result = FluentIterable.from(consumers)
-                                                                    .transform(fn)
-                                                                    .toSet();
+        ImmutableSet<ShardedStream<?, ?, ?>> result =
+                Streams.stream(consumers)
+                       .map(fn)
+                       .collect(ImmutableSet.toImmutableSet());
         return result;
     }
 

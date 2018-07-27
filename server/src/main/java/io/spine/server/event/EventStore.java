@@ -42,7 +42,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
-import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -144,9 +143,9 @@ public class EventStore implements AutoCloseable {
      */
     public void appendAll(Iterable<Event> events) {
         checkNotNull(events);
-        Optional<Event> tenantDefiningEvent = StreamSupport.stream(events.spliterator(), false)
-                                                           .filter(Objects::nonNull)
-                                                           .findFirst();
+        Optional<Event> tenantDefiningEvent = Streams.stream(events)
+                                                     .filter(Objects::nonNull)
+                                                     .findFirst();
         if (!tenantDefiningEvent.isPresent()) {
             return;
         }

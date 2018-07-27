@@ -55,7 +55,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
 
     private final Map<I, EntityRecordWithColumns> records = newConcurrentMap();
     private final Map<I, EntityRecordWithColumns> filtered =
-            filterValues(records, isRecordWithColumnsVisible());
+            filterValues(records, isRecordWithColumnsVisible()::test);
 
     @Override
     public Iterator<I> index() {

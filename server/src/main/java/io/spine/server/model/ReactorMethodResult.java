@@ -20,36 +20,22 @@
 
 package io.spine.server.model;
 
-import io.spine.value.ClassTypeValue;
+import com.google.protobuf.Message;
 
-import java.util.function.Supplier;
+import java.util.List;
 
 /**
- * A class that belongs to a {@link Model}.
+ * A reactor method may not return a result in response to an incoming message. When so,
+ * the raw method should return {@link com.google.protobuf.Empty Empty}.
  *
- * @param <T> the type of objects
  * @author Alexander Yevsyukov
  */
-public abstract class ModelClass<T> extends ClassTypeValue<T> {
+public final class ReactorMethodResult extends EventsResult {
 
-    private static final long serialVersionUID = 0L;
-
-    protected ModelClass(Class<? extends T> value) {
-        super(value);
-    }
-
-    /**
-     * Obtains the model class for the passed raw class.
-     *
-     * <p>If the model does not have the model class yet, it would be obtained
-     * from the passed supplier and remembered.
-     */
-    public static <T, M extends ModelClass>
-    ModelClass<T> get(Class<T> rawClass,
-                      Class<M> requestedModelClass,
-                      Supplier<ModelClass<T>> supplier) {
-        Model model = Model.getInstance(rawClass);
-        ModelClass<T> result = model.getClass(rawClass, requestedModelClass, supplier);
-        return result;
+    public ReactorMethodResult(EventProducer producer, Object rawMethodOutput) {
+        super(producer, rawMethodOutput);
+        List<Message> messages = toMessages(rawMethodOutput);
+        List<Message> filtered = filterEmpty(messages);
+        setMessages(filtered);
     }
 }

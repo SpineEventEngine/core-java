@@ -23,14 +23,13 @@ package io.spine.server.event.model;
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.EventClass;
 import io.spine.server.event.EventSubscriber;
+import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.model.HandlerMethod.domestic;
-import static io.spine.server.model.HandlerMethod.external;
 
 /**
  * Provides type information on an {@link EventSubscriber} class.
@@ -49,17 +48,21 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
     private EventSubscriberClass(Class<? extends S> cls) {
         super(cls);
         this.eventSubscriptions = new MessageHandlerMap<>(cls, EventSubscriberMethod.factory());
-
-        this.domesticSubscriptions = eventSubscriptions.getMessageClasses(domestic());
-        this.externalSubscriptions = eventSubscriptions.getMessageClasses(external());
+        this.domesticSubscriptions =
+                    eventSubscriptions.getMessageClasses(HandlerMethod::isDomestic);
+        this.externalSubscriptions =
+                    eventSubscriptions.getMessageClasses(HandlerMethod::isExternal);
     }
 
     /**
-     * Creates new instance for the passed class value.
+     * Creates new instance for the passed raw class.
      */
-    public static <S extends EventSubscriber> EventSubscriberClass<S> of(Class<S> cls) {
+    public static <S extends EventSubscriber>
+    EventSubscriberClass<S> asEventSubscriberClass(Class<S> cls) {
         checkNotNull(cls);
-        return new EventSubscriberClass<>(cls);
+        EventSubscriberClass<S> result = (EventSubscriberClass<S>)
+                get(cls, EventSubscriberClass.class, () -> new EventSubscriberClass<>(cls));
+        return result;
     }
 
     public Set<EventClass> getEventSubscriptions() {

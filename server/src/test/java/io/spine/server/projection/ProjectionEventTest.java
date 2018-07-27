@@ -31,7 +31,6 @@ import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.projection.given.ProjectionTestEnv.TestProjection;
-import io.spine.server.projection.model.ProjectionClass;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,6 +41,7 @@ import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.TypeConverter.toMessage;
+import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 import static io.spine.testing.server.projection.ProjectionEventDispatcher.dispatch;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -101,8 +101,8 @@ class ProjectionEventTest {
     @Test
     @DisplayName("return handled event classes")
     void exposeEventClasses() {
-        Set<EventClass> classes = ProjectionClass.of(TestProjection.class)
-                                                 .getEventSubscriptions();
+        Set<EventClass> classes =
+                asProjectionClass(TestProjection.class).getEventSubscriptions();
 
         assertEquals(TestProjection.HANDLING_EVENT_COUNT, classes.size());
         assertTrue(classes.contains(EventClass.of(StringValue.class)));

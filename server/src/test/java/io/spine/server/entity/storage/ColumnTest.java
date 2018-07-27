@@ -31,6 +31,7 @@ import io.spine.server.entity.storage.given.ColumnTestEnv.BrokenTestEntity;
 import io.spine.server.entity.storage.given.ColumnTestEnv.EntityRedefiningColumnAnnotation;
 import io.spine.server.entity.storage.given.ColumnTestEnv.EntityWithCustomColumnNameForStoring;
 import io.spine.server.entity.storage.given.ColumnTestEnv.EntityWithDefaultColumnNameForStoring;
+import io.spine.server.entity.storage.given.ColumnTestEnv.TestAggregate;
 import io.spine.server.entity.storage.given.ColumnTestEnv.TestEntity;
 import io.spine.testing.server.entity.given.Given;
 import org.junit.jupiter.api.DisplayName;
@@ -100,13 +101,12 @@ class ColumnTest {
     @Test
     @DisplayName("invoke getter")
     void invokeGetter() {
-        String entityId = "entity-id";
         int version = 2;
         EntityColumn column = forMethod("getVersion", VersionableEntity.class);
-        TestEntity entity = Given.entityOfClass(TestEntity.class)
-                                 .withId(entityId)
-                                 .withVersion(version)
-                                 .build();
+        TestAggregate entity = Given.aggregateOfClass(TestAggregate.class)
+                                    .withId(1L)
+                                    .withVersion(version)
+                                    .build();
         Version actualVersion = (Version) column.getFor(entity);
         assertEquals(version, actualVersion.getNumber());
     }

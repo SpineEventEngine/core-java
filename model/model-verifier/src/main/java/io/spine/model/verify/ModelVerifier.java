@@ -21,7 +21,6 @@
 package io.spine.model.verify;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
 import io.spine.model.CommandHandlers;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.CommandHandler;
@@ -40,10 +39,14 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
+import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
 import static java.util.Arrays.deepToString;
@@ -98,19 +101,19 @@ final class ModelVerifier {
             "CheckReturnValue" /* Returned values for asXxxClass() are ignored because we use
                                   these methods only for verification of the classes. */
     })
-    private void verifyClass(Class<?> cls) {
+    private static void verifyClass(Class<?> cls) {
         Logger log = log();
         if (Aggregate.class.isAssignableFrom(cls)) {
             Class<? extends Aggregate> aggregateClass = (Class<? extends Aggregate>) cls;
-            model.asAggregateClass(aggregateClass);
+            asAggregateClass(aggregateClass);
             log.debug("\'{}\' classified as Aggregate type.", aggregateClass);
         } else if (ProcessManager.class.isAssignableFrom(cls)) {
             Class<? extends ProcessManager> procManClass = (Class<? extends ProcessManager>) cls;
-            model.asProcessManagerClass(procManClass);
+            asProcessManagerClass(procManClass);
             log.debug("\'{}\' classified as ProcessManager type.", procManClass);
         } else if (CommandHandler.class.isAssignableFrom(cls)) {
             Class<? extends CommandHandler> commandHandler = (Class<? extends CommandHandler>) cls;
-            model.asCommandHandlerClass(commandHandler);
+            asCommandHandlerClass(commandHandler);
             log.debug("\'{}\' classified as CommandHandler type.", commandHandler);
         } else {
             throw newIllegalArgumentException(
@@ -151,7 +154,9 @@ final class ModelVerifier {
     }
 
     private static URL[] extractDestinationDirs(Collection<JavaCompile> tasks) {
-        Collection<URL> urls = transform(tasks, GetDestinationDir.FUNCTION);
+        Collection<URL> urls = tasks.stream()
+                                    .map(GetDestinationDir.FUNCTION)
+                                    .collect(Collectors.toList());
         URL[] result = urls.toArray(EMPTY_URL_ARRAY);
         return result;
     }

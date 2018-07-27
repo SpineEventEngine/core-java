@@ -18,25 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model.given;
+package io.spine.server.model;
 
-import com.google.protobuf.Timestamp;
-import io.spine.server.entity.AbstractEntity;
+import com.google.protobuf.Any;
+import io.spine.core.Version;
+
+import java.util.Optional;
 
 /**
+ * An object with identity which produces events.
+ *
  * @author Alexander Yevsyukov
- * @author Dmytro Kuzmin
  */
-public class DefaultStateRegistryTestEnv {
+public interface EventProducer {
 
-    /** Prevents instantiation of this utility class. */
-    private DefaultStateRegistryTestEnv() {
-    }
+    /**
+     * The object identity packed into {@link Any}.
+     */
+    Any getProducerId();
 
-    public static class TimerSnapshot extends AbstractEntity<Long, Timestamp> {
-
-        protected TimerSnapshot(Long id) {
-            super(id);
-        }
-    }
+    /**
+     * The version of the object to be put into events.
+     *
+     * <p>If {@linkplain Optional#empty() empty}, no version will be added to generated events.
+     */
+    Version getVersion();
 }

@@ -20,10 +20,14 @@
 
 package io.spine.server.rejection.given;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import io.spine.core.CommandContext;
 import io.spine.core.React;
+import io.spine.core.Version;
+import io.spine.server.rejection.RejectionReactor;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.RjUpdateProjectName;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -46,8 +50,10 @@ public class RejectionReactorMethodTestEnv {
      * {@linkplain #HANDLER_METHOD_NAME single reactor method}.
      * This reference will be later used for assertions.
      */
-    public abstract static class TestRejectionReactor {
+    public abstract static class TestRejectionReactor implements RejectionReactor {
 
+        private static final Any producerId =
+                Any.pack(StringValue.of(TestRejectionReactor.class.getName()));
         @SuppressWarnings("DuplicateStringLiteralInspection")
         private static final String HANDLER_METHOD_NAME = "handle";
 
@@ -61,6 +67,16 @@ public class RejectionReactorMethodTestEnv {
             }
             throw new RuntimeException("No rejection reactor method found " +
                                                HANDLER_METHOD_NAME);
+        }
+
+        @Override
+        public Any getProducerId() {
+            return producerId;
+        }
+
+        @Override
+        public Version getVersion() {
+            return Version.getDefaultInstance();
         }
     }
 

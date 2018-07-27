@@ -40,7 +40,7 @@ class PredicatesTest {
         LifecycleFlags status = LifecycleFlags.newBuilder()
                                               .setArchived(true)
                                               .build();
-        assertFalse(isEntityVisible().apply(status));
+        assertFalse(isEntityVisible().test(status));
     }
 
     @Test
@@ -49,7 +49,7 @@ class PredicatesTest {
         LifecycleFlags status = LifecycleFlags.newBuilder()
                                               .setDeleted(true)
                                               .build();
-        assertFalse(isEntityVisible().apply(status));
+        assertFalse(isEntityVisible().test(status));
     }
 
     @Test
@@ -59,7 +59,7 @@ class PredicatesTest {
                                           .setLifecycleFlags(LifecycleFlags.newBuilder()
                                                                            .setArchived(true))
                                           .build();
-        assertFalse(isRecordVisible().apply(record));
+        assertFalse(isRecordVisible().test(record));
     }
 
     @Test
@@ -69,7 +69,7 @@ class PredicatesTest {
                                           .setLifecycleFlags(LifecycleFlags.newBuilder()
                                                                            .setDeleted(true))
                                           .build();
-        assertFalse(isRecordVisible().apply(record));
+        assertFalse(isRecordVisible().test(record));
     }
 
     /**
@@ -79,6 +79,6 @@ class PredicatesTest {
     @Test
     @DisplayName("consider null records visible")
     void stateNullRecordsVisible() {
-        assertTrue(isEntityVisible().apply(null));
+        assertTrue(isEntityVisible().test(null));
     }
 }

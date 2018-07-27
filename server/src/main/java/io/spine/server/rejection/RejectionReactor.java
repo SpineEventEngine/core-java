@@ -18,38 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.rejection;
 
-import io.spine.value.ClassTypeValue;
-
-import java.util.function.Supplier;
+import io.spine.server.model.EventProducer;
 
 /**
- * A class that belongs to a {@link Model}.
+ * A rejection reactor declares methods that receive rejections and may generate events in response.
  *
- * @param <T> the type of objects
+ * <p>This means that a reactor does <em>not</em> have to <em>always</em> generate an event.
+ *
  * @author Alexander Yevsyukov
  */
-public abstract class ModelClass<T> extends ClassTypeValue<T> {
-
-    private static final long serialVersionUID = 0L;
-
-    protected ModelClass(Class<? extends T> value) {
-        super(value);
-    }
-
-    /**
-     * Obtains the model class for the passed raw class.
-     *
-     * <p>If the model does not have the model class yet, it would be obtained
-     * from the passed supplier and remembered.
-     */
-    public static <T, M extends ModelClass>
-    ModelClass<T> get(Class<T> rawClass,
-                      Class<M> requestedModelClass,
-                      Supplier<ModelClass<T>> supplier) {
-        Model model = Model.getInstance(rawClass);
-        ModelClass<T> result = model.getClass(rawClass, requestedModelClass, supplier);
-        return result;
-    }
+public interface RejectionReactor extends EventProducer {
 }

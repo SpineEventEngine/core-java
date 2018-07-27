@@ -21,9 +21,6 @@
 package io.spine.server.entity;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -36,6 +33,7 @@ import io.spine.server.entity.storage.EntityColumnCache;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.storage.LifecycleFlagField;
 import io.spine.server.storage.RecordReadRequest;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
@@ -45,7 +43,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.filter;
@@ -125,7 +126,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @Override
     public Iterator<E> iterator(Predicate<E> filter) {
         Iterator<E> allEntities = loadAll();
-        Iterator<E> result = filter(allEntities, filter);
+        Iterator<E> result = filter(allEntities, filter::test);
         return result;
     }
 
@@ -166,7 +167,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             return Optional.empty();
         }
         EntityRecord record = optional.get();
-        boolean recordVisible = isEntityVisible().apply(record.getLifecycleFlags());
+        boolean recordVisible = isEntityVisible().test(record.getLifecycleFlags());
         if (!recordVisible) {
             return Optional.empty();
         }
@@ -257,9 +258,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
         RecordStorage<I> storage = recordStorage();
         Iterator<EntityRecord> entityStorageRecords = storage.readMultiple(ids, fieldMask);
-        Iterator<EntityRecord> presentRecords = filter(entityStorageRecords, Predicates.notNull());
+        Iterator<EntityRecord> presentRecords = filter(entityStorageRecords, Objects::nonNull);
         Function<EntityRecord, E> toEntity = entityConverter().reverse();
-        Iterator<E> result = transform(presentRecords, toEntity);
+        Iterator<E> result = transform(presentRecords, toEntity::apply);
         return result;
     }
 
@@ -275,7 +276,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         RecordStorage<I> storage = recordStorage();
         Iterator<EntityRecord> records = storage.readAll();
         Function<EntityRecord, E> toEntity = entityConverter().reverse();
-        Iterator<E> result = transform(records, toEntity);
+        Iterator<E> result = transform(records, toEntity::apply);
         return result;
     }
 
@@ -305,7 +306,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
         Iterator<EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
         Function<EntityRecord, E> toEntity = entityConverter().reverse();
-        Iterator<E> result = transform(records, toEntity);
+        Iterator<E> result = transform(records, toEntity::apply);
         return result;
     }
 
@@ -331,7 +332,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * <ul>
      *     <li>All the parameters from the {@code src} Query;
      *     <li>At least one parameter limiting
-     *         the {@link io.spine.server.storage.LifecycleFlagField Lifecycle Flags Columns}.
+     *         the {@link LifecycleFlagField Lifecycle Flags Columns}.
      * </ul>
      *
      * <p>If the {@code src} instance
@@ -353,7 +354,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * @param src the source {@link EntityQuery} to take the parameters from
      * @return an {@link EntityQuery} which includes
-     *         the {@link io.spine.server.storage.LifecycleFlagField Lifecycle Flags Columns} unless
+     *         the {@link LifecycleFlagField Lifecycle Flags Columns} unless
      *         they are not supported
      */
     private EntityQuery<I> toCompleteQuery(EntityQuery<I> src) {

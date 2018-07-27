@@ -25,7 +25,6 @@ import io.spine.testing.server.entity.given.GivenTestEnv.AProcessManager;
 import io.spine.testing.server.entity.given.GivenTestEnv.AProjection;
 import io.spine.testing.server.entity.given.GivenTestEnv.AnAggregate;
 import io.spine.testing.server.entity.given.GivenTestEnv.AnAggregatePart;
-import io.spine.testing.server.entity.given.GivenTestEnv.AnEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -52,13 +51,6 @@ class GivenTest {
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(Given.class);
-    }
-
-    @Test
-    @DisplayName("create entity builder")
-    void createEntityBuilder() {
-        assertEquals(AnEntity.class, Given.entityOfClass(AnEntity.class)
-                                          .getResultClass());
     }
 
     @Test

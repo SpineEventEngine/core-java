@@ -23,14 +23,14 @@ package io.spine.server.rejection.model;
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.CommandClass;
 import io.spine.core.RejectionClass;
+import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
 import io.spine.server.rejection.RejectionSubscriber;
 
 import java.util.Set;
 
-import static io.spine.server.model.HandlerMethod.domestic;
-import static io.spine.server.model.HandlerMethod.external;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Provides type information on a {@link RejectionSubscriber} class.
@@ -50,16 +50,21 @@ public final class RejectionSubscriberClass<S extends RejectionSubscriber> exten
     private RejectionSubscriberClass(Class<? extends S> cls) {
         super(cls);
         rejectionSubscriptions = new MessageHandlerMap<>(cls, RejectionSubscriberMethod.factory());
-
-        this.domesticSubscriptions = rejectionSubscriptions.getMessageClasses(domestic());
-        this.externalSubscriptions = rejectionSubscriptions.getMessageClasses(external());
+        this.domesticSubscriptions =
+                rejectionSubscriptions.getMessageClasses(HandlerMethod::isDomestic);
+        this.externalSubscriptions =
+                rejectionSubscriptions.getMessageClasses(HandlerMethod::isExternal);
     }
 
     /**
-     * Creates new instance for the passed class value.
+     * Obtains a model class for the passed raw class.
      */
-    public static <S extends RejectionSubscriber> RejectionSubscriberClass<S> of(Class<S> cls) {
-        return new RejectionSubscriberClass<>(cls);
+    public static <S extends RejectionSubscriber>
+    RejectionSubscriberClass<S> asRejectionSubscriber(Class<S> cls) {
+        checkNotNull(cls);
+        RejectionSubscriberClass<S> result = (RejectionSubscriberClass<S>)
+                get(cls, RejectionSubscriberClass.class, () -> new RejectionSubscriberClass<>(cls));
+        return result;
     }
 
     public Set<RejectionClass> getRejectionSubscriptions() {
