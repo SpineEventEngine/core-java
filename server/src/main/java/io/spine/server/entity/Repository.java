@@ -23,15 +23,11 @@ package io.spine.server.entity;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
-import io.spine.client.EntityId;
 import io.spine.core.Command;
-import io.spine.core.CommandId;
 import io.spine.core.Event;
-import io.spine.core.EventId;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption;
@@ -43,26 +39,19 @@ import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.string.Stringifiers;
-import io.spine.system.server.ArchiveEntity;
 import io.spine.system.server.ChangeEntityState;
-import io.spine.system.server.CommandReceiver;
 import io.spine.system.server.CreateEntity;
-import io.spine.system.server.DeleteEntity;
 import io.spine.system.server.DispatchCommandToHandler;
 import io.spine.system.server.DispatchEventToReactor;
 import io.spine.system.server.DispatchEventToSubscriber;
-import io.spine.system.server.DispatchedMessageId;
-import io.spine.system.server.EntityHistoryId;
-import io.spine.system.server.ExtractEntityFromArchive;
 import io.spine.system.server.MarkCommandAsHandled;
-import io.spine.system.server.RestoreEntity;
+import io.spine.system.server.SystemGateway;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
@@ -70,12 +59,9 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.base.Identifier.pack;
 import static io.spine.server.entity.Repository.GenericParameter.ENTITY;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Abstract base class for repositories.
@@ -382,11 +368,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         log().error(errorMessage, exception);
     }
 
-    private void postSystem(Message systemCommand) {
-        getBoundedContext().getSystemGateway()
-                           .postCommand(systemCommand);
-    }
-
     /**
      * Obtains an instance of {@link Lifecycle} for the entity with the given ID.
      *
@@ -396,7 +377,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     @Internal
     protected Lifecycle lifecycleOf(I id) {
         checkNotNull(id);
-        return new Lifecycle(id);
+        SystemGateway gateway = getBoundedContext().getSystemGateway();
+        return new DefaultLifecycle<>(gateway, id, getEntityStateType());
     }
 
     /**
@@ -463,231 +445,39 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * <p>An instance of {@code Lifecycle} posts the system commands related to the entity
      * lifecycle.
-     *
-     * <p>This class contains {@code public} classes, however it's {@code protected} itself.
-     * The methods are required in the {@code Repository} subclasses, which are located in other
-     * packages.
      */
-    @Internal
-    @SuppressWarnings("OverlyCoupledClass") // Posts system events.
-    protected class Lifecycle {
-
-        private final EntityHistoryId id;
-
-        private Lifecycle(I id) {
-            this.id = historyId(id);
-        }
+    public interface Lifecycle {
 
         /**
          * Posts the {@link CreateEntity} system command.
          */
-        public void onEntityCreated(EntityOption.Kind entityKind) {
-            CreateEntity command = CreateEntity
-                    .newBuilder()
-                    .setId(id)
-                    .setKind(entityKind)
-                    .build();
-            postSystem(command);
-        }
+        void onEntityCreated(EntityOption.Kind entityKind);
 
         /**
          * Posts the {@link DispatchCommandToHandler} system command.
          */
-        public void onDispatchCommand(Command command) {
-            DispatchCommandToHandler systemCommand = DispatchCommandToHandler
-                    .newBuilder()
-                    .setReceiver(id)
-                    .setCommandId(command.getId())
-                    .build();
-            postSystem(systemCommand);
-        }
+        void onDispatchCommand(Command command);
 
         /**
          * Posts the {@link MarkCommandAsHandled} system command.
          */
-        public void onCommandHandled(Command command) {
-            CommandReceiver receiver = CommandReceiver
-                    .newBuilder()
-                    .setEntityId(id.getEntityId())
-                    .setTypeUrl(id.getTypeUrl())
-                    .build();
-            MarkCommandAsHandled systemCommand = MarkCommandAsHandled
-                    .newBuilder()
-                    .setId(command.getId())
-                    .setReceiver(receiver)
-                    .build();
-            postSystem(systemCommand);
-        }
+        void onCommandHandled(Command command);
 
         /**
          * Posts the {@link DispatchEventToSubscriber} system command.
          */
-        public void onDispatchEventToSubscriber(Event event) {
-            DispatchEventToSubscriber systemCommand = DispatchEventToSubscriber
-                    .newBuilder()
-                    .setReceiver(id)
-                    .setEventId(event.getId())
-                    .build();
-            postSystem(systemCommand);
-        }
+        void onDispatchEventToSubscriber(Event event);
 
         /**
          * Posts the {@link DispatchEventToReactor} system command.
          */
-        public void onDispatchEventToReactor(Event event) {
-            DispatchEventToReactor systemCommand = DispatchEventToReactor
-                    .newBuilder()
-                    .setReceiver(id)
-                    .setEventId(event.getId())
-                    .build();
-            postSystem(systemCommand);
-        }
+        void onDispatchEventToReactor(Event event);
 
         /**
          * Posts the {@link ChangeEntityState} system command and the commands related to
          * the lifecycle flags.
          */
-        void onStateChanged(EntityRecordChange change,
-                            Set<? extends Message> messageIds) {
-            Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
-
-            postIfChanged(change, dispatchedMessageIds);
-            postIfArchived(change, dispatchedMessageIds);
-            postIfDeleted(change, dispatchedMessageIds);
-            postIfExtracted(change, dispatchedMessageIds);
-            postIfRestored(change, dispatchedMessageIds);
-        }
-
-        private void postIfChanged(EntityRecordChange change,
-                                   Collection<DispatchedMessageId> messageIds) {
-            Any oldState = change.getPreviousValue().getState();
-            Any newState = change.getNewValue().getState();
-
-            if (!oldState.equals(newState)) {
-                ChangeEntityState command = ChangeEntityState
-                        .newBuilder()
-                        .setId(id)
-                        .setNewState(newState)
-                        .addAllMessageId(messageIds)
-                        .build();
-                postSystem(command);
-            }
-        }
-
-        private void postIfArchived(EntityRecordChange change,
-                                    Collection<DispatchedMessageId> messageIds) {
-            boolean oldValue = change.getPreviousValue()
-                                     .getLifecycleFlags()
-                                     .getArchived();
-            boolean newValue = change.getNewValue()
-                                     .getLifecycleFlags()
-                                     .getArchived();
-            if (newValue && !oldValue) {
-                ArchiveEntity command = ArchiveEntity
-                        .newBuilder()
-                        .setId(id)
-                        .addAllMessageId(messageIds)
-                        .build();
-                postSystem(command);
-            }
-        }
-
-        private void postIfDeleted(EntityRecordChange change,
-                                   Collection<DispatchedMessageId> messageIds) {
-            boolean oldValue = change.getPreviousValue()
-                                     .getLifecycleFlags()
-                                     .getDeleted();
-            boolean newValue = change.getNewValue()
-                                     .getLifecycleFlags()
-                                     .getDeleted();
-            if (newValue && !oldValue) {
-                DeleteEntity command = DeleteEntity
-                        .newBuilder()
-                        .setId(id)
-                        .addAllMessageId(messageIds)
-                        .build();
-                postSystem(command);
-            }
-        }
-
-        private void postIfExtracted(EntityRecordChange change,
-                                     Collection<DispatchedMessageId> messageIds) {
-            boolean oldValue = change.getPreviousValue()
-                                     .getLifecycleFlags()
-                                     .getArchived();
-            boolean newValue = change.getNewValue()
-                                     .getLifecycleFlags()
-                                     .getArchived();
-            if (!newValue && oldValue) {
-                ExtractEntityFromArchive command = ExtractEntityFromArchive
-                        .newBuilder()
-                        .setId(id)
-                        .addAllMessageId(messageIds)
-                        .build();
-                postSystem(command);
-            }
-        }
-
-        private void postIfRestored(EntityRecordChange change,
-                                    Collection<DispatchedMessageId> messageIds) {
-            boolean oldValue = change.getPreviousValue()
-                                     .getLifecycleFlags()
-                                     .getDeleted();
-            boolean newValue = change.getNewValue()
-                                     .getLifecycleFlags()
-                                     .getDeleted();
-            if (!newValue && oldValue) {
-                RestoreEntity command = RestoreEntity
-                        .newBuilder()
-                        .setId(id)
-                        .addAllMessageId(messageIds)
-                        .build();
-                postSystem(command);
-            }
-        }
-
-        private Collection<DispatchedMessageId>
-        toDispatched(Collection<? extends Message> messageIds) {
-            Collection<DispatchedMessageId> dispatchedMessageIds =
-                    messageIds.stream()
-                              .map(this::dispatchedMessageId)
-                              .collect(toList());
-            return dispatchedMessageIds;
-        }
-
-        private EntityHistoryId historyId(I id) {
-            EntityId entityId = EntityId
-                    .newBuilder()
-                    .setId(pack(id))
-                    .build();
-            TypeUrl type = getEntityStateType();
-            EntityHistoryId historyId = EntityHistoryId
-                    .newBuilder()
-                    .setEntityId(entityId)
-                    .setTypeUrl(type.value())
-                    .build();
-            return historyId;
-        }
-
-        @SuppressWarnings("ChainOfInstanceofChecks")
-        private DispatchedMessageId dispatchedMessageId(Message messageId) {
-            checkNotNull(messageId);
-            if (messageId instanceof EventId) {
-                EventId eventId = (EventId) messageId;
-                return DispatchedMessageId.newBuilder()
-                                          .setEventId(eventId)
-                                          .build();
-            } else if (messageId instanceof CommandId) {
-                CommandId commandId = (CommandId) messageId;
-                return DispatchedMessageId.newBuilder()
-                                          .setCommandId(commandId)
-                                          .build();
-            } else {
-                throw newIllegalArgumentException(
-                        "Unexpected message ID of type %s. Expected EventId or CommandId.",
-                        messageId.getClass()
-                );
-            }
-        }
+        void onStateChanged(EntityRecordChange change, Set<? extends Message> messageIds);
     }
+
 }

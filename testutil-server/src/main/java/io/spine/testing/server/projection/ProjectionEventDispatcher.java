@@ -20,6 +20,7 @@
 package io.spine.testing.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -28,6 +29,8 @@ import io.spine.core.Events;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionEndpoint;
 import io.spine.server.projection.ProjectionRepository;
+import io.spine.testing.server.NoOpLifecycle;
+import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.Any.pack;
@@ -95,9 +98,8 @@ public class ProjectionEventDispatcher {
     private static <I, P extends Projection<I, S, ?>, S extends Message>
     ProjectionRepository<I, P, S> mockRepository() {
         TestProjectionRepository mockedRepo = mock(TestProjectionRepository.class);
-        TestProjectionRepository.TestLifecycle mockedLifecycle =
-                mock(TestProjectionRepository.TestLifecycle.class);
-        when(mockedRepo.lifecycleOf(any())).thenReturn(mockedLifecycle);
+        when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
+        when(mockedRepo.getEntityStateType()).thenReturn(TypeUrl.of(Any.class));
         return mockedRepo;
     }
 
@@ -111,14 +113,7 @@ public class ProjectionEventDispatcher {
 
         @Override
         protected Lifecycle lifecycleOf(I id) {
-            return super.lifecycleOf(id);
-        }
-
-        private class TestLifecycle extends Lifecycle {
-
-            protected TestLifecycle(I id) {
-                super(id);
-            }
+            return NoOpLifecycle.INSTANCE;
         }
     }
 }
