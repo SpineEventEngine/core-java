@@ -34,7 +34,6 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
@@ -70,7 +69,6 @@ public class CommandBus extends Bus<Command,
 
     private final CommandScheduler scheduler;
     private final RejectionBus rejectionBus;
-    private final Log log;
     private final SystemGateway systemGateway;
     private final TenantIndex tenantIndex;
     private final CommandErrorHandler errorHandler;
@@ -84,14 +82,6 @@ public class CommandBus extends Bus<Command,
      * {@code tenant_id} attribute defined.
      */
     private final boolean multitenant;
-
-    /**
-     * Determines whether the manual thread spawning is allowed within current runtime environment.
-     *
-     * <p>If set to {@code true}, {@code CommandBus} will be running some of internal processing in
-     * parallel to improve performance.
-     */
-    private final boolean isThreadSpawnAllowed;
 
     private final DeadCommandHandler deadCommandHandler;
 
@@ -114,8 +104,6 @@ public class CommandBus extends Bus<Command,
                            ? builder.multitenant
                            : false;
         this.scheduler = builder.commandScheduler;
-        this.log = builder.log;
-        this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
         this.rejectionBus = builder.rejectionBus;
         this.systemGateway = builder.systemGateway;
         this.tenantIndex = builder.tenantIndex;
@@ -125,14 +113,6 @@ public class CommandBus extends Bus<Command,
                                                .setSystemGateway(systemGateway)
                                                .build();
         this.flowWatcher = builder.flowWatcher;
-    }
-
-    /**
-     * Initializes the instance by rescheduling commands.
-     */
-    @VisibleForTesting
-    void rescheduleCommands() {
-        scheduler.rescheduleCommands();
     }
 
     /**
@@ -146,14 +126,6 @@ public class CommandBus extends Bus<Command,
     @VisibleForTesting
     public boolean isMultitenant() {
         return multitenant;
-    }
-
-    boolean isThreadSpawnAllowed() {
-        return isThreadSpawnAllowed;
-    }
-
-    Log problemLog() {
-        return log;
     }
 
     @VisibleForTesting
@@ -335,37 +307,22 @@ public class CommandBus extends Bus<Command,
          */
         private @Nullable Boolean multitenant;
 
-        private Log log;
-
         /**
          * Optional field for the {@code CommandBus}.
          *
          * <p>If unset, the default {@link ExecutorCommandScheduler} implementation is used.
          */
         private CommandScheduler commandScheduler;
-
-        /** @see #setThreadSpawnAllowed(boolean) */
-        private boolean threadSpawnAllowed = detectThreadsAllowed();
-
-        /** @see #setAutoReschedule(boolean) */
-        private boolean autoReschedule;
-
         private RejectionBus rejectionBus;
-
         private SystemGateway systemGateway;
-
         private TenantIndex tenantIndex;
-
         private CommandFlowWatcher flowWatcher;
 
         /**
-         * Checks whether the manual {@link Thread} spawning is allowed within
-         * the current runtime environment.
+         * Prevents direct instantiation.
          */
-        private static boolean detectThreadsAllowed() {
-            boolean appEngine = ServerEnvironment.getInstance()
-                                                 .isAppEngine();
-            return !appEngine;
+        private Builder() {
+            super();
         }
 
         @Internal
@@ -378,10 +335,6 @@ public class CommandBus extends Bus<Command,
         public Builder setMultitenant(@Nullable Boolean multitenant) {
             this.multitenant = multitenant;
             return this;
-        }
-
-        public boolean isThreadSpawnAllowed() {
-            return threadSpawnAllowed;
         }
 
         public Optional<CommandScheduler> getCommandScheduler() {
@@ -403,25 +356,6 @@ public class CommandBus extends Bus<Command,
         public Builder setRejectionBus(RejectionBus rejectionBus) {
             checkNotNull(rejectionBus);
             this.rejectionBus = rejectionBus;
-            return this;
-        }
-
-        /**
-         * Enables or disables creating threads for {@code CommandBus} operations.
-         *
-         * <p>If set to {@code true}, the {@code CommandBus} will be creating instances of
-         * {@link Thread} for potentially time consuming operation.
-         *
-         * <p>However, some runtime environments, such as Google AppEngine Standard,
-         * do not allow manual thread spawning. In this case, this flag should be set
-         * to {@code false}.
-         *
-         * <p>If not set explicitly, the default value of this flag is set upon the best guess,
-         * based on current {@link io.spine.server.ServerEnvironment server environment}.
-         */
-        @CanIgnoreReturnValue
-        public Builder setThreadSpawnAllowed(boolean threadSpawnAllowed) {
-            this.threadSpawnAllowed = threadSpawnAllowed;
             return this;
         }
 
@@ -452,31 +386,6 @@ public class CommandBus extends Bus<Command,
         }
 
         /**
-         * Sets the log for logging errors.
-         */
-        @VisibleForTesting
-        Builder setLog(Log log) {
-            this.log = log;
-            return this;
-        }
-
-        /**
-         * If not set the builder will not call {@link CommandBus#rescheduleCommands()}.
-         *
-         * <p>One of the applications of this flag is to disable rescheduling of commands in tests.
-         */
-        @VisibleForTesting
-        Builder setAutoReschedule(boolean autoReschedule) {
-            this.autoReschedule = autoReschedule;
-            return this;
-        }
-
-        private Builder() {
-            super();
-            // Do not allow creating builder instances directly.
-        }
-
-        /**
          * Builds an instance of {@link CommandBus}.
          *
          * <p>This method is supposed to be called internally when building an enclosing
@@ -492,9 +401,6 @@ public class CommandBus extends Bus<Command,
             if (commandScheduler == null) {
                 commandScheduler = new ExecutorCommandScheduler();
             }
-            if (log == null) {
-                log = new Log();
-            }
             if (rejectionBus == null) {
                 rejectionBus = RejectionBus.newBuilder()
                                            .build();
@@ -504,12 +410,6 @@ public class CommandBus extends Bus<Command,
             CommandBus commandBus = createCommandBus();
 
             commandScheduler.setCommandBus(commandBus);
-            Rescheduler rescheduler = createRescheduler(commandBus);
-            commandScheduler.setRescheduler(rescheduler);
-            commandScheduler.setFlowWatcher(flowWatcher);
-            if (autoReschedule) {
-                commandBus.rescheduleCommands();
-            }
             return commandBus;
         }
 
@@ -533,14 +433,6 @@ public class CommandBus extends Bus<Command,
             CommandBus commandBus = new CommandBus(this);
             commandBus.registry();
             return commandBus;
-        }
-
-        private Rescheduler createRescheduler(CommandBus bus) {
-            return Rescheduler.newBuilder()
-                              .setBus(bus)
-                              .setTenantIndex(tenantIndex)
-                              .setSystemGateway(systemGateway)
-                              .build();
         }
     }
 

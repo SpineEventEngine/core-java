@@ -142,15 +142,6 @@ class CommandBusBuilderTest
         }
 
         @Test
-        @DisplayName("if thread spawn is allowed")
-        void ifThreadSpawnAllowed() {
-            assertTrue(builder().setThreadSpawnAllowed(true)
-                                .isThreadSpawnAllowed());
-            assertFalse(builder().setThreadSpawnAllowed(false)
-                                 .isThreadSpawnAllowed());
-        }
-
-        @Test
         @DisplayName("if CommandBus is multitenant")
         void ifIsMultitenant() {
             assertTrue(builder().setMultitenant(true)

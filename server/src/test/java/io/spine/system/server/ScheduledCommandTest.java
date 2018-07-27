@@ -71,7 +71,6 @@ class ScheduledCommandTest {
     void setUp() {
         scheduler = new TestCommandScheduler();
         CommandBus.Builder commandBus = CommandBus.newBuilder()
-                                                  .setThreadSpawnAllowed(false)
                                                   .setCommandScheduler(scheduler);
         context = BoundedContext.newBuilder()
                                 .setCommandBus(commandBus)

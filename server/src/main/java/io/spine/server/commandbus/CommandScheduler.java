@@ -56,8 +56,6 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
     private @Nullable CommandBus commandBus;
 
-    private @Nullable Rescheduler rescheduler;
-
     private @Nullable CommandFlowWatcher flowWatcher;
 
     protected CommandScheduler() {
@@ -69,14 +67,6 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      */
     void setCommandBus(CommandBus commandBus) {
         this.commandBus = commandBus;
-    }
-
-    /**
-     * Assigns the {@code Recscheduler} to the scheduler during {@code CommandBus}
-     * {@linkplain CommandBus.Builder#build() construction}.
-     */
-    void setRescheduler(Rescheduler rescheduler) {
-        this.rescheduler = rescheduler;
     }
 
     /**
@@ -134,11 +124,6 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         return commandBus;
     }
 
-    private Rescheduler rescheduler() {
-        checkState(rescheduler != null, "Rescheduler is not initialized.");
-        return rescheduler;
-    }
-
     private CommandFlowWatcher flowWatcher() {
         checkState(flowWatcher != null, "CommandFlowWatcher is not initialized.");
         return flowWatcher;
@@ -152,10 +137,6 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      * @see #post(Command)
      */
     protected abstract void doSchedule(Command command);
-
-    void rescheduleCommands() {
-        rescheduler().rescheduleCommands();
-    }
 
     /**
      * Delivers a scheduled command to a target.

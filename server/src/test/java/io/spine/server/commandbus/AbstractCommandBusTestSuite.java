@@ -200,9 +200,6 @@ abstract class AbstractCommandBusTestSuite {
                 .setMultitenant(this.multitenant)
                 .setCommandScheduler(scheduler)
                 .setRejectionBus(rejectionBus)
-                .setThreadSpawnAllowed(false)
-                .setLog(log)
-                .setAutoReschedule(false)
                 .injectSystemGateway(systemGateway)
                 .injectTenantIndex(tenantIndex)
                 .build();
