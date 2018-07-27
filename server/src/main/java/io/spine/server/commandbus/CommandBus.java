@@ -170,6 +170,13 @@ public class CommandBus extends Bus<Command,
         return CommandEnvelope.of(message);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Wraps the {@code source} observer with the {@link CommandAckMonitor}.
+     *
+     * @return new instance of {@link CommandAckMonitor} with the given parameters
+     */
     @Override
     protected StreamObserver<Ack> wrappedObserver(Iterable<Command> commands,
                                                   StreamObserver<Ack> source) {
