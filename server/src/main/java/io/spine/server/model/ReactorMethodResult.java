@@ -18,34 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+package io.spine.server.model;
 
 import com.google.protobuf.Message;
-import io.spine.server.command.Command;
-import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.HandlerMethodPredicate;
-import io.spine.server.model.MethodResult;
-import io.spine.type.MessageClass;
+
+import java.util.List;
 
 /**
- * Base interface for methods that generate one or more command messages in response to
- * an incoming message.
- *
- * @param <M> the type of the message class
- * @param <C> the type of the message context
+ * A reactor method may not return a result in response to an incoming message. When so,
+ * the raw method should return {@link com.google.protobuf.Empty Empty}.
  *
  * @author Alexander Yevsyukov
  */
-public interface CommandingMethod<M extends MessageClass, C extends Message, R extends MethodResult>
-        extends HandlerMethod<Object, M, C, R> {
+public final class ReactorMethodResult extends EventsResult {
 
-    /**
-     * Abstract base for commanding method predicates.
-     */
-    abstract class AbstractPredicate<C extends Message> extends HandlerMethodPredicate<C> {
-
-        AbstractPredicate(Class<C> contextClass) {
-            super(Command.class, contextClass);
-        }
+    public ReactorMethodResult(EventProducer producer, Object rawMethodOutput) {
+        super(producer, rawMethodOutput);
+        List<Message> messages = toMessages(rawMethodOutput);
+        List<Message> filtered = filterEmpty(messages);
+        setMessages(filtered);
     }
 }

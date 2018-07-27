@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -18,16 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.dispatch;
+package io.spine.server.model;
 
-import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.server.event.EventFactory;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 
@@ -35,42 +32,33 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.toList;
 
 /**
- * The events emitted as a result of message dispatch.
+ * Abstract base for method results that generate events.
  *
- * <p>Dispatch result can be treated in different forms.
- * (e.g. {@link #asMessages() as messages} or {@link #asEvents(Any, Version) as events}).
- *
- * @author Mykhailo Drachuk
+ * @author Alexander Yevsyukov
  */
-public final class DispatchResult {
+public abstract class EventsResult extends MethodResult<Message> {
 
-    private final MessageEnvelope origin;
-    private final List<? extends Message> messages;
+    private final EventProducer producer;
 
     /**
-     * @param messages messages which were emitted by the dispatch
-     * @param origin   a message that was dispatched
-     * @param <E>      {@link MessageEnvelope} dispatched message type
+     * Creates a new results object.
+     *
+     * @param producer the object on behalf of which to produce events
+     * @param output   raw method output, cannot be {@code null}
      */
-    <E extends MessageEnvelope> DispatchResult(List<? extends Message> messages, E origin) {
-        checkNotNull(messages);
-        this.messages = ImmutableList.copyOf(messages);
-        this.origin = checkNotNull(origin);
+    protected EventsResult(EventProducer producer, Object output) {
+        super(checkNotNull(output));
+        this.producer = checkNotNull(producer);
     }
 
     /**
-     * @return dispatch result representation as a list of domain event messages
+     * Transforms the messages of the result into a list of events.
      */
-    public List<? extends Message> asMessages() {
-        return ImmutableList.copyOf(this.messages);
-    }
-
-    /**
-     * @return dispatch result representation as a list of events
-     */
-    public List<Event> asEvents(Any producerId, @Nullable Version version) {
-        checkNotNull(producerId);
-        EventFactory eventFactory = EventFactory.on(origin, producerId);
+    public
+    List<Event> produceEvents(MessageEnvelope origin) {
+        EventFactory eventFactory = EventFactory.on(origin, producer.getProducerId());
+        List<? extends Message> messages = asMessages();
+        Version version = producer.getVersion();
         List<Event> result =
                 messages.stream()
                         .map(eventMessage -> eventFactory.createEvent(eventMessage, version))
