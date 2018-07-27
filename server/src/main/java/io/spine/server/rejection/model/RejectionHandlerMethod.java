@@ -19,6 +19,7 @@
  */
 package io.spine.server.rejection.model;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
@@ -28,7 +29,9 @@ import io.spine.core.RejectionClass;
 import io.spine.core.RejectionContext;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
+import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
+import io.spine.server.model.MethodResult;
 import io.spine.server.rejection.RejectionSubscriber;
 
 import java.lang.annotation.Annotation;
@@ -47,7 +50,8 @@ import static io.spine.util.Exceptions.unsupported;
  * @author Dmytro Dashenkov
  * @author Alexander Yevsyukov
  */
-abstract class RejectionHandlerMethod extends AbstractHandlerMethod<RejectionClass, RejectionContext> {
+abstract class RejectionHandlerMethod<T, R extends MethodResult>
+        extends AbstractHandlerMethod<T, RejectionClass, RejectionContext, R> {
 
     /** Determines the number of parameters and their types. */
     private final Kind kind;
@@ -106,8 +110,8 @@ abstract class RejectionHandlerMethod extends AbstractHandlerMethod<RejectionCla
      * Invokes the wrapped handler method to handle {@code rejectionMessage},
      * {@code commandMessage} with the passed {@code context} of the {@code Command}.
      *
-     * <p>Unlike the {@linkplain #invoke(Object, Message, Message) overloaded alternative method},
-     * this one may return some value.
+     * <p>Unlike the {@linkplain HandlerMethod#invoke(Object, Message, Message) overloaded
+     * alternative method}, this one may return some value.
      *
      * @param  target       the target object on which call the method
      * @param  rejectionMsg the rejection message to handle
@@ -115,6 +119,7 @@ abstract class RejectionHandlerMethod extends AbstractHandlerMethod<RejectionCla
      * @return the result of the invocation
      */
     @SuppressWarnings("OverlyLongMethod")
+    @CanIgnoreReturnValue
     Object doInvoke(Object target, Message rejectionMsg, RejectionContext context) {
         checkNotNull(target);
         checkNotNull(rejectionMsg);

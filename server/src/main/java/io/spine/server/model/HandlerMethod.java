@@ -25,25 +25,25 @@ import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
 import java.util.Set;
-import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Describes a method that accepts a message and optionally its context.
  *
- * <p>Two message handlers are equivalent when they refer to the same method on the
- * same object (not class).
- *
- * @param <M> the type of the message class
+ * @param <T> the type of the target object
+ * @param <M> the type of the incoming message class
  * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
  *            a context parameter is never used
+ * @param <R> the type of the method result object
  *            
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-public interface HandlerMethod<M extends MessageClass, C extends Message> {
+public interface HandlerMethod<T,
+                               M extends MessageClass,
+                               C extends Message,
+                               R extends MethodResult> {
 
     M getMessageClass();
 
@@ -61,60 +61,38 @@ public interface HandlerMethod<M extends MessageClass, C extends Message> {
      * @param context the context of the message
      * @return the result of message handling
      */
-    Object invoke(Object target, Message message, C context);
+    R invoke(T target, Message message, C context);
 
     /**
-     * Creates a predicate to remove the {@linkplain HandlerMethod handler methods}
-     * that are not marked {@linkplain ExternalAttribute#EXTERNAL external}.
-     *
-     * @param <M> the type of the {@code HandlerMethod} to apply this predicate to
-     * @return the predicate
+     * Verifies if the passed method is {@linkplain ExternalAttribute#EXTERNAL external}.
      */
-    static <M extends HandlerMethod<?, ?>> Predicate<M> external() {
-        return input -> {
-            M method = checkNotNull(input);
-            boolean result = isExternal(method);
-            return result;
-        };
+    default boolean isExternal() {
+        return getAttributes().contains(ExternalAttribute.EXTERNAL);
     }
 
     /**
-     * Creates a predicate to remove the {@linkplain HandlerMethod handler methods}
-     * that are marked {@linkplain ExternalAttribute#EXTERNAL external}.
-     *
-     * @param <M> the type of the {@code HandlerMethod} to apply this predicate to
-     * @return the predicate
+     * Verifies if the passed method is domestic, that is not marked as
+     * {@linkplain ExternalAttribute#EXTERNAL external}).
      */
-    static <M extends HandlerMethod<?, ?>> Predicate<M> domestic() {
-        return input -> {
-            M method = checkNotNull(input);
-            boolean result = !isExternal(method);
-            return result;
-        };
-    }
-
-    /**
-     * Verifies if the passed method is external.
-     */
-    static <M extends HandlerMethod<?, ?>> boolean isExternal(M method) {
-        return method.getAttributes()
-                     .contains(ExternalAttribute.EXTERNAL);
+    default boolean isDomestic() {
+        return !isExternal();
     }
 
     /**
      * Ensures that the {@code external} attribute of the {@linkplain HandlerMethod method} is
      * the one expected.
      *
-     * <p>{@link IllegalArgumentException} is thrown if the value does not meet the expectations.
+     * <p>This method is for checking that an {@code external} attribute of a message context
+     * matches the one set for the handler method.
      *
-     * @param method           the method to check
-     * @param shouldBeExternal an expected value of {@code external} attribute.
+     * @param expectedValue an expected value of the {@code external} attribute
      * @see ExternalAttribute
+     * @throws IllegalArgumentException is thrown if the value does not meet the expectation.
      */
-    static void ensureExternalMatch(HandlerMethod<?, ?> method, boolean shouldBeExternal) {
-        checkArgument(isExternal(method) == shouldBeExternal,
+    default void ensureExternalMatch(boolean expectedValue) {
+        checkArgument(isExternal() == expectedValue,
                       "Mismatch of `external` value for the handler method %s. " +
-                              "Expected `external` = %s, but got the other way around.", method,
-                      shouldBeExternal);
+                              "Expected `external` = %s, but got the other way around.", this,
+                      expectedValue);
     }
 }
