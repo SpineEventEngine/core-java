@@ -21,17 +21,18 @@ package io.spine.server.rejection.model;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.RejectionContext;
 import io.spine.core.Subscribe;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
+import io.spine.server.model.MethodResult;
 
 import java.lang.reflect.Method;
 import java.util.function.Predicate;
 
-import static io.spine.server.model.HandlerMethod.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
@@ -41,7 +42,8 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  * @author Dmytro Dashenkov
  * @author Alexander Yevsyukov
  */
-public class RejectionSubscriberMethod extends RejectionHandlerMethod {
+public final class RejectionSubscriberMethod
+        extends RejectionHandlerMethod<Object, MethodResult<Empty>> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -57,20 +59,29 @@ public class RejectionSubscriberMethod extends RejectionHandlerMethod {
      * Invokes the wrapped handler method to handle {@code rejectionMessage},
      * {@code commandMessage} with the passed {@code context} of the {@code Command}.
      *
-     * @param target
-     *        the target object on which call the method
-     * @param rejectionMessage
-     *        the rejection message to handle
-     * @param context
-     *        the context of the rejection
+     * @param target           the target object on which call the method
+     * @param rejectionMessage the rejection message to handle
+     * @param context          the context of the rejection
      */
     @CanIgnoreReturnValue
     @Override
-    public Object invoke(Object target, Message rejectionMessage, RejectionContext context) {
-        ensureExternalMatch(this, context.getExternal());
+    public
+    MethodResult<Empty> invoke(Object target, Message rejectionMessage, RejectionContext context) {
+        ensureExternalMatch(context.getExternal());
+        doInvoke(target, rejectionMessage, context);
+        return MethodResult.empty();
+    }
 
-        Object result = doInvoke(target, rejectionMessage, context);
-        return result;
+    /**
+     * @implNote This method is never called because
+     * {@link #invoke(Object, Message, RejectionContext) invoke()} overridden in this class
+     * does not call
+     * {@linkplain io.spine.server.model.HandlerMethod#invoke(Object, Message, Message)
+     * the parent method} (which invokes {@code toResult()}).
+     */
+    @Override
+    protected MethodResult<Empty> toResult(Object target, Object rawMethodOutput) {
+        return MethodResult.empty();
     }
 
     /** Returns the factory for filtering and creating rejection subscriber methods. */
