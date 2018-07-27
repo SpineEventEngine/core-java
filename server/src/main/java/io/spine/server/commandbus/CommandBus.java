@@ -158,7 +158,7 @@ public class CommandBus extends Bus<Command,
     }
 
     @Override
-    protected Deque<BusFilter<CommandEnvelope>> filterChainHead() {
+    protected Collection<BusFilter<CommandEnvelope>> filterChainHead() {
         BusFilter<CommandEnvelope> tap = new CommandReceivedTap(systemGateway);
         Deque<BusFilter<CommandEnvelope>> result = newLinkedList();
         result.push(tap);
