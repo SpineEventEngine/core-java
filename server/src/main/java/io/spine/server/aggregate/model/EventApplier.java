@@ -159,5 +159,4 @@ public final class EventApplier
             return isVoid;
         }
     }
-
 }
