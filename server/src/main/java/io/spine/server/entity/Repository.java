@@ -354,15 +354,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * Ensures that the repository {@linkplain #isOpen() is open}.
-     *
-     * <p>If not throws {@code IllegalStateException}
-     */
-    protected void checkNotClosed() {
-        checkState(isOpen(), "The repository (%s) is closed.", getClass().getName());
-    }
-
-    /**
      * Obtains the instance of logger associated with the class of the repository.
      */
     protected Logger log() {
