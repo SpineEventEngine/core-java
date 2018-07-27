@@ -50,6 +50,9 @@ import static java.util.Optional.empty;
  */
 public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
+    // TODO:2018-07-27:dmytro.dashenkov: Refactor command scheduling - move to System BC.
+    // todo https://github.com/SpineEventEngine/core-java/issues/799
+
     private static final Set<CommandId> scheduledCommandIds = newHashSet();
 
     private boolean isActive = true;
