@@ -22,16 +22,16 @@ package io.spine.server.entity.storage;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter.CompositeOperator;
 
 import java.io.Serializable;
+import java.util.function.Predicate;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -92,7 +92,8 @@ public final class CompositeQueryParameter implements Serializable {
     }
 
     private static boolean containsLifecycle(Iterable<EntityColumn> columns) {
-        boolean result = Iterables.any(columns, isLifecycleColumn);
+        boolean result = StreamSupport.stream(columns.spliterator(), false)
+                                      .anyMatch(isLifecycleColumn);
         return result;
     }
 

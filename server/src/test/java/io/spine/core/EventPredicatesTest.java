@@ -20,13 +20,14 @@
 
 package io.spine.core;
 
-import com.google.common.base.Predicate;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import io.spine.core.given.GivenEvent;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
+import java.util.function.Predicate;
 
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
@@ -91,16 +92,16 @@ class EventPredicatesTest {
         @DisplayName("`IsAfter` predicate")
         void isAfter() {
             Predicate<Event> predicate = EventPredicates.isAfter(minutesAgo(100));
-            assertTrue(predicate.apply(GivenEvent.occurredMinutesAgo(20)));
-            assertFalse(predicate.apply(GivenEvent.occurredMinutesAgo(360)));
+            assertTrue(predicate.test(GivenEvent.occurredMinutesAgo(20)));
+            assertFalse(predicate.test(GivenEvent.occurredMinutesAgo(360)));
         }
 
         @Test
         @DisplayName("`isBefore` predicate")
         void isBefore() {
             Predicate<Event> predicate = EventPredicates.isBefore(minutesAgo(100));
-            assertFalse(predicate.apply(GivenEvent.occurredMinutesAgo(20)));
-            assertTrue(predicate.apply(GivenEvent.occurredMinutesAgo(360)));
+            assertFalse(predicate.test(GivenEvent.occurredMinutesAgo(20)));
+            assertTrue(predicate.test(GivenEvent.occurredMinutesAgo(360)));
         }
 
         @Test
