@@ -21,7 +21,6 @@
 package io.spine.system.server.given;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
@@ -40,9 +39,11 @@ import io.spine.system.server.CommandRejected;
 import io.spine.system.server.Company;
 import io.spine.system.server.CompanyEstablished;
 import io.spine.system.server.CompanyEstablishing;
+import io.spine.system.server.CompanyEstablishingStarted;
 import io.spine.system.server.CompanyEstablishingVBuilder;
 import io.spine.system.server.CompanyId;
 import io.spine.system.server.CompanyNameAlreadyTaken;
+import io.spine.system.server.CompanyNameRethought;
 import io.spine.system.server.CompanyVBuilder;
 import io.spine.system.server.EstablishCompany;
 import io.spine.system.server.ProposeCompanyName;
@@ -50,7 +51,6 @@ import io.spine.system.server.SelectCompanyName;
 import io.spine.system.server.StartCompanyEstablishing;
 
 import java.util.Collection;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -118,31 +118,33 @@ public final class CommandLifecycleTestEnv {
         public static final String FAULTY_NAME = "This name is exceptionally faulty";
 
         @Assign
-        Empty handle(StartCompanyEstablishing command) {
+        CompanyEstablishingStarted handle(StartCompanyEstablishing command) {
             getBuilder().setId(command.getId());
 
-            return Empty.getDefaultInstance();
+            return CompanyEstablishingStarted.newBuilder()
+                                             .setId(command.getId())
+                                             .build();
         }
 
         @Assign
-        Empty handle(ProposeCompanyName command) {
+        CompanyNameRethought handle(ProposeCompanyName command) {
             String name = command.getName();
             checkArgument(!name.equals(FAULTY_NAME));
-            getBuilder().addProposedName(name);
+            getBuilder().setProposedName(name);
 
-            return Empty.getDefaultInstance();
+            return CompanyNameRethought.newBuilder()
+                                       .setId(command.getId())
+                                       .setName(command.getName())
+                                       .build();
         }
 
         @Assign
         CommandTransformed handle(SelectCompanyName command, CommandContext context) {
-            List<String> proposedNames = getBuilder().getProposedName();
-            String finalName = proposedNames.stream()
-                                            .findAny()
-                                            .orElse("");
+            String name = getBuilder().getProposedName();
             EstablishCompany establishCommand = EstablishCompany
                     .newBuilder()
                     .setId(getBuilder().getId())
-                    .setFinalName(finalName)
+                    .setFinalName(name)
                     .build();
             return transform(command, context)
                     .to(establishCommand)
