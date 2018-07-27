@@ -20,7 +20,6 @@
 
 package io.spine.server;
 
-import com.google.common.base.Supplier;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.core.BoundedContextName;
@@ -43,9 +42,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -67,8 +65,8 @@ public final class BoundedContextBuilder {
     private BoundedContextName name = BoundedContextNames.defaultName();
     private boolean multitenant;
     private TenantIndex tenantIndex;
-    private Supplier<StorageFactory> storageFactorySupplier;
     private TransportFactory transportFactory;
+    private @Nullable Supplier<StorageFactory> storageFactorySupplier;
 
     private CommandBus.Builder commandBus;
     private EventBus.Builder eventBus;
@@ -300,10 +298,8 @@ public final class BoundedContextBuilder {
 
     private StorageFactory getStorageFactory() {
         if (storageFactorySupplier == null) {
-            storageFactorySupplier =
-                    StorageFactorySwitch.newInstance(name, multitenant);
+            storageFactorySupplier = StorageFactorySwitch.newInstance(name, multitenant);
         }
-
         StorageFactory storageFactory = storageFactorySupplier.get();
 
         if (storageFactory == null) {

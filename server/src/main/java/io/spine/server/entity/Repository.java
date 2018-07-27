@@ -20,8 +20,6 @@
 
 package io.spine.server.entity;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
@@ -62,7 +60,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.entity.Repository.GenericParameter.ENTITY;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
