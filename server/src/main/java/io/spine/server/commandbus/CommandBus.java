@@ -406,10 +406,11 @@ public class CommandBus extends Bus<Command,
                                            .build();
             }
             flowWatcher = new CommandFlowWatcher(systemGateway);
+            commandScheduler.setFlowWatcher(flowWatcher);
 
             CommandBus commandBus = createCommandBus();
-
             commandScheduler.setCommandBus(commandBus);
+
             return commandBus;
         }
 
