@@ -49,7 +49,18 @@ public abstract class MethodResult<V extends Message> {
         rawMethodOutput = output;
     }
 
+    /**
+     * Assigns messages to a method result object.
+     *
+     * <p>This method is meant to be called from withing a constructor of derived classes, and
+     * called only once.
+     *
+     * @throws IllegalStateException if messages are already assigned
+     */
     protected final void setMessages(List<V> messages) {
+        if (this.messages != null) {
+            throw new IllegalStateException("Method result messages are already assigned");
+        }
         checkNotNull(messages);
         this.messages = ImmutableList.copyOf(messages);
     }
