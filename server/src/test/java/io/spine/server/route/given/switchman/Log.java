@@ -21,24 +21,19 @@
 package io.spine.server.route.given.switchman;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
 import io.spine.base.Time;
-import io.spine.core.EventContext;
 import io.spine.core.React;
-import io.spine.core.RejectionContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.rout.given.switchman.LogState;
 import io.spine.server.rout.given.switchman.LogStateVBuilder;
-import io.spine.server.route.EventRoute;
-import io.spine.server.route.RejectionRoute;
 import io.spine.server.route.given.switchman.event.SwitchPositionConfirmed;
 import io.spine.server.route.given.switchman.event.SwitchWorkRecorded;
 import io.spine.server.route.given.switchman.event.SwitchmanAbsenceRecorded;
 import io.spine.server.route.given.switchman.rejection.Rejections;
 
-import java.util.Set;
+import static com.google.common.collect.ImmutableSet.of;
 
 /**
  * The aggregate that accumulates information about switchman work and absence.
@@ -95,26 +90,16 @@ public final class Log extends Aggregate<Long, LogState, LogStateVBuilder> {
     })
     public static final class Repository extends AggregateRepository<Long, Log> {
 
-        private static final ImmutableSet<Long> SINGLETON_ID_SET = ImmutableSet.of(ID);
+        private static final ImmutableSet<Long> SINGLETON_ID_SET = of(ID);
 
         public Repository() {
             super();
-            getEventRouting().replaceDefault(new EventRoute<Long, Message>() {
-                private static final long serialVersionUID = 0L;
+        }
 
-                @Override
-                public Set<Long> apply(Message message, EventContext context) {
-                    return SINGLETON_ID_SET;
-                }
-            });
-            getRejectionRouting().replaceDefault(new RejectionRoute<Long, Message>() {
-                private static final long serialVersionUID = 0L;
-
-                @Override
-                public Set<Long> apply(Message message, RejectionContext context) {
-                    return SINGLETON_ID_SET;
-                }
-            });
+        @Override
+        public void onRegistered() {
+            super.onRegistered();
+            getEventRouting().replaceDefault((message, context) -> SINGLETON_ID_SET);
         }
     }
 }

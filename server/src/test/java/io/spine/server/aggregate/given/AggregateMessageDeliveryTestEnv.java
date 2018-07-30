@@ -26,9 +26,9 @@ import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.core.React;
 import io.spine.core.Rejection;
-import io.spine.core.RejectionContext;
 import io.spine.core.Rejections;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
@@ -37,7 +37,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.delivery.given.ThreadStats;
-import io.spine.server.route.RejectionRoute;
+import io.spine.server.route.EventRoute;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectCancelled;
@@ -129,13 +129,13 @@ public class AggregateMessageDeliveryTestEnv {
         return result;
     }
 
-    public static RejectionRoute<ProjectId, Message> routeByProjectId() {
-        return new RejectionRoute<ProjectId, Message>() {
+    public static EventRoute<ProjectId, Message> routeByProjectId() {
+        return new EventRoute<ProjectId, Message>() {
 
             private static final long serialVersionUID = 1L;
 
             @Override
-            public Set<ProjectId> apply(Message raw, RejectionContext context) {
+            public Set<ProjectId> apply(Message raw, EventContext context) {
                 AggCannotStartArchivedProject msg = (AggCannotStartArchivedProject) raw;
                 return ImmutableSet.of(msg.getProjectId());
             }
@@ -196,7 +196,7 @@ public class AggregateMessageDeliveryTestEnv {
             extends AggregateRepository<ProjectId, DeliveryProject> {
         public SingleShardProjectRepository() {
             super();
-            getRejectionRouting().replaceDefault(routeByProjectId());
+            getEventRouting().replaceDefault(routeByProjectId());
         }
 
     }
@@ -206,7 +206,7 @@ public class AggregateMessageDeliveryTestEnv {
 
         public TripleShardProjectRepository() {
             super();
-            getRejectionRouting().replaceDefault(routeByProjectId());
+            getEventRouting().replaceDefault(routeByProjectId());
         }
 
         @Override
