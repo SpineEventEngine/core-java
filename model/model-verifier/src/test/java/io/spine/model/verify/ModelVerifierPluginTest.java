@@ -31,6 +31,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junitpioneer.jupiter.TempDirectory;
+import org.junitpioneer.jupiter.TempDirectory.TempDir;
 
 import java.nio.file.Path;
 
@@ -53,7 +54,7 @@ class ModelVerifierPluginTest {
     private Path tempDir;
 
     @BeforeEach
-    void setUp(@TempDirectory.TempDir Path junitCreatedDir) {
+    void setUp(@TempDir Path junitCreatedDir) {
         tempDir = junitCreatedDir;
     }
 
