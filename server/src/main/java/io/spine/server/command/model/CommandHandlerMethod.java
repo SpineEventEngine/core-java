@@ -20,11 +20,13 @@
 
 package io.spine.server.command.model;
 
+import com.google.common.base.Throwables;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.Rejection;
+import io.spine.core.RejectionEventContext;
 import io.spine.server.command.Assign;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.EventProducer;
@@ -39,6 +41,9 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Throwables.getRootCause;
+import static io.spine.core.Rejections.causedByRejection;
+import static io.spine.protobuf.AnyPacker.pack;
 
 /**
  * The wrapper for a command handler method.
@@ -70,7 +75,41 @@ public final class CommandHandlerMethod
      */
     @Override
     protected Result toResult(EventProducer target, Object rawMethodOutput) {
-        Result result = new Result(target, rawMethodOutput);
+        Result result = NormalCommandHandlerResult.of(rawMethodOutput, target);
+        return result;
+    }
+
+    @Override
+    public Result invoke(EventProducer target, Message message, CommandContext context) {
+        try {
+            return super.invoke(target, message, context);
+        } catch (RuntimeException e) {
+            return err(e, message, target);
+        }
+    }
+
+    // TODO:2018-07-30:dmytro.dashenkov: Naming.
+    private static Result err(RuntimeException exception,
+                              Message commandMessage,
+                              EventProducer target) {
+        boolean rejection = causedByRejection(exception);
+        if (rejection) {
+            ThrowableMessage throwableMessage = (ThrowableMessage) getRootCause(exception);
+            RejectionEventContext context = rejectionContext(commandMessage, throwableMessage);
+            return RejectionCommandHandlerResult.of(throwableMessage, context, target);
+        } else {
+            throw exception;
+        }
+    }
+
+    private static RejectionEventContext rejectionContext(Message commandMessage,
+                                                          ThrowableMessage throwableMessage) {
+        String stacktrace = Throwables.getStackTraceAsString(throwableMessage);
+        RejectionEventContext result = RejectionEventContext
+                .newBuilder()
+                .setCommandMessage(pack(commandMessage))
+                .setStacktrace(stacktrace)
+                .build();
         return result;
     }
 
@@ -139,9 +178,9 @@ public final class CommandHandlerMethod
     /**
      * The result of a command handler method execution.
      */
-    public static final class Result extends EventsResult {
+    public abstract static class Result extends EventsResult {
 
-        private Result(EventProducer producer, Object rawMethodResult) {
+        Result(EventProducer producer, Object rawMethodResult) {
             super(producer, rawMethodResult);
             List<Message> eventMessages = toMessages(rawMethodResult);
             List<Message> filtered = filterEmpty(eventMessages);

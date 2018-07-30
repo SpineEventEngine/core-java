@@ -33,6 +33,7 @@ import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.model.MethodExceptionChecker.forMethod;
+import static java.lang.String.format;
 
 /**
  * An abstract base for wrappers over methods handling messages.
@@ -77,17 +78,6 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
 
     protected final Class<? extends Message> rawMessageClass() {
         return messageClass;
-    }
-
-    /**
-     * Returns a full method name without parameters.
-     *
-     * @param method a method to get name for
-     * @return full method name
-     */
-    private static String getFullMethodName(Method method) {
-        return method.getDeclaringClass()
-                     .getName() + '.' + method.getName() + "()";
     }
 
     /**
@@ -193,7 +183,12 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
      * @return full name of the subscriber
      */
     public String getFullName() {
-        return getFullMethodName(method);
+        String template = "%s.%s()";
+        String className = method.getDeclaringClass()
+                                 .getName();
+        String methodName = method.getName();
+        String result = format(template, className, methodName);
+        return result;
     }
 
     @Override

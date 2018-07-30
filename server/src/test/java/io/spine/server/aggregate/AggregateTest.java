@@ -22,7 +22,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Time;
@@ -86,7 +85,6 @@ import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
 import static io.spine.server.aggregate.given.Given.EventMessage.taskAdded;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.assignTask;
-import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.cannotModifyDeletedEntity;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.command;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.createTask;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.env;
@@ -100,7 +98,6 @@ import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.server.Assertions.assertCommandClasses;
 import static io.spine.testing.server.Assertions.assertEventClasses;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
-import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchRejection;
 import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -332,27 +329,6 @@ public class AggregateTest {
         dispatchCommand(aggregate, env(startProject));
         assertTrue(aggregate.isStartProjectCommandHandled);
         assertTrue(aggregate.isProjectStartedEventApplied);
-    }
-
-    @Nested
-    @DisplayName("react on rejection")
-    class ReactOnRejection {
-
-        @Test
-        @DisplayName("by rejection message")
-        void byRejectionMessage() {
-            dispatchRejection(aggregate, cannotModifyDeletedEntity(StringValue.class));
-            assertTrue(aggregate.isRejectionHandled);
-            assertFalse(aggregate.isRejectionWithCmdHandled);
-        }
-
-        @Test
-        @DisplayName("by rejection and command message")
-        void byRejectionAndCommandMessage() {
-            dispatchRejection(aggregate, cannotModifyDeletedEntity(AggAddTask.class));
-            assertTrue(aggregate.isRejectionWithCmdHandled);
-            assertFalse(aggregate.isRejectionHandled);
-        }
     }
 
     @Nested

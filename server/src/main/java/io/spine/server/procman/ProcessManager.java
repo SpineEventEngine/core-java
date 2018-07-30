@@ -23,7 +23,6 @@ package io.spine.server.procman;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -37,7 +36,6 @@ import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.rejection.RejectionReactor;
-import io.spine.server.rejection.model.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
@@ -160,23 +158,6 @@ public abstract class ProcessManager<I,
         ReactorMethodResult methodResult =
                 method.invoke(this, event.getMessage(), event.getEventContext());
         List<Event> result = methodResult.produceEvents(event);
-        return result;
-    }
-
-    /**
-     * Dispatches a rejection to the reacting method of the process manager.
-     *
-     * @param  rejection the envelope with the rejection
-     * @return a list of produced events or an empty list if the process manager does not
-     *         produce new events because of the passed event
-     */
-    List<Event> dispatchRejection(RejectionEnvelope rejection) {
-        CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
-        RejectionReactorMethod method =
-                thisClass().getReactor(rejection.getMessageClass(), commandClass);
-        ReactorMethodResult methodResult =
-                method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
-        List<Event> result = methodResult.produceEvents(rejection);
         return result;
     }
 

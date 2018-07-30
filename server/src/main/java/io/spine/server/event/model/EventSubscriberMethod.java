@@ -35,8 +35,6 @@ import io.spine.server.model.MethodResult;
 import java.lang.reflect.Method;
 import java.util.function.Predicate;
 
-import static io.spine.core.Rejections.isRejection;
-import static io.spine.server.model.HandlerMethod.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**

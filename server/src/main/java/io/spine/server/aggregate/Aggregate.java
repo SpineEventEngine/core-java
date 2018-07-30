@@ -26,7 +26,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.core.CommandClass;
+import io.spine.annotation.Internal;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -35,8 +35,6 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
 import io.spine.core.MessageEnvelope;
-import io.spine.core.RejectionEnvelope;
-import io.spine.core.RejectionEventContext;
 import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.AnyPacker;
@@ -46,13 +44,11 @@ import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.EventPlayers;
-import io.spine.server.event.EventFactory;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
+import io.spine.server.model.EventsResult;
 import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.rejection.RejectionReactor;
-import io.spine.server.rejection.model.RejectionReactorMethod;
-import io.spine.server.model.Model;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.Collection;
@@ -64,9 +60,8 @@ import java.util.stream.Stream;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
-import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.validate.Validate.isDefault;
+import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.validate.Validate.isNotDefault;
 import static java.util.stream.Collectors.toList;
 
@@ -219,9 +214,9 @@ public abstract class Aggregate<I,
     protected List<Event> dispatchCommand(CommandEnvelope command) {
         idempotencyGuard.check(command);
         CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
-        CommandHandlerMethod.Result result =
-                method.invoke(this, command.getMessage(), command.getCommandContext());
-        return result.asMessages();
+        EventsResult result = method.invoke(this, command.getMessage(),
+                                            command.getCommandContext());
+        return result.produceEvents(command);
     }
 
     /**
@@ -234,31 +229,11 @@ public abstract class Aggregate<I,
      * @return a list of event messages that the aggregate produces in reaction to the event or
      *         an empty list if the aggregate state does not change in reaction to the event
      */
-    List<? extends Message> reactOn(EventEnvelope event) {
+    List<Event> reactOn(EventEnvelope event) {
         EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
         ReactorMethodResult result =
                 method.invoke(this, event.getMessage(), event.getEventContext());
-        return result.asMessages();
-    }
-
-    /**
-     * Dispatches the rejection to which the aggregate reacts.
-     *
-     * <p>Reacting on a rejection may result in emitting event messages. All the
-     * {@linkplain Empty empty} messages are filtered out from the result.
-     *
-     * @param  rejection the envelope with the rejection
-     * @return a list of event messages that the aggregate produces in reaction to
-     *         the rejection, or an empty list if the aggregate state does not change in
-     *         response to this rejection
-     */
-    List<? extends Message> reactOn(RejectionEnvelope rejection) {
-        CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
-        RejectionReactorMethod method =
-                thisClass().getReactor(rejection.getMessageClass(), commandClass);
-        ReactorMethodResult result =
-                method.invoke(this, rejection.getMessage(), rejection.getMessageContext());
-        return result.asMessages();
+        return result.produceEvents(event);
     }
 
     /**

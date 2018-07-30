@@ -29,6 +29,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.ImmutableList.copyOf;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -58,11 +60,9 @@ public abstract class MethodResult<V extends Message> {
      * @throws IllegalStateException if messages are already assigned
      */
     protected final void setMessages(List<V> messages) {
-        if (this.messages != null) {
-            throw new IllegalStateException("Method result messages are already assigned");
-        }
+        checkState(this.messages == null, "Method result messages are already assigned");
         checkNotNull(messages);
-        this.messages = ImmutableList.copyOf(messages);
+        this.messages = copyOf(messages);
     }
 
     protected @Nullable Object getRawMethodOutput() {
@@ -73,10 +73,10 @@ public abstract class MethodResult<V extends Message> {
      * Filters the list removing instances of {@link Empty}.
      */
     protected static <M extends Message> List<M> filterEmpty(List<M> messages) {
+        Message empty = Empty.getDefaultInstance();
         List<M> result =
                 messages.stream()
-                        .filter((m) -> !Empty.getDefaultInstance()
-                                             .equals(m))
+                        .filter(message -> !empty.equals(message))
                         .collect(toList());
         return result;
     }
@@ -84,7 +84,7 @@ public abstract class MethodResult<V extends Message> {
     /**
      * Obtains messages returned by the method call.
      */
-    public List<? extends Message> asMessages() {
+    public List<V> asMessages() {
         checkNotNull(messages, "Messages are not set");
         return messages;
     }
@@ -129,7 +129,7 @@ public abstract class MethodResult<V extends Message> {
 
         // If it's not a list it could be another `Iterable`.
         if (output instanceof Iterable) {
-            return ImmutableList.copyOf((Iterable<? extends Message>) output);
+            return copyOf((Iterable<? extends Message>) output);
         }
 
         // Another type of result is single event message (as Message).

@@ -22,7 +22,6 @@ package io.spine.server.command;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.change.MessageMismatch;
@@ -32,7 +31,6 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.Rejections;
-import io.spine.server.command.dispatch.DispatchResult;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.model.EventProducer;
 import io.spine.validate.ValidatingBuilder;
@@ -78,15 +76,9 @@ class CommandHandlingEntity<I,
         this.idAsAny = Identifier.pack(id);
     }
 
-    /**
-     * Transforms the provided {@link DispatchResult dispatch result} into a list of events.
-     *
-     * @param  dispatchResult a result of handling a message by the process manager
-     * @return list of events
-     */
-    @Internal
-    protected final List<Event> toEvents(DispatchResult dispatchResult) {
-        return dispatchResult.asEvents(idAsAny, getVersion());
+    @Override
+    public Any getProducerId() {
+        return idAsAny;
     }
 
     /**

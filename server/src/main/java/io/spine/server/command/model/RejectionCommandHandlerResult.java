@@ -18,79 +18,68 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.command.model;
 
 import com.google.protobuf.Message;
+import io.spine.base.ThrowableMessage;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
+import io.spine.core.RejectionEventContext;
 import io.spine.core.Version;
 import io.spine.server.event.EventFactory;
+import io.spine.server.model.EventProducer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.List;
 import java.util.function.Function;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.stream.Collectors.toList;
-
 /**
- * Abstract base for method results that generate events.
- *
- * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
-public abstract class EventsResult extends MethodResult<Message> {
+final class RejectionCommandHandlerResult extends CommandHandlerMethod.Result {
 
-    private final EventProducer producer;
+    private final RejectionEventContext context;
 
-    /**
-     * Creates a new results object.
-     *
-     * @param producer  the object on behalf of which to produce events
-     * @param output    raw method output, cannot be {@code null}
-     */
-    protected EventsResult(EventProducer producer, Object output) {
-        super(checkNotNull(output));
-        this.producer = checkNotNull(producer);
+    private RejectionCommandHandlerResult(EventProducer producer,
+                                          Object rawMethodResult,
+                                          RejectionEventContext context) {
+        super(producer, rawMethodResult);
+        this.context = context;
     }
 
-    /**
-     * Transforms the messages of the result into a list of events.
-     */
-    public
-    List<Event> produceEvents(MessageEnvelope origin) {
-        List<? extends Message> messages = asMessages();
-        List<Event> result =
-                messages.stream()
-                        .map(toEvent(origin))
-                        .collect(toList());
-        return result;
+    static RejectionCommandHandlerResult of(ThrowableMessage rejection,
+                                            RejectionEventContext context,
+                                            EventProducer eventProducer) {
+        Message thrownMessage = rejection.getMessageThrown();
+        return new RejectionCommandHandlerResult(eventProducer, thrownMessage, context);
     }
 
+    @Override
     protected Function<Message, Event> toEvent(MessageEnvelope origin) {
-        return new ToEvent(producer, origin);
-    }
-
-    protected final EventProducer producer() {
-        return producer;
+        EventProducer producer = producer();
+        Function<Message, Event> function = new ToEvent(producer, origin, context);
+        return function;
     }
 
     /**
-     * Converts an event message into an {@link Event}.
+     * Converts a rejection event message into an {@link Event}.
      */
-    private final class ToEvent implements Function<Message, Event> {
+    private static final class ToEvent implements Function<Message, Event> {
 
         private final EventFactory eventFactory;
         private final @Nullable Version version;
+        private final RejectionEventContext context;
 
         private ToEvent(EventProducer producer,
-                        MessageEnvelope origin) {
+                        MessageEnvelope origin,
+                        RejectionEventContext context) {
+            this.context = context;
             this.eventFactory = EventFactory.on(origin, producer.getProducerId());
             this.version = producer.getVersion();
         }
 
         @Override
         public Event apply(Message message) {
-            return eventFactory.createEvent(message, version);
+            return eventFactory.createRejectionEvent(message, version, context);
         }
     }
 }
