@@ -20,7 +20,6 @@
 
 package io.spine.client;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -30,9 +29,10 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.client.ColumnFilters.all;
 import static java.util.Arrays.asList;
@@ -325,14 +325,17 @@ public final class QueryBuilder {
         if (ids == null || ids.isEmpty()) {
             return null;
         }
-        Collection<Any> entityIds = transform(ids, new Function<Object, Any>() {
+        Function<Object, Any> transformFn = new Function<Object, Any>() {
             @Override
             public @Nullable Any apply(@Nullable Object o) {
                 checkNotNull(o);
                 Any id = Identifier.pack(o);
                 return id;
             }
-        });
+        };
+        Collection<Any> entityIds = ids.stream()
+                                       .map(transformFn)
+                                       .collect(Collectors.toList());
         Set<Any> result = newHashSet(entityIds);
         return result;
     }

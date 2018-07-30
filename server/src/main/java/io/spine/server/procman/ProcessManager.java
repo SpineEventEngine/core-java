@@ -22,25 +22,29 @@ package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
+import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.command.CommandHandlingEntity;
-import io.spine.server.command.dispatch.Dispatch;
-import io.spine.server.command.dispatch.DispatchResult;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandSequence;
+import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
-import io.spine.server.model.Model;
+import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.procman.model.ProcessManagerClass;
+import io.spine.server.rejection.RejectionReactor;
+import io.spine.server.rejection.model.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine
@@ -72,7 +76,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public abstract class ProcessManager<I,
                                      S extends Message,
                                      B extends ValidatingBuilder<S, ? extends Message.Builder>>
-        extends CommandHandlingEntity<I, S, B> {
+        extends CommandHandlingEntity<I, S, B>
+        implements EventReactor, RejectionReactor {
 
     /** The Command Bus to post routed commands. */
     private volatile @MonotonicNonNull CommandBus commandBus;
@@ -87,10 +92,10 @@ public abstract class ProcessManager<I,
         super(id);
     }
 
+    @Internal
     @Override
     protected ProcessManagerClass<?> getModelClass() {
-        return Model.getInstance()
-                    .asProcessManagerClass(getClass());
+        return asProcessManagerClass(getClass());
     }
 
     @Override
@@ -137,9 +142,10 @@ public abstract class ProcessManager<I,
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope command) {
         CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
-        Dispatch<CommandEnvelope> dispatch = Dispatch.of(command).to(this, method);
-        DispatchResult dispatchResult = dispatch.perform();
-        return toEvents(dispatchResult);
+        CommandHandlerMethod.Result result =
+                method.invoke(this, command.getMessage(), command.getCommandContext());
+        List<Event> events = result.produceEvents(command);
+        return events;
     }
 
     /**
@@ -151,9 +157,27 @@ public abstract class ProcessManager<I,
      */
     List<Event> dispatchEvent(EventEnvelope event) {
         EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
-        Dispatch<EventEnvelope> dispatch = Dispatch.of(event).to(this, method);
-        DispatchResult dispatchResult = dispatch.perform();
-        return toEvents(dispatchResult);
+        ReactorMethodResult methodResult =
+                method.invoke(this, event.getMessage(), event.getEventContext());
+        List<Event> result = methodResult.produceEvents(event);
+        return result;
+    }
+
+    /**
+     * Dispatches a rejection to the reacting method of the process manager.
+     *
+     * @param  rejection the envelope with the rejection
+     * @return a list of produced events or an empty list if the process manager does not
+     *         produce new events because of the passed event
+     */
+    List<Event> dispatchRejection(RejectionEnvelope rejection) {
+        CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
+        RejectionReactorMethod method =
+                thisClass().getReactor(rejection.getMessageClass(), commandClass);
+        ReactorMethodResult methodResult =
+                method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
+        List<Event> result = methodResult.produceEvents(rejection);
+        return result;
     }
 
     /**

@@ -21,6 +21,7 @@
 package io.spine.server.command.given;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
@@ -31,9 +32,11 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
+import io.spine.server.procman.ProcessManager;
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
+import io.spine.validate.AnyVBuilder;
 import io.spine.validate.EmptyVBuilder;
 
 import java.lang.reflect.Method;
@@ -42,6 +45,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.util.Collections.emptyList;
 
 public class CommandHandlerMethodTestEnv {
 
@@ -171,6 +175,33 @@ public class CommandHandlerMethodTestEnv {
         @Apply
         void event(RefProjectCreated evt) {
             // Do nothing.
+        }
+    }
+
+    public static class ProcessManagerDoingNothing
+            extends ProcessManager<ProjectId, Empty, EmptyVBuilder> {
+
+        public ProcessManagerDoingNothing(ProjectId id) {
+            super(id);
+        }
+
+        @Assign
+        Empty handle(RefCreateProject cmd) {
+            return Empty.getDefaultInstance();
+        }
+    }
+
+    public static class HandlerReturnsEmptyList extends TestCommandHandler {
+        @Assign
+        List<Message> handleTest(RefCreateProject cmd) {
+            return emptyList();
+        }
+    }
+
+    public static class HandlerReturnsEmpty extends TestCommandHandler {
+        @Assign
+        Empty handleTest(RefCreateProject cmd) {
+            return Empty.getDefaultInstance();
         }
     }
 

@@ -18,29 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.server.model;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import com.google.protobuf.Message;
+
+import java.util.List;
 
 /**
- * A test utility for working with {@link SystemBoundedContext}s.
+ * A reactor method may not return a result in response to an incoming message. When so,
+ * the raw method should return {@link com.google.protobuf.Empty Empty}.
  *
- * @author Dmytro Dashenkov
+ * @author Alexander Yevsyukov
  */
-public final class SystemBoundedContexts {
+public final class ReactorMethodResult extends EventsResult {
 
-    /**
-     * Prevents the utility class instantiation.
-     */
-    private SystemBoundedContexts() {
-    }
-
-    /**
-     * Extracts the {@code System} bounded context from the given bounded context.
-     */
-    public static BoundedContext systemOf(BoundedContext context) {
-        checkArgument(context instanceof DomainBoundedContext);
-        DomainBoundedContext defaultContext = (DomainBoundedContext) context;
-        return defaultContext.system();
+    public ReactorMethodResult(EventProducer producer, Object rawMethodOutput) {
+        super(producer, rawMethodOutput);
+        List<Message> messages = toMessages(rawMethodOutput);
+        List<Message> filtered = filterEmpty(messages);
+        setMessages(filtered);
     }
 }

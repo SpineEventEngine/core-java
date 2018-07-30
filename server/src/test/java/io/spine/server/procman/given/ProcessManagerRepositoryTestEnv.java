@@ -56,7 +56,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.List;
 
 import static io.spine.protobuf.AnyPacker.pack;
-import static java.util.Collections.emptyList;
 
 /**
  * @author Alexander Yevsyukov
@@ -189,9 +188,9 @@ public class ProcessManagerRepositoryTestEnv {
         }
 
         @Assign
-        List<Message> handle(PmDoNothing command, CommandContext ignored) {
+        Empty handle(PmDoNothing command, CommandContext ignored) {
             keep(command);
-            return emptyList();
+            return withNothing();
         }
 
         @Assign

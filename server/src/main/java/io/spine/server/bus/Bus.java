@@ -22,6 +22,7 @@ package io.spine.server.bus;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.common.collect.Streams;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
@@ -33,6 +34,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -163,10 +167,15 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * Transforms the given {@link StreamObserver}.
+     * Preprocesses the given {@link StreamObserver} before it receives the outcome of
+     * a {@link #post(Iterable, StreamObserver)} operation.
      *
      * <p>By default, returns the given {@code observer}. Override this method in order to change
      * the behaviour.
+     *
+     * <p>A typical implementation obtains the output from the base method
+     * (via {@code super.wrappedObserver(messages, source)}), creates a new {@link StreamObserver},
+     * which performs some custom logic and delegates its calls to the obtained observer instance.
      *
      * @param messages the messages to create an observer for
      * @param source   the source {@link StreamObserver} to be transformed

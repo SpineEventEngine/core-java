@@ -47,8 +47,19 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
     private volatile @Nullable Class<? extends AggregateRoot> rootClass;
 
     /** Creates new instance. */
-    public AggregatePartClass(Class<A> cls) {
+    private AggregatePartClass(Class<A> cls) {
         super(cls);
+    }
+
+    /**
+     * Obtains an aggregate part class for the passed raw class.
+     */
+    public static <A extends AggregatePart>
+    AggregatePartClass<A> asAggregatePartClass(Class<A> cls) {
+        checkNotNull(cls);
+        AggregatePartClass<A> result = (AggregatePartClass<A>)
+                get(cls, AggregatePartClass.class, () -> new AggregatePartClass<>(cls));
+        return result;
     }
 
     /**

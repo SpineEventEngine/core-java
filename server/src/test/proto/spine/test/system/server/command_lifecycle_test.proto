@@ -51,5 +51,5 @@ message CompanyEstablishing {
 
     CompanyId id = 1;
 
-    repeated string proposed_name = 2;
+    string proposed_name = 2;
 }

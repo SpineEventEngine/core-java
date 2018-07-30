@@ -27,8 +27,11 @@ import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.CommandHandler;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.HandlerReturnsEmpty;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.HandlerReturnsEmptyList;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerNoAnnotation;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerNoParams;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerOneNotMsgParam;
@@ -36,6 +39,7 @@ import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerR
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerTooManyParams;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerTwoParamsFirstInvalid;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerTwoParamsSecondInvalid;
+import io.spine.server.command.given.CommandHandlerMethodTestEnv.ProcessManagerDoingNothing;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.RejectingAggregate;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.RejectingHandler;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.ValidHandlerButPrivate;
@@ -44,12 +48,14 @@ import io.spine.server.command.given.CommandHandlerMethodTestEnv.ValidHandlerOne
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.ValidHandlerTwoParams;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.ValidHandlerTwoParamsReturnsList;
 import io.spine.server.model.HandlerMethodFailedException;
+import io.spine.server.procman.ProcessManager;
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 import io.spine.testing.server.model.ModelTests;
+import io.spine.testing.server.procman.ProcessManagerDispatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -59,6 +65,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.google.common.base.Throwables.getRootCause;
+import static com.google.common.collect.testing.Helpers.assertEmpty;
 import static io.spine.server.command.model.CommandHandlerMethod.from;
 import static io.spine.server.model.given.Given.CommandMessage.createProject;
 import static io.spine.server.model.given.Given.CommandMessage.startProject;
@@ -112,7 +119,8 @@ class CommandHandlerMethodTest {
             CommandHandlerMethod handler = from(handlerObject.getHandler());
             RefCreateProject cmd = createProject();
 
-            List<? extends Message> events = handler.invoke(handlerObject, cmd, emptyContext);
+            CommandHandlerMethod.Result result = handler.invoke(handlerObject, cmd, emptyContext);
+            List<? extends Message> events = result.asMessages();
 
             verify(handlerObject, times(1))
                     .handleTest(cmd, emptyContext);
@@ -129,13 +137,52 @@ class CommandHandlerMethodTest {
             CommandHandlerMethod handler = from(handlerObject.getHandler());
             RefCreateProject cmd = createProject();
 
-            List<? extends Message> events = handler.invoke(handlerObject, cmd, emptyContext);
+            CommandHandlerMethod.Result result = handler.invoke(handlerObject, cmd, emptyContext);
+            List<? extends Message> events = result.asMessages();
 
             verify(handlerObject, times(1)).handleTest(cmd);
             assertEquals(1, events.size());
             RefProjectCreated event = (RefProjectCreated) events.get(0);
             assertEquals(cmd.getProjectId(), event.getProjectId());
         }
+    }
+
+    @Nested
+    @DisplayName("throw ISE when invoked method produces")
+    class ThrowWhenProduces {
+
+        @Test
+        @DisplayName("no events")
+        void noEvents() {
+            HandlerReturnsEmptyList handlerObject = new HandlerReturnsEmptyList();
+            CommandHandlerMethod handler = from(handlerObject.getHandler());
+            RefCreateProject cmd = createProject();
+
+            assertThrows(IllegalStateException.class,
+                         () -> handler.invoke(handlerObject, cmd, emptyContext));
+        }
+
+        @Test
+        @DisplayName("`Empty` event")
+        void emptyEvent() {
+            HandlerReturnsEmpty handlerObject = new HandlerReturnsEmpty();
+            CommandHandlerMethod handler = from(handlerObject.getHandler());
+            RefCreateProject cmd = createProject();
+
+            assertThrows(IllegalStateException.class,
+                         () -> handler.invoke(handlerObject, cmd, emptyContext));
+        }
+    }
+
+    @Test
+    @DisplayName("allow `ProcessManager` methods producing `Empty`")
+    void allowEmptyInProcman() {
+        RefCreateProject commandMessage = createProject();
+        ProcessManager<ProjectId, ?, ?> entity =
+                new ProcessManagerDoingNothing(commandMessage.getProjectId());
+        CommandEnvelope cmd = requestFactory.createEnvelope(commandMessage);
+        List<Event> events = ProcessManagerDispatcher.dispatch(entity, cmd);
+        assertEmpty(events);
     }
 
     @Nested

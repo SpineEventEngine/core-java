@@ -21,6 +21,7 @@ package io.spine.testing.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
@@ -30,6 +31,8 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateCommandEndpoint;
 import io.spine.server.aggregate.AggregateEventEndpoint;
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.testing.server.NoOpLifecycle;
+import io.spine.type.TypeUrl;
 
 import java.util.List;
 
@@ -157,9 +160,8 @@ public class AggregateMessageDispatcher {
     @SuppressWarnings("unchecked") // It is OK when mocking
     private static <I, A extends Aggregate<I, ?, ?>> AggregateRepository<I, A> mockRepository() {
         TestAggregateRepository mockedRepo = mock(TestAggregateRepository.class);
-        TestAggregateRepository.TestLifecycle mockedLifecycle =
-                mock(TestAggregateRepository.TestLifecycle.class);
-        when(mockedRepo.lifecycleOf(any())).thenReturn(mockedLifecycle);
+        when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
+        when(mockedRepo.getEntityStateType()).thenReturn(TypeUrl.of(Any.class));
         return mockedRepo;
     }
 
@@ -171,14 +173,7 @@ public class AggregateMessageDispatcher {
 
         @Override
         protected Lifecycle lifecycleOf(I id) {
-            return super.lifecycleOf(id);
-        }
-
-        private class TestLifecycle extends Lifecycle {
-
-            protected TestLifecycle(I id) {
-                super(id);
-            }
+            return NoOpLifecycle.INSTANCE;
         }
     }
 }

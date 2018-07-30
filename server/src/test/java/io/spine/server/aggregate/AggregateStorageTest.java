@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
@@ -48,10 +47,11 @@ import org.junit.jupiter.api.Test;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
-import static com.google.common.collect.Lists.transform;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
@@ -125,7 +125,11 @@ public abstract class AggregateStorageTest
 
     @Override
     protected ProjectId newId() {
-        return Sample.messageOfType(ProjectId.class);
+        ProjectId id = ProjectId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
+        return id;
     }
 
     @Override
@@ -653,7 +657,9 @@ public abstract class AggregateStorageTest
 
         AggregateStateRecord events = storage.read(newReadRequest(id))
                                              .get();
-        List<Event> expectedEvents = transform(records, TO_EVENT);
+        List<Event> expectedEvents = records.stream()
+                                            .map(TO_EVENT)
+                                            .collect(Collectors.toList());
         List<Event> actualEvents = events.getEventList();
         assertEquals(expectedEvents, actualEvents);
     }

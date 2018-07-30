@@ -25,34 +25,23 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import io.spine.testing.Tests;
 import io.spine.time.Durations2;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 
-import java.util.List;
-import java.util.concurrent.CountDownLatch;
-
-import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
-import static io.spine.server.commandbus.Given.ACommand.addTask;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
-import static io.spine.server.commandbus.Given.ACommand.startProject;
 import static io.spine.time.Durations2.minutes;
 import static io.spine.time.testing.TimeTests.Past.minutesAgo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
@@ -98,139 +87,11 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    @DisplayName("reschedule commands from storage")
-    void rescheduleCmdsFromStorage() {
-        Timestamp schedulingTime = minutesAgo(3);
-        Duration delayPrimary = Durations2.fromMinutes(5);
-        Duration newDelayExpected = Durations2.fromMinutes(2); // = 5 - 3
-        List<Command> commandsPrimary =
-                newArrayList(createProject(), addTask(), startProject());
-        storeAsScheduled(commandsPrimary, delayPrimary, schedulingTime);
-
-        commandBus.rescheduleCommands();
-
-        ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
-        verify(scheduler, times(commandsPrimary.size())).schedule(commandCaptor.capture());
-        List<Command> commandsRescheduled = commandCaptor.getAllValues();
-        for (Command cmd : commandsRescheduled) {
-            long actualDelay = getDelaySeconds(cmd);
-            Tests.assertSecondsEqual(newDelayExpected.getSeconds(), actualDelay, /*maxDiffSec=*/1);
-        }
-    }
-
-    @Nested
-    @DisplayName("reschedule commands from storage on build")
-    class RescheduleOnBuild {
-
-        @SuppressWarnings("CheckReturnValue")
-        // OK to ignore stored command for the purpose of this test.
-        @Test
-        @DisplayName("in parallel if thread spawning is allowed")
-        void inParallel() {
-            String mainThreadName = Thread.currentThread()
-                                          .getName();
-            StringBuilder threadNameUponScheduling = new StringBuilder(0);
-            CountDownLatch latch = new CountDownLatch(1);
-            CommandScheduler scheduler =
-                    threadAwareScheduler(threadNameUponScheduling, latch);
-            TestSystemGateway gateway = new TestSingleTenantSystemGateway();
-            storeSingleCommandForRescheduling(gateway);
-
-            // Create CommandBus specific for this test.
-            CommandBus commandBus = CommandBus
-                    .newBuilder()
-                    .injectTenantIndex(tenantIndex)
-                    .injectSystemGateway(gateway)
-                    .setCommandScheduler(scheduler)
-                    .setThreadSpawnAllowed(true)
-                    .setAutoReschedule(true)
-                    .build();
-            assertNotNull(commandBus);
-
-            // Await to ensure the commands have been rescheduled in parallel.
-            try {
-                latch.await();
-            } catch (InterruptedException e) {
-                throw new IllegalStateException(e);
-            }
-
-            // Ensure the scheduler has been called for a single command,
-            ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
-            verify(scheduler, times(1)).schedule(commandCaptor.capture());
-
-            // and the call has been made for a thread, different than the main thread.
-            String actualThreadName = threadNameUponScheduling.toString();
-            assertNotNull(actualThreadName);
-            assertNotEquals(mainThreadName, actualThreadName);
-        }
-
-        @SuppressWarnings("CheckReturnValue")
-        // OK to ignore stored command for the purpose of this test.
-        @Test
-        @DisplayName("synchronously if thread spawning is not allowed")
-        void synchronously() {
-            String mainThreadName = Thread.currentThread()
-                                          .getName();
-            StringBuilder threadNameUponScheduling = new StringBuilder(0);
-            CountDownLatch latch = new CountDownLatch(1);
-            CommandScheduler scheduler = threadAwareScheduler(threadNameUponScheduling, latch);
-
-            TestSystemGateway systemGateway = new TestSingleTenantSystemGateway();
-            storeSingleCommandForRescheduling(systemGateway);
-
-            // Create CommandBus specific for this test.
-            CommandBus commandBus = CommandBus
-                    .newBuilder()
-                    .injectTenantIndex(tenantIndex)
-                    .injectSystemGateway(systemGateway)
-                    .setCommandScheduler(scheduler)
-                    .setThreadSpawnAllowed(false)
-                    .setAutoReschedule(true)
-                    .build();
-            assertNotNull(commandBus);
-
-            // Ensure the scheduler has been called for a single command,
-            ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
-            verify(scheduler, times(1)).schedule(commandCaptor.capture());
-
-            // and the call has been made in the main thread (as spawning is not allowed).
-            String actualThreadName = threadNameUponScheduling.toString();
-            assertNotNull(actualThreadName);
-            assertEquals(mainThreadName, actualThreadName);
-        }
-
-        /**
-         * Creates a new thread-aware scheduler spied by Mockito.
-         *
-         * <p>The method is not {@code static} to allow Mockito spy on the created anonymous class
-         * instance.
-         *
-         * @param targetThreadName the builder of the thread name that will be created upon command
-         *                         scheduling
-         * @param latch            the instance of the {@code CountDownLatch} to await the execution
-         *                         finishing
-         * @return newly created instance
-         */
-        private CommandScheduler threadAwareScheduler(StringBuilder targetThreadName,
-                                                      CountDownLatch latch) {
-            return spy(new ExecutorCommandScheduler() {
-                @Override
-                public void schedule(Command command) {
-                    super.schedule(command);
-                    targetThreadName.append(Thread.currentThread()
-                                                  .getName());
-                    latch.countDown();
-                }
-            });
-        }
-    }
-
-    @Test
     @DisplayName("post previously scheduled command")
     void postPreviouslyScheduled() {
         CommandBus spy = spy(commandBus);
         spy.register(createProjectHandler);
-        Command command = storeSingleCommandForRescheduling();
+        Command command = createScheduledCommand();
 
         spy.postPreviouslyScheduled(command);
 
@@ -240,7 +101,7 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
     @Test
     @DisplayName("reject previously scheduled command if no endpoint is found")
     void rejectPreviouslyScheduledWithoutEndpoint() {
-        Command command = storeSingleCommandForRescheduling();
+        Command command = createScheduledCommand();
         assertThrows(IllegalStateException.class,
                      () -> commandBus.postPreviouslyScheduled(command));
     }
@@ -280,37 +141,9 @@ class CommandSchedulingTest extends AbstractCommandBusTestSuite {
         }
     }
 
-    /*
-     * Utility methods
-     ********************/
-
     private static Command createScheduledCommand() {
         Timestamp schedulingTime = minutesAgo(3);
         Duration delayPrimary = Durations2.fromMinutes(5);
         return setSchedule(createProject(), delayPrimary, schedulingTime);
-    }
-
-    /**
-     * Creates and stores one scheduled command.
-     */
-    private Command storeSingleCommandForRescheduling() {
-        return storeSingleCommandForRescheduling(systemGateway);
-    }
-
-    /**
-     * Creates and stores one scheduled command.
-     */
-    private static Command storeSingleCommandForRescheduling(TestSystemGateway gateway) {
-        Command cmdWithSchedule = createScheduledCommand();
-        gateway.schedule(cmdWithSchedule);
-        return cmdWithSchedule;
-    }
-
-    private static long getDelaySeconds(Command cmd) {
-        long delaySec = cmd.getContext()
-                           .getSchedule()
-                           .getDelay()
-                           .getSeconds();
-        return delaySec;
     }
 }

@@ -20,26 +20,9 @@
 
 package io.spine.server.model;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregatePart;
-import io.spine.server.aggregate.model.AggregateClass;
-import io.spine.server.aggregate.model.AggregatePartClass;
-import io.spine.server.command.CommandHandler;
-import io.spine.server.command.model.CommandHandlerClass;
-import io.spine.server.entity.Entity;
-import io.spine.server.entity.model.EntityClass;
-import io.spine.server.event.EventSubscriber;
-import io.spine.server.event.model.EventSubscriberClass;
-import io.spine.server.procman.ProcessManager;
-import io.spine.server.procman.model.ProcessManagerClass;
-import io.spine.server.projection.Projection;
-import io.spine.server.projection.model.ProjectionClass;
-import io.spine.server.rejection.RejectionSubscriber;
-import io.spine.server.rejection.model.RejectionSubscriberClass;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.function.Supplier;
 
 /**
  * Stores information of message handling classes.
@@ -57,6 +40,14 @@ public class Model {
         return Singleton.INSTANCE.value;
     }
 
+    @SuppressWarnings("unused") // The param will be used when Model is created per BoundedContext.
+    public static <T> Model getInstance(Class<? extends T> rawClass) {
+        //TODO:2018-07-25:alexander.yevsyukov: Find the model for the raw class using the
+        // @BoundedContext("MyBoundedContext") annotation in the one of the parent packages
+        // of the passed class.
+        return getInstance();
+    }
+
     /** Prevents instantiation from outside. */
     private Model() {
     }
@@ -72,127 +63,16 @@ public class Model {
     }
 
     /**
-     * Obtains an instance of aggregate class information.
+     * Obtains the model class for the passed raw class.
      *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
-     * this method call.
-     *
-     * @throws DuplicateCommandHandlerError if the aggregate class handles one or more
-     *         commands which are already known to the model as handled by another class
+     * <p>If the model does not have the model class yet, it would be obtained
+     * from the passed supplier and remembered.
      */
-    public AggregateClass<?> asAggregateClass(Class<? extends Aggregate> cls)
-            throws DuplicateCommandHandlerError {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> new AggregateClass<>(cls));
-        return (AggregateClass<?>) modelClass;
-    }
-
-    /**
-     * Obtains an instance of aggregate part class information.
-     *
-     * <p>If the passed class is not added to the model before, it will be added as the result of
-     * this method call.
-     *
-     * @throws DuplicateCommandHandlerError if the given aggregate part class handles one or
-     *         more commands which are already known to the model as handled by another class
-     */
-    public AggregatePartClass<?> asAggregatePartClass(Class<? extends AggregatePart> cls)
-            throws DuplicateCommandHandlerError {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> new AggregatePartClass<>(cls));
-        return (AggregatePartClass<?>) modelClass;
-    }
-
-    /**
-     * Obtains an instance of a process manager class information.
-     *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
-     * this method call.
-     *
-     * @throws DuplicateCommandHandlerError if the passed process manager class handles one
-     *         or more commands already known to the model as handled by another class
-     */
-    public ProcessManagerClass<?> asProcessManagerClass(Class<? extends ProcessManager> cls)
-        throws DuplicateCommandHandlerError {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> ProcessManagerClass.of(cls));
-        return (ProcessManagerClass<?>) modelClass;
-    }
-
-    /**
-     * Obtains an instance of a projection class information.
-     *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
-     * this method call.
-     */
-    public ProjectionClass<?> asProjectionClass(Class<? extends Projection> cls) {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> ProjectionClass.of(cls));
-        return (ProjectionClass<?>) modelClass;
-    }
-
-    /**
-     * Obtains an instance of event subscriber class information.
-     *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
-     * this method call.
-     */
-    public EventSubscriberClass<?> asEventSubscriberClass(Class<? extends EventSubscriber> cls) {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> EventSubscriberClass.of(cls));
-        return (EventSubscriberClass<?>) modelClass;
-    }
-
-    /**
-     * Obtains an instance of a command handler class information.
-     *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
-     * this method call.
-     *
-     * @throws DuplicateCommandHandlerError if the passed command handler class handles one
-     *         or more commands which are already known to the model as handled by another class
-     */
-    public CommandHandlerClass asCommandHandlerClass(Class<? extends CommandHandler> cls)
-            throws DuplicateCommandHandlerError {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> CommandHandlerClass.of(cls));
-        return (CommandHandlerClass<?>) modelClass;
-    }
-
-    /**
-     * Obtains an instance of a rejection subscriber class information.
-     *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
-     * this method call.
-     */
-    public
-    RejectionSubscriberClass<?> asRejectionSubscriber(Class<? extends RejectionSubscriber> cls) {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> RejectionSubscriberClass.of(cls));
-        return (RejectionSubscriberClass<?>) modelClass;
-    }
-
-    /**
-     * Obtains an instance of an entity class information.
-     *
-     * <p>If the passed class was not added to the model before, it would be added as the result of
-     * this method call.
-     */
-    public EntityClass<?> asEntityClass(Class<? extends Entity> cls) {
-        checkNotNull(cls);
-        ModelClass<?> modelClass = classes.get(cls, () -> new EntityClass<>(cls));
-        return (EntityClass<?>) modelClass;
-    }
-
-    /**
-     * Obtains the default entity state by entity class.
-     *
-     * @return default entity state
-     */
-    public Message getDefaultState(Class<? extends Entity> cls) {
-        checkNotNull(cls);
-        DefaultStateRegistry registry = DefaultStateRegistry.getInstance();
-        Message result = registry.get(cls);
+    <T, M extends ModelClass>
+    ModelClass<T> getClass(Class<? extends T> cls,
+                           Class<M> classOfModelClass,
+                           Supplier<ModelClass<T>> supplier) {
+        ModelClass<T> result = classes.get(cls, classOfModelClass, supplier);
         return result;
     }
 

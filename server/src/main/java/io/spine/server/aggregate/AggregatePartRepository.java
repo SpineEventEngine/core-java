@@ -20,8 +20,10 @@
 
 package io.spine.server.aggregate;
 
+import io.spine.annotation.Internal;
 import io.spine.server.aggregate.model.AggregatePartClass;
-import io.spine.server.model.Model;
+
+import static io.spine.server.aggregate.model.AggregatePartClass.asAggregatePartClass;
 
 /**
  * Common abstract base for repositories that manage {@code AggregatePart}s.
@@ -51,11 +53,10 @@ public abstract class AggregatePartRepository<I,
         return result;
     }
 
-    @SuppressWarnings("unchecked") // The cast is ensured by generic parameters of the repository.
+    @Internal
     @Override
     protected final AggregatePartClass<A> getModelClass(Class<A> cls) {
-        return (AggregatePartClass<A>) Model.getInstance()
-                                            .asAggregatePartClass(cls);
+        return asAggregatePartClass(cls);
     }
 
     private AggregatePartClass<A> aggregatePartClass() {

@@ -46,6 +46,8 @@ import static java.lang.String.format;
 public final class LoggingObserver<V> implements StreamObserver<V> {
 
     private static final String FMT_ON_NEXT = "onNext(%s)";
+
+    @SuppressWarnings("DuplicateStringLiteralInspection") // Used in other scope.
     private static final String ON_COMPLETED = "onCompleted()";
     private static final Object[] emptyParam = {};
 

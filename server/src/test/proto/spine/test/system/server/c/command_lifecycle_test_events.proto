@@ -37,3 +37,15 @@ message CompanyEstablished {
 
     string name = 2;
 }
+
+message CompanyEstablishingStarted {
+
+    CompanyId id = 1;
+}
+
+message CompanyNameRethought {
+
+    CompanyId id = 1;
+
+    string name = 2;
+}

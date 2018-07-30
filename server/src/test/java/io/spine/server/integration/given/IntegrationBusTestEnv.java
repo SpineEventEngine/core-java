@@ -482,8 +482,7 @@ public class IntegrationBusTestEnv {
     /**
      * A subscriber for testing of
      * {@linkplain
-     * io.spine.server.model.HandlerMethod#ensureExternalMatch(io.spine.server.model.HandlerMethod,
-     * boolean) external attribute mismatch check}.
+     * #ensureExternalMatch(boolean) external attribute mismatch check}.
      */
     @SuppressWarnings("unused") // OK to have unused params in this test env. class
     public static final class ExternalMismatchSubscriber extends RejectionSubscriber {

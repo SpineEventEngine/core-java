@@ -112,10 +112,7 @@ class ProcessManagerRepositoryTest
     }
 
     @Override
-    protected TestProcessManager createEntity() {
-        ProjectId id = ProjectId.newBuilder()
-                                .setId(newUuid())
-                                .build();
+    protected TestProcessManager createEntity(ProjectId id) {
         TestProcessManager result = Given.processManagerOfClass(TestProcessManager.class)
                                          .withId(id)
                                          .build();
@@ -341,7 +338,7 @@ class ProcessManagerRepositoryTest
 
     @Test
     @DisplayName("allow process manager have unmodified state after command handling")
-    void notModifyStateIfDoNothing() {
+    void allowUnmodifiedStateAfterCommand() {
         testDispatchCommand(doNothing());
     }
 

@@ -20,10 +20,11 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+
+import java.util.function.Predicate;
 
 /**
  * An entity which has {@linkplain LifecycleFlags lifecycle flags}.
@@ -69,7 +70,7 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
                         return true;
                     }
                     LifecycleFlags flags = input.getLifecycleFlags();
-                    boolean result = isEntityVisible.apply(flags);
+                    boolean result = isEntityVisible.test(flags);
                     return result;
                 };
 
@@ -79,7 +80,7 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
                         return false;
                     }
                     EntityRecord record = input.getRecord();
-                    return isRecordVisible().apply(record);
+                    return isRecordVisible().test(record);
                 };
 
         private Predicates() {

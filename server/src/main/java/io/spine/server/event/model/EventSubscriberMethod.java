@@ -21,6 +21,7 @@
 package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -29,10 +30,12 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
+import io.spine.server.model.MethodResult;
 
 import java.lang.reflect.Method;
 import java.util.function.Predicate;
 
+import static io.spine.core.Rejections.isRejection;
 import static io.spine.server.model.HandlerMethod.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 
@@ -42,7 +45,8 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  * @author Alexander Yevsyukov
  * @see Subscribe
  */
-public final class EventSubscriberMethod extends AbstractHandlerMethod<EventClass, EventContext> {
+public final class EventSubscriberMethod
+        extends AbstractHandlerMethod<Object, EventClass, EventContext, MethodResult<Empty>> {
 
     /** Creates a new instance. */
     private EventSubscriberMethod(Method method) {
@@ -70,9 +74,14 @@ public final class EventSubscriberMethod extends AbstractHandlerMethod<EventClas
 
     @CanIgnoreReturnValue // since event subscriber methods do not return values
     @Override
-    public Object invoke(Object target, Message message, EventContext context) {
-        ensureExternalMatch(this, context.getExternal());
+    public MethodResult<Empty> invoke(Object target, Message message, EventContext context) {
+        ensureExternalMatch(context.getExternal());
         return super.invoke(target, message, context);
+    }
+
+    @Override
+    protected MethodResult<Empty> toResult(Object target, Object rawMethodOutput) {
+        return MethodResult.empty();
     }
 
     /**

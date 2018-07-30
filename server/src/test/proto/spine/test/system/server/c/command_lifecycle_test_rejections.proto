@@ -36,10 +36,3 @@ message CompanyNameAlreadyTaken {
 
     string taken_name = 2;
 }
-
-message CompanyNameNotProposed {
-
-    CompanyId id = 1;
-
-    uint32 invalid_index = 2;
-}

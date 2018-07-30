@@ -50,13 +50,16 @@ import static java.util.Optional.empty;
  */
 public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
+    // TODO:2018-07-27:dmytro.dashenkov: Refactor command scheduling - move to System BC.
+    // todo https://github.com/SpineEventEngine/core-java/issues/799
+
     private static final Set<CommandId> scheduledCommandIds = newHashSet();
 
     private boolean isActive = true;
 
     private @Nullable CommandBus commandBus;
 
-    private @Nullable Rescheduler rescheduler;
+    private @Nullable CommandFlowWatcher flowWatcher;
 
     protected CommandScheduler() {
     }
@@ -70,16 +73,11 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
     }
 
     /**
-     * Assigns the {@code Recscheduler} to the scheduler during {@code CommandBus}
+     * Assigns the {@code CommandFlowWatcher} to the scheduler during {@code CommandBus}
      * {@linkplain CommandBus.Builder#build() construction}.
      */
-    void setRescheduler(Rescheduler rescheduler) {
-        this.rescheduler = rescheduler;
-    }
-
-    private Rescheduler rescheduler() {
-        checkState(rescheduler != null, "Rescheduler is not initialized");
-        return rescheduler;
+    void setFlowWatcher(CommandFlowWatcher flowWatcher) {
+        this.flowWatcher = flowWatcher;
     }
 
     @Override
@@ -115,7 +113,7 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         rememberAsScheduled(commandUpdated);
 
         CommandEnvelope updatedCommandEnvelope = CommandEnvelope.of(commandUpdated);
-        commandBus().onScheduled(updatedCommandEnvelope);
+        flowWatcher().onScheduled(updatedCommandEnvelope);
     }
 
     /**
@@ -125,8 +123,13 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      * {@linkplain #setCommandBus(CommandBus) set} prior to calling this method
      */
     protected CommandBus commandBus() {
-        checkState(commandBus != null, "CommandBus is not set");
+        checkState(commandBus != null, "CommandBus is not set.");
         return commandBus;
+    }
+
+    private CommandFlowWatcher flowWatcher() {
+        checkState(flowWatcher != null, "CommandFlowWatcher is not initialized.");
+        return flowWatcher;
     }
 
     /**
@@ -137,10 +140,6 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      * @see #post(Command)
      */
     protected abstract void doSchedule(Command command);
-
-    void rescheduleCommands() {
-        rescheduler().rescheduleCommands();
-    }
 
     /**
      * Delivers a scheduled command to a target.

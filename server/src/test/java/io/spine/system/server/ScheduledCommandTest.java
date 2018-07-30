@@ -47,8 +47,8 @@ import java.util.Optional;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.server.SystemBoundedContexts.systemOf;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.validate.Validate.isDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -71,7 +71,6 @@ class ScheduledCommandTest {
     void setUp() {
         scheduler = new TestCommandScheduler();
         CommandBus.Builder commandBus = CommandBus.newBuilder()
-                                                  .setThreadSpawnAllowed(false)
                                                   .setCommandScheduler(scheduler);
         context = BoundedContext.newBuilder()
                                 .setCommandBus(commandBus)

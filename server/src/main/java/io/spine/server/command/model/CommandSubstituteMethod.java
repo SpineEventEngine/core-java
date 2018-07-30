@@ -20,14 +20,18 @@
 
 package io.spine.server.command.model;
 
+import com.google.protobuf.Message;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
+import io.spine.server.command.model.CommandSubstituteMethod.Result;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
+import io.spine.server.model.MethodResult;
 
 import java.lang.reflect.Method;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -35,29 +39,36 @@ import java.util.function.Predicate;
  *
  * @author Alexander Yevsyukov
  */
-public final class CommandSubstMethod
-        extends CommandAcceptingMethod
-        implements CommandingMethod<CommandClass, CommandContext> {
+public final class CommandSubstituteMethod
+        extends CommandAcceptingMethod<Object, Result>
+        implements CommandingMethod<CommandClass, CommandContext, Result> {
 
-    private CommandSubstMethod(Method method) {
+    private CommandSubstituteMethod(Method method) {
         super(method);
     }
 
-    static CommandSubstMethod from(Method method) {
-        return new CommandSubstMethod(method);
+    @Override
+    protected Result toResult(Object target, Object rawMethodOutput) {
+        Result result = new Result(rawMethodOutput);
+        return result;
     }
 
-    static AbstractHandlerMethod.Factory<CommandSubstMethod> factory() {
+    static CommandSubstituteMethod from(Method method) {
+        return new CommandSubstituteMethod(method);
+    }
+
+    static AbstractHandlerMethod.Factory<CommandSubstituteMethod> factory() {
         return Factory.INSTANCE;
     }
 
-    private static class Factory extends AbstractHandlerMethod.Factory<CommandSubstMethod> {
+    private static class Factory
+            extends AbstractHandlerMethod.Factory<CommandSubstituteMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
         @Override
-        public Class<CommandSubstMethod> getMethodClass() {
-            return CommandSubstMethod.class;
+        public Class<CommandSubstituteMethod> getMethodClass() {
+            return CommandSubstituteMethod.class;
         }
 
         @Override
@@ -80,7 +91,7 @@ public final class CommandSubstMethod
         }
 
         @Override
-        protected CommandSubstMethod doCreate(Method method) {
+        protected CommandSubstituteMethod doCreate(Method method) {
             return from(method);
         }
     }
@@ -100,6 +111,18 @@ public final class CommandSubstMethod
         protected boolean verifyReturnType(Method method) {
             boolean result = returnsMessageOrIterable(method);
             return result;
+        }
+    }
+
+    /**
+     * A command substitution method returns a one or more command messages.
+     */
+    public static final class Result extends MethodResult<Message> {
+
+        private Result(Object rawMethodOutput) {
+            super(rawMethodOutput);
+            List<Message> messages = toMessages(rawMethodOutput);
+            setMessages(messages);
         }
     }
 }

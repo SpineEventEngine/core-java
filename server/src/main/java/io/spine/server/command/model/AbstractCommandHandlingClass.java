@@ -21,7 +21,7 @@
 package io.spine.server.command.model;
 
 import io.spine.core.CommandClass;
-import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.AbstractHandlerMethod.Factory;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
 
@@ -33,7 +33,7 @@ import java.util.Set;
  * @param <C> the type of a command handling class
  * @author Alexander Yevsyukov
  */
-public abstract class AbstractCommandHandlingClass<C, H extends CommandAcceptingMethod>
+public abstract class AbstractCommandHandlingClass<C, H extends CommandAcceptingMethod<?, ?>>
         extends ModelClass<C>
         implements CommandHandlingClass {
 
@@ -41,8 +41,7 @@ public abstract class AbstractCommandHandlingClass<C, H extends CommandAccepting
 
     private final MessageHandlerMap<CommandClass, H> commands;
 
-    protected AbstractCommandHandlingClass(Class<? extends C> cls,
-                                           AbstractHandlerMethod.Factory<H> factory) {
+    AbstractCommandHandlingClass(Class<? extends C> cls, Factory<H> factory) {
         super(cls);
         this.commands = new MessageHandlerMap<>(cls, factory);
     }

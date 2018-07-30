@@ -22,8 +22,8 @@ package io.spine.server.entity;
 
 import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.model.Model;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
@@ -43,6 +43,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  * @author Dmitry Ganzha
  */
+@SuppressWarnings("SynchronizeOnThis") /* This class uses double-check idiom for lazy init of some
+    fields. See Effective Java 2nd Ed. Item #71. */
 public abstract class AbstractEntity<I, S extends Message> implements Entity<I, S> {
 
     /**
@@ -59,7 +61,13 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     /** Cached version of string ID. */
     private volatile @MonotonicNonNull String stringId;
 
-    /** The state of the entity. */
+    /**
+     * The state of the entity.
+     *
+     * <p>Lazily initialized to the {@linkplain #getDefaultState() default state},
+     * if {@linkplain #getState() accessed} before {@linkplain #setState(Message)}
+     * initialization}.
+     */
     private volatile @MonotonicNonNull S state;
 
     /**
@@ -87,30 +95,52 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         return id;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>If the state of the entity was not initialized, it is set to
+     * {@linkplain #getDefaultState() default value} and returned.
+     *
+     * @return the current state or default state value
+     */
     @Override
     public S getState() {
-        if (state == null) {
-            state = getDefaultState();
+        S result = state;
+        if (result == null) {
+            synchronized (this) {
+                result = state;
+                if (result == null) {
+                    state = getDefaultState();
+                    result = state;
+                }
+            }
         }
-        return state;
+        return result;
     }
 
     /**
      * Obtains model class for this entity.
      */
     protected EntityClass<?> thisClass() {
-        if (thisClass == null) {
-            thisClass = getModelClass();
+        EntityClass<?> result = thisClass;
+        if (result == null) {
+            synchronized (this) {
+                result = thisClass;
+                if (result == null) {
+                    thisClass = getModelClass();
+                    result = thisClass;
+                }
+            }
         }
-        return thisClass;
+        return result;
     }
 
     /**
-     * Obtains the model class for this entity from the {@link io.spine.server.model.Model Model}.
+     * Obtains the model class.
      */
+    @Internal
     protected EntityClass<?> getModelClass() {
-        return Model.getInstance()
-                    .asEntityClass(getClass());
+        return EntityClass.asEntityClass(getClass());
     }
 
     /**
@@ -121,15 +151,12 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     /**
-     * {@inheritDoc}
+     * Obtains the default state of the entity.
      */
-    @Override
-    public final S getDefaultState() {
-        Class<? extends Entity> entityClass = getClass();
+    protected final S getDefaultState() {
         @SuppressWarnings("unchecked")
         // cast is safe because this type of messages is saved to the map
-        S result = (S) Model.getInstance()
-                            .getDefaultState(entityClass);
+        S result = (S) thisClass().getDefaultState();
         return result;
     }
 
@@ -184,7 +211,6 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      *
      * @return string form of the entity ID
      */
-    @SuppressWarnings("SynchronizeOnThis") // See Effective Java 2nd Ed. Item #71.
     public String stringId() {
         String result = stringId;
         if (result == null) {

@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.FloatValue;
@@ -48,7 +47,6 @@ import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReact
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingRepository;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.model.HandlerMethodFailedException;
-import io.spine.server.model.Model;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProjectWithChildren;
@@ -78,6 +76,7 @@ import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.reposit
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.requestFactory;
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetBoundedContext;
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetRepository;
+import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -126,9 +125,8 @@ public class AggregateRepositoryTest {
         @DisplayName("command classes handled by aggregate")
         void aggregateCommandClasses() {
             Set<CommandClass> aggregateCommands =
-                    Model.getInstance()
-                         .asAggregateClass(ProjectAggregate.class)
-                         .getCommands();
+                    asAggregateClass(ProjectAggregate.class)
+                            .getCommands();
             Set<CommandClass> exposedByRepository = repository().getMessageClasses();
 
             assertTrue(exposedByRepository.containsAll(aggregateCommands));
@@ -364,7 +362,7 @@ public class AggregateRepositoryTest {
         op.execute();
 
         Iterator<ProjectAggregate> iterator =
-                repository().iterator(Predicates.alwaysTrue());
+                repository().iterator(aggregate -> true);
 
         // This should iterate through all and fail.
         assertThrows(IllegalStateException.class, () -> Lists.newArrayList(iterator));

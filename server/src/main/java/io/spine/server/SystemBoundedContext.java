@@ -27,6 +27,7 @@ import io.spine.system.server.CommandLifecycleRepository;
 import io.spine.system.server.EntityHistoryRepository;
 import io.spine.system.server.NoOpSystemGateway;
 import io.spine.system.server.ScheduledCommandRepository;
+import io.spine.system.server.SystemEnricher;
 import io.spine.system.server.SystemGateway;
 
 import java.util.stream.Stream;

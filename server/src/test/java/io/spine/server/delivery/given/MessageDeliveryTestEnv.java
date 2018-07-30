@@ -36,7 +36,6 @@ import io.spine.server.delivery.Sharding;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.model.EntityClass;
-import io.spine.server.model.Model;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggStartProject;
@@ -49,6 +48,7 @@ import io.spine.validate.StringValueVBuilder;
 import java.util.Optional;
 
 import static io.spine.core.BoundedContextNames.newName;
+import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 
 /**
  * An abstract base for environments, which are created to ease the message delivery testing.
@@ -156,8 +156,7 @@ public class MessageDeliveryTestEnv {
         @Override
         public EntityClass getShardedModelClass() {
             Class<DeliveryEqualityProject> someAggregate = DeliveryEqualityProject.class;
-            AggregateClass<?> result = Model.getInstance()
-                                            .asAggregateClass(someAggregate);
+            AggregateClass<?> result = asAggregateClass(someAggregate);
             return result;
         }
     }

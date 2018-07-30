@@ -20,7 +20,6 @@
 
 package io.spine.server;
 
-import com.google.common.base.Supplier;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.core.BoundedContextName;
@@ -44,6 +43,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -65,8 +65,8 @@ public final class BoundedContextBuilder {
     private BoundedContextName name = BoundedContextNames.defaultName();
     private boolean multitenant;
     private TenantIndex tenantIndex;
-    private Supplier<StorageFactory> storageFactorySupplier;
     private TransportFactory transportFactory;
+    private @Nullable Supplier<StorageFactory> storageFactorySupplier;
 
     private CommandBus.Builder commandBus;
     private EventBus.Builder eventBus;
@@ -254,9 +254,7 @@ public final class BoundedContextBuilder {
 
     private BoundedContext buildDefault(SystemBoundedContext system) {
         BiFunction<BoundedContextBuilder, SystemGateway, DomainBoundedContext> instanceFactory =
-                (builder, systemGateway) -> DomainBoundedContext.newInstance(builder,
-                                                                             system,
-                                                                             systemGateway);
+                DomainBoundedContext::newInstance;
         SystemGateway systemGateway = new DefaultSystemGateway(system);
         BoundedContext result = buildPartial(instanceFactory, systemGateway);
         return result;
@@ -273,6 +271,7 @@ public final class BoundedContextBuilder {
         storage.ifPresent(system::setStorageFactorySupplier);
         Optional<? extends TenantIndex> tenantIndex = getTenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
+
         BiFunction<BoundedContextBuilder, SystemGateway, SystemBoundedContext> instanceFactory =
                 (builder, systemGateway) -> SystemBoundedContext.newInstance(builder);
         NoOpSystemGateway systemGateway = NoOpSystemGateway.INSTANCE;
@@ -299,10 +298,8 @@ public final class BoundedContextBuilder {
 
     private StorageFactory getStorageFactory() {
         if (storageFactorySupplier == null) {
-            storageFactorySupplier =
-                    StorageFactorySwitch.newInstance(name, multitenant);
+            storageFactorySupplier = StorageFactorySwitch.newInstance(name, multitenant);
         }
-
         StorageFactory storageFactory = storageFactorySupplier.get();
 
         if (storageFactory == null) {

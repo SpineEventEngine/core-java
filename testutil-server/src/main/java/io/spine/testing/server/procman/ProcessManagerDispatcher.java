@@ -20,16 +20,18 @@
 package io.spine.testing.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.RejectionEnvelope;
-import io.spine.server.entity.Repository;
 import io.spine.server.procman.PmCommandEndpoint;
 import io.spine.server.procman.PmEventEndpoint;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.testing.server.NoOpLifecycle;
+import io.spine.type.TypeUrl;
 
 import java.util.List;
 
@@ -138,9 +140,8 @@ public class ProcessManagerDispatcher {
     private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
     ProcessManagerRepository<I, P, S> mockRepository() {
         TestPmRepository mockedRepo = mock(TestPmRepository.class);
-        TestPmRepository.TestLifecycle mockedLifecycle =
-                mock(TestPmRepository.TestLifecycle.class);
-        when(mockedRepo.lifecycleOf(any())).thenReturn(mockedLifecycle);
+        when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
+        when(mockedRepo.getEntityStateType()).thenReturn(TypeUrl.of(Any.class));
         return mockedRepo;
     }
 
@@ -152,14 +153,7 @@ public class ProcessManagerDispatcher {
 
         @Override
         protected Lifecycle lifecycleOf(I id) {
-            return super.lifecycleOf(id);
-        }
-
-        private class TestLifecycle extends Repository.Lifecycle {
-
-            protected TestLifecycle(I id) {
-                super(id);
-            }
+            return NoOpLifecycle.INSTANCE;
         }
     }
 }

@@ -20,36 +20,26 @@
 
 package io.spine.system.server;
 
-import com.google.common.collect.Streams;
-import io.spine.core.Command;
-import io.spine.server.entity.Entity;
-
-import java.util.Iterator;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import io.spine.server.BoundedContext;
 
 /**
+ * A test utility for working with system {@link BoundedContext}s.
+ *
  * @author Dmytro Dashenkov
  */
-final class DomainCommandIndex implements CommandIndex {
+public final class SystemBoundedContexts {
 
-    private final ScheduledCommandRepository repository;
-
-    private DomainCommandIndex(ScheduledCommandRepository repository) {
-        this.repository = repository;
+    /**
+     * Prevents the utility class instantiation.
+     */
+    private SystemBoundedContexts() {
     }
 
-    static CommandIndex atopOf(ScheduledCommandRepository repository) {
-        checkNotNull(repository);
-        return new DomainCommandIndex(repository);
-    }
-
-    @Override
-    public Iterator<Command> scheduledCommands() {
-        Iterator<Command> result = Streams.stream(repository.loadAll())
-                                          .map(Entity::getState)
-                                          .map(ScheduledCommandRecord::getCommand)
-                                          .iterator();
-        return result;
+    /**
+     * Extracts the {@code System} bounded context from the given bounded context.
+     */
+    public static BoundedContext systemOf(BoundedContext context) {
+        DefaultSystemGateway gateway = (DefaultSystemGateway) context.getSystemGateway();
+        return gateway.target();
     }
 }

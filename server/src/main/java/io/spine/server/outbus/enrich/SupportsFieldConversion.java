@@ -21,8 +21,9 @@
 package io.spine.server.outbus.enrich;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Predicate;
 import io.spine.annotation.Internal;
+
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -51,7 +52,7 @@ public final class SupportsFieldConversion implements Predicate<EnrichmentFuncti
     }
 
     @Override
-    public boolean apply(EnrichmentFunction<?, ?, ?> input) {
+    public boolean test(EnrichmentFunction<?, ?, ?> input) {
         checkNotNull(input);
         boolean eventClassMatches = messageFieldClass.equals(input.getSourceClass());
         boolean enrichmentClassMatches = enrichmentFieldClass.equals(input.getEnrichmentClass());

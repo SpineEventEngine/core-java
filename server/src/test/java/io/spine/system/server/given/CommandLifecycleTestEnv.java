@@ -39,10 +39,11 @@ import io.spine.system.server.CommandRejected;
 import io.spine.system.server.Company;
 import io.spine.system.server.CompanyEstablished;
 import io.spine.system.server.CompanyEstablishing;
+import io.spine.system.server.CompanyEstablishingStarted;
 import io.spine.system.server.CompanyEstablishingVBuilder;
 import io.spine.system.server.CompanyId;
 import io.spine.system.server.CompanyNameAlreadyTaken;
-import io.spine.system.server.CompanyNameNotProposed;
+import io.spine.system.server.CompanyNameRethought;
 import io.spine.system.server.CompanyVBuilder;
 import io.spine.system.server.EstablishCompany;
 import io.spine.system.server.ProposeCompanyName;
@@ -50,10 +51,8 @@ import io.spine.system.server.SelectCompanyName;
 import io.spine.system.server.StartCompanyEstablishing;
 
 import java.util.Collection;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.util.Collections.emptyList;
 
 /**
  * The environment for the {@link io.spine.system.server.CommandLifecycleAggregate CommandLifecycle}
@@ -69,7 +68,7 @@ public final class CommandLifecycleTestEnv {
     private CommandLifecycleTestEnv() {
     }
 
-    public static class CommandLifecycleWatcher extends AbstractEventWatcher {
+    public static class CommandLifecycleWatcher extends AbstractEventAccumulator {
 
         @Override
         protected Collection<Class<? extends Message>> getEventClasses() {
@@ -119,34 +118,33 @@ public final class CommandLifecycleTestEnv {
         public static final String FAULTY_NAME = "This name is exceptionally faulty";
 
         @Assign
-        List<Message> handle(StartCompanyEstablishing command) {
+        CompanyEstablishingStarted handle(StartCompanyEstablishing command) {
             getBuilder().setId(command.getId());
 
-            return emptyList();
+            return CompanyEstablishingStarted.newBuilder()
+                                             .setId(command.getId())
+                                             .build();
         }
 
         @Assign
-        List<Message> handle(ProposeCompanyName command) {
+        CompanyNameRethought handle(ProposeCompanyName command) {
             String name = command.getName();
             checkArgument(!name.equals(FAULTY_NAME));
-            getBuilder().addProposedName(name);
+            getBuilder().setProposedName(name);
 
-            return emptyList();
+            return CompanyNameRethought.newBuilder()
+                                       .setId(command.getId())
+                                       .setName(command.getName())
+                                       .build();
         }
 
         @Assign
-        CommandTransformed handle(SelectCompanyName command, CommandContext context)
-                throws CompanyNameNotProposed {
-            int index = command.getIndex();
-            List<String> proposedNames = getBuilder().getProposedName();
-            if (index < 0 || index > proposedNames.size()) {
-                throw new CompanyNameNotProposed(getId(), index);
-            }
-            String finalName = proposedNames.get(index);
+        CommandTransformed handle(SelectCompanyName command, CommandContext context) {
+            String name = getBuilder().getProposedName();
             EstablishCompany establishCommand = EstablishCompany
                     .newBuilder()
                     .setId(getBuilder().getId())
-                    .setFinalName(finalName)
+                    .setFinalName(name)
                     .build();
             return transform(command, context)
                     .to(establishCommand)

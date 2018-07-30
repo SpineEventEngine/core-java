@@ -49,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  * @author Dmytro Dashenkov
  */
-abstract class AbstractEventWatcher implements EventDispatcher<String> {
+abstract class AbstractEventAccumulator implements EventDispatcher<String> {
 
     private final String id = getClass().getName();
 
@@ -57,7 +57,7 @@ abstract class AbstractEventWatcher implements EventDispatcher<String> {
 
     private @Nullable Iterator<? extends Message> eventIterator;
 
-    protected AbstractEventWatcher() {
+    AbstractEventAccumulator() {
         super();
     }
 

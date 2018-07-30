@@ -166,7 +166,7 @@ class CommandsTest {
             Command command = requestFactory.command()
                                             .create(BOOL_MSG);
             assertTrue(Commands.wereAfter(secondsAgo(5))
-                               .apply(command));
+                               .test(command));
         }
 
         @Test
@@ -183,8 +183,7 @@ class CommandsTest {
                                               thirtySecondsAgo,
                                               twentySecondsAgo,
                                               fiveSecondsAgo)
-                                          .filter(wereWithinPeriod(minutesAgo(3), secondsAgo(10))
-                                                          ::apply)
+                                          .filter(wereWithinPeriod(minutesAgo(3), secondsAgo(10)))
                                           .count();
             assertEquals(3, filteredCommands);
         }

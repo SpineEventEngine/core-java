@@ -34,6 +34,7 @@ import io.spine.core.Event;
 import io.spine.core.Rejections;
 import io.spine.server.command.dispatch.DispatchResult;
 import io.spine.server.entity.TransactionalEntity;
+import io.spine.server.model.EventProducer;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;
@@ -63,7 +64,8 @@ public abstract
 class CommandHandlingEntity<I,
                             S extends Message,
                             B extends ValidatingBuilder<S, ? extends Message.Builder>>
-        extends TransactionalEntity<I, S, B> {
+        extends TransactionalEntity<I, S, B>
+        implements EventProducer {
 
     /** Cached value of the ID in the form of {@code Any} instance. */
     private final Any idAsAny;

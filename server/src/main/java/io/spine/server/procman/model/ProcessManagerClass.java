@@ -51,9 +51,15 @@ public final class ProcessManagerClass<P extends ProcessManager>
         this.delegate = new ReactorClassDelegate<>(cls);
     }
 
-    public static <P extends ProcessManager> ProcessManagerClass<P> of(Class<P> cls) {
+    /**
+     * Obtains the process manager class for the passed raw class.
+     */
+    public static <P extends ProcessManager>
+    ProcessManagerClass<P> asProcessManagerClass(Class<P> cls) {
         checkNotNull(cls);
-        return new ProcessManagerClass<>(cls);
+        ProcessManagerClass<P> result = (ProcessManagerClass<P>)
+                get(cls, ProcessManagerClass.class, () -> new ProcessManagerClass<>(cls));
+        return result;
     }
 
     @Override

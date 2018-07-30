@@ -30,12 +30,13 @@ import io.spine.core.Versions;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.testing.ReflectiveBuilder;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.lang.reflect.Constructor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.server.entity.model.EntityClass.asEntityClass;
 
 /**
  * Utility class for building entities for tests.
@@ -46,7 +47,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @author Alexander Yevsyukov
  */
 @VisibleForTesting
-public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S extends Message>
+public abstract class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S extends Message>
         extends ReflectiveBuilder<E> {
 
     /**
@@ -54,19 +55,19 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
      *
      * <p>Is null until {@link #setResultClass(Class)} is called.
      */
-    private @Nullable EntityClass<E> entityClass;
+    private @MonotonicNonNull EntityClass<E> entityClass;
 
     /** The ID of the entity. If not set, a value default to the type will be used. */
-    private @Nullable I id;
+    private @MonotonicNonNull I id;
 
     /** The entity state. If not set, a default instance will be used. */
-    private @Nullable S state;
+    private @MonotonicNonNull S state;
 
     /** The entity version. Or zero if not set. */
     private int version;
 
-    /** The entity timestamp or default {@code Timestamp} if not set. */
-    private @Nullable Timestamp whenModified;
+    /** The entity timestamp or {@code null} if not set. */
+    private @MonotonicNonNull Timestamp whenModified;
 
     /**
      * Creates new instance of the builder.
@@ -80,12 +81,12 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
     @Override
     public EntityBuilder<E, I, S> setResultClass(Class<E> entityClass) {
         super.setResultClass(entityClass);
-        this.entityClass = createModelClass(entityClass);
+        this.entityClass = getModelClass(entityClass);
         return this;
     }
 
-    protected EntityClass<E> createModelClass(Class<E> entityClass) {
-        return new EntityClass<>(entityClass);
+    protected EntityClass<E> getModelClass(Class<E> entityClass) {
+        return asEntityClass(entityClass);
     }
 
     public EntityBuilder<E, I, S> withId(I id) {
@@ -127,7 +128,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
     public E build() {
         I id = id();
         E result = createEntity(id);
-        S state = state(result);
+        S state = state();
         Timestamp timestamp = timestamp();
 
         Version version = Versions.newVersion(this.version, timestamp);
@@ -135,9 +136,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
         return result;
     }
 
-    protected void setState(E result, S state, Version version) {
-        result.updateState(state, version);
-    }
+    protected abstract void setState(E result, S state, Version version);
 
     /**
      * Returns ID if it was previously set or default value if it was not.
@@ -151,10 +150,14 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
     /**
      * Returns state if it was set or the default value if it was not.
      */
-    protected S state(E result) {
-        return this.state != null
-               ? this.state
-               : result.getDefaultState();
+    protected S state() {
+        if (state != null) {
+            return state;
+        }
+        checkNotNull(entityClass, "Entity class is not set");
+        @SuppressWarnings("unchecked") // The cast is preserved by generic params of this class.
+        S result = (S) entityClass.getDefaultState();
+        return result;
     }
 
     /**

@@ -33,8 +33,13 @@ option java_multiple_files = true;
 
 import "spine/core/command.proto";
 
+// The enrichment for system events.
+//
+// Enriches the `CommandScheduled` event with an instance of `Command`.
+//
 message CommandEnrichment {
     option (enrichment_for) = "spine.system.server.CommandScheduled";
 
-    spine.core.Command command = 1 [(by) = "ScheduleCommand.id"];
+    // `Command` which enriches the `CommandScheduled` event.
+    spine.core.Command command = 1 [(by) = "*.id"];
 }

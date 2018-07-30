@@ -21,6 +21,7 @@
 package io.spine.testing.server.entity;
 
 import com.google.protobuf.StringValue;
+import io.spine.core.Version;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.testing.server.User;
@@ -46,4 +47,12 @@ public class EntityBuilderTestEnv {
             super(id);
         }
     }
+
+    static class TestEntityBuilder extends EntityBuilder<TestEntity, Long, StringValue> {
+
+        @Override
+        protected void setState(TestEntity result, StringValue state, Version version) {
+            // NoOp.
+        }
+    };
 }

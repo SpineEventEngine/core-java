@@ -42,6 +42,7 @@ import io.spine.system.server.given.CommandLifecycleTestEnv.TestProcmanRepositor
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,8 +51,8 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.SystemBoundedContexts.systemOf;
 import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
+import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.system.server.given.CommandLifecycleTestEnv.TestProcman.FAULTY_NAME;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -90,13 +91,13 @@ class CommandLifecycleTest {
     @Nested
     class ProduceEvents {
 
-        private CommandLifecycleWatcher eventWatcher;
+        private CommandLifecycleWatcher eventAccumulator;
         private CompanyId id;
 
         @BeforeEach
         void setUp() {
-            this.eventWatcher = new CommandLifecycleWatcher();
-            system.getEventBus().register(eventWatcher);
+            this.eventAccumulator = new CommandLifecycleWatcher();
+            system.getEventBus().register(eventAccumulator);
             id = CompanyId.newBuilder()
                           .setUuid(newUuid())
                           .build();
@@ -142,12 +143,14 @@ class CommandLifecycleTest {
             CommandId commandId = postCommand(rejectedCommand);
             checkReceived(rejectedCommand);
 
-            eventWatcher.nextEvent(CommandAcknowledged.class);
-            eventWatcher.nextEvent(CommandDispatched.class);
+            eventAccumulator.nextEvent(CommandAcknowledged.class);
+            eventAccumulator.nextEvent(CommandDispatched.class);
 
             checkRejected(commandId, Rejections.CompanyNameAlreadyTaken.class);
         }
 
+        // TODO:2018-07-25:dmytro.dashenkov: Re-enable.
+        @Disabled("google.protobuf.Empty is temporally impossible to return from @Assign")
         @Test
         @DisplayName("causes a runtime exception")
         void errored() {
@@ -157,14 +160,14 @@ class CommandLifecycleTest {
                     .build();
             CommandId startId = postCommand(start);
 
-            eventWatcher.assertEventCount(4);
+            eventAccumulator.assertEventCount(4);
 
             checkReceived(start);
             checkAcknowledged(startId);
             checkDispatched(startId);
             checkHandled(startId);
 
-            eventWatcher.forgetEvents();
+            eventAccumulator.forgetEvents();
 
             ProposeCompanyName propose = ProposeCompanyName
                     .newBuilder()
@@ -173,7 +176,7 @@ class CommandLifecycleTest {
                     .build();
             CommandId proposeId = postCommand(propose);
 
-            eventWatcher.assertEventCount(4);
+            eventAccumulator.assertEventCount(4);
 
             checkReceived(propose);
             checkAcknowledged(proposeId);
@@ -211,23 +214,23 @@ class CommandLifecycleTest {
         }
 
         private void checkReceived(Message expectedCommand) {
-            CommandReceived received = eventWatcher.nextEvent(CommandReceived.class);
+            CommandReceived received = eventAccumulator.nextEvent(CommandReceived.class);
             Message actualCommand = unpack(received.getPayload().getMessage());
             assertEquals(expectedCommand, actualCommand);
         }
 
         private void checkAcknowledged(CommandId commandId) {
-            CommandAcknowledged acknowledged = eventWatcher.nextEvent(CommandAcknowledged.class);
+            CommandAcknowledged acknowledged = eventAccumulator.nextEvent(CommandAcknowledged.class);
             assertEquals(commandId, acknowledged.getId());
         }
 
         private void checkDispatched(CommandId commandId) {
-            CommandDispatched dispatched = eventWatcher.nextEvent(CommandDispatched.class);
+            CommandDispatched dispatched = eventAccumulator.nextEvent(CommandDispatched.class);
             assertEquals(commandId, dispatched.getId());
         }
 
         private void checkHandled(CommandId commandId) {
-            CommandHandled handled = eventWatcher.nextEvent(CommandHandled.class);
+            CommandHandled handled = eventAccumulator.nextEvent(CommandHandled.class);
             assertEquals(commandId, handled.getId());
             CompanyId actualReceiver = Identifier.unpack(handled.getReceiver()
                                                                 .getEntityId()
@@ -237,14 +240,14 @@ class CommandLifecycleTest {
 
         @CanIgnoreReturnValue
         private Error checkErrored(CommandId commandId) {
-            CommandErrored errored = eventWatcher.nextEvent(CommandErrored.class);
+            CommandErrored errored = eventAccumulator.nextEvent(CommandErrored.class);
             assertEquals(commandId, errored.getId());
             return errored.getError();
         }
 
         private void checkRejected(CommandId commandId,
                                    Class<? extends Message> expectedRejectionClass) {
-            CommandRejected rejected = eventWatcher.nextEvent(CommandRejected.class);
+            CommandRejected rejected = eventAccumulator.nextEvent(CommandRejected.class);
             assertEquals(commandId, rejected.getId());
             Rejection rejection = rejected.getRejection();
             TypeUrl rejectionType = TypeUrl.ofEnclosed(rejection.getMessage());

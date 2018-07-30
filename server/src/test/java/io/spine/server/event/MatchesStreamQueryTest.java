@@ -70,7 +70,7 @@ class MatchesStreamQueryTest {
                                                 .build();
         Event event = eventFactory.createEvent(eventMsg);
         MatchesStreamQuery predicate = eventWith(FIELD_NAME, properField);
-        assertTrue(predicate.apply(event));
+        assertTrue(predicate.test(event));
     }
 
     @Test
@@ -85,7 +85,7 @@ class MatchesStreamQueryTest {
                                                 .build();
         Event event = eventFactory.createEvent(eventMsg);
         MatchesStreamQuery predicate = eventWith(FIELD_NAME, properField);
-        assertFalse(predicate.apply(event));
+        assertFalse(predicate.test(event));
     }
 
     private static MatchesStreamQuery eventWith(String fieldPath, Message field) {

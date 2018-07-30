@@ -51,7 +51,7 @@ message ScheduledCommandRecord {
 
     // The time when the command was scheduled.
     //
-    // Is set automatically and used only by Spine when re-scheduling a command.
+    // Set automatically and used only by Spine when re-scheduling a command.
     //
     google.protobuf.Timestamp scheduling_time = 3;
 }

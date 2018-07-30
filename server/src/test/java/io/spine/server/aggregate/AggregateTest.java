@@ -45,7 +45,6 @@ import io.spine.server.aggregate.given.aggregate.TestAggregate;
 import io.spine.server.aggregate.given.aggregate.TestAggregateRepository;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
-import io.spine.server.model.Model;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;
@@ -94,6 +93,7 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.env;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.event;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.newTenantId;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.reassignTask;
+import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
@@ -191,9 +191,8 @@ public class AggregateTest {
         @DisplayName("handled command classes")
         void handledCommandClasses() {
             Set<CommandClass> commandClasses =
-                    Model.getInstance()
-                         .asAggregateClass(TestAggregate.class)
-                         .getCommands();
+                    asAggregateClass(TestAggregate.class)
+                            .getCommands();
 
             assertEquals(4, commandClasses.size());
 
@@ -391,14 +390,6 @@ public class AggregateTest {
     @Nested
     @DisplayName("have state")
     class HaveState {
-
-        @Test
-        @DisplayName("default on creation")
-        void defaultOnCreation() {
-            Project state = aggregate.getState();
-
-            assertEquals(aggregate.getDefaultState(), state);
-        }
 
         @Test
         @DisplayName("updated when command is handled")

@@ -24,13 +24,14 @@ import com.google.protobuf.Message;
 import io.spine.core.React;
 import io.spine.core.RejectionContext;
 import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
+import io.spine.server.model.ReactorMethodResult;
+import io.spine.server.rejection.RejectionReactor;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.function.Predicate;
 
-import static io.spine.server.model.HandlerMethod.ensureExternalMatch;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
@@ -40,7 +41,8 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  * @author Dmytro Dashenkov
  * @author Alexander Yevsyukov
  */
-public class RejectionReactorMethod extends RejectionHandlerMethod {
+public class RejectionReactorMethod
+        extends RejectionHandlerMethod<RejectionReactor, ReactorMethodResult> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -56,8 +58,9 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
      * Invokes the wrapped handler method to handle {@code rejectionMessage},
      * {@code commandMessage} with the passed {@code context} of the {@code Command}.
      *
-     * <p>Unlike the {@linkplain #invoke(Object, Message, Message) overloaded alternative method},
-     * this one implies returning the value, being a reaction to the rejection passed.
+     * <p>Unlike the {@linkplain HandlerMethod#invoke(Object, Message, Message)
+     * overloaded alternative method}, this one implies returning the value,
+     * being a reaction to the rejection passed.
      *
      * @param  target           the target object on which call the method
      * @param  rejectionMessage the rejection message to handle
@@ -66,14 +69,20 @@ public class RejectionReactorMethod extends RejectionHandlerMethod {
      *         messages were produced
      */
     @Override
-    public List<? extends Message> invoke(Object target,
-                                          Message rejectionMessage,
-                                          RejectionContext context) {
-        ensureExternalMatch(this, context.getExternal());
+    public
+    ReactorMethodResult invoke(RejectionReactor target,
+                               Message rejectionMessage,
+                               RejectionContext context) {
+        ensureExternalMatch(context.getExternal());
 
         Object output = doInvoke(target, rejectionMessage, context);
-        List<? extends Message> eventMessages = toList(output);
-        return eventMessages;
+        ReactorMethodResult result = toResult(target, output);
+        return result;
+    }
+
+    @Override
+    protected ReactorMethodResult toResult(RejectionReactor target, Object rawMethodOutput) {
+        return new ReactorMethodResult(target, rawMethodOutput);
     }
 
     /** Returns the factory for filtering and creating rejection reactor methods. */

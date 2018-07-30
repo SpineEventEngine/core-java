@@ -20,11 +20,11 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.base.Function;
 import io.spine.annotation.SPI;
 import io.spine.core.TenantId;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * A function, which is calculated in a tenant context.

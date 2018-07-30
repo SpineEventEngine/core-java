@@ -52,8 +52,8 @@ public final class EntityRecordWithColumns implements Serializable {
     /**
      * Creates a new instance of the {@code EntityRecordWithColumns}.
      *
-     * @param record  {@link EntityRecord} to pack
-     * @param columns {@linkplain Columns#extractColumnValues(Entity, Collection)} columns} map to pack
+     * @param record the record to pack
+     * @param columns {@linkplain Columns#extractColumnValues(Entity, Collection)} columns} to pack
      */
     private EntityRecordWithColumns(EntityRecord record,
                                     Map<String, EntityColumn.MemoizedValue> columns) {
@@ -85,9 +85,9 @@ public final class EntityRecordWithColumns implements Serializable {
      * <p>Extracts {@linkplain EntityColumn column} values from the given {@linkplain Entity}
      * and then combines it with the given {@link EntityRecord}.
      *
-     * <p>Uses {@link EntityColumn} definitions contained in storage for the value extraction. This way
-     * the {@linkplain Columns#getAllColumns(Class) column retrieval operation} can be omitted when calling
-     * this method.
+     * <p>Uses {@link EntityColumn} definitions contained in storage for the value extraction.
+     * This way the {@linkplain Columns#getAllColumns(Class) column retrieval operation} can be
+     * omitted when calling this method.
      *
      * @param record  the {@link EntityRecord} to create value from
      * @param entity  the {@link Entity} to extract {@linkplain EntityColumn column} values from
@@ -95,11 +95,11 @@ public final class EntityRecordWithColumns implements Serializable {
      * @return new instance of {@link EntityRecordWithColumns}
      */
     public static EntityRecordWithColumns create(EntityRecord record,
-                                                 Entity entity,
+                                                 Entity<?, ?> entity,
                                                  RecordStorage<?> storage) {
         Collection<EntityColumn> entityColumns = storage.entityColumns();
-        Map<String, EntityColumn.MemoizedValue> columns = extractColumnValues(entity,
-                                                                              entityColumns);
+        Map<String, EntityColumn.MemoizedValue> columns =
+                extractColumnValues(entity, entityColumns);
         return of(record, columns);
     }
 
@@ -164,8 +164,9 @@ public final class EntityRecordWithColumns implements Serializable {
      * <p>If returns {@code false}, the {@linkplain EntityColumn columns} are not considered
      * by the storage.
      *
-     * @return {@code true} if the object was constructed via {@link #create(EntityRecord, Entity, RecordStorage)}
-     *         and the entity has columns; {@code false} otherwise
+     * @return {@code true} if the object was constructed via
+     *  {@link #create(EntityRecord, Entity, RecordStorage)} and the entity has columns;
+     *  {@code false} otherwise
      */
     public boolean hasColumns() {
         return hasStorageFields;

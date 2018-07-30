@@ -18,25 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server;
+package io.spine.server.storage.given;
 
-import io.spine.annotation.Internal;
-import io.spine.core.Command;
-
-import java.util.Iterator;
+import io.spine.server.entity.TransactionalEntity;
+import io.spine.test.storage.Project;
+import io.spine.test.storage.ProjectId;
+import io.spine.test.storage.ProjectVBuilder;
 
 /**
- * An index of all commands in a bounded context.
- *
- * @author Dmytro Dashenkov
+ * Test environment for {@link io.spine.server.stand.StandStorageTest StandStorageTest}.
  */
-@Internal
-public interface CommandIndex {
+public class StandStorageTestEnv {
 
-    /**
-     * Returns an {@code Iterator} over all the scheduled commands in the bounded context.
-     *
-     * @return all scheduled commands
-     */
-    Iterator<Command> scheduledCommands();
+    public static class StandingEntity
+            extends TransactionalEntity<ProjectId, Project, ProjectVBuilder> {
+
+        public StandingEntity(ProjectId id) {
+            super(id);
+        }
+    }
 }

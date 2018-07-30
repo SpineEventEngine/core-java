@@ -18,42 +18,54 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server;
+package io.spine.testing.server;
 
 import com.google.protobuf.Message;
-import io.spine.core.Ack;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.CommandId;
-import io.spine.server.bus.BusFilter;
+import io.spine.core.Command;
+import io.spine.core.Event;
+import io.spine.option.EntityOption;
+import io.spine.server.entity.EntityRecordChange;
+import io.spine.server.entity.Repository;
 
-import java.util.Map;
-import java.util.Optional;
-
-import static com.google.common.collect.Maps.newHashMap;
+import java.util.Set;
 
 /**
- * A {@link BusFilter} which remembers all the accepted command messages and never halts the command
- * processing.
+ * A test implementation of {@link Repository.Lifecycle} which performs no action on any method
+ * call.
  *
  * @author Dmytro Dashenkov
  */
-final class CommandWatcher implements BusFilter<CommandEnvelope> {
+public enum  NoOpLifecycle implements Repository.Lifecycle {
 
-    private final Map<CommandId, Message> commandMessages = newHashMap();
+    INSTANCE;
 
-    /**
-     * Looks up the command message by the command ID.
-     */
-    <M extends Message> Optional<M> find(CommandId commandId) {
-        Message commandMessage = commandMessages.get(commandId);
-        @SuppressWarnings("unchecked")
-        M result = (M) commandMessage;
-        return Optional.ofNullable(result);
+    @Override
+    public void onEntityCreated(EntityOption.Kind entityKind) {
+        // NoOp.
     }
 
     @Override
-    public Optional<Ack> accept(CommandEnvelope envelope) {
-        commandMessages.put(envelope.getId(), envelope.getMessage());
-        return Optional.empty();
+    public void onDispatchCommand(Command command) {
+        // NoOp.
+    }
+
+    @Override
+    public void onCommandHandled(Command command) {
+        // NoOp.
+    }
+
+    @Override
+    public void onDispatchEventToSubscriber(Event event) {
+        // NoOp.
+    }
+
+    @Override
+    public void onDispatchEventToReactor(Event event) {
+        // NoOp.
+    }
+
+    @Override
+    public void onStateChanged(EntityRecordChange change, Set<? extends Message> messageIds) {
+        // NoOp.
     }
 }
