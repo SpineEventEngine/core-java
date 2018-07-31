@@ -53,8 +53,8 @@ message CommandLifecycle {
 
     // The receiver of the command.
     //
-    // This field is set only after the command is successfully handled. Otherwise, the receiver is
-    // considered unknown.
+    // This field is set only after the command is successfully handled. Before that, this field is
+    // not set.
     //
     CommandReceiver receiver = 3;
 
@@ -64,14 +64,14 @@ message CommandLifecycle {
 
 // A receiver of a command.
 //
-// This type represents an ID of an entity, which handles the command.
+// This type represents an ID of an entity, which has handled a command.
 //
 message CommandReceiver {
 
-    // The ID of the entity which the command is dispatched to.
+    // The ID of the entity which the command was dispatched to.
     spine.client.EntityId entity_id = 1 [(valid) = true];
 
-    // The state type URL of the entity ehich received the command.
+    // The state type URL of the entity which received the command.
     string type_url = 2 [(required) = true];
 }
 

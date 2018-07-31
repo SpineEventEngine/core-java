@@ -58,8 +58,6 @@ message MarkCommandAsAcknowledged {
 
 // A system command to schedule a domain command.
 //
-// After handling this command, the domain command is considered scheduled.
-//
 // See `spine.system.server.ScheduledCommandRecord` projection for the scheduled command
 // representation.
 //
