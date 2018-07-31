@@ -20,14 +20,10 @@
 package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.Int32Value;
-import com.google.protobuf.StringValue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Alex Tymchenko
@@ -37,17 +33,8 @@ class RejectionClassTest {
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() throws Exception {
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(RejectionClass.class);
-    }
-
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display name.
-    @Test
-    @DisplayName("create set on varargs")
-    void createSetOnVarargs() {
-        assertEquals(3,
-                     RejectionClass.setOf(BoolValue.class, Int32Value.class, StringValue.class)
-                                   .size());
     }
 }

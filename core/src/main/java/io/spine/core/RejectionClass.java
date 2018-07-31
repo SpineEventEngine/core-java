@@ -19,21 +19,17 @@
  */
 package io.spine.core;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.type.MessageClass;
-
-import java.util.Arrays;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.core.Events.ensureMessage;
 
 /**
  * A value object holding a class of a business rejection.
  *
  * @author Alex Tymchenko
  */
-public class RejectionClass extends MessageClass {
+public class RejectionClass extends EventClass {
 
     private static final long serialVersionUID = 0L;
 
@@ -54,7 +50,7 @@ public class RejectionClass extends MessageClass {
     /**
      * Creates a new instance of the rejection class by passed rejection instance.
      *
-     * <p>If an instance of {@link Rejection} (which implements {@code Message}) is
+     * <p>If an instance of {@link Event} (which implements {@code Message}) is
      * passed to this method, enclosing rejection message will be un-wrapped to determine
      * the class of the rejection.
      *
@@ -62,23 +58,8 @@ public class RejectionClass extends MessageClass {
      * @return new instance
      */
     public static RejectionClass of(Message rejectionOrMessage) {
-        Message message = Rejections.ensureMessage(rejectionOrMessage);
+        Message message = ensureMessage(rejectionOrMessage);
         RejectionClass result = of(message.getClass());
         return result;
-    }
-
-    /** Creates an immutable set of {@code RejectionClass} from the passed classes. */
-    public static Set<RejectionClass> setOf(Iterable<Class<? extends Message>> classes) {
-        ImmutableSet.Builder<RejectionClass> builder = ImmutableSet.builder();
-        for (Class<? extends Message> cls : classes) {
-            builder.add(of(cls));
-        }
-        return builder.build();
-    }
-
-    /** Creates an immutable set of {@code RejectionClass} from the passed classes. */
-    @SafeVarargs
-    public static Set<RejectionClass> setOf(Class<? extends Message> ...classes) {
-        return setOf(Arrays.asList(classes));
     }
 }

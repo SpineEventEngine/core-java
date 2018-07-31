@@ -69,18 +69,6 @@ public final class Rejections {
     }
 
     /**
-     * Extracts a rejection message if the passed instance is {@link Rejection} or {@link Any},
-     * otherwise returns the passed message.
-     */
-    public static Message ensureMessage(Message rejectionOrMessage) {
-        checkNotNull(rejectionOrMessage);
-        if (rejectionOrMessage instanceof Rejection) {
-            return getMessage((Rejection) rejectionOrMessage);
-        }
-        return io.spine.protobuf.Messages.ensureMessage(rejectionOrMessage);
-    }
-
-    /**
      * Converts this {@code ThrowableMessage} into {@link Rejection}.
      *
      * @param command the command which caused the rejection
