@@ -46,8 +46,8 @@ import io.spine.system.server.CompanyNameAlreadyTaken;
 import io.spine.system.server.CompanyNameRethought;
 import io.spine.system.server.CompanyVBuilder;
 import io.spine.system.server.EstablishCompany;
+import io.spine.system.server.FinalizeCompanyName;
 import io.spine.system.server.ProposeCompanyName;
-import io.spine.system.server.SelectCompanyName;
 import io.spine.system.server.StartCompanyEstablishing;
 
 import java.util.Collection;
@@ -139,7 +139,7 @@ public final class CommandLifecycleTestEnv {
         }
 
         @Assign
-        CommandTransformed handle(SelectCompanyName command, CommandContext context) {
+        CommandTransformed handle(FinalizeCompanyName command, CommandContext context) {
             String name = getBuilder().getProposedName();
             EstablishCompany establishCommand = EstablishCompany
                     .newBuilder()
