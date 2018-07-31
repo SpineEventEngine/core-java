@@ -24,7 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.base.Time;
 import io.spine.core.TenantId;
-import io.spine.server.MemoizingGateway;
+import io.spine.system.server.MemoizingGateway;
 import io.spine.system.server.NoOpSystemGateway;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
