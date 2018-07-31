@@ -128,7 +128,7 @@ class FieldMasksTest {
             assertSize(original.size(), masked);
 
             // Collection references are not the same
-            assertFalse(original == masked);
+            assertNotSame(original, masked);
 
             for (Project project : masked) {
                 assertMatchesMask(project, fieldMask);
