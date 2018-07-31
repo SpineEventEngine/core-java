@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 import io.spine.system.server.SystemGateway;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
 
@@ -39,7 +39,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public final class MemoizingGateway implements SystemGateway {
 
     private final List<Message> commands = newLinkedList();
-    private @Nullable TenantId tenantId;
+
+    /**
+     * The last tenant which a system command was posted for.
+     *
+     * <p>This field may be {@code null} iff no system has yet been posted.
+     */
+    private @MonotonicNonNull TenantId tenantId;
 
     private final boolean multitenant;
 
@@ -47,23 +53,43 @@ public final class MemoizingGateway implements SystemGateway {
         this.multitenant = multitenant;
     }
 
+    /**
+     * Creates a new instance of {@code MemoizingGateway} for a single-tenant execution environment.
+     *
+     * @return new {@code MemoizingGateway}
+     */
     public static MemoizingGateway singleTenant() {
         return new MemoizingGateway(false);
     }
 
+    /**
+     * Creates a new instance of {@code MemoizingGateway} for a multitenant execution environment.
+     *
+     * @return new {@code MemoizingGateway}
+     */
     public static MemoizingGateway multitenant() {
         return new MemoizingGateway(true);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Memoizes the given command message and the {@link TenantId} which it was posted for.
+     *
+     * @see #receivedCommand()
+     * @see #receivedTenant()
+     */
     @Override
     public void postCommand(Message systemCommand) {
         commands.add(systemCommand);
-        tenantId = new TenantFunction<TenantId>(multitenant) {
+        TenantId tenantId = new TenantFunction<TenantId>(multitenant) {
             @Override
             public TenantId apply(TenantId id) {
                 return id;
             }
         }.execute();
+        checkNotNull(tenantId);
+        this.tenantId = tenantId;
     }
 
     /**
@@ -74,22 +100,22 @@ public final class MemoizingGateway implements SystemGateway {
      * @return the single posted command message
      */
     @CanIgnoreReturnValue
-    public Message oneCommand() {
+    public Message receivedCommand() {
         assertEquals(1, commands.size());
         return commands.get(0);
     }
 
     /**
-     * Obtains the single {@link TenantId} which the {@link #oneCommand() single command} was posted
-     * for.
+     * Obtains the single {@link TenantId} which the {@link #receivedCommand() single command} was
+     * posted for.
      *
      * <p>Fails if the were no commands posted or if there were more then one commands. Also fails
      * if the command was posted for the default tenant.
      *
      * @return the single tenant ID
      */
-    public TenantId oneTenant() {
-        oneCommand();
+    public TenantId receivedTenant() {
+        receivedCommand();
         checkNotNull(tenantId);
         return tenantId;
     }
