@@ -146,7 +146,7 @@ public abstract class Bus<T extends Message,
         checkNotNull(messages);
         checkNotNull(observer);
 
-        StreamObserver<Ack> wrappedObserver = wrappedObserver(messages, observer);
+        StreamObserver<Ack> wrappedObserver = prepareObserver(messages, observer);
         filterAndPost(messages, wrappedObserver);
     }
 
@@ -163,21 +163,30 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * Preprocesses the given {@link StreamObserver} before it receives the outcome of
-     * a {@link #post(Iterable, StreamObserver)} operation.
+     * Prepares the given {@link StreamObserver} in order to post messages into this bus.
      *
-     * <p>By default, returns the given {@code observer}. Override this method in order to change
-     * the behaviour.
+     * <p>This method is an extension point of a {@code Bus}.
      *
-     * <p>A typical implementation obtains the output from the base method
-     * (via {@code super.wrappedObserver(messages, source)}), creates a new {@link StreamObserver},
-     * which performs some custom logic and delegates its calls to the obtained observer instance.
+     * <p>When {@linkplain #post(Iterable, StreamObserver) posting} messages into the bus,
+     * the message {@linkplain Ack acknowledgement} messages are passed to the observer created by
+     * this method.
+     *
+     * <p>Conventionally, the resulting {@link StreamObserver} should delegate calls to
+     * the {@code source} observer, so that the caller receives the posting outcome. If violating
+     * this convention, the {@code Bus} implementation should specify the altered behavior
+     * explicitly.
+     *
+     * <p>The resulting observer is used only for acknowledgment of the given messages. Thus,
+     * the messages can be used in order to construct the observer.
+     *
+     * <p>By default, this method returns the {@code source} observer. See {@code Bus} subclasses
+     * for the altered behavior specification.
      *
      * @param messages the messages to create an observer for
      * @param source   the source {@link StreamObserver} to be transformed
      * @return a transformed observer of {@link Ack} streams
      */
-    protected StreamObserver<Ack> wrappedObserver(Iterable<T> messages,
+    protected StreamObserver<Ack> prepareObserver(Iterable<T> messages,
                                                   StreamObserver<Ack> source) {
         return source;
     }

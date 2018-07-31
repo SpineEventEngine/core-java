@@ -178,9 +178,9 @@ public class CommandBus extends Bus<Command,
      * @return new instance of {@link CommandAckMonitor} with the given parameters
      */
     @Override
-    protected StreamObserver<Ack> wrappedObserver(Iterable<Command> commands,
+    protected StreamObserver<Ack> prepareObserver(Iterable<Command> commands,
                                                   StreamObserver<Ack> source) {
-        StreamObserver<Ack> wrappedSource = super.wrappedObserver(commands, source);
+        StreamObserver<Ack> wrappedSource = super.prepareObserver(commands, source);
         TenantId tenant = tenantOf(commands);
         StreamObserver<Ack> result = CommandAckMonitor
                 .newBuilder()
