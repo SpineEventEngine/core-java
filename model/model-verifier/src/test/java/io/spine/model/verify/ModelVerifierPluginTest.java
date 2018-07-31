@@ -20,8 +20,6 @@
 
 package io.spine.model.verify;
 
-import io.spine.testing.TempDirectory;
-import io.spine.testing.TempDirectory.TempDir;
 import io.spine.tools.gradle.GradleProject;
 import io.spine.tools.gradle.TaskName;
 import org.gradle.testkit.runner.BuildResult;
@@ -32,6 +30,8 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junitpioneer.jupiter.TempDirectory;
+import org.junitpioneer.jupiter.TempDirectory.TempDir;
 
 import java.nio.file.Path;
 
