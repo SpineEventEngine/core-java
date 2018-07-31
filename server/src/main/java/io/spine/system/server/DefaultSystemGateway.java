@@ -20,6 +20,7 @@
 
 package io.spine.system.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.client.ActorRequestFactory;
@@ -67,6 +68,7 @@ public final class DefaultSystemGateway implements SystemGateway {
               .post(command, noOpObserver());
     }
 
+    @VisibleForTesting
     BoundedContext target() {
         return system;
     }
