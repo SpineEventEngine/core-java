@@ -49,12 +49,11 @@ import static io.spine.protobuf.AnyPacker.unpack;
 @VisibleForTesting
 public class Acknowledgements {
 
-    private static final Rejection EMPTY_REJECTION = Rejection.getDefaultInstance();
     private static final Error EMPTY_ERROR = Error.getDefaultInstance();
 
     private final List<Ack> acks = newArrayList();
     private final List<Error> errors = newArrayList();
-    private final List<Rejection> rejections = newArrayList();
+    private final List<Event> rejections = newArrayList();
     private final Map<RejectionClass, Integer> rejectionTypes;
 
     public Acknowledgements(Iterable<Ack> responses) {
@@ -68,10 +67,8 @@ public class Acknowledgements {
                 errors.add(error);
             }
 
-            Rejection rejection = status.getRejection();
-            if (!rejection.equals(EMPTY_REJECTION)) {
-                rejections.add(rejection);
-            }
+            Event rejection = status.getRejection();
+            rejections.add(rejection);
         }
         rejectionTypes = countRejectionTypes(rejections);
     }
@@ -82,9 +79,9 @@ public class Acknowledgements {
      * @param rejections a list of {@link Event}
      * @return a mapping of Rejection classes to their count
      */
-    private static Map<RejectionClass, Integer> countRejectionTypes(List<Rejection> rejections) {
+    private static Map<RejectionClass, Integer> countRejectionTypes(List<Event> rejections) {
         Map<RejectionClass, Integer> countForType = new HashMap<>();
-        for (Rejection rejection : rejections) {
+        for (Event rejection : rejections) {
             RejectionClass type = RejectionClass.of(rejection);
             int currentCount = countForType.getOrDefault(type, 0);
             countForType.put(type, currentCount + 1);
@@ -205,7 +202,7 @@ public class Acknowledgements {
     /**
      * A predicate filtering the {@link Rejection rejections} which match the provided predicate.
      */
-    private static class RejectionFilter<T extends Message> implements Predicate<Rejection> {
+    private static class RejectionFilter<T extends Message> implements Predicate<Event> {
 
         private final TypeUrl typeUrl;
         private final RejectionCriterion<T> predicate;
@@ -216,8 +213,8 @@ public class Acknowledgements {
         }
 
         @Override
-        public boolean test(Rejection rejection) {
-            T message = unpack(rejection.getMessage());
+        public boolean test(Event rejectionEvent) {
+            T message = unpack(rejectionEvent.getMessage());
             return typeUrl.equals(TypeUrl.of(message)) && predicate.matches(message);
         }
     }
