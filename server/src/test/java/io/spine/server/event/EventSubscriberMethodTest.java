@@ -170,13 +170,12 @@ class EventSubscriberMethodTest {
         }
 
         @Test
-        @DisplayName("Rejection type")
+        @DisplayName("rejection event type")
         void rejectionClassType() {
             Method rejectionSubscriber = new ARejectionSubscriber().getMethod();
 
-            assertIsEventSubscriber(rejectionSubscriber, false);
+            assertIsEventSubscriber(rejectionSubscriber, true);
         }
-
     }
 
     private static void assertIsEventSubscriber(Method subscriber, boolean isSubscriber) {

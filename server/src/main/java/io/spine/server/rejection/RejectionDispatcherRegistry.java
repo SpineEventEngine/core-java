@@ -31,6 +31,7 @@ import java.util.Set;
  *
  * @author Alex Tymchenko
  */
+@Deprecated
 public class RejectionDispatcherRegistry
         extends OutputDispatcherRegistry<RejectionClass, RejectionDispatcher<?>> {
     /**

@@ -29,7 +29,6 @@ import io.spine.core.CommandValidationError;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.commandbus.given.MultitenantCommandBusTestEnv.AddTaskDispatcher;
-import io.spine.server.rejection.RejectionBus;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
 import org.junit.jupiter.api.DisplayName;
@@ -45,11 +44,8 @@ import static io.spine.server.commandbus.Given.ACommand.addTask;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 
 @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display names.
 @DisplayName("Multitenant CommandBus should")
@@ -73,57 +69,6 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
     void notAcceptDefaultCommand() {
         assertThrows(IllegalArgumentException.class,
                      () -> commandBus.post(Command.getDefaultInstance(), observer));
-    }
-
-    @Nested
-    @DisplayName("have RejectionBus")
-    class HaveRejectionBus {
-
-        @Test
-        @DisplayName("default if no custom one was specified")
-        void setToDefault() {
-            CommandBus bus = CommandBus.newBuilder()
-                                       .injectTenantIndex(tenantIndex)
-                                       .injectSystemGateway(systemGateway)
-                                       .build();
-            assertNotNull(bus.rejectionBus());
-        }
-
-        @Test
-        @DisplayName("custom if one was specified via Builder")
-        void setToCustom() {
-            RejectionBus expectedRejectionBus = mock(RejectionBus.class);
-            CommandBus commandBus = CommandBus.newBuilder()
-                                              .injectTenantIndex(tenantIndex)
-                                              .injectSystemGateway(systemGateway)
-                                              .setRejectionBus(expectedRejectionBus)
-                                              .build();
-            assertNotNull(commandBus);
-
-            RejectionBus actualRejectionBus = commandBus.rejectionBus();
-            assertEquals(expectedRejectionBus, actualRejectionBus);
-        }
-    }
-
-    @Nested
-    @DisplayName("when closed, shutdown")
-    class ShutdownWhenClosed {
-
-        @Test
-        @DisplayName("RejectionBus")
-        void rejectionBus() throws Exception {
-            commandBus.close();
-
-            verify(rejectionBus).close();
-        }
-
-        @Test
-        @DisplayName("CommandScheduler")
-        void commandScheduler() throws Exception {
-            commandBus.close();
-
-            verify(scheduler).shutdown();
-        }
     }
 
     @Test

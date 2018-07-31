@@ -35,8 +35,8 @@ import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
+import io.spine.server.bus.MulticastBus;
 import io.spine.server.outbus.CommandOutputBus;
-import io.spine.server.outbus.OutputDispatcherRegistry;
 import io.spine.server.storage.StorageFactory;
 import io.spine.validate.MessageValidator;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -48,6 +48,7 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.of;
+import static java.lang.String.format;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -89,7 +90,7 @@ import static com.google.common.collect.ImmutableSet.of;
  * @see io.spine.core.Subscribe @Subscribe
  */
 public class EventBus
-        extends CommandOutputBus<Event, EventEnvelope, EventClass, EventDispatcher<?>> {
+        extends MulticastBus<Event, EventEnvelope, EventClass, EventDispatcher<?>> {
 
     /*
      * NOTE: Even though, the EventBus has a private constructor and
@@ -156,7 +157,7 @@ public class EventBus
     }
 
     @Override
-    protected OutputDispatcherRegistry<EventClass, EventDispatcher<?>> createRegistry() {
+    protected EventDispatcherRegistry createRegistry() {
         return new EventDispatcherRegistry();
     }
 
@@ -205,13 +206,20 @@ public class EventBus
         post(events, streamObserver);
     }
 
-    @Override
     protected EventEnvelope enrich(EventEnvelope event) {
         if (enricher == null || !enricher.canBeEnriched(event)) {
             return event;
         }
         EventEnvelope enriched = enricher.enrich(event);
         return enriched;
+    }
+
+    @Override
+    protected void dispatch(EventEnvelope envelope) {
+        EventEnvelope enrichedEnvelope = enrich(envelope);
+        int dispatchersCalled = callDispatchers(enrichedEnvelope);
+        checkState(dispatchersCalled != 0,
+                   format("Message %s has no dispatchers.", envelope.getMessage()));
     }
 
     @Override

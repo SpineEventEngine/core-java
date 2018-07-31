@@ -23,8 +23,6 @@ package io.spine.server.model;
 import com.google.protobuf.Any;
 import io.spine.core.Version;
 
-import java.util.Optional;
-
 /**
  * An object with identity which produces events.
  *
@@ -40,7 +38,8 @@ public interface EventProducer {
     /**
      * The version of the object to be put into events.
      *
-     * <p>If {@linkplain Optional#empty() empty}, no version will be added to generated events.
+     * <p>If {@linkplain Version#getDefaultInstance() empty}, no version will be added to
+     * the generated events.
      */
     Version getVersion();
 }

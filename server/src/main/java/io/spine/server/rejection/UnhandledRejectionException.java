@@ -34,6 +34,7 @@ import static java.lang.String.format;
  *
  * @author Dmytro Dashenkov
  */
+@Deprecated
 public class UnhandledRejectionException extends RuntimeException implements MessageUnhandled {
 
     private static final long serialVersionUID = 0L;

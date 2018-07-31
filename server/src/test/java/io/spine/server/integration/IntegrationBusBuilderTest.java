@@ -23,7 +23,6 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.server.bus.BusBuilderTest;
 import io.spine.server.event.EventBus;
-import io.spine.server.rejection.RejectionBus;
 import io.spine.server.transport.TransportFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -69,13 +68,6 @@ class IntegrationBusBuilderTest
         }
 
         @Test
-        @DisplayName("RejectionBus")
-        void rejectionBus() {
-            assertThrows(NullPointerException.class,
-                         () -> builder().setRejectionBus(nullRef()));
-        }
-
-        @Test
         @DisplayName("BoundedContextName")
         void boundedContextName() {
             assertThrows(NullPointerException.class,
@@ -104,20 +96,12 @@ class IntegrationBusBuilderTest
         }
 
         @Test
-        @DisplayName("RejectionBus")
-        void rejectionBus() {
-            RejectionBus mock = mock(RejectionBus.class);
-            assertPresent(mock, builder().setRejectionBus(mock)
-                                         .getRejectionBus());
-        }
-
-        @Test
         @DisplayName("BoundedContextName")
         void boundedContextName() {
             BoundedContextName name =
                     BoundedContextNames.newName("Name that is expected back from the Builder");
             assertPresent(name, builder().setBoundedContextName(name)
-                                        .getBoundedContextName());
+                                         .getBoundedContextName());
         }
 
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // is the purpose of the method.

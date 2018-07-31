@@ -38,6 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <S> the type of rejection subscribers
  * @author Alexander Yevsyukov
  */
+@Deprecated
 public final class RejectionSubscriberClass<S extends RejectionSubscriber> extends ModelClass<S> {
 
     private static final long serialVersionUID = 0L;

@@ -31,8 +31,6 @@ import io.spine.core.UserId;
 import io.spine.people.PersonName;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventEnricherTest;
-import io.spine.server.outbus.enrich.given.StringToPersonName;
-import io.spine.server.outbus.enrich.given.StringToZoneOffset;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;

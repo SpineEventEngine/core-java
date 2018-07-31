@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.outbus.enrich.given;
+package io.spine.server.event.given;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
@@ -27,7 +27,6 @@ import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.people.PersonName;
 import io.spine.server.event.EventEnricher;
-import io.spine.server.outbus.enrich.Enricher;
 import io.spine.test.event.ProjectId;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneOffset;
@@ -38,35 +37,20 @@ import java.util.function.Function;
 /**
  * @author Alexander Yevsyukov
  */
-public class EventMessageEnricherTestEnv {
+public class EnricherBuilderTestEnv {
 
     /** Prevent instantiation of this utility class. */
-    private EventMessageEnricherTestEnv() {
+    private EnricherBuilderTestEnv() {
     }
 
     public static class Enrichment {
 
-        private static final Function<EventId, String> EVENT_ID_TO_STRING =
-                input -> input == null ? "" : input.getValue();
-        private static final Function<Timestamp, String> TIMESTAMP_TO_STRING =
-                input -> input == null ? "" : input.toString();
-        private static final Function<CommandContext, String> CMD_CONTEXT_TO_STRING =
-                input -> input == null ? "" : input.toString();
-        private static final Function<Any, String> ANY_TO_STRING =
-                input -> input == null ? "" : input.toString();
-        private static final Function<Integer, String> VERSION_TO_STRING =
-                input -> input == null ? "" : input.toString();
-        private static final Function<String, ZoneOffset> STRING_TO_ZONE_OFFSET =
-                new StringToZoneOffset();
-        private static final Function<String, PersonName> STRING_TO_PERSON_NAME =
-                new StringToPersonName();
-        private static final Function<String, Integer> STRING_TO_INT = Integer::valueOf;
-
+        /** Prevent instantiation of this utility class. */
         private Enrichment() {
         }
 
         /** Creates a new enricher with all required enrichment functions set. */
-        public static Enricher newEventEnricher() {
+        public static EventEnricher newEnricher() {
             EventEnricher.Builder builder = EventEnricher
                     .newBuilder()
                     .add(ProjectId.class, String.class, new GetProjectName())
@@ -88,7 +72,7 @@ public class EventMessageEnricherTestEnv {
                 if (id == null) {
                     return null;
                 }
-                String name = "pr-" + id.getId();
+                String name = "P-" + id.getId();
                 return name;
             }
         }
@@ -99,8 +83,37 @@ public class EventMessageEnricherTestEnv {
                 if (id == null) {
                     return null;
                 }
-                return GivenUserId.of("po-" + id.getId());
+                return GivenUserId.of("PO-" + id.getId());
             }
         }
+
+        private static final Function<EventId, String> EVENT_ID_TO_STRING =
+                new Function<EventId, String>() {
+                    @Override
+                    public @Nullable String apply(@Nullable EventId input) {
+                        return input == null ? "" : input.getValue();
+                    }
+                };
+
+        private static final Function<Timestamp, String> TIMESTAMP_TO_STRING =
+                input -> input == null ? "" : input.toString();
+
+        private static final Function<CommandContext, String> CMD_CONTEXT_TO_STRING =
+                input -> input == null ? "" : input.toString();
+
+        private static final Function<Any, String> ANY_TO_STRING =
+                input -> input == null ? "" : input.toString();
+
+        private static final Function<Integer, String> VERSION_TO_STRING =
+                input -> input == null ? "" : input.toString();
+
+        private static final Function<String, ZoneOffset> STRING_TO_ZONE_OFFSET =
+                new StringToZoneOffset();
+
+        private static final Function<String, PersonName> STRING_TO_PERSON_NAME =
+                new StringToPersonName();
+
+        private static final Function<String, Integer> STRING_TO_INT = Integer::valueOf;
+
     }
 }

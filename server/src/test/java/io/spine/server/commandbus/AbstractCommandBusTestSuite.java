@@ -35,7 +35,6 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
-import io.spine.server.rejection.RejectionBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.NoOpSystemGateway;
@@ -85,7 +84,6 @@ abstract class AbstractCommandBusTestSuite {
 
     protected CommandBus commandBus;
     protected EventBus eventBus;
-    protected RejectionBus rejectionBus;
     protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
     protected MemoizingObserver<Ack> observer;
@@ -175,20 +173,18 @@ abstract class AbstractCommandBusTestSuite {
                 InMemoryStorageFactory.newInstance(newName(cls.getSimpleName()), multitenant);
         tenantIndex = TenantAwareTest.createTenantIndex(multitenant, storageFactory);
         scheduler = spy(new ExecutorCommandScheduler());
-        rejectionBus = spy(RejectionBus.newBuilder()
-                                       .build());
         systemGateway = NoOpSystemGateway.INSTANCE;
+        eventBus = EventBus.newBuilder()
+                           .setStorageFactory(storageFactory)
+                           .build();
         commandBus = CommandBus
                 .newBuilder()
                 .setMultitenant(this.multitenant)
                 .setCommandScheduler(scheduler)
-                .setRejectionBus(rejectionBus)
+                .injectEventBus(eventBus)
                 .injectSystemGateway(systemGateway)
                 .injectTenantIndex(tenantIndex)
                 .build();
-        eventBus = EventBus.newBuilder()
-                           .setStorageFactory(storageFactory)
-                           .build();
         requestFactory =
                 multitenant
                 ? TestActorRequestFactory.newInstance(getClass(), newUuid())

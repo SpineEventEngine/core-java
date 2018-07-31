@@ -18,12 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.outbus.enrich;
+package io.spine.server.event;
 
 import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.core.EnrichableMessageEnvelope;
+import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeName;
 
@@ -38,14 +39,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-final class Action<M extends EnrichableMessageEnvelope<?, ?, C>, C extends Message> {
+final class Action {
 
-    private final M envelope;
+    private final EventEnvelope envelope;
     private final Collection<EnrichmentFunction<?, ?, ?>> availableFunctions;
 
     private final Map<String, Any> enrichments = Maps.newHashMap();
 
-    Action(Enricher<M, ?> parent, M envelope) {
+    Action(EventEnricher parent, EventEnvelope envelope) {
         this.envelope = envelope;
         Class<? extends Message> sourceClass = envelope.getMessageClass()
                                                        .value();
@@ -56,11 +57,11 @@ final class Action<M extends EnrichableMessageEnvelope<?, ?, C>, C extends Messa
                                                    .collect(Collectors.toList());
     }
 
-    M perform() {
+    EventEnvelope perform() {
         createEnrichments();
         @SuppressWarnings("unchecked")
             // The cast is safe because envelopes produce enriched versions of the same type.
-        M enriched = (M) envelope.toEnriched(enrichments);
+        EventEnvelope enriched = (EventEnvelope) envelope.toEnriched(enrichments);
         return enriched;
     }
 
@@ -81,11 +82,13 @@ final class Action<M extends EnrichableMessageEnvelope<?, ?, C>, C extends Messa
      * <p>We suppress the {@code "unchecked"} because we ensure types when we...
      * <ol>
      *      <li>create enrichments,
-     *      <li>put them into {@linkplain Enricher#functions} by their message class.
+     *      <li>put them into {@linkplain EventEnricher#functions} by their message class.
      * </ol>
      */
     @SuppressWarnings("unchecked")
-    private Message apply(EnrichmentFunction function, Message input, C context) {
+    private static Message apply(EnrichmentFunction function,
+                                 Message input,
+                                 EventContext context) {
         Message result = (Message) function.apply(input, context);
         return result;
     }

@@ -50,6 +50,7 @@ import static java.lang.String.format;
  * @author Alex Tymchenko
  * @see RejectionDispatcherDelegate
  */
+@Deprecated
 @Internal
 public final class DelegatingRejectionDispatcher<I> implements RejectionDispatcher<I> {
 

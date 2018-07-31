@@ -39,6 +39,7 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  * @see DelegatingRejectionDispatcher
  */
+@Deprecated
 @Internal
 public interface RejectionDispatcherDelegate<I> {
 

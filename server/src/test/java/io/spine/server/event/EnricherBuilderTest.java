@@ -18,14 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.outbus.enrich;
+package io.spine.server.event;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.core.UserId;
-import io.spine.server.event.EventEnricher;
-import io.spine.server.outbus.enrich.given.EnricherBuilderTestEnv.Enrichment;
+import io.spine.server.event.given.EnricherBuilderTestEnv.Enrichment;
 import io.spine.test.event.ProjectId;
 import io.spine.testing.Tests;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -47,10 +46,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ResultOfMethodCallIgnored")
-@DisplayName("Enricher Builder should")
+@DisplayName("EventEnricher Builder should")
 class EnricherBuilderTest {
 
-    private Enricher.AbstractBuilder builder;
+    private EventEnricher.Builder builder;
     private Function<Timestamp, StringValue> function;
     private FieldEnrichment<Timestamp, StringValue, ?> fieldEnrichment;
 
@@ -70,13 +69,13 @@ class EnricherBuilderTest {
     }
 
     @Nested
-    @DisplayName("build Enricher")
+    @DisplayName("build EventEnricher")
     class BuildEnricher {
 
         @Test
         @DisplayName("if all functions have been registered")
         void forAllFunctionsRegistered() {
-            Enricher enricher = Enrichment.newEnricher();
+            EventEnricher enricher = Enrichment.newEnricher();
 
             assertNotNull(enricher);
         }
@@ -84,7 +83,7 @@ class EnricherBuilderTest {
         @Test
         @DisplayName("if no functions have been registered")
         void forNoFunctionsRegistered() {
-            Enricher enricher = EventEnricher.newBuilder()
+            EventEnricher enricher = EventEnricher.newBuilder()
                                              .build();
             assertNotNull(enricher);
         }
@@ -96,7 +95,7 @@ class EnricherBuilderTest {
                         new Enrichment.GetProjectOwnerId())
                    .add(ProjectId.class, String.class,
                         new Enrichment.GetProjectName());
-            Enricher enricher = builder.build();
+            EventEnricher enricher = builder.build();
             assertNotNull(enricher);
         }
     }

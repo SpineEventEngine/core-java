@@ -42,6 +42,7 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  * @author Dmytro Dashenkov
  * @author Alexander Yevsyukov
  */
+@Deprecated
 public final class RejectionSubscriberMethod
         extends RejectionHandlerMethod<Object, MethodResult<Empty>> {
 

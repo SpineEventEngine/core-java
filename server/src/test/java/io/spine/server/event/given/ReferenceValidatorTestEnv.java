@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.outbus.enrich.given;
+package io.spine.server.event.given;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
@@ -27,7 +27,6 @@ import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.people.PersonName;
 import io.spine.server.event.EventEnricher;
-import io.spine.server.outbus.enrich.Enricher;
 import io.spine.test.event.ProjectId;
 import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneOffset;
@@ -78,7 +77,7 @@ public class ReferenceValidatorTestEnv {
         }
 
         /** Creates a new enricher with all required enrichment functions set. */
-        public static Enricher newEventEnricher() {
+        public static EventEnricher newEventEnricher() {
             EventEnricher.Builder builder = EventEnricher
                     .newBuilder()
                     .add(ProjectId.class, String.class, new GetProjectName())

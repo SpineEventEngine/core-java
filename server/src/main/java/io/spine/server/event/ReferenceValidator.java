@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.outbus.enrich;
+package io.spine.server.event;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
@@ -76,13 +76,13 @@ final class ReferenceValidator {
         // not a variable name as other strings that use the same value.
     private static final String CONTEXT_REFERENCE = "context";
 
-    private final Enricher<?, ?> enricher;
+    private final EventEnricher enricher;
     private final Descriptor eventDescriptor;
     private final Descriptor enrichmentDescriptor;
 
-    ReferenceValidator(Enricher enricher,
-            Class<? extends Message> eventClass,
-            Class<? extends Message> enrichmentClass) {
+    ReferenceValidator(EventEnricher enricher,
+                       Class<? extends Message> eventClass,
+                       Class<? extends Message> enrichmentClass) {
         this.enricher = enricher;
         this.eventDescriptor = Internal.getDefaultInstance(eventClass)
                                        .getDescriptorForType();

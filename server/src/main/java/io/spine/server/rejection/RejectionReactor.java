@@ -29,5 +29,6 @@ import io.spine.server.model.EventProducer;
  *
  * @author Alexander Yevsyukov
  */
+@Deprecated
 public interface RejectionReactor extends EventProducer {
 }

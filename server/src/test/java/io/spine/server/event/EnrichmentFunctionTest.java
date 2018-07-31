@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.outbus.enrich;
+package io.spine.server.event;
 
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
@@ -26,7 +26,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.EventContext;
-import io.spine.server.outbus.enrich.given.EnrichmentFunctionTestEnv.GivenEventMessage;
+import io.spine.server.event.given.EnrichmentFunctionTestEnv.GivenEventMessage;
 import io.spine.test.event.ProjectCreated;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;

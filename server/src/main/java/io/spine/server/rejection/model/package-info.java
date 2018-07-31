@@ -21,6 +21,7 @@
 /**
  * This package provides model classes for {@link io.spine.server.rejection}.
  */
+@Deprecated
 @Internal
 @CheckReturnValue
 @ParametersAreNonnullByDefault

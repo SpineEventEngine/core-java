@@ -23,7 +23,7 @@ package io.spine.server.commandbus;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.bus.BusBuilderTest;
-import io.spine.server.rejection.RejectionBus;
+import io.spine.server.event.EventBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.NoOpSystemGateway;
@@ -57,12 +57,14 @@ class CommandBusBuilderTest
     private static final SystemGateway SYSTEM_GATEWAY = NoOpSystemGateway.INSTANCE;
 
     private TenantIndex tenantIndex;
+    private EventBus eventBus;
 
     @Override
     protected CommandBus.Builder builder() {
         return CommandBus.newBuilder()
                          .injectSystemGateway(SYSTEM_GATEWAY)
-                         .injectTenantIndex(tenantIndex);
+                         .injectTenantIndex(tenantIndex)
+                         .injectEventBus(eventBus);
     }
 
     @BeforeEach
@@ -72,6 +74,10 @@ class CommandBusBuilderTest
                 InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
                                                    multitenant);
         tenantIndex = createTenantIndex(multitenant, storageFactory);
+        eventBus = EventBus
+                .newBuilder()
+                .setStorageFactory(storageFactory)
+                .build();
     }
 
     @Test
@@ -80,6 +86,7 @@ class CommandBusBuilderTest
         CommandBus commandBus = CommandBus.newBuilder()
                                           .injectTenantIndex(tenantIndex)
                                           .injectSystemGateway(SYSTEM_GATEWAY)
+                                          .injectEventBus(eventBus)
                                           .build();
         assertNotNull(commandBus);
     }
@@ -133,15 +140,15 @@ class CommandBusBuilderTest
         }
 
         @Test
-        @DisplayName("RejectionBus")
+        @DisplayName("EventBus")
         void rejectionBus() {
-            RejectionBus expectedRejectionBus = mock(RejectionBus.class);
+            EventBus expectedEventBus = mock(EventBus.class);
 
-            CommandBus.Builder builder = builder().setRejectionBus(expectedRejectionBus);
-            assertTrue(builder.getRejectionBus()
+            CommandBus.Builder builder = builder().injectEventBus(expectedEventBus);
+            assertTrue(builder.getEventBus()
                               .isPresent());
-            assertEquals(expectedRejectionBus, builder.getRejectionBus()
-                                                      .get());
+            assertEquals(expectedEventBus, builder.getEventBus()
+                                                  .get());
         }
 
         @Test

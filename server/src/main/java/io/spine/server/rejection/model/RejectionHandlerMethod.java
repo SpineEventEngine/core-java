@@ -50,6 +50,7 @@ import static io.spine.util.Exceptions.unsupported;
  * @author Dmytro Dashenkov
  * @author Alexander Yevsyukov
  */
+@Deprecated
 abstract class RejectionHandlerMethod<T, R extends MethodResult>
         extends AbstractHandlerMethod<T, RejectionClass, RejectionContext, R> {
 

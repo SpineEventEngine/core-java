@@ -139,12 +139,12 @@ class EventBusBuilderTest extends BusBuilderTest<EventBus.Builder,
         @Test
         @DisplayName("Enricher")
         void enricher() {
-            EventEnricher enricher = mock(EventEnricher.class);
-
-            assertEquals(enricher, builder().setStorageFactory(storageFactory)
-                                            .setEnricher(enricher)
-                                            .getEnricher()
-                                            .get());
+            EventEnricher enricher = EventEnricher.newBuilder()
+                                                  .build();
+            assertSame(enricher, builder().setStorageFactory(storageFactory)
+                                          .setEnricher(enricher)
+                                          .getEnricher()
+                                          .get());
         }
     }
 

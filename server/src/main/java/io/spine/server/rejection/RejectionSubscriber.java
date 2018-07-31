@@ -47,6 +47,7 @@ import static java.lang.String.format;
  * @see RejectionBus#register(io.spine.server.bus.MessageDispatcher)
  * @see io.spine.core.Subscribe
  */
+@Deprecated
 public class RejectionSubscriber implements RejectionDispatcher<String> {
 
     private final RejectionSubscriberClass<?> thisClass = asRejectionSubscriber(getClass());

@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
+@Deprecated
 public class RejectionEnvelope
         extends EnrichableMessageEnvelope<RejectionId, Rejection, RejectionContext> {
 

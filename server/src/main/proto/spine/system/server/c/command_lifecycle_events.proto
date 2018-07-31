@@ -35,7 +35,7 @@ import "google/protobuf/timestamp.proto";
 
 import "spine/base/error.proto";
 import "spine/core/command.proto";
-import "spine/core/rejection.proto";
+import "spine/core/event.proto";
 import "spine/client/entities.proto";
 import "spine/system/server/command_lifecycle.proto";
 
@@ -126,7 +126,7 @@ message CommandRejected {
     spine.core.CommandId id = 1;
 
     // The command rejection.
-    spine.core.Rejection rejection = 2;
+    spine.core.EventId rejection_event_id = 2 [(valid) = true];
 
     // The time when the event occurred.
     google.protobuf.Timestamp when = 3 [(required) = true];

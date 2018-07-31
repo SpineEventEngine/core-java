@@ -40,6 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alex Tymchenko
  * @see CommandOutputBus
  */
+@Deprecated
 @Internal
 public class OutputDispatcherRegistry<C extends MessageClass,
                                       D extends MessageDispatcher<C, ?, ?>>

@@ -18,12 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.outbus.enrich;
+package io.spine.server.event;
 
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import io.spine.server.outbus.enrich.ReferenceValidator.ValidationResult;
-import io.spine.server.outbus.enrich.given.ReferenceValidatorTestEnv.Enrichment;
+import io.spine.server.event.ReferenceValidator.ValidationResult;
+import io.spine.server.event.given.ReferenceValidatorTestEnv.Enrichment;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
 import io.spine.test.event.enrichment.EnrichmentBoundWithFieldsSeparatedWithSpaces;
@@ -58,7 +58,7 @@ import static org.mockito.Mockito.when;
 class ReferenceValidatorTest {
 
     private static final String USER_GOOGLE_UID_FIELD = "user_google_uid";
-    private final Enricher enricher = Enrichment.newEventEnricher();
+    private final EventEnricher enricher = Enrichment.newEventEnricher();
 
     @Test
     @DisplayName("initialize with valid enricher")
@@ -122,7 +122,8 @@ class ReferenceValidatorTest {
     @Test
     @DisplayName("skip mapping if no mapping function is defined")
     void skipMappingIfNoFuncDefined() {
-        Enricher<?, ?> mockEnricher = mock(Enricher.class);
+        // TODO:2018-07-30:dmytro.dashenkov: Moack does not work.
+        EventEnricher mockEnricher = mock(EventEnricher.class);
         when(mockEnricher.functionFor(any(Class.class), any(Class.class)))
                 .thenReturn(Optional.empty());
         ReferenceValidator validator

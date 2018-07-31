@@ -21,15 +21,11 @@ package io.spine.server.outbus;
 
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Rejection;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.bus.MulticastBus;
 import io.spine.type.MessageClass;
-
-import static com.google.common.base.Preconditions.checkState;
-import static java.lang.String.format;
 
 /**
  * A base bus responsible for delivering the {@link io.spine.core.Command command} output.
@@ -37,7 +33,6 @@ import static java.lang.String.format;
  * <p>The typical output artifacts of the command processing are:
  *
  * <ul>
- *     <li>{@linkplain Event events} — in case the command is handled successfully;
  *     <li>{@linkplain Rejection rejections} — if the command contradicts the business rules.
  * </ul>
  *
@@ -46,6 +41,7 @@ import static java.lang.String.format;
  *
  * @author Alex Tymchenko
  */
+@Deprecated
 @Internal
 public abstract class CommandOutputBus<M extends Message,
                                        E extends MessageEnvelope<?, M, ?>,
@@ -73,14 +69,6 @@ public abstract class CommandOutputBus<M extends Message,
      */
     @Override
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
-
-    @Override
-    protected void dispatch(E envelope) {
-        E enrichedEnvelope = enrich(envelope);
-        int dispatchersCalled = callDispatchers(enrichedEnvelope);
-        checkState(dispatchersCalled != 0,
-                   format("Message %s has no dispatchers.", envelope.getMessage()));
-    }
 
     /**
      * {@inheritDoc}

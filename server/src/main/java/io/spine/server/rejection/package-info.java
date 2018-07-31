@@ -22,6 +22,7 @@
  * This package provides classes for working with command rejections.
  */
 
+@Deprecated
 @CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.server.rejection;

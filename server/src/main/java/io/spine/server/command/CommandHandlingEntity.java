@@ -23,14 +23,12 @@ package io.spine.server.command;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
-import io.spine.base.ThrowableMessage;
 import io.spine.change.MessageMismatch;
 import io.spine.change.StringMismatch;
 import io.spine.change.ValueMismatch;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.Rejections;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.model.EventProducer;
 import io.spine.validate.ValidatingBuilder;
@@ -52,9 +50,8 @@ import java.util.List;
  *
  * <p>The method may throw one or more throwables derived from
  * {@link io.spine.base.ThrowableMessage ThrowableMessage}.
- * Throwing a {@code ThrowableMessage} indicates that the passed command cannot be handled
- * because of a {@linkplain Rejections#toRejection(ThrowableMessage, io.spine.core.Command)
- * rejection}.
+ * Throwing a {@code ThrowableMessage} indicates that the passed command cannot be handled because
+ * of a rejection.
  *
  * @author Alexander Yevsyukov
  */

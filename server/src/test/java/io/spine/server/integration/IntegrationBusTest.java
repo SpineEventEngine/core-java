@@ -25,12 +25,12 @@ import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
-import io.spine.core.Rejection;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ContextAwareProjectDetails;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ExternalMismatchSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectCountAggregate;
@@ -39,8 +39,6 @@ import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectEventsSubs
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectRejectionsExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectWizard;
-import io.spine.server.rejection.RejectionBus;
-import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.validate.Validate;
 import org.junit.jupiter.api.BeforeEach;
@@ -190,28 +188,6 @@ class IntegrationBusTest {
         }
     }
 
-    @Test
-    @DisplayName("dispatch rejections from one BC to external subscribers of another BC")
-    void dispatchRejectionsToOtherBc() {
-        InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-
-        BoundedContext sourceContext = contextWithTransport(transportFactory);
-        contextWithExternalSubscribers(transportFactory);
-
-        assertNull(ProjectRejectionsExtSubscriber.getExternalRejection());
-        assertNull(ProjectCountAggregate.getExternalRejection());
-        assertNull(ProjectWizard.getExternalRejection());
-
-        Rejection rejection = cannotStartArchivedProject();
-        sourceContext.getRejectionBus()
-                     .post(rejection);
-        Message rejectionMessage = AnyPacker.unpack(rejection.getMessage());
-
-        assertEquals(rejectionMessage, ProjectRejectionsExtSubscriber.getExternalRejection());
-        assertEquals(rejectionMessage, ProjectCountAggregate.getExternalRejection());
-        assertEquals(rejectionMessage, ProjectWizard.getExternalRejection());
-    }
-
     @Nested
     @DisplayName("avoid dispatching events from one BC")
     class AvoidDispatching {
@@ -327,14 +303,12 @@ class IntegrationBusTest {
         InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
 
         BoundedContext sourceContext = contextWithTransport(transportFactory);
-        RejectionSubscriber rejectionSubscriber = new ExternalMismatchSubscriber();
-        sourceContext.getRejectionBus()
-                     .register(rejectionSubscriber);
+        EventSubscriber subscriber = new ExternalMismatchSubscriber();
         sourceContext.getIntegrationBus()
-                     .register(rejectionSubscriber);
-        Rejection rejection = cannotStartArchivedProject();
+                     .register(subscriber);
+        Event rejection = cannotStartArchivedProject();
         try {
-            sourceContext.getRejectionBus()
+            sourceContext.getEventBus()
                          .post(rejection);
             fail("An exception is expected.");
         } catch (Exception e) {
@@ -370,30 +344,6 @@ class IntegrationBusTest {
             assertNull(ProjectWizard.getExternalEvent());
             assertNull(ProjectCountAggregate.getExternalEvent());
         }
-
-        @Test
-        @DisplayName("rejections")
-        void rejectionsIfNeedExternal() {
-            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-
-            BoundedContext sourceContext = contextWithExtEntitySubscribers(transportFactory);
-            ProjectRejectionsExtSubscriber standaloneSubscriber =
-                    new ProjectRejectionsExtSubscriber();
-
-            RejectionBus rejectionBus = sourceContext.getRejectionBus();
-            rejectionBus.register(standaloneSubscriber);
-
-            assertNull(ProjectRejectionsExtSubscriber.getExternalRejection());
-            assertNull(ProjectWizard.getExternalRejection());
-            assertNull(ProjectCountAggregate.getExternalRejection());
-
-            Rejection rejection = cannotStartArchivedProject();
-            rejectionBus.post(rejection);
-
-            assertNull(ProjectRejectionsExtSubscriber.getExternalRejection());
-            assertNull(ProjectWizard.getExternalRejection());
-            assertNull(ProjectCountAggregate.getExternalRejection());
-        }
     }
 
     @Test
@@ -416,6 +366,6 @@ class IntegrationBusTest {
         assertEquals(ExternalMessageValidationError.getDescriptor()
                                                    .getFullName(),
                      error.getType());
-        assertTrue(UNSUPPORTED_EXTERNAL_MESSAGE.getNumber() == error.getCode());
+        assertEquals(UNSUPPORTED_EXTERNAL_MESSAGE.getNumber(), error.getCode());
     }
 }

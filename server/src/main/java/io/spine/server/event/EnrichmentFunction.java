@@ -18,12 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.outbus.enrich;
+package io.spine.server.event;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Streams;
 import com.google.protobuf.Message;
-import io.spine.server.event.EventBus;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Objects;
@@ -38,7 +37,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * {@code EnrichmentFunction} defines how a source message class can be transformed
  * into a target message class.
  *
- * <p>{@code EnrichmentFunction}s are used by an {@link Enricher} to augment events
+ * <p>{@code EnrichmentFunction}s are used by an {@link EventEnricher} to augment events
  * passed to {@link EventBus}.
  *
  * @param <S> a type of the source object to enrich
@@ -50,9 +49,9 @@ abstract class EnrichmentFunction<S, T, C extends Message> {
 
     /**
      * We are having the generified class to be able to bound the types of messages and the
-     * translation function when building the {@link Enricher}.
+     * translation function when building the {@link EventEnricher}.
      *
-     * @see Enricher.AbstractBuilder#add(Class, Class, java.util.function.Function)
+     * @see EventEnricher.Builder#add(Class, Class, java.util.function.Function)
      */
 
     private final Class<S> sourceClass;

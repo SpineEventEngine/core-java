@@ -29,6 +29,8 @@ import io.spine.server.bus.MulticastDispatcher;
  * @param <I> the type of IDs of entities to which deliver rejections
  * @author Alex Tymchenko
  */
-public interface RejectionDispatcher<I>
+@Deprecated
+public interface
+RejectionDispatcher<I>
         extends MulticastDispatcher<RejectionClass, RejectionEnvelope, I> {
 }

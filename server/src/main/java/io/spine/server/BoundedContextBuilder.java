@@ -139,7 +139,8 @@ public final class BoundedContextBuilder {
      * {@link StorageFactorySwitch} will be used during the construction of
      * a {@code BoundedContext} instance.
      */
-    public BoundedContextBuilder setStorageFactorySupplier(@Nullable Supplier<StorageFactory> supplier) {
+    public BoundedContextBuilder setStorageFactorySupplier(
+            @Nullable Supplier<StorageFactory> supplier) {
         this.storageFactorySupplier = supplier;
         return this;
     }
@@ -160,10 +161,6 @@ public final class BoundedContextBuilder {
 
     public Optional<CommandBus.Builder> getCommandBus() {
         return Optional.ofNullable(commandBus);
-    }
-
-    CommandBus buildCommandBus() {
-        return commandBus.build();
     }
 
     public Optional<? extends TenantIndex> getTenantIndex() {
@@ -232,9 +229,9 @@ public final class BoundedContextBuilder {
      * <p>The System bounded contexts shares some configuration with the domain bounded context,
      * such as:
      * <ul>
-     *     <li>{@linkplain #getTenantIndex()} tenancy;
-     *     <li>{@linkplain #getStorageFactory()} storage facilities;
-     *     <li>{@linkplain #getTransportFactory()} transport facilities.
+     * <li>{@linkplain #getTenantIndex()} tenancy;
+     * <li>{@linkplain #getStorageFactory()} storage facilities;
+     * <li>{@linkplain #getTransportFactory()} transport facilities.
      * </ul>
      *
      * <p>All the other configuration is NOT shared.
@@ -367,7 +364,7 @@ public final class BoundedContextBuilder {
                 stand.setMultitenant(multitenant);
             } else {
                 checkSameValue("Stand must match multitenancy of BoundedContext. " +
-                                        "Status in BoundedContext.Builder: %s Stand: %s",
+                                       "Status in BoundedContext.Builder: %s Stand: %s",
                                standMultitenant);
             }
         }

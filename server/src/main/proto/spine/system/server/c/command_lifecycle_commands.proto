@@ -33,7 +33,7 @@ option java_multiple_files = true;
 
 import "spine/base/error.proto";
 import "spine/core/command.proto";
-import "spine/core/rejection.proto";
+import "spine/core/event.proto";
 import "spine/client/entities.proto";
 import "spine/system/server/command_lifecycle.proto";
 
@@ -116,5 +116,5 @@ message MarkCommandAsRejected {
     spine.core.CommandId id = 1;
 
     // The command rejection.
-    spine.core.Rejection rejection = 2 [(valid) = true];
+    spine.core.EventId rejection_event_id = 2 [(valid) = true];
 }

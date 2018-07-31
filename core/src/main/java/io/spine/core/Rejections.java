@@ -108,7 +108,6 @@ public final class Rejections {
                                 .setTimestamp(message.getTimestamp())
                                 .setStacktrace(stacktrace)
                                 .setCommand(command);
-
         Optional<Any> optional = message.producerId();
         optional.ifPresent(builder::setProducerId);
         return builder.build();

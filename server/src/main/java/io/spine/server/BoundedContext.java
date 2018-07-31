@@ -51,9 +51,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Suppliers.memoize;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -113,12 +113,21 @@ public abstract class BoundedContext
         this.multitenant = builder.isMultitenant();
         this.storageFactory = memoize(() -> builder.buildStorageFactorySupplier()
                                                    .get());
-        this.commandBus = builder.buildCommandBus();
         this.eventBus = builder.buildEventBus();
         this.stand = builder.buildStand();
         this.tenantIndex = builder.buildTenantIndex();
 
-        this.integrationBus = buildIntegrationBus(builder, eventBus, commandBus, name);
+        this.commandBus = buildCommandBus(builder, eventBus);
+        this.integrationBus = buildIntegrationBus(builder, eventBus, name);
+    }
+
+    private static CommandBus buildCommandBus(BoundedContextBuilder builder, EventBus eventBus) {
+        Optional<CommandBus.Builder> busBuilder = builder.getCommandBus();
+        checkState(busBuilder.isPresent());
+        CommandBus result = busBuilder.get()
+                                      .injectEventBus(eventBus)
+                                      .build();
+        return result;
     }
 
     /**
@@ -127,20 +136,17 @@ public abstract class BoundedContext
      * @param builder    the {@link BoundedContextBuilder} to obtain
      *                   the {@link IntegrationBus.Builder} from
      * @param eventBus   the initialized {@link EventBus}
-     * @param commandBus the initialized {@link CommandBus} to obtain the {@link RejectionBus} from
      * @param name       the name of the constructed bounded context
      * @return new instance of {@link IntegrationBus}
      */
     private static IntegrationBus buildIntegrationBus(BoundedContextBuilder builder,
                                                       EventBus eventBus,
-                                                      CommandBus commandBus,
                                                       BoundedContextName name) {
         Optional<IntegrationBus.Builder> busBuilder = builder.getIntegrationBus();
         checkState(busBuilder.isPresent());
         IntegrationBus result = busBuilder.get()
                                           .setBoundedContextName(name)
                                           .setEventBus(eventBus)
-                                          .setRejectionBus(commandBus.rejectionBus())
                                           .build();
         return result;
     }
@@ -217,8 +223,9 @@ public abstract class BoundedContext
     }
 
     /** Obtains instance of {@link RejectionBus} of this {@code BoundedContext}. */
+    @Deprecated
     public RejectionBus getRejectionBus() {
-        return this.commandBus.rejectionBus();
+        throw new UnsupportedOperationException("Method getRejectionBus is not implemented!");
     }
 
     /** Obtains instance of {@link IntegrationBus} of this {@code BoundedContext}. */

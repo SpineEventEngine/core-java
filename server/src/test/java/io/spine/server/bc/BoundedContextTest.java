@@ -131,12 +131,6 @@ class BoundedContextTest {
         }
 
         @Test
-        @DisplayName("RejectionBus")
-        void rejectionBus() {
-            assertNotNull(boundedContext.getRejectionBus());
-        }
-
-        @Test
         @DisplayName("IntegrationBus")
         void integrationBus() {
             assertNotNull(boundedContext.getIntegrationBus());

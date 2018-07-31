@@ -17,6 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.rejection;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -24,7 +25,6 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.annotation.Internal;
 import io.spine.core.MessageInvalid;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
@@ -35,8 +35,6 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
-import io.spine.system.server.SystemGateway;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,22 +54,17 @@ import static java.util.Optional.empty;
  * @see Rejections
  * @see io.spine.core.Subscribe @Subscribe
  */
+@Deprecated
 public class RejectionBus extends CommandOutputBus<Rejection,
                                                    RejectionEnvelope,
                                                    RejectionClass,
                                                    RejectionDispatcher<?>> {
-
-    /** The enricher for posted rejections or {@code null} if the enrichment is not supported. */
-    private final @Nullable RejectionEnricher enricher;
-    private final SystemGateway systemGateway;
 
     /**
      * Creates a new instance according to the pre-configured {@code Builder}.
      */
     private RejectionBus(Builder builder) {
         super(builder);
-        this.enricher = builder.enricher;
-        this.systemGateway = builder.systemGateway;
     }
 
     /**
@@ -93,11 +86,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
 
     @Override
     protected RejectionEnvelope enrich(RejectionEnvelope rejection) {
-        if (enricher == null || !enricher.canBeEnriched(rejection)) {
-            return rejection;
-        }
-        RejectionEnvelope enriched = enricher.enrich(rejection);
-        return enriched;
+        throw new UnsupportedOperationException("Method enrich is not implemented!");
     }
 
     @Override
@@ -109,6 +98,11 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     protected RejectionEnvelope toEnvelope(Rejection message) {
         RejectionEnvelope result = RejectionEnvelope.of(message);
         return result;
+    }
+
+    @Override
+    protected void dispatch(RejectionEnvelope envelope) {
+        throw new UnsupportedOperationException("Method dispatch is not implemented!");
     }
 
     @Override
@@ -159,45 +153,9 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     @CanIgnoreReturnValue
     public static class Builder extends AbstractBuilder<RejectionEnvelope, Rejection, Builder> {
 
-
-        /**
-         * Optional enricher for rejections.
-         *
-         * <p>If not set, the enrichments will NOT be supported
-         * in the {@code RejectionBus} instance built.
-         */
-        private @Nullable RejectionEnricher enricher;
-
-        private @Nullable SystemGateway systemGateway;
-
         /** Prevents direct instantiation. */
         private Builder() {
             super();
-        }
-
-        /**
-         * Sets a custom {@link RejectionEnricher} for events posted to
-         * the {@code RejectionBus} which is being built.
-         *
-         * <p>If the {@code RejectionEnricher} is not set, the enrichments
-         * will <strong>NOT</strong> be supported for the {@code RejectionBus} instance built.
-         *
-         * @param enricher the {@code RejectionEnricher} for events or {@code null} if enrichment is
-         *                 not supported
-         */
-        public Builder setEnricher(RejectionEnricher enricher) {
-            this.enricher = enricher;
-            return this;
-        }
-
-        @Internal
-        public Builder injectSystemGateway(SystemGateway systemGateway) {
-            this.systemGateway = systemGateway;
-            return this;
-        }
-
-        public Optional<RejectionEnricher> getEnricher() {
-            return Optional.ofNullable(enricher);
         }
 
         @Override

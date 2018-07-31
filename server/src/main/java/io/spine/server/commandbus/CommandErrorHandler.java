@@ -21,21 +21,36 @@
 package io.spine.server.commandbus;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.Errors;
+import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
+import io.spine.core.Event;
+import io.spine.core.EventId;
+import io.spine.core.RejectionEventContext;
+import io.spine.core.Version;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.event.EventFactory;
+import io.spine.server.model.EventProducer;
 import io.spine.string.Stringifiers;
 import io.spine.system.server.MarkCommandAsErrored;
+import io.spine.system.server.MarkCommandAsRejected;
 import io.spine.system.server.SystemGateway;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.getRootCause;
+import static com.google.common.base.Throwables.getStackTraceAsString;
+import static io.spine.base.Identifier.pack;
+import static io.spine.core.Rejections.causedByRejection;
 import static java.lang.String.format;
 
 /**
@@ -79,6 +94,9 @@ public final class CommandErrorHandler {
         checkNotNull(exception);
         if (isPreProcessed(exception)) {
             return HandledError.forPreProcessed();
+        } else if(causedByRejection(exception)) {
+            return HandledError.forRejection(exception, envelope);
+            // TODO:2018-07-30:dmytro.dashenkov: MarkCommandAsRejected.
         } else {
             log().error(format("Error dispatching command (class: %s id: %s).",
                                envelope.getMessage().getClass(),
@@ -100,6 +118,17 @@ public final class CommandErrorHandler {
         postSystem(systemCommand);
     }
 
+    private void markRejected(CommandEnvelope command, RuntimeException exception) {
+        CommandId commandId = command.getId();
+
+        MarkCommandAsRejected systemCommand = MarkCommandAsRejected
+                .newBuilder()
+                .setId(commandId)
+                .setRejectionEventId((EventId) null)
+                .build();
+        postSystem(systemCommand);
+    }
+
     private void postSystem(Message systemCommand) {
         systemGateway.postCommand(systemCommand);
     }
@@ -112,21 +141,25 @@ public final class CommandErrorHandler {
      * A wrapper for a handled error.
      *
      * <p>{@linkplain #rethrow() Rethrows} the encountered {@link RuntimeException} if it is not
-     * caused by a {@link Rejection} or has already been rethrown by a {@code CommandErrorHandler}.
+     * caused by a rejection or has already been rethrown by a {@code CommandErrorHandler}.
      */
     public static final class HandledError {
 
         /**
          * The instance of {@code HandledError} with {@code null} exception.
          */
-        private static final HandledError EMPTY = new HandledError(null);
+        private static final HandledError EMPTY = new HandledError(null, null);
+
+        private final @Nullable CommandEnvelope origin;
 
         /**
          * The handled {@link RuntimeException}.
          */
-        private final @MonotonicNonNull RuntimeException exception;
+        private final @Nullable RuntimeException exception;
 
-        private HandledError(@Nullable RuntimeException exception) {
+        private HandledError(@Nullable CommandEnvelope origin,
+                             @Nullable RuntimeException exception) {
+            this.origin = origin;
             this.exception = exception;
         }
 
@@ -135,11 +168,16 @@ public final class CommandErrorHandler {
         }
 
         private static HandledError forRuntime(RuntimeException exception) {
-            return new HandledError(exception);
+            return new HandledError(null, exception);
+        }
+
+        private static HandledError forRejection(RuntimeException rejection,
+                                                 CommandEnvelope command) {
+            return new HandledError(command, rejection);
         }
 
         /**
-         * Rethrows the handled exception if it was <b>not</b> caused by a {@link Rejection} or
+         * Rethrows the handled exception if it was <b>not</b> caused by a rejection or
          * rethrown earlier.
          *
          * <p>Otherwise, preforms no action.
@@ -148,6 +186,79 @@ public final class CommandErrorHandler {
             if (exception != null) {
                 throw new CommandDispatchingException(exception);
             }
+        }
+
+        /**
+         * Converts the handled error into a rejection {@linkplain Event event}.
+         *
+         * <p>The produced {@link Event} does not have a {@link Version}.
+         * The {@linkplain io.spine.core.EventContext#getProducerId() producer ID} is a string with
+         * the value equal to {@code "CommandErrorHandler"}.
+         *
+         * @return the handled rejection event or {@link Optional#empty()} if the handled error is
+         * not a command rejection
+         */
+        Optional<Event> asRejection() {
+            if (origin == null) {
+                return Optional.empty();
+            } else {
+                Event event = convertToRejection();
+                return Optional.of(event);
+            }
+        }
+
+        private Event convertToRejection() {
+            checkNotNull(origin);
+            checkNotNull(exception);
+
+            EventProducer producer = RejectionProducer.INSTANCE;
+
+            ThrowableMessage throwable = (ThrowableMessage) getRootCause(exception);
+            Message rejection = throwable.getMessageThrown();
+            Any producerId = throwable.producerId()
+                                      .orElse(producer.getProducerId());
+            EventFactory eventFactory = EventFactory.on(origin, producerId);
+            Event result = eventFactory.createRejectionEvent(rejection,
+                                                             producer.getVersion(),
+                                                             context());
+            return result;
+        }
+
+        private RejectionEventContext context() {
+            checkNotNull(exception);
+            checkNotNull(origin);
+
+            Throwable cause = getRootCause(exception);
+            String stacktrace = getStackTraceAsString(cause);
+            Message commandMessage = origin.getMessage();
+            Any commandMessageAny = AnyPacker.pack(commandMessage);
+            RejectionEventContext result = RejectionEventContext
+                    .newBuilder()
+                    .setStacktrace(stacktrace)
+                    .setCommandMessage(commandMessageAny)
+                    .build();
+            return result;
+        }
+    }
+
+    /**
+     * The {@link EventProducer} for rejection events fired from the {@code CommandErrorHandler}.
+     */
+    private enum RejectionProducer implements EventProducer {
+
+        INSTANCE;
+
+        private static final Any EVENT_PRODUCER_ID =
+                pack(CommandErrorHandler.class.getSimpleName());
+
+        @Override
+        public Any getProducerId() {
+            return EVENT_PRODUCER_ID;
+        }
+
+        @Override
+        public Version getVersion() {
+            return Version.getDefaultInstance();
         }
     }
 

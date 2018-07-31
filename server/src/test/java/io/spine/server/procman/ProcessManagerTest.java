@@ -42,6 +42,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandSequence;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
+import io.spine.server.event.EventBus;
 import io.spine.server.procman.given.DirectQuizProcmanRepository;
 import io.spine.server.procman.given.ProcessManagerTestEnv.AddTaskDispatcher;
 import io.spine.server.procman.given.ProcessManagerTestEnv.TestProcessManager;
@@ -122,6 +123,7 @@ class ProcessManagerTest {
 
     private CommandBus commandBus;
     private TestProcessManager processManager;
+    private EventBus eventBus;
 
     private static PmCreateProject createProject() {
         return ((PmCreateProject.Builder) Sample.builderForType(PmCreateProject.class))
@@ -161,9 +163,13 @@ class ProcessManagerTest {
         StorageFactory storageFactory = bc.getStorageFactory();
         TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false, storageFactory);
 
+        eventBus = EventBus.newBuilder()
+                           .setStorageFactory(storageFactory)
+                           .build();
         commandBus = spy(CommandBus.newBuilder()
                                    .injectTenantIndex(tenantIndex)
                                    .injectSystemGateway(NoOpSystemGateway.INSTANCE)
+                                   .injectEventBus(eventBus)
                                    .build());
         processManager = Given.processManagerOfClass(TestProcessManager.class)
                               .withId(ID)

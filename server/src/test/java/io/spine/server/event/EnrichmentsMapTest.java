@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.outbus.enrich;
+package io.spine.server.event;
 
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
@@ -56,7 +56,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static io.spine.server.outbus.enrich.EnrichmentsMap.getEventTypes;
+import static io.spine.server.event.EnrichmentsMap.getEventTypes;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertEquals;
