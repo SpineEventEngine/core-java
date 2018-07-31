@@ -50,7 +50,16 @@ class CommandReceivedTapTest {
 
     @BeforeEach
     void setUp() {
-        gateway = new MemoizingGateway();
+        initSingleTenant();
+    }
+
+    private void initSingleTenant() {
+        gateway = MemoizingGateway.singleTenant();
+        filter = new CommandReceivedTap(gateway);
+    }
+
+    private void initMultitenant() {
+        gateway = MemoizingGateway.multitenant();
         filter = new CommandReceivedTap(gateway);
     }
 
@@ -64,6 +73,8 @@ class CommandReceivedTapTest {
     @Test
     @DisplayName("post MarkCommandAsReceived to specific tenant")
     void postIfMultitenant() {
+        initMultitenant();
+
         TenantId expectedTenant = tenantId();
         Command command = command(commandMessage(), expectedTenant);
         postAndCheck(command);

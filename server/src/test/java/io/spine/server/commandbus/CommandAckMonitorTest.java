@@ -116,7 +116,7 @@ class CommandAckMonitorTest {
 
         @BeforeEach
         void setUp() {
-            gateway = new MemoizingGateway();
+            gateway = MemoizingGateway.singleTenant();
             monitor = CommandAckMonitor
                     .newBuilder()
                     .setDelegate(noOpObserver())

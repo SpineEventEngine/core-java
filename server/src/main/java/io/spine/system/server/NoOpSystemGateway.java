@@ -22,7 +22,6 @@ package io.spine.system.server;
 
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.TenantId;
 
 /**
  * An implementation of {@link SystemGateway} which never performs an operation.
@@ -40,7 +39,7 @@ public enum NoOpSystemGateway implements SystemGateway {
     INSTANCE;
 
     @Override
-    public void postCommand(Message systemCommand, TenantId tenantId) {
+    public void postCommand(Message systemCommand) {
         // NOP.
     }
 }

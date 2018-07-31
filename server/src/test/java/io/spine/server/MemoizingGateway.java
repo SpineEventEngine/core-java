@@ -23,6 +23,7 @@ package io.spine.server;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.TenantId;
+import io.spine.server.tenant.TenantFunction;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -40,10 +41,29 @@ public final class MemoizingGateway implements SystemGateway {
     private final List<Message> commands = newLinkedList();
     private @Nullable TenantId tenantId;
 
+    private final boolean multitenant;
+
+    private MemoizingGateway(boolean multitenant) {
+        this.multitenant = multitenant;
+    }
+
+    public static MemoizingGateway singleTenant() {
+        return new MemoizingGateway(false);
+    }
+
+    public static MemoizingGateway multitenant() {
+        return new MemoizingGateway(true);
+    }
+
     @Override
-    public void postCommand(Message systemCommand, @Nullable TenantId tenantId) {
+    public void postCommand(Message systemCommand) {
         commands.add(systemCommand);
-        this.tenantId = tenantId;
+        tenantId = new TenantFunction<TenantId>(multitenant) {
+            @Override
+            public TenantId apply(TenantId id) {
+                return id;
+            }
+        }.execute();
     }
 
     /**

@@ -73,6 +73,11 @@ final class CommandFlowWatcher {
     }
 
     private void postSystem(Message systemCommand, TenantId tenantId) {
-        systemGateway.postCommand(systemCommand, tenantId);
+        SystemGateway tenantAwareGateway = TenantAwareSystemGateway
+                .create()
+                .atopOf(systemGateway)
+                .withTenant(tenantId)
+                .build();
+        tenantAwareGateway.postCommand(systemCommand);
     }
 }
