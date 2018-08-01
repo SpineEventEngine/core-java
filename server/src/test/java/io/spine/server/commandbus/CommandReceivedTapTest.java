@@ -79,7 +79,7 @@ class CommandReceivedTapTest {
         Command command = command(commandMessage(), expectedTenant);
         postAndCheck(command);
 
-        TenantId actualTenant = gateway.receivedTenant();
+        TenantId actualTenant = gateway.lastSeen().tenant();
         assertEquals(expectedTenant, actualTenant);
     }
 
@@ -89,7 +89,7 @@ class CommandReceivedTapTest {
         Optional<?> ack = filter.accept(envelope);
         assertFalse(ack.isPresent());
 
-        MarkCommandAsReceived systemCommand = (MarkCommandAsReceived) gateway.receivedCommand();
+        MarkCommandAsReceived systemCommand = (MarkCommandAsReceived) gateway.lastSeen().command();
         assertEquals(envelope.getId(), systemCommand.getId());
     }
 

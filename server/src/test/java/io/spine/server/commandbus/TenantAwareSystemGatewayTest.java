@@ -99,7 +99,7 @@ class TenantAwareSystemGatewayTest {
                     .setValue(TenantAwareSystemGatewayTest.class.getName())
                     .build();
             postAndCheck(delegate, tenantId);
-            assertEquals(tenantId, delegate.receivedTenant());
+            assertEquals(tenantId, delegate.lastSeen().tenant());
         }
 
         private void postAndCheck(MemoizingGateway delegate, TenantId tenantId) {
@@ -112,7 +112,7 @@ class TenantAwareSystemGatewayTest {
 
             gateway.postCommand(command);
 
-            assertEquals(command, delegate.receivedCommand());
+            assertEquals(command, delegate.lastSeen().command());
         }
     }
 }

@@ -20,17 +20,12 @@
 
 package io.spine.system.server;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import java.util.List;
-
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newLinkedList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * A {@link SystemGateway} which memoizes the posted system commands.
@@ -40,14 +35,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public final class MemoizingGateway implements SystemGateway {
 
-    private final List<Message> commands = newLinkedList();
-
-    /**
-     * The last tenant which a system command was posted for.
-     *
-     * <p>This field may be {@code null} iff no system command has yet been posted.
-     */
-    private @MonotonicNonNull TenantId tenantId;
+    private @MonotonicNonNull MemoizedCommand lastSeenCommand;
 
     private final boolean multitenant;
 
@@ -78,12 +66,10 @@ public final class MemoizingGateway implements SystemGateway {
      *
      * <p>Memoizes the given command message and the {@link TenantId} which it was posted for.
      *
-     * @see #receivedCommand()
-     * @see #receivedTenant()
+     * @see #lastSeen()
      */
     @Override
     public void postCommand(Message systemCommand) {
-        commands.add(systemCommand);
         TenantId tenantId = new TenantFunction<TenantId>(multitenant) {
             @Override
             public TenantId apply(TenantId id) {
@@ -91,34 +77,35 @@ public final class MemoizingGateway implements SystemGateway {
             }
         }.execute();
         checkNotNull(tenantId);
-        this.tenantId = tenantId;
+        lastSeenCommand = new MemoizedCommand(systemCommand, tenantId);
     }
 
     /**
-     * Obtains the single posted system command.
-     *
-     * <p>Fails if the were no commands posted or if there were more then one commands.
-     *
-     * @return the single posted command message
+     * A command received by the {@code MemoizingGateway}.
      */
-    @CanIgnoreReturnValue
-    public Message receivedCommand() {
-        assertEquals(1, commands.size());
-        return commands.get(0);
+    public static final class MemoizedCommand {
+
+        private final Message commandMessage;
+        private final TenantId tenantId;
+
+        private MemoizedCommand(Message message, TenantId id) {
+            commandMessage = message;
+            tenantId = id;
+        }
+
+        public Message command() {
+            return commandMessage;
+        }
+
+        public TenantId tenant() {
+            return tenantId;
+        }
     }
 
     /**
-     * Obtains the single {@link TenantId} which the {@link #receivedCommand() single command} was
-     * posted for.
-     *
-     * <p>Fails if the were no commands posted or if there were more then one commands. Also fails
-     * if the command was posted for the default tenant.
-     *
-     * @return the single tenant ID
+     * Obtains the last seen by the gateway system command.
      */
-    public TenantId receivedTenant() {
-        receivedCommand();
-        checkNotNull(tenantId);
-        return tenantId;
+    public MemoizedCommand lastSeen() {
+        return lastSeenCommand;
     }
 }
