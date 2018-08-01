@@ -20,7 +20,6 @@
 package io.spine.testing.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
@@ -30,7 +29,6 @@ import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionEndpoint;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.testing.server.NoOpLifecycle;
-import io.spine.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.Any.pack;
@@ -99,7 +97,6 @@ public class ProjectionEventDispatcher {
     ProjectionRepository<I, P, S> mockRepository() {
         TestProjectionRepository mockedRepo = mock(TestProjectionRepository.class);
         when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
-        when(mockedRepo.getEntityStateType()).thenReturn(TypeUrl.of(Any.class));
         return mockedRepo;
     }
 

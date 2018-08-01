@@ -21,7 +21,6 @@ package io.spine.testing.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
@@ -32,7 +31,6 @@ import io.spine.server.aggregate.AggregateEventEndpoint;
 import io.spine.server.aggregate.AggregateRejectionEndpoint;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.testing.server.NoOpLifecycle;
-import io.spine.type.TypeUrl;
 
 import java.util.List;
 
@@ -184,7 +182,6 @@ public class AggregateMessageDispatcher {
     private static <I, A extends Aggregate<I, ?, ?>> AggregateRepository<I, A> mockRepository() {
         TestAggregateRepository mockedRepo = mock(TestAggregateRepository.class);
         when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
-        when(mockedRepo.getEntityStateType()).thenReturn(TypeUrl.of(Any.class));
         return mockedRepo;
     }
 
