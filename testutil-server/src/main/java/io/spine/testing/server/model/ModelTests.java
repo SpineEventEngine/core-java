@@ -25,6 +25,8 @@ import io.spine.server.model.Model;
 /**
  * Utilities for tests that deal with {@link Model}.
  *
+ * @implNote The full name of this class is used by {@link Model#dropAllModels()} via a
+ *           string literal for security check.
  * @author Alexander Yevsyukov
  */
 public class ModelTests {

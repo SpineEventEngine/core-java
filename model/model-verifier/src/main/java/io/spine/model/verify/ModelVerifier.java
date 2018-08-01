@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import io.spine.model.CommandHandlers;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.CommandHandler;
+import io.spine.server.model.Model;
 import io.spine.server.procman.ProcessManager;
 import io.spine.tools.gradle.ProjectHierarchy;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -53,6 +54,8 @@ import static java.util.Arrays.deepToString;
 /**
  * A utility for verifying Spine model.
  *
+ * @implNote The full name of this class is used by {@link Model#dropAllModels()} via a
+ *           string literal for security check.
  * @author Dmytro Dashenkov
  */
 final class ModelVerifier {
@@ -77,6 +80,10 @@ final class ModelVerifier {
      */
     void verify(CommandHandlers handlers) {
         Logger log = log();
+
+        // Ensure there are no models from previous runs in the same JVM.
+        Model.dropAllModels();
+
         for (String commandHandlingClass : handlers.getCommandHandlingTypesList()) {
             Class<?> cls;
             try {

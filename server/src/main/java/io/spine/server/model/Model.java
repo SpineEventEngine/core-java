@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
@@ -31,7 +32,10 @@ import io.spine.server.security.CallerProvider;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
+
+import static java.lang.String.format;
 
 /**
  * Stores information of message handling classes.
@@ -130,22 +134,30 @@ public class Model {
      *
      * <p>This method must <em>not</em> be called from the production code.
      *
-     * <p>It <em>may</em> be called indirectly from tests only via the {@code ModelTests} class.
-     *
-     * @throws SecurityException if called directly
+     * @apiNote This method <em>may</em> be called indirectly from authorized tool classes
+     *          or test utility classes.
+     * @throws SecurityException if called directly by non-authorized class
      */
     @VisibleForTesting
     public static synchronized void dropAllModels() {
         Class callingClass = CallerProvider.instance()
                                            .getCallerClass();
-        // We reference the class by the name since we don't depend on testing utilities.
-        if (callingClass.getName().equals("io.spine.testing.server.model.ModelTests")) {
+        // We reference the classes by the name since we don't depend on tools or testing utilities.
+        Set<String> allowedCallers = ImmutableSet.of(
+                "io.spine.server.model.ModelTest",
+                "io.spine.testing.server.model.ModelTests",
+                "io.spine.model.verify.ModelVerifier"
+        );
+        if (allowedCallers.contains(callingClass.getName())) {
             for (Model model : models.values()) {
                 model.clear();
             }
             models.clear();
         } else {
-            throw new SecurityException("Use ModelTests.dropAllModels() instead");
+            String msg = format(
+                    "The class %s is not allowed to perform this operation", callingClass
+            );
+            throw new SecurityException(msg);
         }
     }
 

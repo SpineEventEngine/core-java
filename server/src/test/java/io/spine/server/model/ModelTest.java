@@ -45,11 +45,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 @DisplayName("Model should")
 class ModelTest {
 
-    private final Model model = Model.getInstance(MCommandHandler.class);
-
     @BeforeEach
     void setUp() {
-        model.dropAllModels();
+        Model.dropAllModels();
     }
 
     @SuppressWarnings("CheckReturnValue") // returned values are not used in this test
