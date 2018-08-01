@@ -105,11 +105,18 @@ public final class CommandLifecycleAggregate
     }
 
     @Assign
+    TargetAssignedToCommand on(AssignTargetToCommand event) {
+        return TargetAssignedToCommand.newBuilder()
+                                      .setId(event.getId())
+                                      .setTarget(event.getTarget())
+                                      .build();
+    }
+
+    @Assign
     CommandHandled handle(MarkCommandAsHandled command) {
         Timestamp when = getCurrentTime();
         return CommandHandled.newBuilder()
                              .setId(command.getId())
-                             .setReceiver(command.getReceiver())
                              .setWhen(when)
                              .build();
     }
@@ -136,7 +143,7 @@ public final class CommandLifecycleAggregate
 
     @Apply
     private void on(CommandReceived event) {
-        CommandStatus status = CommandStatus
+        CommandTimeline status = CommandTimeline
                 .newBuilder()
                 .setWhenReceived(event.getWhen())
                 .build();
@@ -147,7 +154,7 @@ public final class CommandLifecycleAggregate
 
     @Apply
     private void on(CommandAcknowledged event) {
-        CommandStatus status = getBuilder()
+        CommandTimeline status = getBuilder()
                 .getStatus()
                 .toBuilder()
                 .setWhenAcknowledged(event.getWhen())
@@ -158,7 +165,7 @@ public final class CommandLifecycleAggregate
     @Apply
     private void on(CommandScheduled event) {
         Command updatedCommand = updateSchedule(event.getSchedule());
-        CommandStatus status = getBuilder()
+        CommandTimeline status = getBuilder()
                 .getStatus()
                 .toBuilder()
                 .setWhenScheduled(event.getWhen())
@@ -169,7 +176,7 @@ public final class CommandLifecycleAggregate
 
     @Apply
     private void on(CommandDispatched event) {
-        CommandStatus status = getBuilder()
+        CommandTimeline status = getBuilder()
                 .getStatus()
                 .toBuilder()
                 .setWhenDispatched(event.getWhen())
@@ -178,9 +185,14 @@ public final class CommandLifecycleAggregate
     }
 
     @Apply
+    private void on(TargetAssignedToCommand event) {
+        CommandTarget target = event.getTarget();
+        getBuilder().setTarget(target);
+    }
+
+    @Apply
     private void on(CommandHandled event) {
         setStatus(Responses.statusOk(), event.getWhen());
-        getBuilder().setReceiver(event.getReceiver());
     }
 
     @Apply
@@ -215,11 +227,12 @@ public final class CommandLifecycleAggregate
     }
 
     private void setStatus(Status status, Timestamp whenProcessed) {
-        CommandStatus commandStatus = getBuilder().getStatus()
-                                                  .toBuilder()
-                                                  .setWhenProcessed(whenProcessed)
-                                                  .setProcessingStatus(status)
-                                                  .build();
+        CommandTimeline commandStatus = getBuilder()
+                .getStatus()
+                .toBuilder()
+                .setWhenHandled(whenProcessed)
+                .setHowHandled(status)
+                .build();
         getBuilder().setStatus(commandStatus);
     }
 }

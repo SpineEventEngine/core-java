@@ -25,6 +25,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -631,6 +632,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     void onDispatchEvent(I id, Event event) {
         lifecycleOf(id).onDispatchEventToReactor(event);
+    }
+
+    void onAssignedToCommand(I id, CommandId commandId) {
+        lifecycleOf(id).onAssignedToCommand(commandId);
     }
 
     @Override

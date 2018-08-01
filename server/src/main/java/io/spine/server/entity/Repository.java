@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
+import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
@@ -456,6 +457,12 @@ public abstract class Repository<I, E extends Entity<I, ?>>
          * Posts the {@link DispatchCommandToHandler} system command.
          */
         void onDispatchCommand(Command command);
+
+        /**
+         * Posts the {@link io.spine.system.server.AssignTargetToCommand AssignTargetToCommand}
+         * system command.
+         */
+        void onAssignedToCommand(CommandId id);
 
         /**
          * Posts the {@link MarkCommandAsHandled} system command.

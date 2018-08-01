@@ -78,6 +78,17 @@ message MarkCommandAsDispatched {
     spine.core.CommandId id = 1;
 }
 
+// A system command to assign a command target to the command.
+//
+message AssignTargetToCommand {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // The command target.
+    CommandTarget target = 2 [(valid) = true];
+}
+
 // A system comand to mark a domain command as handled.
 //
 // Posted only after a successful command handling.
@@ -86,9 +97,6 @@ message MarkCommandAsHandled {
 
     // The ID of the command.
     spine.core.CommandId id = 1;
-
-    // The receiver of the command.
-    CommandReceiver receiver = 2 [(valid) = true];
 }
 
 // A system comand to mark a domain command as handled.

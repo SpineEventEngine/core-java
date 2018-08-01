@@ -51,22 +51,18 @@ message CommandLifecycle {
     // The command.
     spine.core.Command command = 2;
 
-    // The receiver of the command.
-    //
-    // This field is set only after the command is successfully handled. Before that, this field is
-    // not set.
-    //
-    CommandReceiver receiver = 3;
+    // The target of the command delivery.
+    CommandTarget target = 3;
 
-    // The current status of the command.
-    CommandStatus status = 4 [(required) = true];
+    // The log of changes of the command.
+    CommandTimeline status = 4 [(required) = true];
 }
 
 // A receiver of a command.
 //
 // This type represents an ID of an entity, which has handled a command.
 //
-message CommandReceiver { // command_target
+message CommandTarget {
 
     // The ID of the entity which the command was dispatched to.
     spine.client.EntityId entity_id = 1 [(valid) = true];
@@ -75,9 +71,9 @@ message CommandReceiver { // command_target
     string type_url = 2 [(required) = true];
 }
 
-// The status of the command processing.
+// The log of changes of a command status.
 //
-message CommandStatus { // timeline // TODO:2018-07-31:dmytro.dashenkov: .
+message CommandTimeline {
 
     // The instant when the command was received.
     //
@@ -95,11 +91,11 @@ message CommandStatus { // timeline // TODO:2018-07-31:dmytro.dashenkov: .
     google.protobuf.Timestamp when_dispatched = 4;
 
     // The instant when the command processing is completed, successfully or otherwise.
-    google.protobuf.Timestamp when_handled = 5 [(goes).with = "processing_status"];
+    google.protobuf.Timestamp when_handled = 5 [(goes).with = "how_handled"];
 
     // The status of the command after processing.
     //
-    // An empty field notifies a non-processed command.
+    // An empty field notifies a non-handled command.
     //
-    spine.core.Status processing_status = 6 [(goes).with = "when_handled"]; // how_handled
+    spine.core.Status how_handled = 6 [(goes).with = "when_handled"];
 }

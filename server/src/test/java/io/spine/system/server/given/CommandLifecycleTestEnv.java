@@ -49,6 +49,8 @@ import io.spine.system.server.EstablishCompany;
 import io.spine.system.server.FinalizeCompanyName;
 import io.spine.system.server.ProposeCompanyName;
 import io.spine.system.server.StartCompanyEstablishing;
+import io.spine.system.server.TargetAssignedToCommand;
+import io.spine.type.TypeUrl;
 
 import java.util.Collection;
 
@@ -75,6 +77,7 @@ public final class CommandLifecycleTestEnv {
             return ImmutableSet.of(CommandReceived.class,
                                    CommandAcknowledged.class,
                                    CommandDispatched.class,
+                                   TargetAssignedToCommand.class,
                                    CommandHandled.class,
                                    CommandErrored.class,
                                    CommandRejected.class);
@@ -84,6 +87,7 @@ public final class CommandLifecycleTestEnv {
     public static class TestAggregate
             extends Aggregate<CompanyId, Company, CompanyVBuilder> {
 
+        public static final TypeUrl TYPE = TypeUrl.of(Company.class);
         public static final String TAKEN_NAME = "NameIsTaken!";
 
         private TestAggregate(CompanyId id) {
@@ -115,6 +119,7 @@ public final class CommandLifecycleTestEnv {
             super(id);
         }
 
+        public static final TypeUrl TYPE = TypeUrl.of(CompanyEstablishing.class);
         public static final String FAULTY_NAME = "This name is exceptionally faulty";
 
         @Assign

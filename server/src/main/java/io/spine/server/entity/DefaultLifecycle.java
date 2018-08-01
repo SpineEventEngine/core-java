@@ -29,8 +29,9 @@ import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.option.EntityOption;
 import io.spine.system.server.ArchiveEntity;
+import io.spine.system.server.AssignTargetToCommand;
 import io.spine.system.server.ChangeEntityState;
-import io.spine.system.server.CommandReceiver;
+import io.spine.system.server.CommandTarget;
 import io.spine.system.server.CreateEntity;
 import io.spine.system.server.DeleteEntity;
 import io.spine.system.server.DispatchCommandToHandler;
@@ -78,6 +79,21 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
     }
 
     @Override
+    public void onAssignedToCommand(CommandId commandId) {
+        CommandTarget target = CommandTarget
+                .newBuilder()
+                .setEntityId(id.getEntityId())
+                .setTypeUrl(id.getTypeUrl())
+                .build();
+        AssignTargetToCommand command = AssignTargetToCommand
+                .newBuilder()
+                .setId(commandId)
+                .setTarget(target)
+                .build();
+        systemGateway.postCommand(command);
+    }
+
+    @Override
     public void onDispatchCommand(Command command) {
         DispatchCommandToHandler systemCommand = DispatchCommandToHandler
                 .newBuilder()
@@ -89,15 +105,9 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
 
     @Override
     public void onCommandHandled(Command command) {
-        CommandReceiver receiver = CommandReceiver
-                .newBuilder()
-                .setEntityId(id.getEntityId())
-                .setTypeUrl(id.getTypeUrl())
-                .build();
         MarkCommandAsHandled systemCommand = MarkCommandAsHandled
                 .newBuilder()
                 .setId(command.getId())
-                .setReceiver(receiver)
                 .build();
         systemGateway.postCommand(systemCommand);
     }

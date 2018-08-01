@@ -53,7 +53,7 @@ public class Acknowledgements {
 
     private final List<Ack> acks = newArrayList();
     private final List<Error> errors = newArrayList();
-    private final List<Event> rejections = newArrayList();
+    private final List<Rejection> rejections = newArrayList();
     private final Map<RejectionClass, Integer> rejectionTypes;
 
     public Acknowledgements(Iterable<Ack> responses) {
@@ -67,7 +67,7 @@ public class Acknowledgements {
                 errors.add(error);
             }
 
-            Event rejection = status.getRejection();
+            Rejection rejection = status.getRejection();
             rejections.add(rejection);
         }
         rejectionTypes = countRejectionTypes(rejections);
@@ -79,9 +79,9 @@ public class Acknowledgements {
      * @param rejections a list of {@link Event}
      * @return a mapping of Rejection classes to their count
      */
-    private static Map<RejectionClass, Integer> countRejectionTypes(List<Event> rejections) {
+    private static Map<RejectionClass, Integer> countRejectionTypes(List<Rejection> rejections) {
         Map<RejectionClass, Integer> countForType = new HashMap<>();
-        for (Event rejection : rejections) {
+        for (Rejection rejection : rejections) {
             RejectionClass type = RejectionClass.of(rejection);
             int currentCount = countForType.getOrDefault(type, 0);
             countForType.put(type, currentCount + 1);
@@ -202,7 +202,7 @@ public class Acknowledgements {
     /**
      * A predicate filtering the {@link Rejection rejections} which match the provided predicate.
      */
-    private static class RejectionFilter<T extends Message> implements Predicate<Event> {
+    private static class RejectionFilter<T extends Message> implements Predicate<Rejection> {
 
         private final TypeUrl typeUrl;
         private final RejectionCriterion<T> predicate;
@@ -213,7 +213,7 @@ public class Acknowledgements {
         }
 
         @Override
-        public boolean test(Event rejectionEvent) {
+        public boolean test(Rejection rejectionEvent) {
             T message = unpack(rejectionEvent.getMessage());
             return typeUrl.equals(TypeUrl.of(message)) && predicate.matches(message);
         }
