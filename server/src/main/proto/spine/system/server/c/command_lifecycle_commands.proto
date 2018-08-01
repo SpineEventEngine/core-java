@@ -37,7 +37,7 @@ import "spine/core/rejection.proto";
 import "spine/client/entities.proto";
 import "spine/system/server/command_lifecycle.proto";
 
-// A system comand to mark a domain command as received.
+// A system command to mark a domain command as received.
 //
 message MarkCommandAsReceived {
 
@@ -48,7 +48,7 @@ message MarkCommandAsReceived {
     spine.core.Command payload = 2 [(required) = true];
 }
 
-// A system comand to mark a domain command as acknowledged.
+// A system command to mark a domain command as acknowledged.
 //
 message MarkCommandAsAcknowledged {
 
@@ -70,7 +70,7 @@ message ScheduleCommand {
     spine.core.CommandContext.Schedule schedule = 2 [(valid) = true];
 }
 
-// A system comand to mark a domain command as dispatched.
+// A system command to mark a domain command as dispatched.
 //
 message MarkCommandAsDispatched {
 
@@ -92,7 +92,7 @@ message AssignTargetToCommand {
     CommandTarget target = 2 [(valid) = true];
 }
 
-// A system comand to mark a domain command as handled.
+// A system command to mark a domain command as handled.
 //
 // Posted only after a successful command handling.
 //
@@ -102,7 +102,7 @@ message MarkCommandAsHandled {
     spine.core.CommandId id = 1;
 }
 
-// A system comand to mark a domain command as handled.
+// A system command to mark a domain command as handled.
 //
 // Posted if command processing caused a runtime error at any point.
 //
@@ -115,7 +115,7 @@ message MarkCommandAsErrored {
     spine.base.Error error = 2 [(required) = true];
 }
 
-// A system comand to mark a domain command as rejected.
+// A system command to mark a domain command as rejected.
 //
 // Posted if the command handler has rejected the command.
 //
