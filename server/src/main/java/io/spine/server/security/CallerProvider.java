@@ -47,8 +47,8 @@ final class CallerProvider extends SecurityManager {
     }
 
     /**
-     * Obtains the class which was in the call chain before the one which calls
-     * the method of interest.
+     * Obtains the class preceding in call chain the class which calls the
+     * method from which this method is being called.
      */
     Class getPreviousCallerClass() {
         Class[] context = getClassContext();
