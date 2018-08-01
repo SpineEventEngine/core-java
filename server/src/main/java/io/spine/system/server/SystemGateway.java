@@ -34,7 +34,8 @@ public interface SystemGateway {
     /**
      * Posts a system command.
      *
-     * <p>In a multitenant environment, the command is posted for the current tenant.
+     * <p>In a multitenant environment, the command is posted for
+     * the {@linkplain io.spine.server.tenant.TenantAwareOperation current tenant}.
      *
      * @param systemCommand command message
      */
