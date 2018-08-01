@@ -40,10 +40,10 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static io.spine.io.PropertyFiles.loadAllProperties;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A map from an event enrichment Protobuf type name to the corresponding
@@ -173,16 +173,12 @@ class EnrichmentsMap {
         }
 
         private static Collection<String> parseFieldNames(String qualifiers) {
-            Collection<String> result = newLinkedList();
-            String[] fieldNames = pipeSeparatorPattern.split(qualifiers);
-            for (String singleFieldName : fieldNames) {
-                String normalizedFieldName = singleFieldName.trim();
-                if (normalizedFieldName.isEmpty()) {
-                    continue;
-                }
-                String fieldName = getSimpleFieldName(normalizedFieldName);
-                result.add(fieldName);
-            }
+            Collection<String> result =
+                    pipeSeparatorPattern.splitAsStream(qualifiers)
+                                        .map(String::trim)
+                                        .filter(fieldName -> !fieldName.isEmpty())
+                                        .map(Builder::getSimpleFieldName)
+                                        .collect(toList());
             return result;
         }
 
