@@ -80,6 +80,9 @@ message MarkCommandAsDispatched {
 
 // A system command to assign a command target to the command.
 //
+// This command is posted when the command target is determined, but before the command is delivered
+// to the target.
+//
 message AssignTargetToCommand {
 
     // The ID of the command.
