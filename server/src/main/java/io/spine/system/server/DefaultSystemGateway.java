@@ -22,7 +22,6 @@ package io.spine.system.server;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.CommandFactory;
 import io.spine.core.Command;
@@ -42,7 +41,6 @@ import static io.spine.grpc.StreamObservers.noOpObserver;
  *
  * @author Dmytro Dashenkov
  */
-@Internal
 public final class DefaultSystemGateway implements SystemGateway {
 
     /**

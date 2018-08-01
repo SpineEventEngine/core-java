@@ -21,7 +21,6 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Timestamp;
-import io.spine.annotation.Internal;
 import io.spine.core.CommandId;
 import io.spine.core.EventContext;
 import io.spine.core.Responses;
@@ -54,7 +53,6 @@ import io.spine.server.command.Assign;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("OverlyCoupledClass") // OK for an aggregate class.
-@Internal
 public final class CommandLifecycleAggregate
         extends Aggregate<CommandId, CommandLifecycle, CommandLifecycleVBuilder> {
 

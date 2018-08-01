@@ -21,7 +21,6 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Timestamp;
-import io.spine.annotation.Internal;
 import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
@@ -54,7 +53,6 @@ import static io.spine.base.Time.getCurrentTime;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // OK for an Aggregate class.
-@Internal
 public final class EntityHistoryAggregate
         extends Aggregate<EntityHistoryId, EntityHistory, EntityHistoryVBuilder> {
 
