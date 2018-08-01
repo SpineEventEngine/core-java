@@ -44,7 +44,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Time.getCurrentTime;
@@ -209,7 +209,7 @@ public abstract class ProjectionStorageTest
         }
 
         private List<ProjectId> fillStorage(int count) {
-            List<ProjectId> ids = newLinkedList();
+            List<ProjectId> ids = newArrayListWithCapacity(count);
 
             for (int i = 0; i < count; i++) {
                 ProjectId id = newId();

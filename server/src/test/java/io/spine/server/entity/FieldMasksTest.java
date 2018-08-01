@@ -32,6 +32,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
@@ -116,7 +117,7 @@ class FieldMasksTest {
                                                   Project.TASK_FIELD_NUMBER);
             int count = 5;
 
-            Collection<Project> original = newLinkedList();
+            Collection<Project> original = newArrayListWithCapacity(count);
 
             for (int i = 0; i < count; i++) {
                 Project project = Given.newProject(format("project-%s", i));
