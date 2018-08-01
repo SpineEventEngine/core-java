@@ -43,7 +43,7 @@ import static com.google.common.collect.Sets.newHashSet;
  * @author Alexander Yevsyukov
  * @author Dmytro Grankin
  */
-@Immutable
+@Immutable(containerOf = {"M", "H"})
 public class MessageHandlerMap<M extends MessageClass,
                                H extends HandlerMethod<?, M, ?, ?>>
         implements Serializable {

@@ -60,7 +60,7 @@ public final class BoundedContextBuilder {
     private BoundedContextName name = BoundedContextNames.defaultName();
     private boolean multitenant;
     private TenantIndex tenantIndex;
-    private Supplier<StorageFactory> storageFactorySupplier;
+    private @Nullable Supplier<StorageFactory> storageFactorySupplier;
     private TransportFactory transportFactory;
 
     private CommandBus.Builder commandBus;
@@ -134,7 +134,8 @@ public final class BoundedContextBuilder {
      * {@link StorageFactorySwitch} will be used during the construction of
      * a {@code BoundedContext} instance.
      */
-    public BoundedContextBuilder setStorageFactorySupplier(@Nullable Supplier<StorageFactory> supplier) {
+    public
+    BoundedContextBuilder setStorageFactorySupplier(@Nullable Supplier<StorageFactory> supplier) {
         this.storageFactorySupplier = supplier;
         return this;
     }
@@ -255,10 +256,11 @@ public final class BoundedContextBuilder {
     @SuppressWarnings("ResultOfMethodCallIgnored") // Builder methods.
     private SystemBoundedContext buildSystem() {
         BoundedContextName name = BoundedContextNames.system(this.name);
-        BoundedContextBuilder system = BoundedContext.newBuilder()
-                                                     .setMultitenant(multitenant)
-                                                     .setName(name)
-                                                     .setTransportFactory(getTransportFactory());
+        BoundedContextBuilder system = BoundedContext
+                .newBuilder()
+                .setMultitenant(multitenant)
+                .setName(name)
+                .setTransportFactory(getTransportFactory());
         Optional<? extends Supplier<StorageFactory>> storage = getStorageFactorySupplier();
         storage.ifPresent(system::setStorageFactorySupplier);
         Optional<? extends TenantIndex> tenantIndex = getTenantIndex();

@@ -18,29 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.model;
-
-import io.spine.server.model.Model;
-
 /**
- * Utilities for tests that deal with {@link Model}.
- *
- * @author Alexander Yevsyukov
+ * This package provides classes for controlling server-side code execution security.
  */
-public class ModelTests {
 
-    /** Prevents instantiation of this utility class. */
-    private ModelTests() {
-    }
+@Internal
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.security;
 
-    /**
-     * Clears all models.
-     *
-     * @implNote This method is the only way to drop models because {@link Model#dropAllModels()}
-     * verifies the name of the class which calls the method.
-     * It must be {@linkplain ModelTests this class}.
-     */
-    public static void dropAllModels() {
-        Model.dropAllModels();
-    }
-}
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.annotation.Internal;
+
+import javax.annotation.ParametersAreNonnullByDefault;

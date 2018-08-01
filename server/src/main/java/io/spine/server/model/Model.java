@@ -20,11 +20,16 @@
 
 package io.spine.server.model;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Maps;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
+import io.spine.core.BoundedContextNames;
 import io.spine.reflect.PackageInfo;
 import io.spine.server.annotation.BoundedContext;
+import io.spine.server.security.CallerProvider;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -37,23 +42,77 @@ import java.util.function.Supplier;
 @Internal
 public class Model {
 
+    /**
+     * Maps a raw class of a model object to corresponding Model instance.
+     */
+    private static final Map<Class<?>, Model> models = Maps.newConcurrentMap();
+
+    /** The name of the Bounded Context to which this model belongs. */
+    private final BoundedContextName context;
+
     /** Maps a raw Java class to a {@code ModelClass}. */
     private final ClassMap classes = new ClassMap();
 
+    /**
+     * Obtains the model for the {@linkplain BoundedContextNames#defaultName() default}
+     * Bounded Context.
+     */
     public static Model getInstance() {
         return Singleton.INSTANCE.value;
     }
 
-    @SuppressWarnings("unused") // The param will be used when Model is created per BoundedContext.
-    public static <T> Model getInstance(Class<? extends T> rawClass) {
-        //TODO:2018-07-25:alexander.yevsyukov: Find the model for the raw class using the
-        // @BoundedContext("MyBoundedContext") annotation in the one of the parent packages
-        // of the passed class.
-        return getInstance();
+    /**
+     * Creates a new instance for the Bounded Context with the passed name. */
+    private Model(BoundedContextName context) {
+        this.context = context;
     }
 
-    /** Prevents instantiation from outside. */
-    private Model() {
+    @SuppressWarnings("unused") // The param will be used when Model is created per BoundedContext.
+    public static <T> Model getInstance(Class<? extends T> rawClass) {
+        Model model = models.get(rawClass);
+        if (model != null) {
+            return model;
+        }
+
+        Optional<BoundedContextName> optional = findContext(rawClass);
+
+        // If no name of a Bounded Context found, assume the default name.
+        // This is a safety net for newcomers and our tests.
+        // We may want to make this check strict, and require specifying Bounded Context names.
+        BoundedContextName context = optional.orElseGet(BoundedContextNames::defaultName);
+
+        // Try to find a Model if it already exists.
+        Optional<Model> alreadyAvailable =
+                models.values()
+                      .stream()
+                      .filter((m) -> m.context.equals(context))
+                      .findAny();
+
+        if (alreadyAvailable.isPresent()) {
+            return alreadyAvailable.get();
+        }
+
+        // Since a model is not found, create for new Bounded Context and associated with the
+        // passed raw class.
+        Model newModel = new Model(context);
+        models.put(rawClass, newModel);
+        return newModel;
+    }
+
+    /**
+     * Finds Bounded Context name in the package annotations of the raw class,
+     * or in the packages into which the package of the class is nested.
+     */
+    private static <T> Optional<BoundedContextName> findContext(Class<? extends T> rawClass) {
+        PackageInfo pkg = PackageInfo.of(rawClass);
+        Optional<BoundedContext> annotation = pkg.findAnnotation(BoundedContext.class);
+        if (!annotation.isPresent()) {
+            return Optional.empty();
+        }
+        String contextName = annotation.get()
+                                       .name();
+        BoundedContextName result = BoundedContextNames.newName(contextName);
+        return Optional.of(result);
     }
 
     /**
@@ -62,8 +121,32 @@ public class Model {
      * <p>This method can be useful when multiple Spine projects are processed under the same
      * static context, e.g. in tests.
      */
-    public void clear() {
+    private void clear() {
         classes.clear();
+    }
+
+    /**
+     * Clears all models and removes them.
+     *
+     * <p>This method must <em>not</em> be called from the production code.
+     *
+     * <p>It <em>may</em> be called indirectly from tests only via the {@code ModelTests} class.
+     *
+     * @throws SecurityException if called directly
+     */
+    @VisibleForTesting
+    public static synchronized void dropAllModels() {
+        Class callingClass = CallerProvider.instance()
+                                           .getCallerClass();
+        // We reference the class by the name since we don't depend on testing utilities.
+        if (callingClass.getName().equals("io.spine.testing.server.model.ModelTests")) {
+            for (Model model : models.values()) {
+                model.clear();
+            }
+            models.clear();
+        } else {
+            throw new SecurityException("Use ModelTests.dropAllModels() instead");
+        }
     }
 
     /**
@@ -80,28 +163,10 @@ public class Model {
         return result;
     }
 
-    /**
-     * Finds Bounded Context name in the package annotations of the raw class,
-     * or in the packages into which the package of the class is nested.
-     */
-    private static <T> Optional<BoundedContextName> findContext(Class<? extends T> rawClass) {
-        PackageInfo pkg = PackageInfo.of(rawClass);
-        Optional<BoundedContext> annotation = pkg.findAnnotation(BoundedContext.class);
-        if (!annotation.isPresent()) {
-            return Optional.empty();
-        }
-        String contextName = annotation.get()
-                                       .name();
-        BoundedContextName result = BoundedContextName
-                .newBuilder()
-                .setValue(contextName)
-                .build();
-        return Optional.of(result);
-    }
-
     private enum Singleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Model value = new Model();
+        private final Model value = new Model(BoundedContextNames.defaultName());
     }
+
 }

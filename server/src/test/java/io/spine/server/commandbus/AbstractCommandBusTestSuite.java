@@ -170,7 +170,7 @@ abstract class AbstractCommandBusTestSuite {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         Class<? extends AbstractCommandBusTestSuite> cls = getClass();
         InMemoryStorageFactory storageFactory =
                 InMemoryStorageFactory.newInstance(newName(cls.getSimpleName()), multitenant);

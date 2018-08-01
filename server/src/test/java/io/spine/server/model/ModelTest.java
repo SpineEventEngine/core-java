@@ -49,7 +49,7 @@ class ModelTest {
 
     @BeforeEach
     void setUp() {
-        model.clear();
+        model.dropAllModels();
     }
 
     @SuppressWarnings("CheckReturnValue") // returned values are not used in this test

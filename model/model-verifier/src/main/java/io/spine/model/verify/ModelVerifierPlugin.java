@@ -81,17 +81,6 @@ public final class ModelVerifierPlugin extends SpinePlugin {
     }
 
     /**
-     * Verifies the {@link CommandHandlers} upon the {@linkplain Project Gradle project}.
-     *
-     * @param model   the Spine model to process
-     * @param project the Gradle project to process the model upon
-     */
-    private static void verifyModel(CommandHandlers model, Project project) {
-        ModelVerifier verifier = new ModelVerifier(project);
-        verifier.verify(model);
-    }
-
-    /**
      * Opens the method to the helper class.
      */
     @SuppressWarnings("RedundantMethodOverride") // See Javadoc.
@@ -118,6 +107,17 @@ public final class ModelVerifierPlugin extends SpinePlugin {
             this.rawModelPath = rawModelPath;
         }
 
+        /**
+         * Verifies the {@link CommandHandlers} upon the {@linkplain Project Gradle project}.
+         *
+         * @param project the Gradle project to process the model upon
+         * @param commandHandlers   the Spine model to process
+         */
+        private static void verifyModel(Project project, CommandHandlers commandHandlers) {
+            ModelVerifier verifier = new ModelVerifier(project);
+            verifier.verify(commandHandlers);
+        }
+
         @Override
         public void execute(Task task) {
             if (!exists(rawModelPath)) {
@@ -126,13 +126,14 @@ public final class ModelVerifierPlugin extends SpinePlugin {
                          rawModelPath);
                 return;
             }
-            CommandHandlers model;
+            CommandHandlers commandHandlers;
             try (InputStream in = newInputStream(rawModelPath, StandardOpenOption.READ)) {
-                model = CommandHandlers.parseFrom(in);
+                commandHandlers = CommandHandlers.parseFrom(in);
+
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
-            verifyModel(model, task.getProject());
+            verifyModel(task.getProject(), commandHandlers);
         }
     }
 }

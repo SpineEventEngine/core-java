@@ -22,6 +22,7 @@ package io.spine.testing.server.model;
 
 import io.spine.server.command.model.CommandHandlerClass;
 import io.spine.server.model.Model;
+import io.spine.testing.UtilityClassTest;
 import io.spine.testing.server.model.given.ModelTestsTestEnv.DuplicatedCommandHandler;
 import io.spine.testing.server.model.given.ModelTestsTestEnv.TestCommandHandler;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,44 +30,45 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Alexander Yevsyukov
  */
 @DisplayName("ModelTests utility should")
-class ModelTestsTest {
+class ModelTestsTest extends UtilityClassTest<ModelTests> {
 
-    private final Model model = Model.getInstance(TestCommandHandler.class);
+    ModelTestsTest() {
+        super(ModelTests.class);
+    }
 
     @BeforeEach
     void setUp() {
         // The model should not be polluted by the previously executed tests.
-        model.clear();
+        ModelTests.dropAllModels();
     }
 
     @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(ModelTests.class);
-    }
-
-    @Test
-    @DisplayName("clear model")
+    @DisplayName("clear all models")
     void clearModel() {
         // This adds a command handler for `com.google.protobuf.Timestamp`.
         CommandHandlerClass cls1 = asCommandHandlerClass(TestCommandHandler.class);
         assertNotNull(cls1);
 
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
 
         // This should pass as we cleared the model,
         // i.e. there is no registered command handler for `com.google.protobuf.Timestamp`.
         CommandHandlerClass cls2 = asCommandHandlerClass(DuplicatedCommandHandler.class);
         assertNotNull(cls2);
         assertNotEquals(cls1, cls2);
+    }
+
+    @Test
+    @DisplayName("be the only place for clearing models")
+    void theSoleCleaner() {
+        assertThrows(SecurityException.class, Model::dropAllModels);
     }
 }

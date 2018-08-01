@@ -56,7 +56,7 @@ class IdempotencyGuardTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(true)
                                        .build();

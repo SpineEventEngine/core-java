@@ -69,7 +69,7 @@ class CommandHandlerTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .setMultitenant(true)
                                                       .build();

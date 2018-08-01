@@ -18,29 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.model;
-
-import io.spine.server.model.Model;
+package io.spine.server.security;
 
 /**
- * Utilities for tests that deal with {@link Model}.
+ * Provides information about the class calling a method.
  *
  * @author Alexander Yevsyukov
  */
-public class ModelTests {
+public final class CallerProvider extends SecurityManager {
 
-    /** Prevents instantiation of this utility class. */
-    private ModelTests() {
+    private static final CallerProvider INSTANCE = new CallerProvider();
+
+    /**
+     * Obtains the instance.
+     */
+    public static CallerProvider instance() {
+        return INSTANCE;
     }
 
     /**
-     * Clears all models.
-     *
-     * @implNote This method is the only way to drop models because {@link Model#dropAllModels()}
-     * verifies the name of the class which calls the method.
-     * It must be {@linkplain ModelTests this class}.
+     * Obtains the class of the object which calls the method from which this method
+     * is being called.
      */
-    public static void dropAllModels() {
-        Model.dropAllModels();
+    public Class getCallerClass() {
+        Class[] context = getClassContext();
+        Class result = context[2];
+        return result;
     }
 }
