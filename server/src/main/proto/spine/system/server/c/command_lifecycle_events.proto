@@ -92,8 +92,7 @@ message CommandDispatched {
 
 // An event emitted when the command target is determined.
 //
-// This event is emitted when the command target is determined, but before the command is delivered
-// to the target.
+// This event is emitted before the command is delivered to the target.
 //
 message TargetAssignedToCommand {
 
