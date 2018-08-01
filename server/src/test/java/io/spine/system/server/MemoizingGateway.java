@@ -42,7 +42,7 @@ public final class MemoizingGateway implements SystemGateway {
     /**
      * The last tenant which a system command was posted for.
      *
-     * <p>This field may be {@code null} iff no system has yet been posted.
+     * <p>This field may be {@code null} iff no system command has yet been posted.
      */
     private @MonotonicNonNull TenantId tenantId;
 
