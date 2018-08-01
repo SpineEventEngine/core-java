@@ -25,8 +25,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @DisplayName("InvocationGuard should")
 class InvocationGuardTest extends UtilityClassTest<InvocationGuard> {
@@ -55,9 +55,11 @@ class InvocationGuardTest extends UtilityClassTest<InvocationGuard> {
         String callingClass = CallerProvider.instance()
                                             .getCallerClass()
                                             .getName();
-        assertDoesNotThrow(
-                () ->  InvocationGuard.allowOnly(callingClass)
-        );
+        try {
+            InvocationGuard.allowOnly(callingClass);
+        } catch (Exception e) {
+            fail(e);
+        }
     }
 
     private static void assertThrowsOn(Executable executable) {
