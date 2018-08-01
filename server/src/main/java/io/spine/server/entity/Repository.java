@@ -446,6 +446,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * <p>An instance of {@code Lifecycle} posts the system commands related to the entity
      * lifecycle.
      */
+    @Internal
     public interface Lifecycle {
 
         /**
