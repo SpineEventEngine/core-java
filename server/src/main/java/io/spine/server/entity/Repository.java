@@ -482,6 +482,10 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         /**
          * Posts the {@link ChangeEntityState} system command and the commands related to
          * the lifecycle flags.
+         *
+         * @param change     the change in the entity state and attributes
+         * @param messageIds the IDs of the messages which caused the {@code change}; typically,
+         *                   {@link io.spine.core.EventId EventId}s or {@link CommandId}s
          */
         void onStateChanged(EntityRecordChange change, Set<? extends Message> messageIds);
     }
