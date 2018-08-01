@@ -25,9 +25,10 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.core.Ack;
-import io.spine.core.Rejection;
+import io.spine.core.Event;
 import io.spine.core.Responses;
 import io.spine.core.Status;
+import io.spine.server.command.Rejection;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -81,9 +82,11 @@ public class Buses {
      */
     public static Ack reject(Message id, Rejection cause) {
         checkNotNull(cause);
-        checkArgument(isNotDefault(cause));
+
+        Event event = cause.asEvent();
+        checkArgument(isNotDefault(event));
         Status status = Status.newBuilder()
-                              .setRejection(cause)
+                              .setRejection(event)
                               .build();
         return setStatus(id, status);
     }

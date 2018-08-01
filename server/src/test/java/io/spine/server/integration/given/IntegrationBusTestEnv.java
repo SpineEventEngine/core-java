@@ -34,6 +34,7 @@ import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.command.Rejection;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.procman.ProcessManager;
@@ -60,6 +61,8 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.base.Identifier.pack;
+import static io.spine.testing.server.TestEventFactory.newInstance;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
@@ -158,8 +161,8 @@ public class IntegrationBusTestEnv {
         io.spine.test.integration.rejection.ItgCannotStartArchivedProject throwable =
                 new io.spine.test.integration.rejection.ItgCannotStartArchivedProject(projectId);
         throwable.initProducer(pack(projectId));
-        Event rejection = toEvent(throwable);
-        return rejection;
+        Rejection rejection = Rejection.from(CommandEnvelope.of(startProjectCmd), throwable);
+        return rejection.asEvent();
     }
 
     private static Command toCommand(ItgStartProject cmdMessage) {
@@ -456,9 +459,7 @@ public class IntegrationBusTestEnv {
     }
 
     /**
-     * A subscriber for testing of
-     * {@linkplain
-     * #ensureExternalMatch(boolean) external attribute mismatch check}.
+     * A subscriber for testing of external attribute mismatch check.
      */
     @SuppressWarnings("unused") // OK to have unused params in this test env. class
     public static final class ExternalMismatchSubscriber extends EventSubscriber {

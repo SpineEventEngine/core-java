@@ -40,6 +40,7 @@ import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
+import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.SystemGateway;

@@ -34,8 +34,8 @@ import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.model.AggregateClass;
+import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.server.commandbus.CommandErrorHandler;
 import io.spine.server.delivery.Shardable;
 import io.spine.server.delivery.ShardedStreamConsumer;
 import io.spine.server.delivery.ShardingStrategy;
@@ -276,7 +276,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
         commandErrorHandler.handleError(envelope, exception)
-                           .rethrow();
+                           .rethrowOnce();
     }
 
     @Override

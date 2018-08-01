@@ -124,6 +124,6 @@ message MarkCommandAsRejected {
     // The ID of the command.
     spine.core.CommandId id = 1;
 
-    // The command rejection.
-    spine.core.EventId rejection_event_id = 2 [(valid) = true];
+    // The command rejection event.
+    spine.core.Event rejection_event = 2 [(valid) = true];
 }

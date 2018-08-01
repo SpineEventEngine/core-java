@@ -137,7 +137,7 @@ public final class CommandLifecycleAggregate
         Timestamp when = getCurrentTime();
         return CommandRejected.newBuilder()
                               .setId(command.getId())
-                              .setRejection(command.getRejection())
+                              .setRejectionEvent(command.getRejectionEvent())
                               .setWhen(when)
                               .build();
     }
@@ -209,7 +209,7 @@ public final class CommandLifecycleAggregate
     private void on(CommandRejected event) {
         Status status = Status
                 .newBuilder()
-                .setRejection(event.getRejection())
+                .setRejection(event.getRejectionEvent())
                 .build();
         setStatus(status, event.getWhen());
     }

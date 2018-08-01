@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * The predicate that helps finding a function that converts a message field (of the given class)
  * into an enrichment field (of another given class).
  *
- * @see Enricher#functionFor(Class, Class)
+ * @see EventEnricher#functionFor(Class, Class)
  * @author Alexander Yevsyukov
  */
 @Internal

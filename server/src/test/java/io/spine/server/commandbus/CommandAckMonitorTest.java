@@ -21,15 +21,20 @@
 package io.spine.server.commandbus;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
+import io.spine.base.Identifier;
 import io.spine.core.Ack;
+import io.spine.core.Command;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
-import io.spine.core.Rejection;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.Buses;
+import io.spine.server.command.Rejection;
+import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
 import io.spine.system.server.MarkCommandAsAcknowledged;
 import io.spine.system.server.MarkCommandAsErrored;
 import io.spine.system.server.MemoizingGateway;
@@ -41,9 +46,7 @@ import org.junit.jupiter.api.Test;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Time.getCurrentTime;
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.protobuf.AnyPacker.pack;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -250,10 +253,17 @@ class CommandAckMonitorTest {
     }
 
     private static Ack rejectionAck(CommandId commandId) {
-        Rejection rejection = Rejection
+        Command command = Command
                 .newBuilder()
-                .setMessage(pack(getCurrentTime()))
+                .setId(commandId)
                 .build();
+        CommandEnvelope envelope = CommandEnvelope.of(command);
+
+        Any entityId = Identifier.pack(CommandAckMonitorTest.class.getSimpleName());
+        CannotModifyArchivedEntity rejectionThrowable = new CannotModifyArchivedEntity(entityId);
+        RuntimeException wrapperThrowable = new RuntimeException(rejectionThrowable);
+        Rejection rejection = Rejection.fromThrowable(envelope, wrapperThrowable);
+
         return Buses.reject(commandId, rejection);
     }
 }

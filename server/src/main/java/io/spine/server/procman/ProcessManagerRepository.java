@@ -36,10 +36,10 @@ import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
+import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
-import io.spine.server.commandbus.CommandErrorHandler;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.delivery.Shardable;
 import io.spine.server.delivery.ShardedStreamConsumer;
@@ -283,7 +283,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
         commandErrorHandler.handleError(envelope, exception)
-                           .rethrow();
+                           .rethrowOnce();
     }
 
     @SuppressWarnings("unchecked")   // to avoid massive generic-related issues.
