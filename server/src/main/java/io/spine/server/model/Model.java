@@ -51,7 +51,7 @@ public class Model {
      */
     private static final Map<Class<?>, Model> models = Maps.newConcurrentMap();
 
-    /** The name of the Bounded Context to which this model belongs. */
+    /** The name of the Bounded Context to which this instance belongs. */
     private final BoundedContextName context;
 
     /** Maps a raw Java class to a {@code ModelClass}. */
@@ -114,7 +114,7 @@ public class Model {
             return Optional.empty();
         }
         String contextName = annotation.get()
-                                       .name();
+                                       .value();
         BoundedContextName result = BoundedContextNames.newName(contextName);
         return Optional.of(result);
     }
@@ -127,6 +127,13 @@ public class Model {
      */
     private void clear() {
         classes.clear();
+    }
+
+    private static void reset() {
+        for (Model model : models.values()) {
+            model.clear();
+        }
+        models.clear();
     }
 
     /**
@@ -149,10 +156,7 @@ public class Model {
                 "io.spine.model.verify.ModelVerifier"
         );
         if (allowedCallers.contains(callingClass.getName())) {
-            for (Model model : models.values()) {
-                model.clear();
-            }
-            models.clear();
+            reset();
         } else {
             String msg = format(
                     "The class %s is not allowed to perform this operation", callingClass

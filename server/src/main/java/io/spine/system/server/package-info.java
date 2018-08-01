@@ -18,31 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.annotation;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
- * Marks a package as one belonging to a Bounded Context with
- * the {@linkplain #value() specified name}.
+ * Provides implementation of the System Bounded Context.
  *
- * <p>Packages which names start with the name of the annotated package “inherit” the annotation.
- * This means that these packages belong to the same Bounded Context <em>unless</em> they are
- * annotated with another Bounded Context name.
+ * @apiNote The package is annotated {@code @BoundedContext("_System")} to provide
+ * entities of this package with one shared {@code Model}.
  *
- * @author Alexander Yevsyukov
+ * <p>{@link io.spine.server.BoundedContext BoundedContext}s serving entities
+ * of this package will be created with
+ * {@linkplain io.spine.core.BoundedContextNames#system(io.spine.core.BoundedContextName)
+ * synthetic names} created after names of parent {@code BoundedContext}s.
  */
-@Target(ElementType.PACKAGE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface BoundedContext {
+@Internal
+@BoundedContext("_System")
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.system.server;
 
-    /**
-     * The name of the Bounded Context to which the package belongs.
-     */
-    String value();
-}
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.annotation.Internal;
+import io.spine.server.annotation.BoundedContext;
+
+import javax.annotation.ParametersAreNonnullByDefault;
