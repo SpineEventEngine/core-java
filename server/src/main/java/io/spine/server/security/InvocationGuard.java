@@ -42,7 +42,7 @@ public final class InvocationGuard {
     public static void allowOnly(String... allowedCallerClass) {
         checkNotNull(allowedCallerClass);
         Class callingClass = CallerProvider.instance()
-                                           .getCallerClass();
+                                           .getPreviousCallerClass();
         ImmutableSet<String> allowedCallers = ImmutableSet.copyOf(allowedCallerClass);
         if (!allowedCallers.contains(callingClass.getName())) {
             String msg = format(
