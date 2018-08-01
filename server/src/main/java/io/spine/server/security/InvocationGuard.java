@@ -20,29 +20,35 @@
 
 package io.spine.server.security;
 
+import com.google.common.collect.ImmutableSet;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
+
 /**
- * Provides information about the class calling a method.
- *
+ * Controls which class can call a method.
+
  * @author Alexander Yevsyukov
  */
-final class CallerProvider extends SecurityManager {
+public final class InvocationGuard {
 
-    private static final CallerProvider INSTANCE = new CallerProvider();
-
-    /**
-     * Obtains the instance.
-     */
-    static CallerProvider instance() {
-        return INSTANCE;
+    /** Prevents instantiation of this utility class. */
+    private InvocationGuard() {
     }
 
     /**
-     * Obtains the class of the object which calls the method from which this method
-     * is being called.
+     * Throws {@link SecurityException} of the calling class is not among the named.
      */
-    Class getCallerClass() {
-        Class[] context = getClassContext();
-        Class result = context[2];
-        return result;
+    public static void allowOnly(String... allowedCallerClass) {
+        checkNotNull(allowedCallerClass);
+        Class callingClass = CallerProvider.instance()
+                                           .getCallerClass();
+        ImmutableSet<String> allowedCallers = ImmutableSet.copyOf(allowedCallerClass);
+        if (!allowedCallers.contains(callingClass.getName())) {
+            String msg = format(
+                    "The class %s is not allowed to perform this operation.", callingClass
+            );
+            throw new SecurityException(msg);
+        }
     }
 }

@@ -21,21 +21,17 @@
 package io.spine.server.model;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import io.spine.annotation.Internal;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.reflect.PackageInfo;
 import io.spine.server.annotation.BoundedContext;
-import io.spine.server.security.CallerProvider;
+import io.spine.server.security.InvocationGuard;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Supplier;
-
-import static java.lang.String.format;
 
 /**
  * Stores information of message handling classes.
@@ -139,22 +135,12 @@ public class Model {
      */
     @VisibleForTesting
     public static synchronized void dropAllModels() {
-        Class callingClass = CallerProvider.instance()
-                                           .getCallerClass();
-        // We reference the classes by the name since we don't depend on tools or testing utilities.
-        Set<String> allowedCallers = ImmutableSet.of(
+        InvocationGuard.allowOnly(
                 "io.spine.server.model.ModelTest",
                 "io.spine.testing.server.model.ModelTests",
                 "io.spine.model.verify.ModelVerifier"
         );
-        if (allowedCallers.contains(callingClass.getName())) {
-            reset();
-        } else {
-            String msg = format(
-                    "The class %s is not allowed to perform this operation", callingClass
-            );
-            throw new SecurityException(msg);
-        }
+        reset();
     }
 
     /**
