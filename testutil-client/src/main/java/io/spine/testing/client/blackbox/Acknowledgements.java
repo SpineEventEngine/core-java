@@ -49,6 +49,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 @VisibleForTesting
 public class Acknowledgements {
 
+    private static final Rejection EMPTY_REJECTION = Rejection.getDefaultInstance();
     private static final Error EMPTY_ERROR = Error.getDefaultInstance();
 
     private final List<Ack> acks = newArrayList();
@@ -68,7 +69,9 @@ public class Acknowledgements {
             }
 
             Rejection rejection = status.getRejection();
-            rejections.add(rejection);
+            if (!rejection.equals(EMPTY_REJECTION)) {
+                rejections.add(rejection);
+            }
         }
         rejectionTypes = countRejectionTypes(rejections);
     }
@@ -213,8 +216,8 @@ public class Acknowledgements {
         }
 
         @Override
-        public boolean test(Rejection rejectionEvent) {
-            T message = unpack(rejectionEvent.getMessage());
+        public boolean test(Rejection rejection) {
+            T message = unpack(rejection.getMessage());
             return typeUrl.equals(TypeUrl.of(message)) && predicate.matches(message);
         }
     }
