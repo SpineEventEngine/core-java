@@ -227,7 +227,6 @@ public final class CommandErrorHandler {
         }
     }
 
-
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
