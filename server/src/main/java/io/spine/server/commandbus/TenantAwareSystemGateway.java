@@ -63,7 +63,7 @@ final class TenantAwareSystemGateway implements SystemGateway {
     }
 
     /**
-     * A {@link TenantAwareOperation} which executed the given action for a specific tenant.
+     * A {@link TenantAwareOperation} which executes the given action for a specific tenant.
      */
     private static final class Operation extends TenantAwareOperation {
 
@@ -137,5 +137,4 @@ final class TenantAwareSystemGateway implements SystemGateway {
             return new TenantAwareSystemGateway(this);
         }
     }
-
 }
