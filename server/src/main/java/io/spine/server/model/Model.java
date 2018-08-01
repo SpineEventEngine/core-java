@@ -58,14 +58,6 @@ public class Model {
     private final ClassMap classes = new ClassMap();
 
     /**
-     * Obtains the model for the {@linkplain BoundedContextNames#defaultName() default}
-     * Bounded Context.
-     */
-    public static Model getInstance() {
-        return Singleton.INSTANCE.value;
-    }
-
-    /**
      * Creates a new instance for the Bounded Context with the passed name. */
     private Model(BoundedContextName context) {
         this.context = context;
@@ -178,11 +170,4 @@ public class Model {
         ModelClass<T> result = classes.get(cls, classOfModelClass, supplier);
         return result;
     }
-
-    private enum Singleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Model value = new Model(BoundedContextNames.defaultName());
-    }
-
 }
