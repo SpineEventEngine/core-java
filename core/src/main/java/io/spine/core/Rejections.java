@@ -74,31 +74,7 @@ public final class Rejections {
      * @param command the command which caused the rejection
      */
     public static Rejection toRejection(ThrowableMessage throwable, Command command) {
-        checkNotNull(throwable);
-        checkNotNull(command);
-
-        Message rejectionMessage = throwable.getMessageThrown();
-        Any packedState = pack(rejectionMessage);
-        RejectionContext context = createContext(throwable, command);
-        RejectionId id = generateId(command.getId());
-        Rejection.Builder builder = Rejection.newBuilder()
-                                             .setId(id)
-                                             .setMessage(packedState)
-                                             .setContext(context);
-        return builder.build();
-    }
-
-    @SuppressWarnings("CheckReturnValue") // calling builder
-    private static RejectionContext createContext(ThrowableMessage message, Command command) {
-        String stacktrace = Throwables.getStackTraceAsString(message);
-        RejectionContext.Builder builder =
-                RejectionContext.newBuilder()
-                                .setTimestamp(message.getTimestamp())
-                                .setStacktrace(stacktrace)
-                                .setCommand(command);
-        Optional<Any> optional = message.producerId();
-        optional.ifPresent(builder::setProducerId);
-        return builder.build();
+        throw new UnsupportedOperationException("Method toRejection is not implemented!");
     }
 
     /**

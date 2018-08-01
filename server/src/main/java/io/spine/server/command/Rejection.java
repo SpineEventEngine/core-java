@@ -28,6 +28,7 @@ import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.core.RejectionEventContext;
 import io.spine.server.event.EventFactory;
 
@@ -36,6 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.base.Throwables.getStackTraceAsString;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * @author Dmytro Dashenkov
@@ -98,6 +100,18 @@ public final class Rejection {
 
     public Event asEvent() {
         return event;
+    }
+
+    public EventEnvelope asEnvelope() {
+        return EventEnvelope.of(event);
+    }
+
+    public Message origin() {
+        Any commandMessageAny = event.getContext()
+                                     .getRejection()
+                                     .getCommandMessage();
+        Message commandMessage = unpack(commandMessageAny);
+        return commandMessage;
     }
 
     @Override

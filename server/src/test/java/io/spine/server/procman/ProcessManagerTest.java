@@ -34,14 +34,11 @@ import io.spine.core.DispatchedCommand;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
-import io.spine.core.Rejection;
-import io.spine.core.RejectionEnvelope;
-import io.spine.core.Rejections;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
+import io.spine.server.command.Rejection;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandSequence;
-import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
+import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.given.DirectQuizProcmanRepository;
 import io.spine.server.procman.given.ProcessManagerTestEnv.AddTaskDispatcher;
@@ -143,15 +140,12 @@ class ProcessManagerTest {
                 .build();
     }
 
-    private static RejectionEnvelope entityAlreadyArchived(
-            Class<? extends Message> commandMessageCls) {
+    private static Rejection entityAlreadyArchived(Class<? extends Message> commandMessageCls) {
         Any id = Identifier.pack(ProcessManagerTest.class.getName());
-        EntityAlreadyArchived rejectionMessage = EntityAlreadyArchived.newBuilder()
-                                                                      .setEntityId(id)
-                                                                      .build();
+        EntityAlreadyArchived throwable = new EntityAlreadyArchived(id);
         Command command = ACommand.withMessage(Sample.messageOfType(commandMessageCls));
-        Rejection rejection = Rejections.createRejection(rejectionMessage, command);
-        return RejectionEnvelope.of(rejection);
+        CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
+        return Rejection.from(commandEnvelope, throwable);
     }
 
     @BeforeEach
@@ -235,18 +229,19 @@ class ProcessManagerTest {
         @Test
         @DisplayName("rejection message only")
         void rejectionMessage() {
-            RejectionEnvelope rejection = entityAlreadyArchived(StringValue.class);
-            dispatch(processManager, rejection);
-            assertEquals(rejection.getOuterObject()
-                                  .getMessage(), processManager.getState());
+            Rejection rejection = entityAlreadyArchived(StringValue.class);
+            dispatch(processManager, rejection.asEnvelope());
+            assertEquals(rejection.asEvent().getMessage(),
+                         processManager.getState());
         }
 
         @Test
         @DisplayName("rejection and command message")
         void rejectionAndCommandMessage() {
-            RejectionEnvelope rejection = entityAlreadyArchived(PmAddTask.class);
-            dispatch(processManager, rejection);
-            assertEquals(AnyPacker.pack(rejection.getCommandMessage()), processManager.getState());
+            Rejection rejection = entityAlreadyArchived(PmAddTask.class);
+            dispatch(processManager, rejection.asEnvelope());
+            assertEquals(rejection.origin(),
+                         unpack(processManager.getState()));
         }
     }
 
@@ -297,7 +292,7 @@ class ProcessManagerTest {
         // The producer of the event is our Process Manager.
         assertEquals(processManager.getId(), Events.getProducer(event.getContext()));
 
-        Message message = AnyPacker.unpack(event.getMessage());
+        Message message = unpack(event.getMessage());
 
         // The event type is CommandRouted.
         assertThat(message, instanceOf(CommandTransformed.class));

@@ -20,11 +20,11 @@
 package io.spine.testing.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.core.RejectionEnvelope;
 import io.spine.server.procman.PmCommandEndpoint;
 import io.spine.server.procman.PmEventEndpoint;
 import io.spine.server.procman.ProcessManager;
@@ -44,6 +44,7 @@ import static org.mockito.Mockito.when;
  * @author Alex Tymchenko
  */
 @VisibleForTesting
+@CanIgnoreReturnValue
 public class ProcessManagerDispatcher {
 
     /** Prevents this utility class from instantiation. */
@@ -74,14 +75,6 @@ public class ProcessManagerDispatcher {
         checkNotNull(event);
         List<Event> eventMessages = TestPmEventEndpoint.dispatch(pm, event);
         return eventMessages;
-    }
-
-    /**
-     * Dispatches a {@linkplain RejectionEnvelope rejection} to the given {@code ProcessManager}.
-     */
-    @SuppressWarnings("CheckReturnValue") // OK to ignore events in this test utility.
-    public static void dispatch(ProcessManager<?, ?, ?> pm, RejectionEnvelope rejection) {
-        throw new UnsupportedOperationException("Method dispatch is not implemented!");
     }
 
     /**
