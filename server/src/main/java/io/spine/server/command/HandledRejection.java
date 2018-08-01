@@ -18,21 +18,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandbus;
+package io.spine.server.command;
+
+import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
+
+import java.util.Optional;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A {@link RuntimeException} thrown when a {@link CommandDispatcher} fails to dispatch a command.
+ * A wrapper for a handled error.
  *
- * <p>This exception <b>must</b> have a {@linkplain #getCause() cause}, which explains why
- * the dispatching was failed.
- *
- * @author Dmytro Dashenkov
+ * <p>{@linkplain #rethrowOnce() Rethrows} the encountered {@link RuntimeException} if it is not
+ * caused by a rejection or has already been rethrown by a {@code CommandErrorHandler}.
  */
-class CommandDispatchingException extends RuntimeException {
+final class HandledRejection implements HandledError {
 
-    private static final long serialVersionUID = 0L;
+    private final Rejection rejection;
 
-    CommandDispatchingException(Throwable cause) {
-        super(cause);
+    HandledRejection(CommandEnvelope origin, RuntimeException exception) {
+        checkNotNull(origin);
+        checkNotNull(exception);
+
+        this.rejection = Rejection.fromThrowable(origin, exception);
+    }
+
+    @Override
+    public void rethrowOnce() {
+        // Do nothing.
+    }
+
+    @Override
+    public Optional<Event> asRejection() {
+        Event event = rejection.asEvent();
+        return Optional.of(event);
     }
 }
