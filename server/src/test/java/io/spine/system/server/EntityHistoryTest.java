@@ -325,7 +325,7 @@ class EntityHistoryTest {
             CommandDispatchedToHandler commandDispatched =
                     eventAccumulator.nextEvent(CommandDispatchedToHandler.class);
             assertId(commandDispatched.getReceiver());
-            Message commandMessage = findCommand(commandDispatched.getPayload(), Message.class);
+            Message commandMessage = findCommand(commandDispatched.getPayload());
             assertEquals(command, commandMessage);
         }
 
@@ -417,6 +417,10 @@ class EntityHistoryTest {
     private void postCommand(Message commandMessage) {
         Command command = requestFactory.createCommand(commandMessage);
         context.getCommandBus().post(command, noOpObserver());
+    }
+
+    private Message findCommand(DispatchedCommand dispatchedCommand) {
+        return findCommand(dispatchedCommand, Message.class);
     }
 
     private <M extends Message> M findCommand(DispatchedCommand dispatchedCommand,
