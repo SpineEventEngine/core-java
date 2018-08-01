@@ -50,6 +50,7 @@ import static io.spine.base.Time.getCurrentTime;
  *         the {@linkplain io.spine.server.bus.BusFilter bus filters};
  *     <li>{@link CommandDispatched} - when the command is passed to a dispatcher after
  *         being acknowledged;
+ *     <li>{@link TargetAssignedToCommand} - when the command target is determined;
  *     <li>{@link CommandHandled} - after a successful command handling;
  *     <li>{@link CommandErrored} - if the command caused a runtime error during handling;
  *     <li>{@link CommandRejected} - if the command handler rejected the command.
