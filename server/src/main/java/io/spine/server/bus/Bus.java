@@ -168,22 +168,22 @@ public abstract class Bus<T extends Message,
      * <p>This method is an extension point of a {@code Bus}.
      *
      * <p>When {@linkplain #post(Iterable, StreamObserver) posting} messages into the bus,
-     * the message {@linkplain Ack acknowledgement} messages are passed to the observer created by
-     * this method.
+     * the message {@linkplain Ack acknowledgements} are passed to the observer created by this
+     * method.
      *
      * <p>Conventionally, the resulting {@link StreamObserver} should delegate calls to
      * the {@code source} observer, so that the caller receives the posting outcome. If violating
      * this convention, the {@code Bus} implementation should specify the altered behavior
      * explicitly.
      *
-     * <p>The resulting observer is used only for acknowledgment of the given messages. Thus,
-     * the messages can be used in order to construct the observer.
+     * <p>The {@code messages} can be used in order to construct the observer. The resulting
+     * observer is used only for acknowledgment of the given messages.
      *
      * <p>By default, this method returns the {@code source} observer. See {@code Bus} subclasses
      * for the altered behavior specification.
      *
      * @param messages the messages to create an observer for
-     * @param source   the source {@link StreamObserver} to be transformed
+     * @param source   the source {@link StreamObserver} to be transforme
      * @return a transformed observer of {@link Ack} streams
      */
     protected StreamObserver<Ack> prepareObserver(Iterable<T> messages,
