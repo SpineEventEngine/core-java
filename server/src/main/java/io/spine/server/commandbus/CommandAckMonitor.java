@@ -50,7 +50,6 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 final class CommandAckMonitor implements StreamObserver<Ack> {
 
     private final StreamObserver<Ack> delegate;
-
     private final SystemGateway gateway;
 
     private CommandAckMonitor(Builder builder) {
@@ -149,7 +148,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
         }
 
         /**
-         * @param tenantId the ID of a tenant which owns the observed commands
+         * @param tenantId the ID of a tenant who owns the observed commands
          */
         Builder setTenantId(TenantId tenantId) {
             this.tenantId = checkNotNull(tenantId);
