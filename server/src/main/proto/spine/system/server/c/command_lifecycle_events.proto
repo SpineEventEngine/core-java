@@ -90,6 +90,19 @@ message CommandDispatched {
     google.protobuf.Timestamp when = 2 [(required) = true];
 }
 
+// An event emitted when the command target is determined.
+//
+// This event is emitted before the command is delivered to the target.
+//
+message TargetAssignedToCommand {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // The target of the command.
+    CommandTarget target = 2 [(valid) = true];
+}
+
 // An event emitted when a command is successfully handled.
 //
 message CommandHandled {
@@ -97,11 +110,8 @@ message CommandHandled {
     // The ID of the command.
     spine.core.CommandId id = 1;
 
-    // The receiver of the command.
-    CommandReceiver receiver = 2 [(valid) = true];
-
     // The time when the event occurred.
-    google.protobuf.Timestamp when = 3 [(required) = true];
+    google.protobuf.Timestamp when = 2 [(required) = true];
 }
 
 // An event emitted if the handler fails to process the command.

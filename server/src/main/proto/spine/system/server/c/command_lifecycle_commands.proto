@@ -37,7 +37,7 @@ import "spine/core/event.proto";
 import "spine/client/entities.proto";
 import "spine/system/server/command_lifecycle.proto";
 
-// A system comand to mark a domain command as received.
+// A system command to mark a domain command as received.
 //
 message MarkCommandAsReceived {
 
@@ -48,7 +48,7 @@ message MarkCommandAsReceived {
     spine.core.Command payload = 2 [(required) = true];
 }
 
-// A system comand to mark a domain command as acknowledged.
+// A system command to mark a domain command as acknowledged.
 //
 message MarkCommandAsAcknowledged {
 
@@ -57,8 +57,6 @@ message MarkCommandAsAcknowledged {
 }
 
 // A system command to schedule a domain command.
-//
-// After handling this command, the domain command is considered scheduled.
 //
 // See `spine.system.server.ScheduledCommandRecord` projection for the scheduled command
 // representation.
@@ -72,7 +70,7 @@ message ScheduleCommand {
     spine.core.CommandContext.Schedule schedule = 2 [(valid) = true];
 }
 
-// A system comand to mark a domain command as dispatched.
+// A system command to mark a domain command as dispatched.
 //
 message MarkCommandAsDispatched {
 
@@ -80,7 +78,21 @@ message MarkCommandAsDispatched {
     spine.core.CommandId id = 1;
 }
 
-// A system comand to mark a domain command as handled.
+// A system command to assign a command target to the command.
+//
+// This command is posted when the command target is determined, but before the command is delivered
+// to the target.
+//
+message AssignTargetToCommand {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // The command target.
+    CommandTarget target = 2 [(valid) = true];
+}
+
+// A system command to mark a domain command as handled.
 //
 // Posted only after a successful command handling.
 //
@@ -88,12 +100,9 @@ message MarkCommandAsHandled {
 
     // The ID of the command.
     spine.core.CommandId id = 1;
-
-    // The receiver of the command.
-    CommandReceiver receiver = 2 [(valid) = true];
 }
 
-// A system comand to mark a domain command as handled.
+// A system command to mark a domain command as handled.
 //
 // Posted if command processing caused a runtime error at any point.
 //
@@ -106,7 +115,7 @@ message MarkCommandAsErrored {
     spine.base.Error error = 2 [(required) = true];
 }
 
-// A system comand to mark a domain command as rejected.
+// A system command to mark a domain command as rejected.
 //
 // Posted if the command handler has rejected the command.
 //

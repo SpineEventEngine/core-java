@@ -78,6 +78,7 @@ public class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         CommandEnvelope envelope = envelope();
         I id = repository().getCommandRouting()
                            .apply(envelope.getMessage(), envelope.getCommandContext());
+        repository().onAssignedToCommand(id, envelope.getId());
         return id;
     }
 

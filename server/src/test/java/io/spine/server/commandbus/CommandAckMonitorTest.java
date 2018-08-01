@@ -29,10 +29,10 @@ import io.spine.core.Rejection;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
-import io.spine.server.MemoizingGateway;
 import io.spine.server.bus.Buses;
 import io.spine.system.server.MarkCommandAsAcknowledged;
 import io.spine.system.server.MarkCommandAsErrored;
+import io.spine.system.server.MemoizingGateway;
 import io.spine.system.server.NoOpSystemGateway;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -116,7 +116,7 @@ class CommandAckMonitorTest {
 
         @BeforeEach
         void setUp() {
-            gateway = new MemoizingGateway();
+            gateway = MemoizingGateway.singleTenant();
             monitor = CommandAckMonitor
                     .newBuilder()
                     .setDelegate(noOpObserver())
@@ -135,7 +135,7 @@ class CommandAckMonitorTest {
             Ack ack = okAck(commandId);
             monitor.onNext(ack);
 
-            Message actualCommand = gateway.oneCommand();
+            Message actualCommand = gateway.lastSeen().command();
             assertThat(actualCommand, instanceOf(MarkCommandAsAcknowledged.class));
             MarkCommandAsAcknowledged markAsAcknowledged = (MarkCommandAsAcknowledged) actualCommand;
             assertEquals(commandId, markAsAcknowledged.getId());
@@ -147,7 +147,7 @@ class CommandAckMonitorTest {
             Ack ack = errorAck(commandId);
             monitor.onNext(ack);
 
-            Message actualCommand = gateway.oneCommand();
+            Message actualCommand = gateway.lastSeen().command();
             assertThat(actualCommand, instanceOf(MarkCommandAsErrored.class));
             MarkCommandAsErrored markCommandAsErrored = (MarkCommandAsErrored) actualCommand;
             assertEquals(commandId, markCommandAsErrored.getId());

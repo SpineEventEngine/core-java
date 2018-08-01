@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
+import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
@@ -445,6 +446,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * <p>An instance of {@code Lifecycle} posts the system commands related to the entity
      * lifecycle.
      */
+    @Internal
     public interface Lifecycle {
 
         /**
@@ -456,6 +458,12 @@ public abstract class Repository<I, E extends Entity<I, ?>>
          * Posts the {@link DispatchCommandToHandler} system command.
          */
         void onDispatchCommand(Command command);
+
+        /**
+         * Posts the {@link io.spine.system.server.AssignTargetToCommand AssignTargetToCommand}
+         * system command.
+         */
+        void onAssignedToCommand(CommandId id);
 
         /**
          * Posts the {@link MarkCommandAsHandled} system command.
@@ -475,6 +483,10 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         /**
          * Posts the {@link ChangeEntityState} system command and the commands related to
          * the lifecycle flags.
+         *
+         * @param change     the change in the entity state and attributes
+         * @param messageIds the IDs of the messages which caused the {@code change}; typically,
+         *                   {@link io.spine.core.EventId EventId}s or {@link CommandId}s
          */
         void onStateChanged(EntityRecordChange change, Set<? extends Message> messageIds);
     }

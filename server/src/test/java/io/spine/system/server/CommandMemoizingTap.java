@@ -30,6 +30,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static java.util.Optional.ofNullable;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 
 /**
  * A {@link BusFilter} which remembers all the accepted command messages and never halts the command
@@ -44,11 +47,12 @@ final class CommandMemoizingTap implements BusFilter<CommandEnvelope> {
     /**
      * Looks up the command message by the command ID.
      */
-    <M extends Message> Optional<M> find(CommandId commandId) {
+    <M extends Message> Optional<M> find(CommandId commandId, Class<M> commandClass) {
         Message commandMessage = commandMessages.get(commandId);
-        @SuppressWarnings("unchecked")
+        assertThat(commandMessage, instanceOf(commandClass));
+        @SuppressWarnings("unchecked") // Checked with an assertion.
         M result = (M) commandMessage;
-        return Optional.ofNullable(result);
+        return ofNullable(result);
     }
 
     @Override

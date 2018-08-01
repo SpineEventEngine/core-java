@@ -20,7 +20,6 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.Internal;
 import io.spine.core.TenantId;
 
@@ -69,7 +68,6 @@ abstract class TenantAware {
      * Verifies whether a current tenant is set in the execution context.
      */
     @Internal
-    @VisibleForTesting
     public static boolean isTenantSet() {
         Optional<TenantId> currentTenant = CurrentTenant.get();
         return currentTenant.isPresent();
@@ -93,7 +91,6 @@ abstract class TenantAware {
         return CurrentTenant.ensure();
     }
 
-    @VisibleForTesting
     TenantId tenantId() {
         return tenantId;
     }

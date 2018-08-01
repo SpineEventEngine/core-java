@@ -53,7 +53,12 @@ final class CommandReceivedTap implements BusFilter<CommandEnvelope> {
     public Optional<Ack> accept(CommandEnvelope envelope) {
         MarkCommandAsReceived systemCommand = systemCommand(envelope.getCommand());
         TenantId tenantId = envelope.getTenantId();
-        systemGateway.postCommand(systemCommand, tenantId);
+        SystemGateway tenantAwareGateway = TenantAwareSystemGateway
+                .create()
+                .withTenant(tenantId)
+                .atopOf(systemGateway)
+                .build();
+        tenantAwareGateway.postCommand(systemCommand);
         return Optional.empty();
     }
 

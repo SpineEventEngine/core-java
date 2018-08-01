@@ -20,6 +20,7 @@
 
 package io.spine.system.server;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.client.ActorRequestFactory;
@@ -33,7 +34,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.validate.Validate.isDefault;
 
 /**
  * The point of integration of the domain and the system bounded context.
@@ -60,26 +60,23 @@ public final class DefaultSystemGateway implements SystemGateway {
     }
 
     @Override
-    public void postCommand(Message systemCommand, @Nullable TenantId tenantId) {
+    public void postCommand(Message systemCommand) {
         checkNotNull(systemCommand);
-        CommandFactory commandFactory = buildRequestFactory(tenantId).command();
+        CommandFactory commandFactory = buildRequestFactory().command();
         Command command = commandFactory.create(systemCommand);
         system.getCommandBus()
               .post(command, noOpObserver());
     }
 
+    @VisibleForTesting
     BoundedContext target() {
         return system;
     }
 
-    private ActorRequestFactory buildRequestFactory(@Nullable TenantId tenantId) {
-        if (tenantId == null || isDefault(tenantId)) {
-            return system.isMultitenant()
-                   ? buildMultitenantFactory()
-                   : buildSingleTenantFactory();
-        } else {
-            return constructFactory(tenantId);
-        }
+    private ActorRequestFactory buildRequestFactory() {
+        return system.isMultitenant()
+               ? buildMultitenantFactory()
+               : buildSingleTenantFactory();
     }
 
     private static ActorRequestFactory buildMultitenantFactory() {

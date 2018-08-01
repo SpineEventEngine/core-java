@@ -22,6 +22,9 @@ package io.spine.system.server;
 
 import io.spine.server.BoundedContext;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+
 /**
  * A test utility for working with system {@link BoundedContext}s.
  *
@@ -39,7 +42,9 @@ public final class SystemBoundedContexts {
      * Extracts the {@code System} bounded context from the given bounded context.
      */
     public static BoundedContext systemOf(BoundedContext context) {
-        DefaultSystemGateway gateway = (DefaultSystemGateway) context.getSystemGateway();
+        SystemGateway systemGateway = context.getSystemGateway();
+        assertThat(systemGateway, instanceOf(DefaultSystemGateway.class));
+        DefaultSystemGateway gateway = (DefaultSystemGateway) systemGateway;
         return gateway.target();
     }
 }

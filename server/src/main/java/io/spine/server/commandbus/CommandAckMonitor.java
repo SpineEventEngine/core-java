@@ -50,14 +50,15 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 final class CommandAckMonitor implements StreamObserver<Ack> {
 
     private final StreamObserver<Ack> delegate;
-    private final TenantId tenantId;
-
     private final SystemGateway gateway;
 
     private CommandAckMonitor(Builder builder) {
         this.delegate = builder.delegate;
-        this.tenantId = builder.tenantId;
-        this.gateway = builder.systemGateway;
+        this.gateway = TenantAwareSystemGateway
+                .create()
+                .atopOf(builder.systemGateway)
+                .withTenant(builder.tenantId)
+                .build();
     }
 
     /**
@@ -88,7 +89,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
         Status status = ack.getStatus();
         CommandId commandId = commandIdFrom(ack);
         Message systemCommand = systemCommandFor(status, commandId);
-        gateway.postCommand(systemCommand, tenantId);
+        gateway.postCommand(systemCommand);
     }
 
     private static CommandId commandIdFrom(Ack ack) {
@@ -147,7 +148,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
         }
 
         /**
-         * @param tenantId the ID of a tenant which owns the observed commands
+         * @param tenantId the ID of a tenant who owns the observed commands
          */
         Builder setTenantId(TenantId tenantId) {
             this.tenantId = checkNotNull(tenantId);

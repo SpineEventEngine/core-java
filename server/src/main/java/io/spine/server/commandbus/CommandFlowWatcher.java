@@ -59,20 +59,25 @@ final class CommandFlowWatcher {
     /**
      * Posts the {@link ScheduleCommand} system command.
      *
-     * @param envelope the scheduled command
+     * @param command the scheduled command
      */
-    void onScheduled(CommandEnvelope envelope) {
-        CommandContext context = envelope.getCommandContext();
+    void onScheduled(CommandEnvelope command) {
+        CommandContext context = command.getCommandContext();
         CommandContext.Schedule schedule = context.getSchedule();
         ScheduleCommand systemCommand = ScheduleCommand
                 .newBuilder()
-                .setId(envelope.getId())
+                .setId(command.getId())
                 .setSchedule(schedule)
                 .build();
-        postSystem(systemCommand, envelope.getTenantId());
+        postSystem(systemCommand, command.getTenantId());
     }
 
     private void postSystem(Message systemCommand, TenantId tenantId) {
-        systemGateway.postCommand(systemCommand, tenantId);
+        SystemGateway tenantAwareGateway = TenantAwareSystemGateway
+                .create()
+                .atopOf(systemGateway)
+                .withTenant(tenantId)
+                .build();
+        tenantAwareGateway.postCommand(systemCommand);
     }
 }

@@ -22,6 +22,7 @@ package io.spine.testing.server;
 
 import com.google.protobuf.Message;
 import io.spine.core.Command;
+import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.option.EntityOption;
 import io.spine.server.entity.EntityRecordChange;
@@ -66,6 +67,11 @@ public enum  NoOpLifecycle implements Repository.Lifecycle {
 
     @Override
     public void onStateChanged(EntityRecordChange change, Set<? extends Message> messageIds) {
+        // NoOp.
+    }
+
+    @Override
+    public void onAssignedToCommand(CommandId id) {
         // NoOp.
     }
 }

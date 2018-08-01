@@ -57,10 +57,6 @@ abstract class AbstractEventAccumulator implements EventDispatcher<String> {
 
     private @Nullable Iterator<? extends Message> eventIterator;
 
-    AbstractEventAccumulator() {
-        super();
-    }
-
     /**
      * {@inheritDoc}
      *

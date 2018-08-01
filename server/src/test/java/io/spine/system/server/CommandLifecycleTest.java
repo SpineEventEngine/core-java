@@ -21,6 +21,7 @@
 package io.spine.system.server;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Error;
@@ -38,11 +39,11 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.system.server.given.CommandLifecycleTestEnv.CommandLifecycleWatcher;
 import io.spine.system.server.given.CommandLifecycleTestEnv.TestAggregate;
 import io.spine.system.server.given.CommandLifecycleTestEnv.TestAggregateRepository;
+import io.spine.system.server.given.CommandLifecycleTestEnv.TestProcman;
 import io.spine.system.server.given.CommandLifecycleTestEnv.TestProcmanRepository;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -115,6 +116,7 @@ class CommandLifecycleTest {
             checkReceived(successfulCommand);
             checkAcknowledged(commandId);
             checkDispatched(commandId);
+            checkTargetAssigned(commandId, TestAggregate.TYPE);
             checkHandled(commandId);
         }
 
@@ -145,12 +147,11 @@ class CommandLifecycleTest {
 
             eventAccumulator.nextEvent(CommandAcknowledged.class);
             eventAccumulator.nextEvent(CommandDispatched.class);
+            eventAccumulator.nextEvent(TargetAssignedToCommand.class);
 
             checkRejected(commandId, Rejections.CompanyNameAlreadyTaken.class);
         }
 
-        // TODO:2018-07-25:dmytro.dashenkov: Re-enable.
-        @Disabled("google.protobuf.Empty is temporally impossible to return from @Assign")
         @Test
         @DisplayName("causes a runtime exception")
         void errored() {
@@ -160,11 +161,12 @@ class CommandLifecycleTest {
                     .build();
             CommandId startId = postCommand(start);
 
-            eventAccumulator.assertEventCount(4);
+            eventAccumulator.assertEventCount(5);
 
             checkReceived(start);
             checkAcknowledged(startId);
             checkDispatched(startId);
+            checkTargetAssigned(startId, TestProcman.TYPE);
             checkHandled(startId);
 
             eventAccumulator.forgetEvents();
@@ -176,11 +178,12 @@ class CommandLifecycleTest {
                     .build();
             CommandId proposeId = postCommand(propose);
 
-            eventAccumulator.assertEventCount(4);
+            eventAccumulator.assertEventCount(5);
 
             checkReceived(propose);
             checkAcknowledged(proposeId);
             checkDispatched(proposeId);
+            checkTargetAssigned(proposeId, TestProcman.TYPE);
             checkErrored(proposeId);
         }
 
@@ -229,13 +232,19 @@ class CommandLifecycleTest {
             assertEquals(commandId, dispatched.getId());
         }
 
+        private void checkTargetAssigned(CommandId commandId, TypeUrl entityType) {
+            TargetAssignedToCommand assigned =
+                    eventAccumulator.nextEvent(TargetAssignedToCommand.class);
+            CommandTarget target = assigned.getTarget();
+            Any actualId = target.getEntityId().getId();
+            assertEquals(commandId, assigned.getId());
+            assertEquals(id, Identifier.unpack(actualId));
+            assertEquals(entityType.value(), target.getTypeUrl());
+        }
+
         private void checkHandled(CommandId commandId) {
             CommandHandled handled = eventAccumulator.nextEvent(CommandHandled.class);
             assertEquals(commandId, handled.getId());
-            CompanyId actualReceiver = Identifier.unpack(handled.getReceiver()
-                                                                .getEntityId()
-                                                                .getId());
-            assertEquals(id, actualReceiver);
         }
 
         @CanIgnoreReturnValue

@@ -52,7 +52,7 @@ message ProposeCompanyName {
     string name = 2 [(required) = true, (pattern).regex = ".*\\w{5,}.*"];
 }
 
-message SelectCompanyName {
+message FinalizeCompanyName {
     option (rejections) = "CompanyNameAlreadyTaken";
 
     CompanyId id = 1;

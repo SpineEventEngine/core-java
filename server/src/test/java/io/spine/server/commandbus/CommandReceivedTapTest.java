@@ -24,8 +24,8 @@ import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
-import io.spine.server.MemoizingGateway;
 import io.spine.system.server.MarkCommandAsReceived;
+import io.spine.system.server.MemoizingGateway;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.BeforeEach;
@@ -50,7 +50,16 @@ class CommandReceivedTapTest {
 
     @BeforeEach
     void setUp() {
-        gateway = new MemoizingGateway();
+        initSingleTenant();
+    }
+
+    private void initSingleTenant() {
+        gateway = MemoizingGateway.singleTenant();
+        filter = new CommandReceivedTap(gateway);
+    }
+
+    private void initMultitenant() {
+        gateway = MemoizingGateway.multitenant();
         filter = new CommandReceivedTap(gateway);
     }
 
@@ -64,11 +73,13 @@ class CommandReceivedTapTest {
     @Test
     @DisplayName("post MarkCommandAsReceived to specific tenant")
     void postIfMultitenant() {
+        initMultitenant();
+
         TenantId expectedTenant = tenantId();
         Command command = command(commandMessage(), expectedTenant);
         postAndCheck(command);
 
-        TenantId actualTenant = gateway.oneTenant();
+        TenantId actualTenant = gateway.lastSeen().tenant();
         assertEquals(expectedTenant, actualTenant);
     }
 
@@ -78,7 +89,7 @@ class CommandReceivedTapTest {
         Optional<?> ack = filter.accept(envelope);
         assertFalse(ack.isPresent());
 
-        MarkCommandAsReceived systemCommand = (MarkCommandAsReceived) gateway.oneCommand();
+        MarkCommandAsReceived systemCommand = (MarkCommandAsReceived) gateway.lastSeen().command();
         assertEquals(envelope.getId(), systemCommand.getId());
     }
 
