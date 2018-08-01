@@ -117,6 +117,9 @@ public class Model {
         classes.clear();
     }
 
+    /**
+     * Clears all models, and then clears the {@link #models} map.
+     */
     private static void reset() {
         for (Model model : models.values()) {
             model.clear();
