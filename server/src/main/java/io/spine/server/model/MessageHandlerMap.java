@@ -23,6 +23,7 @@ package io.spine.server.model;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.errorprone.annotations.Immutable;
 import io.spine.type.MessageClass;
 
 import java.io.Serializable;
@@ -42,6 +43,7 @@ import static com.google.common.collect.Sets.newHashSet;
  * @author Alexander Yevsyukov
  * @author Dmytro Grankin
  */
+@Immutable
 public class MessageHandlerMap<M extends MessageClass,
                                H extends HandlerMethod<?, M, ?, ?>>
         implements Serializable {

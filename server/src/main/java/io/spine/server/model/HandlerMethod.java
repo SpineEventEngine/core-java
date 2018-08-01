@@ -20,6 +20,7 @@
 
 package io.spine.server.model;
 
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 
@@ -40,6 +41,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
+@Immutable
 public interface HandlerMethod<T,
                                M extends MessageClass,
                                C extends Message,

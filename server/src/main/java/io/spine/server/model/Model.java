@@ -21,7 +21,11 @@
 package io.spine.server.model;
 
 import io.spine.annotation.Internal;
+import io.spine.core.BoundedContextName;
+import io.spine.reflect.PackageInfo;
+import io.spine.server.annotation.BoundedContext;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -74,6 +78,25 @@ public class Model {
                            Supplier<ModelClass<T>> supplier) {
         ModelClass<T> result = classes.get(cls, classOfModelClass, supplier);
         return result;
+    }
+
+    /**
+     * Finds Bounded Context name in the package annotations of the raw class,
+     * or in the packages into which the package of the class is nested.
+     */
+    private static <T> Optional<BoundedContextName> findContext(Class<? extends T> rawClass) {
+        PackageInfo pkg = PackageInfo.of(rawClass);
+        Optional<BoundedContext> annotation = pkg.findAnnotation(BoundedContext.class);
+        if (!annotation.isPresent()) {
+            return Optional.empty();
+        }
+        String contextName = annotation.get()
+                                       .name();
+        BoundedContextName result = BoundedContextName
+                .newBuilder()
+                .setValue(contextName)
+                .build();
+        return Optional.of(result);
     }
 
     private enum Singleton {

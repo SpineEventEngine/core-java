@@ -20,6 +20,7 @@
 
 package io.spine.server.entity.model;
 
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.protobuf.Messages;
@@ -54,12 +55,15 @@ public class EntityClass<E extends Entity> extends ModelClass<E> {
     private final Class<? extends Message> stateClass;
 
     /** The default state of entities of this class. */
+    @LazyInit
     private transient volatile @MonotonicNonNull Message defaultState;
 
     /** Type of the entity state. */
     private final TypeUrl entityStateType;
 
     /** The constructor for entities of this class. */
+    @LazyInit
+    @SuppressWarnings("Immutable") // effectively
     private transient volatile @MonotonicNonNull Constructor<E> entityConstructor;
 
     /** Creates new instance of the model class for the passed class of entities. */
