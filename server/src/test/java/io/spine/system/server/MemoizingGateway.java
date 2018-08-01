@@ -34,6 +34,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * A {@link SystemGateway} which memoizes the posted system commands.
+ *
+ * <p>This class is a test-only facility, used in order to avoid mocking {@link SystemGateway}
+ * instances.
  */
 public final class MemoizingGateway implements SystemGateway {
 
