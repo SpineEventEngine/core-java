@@ -44,7 +44,6 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.SystemGateway;
 import io.spine.type.TypeName;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,9 +51,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Suppliers.memoize;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -106,7 +105,7 @@ public abstract class BoundedContext
     /** Memoized version of the {@code StorageFactory} supplier passed to the constructor. */
     private final Supplier<StorageFactory> storageFactory;
 
-    private final @Nullable TenantIndex tenantIndex;
+    private final TenantIndex tenantIndex;
 
     BoundedContext(BoundedContextBuilder builder) {
         super();
@@ -138,11 +137,12 @@ public abstract class BoundedContext
                                                       BoundedContextName name) {
         Optional<IntegrationBus.Builder> busBuilder = builder.getIntegrationBus();
         checkState(busBuilder.isPresent());
-        IntegrationBus result = busBuilder.get()
-                                          .setBoundedContextName(name)
-                                          .setEventBus(eventBus)
-                                          .setRejectionBus(commandBus.rejectionBus())
-                                          .build();
+        IntegrationBus result = busBuilder
+                .get()
+                .setBoundedContextName(name)
+                .setEventBus(eventBus)
+                .setRejectionBus(commandBus.rejectionBus())
+                .build();
         return result;
     }
 
@@ -268,9 +268,6 @@ public abstract class BoundedContext
      */
     @Internal
     public TenantIndex getTenantIndex() {
-        if (!isMultitenant()) {
-            return TenantIndex.Factory.singleTenant();
-        }
         return tenantIndex;
     }
 

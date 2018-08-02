@@ -167,7 +167,10 @@ public final class BoundedContextBuilder {
     }
 
     TenantIndex buildTenantIndex() {
-        return tenantIndex;
+        TenantIndex result = isMultitenant()
+            ? checkNotNull(tenantIndex)
+            : TenantIndex.Factory.singleTenant();
+        return result;
     }
 
     public BoundedContextBuilder setEventBus(EventBus.Builder eventBus) {
