@@ -31,7 +31,6 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventSubscriber;
-import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.server.transport.PublisherHub;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.SubscriberHub;
@@ -297,17 +296,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      */
     public void register(EventSubscriber eventSubscriber) {
         ExternalEventSubscriber wrapped = new ExternalEventSubscriber(eventSubscriber);
-        register(wrapped);
-    }
-
-    /**
-     * Registers the passed rejection subscriber as an external rejection dispatcher
-     * by taking only external subscriptions into account.
-     *
-     * @param rejectionSubscriber the subscriber to register.
-     */
-    public void register(RejectionSubscriber rejectionSubscriber) {
-        ExternalRejectionSubscriber wrapped = new ExternalRejectionSubscriber(rejectionSubscriber);
         register(wrapped);
     }
 

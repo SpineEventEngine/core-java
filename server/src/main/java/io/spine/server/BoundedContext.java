@@ -37,7 +37,6 @@ import io.spine.server.event.EventFactory;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
-import io.spine.server.rejection.RejectionBus;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
@@ -220,12 +219,6 @@ public abstract class BoundedContext
     /** Obtains instance of {@link EventBus} of this {@code BoundedContext}. */
     public EventBus getEventBus() {
         return this.eventBus;
-    }
-
-    /** Obtains instance of {@link RejectionBus} of this {@code BoundedContext}. */
-    @Deprecated
-    public RejectionBus getRejectionBus() {
-        throw new UnsupportedOperationException("Method getRejectionBus is not implemented!");
     }
 
     /** Obtains instance of {@link IntegrationBus} of this {@code BoundedContext}. */
