@@ -56,7 +56,6 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
@@ -137,7 +136,7 @@ public abstract class Aggregate<I,
      *
      * @see #commitEvents()
      */
-    private final List<Event> uncommittedEvents = newLinkedList();
+    private final List<Event> uncommittedEvents = newArrayList();
 
     /** A guard for ensuring idempotency of messages dispatched by this aggregate. */
     private IdempotencyGuard idempotencyGuard;
@@ -145,7 +144,7 @@ public abstract class Aggregate<I,
     /**
      * Creates a new instance.
      *
-     * <p>Constructors of derived classes should have package access level
+     * @apiNote Constructors of derived classes are likely to have package-private access level
      * because of the following reasons:
      * <ol>
      *     <li>These constructors are not public API of an application.
@@ -153,9 +152,9 @@ public abstract class Aggregate<I,
      *     <li>These constructors need to be accessible from tests in the same package.
      * </ol>
      *
-     * <p>Because of the last reason consider annotating constructors with
-     * {@code @VisibleForTesting}. The package access is needed only for tests.
-     * Otherwise aggregate constructors (that are invoked by {@link AggregateRepository}
+     * <p>If you do have tests that create aggregates via constructors, consider annotating them
+     * with {@code @VisibleForTesting}. Otherwise, aggregate constructors (that are invoked by
+     * {@link io.spine.server.aggregate.AggregateRepository AggregateRepository}
      * via Reflection) may be left {@code private}.
      *
      * @param id the ID for the new aggregate
@@ -341,15 +340,17 @@ public abstract class Aggregate<I,
      * @return an event with updated command context and entity version
      */
     private static Event importEvent(Event event, CommandContext commandContext, Version version) {
-        EventContext eventContext = event.getContext()
-                                         .toBuilder()
-                                         .setCommandContext(commandContext)
-                                         .setTimestamp(getCurrentTime())
-                                         .setVersion(version)
-                                         .build();
-        Event result = event.toBuilder()
-                            .setContext(eventContext)
-                            .build();
+        EventContext eventContext =
+                event.getContext()
+                     .toBuilder()
+                     .setCommandContext(commandContext)
+                     .setTimestamp(getCurrentTime())
+                     .setVersion(version)
+                     .build();
+        Event result =
+                event.toBuilder()
+                     .setContext(eventContext)
+                     .build();
         return result;
     }
 
@@ -440,12 +441,12 @@ public abstract class Aggregate<I,
      */
     Snapshot toShapshot() {
         Any state = AnyPacker.pack(getState());
-        Snapshot.Builder builder = Snapshot.newBuilder()
-                                           .setState(state)
-                                           .setVersion(getVersion())
-                                           .setTimestamp(getCurrentTime());
-        Snapshot snapshot = builder.build();
-        return snapshot;
+        Snapshot.Builder builder = Snapshot
+                .newBuilder()
+                .setState(state)
+                .setVersion(getVersion())
+                .setTimestamp(getCurrentTime());
+        return builder.build();
     }
 
     /**

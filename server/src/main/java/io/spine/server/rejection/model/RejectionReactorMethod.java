@@ -110,7 +110,7 @@ public class RejectionReactorMethod
         @Override
         public void checkAccessModifier(Method method) {
             MethodAccessChecker checker = forMethod(method);
-            checker.checkPublic("Rejection reactor {} must be declared 'public'");
+            checker.checkPublic("Rejection reactor `{}` must be declared `public`");
         }
 
         @Override
