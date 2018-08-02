@@ -21,7 +21,6 @@ package io.spine.server.aggregate;
 
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.Rejection;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.DeliveryProject;
@@ -36,7 +35,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.cannotStartProject;
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.projectCancelled;
 import static io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv.startProject;
 import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
@@ -47,7 +45,7 @@ import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWait
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names */})
-@DisplayName("Aggregate message delivery should")
+@DisplayName("Aggregate message delivery in multithreaded env should")
 class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
 
     @Override
@@ -59,7 +57,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
     }
 
     @Nested
-    @DisplayName("in multithreaded env, dispatch commands")
+    @DisplayName("dispatch commands")
     class DispatchCommands {
 
         @Test
@@ -114,7 +112,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
     }
 
     @Nested
-    @DisplayName("in multithreaded env, dispatch events")
+    @DisplayName("dispatch events")
     class DispatchEvents {
 
         @Test
@@ -161,61 +159,6 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
                         protected void postToBus(BoundedContext context, Event event) {
                             context.getEventBus()
                                    .post(event, StreamObservers.noOpObserver());
-                        }
-                    };
-
-            dispatcher.dispatchMessagesTo(new TripleShardProjectRepository());
-        }
-    }
-
-    @Nested
-    @DisplayName("in multithreaded env, dispatch rejections")
-    class DispatchRejections {
-
-        @Test
-        @DisplayName("to single shard")
-        void toSingleShard() throws Exception {
-            ParallelDispatcher<ProjectId, Rejection> dispatcher =
-                    new ParallelDispatcher<ProjectId, Rejection>(36, 12, dispatchWaitTime()) {
-                        @Override
-                        protected ThreadStats<ProjectId> getStats() {
-                            return DeliveryProject.getStats();
-                        }
-
-                        @Override
-                        protected Rejection newMessage() {
-                            return cannotStartProject();
-                        }
-
-                        @Override
-                        protected void postToBus(BoundedContext context, Rejection rejection) {
-                            context.getRejectionBus()
-                                   .post(rejection, StreamObservers.noOpObserver());
-                        }
-                    };
-
-            dispatcher.dispatchMessagesTo(new SingleShardProjectRepository());
-        }
-
-        @Test
-        @DisplayName("to several shards")
-        void toSeveralShards() throws Exception {
-            ParallelDispatcher<ProjectId, Rejection> dispatcher =
-                    new ParallelDispatcher<ProjectId, Rejection>(40, 603, dispatchWaitTime()) {
-                        @Override
-                        protected ThreadStats<ProjectId> getStats() {
-                            return DeliveryProject.getStats();
-                        }
-
-                        @Override
-                        protected Rejection newMessage() {
-                            return cannotStartProject();
-                        }
-
-                        @Override
-                        protected void postToBus(BoundedContext context, Rejection rejection) {
-                            context.getRejectionBus()
-                                   .post(rejection);
                         }
                     };
 
