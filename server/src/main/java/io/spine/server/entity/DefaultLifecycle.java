@@ -159,7 +159,7 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
      * the lifecycle flags.
      *
      * <p>Only the actual changes in the entity attributes result into system commands.
-     * If the previous and new values are equal, then no command are posted.
+     * If the previous and new values are equal, then no commands are posted.
      */
     @Override
     public void onStateChanged(EntityRecordChange change,

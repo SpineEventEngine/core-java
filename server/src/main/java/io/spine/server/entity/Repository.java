@@ -440,7 +440,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * <p>Represents a set of callbacks which are invoked at certain point when interacting with
      * an {@link Entity}.
      *
-     * <p>An instance of {@code Lifecycle} belongs is associated with a single instance of entity.
+     * <p>An instance of {@code Lifecycle} is associated with a single instance of entity.
      *
      * @see Repository#lifecycleOf(Object) Repository.lifecycleOf(I)
      */
