@@ -20,99 +20,53 @@
 
 package io.spine.server.commandbus;
 
-import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.base.Time;
 import io.spine.core.TenantId;
 import io.spine.system.server.MemoizingGateway;
-import io.spine.system.server.NoOpSystemGateway;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("InnerClassMayBeStatic")
-@DisplayName("TenantAwareSystemGateway should")
+@DisplayName("TenantAwareSystemGateway should post system commands")
 class TenantAwareSystemGatewayTest {
 
     @Test
-    @DisplayName("not allow null arguments on construction")
-    void builderNonNull() {
-        new NullPointerTester()
-                .testInstanceMethods(TenantAwareSystemGateway.create(), PACKAGE);
+    @DisplayName("in single-tenant env")
+    void singleTenant() {
+        MemoizingGateway delegate = MemoizingGateway.singleTenant();
+        TenantId tenantId = TenantId.getDefaultInstance();
+        postAndCheck(delegate, tenantId);
     }
 
     @Test
-    @DisplayName("not be created without delegate")
-    void expectDelegate() {
-        TenantAwareSystemGateway.Builder builder = TenantAwareSystemGateway
-                .create()
-                .withTenant(TenantId.getDefaultInstance());
-        assertThrows(NullPointerException.class, builder::build);
-    }
-
-    @Test
-    @DisplayName("not be created without tenant ID")
-    void expectTenant() {
-        TenantAwareSystemGateway.Builder builder = TenantAwareSystemGateway
-                .create()
-                .atopOf(NoOpSystemGateway.INSTANCE);
-        assertThrows(NullPointerException.class, builder::build);
-    }
-
-    @Test
-    @DisplayName("be created successfully with all arguments")
-    void createSuccessfully() {
-        TenantAwareSystemGateway result = TenantAwareSystemGateway
-                .create()
-                .atopOf(NoOpSystemGateway.INSTANCE)
-                .withTenant(TenantId.getDefaultInstance())
+    @DisplayName("in multitenant env")
+    void multitenant() {
+        MemoizingGateway delegate = MemoizingGateway.multitenant();
+        TenantId tenantId = TenantId
+                .newBuilder()
+                .setValue(TenantAwareSystemGatewayTest.class.getName())
                 .build();
-        assertNotNull(result);
+        postAndCheck(delegate, tenantId);
+        assertEquals(tenantId, delegate.lastSeen()
+                                       .tenant());
     }
 
-    @Nested
-    @DisplayName("post system commands")
-    class PostCommand {
+    private static void postAndCheck(MemoizingGateway delegate, TenantId tenantId) {
+        Message command = Time.getCurrentTime();
+        TenantAwareSystemGateway gateway = TenantAwareSystemGateway
+                .create()
+                .withTenant(tenantId)
+                .atopOf(delegate)
+                .build();
 
-        @Test
-        @DisplayName("in single-tenant env")
-        void singleTenant() {
-            MemoizingGateway delegate = MemoizingGateway.singleTenant();
-            TenantId tenantId = TenantId.getDefaultInstance();
-            postAndCheck(delegate, tenantId);
-        }
+        gateway.postCommand(command);
 
-        @Test
-        @DisplayName("in multitenant env")
-        void multitenant() {
-            MemoizingGateway delegate = MemoizingGateway.multitenant();
-            TenantId tenantId = TenantId
-                    .newBuilder()
-                    .setValue(TenantAwareSystemGatewayTest.class.getName())
-                    .build();
-            postAndCheck(delegate, tenantId);
-            assertEquals(tenantId, delegate.lastSeen().tenant());
-        }
-
-        private void postAndCheck(MemoizingGateway delegate, TenantId tenantId) {
-            Message command = Time.getCurrentTime();
-            TenantAwareSystemGateway gateway = TenantAwareSystemGateway
-                    .create()
-                    .withTenant(tenantId)
-                    .atopOf(delegate)
-                    .build();
-
-            gateway.postCommand(command);
-
-            assertEquals(command, delegate.lastSeen().command());
-        }
+        assertEquals(command, delegate.lastSeen().command());
     }
 }

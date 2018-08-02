@@ -38,12 +38,6 @@ import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.string.Stringifiers;
-import io.spine.system.server.ChangeEntityState;
-import io.spine.system.server.CreateEntity;
-import io.spine.system.server.DispatchCommandToHandler;
-import io.spine.system.server.DispatchEventToReactor;
-import io.spine.system.server.DispatchEventToSubscriber;
-import io.spine.system.server.MarkCommandAsHandled;
 import io.spine.system.server.SystemGateway;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
@@ -441,48 +435,76 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * The lifecycle of an entity.
+     * The lifecycle of an {@link Entity}.
      *
-     * <p>An instance of {@code Lifecycle} posts the system commands related to the entity
-     * lifecycle.
+     * <p>Represents a set of callbacks which are invoked at certain point when interacting with
+     * an {@link Entity}.
+     *
+     * <p>An instance of {@code Lifecycle} is associated with a single instance of entity.
+     *
+     * @see Repository#lifecycleOf(Object) Repository.lifecycleOf(I)
      */
     @Internal
     public interface Lifecycle {
 
         /**
-         * Posts the {@link CreateEntity} system command.
+         * The callback invoked when the entity is created.
+         *
+         * <p>Invoked once per an entity instance. Not invoked when the entity is loaded from
+         * storage.
+         *
+         * @param entityKind the {@link EntityOption.Kind} of the created entity
          */
         void onEntityCreated(EntityOption.Kind entityKind);
 
         /**
-         * Posts the {@link DispatchCommandToHandler} system command.
+         * The callback invoked when the associated entity is assigned to handle a {@link Command}.
+         *
+         * @param id the ID of the command which should be handled by the entity
+         */
+        void onTargetAssignedToCommand(CommandId id);
+
+        /**
+         * The callback invoked before a {@link Command} is dispatched to the handler in the entity.
+         *
+         * @param command the dispatched command
          */
         void onDispatchCommand(Command command);
 
         /**
-         * Posts the {@link io.spine.system.server.AssignTargetToCommand AssignTargetToCommand}
-         * system command.
-         */
-        void onAssignedToCommand(CommandId id);
-
-        /**
-         * Posts the {@link MarkCommandAsHandled} system command.
+         * The callback invoked after the given {@link Command} is handled by the entity.
+         *
+         * @param command the handled command
          */
         void onCommandHandled(Command command);
 
         /**
-         * Posts the {@link DispatchEventToSubscriber} system command.
+         * The callback invoked when an {@link Event} is dispatched to a subscriber in the entity.
+         *
+         * <p>This callback applies only to entities which
+         * {@link io.spine.core.Subscribe @Subscribe} to events, such as
+         * {@link io.spine.server.projection.Projection Projection}s.
+         *
+         * @param event the dispatched event
+         * @see #onDispatchEventToReactor(Event)
          */
         void onDispatchEventToSubscriber(Event event);
 
         /**
-         * Posts the {@link DispatchEventToReactor} system command.
+         * The callback invoked when an {@link Event} is dispatched to a reactor in the entity.
+         *
+         * <p>This callback applies only to entities which
+         * {@link io.spine.core.React @React} to events, such as
+         * {@link io.spine.server.aggregate.Aggregate Aggregate}s and
+         * {@link io.spine.server.procman.ProcessManager ProcessManager}s.
+         *
+         * @param event the dispatched event
+         * @see #onDispatchEventToReactor(Event)
          */
         void onDispatchEventToReactor(Event event);
 
         /**
-         * Posts the {@link ChangeEntityState} system command and the commands related to
-         * the lifecycle flags.
+         * The callback invoked when the entity state and/or attributes are changed.
          *
          * @param change     the change in the entity state and attributes
          * @param messageIds the IDs of the messages which caused the {@code change}; typically,

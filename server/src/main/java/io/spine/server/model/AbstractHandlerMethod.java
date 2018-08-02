@@ -20,6 +20,7 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -47,11 +48,13 @@ import static java.lang.String.format;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
+@Immutable
 public abstract
 class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R extends MethodResult>
         implements HandlerMethod<T, M, C, R> {
 
     /** The method to be called. */
+    @SuppressWarnings("Immutable")
     private final Method method;
 
     /** The class of the first parameter. */
@@ -60,8 +63,15 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
     /** The number of parameters the method has. */
     private final int paramCount;
 
-    /** The set of the metadata attributes set via method annotations. */
-    private final Set<MethodAttribute<?>> attributes;
+    /**
+     * The set of the metadata attributes set via method annotations.
+     *
+     * @implNote Even though that {@code MethodAttribute} is parameterized with {@code Object},
+     * which is mutable, the {@code @Immutable} annotation of {@code MethodAttribute} class
+     * ensures that we don't have mutable types passed as generic parameters.
+     */
+    @SuppressWarnings("Immutable")
+    private final ImmutableSet<MethodAttribute<?>> attributes;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -132,7 +142,7 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
         return attributes;
     }
 
-    private static Set<MethodAttribute<?>> discoverAttributes(Method method) {
+    private static ImmutableSet<MethodAttribute<?>> discoverAttributes(Method method) {
         checkNotNull(method);
         ExternalAttribute externalAttribute = ExternalAttribute.of(method);
         return ImmutableSet.of(externalAttribute);

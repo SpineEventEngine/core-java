@@ -64,7 +64,7 @@ class QueryServiceTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         // Create Projects Bounded Context with one repository and one projection.
         projectsContext = BoundedContext.newBuilder()
                                         .setName(PROJECTS_CONTEXT_NAME)

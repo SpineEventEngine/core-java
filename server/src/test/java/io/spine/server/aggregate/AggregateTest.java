@@ -162,7 +162,7 @@ public class AggregateTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         aggregate = newAggregate(ID);
         amishAggregate = newAmishAggregate(ID);
         boundedContext = BoundedContext.newBuilder()
@@ -335,7 +335,7 @@ public class AggregateTest {
         @Test
         @DisplayName("command handler")
         void commandHandler() {
-            ModelTests.clearModel();
+            ModelTests.dropAllModels();
             AggregateWithMissingApplier aggregate = new AggregateWithMissingApplier(ID);
 
             // Pass a command for which the target aggregate does not have a handling method.
@@ -346,7 +346,7 @@ public class AggregateTest {
         @Test
         @DisplayName("event applier for the event emitted in a result of command handling")
         void eventApplier() {
-            ModelTests.clearModel();
+            ModelTests.dropAllModels();
             AggregateWithMissingApplier aggregate =
                     new AggregateWithMissingApplier(ID);
             assertThrows(IllegalStateException.class, () -> {
@@ -594,7 +594,7 @@ public class AggregateTest {
         @Test
         @DisplayName("when handler throws")
         void whenHandlerThrows() {
-            ModelTests.clearModel();
+            ModelTests.dropAllModels();
             FaultyAggregate faultyAggregate = new FaultyAggregate(ID, true, false);
 
             Command command = Given.ACommand.createProject();
@@ -611,7 +611,7 @@ public class AggregateTest {
         @Test
         @DisplayName("when applier throws")
         void whenApplierThrows() {
-            ModelTests.clearModel();
+            ModelTests.dropAllModels();
             FaultyAggregate faultyAggregate =
                     new FaultyAggregate(ID, false, true);
 
@@ -629,7 +629,7 @@ public class AggregateTest {
         @Test
         @DisplayName("when play raises exception")
         void whenPlayThrows() {
-            ModelTests.clearModel();
+            ModelTests.dropAllModels();
             FaultyAggregate faultyAggregate =
                     new FaultyAggregate(ID, false, true);
             try {

@@ -99,7 +99,7 @@ public class AggregateRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         resetBoundedContext();
         resetRepository();
         boundedContext().register(repository());

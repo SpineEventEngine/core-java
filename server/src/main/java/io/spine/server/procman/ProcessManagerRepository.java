@@ -316,8 +316,8 @@ public abstract class ProcessManagerRepository<I,
         lifecycleOf(id).onDispatchEventToReactor(event);
     }
 
-    void onAssignToCommand(I id, CommandId commandId) {
-        lifecycleOf(id).onAssignedToCommand(commandId);
+    void onCommandTargetSet(I id, CommandId commandId) {
+        lifecycleOf(id).onTargetAssignedToCommand(commandId);
     }
 
     /**

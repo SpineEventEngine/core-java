@@ -21,7 +21,6 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Timestamp;
-import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandContext.Schedule;
@@ -59,7 +58,6 @@ import static io.spine.base.Time.getCurrentTime;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("OverlyCoupledClass") // OK for an aggregate class.
-@Internal
 public final class CommandLifecycleAggregate
         extends Aggregate<CommandId, CommandLifecycle, CommandLifecycleVBuilder> {
 

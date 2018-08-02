@@ -20,8 +20,17 @@
 
 package io.spine.server.model;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Maps;
 import io.spine.annotation.Internal;
+import io.spine.core.BoundedContextName;
+import io.spine.core.BoundedContextNames;
+import io.spine.reflect.PackageInfo;
+import io.spine.server.annotation.BoundedContext;
+import io.spine.server.security.InvocationGuard;
 
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -33,23 +42,70 @@ import java.util.function.Supplier;
 @Internal
 public class Model {
 
+    /**
+     * Maps a raw class of a model object to corresponding Model instance.
+     */
+    private static final Map<Class<?>, Model> models = Maps.newConcurrentMap();
+
+    /** The name of the Bounded Context to which this instance belongs. */
+    private final BoundedContextName context;
+
     /** Maps a raw Java class to a {@code ModelClass}. */
     private final ClassMap classes = new ClassMap();
 
-    public static Model getInstance() {
-        return Singleton.INSTANCE.value;
+    /**
+     * Creates a new instance for the Bounded Context with the passed name. */
+    private Model(BoundedContextName context) {
+        this.context = context;
     }
 
     @SuppressWarnings("unused") // The param will be used when Model is created per BoundedContext.
     public static <T> Model getInstance(Class<? extends T> rawClass) {
-        //TODO:2018-07-25:alexander.yevsyukov: Find the model for the raw class using the
-        // @BoundedContext("MyBoundedContext") annotation in the one of the parent packages
-        // of the passed class.
-        return getInstance();
+        Model model = models.get(rawClass);
+        if (model != null) {
+            return model;
+        }
+
+        Optional<BoundedContextName> optional = findContext(rawClass);
+
+        // If no name of a Bounded Context found, assume the default name.
+        // This is a safety net for newcomers and our tests.
+        // We may want to make this check strict, and require specifying Bounded Context names.
+        BoundedContextName context = optional.orElseGet(BoundedContextNames::defaultName);
+
+        // Try to find a Model if it already exists.
+        Optional<Model> alreadyAvailable =
+                models.values()
+                      .stream()
+                      .filter((m) -> m.context.equals(context))
+                      .findAny();
+
+        if (alreadyAvailable.isPresent()) {
+            return alreadyAvailable.get();
+        }
+
+        // Since a model is not found, create for new Bounded Context and associated with the
+        // passed raw class.
+        Model newModel = new Model(context);
+        models.put(rawClass, newModel);
+        return newModel;
     }
 
-    /** Prevents instantiation from outside. */
-    private Model() {
+    /**
+     * Finds Bounded Context name in the package annotations of the raw class,
+     * or in the packages into which the package of the class is nested.
+     */
+    @VisibleForTesting
+    static <T> Optional<BoundedContextName> findContext(Class<? extends T> rawClass) {
+        PackageInfo pkg = PackageInfo.of(rawClass);
+        Optional<BoundedContext> annotation = pkg.findAnnotation(BoundedContext.class);
+        if (!annotation.isPresent()) {
+            return Optional.empty();
+        }
+        String contextName = annotation.get()
+                                       .value();
+        BoundedContextName result = BoundedContextNames.newName(contextName);
+        return Optional.of(result);
     }
 
     /**
@@ -58,8 +114,37 @@ public class Model {
      * <p>This method can be useful when multiple Spine projects are processed under the same
      * static context, e.g. in tests.
      */
-    public void clear() {
+    private void clear() {
         classes.clear();
+    }
+
+    /**
+     * Clears all models, and then clears the {@link #models} map.
+     */
+    private static void reset() {
+        for (Model model : models.values()) {
+            model.clear();
+        }
+        models.clear();
+    }
+
+    /**
+     * Clears all models and removes them.
+     *
+     * <p>This method must <em>not</em> be called from the production code.
+     *
+     * @apiNote This method <em>may</em> be called indirectly from authorized tool classes
+     *          or test utility classes.
+     * @throws SecurityException if called directly by non-authorized class
+     */
+    @VisibleForTesting
+    public static synchronized void dropAllModels() {
+        InvocationGuard.allowOnly(
+                "io.spine.server.model.ModelTest",
+                "io.spine.testing.server.model.ModelTests",
+                "io.spine.model.verify.ModelVerifier"
+        );
+        reset();
     }
 
     /**
@@ -74,11 +159,5 @@ public class Model {
                            Supplier<ModelClass<T>> supplier) {
         ModelClass<T> result = classes.get(cls, classOfModelClass, supplier);
         return result;
-    }
-
-    private enum Singleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Model value = new Model();
     }
 }

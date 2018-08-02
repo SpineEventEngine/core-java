@@ -123,7 +123,7 @@ public abstract class TransactionTest<I,
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
     }
 
     @Nested

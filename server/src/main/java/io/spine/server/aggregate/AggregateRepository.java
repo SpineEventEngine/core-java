@@ -527,8 +527,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         lifecycleOf(id).onDispatchEventToReactor(event);
     }
 
-    void onAssignedToCommand(I id, CommandId commandId) {
-        lifecycleOf(id).onAssignedToCommand(commandId);
+    void onCommandTargetSet(I id, CommandId commandId) {
+        lifecycleOf(id).onTargetAssignedToCommand(commandId);
     }
 
     @Override

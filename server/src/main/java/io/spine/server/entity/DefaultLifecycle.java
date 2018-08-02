@@ -55,6 +55,10 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * The default implementation of {@link Repository.Lifecycle}.
+ *
+ * <p>On each callback, posts a number of system commands describing the interaction with
+ * the entity. A call may not result in a system command at all.
+ * See the individual method descriptions for more info.
  */
 @SuppressWarnings("OverlyCoupledClass") // Posts system events.
 final class DefaultLifecycle<I> implements Repository.Lifecycle {
@@ -62,12 +66,14 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
     private final SystemGateway systemGateway;
     private final EntityHistoryId id;
 
-
     DefaultLifecycle(SystemGateway gateway, I id, TypeUrl entityType) {
         this.systemGateway = gateway;
         this.id = historyId(id, entityType);
     }
 
+    /**
+     * Posts the {@link CreateEntity} system command.
+     */
     @Override
     public void onEntityCreated(EntityOption.Kind entityKind) {
         CreateEntity command = CreateEntity
@@ -78,8 +84,12 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
         systemGateway.postCommand(command);
     }
 
+    /**
+     * Posts the {@link io.spine.system.server.AssignTargetToCommand AssignTargetToCommand}
+     * system command.
+     */
     @Override
-    public void onAssignedToCommand(CommandId commandId) {
+    public void onTargetAssignedToCommand(CommandId commandId) {
         CommandTarget target = CommandTarget
                 .newBuilder()
                 .setEntityId(id.getEntityId())
@@ -93,6 +103,9 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
         systemGateway.postCommand(command);
     }
 
+    /**
+     * Posts the {@link DispatchCommandToHandler} system command.
+     */
     @Override
     public void onDispatchCommand(Command command) {
         DispatchCommandToHandler systemCommand = DispatchCommandToHandler
@@ -103,6 +116,9 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
         systemGateway.postCommand(systemCommand);
     }
 
+    /**
+     * Posts the {@link MarkCommandAsHandled} system command.
+     */
     @Override
     public void onCommandHandled(Command command) {
         MarkCommandAsHandled systemCommand = MarkCommandAsHandled
@@ -112,6 +128,9 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
         systemGateway.postCommand(systemCommand);
     }
 
+    /**
+     * Posts the {@link DispatchEventToSubscriber} system command.
+     */
     @Override
     public void onDispatchEventToSubscriber(Event event) {
         DispatchEventToSubscriber systemCommand = DispatchEventToSubscriber
@@ -122,6 +141,9 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
         systemGateway.postCommand(systemCommand);
     }
 
+    /**
+     * Posts the {@link DispatchEventToReactor} system command.
+     */
     @Override
     public void onDispatchEventToReactor(Event event) {
         DispatchEventToReactor systemCommand = DispatchEventToReactor
@@ -132,6 +154,13 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
         systemGateway.postCommand(systemCommand);
     }
 
+    /**
+     * Posts the {@link ChangeEntityState} system command and the commands related to
+     * the lifecycle flags.
+     *
+     * <p>Only the actual changes in the entity attributes result into system commands.
+     * If the previous and new values are equal, then no commands are posted.
+     */
     @Override
     public void onStateChanged(EntityRecordChange change,
                                Set<? extends Message> messageIds) {

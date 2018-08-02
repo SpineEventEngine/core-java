@@ -19,6 +19,7 @@
  */
 package io.spine.server.model;
 
+import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
 
 /**
@@ -30,6 +31,7 @@ import io.spine.annotation.Internal;
  * @author Alex Tymchenko
  */
 @Internal
+@Immutable(containerOf = "V")
 public interface MethodAttribute<V> {
 
     /**

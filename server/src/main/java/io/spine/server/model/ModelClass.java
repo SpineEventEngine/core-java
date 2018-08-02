@@ -25,7 +25,8 @@ import io.spine.value.ClassTypeValue;
 import java.util.function.Supplier;
 
 /**
- * A class that belongs to a {@link Model}.
+ * Abstract base for classes providing additional information on a Java class
+ * such as classes of messages being handled by the methods exposed by the class.
  *
  * @param <T> the type of objects
  * @author Alexander Yevsyukov
@@ -34,8 +35,8 @@ public abstract class ModelClass<T> extends ClassTypeValue<T> {
 
     private static final long serialVersionUID = 0L;
 
-    protected ModelClass(Class<? extends T> value) {
-        super(value);
+    protected ModelClass(Class<? extends T> rawClass) {
+        super(rawClass);
     }
 
     /**
@@ -44,7 +45,7 @@ public abstract class ModelClass<T> extends ClassTypeValue<T> {
      * <p>If the model does not have the model class yet, it would be obtained
      * from the passed supplier and remembered.
      */
-    public static <T, M extends ModelClass>
+    protected static <T, M extends ModelClass>
     ModelClass<T> get(Class<T> rawClass,
                       Class<M> requestedModelClass,
                       Supplier<ModelClass<T>> supplier) {

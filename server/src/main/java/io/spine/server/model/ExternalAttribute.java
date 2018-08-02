@@ -19,6 +19,7 @@
  */
 package io.spine.server.model;
 
+import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
 import io.spine.core.React;
 import io.spine.core.Subscribe;
@@ -35,6 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see io.spine.core.React#external()
  * @author Alex Tymchenko
  */
+@Immutable
 @Internal
 public enum ExternalAttribute implements MethodAttribute<Boolean> {
 

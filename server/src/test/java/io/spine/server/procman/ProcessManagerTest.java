@@ -150,7 +150,7 @@ class ProcessManagerTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         BoundedContext bc = BoundedContext.newBuilder()
                                           .setMultitenant(true)
                                           .build();

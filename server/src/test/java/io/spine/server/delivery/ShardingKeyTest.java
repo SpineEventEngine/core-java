@@ -40,7 +40,7 @@ class ShardingKeyTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
 
         ShardingKey projectsZero = projectsShardZero().getKey();
         ShardingKey theSameProjectsZero = anotherProjectsShardZero().getKey();

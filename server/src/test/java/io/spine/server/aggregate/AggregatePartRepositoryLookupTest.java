@@ -52,7 +52,7 @@ class AggregatePartRepositoryLookupTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
         boundedContext.register(new ProjectPartRepository());

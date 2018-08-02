@@ -45,7 +45,7 @@ class DeliveryTagTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         DeliveryEqualityRepository repository = new DeliveryEqualityRepository();
 
         DeliveryTag eventTag = DeliveryTag.forEventsOf(repository);

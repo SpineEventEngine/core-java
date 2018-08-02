@@ -57,7 +57,7 @@ class ShardedStreamTest {
     @Test
     @DisplayName("support equality")
     void supportEquality() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         new EqualsTester().addEqualityGroup(projectsShardZero(), anotherProjectsShardZero())
                           .addEqualityGroup(projectsShardOne(), anotherProjectsShardOne())
                           .addEqualityGroup(tasksShardZero())

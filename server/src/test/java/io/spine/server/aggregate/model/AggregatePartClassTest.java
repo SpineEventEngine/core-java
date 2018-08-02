@@ -48,7 +48,7 @@ class AggregatePartClassTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .build();
         root = new AnAggregateRoot(boundedContext, newUuid());

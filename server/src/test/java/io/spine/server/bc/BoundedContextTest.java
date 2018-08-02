@@ -96,7 +96,7 @@ class BoundedContextTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(true)
                                        .build();
@@ -166,7 +166,7 @@ class BoundedContextTest {
         @Test
         @DisplayName("ProcessManagerRepository")
         void processManagerRepository() {
-            ModelTests.clearModel();
+            ModelTests.dropAllModels();
 
             ProjectPmRepo repository = new ProjectPmRepo();
             boundedContext.register(repository);
@@ -382,7 +382,7 @@ class BoundedContextTest {
     @Test
     @DisplayName("not expose invisible aggregates")
     void notExposeInvisibleAggregates() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
 
         boundedContext.register(new SecretProjectRepository());
 
