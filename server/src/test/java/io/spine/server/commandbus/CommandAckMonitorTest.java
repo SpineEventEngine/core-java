@@ -25,6 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
+import io.spine.base.Time;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
@@ -47,6 +48,7 @@ import org.junit.jupiter.api.Test;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.protobuf.AnyPacker.pack;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -256,6 +258,7 @@ class CommandAckMonitorTest {
         Command command = Command
                 .newBuilder()
                 .setId(commandId)
+                .setMessage(pack(Time.getCurrentTime()))
                 .build();
         CommandEnvelope envelope = CommandEnvelope.of(command);
 
