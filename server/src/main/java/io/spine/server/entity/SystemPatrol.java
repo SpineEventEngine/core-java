@@ -28,6 +28,7 @@ import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.option.EntityOption;
+import io.spine.server.entity.Repository.Lifecycle;
 import io.spine.system.server.ArchiveEntity;
 import io.spine.system.server.AssignTargetToCommand;
 import io.spine.system.server.ChangeEntityState;
@@ -54,19 +55,21 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toList;
 
 /**
- * The default implementation of {@link Repository.Lifecycle}.
+ * An observer of an entity {@linkplain Repository.Lifecycle lifecycle} which posts system commands.
  *
  * <p>On each callback, posts a number of system commands describing the interaction with
  * the entity. A call may not result in a system command at all.
  * See the individual method descriptions for more info.
+ *
+ * @author Dmytro Dashenkov
  */
-@SuppressWarnings("OverlyCoupledClass") // Posts system events.
-final class DefaultLifecycle implements Repository.Lifecycle {
+@SuppressWarnings("OverlyCoupledClass") // Posts system commands.
+final class SystemPatrol implements Lifecycle {
 
     private final SystemGateway systemGateway;
     private final EntityHistoryId id;
 
-    DefaultLifecycle(SystemGateway gateway, Object id, TypeUrl entityType) {
+    SystemPatrol(SystemGateway gateway, Object id, TypeUrl entityType) {
         this.systemGateway = gateway;
         this.id = historyId(id, entityType);
     }
@@ -265,7 +268,7 @@ final class DefaultLifecycle implements Repository.Lifecycle {
     toDispatched(Collection<? extends Message> messageIds) {
         Collection<DispatchedMessageId> dispatchedMessageIds =
                 messageIds.stream()
-                          .map(DefaultLifecycle::dispatchedMessageId)
+                          .map(SystemPatrol::dispatchedMessageId)
                           .collect(toList());
         return dispatchedMessageIds;
     }
