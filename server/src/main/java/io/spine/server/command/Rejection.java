@@ -24,6 +24,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandEnvelope;
@@ -42,6 +43,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 /**
  * @author Dmytro Dashenkov
  */
+@Internal
 public final class Rejection {
 
     private static final Any DEFAULT_PRODUCER_ID = Identifier.pack("Unknown");
