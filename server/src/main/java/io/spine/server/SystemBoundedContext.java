@@ -20,13 +20,10 @@
 
 package io.spine.server;
 
-import io.spine.server.entity.Repository;
 import io.spine.system.server.CommandLifecycleRepository;
 import io.spine.system.server.EntityHistoryRepository;
 import io.spine.system.server.NoOpSystemGateway;
 import io.spine.system.server.SystemGateway;
-
-import java.util.stream.Stream;
 
 /**
  * An implementation of {@link BoundedContext} used for the System domain.
@@ -71,10 +68,8 @@ final class SystemBoundedContext extends BoundedContext {
     }
 
     private void init() {
-        Stream.<Repository<?, ?>>of(
-                new EntityHistoryRepository(),
-                new CommandLifecycleRepository()
-        ).forEach(this::register);
+        register(new EntityHistoryRepository());
+        register(new CommandLifecycleRepository());
     }
 
     /**
