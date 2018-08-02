@@ -136,7 +136,7 @@ public abstract class Aggregate<I,
      *
      * @see #commitEvents()
      */
-    private final List<Event> uncommittedEvents = newArrayListWithCapacity(3);
+    private final List<Event> uncommittedEvents = newArrayList();
 
     /** A guard for ensuring idempotency of messages dispatched by this aggregate. */
     private IdempotencyGuard idempotencyGuard;
