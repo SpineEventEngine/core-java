@@ -24,7 +24,7 @@ package io.spine.server.commandbus;
  * A {@link RuntimeException} thrown when a {@link CommandDispatcher} fails to dispatch a command.
  *
  * <p>This exception <b>must</b> have a {@linkplain #getCause() cause}, which explains why
- * the dispatching was failed.
+ * the dispatching has failed.
  *
  * @author Dmytro Dashenkov
  */
