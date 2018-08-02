@@ -137,12 +137,12 @@ public abstract class BoundedContext
                                                       BoundedContextName name) {
         Optional<IntegrationBus.Builder> busBuilder = builder.getIntegrationBus();
         checkState(busBuilder.isPresent());
-        IntegrationBus result = busBuilder
-                .get()
-                .setBoundedContextName(name)
-                .setEventBus(eventBus)
-                .setRejectionBus(commandBus.rejectionBus())
-                .build();
+        IntegrationBus result =
+                busBuilder.get()
+                          .setBoundedContextName(name)
+                          .setEventBus(eventBus)
+                          .setRejectionBus(commandBus.rejectionBus())
+                          .build();
         return result;
     }
 
