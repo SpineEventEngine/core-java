@@ -95,7 +95,8 @@ public class Model {
      * Finds Bounded Context name in the package annotations of the raw class,
      * or in the packages into which the package of the class is nested.
      */
-    private static <T> Optional<BoundedContextName> findContext(Class<? extends T> rawClass) {
+    @VisibleForTesting
+    static <T> Optional<BoundedContextName> findContext(Class<? extends T> rawClass) {
         PackageInfo pkg = PackageInfo.of(rawClass);
         Optional<BoundedContext> annotation = pkg.findAnnotation(BoundedContext.class);
         if (!annotation.isPresent()) {
