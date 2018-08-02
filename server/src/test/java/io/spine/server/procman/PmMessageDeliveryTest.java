@@ -45,7 +45,7 @@ import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.projectStar
 @SuppressWarnings({"InnerClassMayBeStatic", "ClassCanBeStatic"
         /* JUnit nested classes cannot be static. */,
         "DuplicateStringLiteralInspection" /* Common test display names. */})
-@DisplayName("ProcessManager message delivery should")
+@DisplayName("ProcessManager message delivery in multithreaded env should")
 class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
 
     @Override
@@ -56,7 +56,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
     }
 
     @Nested
-    @DisplayName("in multithreaded env, dispatch commands")
+    @DisplayName("dispatch commands")
     class DispatchCommands {
 
         @Test
@@ -113,7 +113,7 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
     }
 
     @Nested
-    @DisplayName("in multithreaded env, dispatch events")
+    @DisplayName("dispatch events")
     class DispatchEvents {
 
         @Test
