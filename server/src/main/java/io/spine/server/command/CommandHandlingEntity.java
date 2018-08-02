@@ -30,7 +30,6 @@ import io.spine.change.ValueMismatch;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Rejections;
-import io.spine.server.EventProducer;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.validate.ValidatingBuilder;
 
@@ -62,7 +61,7 @@ class CommandHandlingEntity<I,
                             S extends Message,
                             B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends TransactionalEntity<I, S, B>
-        implements EventProducer {
+        implements CommandHandler {
 
     /** Cached value of the ID in the form of {@code Any} instance. */
     private final Any idAsAny;

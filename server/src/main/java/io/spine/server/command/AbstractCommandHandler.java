@@ -24,7 +24,6 @@ import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.Version;
-import io.spine.server.EventProducer;
 import io.spine.server.command.model.CommandHandlerClass;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.command.model.CommandHandlerMethod.Result;
@@ -65,7 +64,7 @@ import static io.spine.server.command.model.CommandHandlerClass.asCommandHandler
  */
 public abstract class AbstractCommandHandler
         extends AbstractCommandDispatcher
-        implements EventProducer {
+        implements CommandHandler {
 
     private final CommandHandlerClass<?> thisClass = asCommandHandlerClass(getClass());
 
