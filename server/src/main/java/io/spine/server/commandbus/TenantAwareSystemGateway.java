@@ -20,6 +20,7 @@
 
 package io.spine.server.commandbus;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -62,6 +63,16 @@ final class TenantAwareSystemGateway implements SystemGateway {
         operation.execute();
     }
 
+    @VisibleForTesting
+    SystemGateway getDelegate() {
+        return delegate;
+    }
+
+    @VisibleForTesting
+    TenantId getTenantId() {
+        return tenantId;
+    }
+
     /**
      * A {@link TenantAwareOperation} which executes the given action for a specific tenant.
      */
@@ -85,7 +96,7 @@ final class TenantAwareSystemGateway implements SystemGateway {
      *
      * @return new instance of {@code Builder}
      */
-    public static Builder create() {
+    static Builder create() {
         return new Builder();
     }
 
