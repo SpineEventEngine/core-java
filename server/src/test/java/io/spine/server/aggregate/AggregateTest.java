@@ -102,13 +102,15 @@ import static io.spine.testing.server.Assertions.assertEventClasses;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchRejection;
 import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
-import static java.util.stream.Collectors.toList;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static java.util.stream.Collectors.toList;
 
 /**
  * @author Alexander Litus
@@ -750,7 +752,9 @@ public class AggregateTest {
         CommandEnvelope envelope = of(createCommand);
         repository.dispatch(envelope);
 
-        assertThrows(DuplicateCommandException.class, () -> repository.dispatch(envelope));
+        Throwable exception = assertThrows(RuntimeException.class,
+                                           () -> repository.dispatch(envelope));
+        assertThat(exception.getCause(), instanceOf(DuplicateCommandException.class));
     }
 
     @Nested

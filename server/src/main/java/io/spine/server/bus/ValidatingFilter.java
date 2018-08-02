@@ -32,6 +32,8 @@ import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.bus.Buses.reject;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 
 /**
  * A filter validating the {@linkplain MessageEnvelope envelopes} with the given
@@ -40,7 +42,7 @@ import static io.spine.server.bus.Buses.reject;
  * @author Dmytro Dashenkov
  */
 final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Message>
-        extends AbstractBusFilter<E> {
+        implements BusFilter<E> {
 
     private final EnvelopeValidator<E> validator;
 
@@ -58,9 +60,9 @@ final class ValidatingFilter<E extends MessageEnvelope<?, T, ?>, T extends Messa
                                    .asError();
             Any packedId = Identifier.pack(envelope.getId());
             Ack result = reject(packedId, error);
-            return Optional.of(result);
+            return of(result);
         } else {
-            return Optional.empty();
+            return empty();
         }
     }
 }

@@ -28,6 +28,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -55,12 +56,14 @@ import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
+import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.RejectionProducers;
 import io.spine.server.route.RejectionRouting;
+import io.spine.system.server.SystemGateway;
 
 import java.util.Set;
 import java.util.function.Supplier;
@@ -176,8 +179,8 @@ public abstract class ProcessManagerRepository<I,
 
         boolean handlesCommands = register(boundedContext.getCommandBus(),
                                            DelegatingCommandDispatcher.of(this));
-        boolean handlesDomesticRejections = register(boundedContext.getRejectionBus(),
-                                                     rejDispatcher);
+        RejectionBus rejectionBus = boundedContext.getRejectionBus();
+        boolean handlesDomesticRejections = register(rejectionBus, rejDispatcher);
         boolean handlesExternalRejections = register(boundedContext.getIntegrationBus(),
                                                      rejDispatcher.getExternalDispatcher());
         boolean handlesDomesticEvents = !getMessageClasses().isEmpty();
@@ -192,8 +195,12 @@ public abstract class ProcessManagerRepository<I,
                     "Process managers of the repository %s have no command handlers, " +
                             "and do not react upon any rejections or events.", this);
         }
-        this.commandErrorHandler = CommandErrorHandler.with(boundedContext.getRejectionBus());
-
+        SystemGateway systemGateway = boundedContext.getSystemGateway();
+        this.commandErrorHandler = CommandErrorHandler
+                .newBuilder()
+                .setRejectionBus(rejectionBus)
+                .setSystemGateway(systemGateway)
+                .build();
         ServerEnvironment.getInstance()
                          .getSharding()
                          .register(this);
@@ -336,7 +343,8 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        commandErrorHandler.handleError(envelope, exception);
+        commandErrorHandler.handleError(envelope, exception)
+                           .rethrow();
     }
 
     @Override
@@ -362,12 +370,20 @@ public abstract class ProcessManagerRepository<I,
         }
     }
 
-    void onCommandDispatched(I id, Command command) {
+    void onDispatchCommand(I id, Command command) {
         lifecycleOf(id).onDispatchCommand(command);
     }
 
-    void onEventDispatched(I id, Event event) {
+    void onCommandHandled(I id, Command command) {
+        lifecycleOf(id).onCommandHandled(command);
+    }
+
+    void onDispatchEvent(I id, Event event) {
         lifecycleOf(id).onDispatchEventToReactor(event);
+    }
+
+    void onCommandTargetSet(I id, CommandId commandId) {
+        lifecycleOf(id).onTargetAssignedToCommand(commandId);
     }
 
     /**

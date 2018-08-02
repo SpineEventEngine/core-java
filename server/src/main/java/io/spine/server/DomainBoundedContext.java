@@ -20,9 +20,6 @@
 
 package io.spine.server;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.server.entity.Repository;
-import io.spine.system.server.DefaultSystemGateway;
 import io.spine.system.server.SystemGateway;
 
 /**
@@ -32,7 +29,7 @@ import io.spine.system.server.SystemGateway;
  * (i.e. built with a {@link BoundedContextBuilder}) are instances of this class.
  *
  * <p>All the user interactions with the system (such as
- * {@linkplain BoundedContext#register(Repository) repository registration},
+ * {@linkplain BoundedContext#register(io.spine.server.entity.Repository) repository registration},
  * {@linkplain BoundedContext#getCommandBus() command posting},
  * {@linkplain BoundedContext#findRepository(Class) query processing}, etc.) happen through
  * an instance of this class.
@@ -45,28 +42,23 @@ import io.spine.system.server.SystemGateway;
  */
 final class DomainBoundedContext extends BoundedContext {
 
-    private final SystemBoundedContext system;
     private final SystemGateway systemGateway;
 
-    private DomainBoundedContext(BoundedContextBuilder builder, SystemBoundedContext system) {
+    private DomainBoundedContext(BoundedContextBuilder builder,
+                                 SystemGateway gateway) {
         super(builder);
-        this.system = system;
-        this.systemGateway = new DefaultSystemGateway(system);
+        this.systemGateway = gateway;
     }
 
-    static DomainBoundedContext newInstance(BoundedContextBuilder builder, SystemBoundedContext system) {
-        DomainBoundedContext result = new DomainBoundedContext(builder, system);
+    static DomainBoundedContext newInstance(BoundedContextBuilder builder,
+                                            SystemGateway gateway) {
+        DomainBoundedContext result = new DomainBoundedContext(builder, gateway);
         result.init();
         return result;
     }
 
     private void init() {
         getStand().onCreated(this);
-    }
-
-    @VisibleForTesting
-    BoundedContext system() {
-        return system;
     }
 
     @Override

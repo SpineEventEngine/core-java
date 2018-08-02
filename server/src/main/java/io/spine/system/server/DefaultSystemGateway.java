@@ -20,7 +20,7 @@
 
 package io.spine.system.server;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.CommandFactory;
@@ -59,30 +59,31 @@ public final class DefaultSystemGateway implements SystemGateway {
 
     @Override
     public void postCommand(Message systemCommand) {
+        checkNotNull(systemCommand);
         CommandFactory commandFactory = buildRequestFactory().command();
         Command command = commandFactory.create(systemCommand);
         system.getCommandBus()
               .post(command, noOpObserver());
     }
 
+    @VisibleForTesting
+    BoundedContext target() {
+        return system;
+    }
+
     private ActorRequestFactory buildRequestFactory() {
-        ActorRequestFactory result = system.isMultitenant()
-                                     ? buildMultitenantFactory()
-                                     : buildSingleTenantFactory();
-        return result;
+        return system.isMultitenant()
+               ? buildMultitenantFactory()
+               : buildSingleTenantFactory();
     }
 
     private static ActorRequestFactory buildMultitenantFactory() {
         TenantFunction<ActorRequestFactory> contextFactory =
                 new TenantFunction<ActorRequestFactory>(true) {
                     @Override
-                    @CanIgnoreReturnValue
-                    public ActorRequestFactory apply(@Nullable TenantId input) {
-                        checkNotNull(input);
-                        return ActorRequestFactory.newBuilder()
-                                                  .setTenantId(input)
-                                                  .setActor(SYSTEM)
-                                                  .build();
+                    public ActorRequestFactory apply(@Nullable TenantId tenantId) {
+                        checkNotNull(tenantId);
+                        return constructFactory(tenantId);
                     }
                 };
         ActorRequestFactory result = contextFactory.execute();
@@ -91,8 +92,13 @@ public final class DefaultSystemGateway implements SystemGateway {
     }
 
     private static ActorRequestFactory buildSingleTenantFactory() {
+        return constructFactory(TenantId.getDefaultInstance());
+    }
+
+    private static ActorRequestFactory constructFactory(TenantId tenantId) {
         return ActorRequestFactory.newBuilder()
                                   .setActor(SYSTEM)
+                                  .setTenantId(tenantId)
                                   .build();
     }
 }

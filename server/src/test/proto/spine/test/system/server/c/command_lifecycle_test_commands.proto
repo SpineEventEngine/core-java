@@ -1,0 +1,59 @@
+//
+// Copyright 2018, TeamDev. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+
+syntax = "proto3";
+
+package spine.test.system.server;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.system.server";
+option java_outer_classname = "CLCommandsProto";
+option java_multiple_files = true;
+
+import "spine/test/system/server/command_lifecycle_test.proto";
+
+message EstablishCompany {
+    option (rejections) = "CompanyNameAlreadyTaken";
+
+    CompanyId id = 1;
+
+    string final_name = 2;
+}
+
+message StartCompanyEstablishing {
+
+    CompanyId id = 1;
+}
+
+message ProposeCompanyName {
+    option (rejections) = "CompanyNameAlreadyTaken";
+
+    CompanyId id = 1;
+
+    string name = 2 [(required) = true, (pattern).regex = ".*\\w{5,}.*"];
+}
+
+message FinalizeCompanyName {
+    option (rejections) = "CompanyNameAlreadyTaken";
+
+    CompanyId id = 1;
+}

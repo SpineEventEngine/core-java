@@ -18,29 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
-
-import static com.google.common.base.Preconditions.checkArgument;
+package io.spine.server.commandbus;
 
 /**
- * A test utility for working with {@link SystemBoundedContext}s.
+ * A {@link RuntimeException} thrown when a {@link CommandDispatcher} fails to dispatch a command.
+ *
+ * <p>This exception <b>must</b> have a {@linkplain #getCause() cause}, which explains why
+ * the dispatching has failed.
  *
  * @author Dmytro Dashenkov
  */
-public final class SystemBoundedContexts {
+class CommandDispatchingException extends RuntimeException {
 
-    /**
-     * Prevents the utility class instantiation.
-     */
-    private SystemBoundedContexts() {
-    }
+    private static final long serialVersionUID = 0L;
 
-    /**
-     * Extracts the {@code System} bounded context from the given bounded context.
-     */
-    public static BoundedContext systemOf(BoundedContext context) {
-        checkArgument(context instanceof DomainBoundedContext);
-        DomainBoundedContext defaultContext = (DomainBoundedContext) context;
-        return defaultContext.system();
+    CommandDispatchingException(Throwable cause) {
+        super(cause);
     }
 }

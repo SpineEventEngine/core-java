@@ -30,6 +30,8 @@ import io.spine.server.aggregate.AggregateCommandEndpoint;
 import io.spine.server.aggregate.AggregateEventEndpoint;
 import io.spine.server.aggregate.AggregateRejectionEndpoint;
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.entity.EntityLifecycle;
+import io.spine.testing.server.NoOpLifecycle;
 
 import java.util.List;
 
@@ -180,9 +182,7 @@ public class AggregateMessageDispatcher {
     @SuppressWarnings("unchecked") // It is OK when mocking
     private static <I, A extends Aggregate<I, ?, ?>> AggregateRepository<I, A> mockRepository() {
         TestAggregateRepository mockedRepo = mock(TestAggregateRepository.class);
-        TestAggregateRepository.TestLifecycle mockedLifecycle =
-                mock(TestAggregateRepository.TestLifecycle.class);
-        when(mockedRepo.lifecycleOf(any())).thenReturn(mockedLifecycle);
+        when(mockedRepo.lifecycleOf(any())).thenCallRealMethod();
         return mockedRepo;
     }
 
@@ -193,15 +193,8 @@ public class AggregateMessageDispatcher {
             extends AggregateRepository<I, A> {
 
         @Override
-        protected Lifecycle lifecycleOf(I id) {
-            return super.lifecycleOf(id);
-        }
-
-        private class TestLifecycle extends Lifecycle {
-
-            protected TestLifecycle(I id) {
-                super(id);
-            }
+        protected EntityLifecycle lifecycleOf(I id) {
+            return NoOpLifecycle.instance();
         }
     }
 }

@@ -21,6 +21,7 @@
 package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
+import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 
@@ -59,6 +60,7 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
         CommandEnvelope envelope = envelope();
         I id = repository().getCommandRouting()
                            .apply(envelope.getMessage(), envelope.getCommandContext());
+        repository().onCommandTargetSet(id, envelope.getId());
         return id;
     }
 
@@ -68,9 +70,13 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
     }
 
     @Override
-    protected List<Event> doDispatch(P processManager, CommandEnvelope command) {
-        repository().onCommandDispatched(processManager.getId(), command.getCommand());
-        return processManager.dispatchCommand(command);
+    protected List<Event> doDispatch(P processManager, CommandEnvelope envelope) {
+        I id = processManager.getId();
+        Command command = envelope.getCommand();
+        repository().onDispatchCommand(id, command);
+        List<Event> result = processManager.dispatchCommand(envelope);
+        repository().onCommandHandled(id, command);
+        return result;
     }
 
     @Override

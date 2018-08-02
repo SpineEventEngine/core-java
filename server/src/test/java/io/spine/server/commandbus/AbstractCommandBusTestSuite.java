@@ -20,8 +20,6 @@
 
 package io.spine.server.commandbus;
 
-import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
 import io.spine.base.Error;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Ack;
@@ -36,11 +34,13 @@ import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.commandstore.CommandStore;
+import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.SystemGateway;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.event.CmdProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -56,11 +56,9 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.BoundedContextNames.newName;
-import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.commandbus.CommandScheduler.setSchedule;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.testing.Verify.assertContainsAll;
 import static io.spine.testing.Verify.assertSize;
@@ -87,13 +85,13 @@ abstract class AbstractCommandBusTestSuite {
     protected ActorRequestFactory requestFactory;
 
     protected CommandBus commandBus;
-    protected CommandStore commandStore;
-    protected Log log;
     protected EventBus eventBus;
     protected RejectionBus rejectionBus;
     protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
     protected MemoizingObserver<Ack> observer;
+    protected TenantIndex tenantIndex;
+    protected SystemGateway systemGateway;
 
     /**
      * A public constructor for derived test cases.
@@ -146,8 +144,9 @@ abstract class AbstractCommandBusTestSuite {
 
     protected static Command newCommandWithoutTenantId() {
         Command cmd = createProject();
-        ActorContext.Builder withNoTenant = ActorContext.newBuilder()
-                                                        .setTenantId(TenantId.getDefaultInstance());
+        ActorContext.Builder withNoTenant = ActorContext
+                .newBuilder()
+                .setTenantId(TenantId.getDefaultInstance());
         Command invalidCmd =
                 cmd.toBuilder()
                    .setContext(cmd.getContext()
@@ -158,8 +157,9 @@ abstract class AbstractCommandBusTestSuite {
     }
 
     protected static Command clearTenantId(Command cmd) {
-        ActorContext.Builder withNoTenant = ActorContext.newBuilder()
-                                                        .setTenantId(TenantId.getDefaultInstance());
+        ActorContext.Builder withNoTenant = ActorContext
+                .newBuilder()
+                .setTenantId(TenantId.getDefaultInstance());
         Command result = cmd.toBuilder()
                             .setContext(cmd.getContext()
                                            .toBuilder()
@@ -174,40 +174,32 @@ abstract class AbstractCommandBusTestSuite {
         Class<? extends AbstractCommandBusTestSuite> cls = getClass();
         InMemoryStorageFactory storageFactory =
                 InMemoryStorageFactory.newInstance(newName(cls.getSimpleName()), multitenant);
-        TenantIndex tenantIndex = 
-                TenantAwareTest.createTenantIndex(multitenant, storageFactory);
-        commandStore = spy(new CommandStore(storageFactory, tenantIndex));
+        tenantIndex = TenantAwareTest.createTenantIndex(multitenant, storageFactory);
         scheduler = spy(new ExecutorCommandScheduler());
-        log = spy(new Log());
         rejectionBus = spy(RejectionBus.newBuilder()
                                        .build());
+        systemGateway = NoOpSystemGateway.INSTANCE;
         commandBus = CommandBus
                 .newBuilder()
-                .setMultitenant(multitenant)
-                .setCommandStore(commandStore)
+                .setMultitenant(this.multitenant)
                 .setCommandScheduler(scheduler)
                 .setRejectionBus(rejectionBus)
-                .setThreadSpawnAllowed(false)
-                .setLog(log)
-                .setAutoReschedule(false)
+                .injectSystemGateway(systemGateway)
+                .injectTenantIndex(tenantIndex)
                 .build();
-        eventBus = EventBus
-                .newBuilder()
-                .setStorageFactory(storageFactory)
-                .build();
-        requestFactory = 
+        eventBus = EventBus.newBuilder()
+                           .setStorageFactory(storageFactory)
+                           .build();
+        requestFactory =
                 multitenant
-                ? TestActorRequestFactory.newInstance(cls, newUuid())
-                : TestActorRequestFactory.newInstance(cls);
+                ? TestActorRequestFactory.newInstance(getClass(), newUuid())
+                : TestActorRequestFactory.newInstance(getClass());
         createProjectHandler = new CreateProjectHandler();
         observer = memoizingObserver();
     }
 
     @AfterEach
     void tearDown() throws Exception {
-        if (commandStore.isOpen()) { // then CommandBus is opened, too
-            commandBus.close();
-        }
         eventBus.close();
     }
 
@@ -252,13 +244,6 @@ abstract class AbstractCommandBusTestSuite {
         CommandId commandId = unpack(observer.firstResponse()
                                              .getMessageId());
         assertEquals(cmd.getId(), commandId);
-    }
-
-    void storeAsScheduled(Iterable<Command> commands, Duration delay, Timestamp schedulingTime) {
-        for (Command cmd : commands) {
-            Command cmdWithSchedule = setSchedule(cmd, delay, schedulingTime);
-            commandStore.store(cmdWithSchedule, SCHEDULED);
-        }
     }
 
     /**

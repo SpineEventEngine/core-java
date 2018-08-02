@@ -43,7 +43,8 @@ import static io.spine.validate.Validate.isNotDefault;
 public class Buses {
 
     /** Prevents instantiation of this utility class. */
-    private Buses() {}
+    private Buses() {
+    }
 
     /**
      * Acknowledges the envelope posted.

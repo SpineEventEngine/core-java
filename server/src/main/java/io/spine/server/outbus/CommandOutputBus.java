@@ -53,6 +53,10 @@ public abstract class CommandOutputBus<M extends Message,
                                        D extends MessageDispatcher<C, E, ?>>
         extends MulticastBus<M, E, C, D> {
 
+    protected CommandOutputBus(AbstractBuilder<E, M, ?> builder) {
+        super(builder);
+    }
+
     /**
      * Enriches the message posted to this instance of {@code CommandOutputBus}.
      *

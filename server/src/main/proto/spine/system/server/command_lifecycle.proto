@@ -43,6 +43,7 @@ import "spine/client/entities.proto";
 // the commads of the `System` bounded contexts, which do not have an explicit lifecycle.
 //
 message CommandLifecycle {
+    option (entity).kind = AGGREGATE;
 
     // The ID of the command.
     spine.core.CommandId id = 1;
@@ -50,16 +51,27 @@ message CommandLifecycle {
     // The command.
     spine.core.Command command = 2;
 
-    // The ID of the command receiver entity.
-    spine.client.EntityId receiver = 3;
+    // The target of the command delivery.
+    CommandTarget target = 3;
 
-    // The current status of the command.
-    CommandStatus status = 4 [(required) = true];
+    // The log of changes of the command.
+    CommandTimeline status = 4 [(required) = true];
 }
 
-// The status of the command processing.
+// An identifier of an entity which is the target of a command.
 //
-message CommandStatus {
+message CommandTarget {
+
+    // The ID of the entity which the command is dispatched to.
+    spine.client.EntityId entity_id = 1 [(valid) = true];
+
+    // The state type URL of the entity which receives the command.
+    string type_url = 2 [(required) = true];
+}
+
+// The log of changes of a command status.
+//
+message CommandTimeline {
 
     // The instant when the command was received.
     //
@@ -70,15 +82,18 @@ message CommandStatus {
     // The instant when the command is acknowledged by the `CommandBus`.
     google.protobuf.Timestamp when_acknowledged = 2;
 
+    // The instant when the command is scheduled for the last time.
+    google.protobuf.Timestamp when_scheduled = 3;
+
     // The instant when the command is sent to a dispatcher.
-    google.protobuf.Timestamp when_dispatched = 3;
+    google.protobuf.Timestamp when_dispatched = 4;
 
     // The instant when the command processing is completed, successfully or otherwise.
-    google.protobuf.Timestamp when_processed = 4 [(goes).with = "processing_status"];
+    google.protobuf.Timestamp when_handled = 5 [(goes).with = "how_handled"];
 
     // The status of the command after processing.
     //
-    // An empty field notifies a non-processed command.
+    // An empty field notifies a non-handled command.
     //
-    spine.core.Status processing_status = 5 [(goes).with = "when_processed"];
+    spine.core.Status how_handled = 6 [(goes).with = "when_handled"];
 }

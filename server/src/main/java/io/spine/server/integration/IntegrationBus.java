@@ -21,11 +21,11 @@ package io.spine.server.integration;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.BoundedContextName;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.bus.Bus;
-import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
@@ -40,13 +40,11 @@ import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.validate.Validate;
 
-import java.util.Deque;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.Identifier.pack;
 import static io.spine.server.integration.IntegrationChannels.fromId;
@@ -132,6 +130,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
     @SuppressWarnings("ConstantConditions")     // `TransportFactory` has already been initialized.
     private IntegrationBus(Builder builder) {
+        super(builder);
         TransportFactory transportFactory = builder.getTransportFactory()
                                                    .get();
         this.boundedContextName = builder.boundedContextName;
@@ -186,11 +185,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     @Override
     protected EnvelopeValidator<ExternalMessageEnvelope> getValidator() {
         return ExternalMessageValidator.INSTANCE;
-    }
-
-    @Override
-    protected Deque<BusFilter<ExternalMessageEnvelope>> createFilterChain() {
-        return newLinkedList();
     }
 
     @Override
@@ -389,6 +383,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     /**
      * A {@code Builder} for {@code IntegrationBus} instances.
      */
+    @CanIgnoreReturnValue
     public static class Builder
             extends Bus.AbstractBuilder<ExternalMessageEnvelope, ExternalMessage, Builder> {
 
@@ -449,6 +444,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         }
 
         @Override
+        @CheckReturnValue
         public IntegrationBus build() {
 
             checkState(eventBus != null,

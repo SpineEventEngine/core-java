@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 
 import java.util.List;
@@ -56,8 +57,12 @@ public class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     protected List<? extends Message> doDispatch(A aggregate, CommandEnvelope envelope) {
-        repository().onDispatchCommand(aggregate.getId(), envelope.getCommand());
-        return aggregate.dispatchCommand(envelope);
+        I id = aggregate.getId();
+        Command command = envelope.getCommand();
+        repository().onDispatchCommand(id, command);
+        List<? extends Message> result = aggregate.dispatchCommand(envelope);
+        repository().onCommandHandled(id, command);
+        return result;
     }
 
     @Override
@@ -73,6 +78,7 @@ public class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         CommandEnvelope envelope = envelope();
         I id = repository().getCommandRouting()
                            .apply(envelope.getMessage(), envelope.getCommandContext());
+        repository().onCommandTargetSet(id, envelope.getId());
         return id;
     }
 

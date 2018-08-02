@@ -20,7 +20,6 @@
 
 package io.spine.server.bus;
 
-import com.google.common.collect.Lists;
 import io.spine.core.EventEnvelope;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,8 +35,8 @@ class FilterChainTest {
     @Test
     @DisplayName("not allow closing twice")
     void notAllowClosingTwice() throws Exception {
-        FilterChain<EventEnvelope, BusFilter<EventEnvelope>> chain =
-                new FilterChain<>(Lists.<BusFilter<EventEnvelope>>newArrayList());
+        FilterChain<EventEnvelope> chain = FilterChain.<EventEnvelope>newBuilder()
+                                                      .build();
 
         chain.close();
         assertThrows(IllegalStateException.class, chain::close);

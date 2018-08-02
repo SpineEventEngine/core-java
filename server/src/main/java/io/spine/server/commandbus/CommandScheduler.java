@@ -38,11 +38,9 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.protobuf.util.Timestamps.checkValid;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.Commands.isScheduled;
 import static io.spine.server.bus.Buses.acknowledge;
 import static java.util.Optional.empty;
-import static java.util.Optional.of;
 
 /**
  * Schedules commands delivering them to the target according to the scheduling options.
@@ -52,13 +50,16 @@ import static java.util.Optional.of;
  */
 public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
+    // TODO:2018-07-27:dmytro.dashenkov: Refactor command scheduling - move to System BC.
+    // todo https://github.com/SpineEventEngine/core-java/issues/799
+
     private static final Set<CommandId> scheduledCommandIds = newHashSet();
 
     private boolean isActive = true;
 
     private @Nullable CommandBus commandBus;
 
-    private @Nullable Rescheduler rescheduler;
+    private @Nullable CommandFlowWatcher flowWatcher;
 
     protected CommandScheduler() {
     }
@@ -67,31 +68,26 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      * Assigns the {@code CommandBus} to the scheduler during {@code CommandBus}
      * {@linkplain CommandBus.Builder#build() construction}.
      */
-    protected void setCommandBus(CommandBus commandBus) {
+    void setCommandBus(CommandBus commandBus) {
         this.commandBus = commandBus;
-        this.rescheduler = new Rescheduler(commandBus);
     }
 
-    private Rescheduler rescheduler() {
-        checkState(rescheduler != null, "Rescheduler is not initialized");
-        return rescheduler;
+    /**
+     * Assigns the {@code CommandFlowWatcher} to the scheduler during {@code CommandBus}
+     * {@linkplain CommandBus.Builder#build() construction}.
+     */
+    void setFlowWatcher(CommandFlowWatcher flowWatcher) {
+        this.flowWatcher = flowWatcher;
     }
 
     @Override
     public Optional<Ack> accept(CommandEnvelope envelope) {
         Command command = envelope.getCommand();
         if (isScheduled(command)) {
-            scheduleAndStore(envelope);
-            return of(acknowledge(envelope.getId()));
+            schedule(envelope.getCommand());
+            return Optional.of(acknowledge(envelope.getId()));
         }
         return empty();
-    }
-
-    private void scheduleAndStore(CommandEnvelope commandEnvelope) {
-        Command command = commandEnvelope.getCommand();
-        schedule(command);
-        commandBus().commandStore()
-                    .store(command, SCHEDULED);
     }
 
     @Override
@@ -115,6 +111,9 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
         Command commandUpdated = setSchedulingTime(command, getCurrentTime());
         doSchedule(commandUpdated);
         rememberAsScheduled(commandUpdated);
+
+        CommandEnvelope updatedCommandEnvelope = CommandEnvelope.of(commandUpdated);
+        flowWatcher().onScheduled(updatedCommandEnvelope);
     }
 
     /**
@@ -124,8 +123,13 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      * {@linkplain #setCommandBus(CommandBus) set} prior to calling this method
      */
     protected CommandBus commandBus() {
-        checkState(commandBus != null, "CommandBus is not set");
+        checkState(commandBus != null, "CommandBus is not set.");
         return commandBus;
+    }
+
+    private CommandFlowWatcher flowWatcher() {
+        checkState(flowWatcher != null, "CommandFlowWatcher is not initialized.");
+        return flowWatcher;
     }
 
     /**
@@ -136,10 +140,6 @@ public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
      * @see #post(Command)
      */
     protected abstract void doSchedule(Command command);
-
-    void rescheduleCommands() {
-        rescheduler().rescheduleCommands();
-    }
 
     /**
      * Delivers a scheduled command to a target.

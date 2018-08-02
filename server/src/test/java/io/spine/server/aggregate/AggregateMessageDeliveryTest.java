@@ -215,7 +215,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
                         @Override
                         protected void postToBus(BoundedContext context, Rejection rejection) {
                             context.getRejectionBus()
-                                   .post(rejection, StreamObservers.noOpObserver());
+                                   .post(rejection);
                         }
                     };
 

@@ -20,11 +20,21 @@
 
 package io.spine.server.commandbus;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
+import io.spine.base.Errors;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
 import io.spine.core.Rejection;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.string.Stringifiers;
+import io.spine.system.server.MarkCommandAsErrored;
+import io.spine.system.server.MarkCommandAsRejected;
+import io.spine.system.server.SystemGateway;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,20 +57,11 @@ import static java.lang.String.format;
 public final class CommandErrorHandler {
 
     private final RejectionBus rejectionBus;
+    private final SystemGateway systemGateway;
 
-    private CommandErrorHandler(RejectionBus rejectionBus) {
-        this.rejectionBus = rejectionBus;
-    }
-
-    /**
-     * Creates new instance of {@code CommandErrorHandler} with the given {@link RejectionBus}.
-     *
-     * @param rejectionBus the {@link RejectionBus} to post the command rejections into
-     * @return a new instance of {@code CommandErrorHandler}
-     */
-    public static CommandErrorHandler with(RejectionBus rejectionBus) {
-        checkNotNull(rejectionBus);
-        return new CommandErrorHandler(rejectionBus);
+    private CommandErrorHandler(Builder builder) {
+        this.rejectionBus = builder.rejectionBus;
+        this.systemGateway = builder.systemGateway;
     }
 
     /**
@@ -70,19 +71,159 @@ public final class CommandErrorHandler {
      * a {@linkplain io.spine.base.ThrowableMessage command rejection}, the {@link Rejection} is
      * {@linkplain RejectionBus#post(Rejection) posted} to the {@code RejectionBus}. Otherwise,
      * the given {@code exception} is thrown.
+     *
+     * @return the result of the error handing
      */
-    public void handleError(CommandEnvelope envelope, RuntimeException exception) {
+    @CanIgnoreReturnValue
+    public HandledError handleError(CommandEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
         if (causedByRejection(exception)) {
-            Rejection rejection = rejectWithCause(envelope.getCommand(), exception);
-            rejectionBus.post(rejection);
+            return handleRejection(envelope, exception);
+        } else {
+            return handleRuntime(envelope, exception);
+        }
+    }
+
+    private HandledError handleRejection(CommandEnvelope envelope, RuntimeException exception) {
+        Rejection rejection = rejectWithCause(envelope.getCommand(), exception);
+        rejectionBus.post(rejection);
+        markRejected(envelope, rejection);
+        return HandledError.forRejection();
+    }
+
+    private void markRejected(CommandEnvelope command, Rejection rejection) {
+        CommandId commandId = command.getId();
+        MarkCommandAsRejected systemCommand = MarkCommandAsRejected
+                .newBuilder()
+                .setId(commandId)
+                .setRejection(rejection)
+                .build();
+        postSystem(systemCommand);
+    }
+
+    private HandledError handleRuntime(CommandEnvelope envelope, RuntimeException exception) {
+        if (isPreProcessed(exception)) {
+            return HandledError.forPreProcessed();
         } else {
             log().error(format("Error dispatching command (class: %s id: %s).",
                                envelope.getMessage().getClass(),
                                Stringifiers.toString(envelope.getId())),
                         exception);
-            throw exception;
+            Error error = Errors.causeOf(exception);
+            markErrored(envelope, error);
+            return HandledError.forRuntime(exception);
+        }
+    }
+
+    private void markErrored(CommandEnvelope command, Error error) {
+        CommandId commandId = command.getId();
+        MarkCommandAsErrored systemCommand = MarkCommandAsErrored
+                .newBuilder()
+                .setId(commandId)
+                .setError(error)
+                .build();
+        postSystem(systemCommand);
+    }
+
+    private void postSystem(Message systemCommand) {
+        systemGateway.postCommand(systemCommand);
+    }
+
+    private static boolean isPreProcessed(RuntimeException exception) {
+        return exception instanceof CommandDispatchingException;
+    }
+
+    /**
+     * A wrapper for a handled error.
+     *
+     * <p>{@linkplain #rethrow() Rethrows} the encountered {@link RuntimeException} if it is not
+     * caused by a {@link Rejection} or has already been rethrown by a {@code CommandErrorHandler}.
+     */
+    public static final class HandledError {
+
+        /**
+         * The instance of {@code HandledError} with {@code null} exception.
+         */
+        private static final HandledError EMPTY = new HandledError(null);
+
+        /**
+         * The handled {@link RuntimeException}.
+         *
+         * <p>If the handled error was caused by a {@link Rejection}, this field is equal
+         * to {@code null}. Otherwise the field is non-null.
+         */
+        private final @MonotonicNonNull RuntimeException exception;
+
+        private HandledError(@Nullable RuntimeException exception) {
+            this.exception = exception;
+        }
+
+        private static HandledError forRejection() {
+            return EMPTY;
+        }
+
+        private static HandledError forPreProcessed() {
+            return EMPTY;
+        }
+
+        private static HandledError forRuntime(RuntimeException exception) {
+            return new HandledError(exception);
+        }
+
+        /**
+         * Rethrows the handled exception if it was <b>not</b> caused by a {@link Rejection} or
+         * rethrown earlier.
+         *
+         * <p>Otherwise, preforms no action.
+         */
+        public void rethrow() {
+            if (exception != null) {
+                throw new CommandDispatchingException(exception);
+            }
+        }
+    }
+
+    /**
+     * Creates a new instance of {@code Builder} for {@code CommandErrorHandler} instances.
+     *
+     * @return new instance of {@code Builder}
+     */
+    public static Builder newBuilder() {
+        return new Builder();
+    }
+
+    /**
+     * A builder for the {@code CommandErrorHandler} instances.
+     */
+    public static final class Builder {
+
+        private RejectionBus rejectionBus;
+        private SystemGateway systemGateway;
+
+        /**
+         * Prevents direct instantiation.
+         */
+        private Builder() {
+        }
+
+        public Builder setRejectionBus(RejectionBus rejectionBus) {
+            this.rejectionBus = checkNotNull(rejectionBus);
+            return this;
+        }
+
+        public Builder setSystemGateway(SystemGateway systemGateway) {
+            this.systemGateway = checkNotNull(systemGateway);
+            return this;
+        }
+
+        /**
+         * Creates a new instance of {@code CommandErrorHandler}.
+         *
+         * @return new instance of {@code CommandErrorHandler}
+         */
+        public CommandErrorHandler build() {
+            return new CommandErrorHandler(this);
         }
     }
 

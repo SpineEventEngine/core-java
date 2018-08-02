@@ -258,7 +258,8 @@ public abstract class Aggregate<I,
      * @param eventMessage the event message to apply
      */
     void invokeApplier(Message eventMessage) {
-        EventApplier method = thisClass().getApplier(EventClass.of(eventMessage));
+        EventClass eventClass = EventClass.of(eventMessage);
+        EventApplier method = thisClass().getApplier(eventClass);
         method.invoke(this, eventMessage);
     }
 

@@ -37,12 +37,13 @@ import java.util.List;
 import java.util.Optional;
 
 import static io.spine.base.Identifier.EMPTY_ID;
+import static io.spine.server.commandbus.InvalidCommandException.inapplicableTenantId;
+import static io.spine.server.commandbus.InvalidCommandException.missingTenantId;
 import static io.spine.server.commandbus.InvalidCommandException.onConstraintViolations;
-import static io.spine.server.commandbus.InvalidCommandException.onInapplicableTenantId;
-import static io.spine.server.commandbus.InvalidCommandException.onMissingTenantId;
 import static io.spine.validate.Validate.isDefault;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static java.util.Optional.ofNullable;
 
 /**
  * Validates a command.
@@ -89,24 +90,21 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
             }
         } else {
             if (tenantSpecified) {
-                MessageInvalid report = tenantIdInapplicable(command);
+                MessageInvalid report = inapplicableTenantId(command);
                 return of(report);
             }
         }
         return empty();
     }
 
-    private Optional<MessageInvalid> isCommandValid(CommandEnvelope envelope) {
+    private static Optional<MessageInvalid> isCommandValid(CommandEnvelope envelope) {
         Command command = envelope.getCommand();
         List<ConstraintViolation> violations = inspect(envelope);
         InvalidCommandException exception = null;
         if (!violations.isEmpty()) {
             exception = onConstraintViolations(command, violations);
-            commandBus.commandStore()
-                      .storeWithError(command, exception);
-
         }
-        return Optional.ofNullable(exception);
+        return ofNullable(exception);
     }
 
     /**
@@ -120,20 +118,6 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
     static List<ConstraintViolation> inspect(CommandEnvelope envelope) {
         ViolationCheck result = new ViolationCheck(envelope);
         return result.build();
-    }
-
-    private InvalidCommandException missingTenantId(Command command) {
-        InvalidCommandException noTenantDefined = onMissingTenantId(command);
-        commandBus.commandStore()
-                  .storeWithError(command, noTenantDefined);
-        return noTenantDefined;
-    }
-
-    private InvalidCommandException tenantIdInapplicable(Command command) {
-        InvalidCommandException tenantIdInapplicable = onInapplicableTenantId(command);
-        commandBus.commandStore()
-                  .storeWithError(command, tenantIdInapplicable);
-        return tenantIdInapplicable;
     }
 
     /**

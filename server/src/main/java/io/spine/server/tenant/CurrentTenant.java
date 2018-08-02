@@ -34,7 +34,7 @@ import static io.spine.validate.Validate.isNotDefault;
  * a command or a query in a multi-tenant application.
  *
  * @author Alexander Yevsyukov
- * @see <a href="https://msdn.microsoft.com/en-us/library/aa479086.aspx">Multi-Tenant Data Architecture</a>
+ * @see <a href="http://ramblingsofraju.com/wp-content/uploads/2016/08/Multi-Tenant-Data-Architecture.pdf">Multi-Tenant Data Architecture</a>
  */
 @Internal
 public class CurrentTenant {

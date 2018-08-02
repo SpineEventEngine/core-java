@@ -22,7 +22,6 @@ package io.spine.server.storage;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
-import io.spine.server.commandstore.CommandStore;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.projection.Projection;
@@ -31,7 +30,6 @@ import io.spine.server.stand.StandStorage;
 
 /**
  * A factory for creating storages used by repositories,
- * {@link CommandStore CommandStore},
  * {@link io.spine.server.event.EventStore EventStore},
  * and {@link io.spine.server.stand.Stand Stand}.
  *

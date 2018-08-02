@@ -21,13 +21,17 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Timestamp;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandContext.Schedule;
 import io.spine.core.CommandId;
-import io.spine.core.EventContext;
 import io.spine.core.Responses;
 import io.spine.core.Status;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+
+import static io.spine.base.Time.getCurrentTime;
 
 /**
  * The aggregate representing the lifecycle of a command.
@@ -45,6 +49,7 @@ import io.spine.server.command.Assign;
  *         the {@linkplain io.spine.server.bus.BusFilter bus filters};
  *     <li>{@link CommandDispatched} - when the command is passed to a dispatcher after
  *         being acknowledged;
+ *     <li>{@link TargetAssignedToCommand} - when the command target is determined;
  *     <li>{@link CommandHandled} - after a successful command handling;
  *     <li>{@link CommandErrored} - if the command caused a runtime error during handling;
  *     <li>{@link CommandRejected} - if the command handler rejected the command.
@@ -61,56 +66,85 @@ public final class CommandLifecycleAggregate
     }
 
     @Assign
-    CommandReceived handle(ReceiveCommand command) {
+    CommandReceived handle(MarkCommandAsReceived command) {
+        Timestamp when = getCurrentTime();
         return CommandReceived.newBuilder()
                               .setId(command.getId())
                               .setPayload(command.getPayload())
+                              .setWhen(when)
                               .build();
     }
 
     @Assign
-    CommandAcknowledged handle(AcknowledgeCommand command) {
+    CommandAcknowledged handle(MarkCommandAsAcknowledged command) {
+        Timestamp when = getCurrentTime();
         return CommandAcknowledged.newBuilder()
                                   .setId(command.getId())
+                                  .setWhen(when)
                                   .build();
     }
 
     @Assign
-    CommandDispatched handle(DispatchCommand command) {
+    CommandScheduled handle(ScheduleCommand command) {
+        Timestamp when = getCurrentTime();
+        return CommandScheduled.newBuilder()
+                               .setId(command.getId())
+                               .setSchedule(command.getSchedule())
+                               .setWhen(when)
+                               .build();
+    }
+
+    @Assign
+    CommandDispatched handle(MarkCommandAsDispatched command) {
+        Timestamp when = getCurrentTime();
         return CommandDispatched.newBuilder()
                                 .setId(command.getId())
-                                .setReceiver(command.getReceiver())
+                                .setWhen(when)
                                 .build();
     }
 
     @Assign
+    TargetAssignedToCommand on(AssignTargetToCommand event) {
+        return TargetAssignedToCommand.newBuilder()
+                                      .setId(event.getId())
+                                      .setTarget(event.getTarget())
+                                      .build();
+    }
+
+    @Assign
     CommandHandled handle(MarkCommandAsHandled command) {
+        Timestamp when = getCurrentTime();
         return CommandHandled.newBuilder()
                              .setId(command.getId())
+                             .setWhen(when)
                              .build();
     }
 
     @Assign
     CommandErrored handle(MarkCommandAsErrored command) {
+        Timestamp when = getCurrentTime();
         return CommandErrored.newBuilder()
                              .setId(command.getId())
                              .setError(command.getError())
+                             .setWhen(when)
                              .build();
     }
 
     @Assign
     CommandRejected handle(MarkCommandAsRejected command) {
+        Timestamp when = getCurrentTime();
         return CommandRejected.newBuilder()
                               .setId(command.getId())
                               .setRejection(command.getRejection())
+                              .setWhen(when)
                               .build();
     }
 
     @Apply
-    private void on(CommandReceived event, EventContext context) {
-        CommandStatus status = CommandStatus
+    private void on(CommandReceived event) {
+        CommandTimeline status = CommandTimeline
                 .newBuilder()
-                .setWhenReceived(context.getTimestamp())
+                .setWhenReceived(event.getWhen())
                 .build();
         getBuilder().setId(event.getId())
                     .setCommand(event.getPayload())
@@ -118,53 +152,86 @@ public final class CommandLifecycleAggregate
     }
 
     @Apply
-    private void on(CommandAcknowledged event, EventContext context) {
-        CommandStatus status = getBuilder().getStatus()
-                                    .toBuilder()
-                                    .setWhenAcknowledged(context.getTimestamp())
-                                    .build();
+    private void on(CommandAcknowledged event) {
+        CommandTimeline status = getBuilder()
+                .getStatus()
+                .toBuilder()
+                .setWhenAcknowledged(event.getWhen())
+                .build();
         getBuilder().setStatus(status);
     }
 
     @Apply
-    private void on(CommandDispatched event, EventContext context) {
-        CommandStatus status = getBuilder().getStatus()
-                                    .toBuilder()
-                                    .setWhenDispatched(context.getTimestamp())
-                                    .build();
-        getBuilder().setStatus(status)
-                    .setReceiver(event.getReceiver());
+    private void on(CommandScheduled event) {
+        Command updatedCommand = updateSchedule(event.getSchedule());
+        CommandTimeline status = getBuilder()
+                .getStatus()
+                .toBuilder()
+                .setWhenScheduled(event.getWhen())
+                .build();
+        getBuilder().setCommand(updatedCommand)
+                    .setStatus(status);
     }
 
     @Apply
-    private void on(CommandHandled event, EventContext context) {
-        setProcessingStatus(Responses.statusOk(), context.getTimestamp());
+    private void on(CommandDispatched event) {
+        CommandTimeline status = getBuilder()
+                .getStatus()
+                .toBuilder()
+                .setWhenDispatched(event.getWhen())
+                .build();
+        getBuilder().setStatus(status);
     }
 
     @Apply
-    private void on(CommandErrored event, EventContext context) {
+    private void on(TargetAssignedToCommand event) {
+        CommandTarget target = event.getTarget();
+        getBuilder().setTarget(target);
+    }
+
+    @Apply
+    private void on(CommandHandled event) {
+        setStatus(Responses.statusOk(), event.getWhen());
+    }
+
+    @Apply
+    private void on(CommandErrored event) {
         Status status = Status
                 .newBuilder()
                 .setError(event.getError())
                 .build();
-        setProcessingStatus(status, context.getTimestamp());
+        setStatus(status, event.getWhen());
     }
 
     @Apply
-    private void on(CommandRejected event, EventContext context) {
+    private void on(CommandRejected event) {
         Status status = Status
                 .newBuilder()
                 .setRejection(event.getRejection())
                 .build();
-        setProcessingStatus(status, context.getTimestamp());
+        setStatus(status, event.getWhen());
     }
 
-    private void setProcessingStatus(Status status, Timestamp whenProcessed) {
-        CommandStatus commandStatus = getBuilder().getStatus()
-                                                  .toBuilder()
-                                                  .setWhenProcessed(whenProcessed)
-                                                  .setProcessingStatus(status)
-                                                  .build();
+    private Command updateSchedule(Schedule schedule) {
+        CommandContext updatedContext = getBuilder().getCommand()
+                                                    .getContext()
+                                                    .toBuilder()
+                                                    .setSchedule(schedule)
+                                                    .build();
+        Command updatedCommand = getBuilder().getCommand()
+                                             .toBuilder()
+                                             .setContext(updatedContext)
+                                             .build();
+        return updatedCommand;
+    }
+
+    private void setStatus(Status status, Timestamp whenProcessed) {
+        CommandTimeline commandStatus = getBuilder()
+                .getStatus()
+                .toBuilder()
+                .setWhenHandled(whenProcessed)
+                .setHowHandled(status)
+                .build();
         getBuilder().setStatus(commandStatus);
     }
 }

@@ -20,35 +20,39 @@
 package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
-import io.spine.base.ThrowableMessage;
+import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.Rejection;
-import io.spine.protobuf.AnyPacker;
+import io.spine.core.Commands;
+import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
-import io.spine.server.commandstore.CommandStore;
 import io.spine.server.rejection.RejectionBus;
+import io.spine.server.tenant.TenantIndex;
+import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Collection;
 import java.util.Deque;
 import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.core.Rejections.causedByRejection;
-import static io.spine.core.Rejections.toRejection;
+import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.String.format;
+import static java.util.Optional.ofNullable;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.
@@ -64,15 +68,12 @@ public class CommandBus extends Bus<Command,
                                     CommandClass,
                                     CommandDispatcher<?>> {
 
-    private final CommandStore commandStore;
-
-    private final Deque<BusFilter<CommandEnvelope>> filterChain;
-
     private final CommandScheduler scheduler;
-
     private final RejectionBus rejectionBus;
-
-    private final Log log;
+    private final SystemGateway systemGateway;
+    private final TenantIndex tenantIndex;
+    private final CommandErrorHandler errorHandler;
+    private final CommandFlowWatcher flowWatcher;
 
     /**
      * Is {@code true}, if the {@code BoundedContext} (to which this {@code CommandBus} belongs)
@@ -82,14 +83,6 @@ public class CommandBus extends Bus<Command,
      * {@code tenant_id} attribute defined.
      */
     private final boolean multitenant;
-
-    /**
-     * Determines whether the manual thread spawning is allowed within current runtime environment.
-     *
-     * <p>If set to {@code true}, {@code CommandBus} will be running some of internal processing in
-     * parallel to improve performance.
-     */
-    private final boolean isThreadSpawnAllowed;
 
     private final DeadCommandHandler deadCommandHandler;
 
@@ -107,25 +100,20 @@ public class CommandBus extends Bus<Command,
      */
     @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as nested objects only
     private CommandBus(Builder builder) {
-        super();
+        super(builder);
         this.multitenant = builder.multitenant != null
                            ? builder.multitenant
                            : false;
-        this.commandStore = builder.commandStore;
         this.scheduler = builder.commandScheduler;
-        this.log = builder.log;
-        this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
         this.rejectionBus = builder.rejectionBus;
-        this.filterChain = builder.getFilters();
+        this.systemGateway = builder.systemGateway;
+        this.tenantIndex = builder.tenantIndex;
         this.deadCommandHandler = new DeadCommandHandler();
-    }
-
-    /**
-     * Initializes the instance by rescheduling commands.
-     */
-    @VisibleForTesting
-    void rescheduleCommands() {
-        scheduler.rescheduleCommands();
+        this.errorHandler = CommandErrorHandler.newBuilder()
+                                               .setRejectionBus(rejectionBus)
+                                               .setSystemGateway(systemGateway)
+                                               .build();
+        this.flowWatcher = builder.flowWatcher;
     }
 
     /**
@@ -139,19 +127,6 @@ public class CommandBus extends Bus<Command,
     @VisibleForTesting
     public boolean isMultitenant() {
         return multitenant;
-    }
-
-    boolean isThreadSpawnAllowed() {
-        return isThreadSpawnAllowed;
-    }
-
-    @VisibleForTesting
-    public CommandStore commandStore() {
-        return commandStore;
-    }
-
-    Log problemLog() {
-        return log;
     }
 
     @VisibleForTesting
@@ -178,9 +153,16 @@ public class CommandBus extends Bus<Command,
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a protected factory method
     @Override
-    protected Deque<BusFilter<CommandEnvelope>> createFilterChain() {
-        filterChain.push(scheduler);
-        return filterChain;
+    protected Collection<BusFilter<CommandEnvelope>> filterChainTail() {
+        return ImmutableList.of(scheduler);
+    }
+
+    @Override
+    protected Collection<BusFilter<CommandEnvelope>> filterChainHead() {
+        BusFilter<CommandEnvelope> tap = new CommandReceivedTap(systemGateway);
+        Deque<BusFilter<CommandEnvelope>> result = newLinkedList();
+        result.push(tap);
+        return result;
     }
 
     @Override
@@ -188,24 +170,42 @@ public class CommandBus extends Bus<Command,
         return CommandEnvelope.of(message);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Wraps the {@code source} observer with the {@link CommandAckMonitor}.
+     *
+     * @return new instance of {@link CommandAckMonitor} with the given parameters
+     */
+    @Override
+    protected StreamObserver<Ack> prepareObserver(Iterable<Command> commands,
+                                                  StreamObserver<Ack> source) {
+        StreamObserver<Ack> wrappedSource = super.prepareObserver(commands, source);
+        TenantId tenant = tenantOf(commands);
+        StreamObserver<Ack> result = CommandAckMonitor
+                .newBuilder()
+                .setDelegate(wrappedSource)
+                .setTenantId(tenant)
+                .setSystemGateway(systemGateway)
+                .build();
+        return result;
+    }
+
+    private static TenantId tenantOf(Iterable<Command> commands) {
+        return Streams.stream(commands)
+                      .map(Commands::getTenantId)
+                      .findAny()
+                      .orElse(TenantId.getDefaultInstance());
+    }
+
     @Override
     protected void dispatch(CommandEnvelope envelope) {
         CommandDispatcher<?> dispatcher = getDispatcher(envelope);
+        flowWatcher.onDispatchCommand(envelope);
         try {
             dispatcher.dispatch(envelope);
-            commandStore.setCommandStatusOk(envelope);
-        } catch (RuntimeException e) {
-            Throwable cause = getRootCause(e);
-            commandStore.updateCommandStatus(envelope, cause, log);
-            if (causedByRejection(e)) {
-                ThrowableMessage throwableMessage = (ThrowableMessage) cause;
-                Rejection rejection = toRejection(throwableMessage, envelope.getCommand());
-                Class<?> rejectionClass = AnyPacker.unpack(rejection.getMessage())
-                                                   .getClass();
-                Log.log()
-                   .trace("Posting rejection {} to RejectionBus.", rejectionClass.getName());
-                rejectionBus().post(rejection);
-            }
+        } catch (RuntimeException exception) {
+            errorHandler.handleError(envelope, exception);
         }
     }
 
@@ -256,9 +256,8 @@ public class CommandBus extends Bus<Command,
 
     @Override
     protected void store(Iterable<Command> commands) {
-        for (Command command : commands) {
-            commandStore().store(command);
-        }
+        TenantId tenantId = tenantOf(commands);
+        tenantIndex.keep(tenantId);
     }
 
     private CommandDispatcher<?> getDispatcher(CommandEnvelope commandEnvelope) {
@@ -285,7 +284,6 @@ public class CommandBus extends Bus<Command,
     @Override
     public void close() throws Exception {
         super.close();
-        commandStore.close();
         rejectionBus.close();
     }
 
@@ -302,6 +300,7 @@ public class CommandBus extends Bus<Command,
     /**
      * The {@code Builder} for {@code CommandBus}.
      */
+    @CanIgnoreReturnValue
     public static class Builder extends AbstractBuilder<CommandEnvelope, Command, Builder> {
 
         /**
@@ -316,33 +315,22 @@ public class CommandBus extends Bus<Command,
          */
         private @Nullable Boolean multitenant;
 
-        private CommandStore commandStore;
-
-        private Log log;
-
         /**
          * Optional field for the {@code CommandBus}.
          *
          * <p>If unset, the default {@link ExecutorCommandScheduler} implementation is used.
          */
         private CommandScheduler commandScheduler;
-
-        /** @see #setThreadSpawnAllowed(boolean) */
-        private boolean threadSpawnAllowed = detectThreadsAllowed();
-
-        /** @see #setAutoReschedule(boolean) */
-        private boolean autoReschedule;
-
         private RejectionBus rejectionBus;
+        private SystemGateway systemGateway;
+        private TenantIndex tenantIndex;
+        private CommandFlowWatcher flowWatcher;
 
         /**
-         * Checks whether the manual {@link Thread} spawning is allowed within
-         * the current runtime environment.
+         * Prevents direct instantiation.
          */
-        private static boolean detectThreadsAllowed() {
-            boolean appEngine = ServerEnvironment.getInstance()
-                                                 .isAppEngine();
-            return !appEngine;
+        private Builder() {
+            super();
         }
 
         @Internal
@@ -357,27 +345,12 @@ public class CommandBus extends Bus<Command,
             return this;
         }
 
-        public boolean isThreadSpawnAllowed() {
-            return threadSpawnAllowed;
-        }
-
-        public CommandStore getCommandStore() {
-            return commandStore;
-        }
-
         public Optional<CommandScheduler> getCommandScheduler() {
-            return Optional.ofNullable(commandScheduler);
+            return ofNullable(commandScheduler);
         }
 
         public Optional<RejectionBus> getRejectionBus() {
-            return Optional.ofNullable(rejectionBus);
-        }
-
-        @CanIgnoreReturnValue
-        public Builder setCommandStore(CommandStore commandStore) {
-            checkNotNull(commandStore);
-            this.commandStore = commandStore;
-            return this;
+            return ofNullable(rejectionBus);
         }
 
         @CanIgnoreReturnValue
@@ -395,47 +368,37 @@ public class CommandBus extends Bus<Command,
         }
 
         /**
-         * Enables or disables creating threads for {@code CommandBus} operations.
+         * Inject the {@link SystemGateway} of the bounded context to which the built bus belongs.
          *
-         * <p>If set to {@code true}, the {@code CommandBus} will be creating instances of
-         * {@link Thread} for potentially time consuming operation.
-         *
-         * <p>However, some runtime environments, such as Google AppEngine Standard,
-         * do not allow manual thread spawning. In this case, this flag should be set
-         * to {@code false}.
-         *
-         * <p>If not set explicitly, the default value of this flag is set upon the best guess,
-         * based on current {@link io.spine.server.ServerEnvironment server environment}.
+         * <p>This method is {@link Internal} to the framework. The name of the method starts with
+         * {@code inject} prefix so that this method does not appear in an autocomplete hint for
+         * {@code set} prefix.
          */
-        @CanIgnoreReturnValue
-        public Builder setThreadSpawnAllowed(boolean threadSpawnAllowed) {
-            this.threadSpawnAllowed = threadSpawnAllowed;
+        @Internal
+        public Builder injectSystemGateway(SystemGateway gateway) {
+            this.systemGateway = checkNotNull(gateway);
             return this;
         }
 
         /**
-         * Sets the log for logging errors.
-         */
-        @VisibleForTesting
-        Builder setLog(Log log) {
-            this.log = log;
-            return this;
-        }
-
-        /**
-         * If not set the builder will not call {@link CommandBus#rescheduleCommands()}.
+         * Inject the {@link TenantIndex} of the bounded context to which the built bus belongs.
          *
-         * <p>One of the applications of this flag is to disable rescheduling of commands in tests.
+         * <p>This method is {@link Internal} to the framework. The name of the method starts with
+         * {@code inject} prefix so that this method does not appear in an autocomplete hint for
+         * {@code set} prefix.
          */
-        @VisibleForTesting
-        Builder setAutoReschedule(boolean autoReschedule) {
-            this.autoReschedule = autoReschedule;
+        @Internal
+        public Builder injectTenantIndex(TenantIndex index) {
+            this.tenantIndex = checkNotNull(index);
             return this;
         }
 
-        private Builder() {
-            super();
-            // Do not allow creating builder instances directly.
+        Optional<SystemGateway> getSystemGateway() {
+            return ofNullable(systemGateway);
+        }
+
+        Optional<TenantIndex> getTenantIndex() {
+            return ofNullable(tenantIndex);
         }
 
         /**
@@ -446,34 +409,33 @@ public class CommandBus extends Bus<Command,
          */
         @Override
         @Internal
+        @CheckReturnValue
         public CommandBus build() {
-            checkState(
-                    commandStore != null,
-                    "CommandStore must be set. Please call CommandBus.Builder.setCommandStore()."
-            );
+            checkSet(systemGateway, SystemGateway.class, "injectSystemGateway");
+            checkSet(tenantIndex, SystemGateway.class, "injectTenantIndex");
 
             if (commandScheduler == null) {
                 commandScheduler = new ExecutorCommandScheduler();
             }
-
-            if (log == null) {
-                log = new Log();
-            }
-
             if (rejectionBus == null) {
                 rejectionBus = RejectionBus.newBuilder()
                                            .build();
             }
+            flowWatcher = new CommandFlowWatcher(systemGateway);
+            commandScheduler.setFlowWatcher(flowWatcher);
 
             CommandBus commandBus = createCommandBus();
-
             commandScheduler.setCommandBus(commandBus);
 
-            if (autoReschedule) {
-                commandBus.rescheduleCommands();
-            }
-
             return commandBus;
+        }
+
+        private static void checkSet(@Nullable Object field,
+                                     Class<?> fieldType,
+                                     String setterName) {
+            checkState(field != null,
+                       "%s must be set. Please call CommandBus.Builder.%s().",
+                       fieldType.getSimpleName(), setterName);
         }
 
         @Override
@@ -494,13 +456,12 @@ public class CommandBus extends Bus<Command,
     /**
      * Produces an {@link UnsupportedCommandException} upon a dead command.
      */
-    private class DeadCommandHandler implements DeadMessageHandler<CommandEnvelope> {
+    private static class DeadCommandHandler implements DeadMessageHandler<CommandEnvelope> {
 
         @Override
         public UnsupportedCommandException handle(CommandEnvelope message) {
             Command command = message.getCommand();
             UnsupportedCommandException exception = new UnsupportedCommandException(command);
-            commandStore().storeWithError(command, exception);
             return exception;
         }
     }
