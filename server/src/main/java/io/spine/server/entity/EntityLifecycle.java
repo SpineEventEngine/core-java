@@ -75,11 +75,11 @@ public class EntityLifecycle {
      *
      * <p>Use this constructor for test purposes <b>only</b>.
      *
-     * @see #create(SystemGateway, Object, TypeUrl) EntityLifecycle.create(...) to instantiate
+     * @see #create(Object, TypeUrl, SystemGateway) EntityLifecycle.create(...) to instantiate
      *                                              the class
      */
     @VisibleForTesting
-    protected EntityLifecycle(SystemGateway gateway, Object id, TypeUrl entityType) {
+    protected EntityLifecycle(Object id, TypeUrl entityType, SystemGateway gateway) {
         this.systemGateway = gateway;
         this.id = historyId(id, entityType);
     }
@@ -87,13 +87,13 @@ public class EntityLifecycle {
     /**
      * Creates a new instance of {@code EntityLifecycle}.
      *
-     * @param gateway    the {@link SystemGateway} to post the system commands
      * @param id         the ID of the associated entity
      * @param entityType the type of the associated entity
+     * @param gateway    the {@link SystemGateway} to post the system commands
      * @return new instance of {@code EntityLifecycle}
      */
-    static EntityLifecycle create(SystemGateway gateway, Object id, TypeUrl entityType) {
-        return new EntityLifecycle(gateway, id, entityType);
+    static EntityLifecycle create(Object id, TypeUrl entityType, SystemGateway gateway) {
+        return new EntityLifecycle(id, entityType, gateway);
     }
 
     /**
