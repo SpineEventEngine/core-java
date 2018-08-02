@@ -18,24 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.model.contexts;
+
+import io.spine.server.BoundedContext;
+import io.spine.server.model.contexts.orders.OrdersContext;
+import io.spine.server.model.contexts.tasks.TasksContext;
+import io.spine.testing.server.model.ModelTests;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 /**
- *  The versions of the libraries used.
- *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * @author Alexander Yevsyukov
  */
- 
-def final SPINE_VERSION = '0.10.73-SNAPSHOT'
+@DisplayName("Two BoundedContexts")
+class TwoBoundedContextsTest {
 
-ext {
+    private BoundedContext tasksContext;
+    private BoundedContext ordersContext;
 
-    // The version of the modules in this project.
-    spineVersion = SPINE_VERSION
+    @BeforeEach
+    void clearModel() {
+        ModelTests.dropAllModels();
+        tasksContext = TasksContext.newInstance();
+        ordersContext = OrdersContext.newInstance();
+    }
 
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.10.61-SNAPSHOT'
-
-    spineTimeVersion = '0.10.45-SNAPSHOT'
-
-    gRpcVersion = '1.13.0'
+    @Test
+    @DisplayName("can be created")
+    void bothContextsCreated() {
+        assertNotNull(tasksContext);
+        assertNotNull(ordersContext);
+    }
 }

@@ -19,23 +19,16 @@
  */
 
 /**
- *  The versions of the libraries used.
+ * This package tests that a Model allows having two Bounded Contexts,
+ * and their System Contexts can co-exist inside the Model.
  *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * @see io.spine.server.model.contexts.orders
+ * @see io.spine.server.model.contexts.tasks
  */
- 
-def final SPINE_VERSION = '0.10.73-SNAPSHOT'
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.model.contexts;
 
-ext {
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    // The version of the modules in this project.
-    spineVersion = SPINE_VERSION
-
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.10.61-SNAPSHOT'
-
-    spineTimeVersion = '0.10.45-SNAPSHOT'
-
-    gRpcVersion = '1.13.0'
-}
+import javax.annotation.ParametersAreNonnullByDefault;

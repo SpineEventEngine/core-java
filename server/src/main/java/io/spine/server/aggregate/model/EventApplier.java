@@ -117,7 +117,7 @@ public final class EventApplier
         @Override
         public void checkAccessModifier(Method method) {
             MethodAccessChecker checker = forMethod(method);
-            checker.checkPrivate("Event applier method {} must be declared 'private'.");
+            checker.checkPrivate("Event applier method `{}` must be declared `private`.");
         }
 
         @Override
