@@ -34,8 +34,7 @@ import io.spine.type.TypeUrl;
 import java.util.Set;
 
 /**
- * A test implementation of {@link EntityLifecycle} which performs no action on any method
- * call.
+ * A test implementation of {@link EntityLifecycle} which performs no action on any method call.
  *
  * @author Dmytro Dashenkov
  */

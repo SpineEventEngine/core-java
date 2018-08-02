@@ -55,7 +55,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toList;
 
 /**
- * The lifecycle of an {@link Entity}.
+ * The lifecycle callbacks of an {@link Entity}.
  *
  * <p>On each call, posts from zero to few system commands. See the individual method descriptions
  * for more info about the posted commands.
@@ -70,12 +70,28 @@ public class EntityLifecycle {
     private final SystemGateway systemGateway;
     private final EntityHistoryId id;
 
+    /**
+     * Creates a new instance.
+     *
+     * <p>Use this constructor for test purposes <b>only</b>.
+     *
+     * @see #create(SystemGateway, Object, TypeUrl) EntityLifecycle.create(...) to instantiate
+     *                                              the class
+     */
     @VisibleForTesting
     protected EntityLifecycle(SystemGateway gateway, Object id, TypeUrl entityType) {
         this.systemGateway = gateway;
         this.id = historyId(id, entityType);
     }
 
+    /**
+     * Creates a new instance of {@code EntityLifecycle}.
+     *
+     * @param gateway    the {@link SystemGateway} to post the system commands
+     * @param id         the ID of the associated entity
+     * @param entityType the type of the associated entity
+     * @return new instance of {@code EntityLifecycle}
+     */
     static EntityLifecycle create(SystemGateway gateway, Object id, TypeUrl entityType) {
         return new EntityLifecycle(gateway, id, entityType);
     }
