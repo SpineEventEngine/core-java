@@ -56,7 +56,9 @@ import static java.util.stream.Collectors.toList;
 /**
  * The default implementation of {@link Repository.Lifecycle}.
  *
- * <p>Posts system commands describing entity interactions.
+ * <p>On each callback, posts a number of system commands describing the interaction with
+ * the entity. A call may not result in a system command at all.
+ * See the individual method descriptions for more info.
  */
 @SuppressWarnings("OverlyCoupledClass") // Posts system events.
 final class DefaultLifecycle<I> implements Repository.Lifecycle {
@@ -155,6 +157,9 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
     /**
      * Posts the {@link ChangeEntityState} system command and the commands related to
      * the lifecycle flags.
+     *
+     * <p>Only the actual changes in the entity attributes result into system commands.
+     * If the previous and new values are equal, then no command are posted.
      */
     @Override
     public void onStateChanged(EntityRecordChange change,
