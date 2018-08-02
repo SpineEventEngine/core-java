@@ -93,7 +93,7 @@ public class DuplicateCommandHandlerError extends ModelError {
                 builder.append(" Commands ");
                 List<String> commandsBackTicked =
                         commandClasses.stream()
-                                      .map(DuplicateCommandHandlerError::backTick)
+                                      .map(DuplicateCommandHandlerError::backtick)
                                       .collect(toList());
                 builder.append(
                         Joiner.on(", ")
@@ -105,17 +105,17 @@ public class DuplicateCommandHandlerError extends ModelError {
                 builder.append(" The command ");
                 CommandClass cmdClass = commandClasses.iterator()
                                                       .next();
-                builder.append(backTick(cmdClass));
+                builder.append(backtick(cmdClass));
                 builder.append(" is handled by ");
             }
             CommandHandlingClass handlingClass = registeredHandlers.get(commandClasses);
-            builder.append(backTick(handlingClass));
+            builder.append(backtick(handlingClass));
             builder.append('.');
         }
         return builder.toString();
     }
 
-    private static String backTick(Object obj) {
+    private static String backtick(Object obj) {
         return format("`%s`", obj);
     }
 }
