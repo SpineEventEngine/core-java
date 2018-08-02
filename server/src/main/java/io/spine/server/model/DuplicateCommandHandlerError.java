@@ -74,7 +74,7 @@ public class DuplicateCommandHandlerError extends ModelError {
         );
         builder.append("already handled by ");
 
-        // How many already handling classes do we have?
+        // How many handling classes do we have already?
         long totalHandlingClasses = registeredHandlers.values()
                                                       .size();
         builder.append(
@@ -82,7 +82,7 @@ public class DuplicateCommandHandlerError extends ModelError {
                 ? "another class."
                 : "other classes."
         );
-        // Period. New line.
+
         String newLine = format("%n");
         builder.append(newLine);
 
