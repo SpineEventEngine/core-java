@@ -90,6 +90,8 @@ message CommandTimeline {
     // The instant when the command is sent to a dispatcher.
     google.protobuf.Timestamp when_dispatched = 4;
 
+    google.protobuf.Timestamp when_target_assgined = 7;
+
     // The instant when the command processing is completed, successfully or otherwise.
     google.protobuf.Timestamp when_handled = 5 [(goes).with = "how_handled"];
 

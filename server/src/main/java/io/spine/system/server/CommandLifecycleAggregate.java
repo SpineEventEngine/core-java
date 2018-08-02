@@ -107,9 +107,11 @@ public final class CommandLifecycleAggregate
 
     @Assign
     TargetAssignedToCommand on(AssignTargetToCommand event) {
+        Timestamp when = getCurrentTime();
         return TargetAssignedToCommand.newBuilder()
                                       .setId(event.getId())
                                       .setTarget(event.getTarget())
+                                      .setWhen(when)
                                       .build();
     }
 
@@ -188,7 +190,14 @@ public final class CommandLifecycleAggregate
     @Apply
     private void on(TargetAssignedToCommand event) {
         CommandTarget target = event.getTarget();
-        getBuilder().setTarget(target);
+        CommandTimeline status = getBuilder()
+                .getStatus()
+                .toBuilder()
+                .setWhenTargetAssgined(event.getWhen())
+                .build();
+        getBuilder()
+                .setStatus(status)
+                .setTarget(target);
     }
 
     @Apply
