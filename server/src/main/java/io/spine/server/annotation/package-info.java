@@ -18,31 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.model;
-
-import io.spine.server.model.Model;
-
 /**
- * Utilities for tests that deal with {@link Model}.
- *
- * @implNote The full name of this class is used by {@link Model#dropAllModels()} via a
- *           string literal for security check.
- * @author Alexander Yevsyukov
+ * This package provides server-side annotations.
  */
-public class ModelTests {
-
-    /** Prevents instantiation of this utility class. */
-    private ModelTests() {
-    }
-
-    /**
-     * Clears all models.
-     *
-     * @implNote This method is the only way to drop models because {@link Model#dropAllModels()}
-     * verifies the name of the class which calls the method.
-     * It must be {@linkplain ModelTests this class}.
-     */
-    public static void dropAllModels() {
-        Model.dropAllModels();
-    }
-}
+package io.spine.server.annotation;

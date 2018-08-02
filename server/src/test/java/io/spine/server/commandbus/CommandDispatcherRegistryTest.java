@@ -68,7 +68,7 @@ class CommandDispatcherRegistryTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
 
         BoundedContext boundedContext = BoundedContext.newBuilder()
                                                       .setName(getClass().getSimpleName())

@@ -27,7 +27,7 @@ import io.spine.server.transport.memory.SingleThreadInMemTransportFactory;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
-import static io.spine.testing.server.model.ModelTests.clearModel;
+import static io.spine.testing.server.model.ModelTests.dropAllModels;
 
 /**
  * An abstract base for message delivery tests.
@@ -41,7 +41,7 @@ public abstract class AbstractMessageDeliveryTest {
 
     @BeforeEach
     protected void setUp() {
-        clearModel();
+        dropAllModels();
         switchToShardingWithTransport(getTransport());
     }
 

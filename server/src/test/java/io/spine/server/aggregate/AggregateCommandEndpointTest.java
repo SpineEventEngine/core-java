@@ -56,7 +56,7 @@ class AggregateCommandEndpointTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(false)
                                        .build();

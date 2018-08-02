@@ -21,7 +21,6 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 
 /**
  * An implementation of {@link SystemGateway} which never performs an operation.
@@ -33,7 +32,6 @@ import io.spine.annotation.Internal;
  *
  * @author Dmytro Dashenkov
  */
-@Internal
 public enum NoOpSystemGateway implements SystemGateway {
 
     INSTANCE;

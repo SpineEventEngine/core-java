@@ -47,7 +47,7 @@ class ShardedStreamBuilderTest {
     @BeforeEach
     void setUp() {
         // As long as we refer to the Model in delivery tag initialization.
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
     }
 
     @Nested

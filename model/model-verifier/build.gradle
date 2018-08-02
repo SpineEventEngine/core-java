@@ -52,6 +52,7 @@ dependencies {
     testImplementation "io.spine:spine-testlib:$spineBaseVersion"
     testImplementation "io.spine.tools:spine-plugin-testlib:$spineBaseVersion"
     testImplementation "org.junit-pioneer:junit-pioneer:$jUnitPioneerVersion"
+    testImplementation project(":testutil-server")
 }
 
 test {

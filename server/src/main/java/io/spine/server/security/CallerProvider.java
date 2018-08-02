@@ -18,39 +18,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
-
-import io.spine.value.ClassTypeValue;
-
-import java.util.function.Supplier;
+package io.spine.server.security;
 
 /**
- * Abstract base for classes providing additional information on a Java class
- * such as classes of messages being handled by the methods exposed by the class.
+ * Provides information about the class calling a method.
  *
- * @param <T> the type of objects
  * @author Alexander Yevsyukov
  */
-public abstract class ModelClass<T> extends ClassTypeValue<T> {
+final class CallerProvider extends SecurityManager {
 
-    private static final long serialVersionUID = 0L;
+    private static final CallerProvider INSTANCE = new CallerProvider();
 
-    protected ModelClass(Class<? extends T> rawClass) {
-        super(rawClass);
+    /**
+     * Obtains the instance.
+     */
+    static CallerProvider instance() {
+        return INSTANCE;
     }
 
     /**
-     * Obtains the model class for the passed raw class.
-     *
-     * <p>If the model does not have the model class yet, it would be obtained
-     * from the passed supplier and remembered.
+     * Obtains the class of the object which calls the method from which this method
+     * is being called.
      */
-    protected static <T, M extends ModelClass>
-    ModelClass<T> get(Class<T> rawClass,
-                      Class<M> requestedModelClass,
-                      Supplier<ModelClass<T>> supplier) {
-        Model model = Model.getInstance(rawClass);
-        ModelClass<T> result = model.getClass(rawClass, requestedModelClass, supplier);
+    Class getCallerClass() {
+        Class[] context = getClassContext();
+        Class result = context[2];
+        return result;
+    }
+
+    /**
+     * Obtains the class preceding in call chain the class which calls the
+     * method from which this method is being called.
+     */
+    Class getPreviousCallerClass() {
+        Class[] context = getClassContext();
+        Class result = context[3];
         return result;
     }
 }

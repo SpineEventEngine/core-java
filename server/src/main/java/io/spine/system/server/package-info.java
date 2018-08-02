@@ -18,31 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.model;
-
-import io.spine.server.model.Model;
-
 /**
- * Utilities for tests that deal with {@link Model}.
+ * Provides implementation of the System Bounded Context.
  *
- * @implNote The full name of this class is used by {@link Model#dropAllModels()} via a
- *           string literal for security check.
- * @author Alexander Yevsyukov
+ * @apiNote The package is annotated {@code @BoundedContext("_System")} to provide
+ * entities of this package with one shared {@code Model}.
+ *
+ * <p>{@link io.spine.server.BoundedContext BoundedContext}s serving entities
+ * of this package will be created with
+ * {@linkplain io.spine.core.BoundedContextNames#system(io.spine.core.BoundedContextName)
+ * synthetic names} created after names of parent {@code BoundedContext}s.
  */
-public class ModelTests {
+@Internal
+@BoundedContext("_System")
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.system.server;
 
-    /** Prevents instantiation of this utility class. */
-    private ModelTests() {
-    }
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.annotation.Internal;
+import io.spine.server.annotation.BoundedContext;
 
-    /**
-     * Clears all models.
-     *
-     * @implNote This method is the only way to drop models because {@link Model#dropAllModels()}
-     * verifies the name of the class which calls the method.
-     * It must be {@linkplain ModelTests this class}.
-     */
-    public static void dropAllModels() {
-        Model.dropAllModels();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

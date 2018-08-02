@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.common.base.MoreObjects;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.model.EntityClass;
@@ -53,12 +54,14 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * @see #thisClass()
      * @see #getModelClass()
      */
+    @LazyInit
     private volatile @MonotonicNonNull EntityClass<?> thisClass;
 
     /** The ID of the entity. */
     private final I id;
 
     /** Cached version of string ID. */
+    @LazyInit
     private volatile @MonotonicNonNull String stringId;
 
     /**
@@ -68,6 +71,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * if {@linkplain #getState() accessed} before {@linkplain #setState(Message)}
      * initialization}.
      */
+    @LazyInit
     private volatile @MonotonicNonNull S state;
 
     /**

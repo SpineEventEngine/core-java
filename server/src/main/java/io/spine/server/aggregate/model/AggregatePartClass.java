@@ -20,11 +20,12 @@
 
 package io.spine.server.aggregate.model;
 
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.AggregateRoot;
 import io.spine.server.model.ModelError;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -44,7 +45,8 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
     private static final long serialVersionUID = 0L;
 
     /** The model class of the aggregate root to which the aggregate part belongs. */
-    private volatile @Nullable Class<? extends AggregateRoot> rootClass;
+    @LazyInit
+    private transient volatile @MonotonicNonNull Class<? extends AggregateRoot> rootClass;
 
     /** Creates new instance. */
     private AggregatePartClass(Class<A> cls) {
@@ -66,7 +68,7 @@ public final class AggregatePartClass<A extends AggregatePart> extends Aggregate
      * Obtains the aggregate root class of this part class.
      */
     @SuppressWarnings("unchecked") // The type is ensured by the class declaration.
-    public Class<? extends AggregateRoot> rootClass() {
+    private Class<? extends AggregateRoot> rootClass() {
         if (rootClass == null) {
             rootClass = (Class<? extends AggregateRoot>) AGGREGATE_ROOT.getArgumentIn(value());
         }

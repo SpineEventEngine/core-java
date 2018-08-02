@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import com.google.errorprone.annotations.Immutable;
 import io.spine.core.CommandClass;
 import io.spine.server.model.AbstractHandlerMethod.Factory;
 import io.spine.server.model.MessageHandlerMap;
@@ -33,6 +34,7 @@ import java.util.Set;
  * @param <C> the type of a command handling class
  * @author Alexander Yevsyukov
  */
+@Immutable(containerOf = "H")
 public abstract class AbstractCommandHandlingClass<C, H extends CommandAcceptingMethod<?, ?>>
         extends ModelClass<C>
         implements CommandHandlingClass {

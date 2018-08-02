@@ -18,39 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.security;
 
-import io.spine.value.ClassTypeValue;
+import com.google.common.collect.ImmutableSet;
 
-import java.util.function.Supplier;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
- * Abstract base for classes providing additional information on a Java class
- * such as classes of messages being handled by the methods exposed by the class.
- *
- * @param <T> the type of objects
+ * Controls which class can call a method.
+
  * @author Alexander Yevsyukov
  */
-public abstract class ModelClass<T> extends ClassTypeValue<T> {
+public final class InvocationGuard {
 
-    private static final long serialVersionUID = 0L;
-
-    protected ModelClass(Class<? extends T> rawClass) {
-        super(rawClass);
+    /** Prevents instantiation of this utility class. */
+    private InvocationGuard() {
     }
 
     /**
-     * Obtains the model class for the passed raw class.
-     *
-     * <p>If the model does not have the model class yet, it would be obtained
-     * from the passed supplier and remembered.
+     * Throws {@link SecurityException} of the calling class is not among the named.
      */
-    protected static <T, M extends ModelClass>
-    ModelClass<T> get(Class<T> rawClass,
-                      Class<M> requestedModelClass,
-                      Supplier<ModelClass<T>> supplier) {
-        Model model = Model.getInstance(rawClass);
-        ModelClass<T> result = model.getClass(rawClass, requestedModelClass, supplier);
-        return result;
+    public static void allowOnly(String... allowedCallerClass) {
+        checkNotNull(allowedCallerClass);
+        Class callingClass = CallerProvider.instance()
+                                           .getPreviousCallerClass();
+        ImmutableSet<String> allowedCallers = ImmutableSet.copyOf(allowedCallerClass);
+        if (!allowedCallers.contains(callingClass.getName())) {
+            String msg = format(
+                    "The class %s is not allowed to perform this operation.", callingClass
+            );
+            throw new SecurityException(msg);
+        }
     }
 }

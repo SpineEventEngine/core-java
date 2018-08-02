@@ -21,14 +21,12 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 
 /**
  * A gateway for sending messages into a system bounded context.
  *
  * @author Dmytro Dashenkov
  */
-@Internal
 public interface SystemGateway {
 
     /**

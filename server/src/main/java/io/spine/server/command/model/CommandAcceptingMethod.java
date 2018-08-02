@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
@@ -44,6 +45,7 @@ import static com.google.common.base.Throwables.getRootCause;
  * @param <R> the type of the result object returned by the method
  * @author Alexander Yevsyukov
  */
+@Immutable
 public abstract class CommandAcceptingMethod<T, R extends MethodResult>
         extends AbstractHandlerMethod<T, CommandClass, CommandContext, R> {
 
