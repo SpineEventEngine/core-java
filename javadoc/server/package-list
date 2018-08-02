@@ -1,6 +1,7 @@
 io.spine.server
 io.spine.server.aggregate
 io.spine.server.aggregate.storage
+io.spine.server.annotation
 io.spine.server.bus
 io.spine.server.command
 io.spine.server.commandbus
@@ -23,4 +24,3 @@ io.spine.server.tenant
 io.spine.server.transport
 io.spine.server.transport.memory
 io.spine.server.tuple
-io.spine.system.server
