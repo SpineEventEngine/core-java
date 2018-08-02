@@ -72,7 +72,7 @@ class AggregateMessageDeliveryTest extends AbstractMessageDeliveryTest {
 
                         @Override
                         protected Command newMessage() {
-                            return startProjct();
+                            return startProject();
                         }
 
                         @Override
