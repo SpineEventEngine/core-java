@@ -463,7 +463,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
          * Posts the {@link io.spine.system.server.AssignTargetToCommand AssignTargetToCommand}
          * system command.
          */
-        void onAssignedToCommand(CommandId id);
+        void onTargetAssignedToCommand(CommandId id);
 
         /**
          * Posts the {@link MarkCommandAsHandled} system command.

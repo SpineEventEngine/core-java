@@ -71,7 +71,7 @@ public enum  NoOpLifecycle implements Repository.Lifecycle {
     }
 
     @Override
-    public void onAssignedToCommand(CommandId id) {
+    public void onTargetAssignedToCommand(CommandId id) {
         // NoOp.
     }
 }

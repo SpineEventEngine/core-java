@@ -79,7 +79,7 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
     }
 
     @Override
-    public void onAssignedToCommand(CommandId commandId) {
+    public void onTargetAssignedToCommand(CommandId commandId) {
         CommandTarget target = CommandTarget
                 .newBuilder()
                 .setEntityId(id.getEntityId())
