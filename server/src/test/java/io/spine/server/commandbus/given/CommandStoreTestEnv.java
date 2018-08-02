@@ -31,8 +31,8 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.TenantId;
 import io.spine.protobuf.TypeConverter;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.ProcessingStatus;
@@ -91,7 +91,7 @@ public class CommandStoreTestEnv {
      *
      * @see io.spine.server.commandbus.CommandStoreTest.SetCommandStatusTo#rejectionForHandlerRejection()
      */
-    private static class RejectingCreateProjectHandler extends CommandHandler {
+    private static class RejectingCreateProjectHandler extends AbstractCommandHandler {
 
         @Nonnull
         private final ThrowableMessage throwable;
@@ -113,8 +113,8 @@ public class CommandStoreTestEnv {
 
     public static <E extends ThrowableMessage> Command
     givenRejectingHandler(E throwable, CommandStoreTestAssets assets) {
-        CommandHandler handler = new RejectingCreateProjectHandler(throwable,
-                                                                   assets.eventBus);
+        AbstractCommandHandler handler = new RejectingCreateProjectHandler(throwable,
+                                                                           assets.eventBus);
         assets.commandBus.register(handler);
         CmdCreateProject msg = createProjectMessage();
         Command command = assets.requestFactory.command()
@@ -127,7 +127,7 @@ public class CommandStoreTestEnv {
      *
      * @see io.spine.server.commandbus.CommandStoreTest.SetCommandStatusTo#errorForHandlerException()
      */
-    private static class ThrowingCreateProjectHandler extends CommandHandler {
+    private static class ThrowingCreateProjectHandler extends AbstractCommandHandler {
 
         @Nonnull
         private final RuntimeException exception;
@@ -148,7 +148,7 @@ public class CommandStoreTestEnv {
 
     public static <E extends RuntimeException> Command
     givenThrowingHandler(E exception, CommandStoreTestAssets assets) {
-        CommandHandler handler = new ThrowingCreateProjectHandler(exception, assets.eventBus);
+        AbstractCommandHandler handler = new ThrowingCreateProjectHandler(exception, assets.eventBus);
         assets.commandBus.register(handler);
         CmdCreateProject msg = createProjectMessage();
         Command command = assets.requestFactory.command()

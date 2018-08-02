@@ -30,8 +30,8 @@ import io.spine.change.ValueMismatch;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Rejections;
+import io.spine.server.EventProducer;
 import io.spine.server.entity.TransactionalEntity;
-import io.spine.server.model.EventProducer;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;

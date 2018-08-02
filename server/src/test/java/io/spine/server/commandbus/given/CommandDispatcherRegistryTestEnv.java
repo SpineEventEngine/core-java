@@ -29,8 +29,8 @@ import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Subscribe;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.event.EventBus;
@@ -210,7 +210,7 @@ public class CommandDispatcherRegistryTestEnv {
      * Test command handlers.
      ************************/
 
-    public static class CreateProjectHandler extends CommandHandler {
+    public static class CreateProjectHandler extends AbstractCommandHandler {
 
         public CreateProjectHandler(EventBus eventBus) {
             super(eventBus);
@@ -222,7 +222,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
     }
 
-    public static class AllCommandHandler extends CommandHandler {
+    public static class AllCommandHandler extends AbstractCommandHandler {
 
         public AllCommandHandler(EventBus eventBus) {
             super(eventBus);
@@ -244,7 +244,7 @@ public class CommandDispatcherRegistryTestEnv {
         }
     }
 
-    public static class EmptyCommandHandler extends CommandHandler {
+    public static class EmptyCommandHandler extends AbstractCommandHandler {
 
         public EmptyCommandHandler(EventBus eventBus) {
             super(eventBus);

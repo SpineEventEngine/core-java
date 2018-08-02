@@ -20,7 +20,7 @@
 
 package io.spine.server.rejection;
 
-import io.spine.server.model.EventProducer;
+import io.spine.server.EventProducer;
 
 /**
  * A rejection reactor declares methods that receive rejections and may generate events in response.

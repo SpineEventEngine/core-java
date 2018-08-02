@@ -20,7 +20,7 @@
 
 package io.spine.server.command.model;
 
-import io.spine.server.command.CommandHandler;
+import io.spine.server.command.AbstractCommandHandler;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -30,7 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <C> the type of command handlers
  * @author Alexander Yevsyukov
  */
-public final class CommandHandlerClass<C extends CommandHandler>
+public final class CommandHandlerClass<C extends AbstractCommandHandler>
         extends AbstractCommandHandlingClass<C, CommandHandlerMethod> {
 
     private static final long serialVersionUID = 0L;
@@ -42,7 +42,7 @@ public final class CommandHandlerClass<C extends CommandHandler>
     /**
      * Obtains command handler class for the passed raw class.
      */
-    public static <C extends CommandHandler>
+    public static <C extends AbstractCommandHandler>
     CommandHandlerClass<C> asCommandHandlerClass(Class<C> cls) {
         checkNotNull(cls);
         CommandHandlerClass<C> result = (CommandHandlerClass<C>)

@@ -34,8 +34,8 @@ import io.spine.core.CommandValidationError;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.event.EventBus;
 import io.spine.server.rejection.RejectionBus;
@@ -264,7 +264,7 @@ abstract class AbstractCommandBusTestSuite {
     /**
      * A sample command handler that tells whether a handler was invoked.
      */
-    class CreateProjectHandler extends CommandHandler {
+    class CreateProjectHandler extends AbstractCommandHandler {
 
         private boolean handlerInvoked = false;
 

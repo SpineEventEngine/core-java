@@ -27,7 +27,7 @@ import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.server.command.CommandHandler;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.entity.Entity;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
@@ -55,7 +55,7 @@ public abstract class CommandAcceptingMethod<T, R extends MethodResult>
 
     /**
      * Obtains ID of the passed object by attempting to cast it to {@link Entity} or
-     * {@link CommandHandler}.
+     * {@link AbstractCommandHandler}.
      *
      * @return packed ID or empty optional if the object is of type for which we cannot get ID
      */
@@ -64,8 +64,8 @@ public abstract class CommandAcceptingMethod<T, R extends MethodResult>
         Any producerId;
         if (target instanceof Entity) {
             producerId = Identifier.pack(((Entity) target).getId());
-        } else if (target instanceof CommandHandler) {
-            producerId = Identifier.pack(((CommandHandler) target).getId());
+        } else if (target instanceof AbstractCommandHandler) {
+            producerId = Identifier.pack(((AbstractCommandHandler) target).getId());
         } else {
             return Optional.empty();
         }

@@ -20,7 +20,7 @@
 
 package io.spine.server.event;
 
-import io.spine.server.model.EventProducer;
+import io.spine.server.EventProducer;
 
 /**
  * A event reactor declares methods that receive events and may generate other events in response.

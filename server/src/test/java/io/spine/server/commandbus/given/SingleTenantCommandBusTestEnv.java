@@ -27,8 +27,8 @@ import io.spine.core.CommandContext;
 import io.spine.core.Rejection;
 import io.spine.core.Rejections;
 import io.spine.core.Subscribe;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.rejection.given.VerifiableSubscriber;
@@ -58,7 +58,7 @@ public class SingleTenantCommandBusTestEnv {
     /**
      * A {@code CommandHandler}, which throws a rejection upon a command.
      */
-    public static class FaultyHandler extends CommandHandler {
+    public static class FaultyHandler extends AbstractCommandHandler {
 
         private final InvalidProjectName rejection =
                 new InvalidProjectName(ProjectId.getDefaultInstance());
@@ -103,7 +103,7 @@ public class SingleTenantCommandBusTestEnv {
     /**
      * A command handler that posts a nested command.
      */
-    public static class CommandPostingHandler extends CommandHandler {
+    public static class CommandPostingHandler extends AbstractCommandHandler {
 
         private final CommandBus commandBus;
         private final List<Message> handledCommands = new ArrayList<>();
