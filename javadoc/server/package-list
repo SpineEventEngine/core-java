@@ -5,7 +5,6 @@ io.spine.server.annotation
 io.spine.server.bus
 io.spine.server.command
 io.spine.server.commandbus
-io.spine.server.commandstore
 io.spine.server.delivery
 io.spine.server.entity
 io.spine.server.entity.storage
