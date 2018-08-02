@@ -22,9 +22,7 @@ package io.spine.testing.server.aggregate;
 
 import com.google.protobuf.Timestamp;
 import io.spine.testing.server.Rejections.TUFailedToAssignProject;
-import io.spine.testing.server.TUProjectAggregate;
 import io.spine.testing.server.aggregate.given.AggregateCommandTestShouldEnv.CommandHandlingAggregate;
-import io.spine.testing.server.expected.CommandHandlerExpected;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -76,9 +74,8 @@ class AggregateCommandTestShould {
     void trackGeneratedRejection() {
         aggregateRejectionCommandTest.setUp();
         CommandHandlingAggregate testAggregate = aggregate();
-        CommandHandlerExpected<TUProjectAggregate> expected =
-                aggregateRejectionCommandTest.expectThat(testAggregate);
-        expected.throwsRejection(TUFailedToAssignProject.class);
+        aggregateRejectionCommandTest.expectThat(testAggregate)
+                                     .throwsRejection(TUFailedToAssignProject.class);
     }
 }
 

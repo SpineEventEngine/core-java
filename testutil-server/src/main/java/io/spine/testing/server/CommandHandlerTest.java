@@ -22,20 +22,16 @@ package io.spine.testing.server;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
-import io.spine.base.ThrowableMessage;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Command;
-import io.spine.core.Rejection;
 import io.spine.server.command.CommandHandlingEntity;
-import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.expected.CommandHandlerExpected;
 
 import java.util.List;
+import java.util.Optional;
 
-import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.core.Rejections.causedByRejection;
-import static io.spine.core.Rejections.toRejection;
+import static io.spine.core.Events.isRejection;
 import static java.util.Collections.emptyList;
 
 /**
@@ -66,9 +62,10 @@ public abstract class CommandHandlerTest<I,
     /**
      * Creates a new instance with {@link TestActorRequestFactory}.
      */
+    @SuppressWarnings("TestOnlyProblems") // OK for a test-util.
     protected CommandHandlerTest() {
         super();
-        requestFactory = TestActorRequestFactory.newInstance(getClass());
+        this.requestFactory = TestActorRequestFactory.newInstance(getClass());
     }
 
     /**
@@ -86,21 +83,26 @@ public abstract class CommandHandlerTest<I,
     @Override
     protected CommandHandlerExpected<S> expectThat(E entity) {
         S initialState = entity.getState();
-        Rejection rejection = null;
-
-        List<? extends Message> events = emptyList();
-        try {
-            events = dispatchTo(entity);
-        } catch (HandlerMethodFailedException e) {
-            Throwable cause = getRootCause(e);
-            if (causedByRejection(cause)) {
-                ThrowableMessage throwableMessage = (ThrowableMessage) cause;
-                rejection = toRejection(throwableMessage, createCommand(message()));
-            } else {
-                throw e;
-            }
+        Message rejection = null;
+        List<? extends Message> events = dispatchTo(entity);
+        Optional<Message> rejectionMessage = rejectionFrom(events);
+        if (rejectionMessage.isPresent()) {
+            rejection = rejectionMessage.get();
+            events = emptyList();
         }
         return new CommandHandlerExpected<>(events, rejection, initialState,
                                             entity.getState(), interceptedCommands());
+    }
+
+    private static Optional<Message> rejectionFrom(List<? extends Message> events) {
+        if (events.size() != 1) {
+            return Optional.empty();
+        }
+        Message singleEvent = events.get(0);
+        if (isRejection(singleEvent.getClass())) {
+            return Optional.of(singleEvent);
+        } else {
+            return Optional.empty();
+        }
     }
 }

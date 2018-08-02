@@ -50,6 +50,8 @@ import static io.spine.validate.Validate.isDefault;
  */
 public final class Events {
 
+    private static final String REJECTION_CLASS_SUFFIX = "Rejections";
+
     /** Compares two events by their timestamps. */
     private static final Comparator<Event> eventComparator = (o1, o2) -> {
         Timestamp timestamp1 = getTimestamp(o1);
@@ -207,6 +209,20 @@ public final class Events {
         boolean result = context.hasRejection()
                       || !isDefault(context.getRejection());
         return result;
+    }
+
+    /**
+     * Tells whether the passed message class represents a rejection message.
+     */
+    public static boolean isRejection(Class<? extends Message> messageClass) {
+        checkNotNull(messageClass);
+        Class<?> enclosingClass = messageClass.getEnclosingClass();
+        if (enclosingClass == null) {
+            return false; // Rejection messages are generated as inner static classes.
+        }
+        boolean hasCorrectSuffix = enclosingClass.getName()
+                                                 .endsWith(REJECTION_CLASS_SUFFIX);
+        return hasCorrectSuffix;
     }
 
     /**
