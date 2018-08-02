@@ -107,7 +107,7 @@ public final class RejectionSubscriberMethod
         @Override
         public void checkAccessModifier(Method method) {
             MethodAccessChecker checker = forMethod(method);
-            checker.checkPublic("Rejection subscriber {} must be declared 'public'");
+            checker.checkPublic("Rejection subscriber `{}` must be declared `public`");
         }
 
         @Override
