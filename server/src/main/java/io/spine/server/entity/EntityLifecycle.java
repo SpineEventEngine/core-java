@@ -57,8 +57,8 @@ import static java.util.stream.Collectors.toList;
 /**
  * The lifecycle callbacks of an {@link Entity}.
  *
- * <p>On each call, posts from zero to few system commands. See the individual method descriptions
- * for more info about the posted commands.
+ * <p>On each call, posts from zero to several system commands. See the individual method
+ * descriptions for more info about the posted commands.
  *
  * <p>An instance of {@code EntityLifecycle} is associated with a single instance of entity.
  *
