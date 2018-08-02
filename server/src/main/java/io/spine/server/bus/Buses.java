@@ -65,11 +65,14 @@ public class Buses {
      * @return the {@code Ack} response with the given message ID
      */
     public static Ack reject(Message id, Error cause) {
+        checkNotNull(id);
         checkNotNull(cause);
+
         checkArgument(isNotDefault(cause));
-        Status status = Status.newBuilder()
-                              .setError(cause)
-                              .build();
+        Status status = Status
+                .newBuilder()
+                .setError(cause)
+                .build();
         return setStatus(id, status);
     }
 
@@ -82,23 +85,24 @@ public class Buses {
      */
     public static Ack reject(Message id, Rejection cause) {
         checkNotNull(cause);
+        checkNotNull(cause);
 
         Event event = cause.asEvent();
         checkArgument(isNotDefault(event));
-        Status status = Status.newBuilder()
-                              .setRejection(event)
-                              .build();
+        Status status = Status
+                .newBuilder()
+                .setRejection(event)
+                .build();
         return setStatus(id, status);
     }
 
     private static Ack setStatus(Message id, Status status) {
-        checkNotNull(id);
-
         Any packedId = pack(id);
-        Ack result = Ack.newBuilder()
-                        .setMessageId(packedId)
-                        .setStatus(status)
-                        .build();
+        Ack result = Ack
+                .newBuilder()
+                .setMessageId(packedId)
+                .setStatus(status)
+                .build();
         return result;
     }
 }
