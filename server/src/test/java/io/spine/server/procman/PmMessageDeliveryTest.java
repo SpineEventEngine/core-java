@@ -21,7 +21,6 @@ package io.spine.server.procman;
 
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.Rejection;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.delivery.AbstractMessageDeliveryTest;
@@ -37,7 +36,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
-import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.cannotStartProject;
 import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.createProject;
 import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.projectStarted;
 
@@ -164,63 +162,6 @@ class PmMessageDeliveryTest extends AbstractMessageDeliveryTest {
                         protected void postToBus(BoundedContext context, Event event) {
                             context.getEventBus()
                                    .post(event, StreamObservers.noOpObserver());
-                        }
-                    };
-
-            dispatcher.dispatchMessagesTo(new QuadrupleShardPmRepository());
-        }
-    }
-
-    @Nested
-    @DisplayName("in multithreaded env, dispatch rejections")
-    class DispatchRejections {
-
-        @Test
-        @DisplayName("to single shard")
-        void toSingleShard() throws Exception {
-            ParallelDispatcher<ProjectId, Rejection> dispatcher =
-                    new ParallelDispatcher<ProjectId, Rejection>(
-                            30, 619, dispatchWaitTime()) {
-                        @Override
-                        protected ThreadStats<ProjectId> getStats() {
-                            return DeliveryPm.getStats();
-                        }
-
-                        @Override
-                        protected Rejection newMessage() {
-                            return cannotStartProject();
-                        }
-
-                        @Override
-                        protected void postToBus(BoundedContext context, Rejection rejection) {
-                            context.getRejectionBus()
-                                   .post(rejection, StreamObservers.noOpObserver());
-                        }
-                    };
-
-            dispatcher.dispatchMessagesTo(new SingleShardPmRepository());
-        }
-
-        @Test
-        @DisplayName("to several shards")
-        void toSeveralShards() throws Exception {
-            ParallelDispatcher<ProjectId, Rejection> dispatcher =
-                    new ParallelDispatcher<ProjectId, Rejection>(
-                            43, 719, dispatchWaitTime()) {
-                        @Override
-                        protected ThreadStats<ProjectId> getStats() {
-                            return DeliveryPm.getStats();
-                        }
-
-                        @Override
-                        protected Rejection newMessage() {
-                            return cannotStartProject();
-                        }
-
-                        @Override
-                        protected void postToBus(BoundedContext context, Rejection rejection) {
-                            context.getRejectionBus()
-                                   .post(rejection, StreamObservers.noOpObserver());
                         }
                     };
 
