@@ -437,12 +437,12 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * The lifecycle of an {@link Entity}.
      *
-     * <p>This type represents a set of callback methods which are invoked at certain point when
-     * interacting with an {@link Entity}.
+     * <p>Represents a set of callbacks which are invoked at certain point when interacting with
+     * an {@link Entity}.
      *
-     * <p>An instance of {@code Lifecycle} belongs to a single instance of {@link Entity}.
+     * <p>An instance of {@code Lifecycle} belongs is associated with a single instance of entity.
      *
-     * @see Repository#lifecycleOf(Object)
+     * @see Repository#lifecycleOf(Object) Repository.lifecycleOf(I)
      */
     @Internal
     public interface Lifecycle {
@@ -472,7 +472,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         void onDispatchCommand(Command command);
 
         /**
-         * The callback after the given {@link Command} is handled by the entity.
+         * The callback invoked after the given {@link Command} is handled by the entity.
          *
          * @param command the handled command
          */
@@ -504,7 +504,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         void onDispatchEventToReactor(Event event);
 
         /**
-         * The callback invoked when the entity state or/and attributes are changed.
+         * The callback invoked when the entity state and/or attributes are changed.
          *
          * @param change     the change in the entity state and attributes
          * @param messageIds the IDs of the messages which caused the {@code change}; typically,
