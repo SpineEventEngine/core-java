@@ -152,7 +152,7 @@ public abstract class Aggregate<I,
      *     <li>These constructors need to be accessible from tests in the same package.
      * </ol>
      *
-     * <p>If you do have tests that create aggregates via constructors consider annotating them
+     * <p>If you do have tests that create aggregates via constructors, consider annotating them
      * with {@code @VisibleForTesting}. Otherwise, aggregate constructors (that are invoked by
      * {@link io.spine.server.aggregate.AggregateRepository AggregateRepository}
      * via Reflection) may be left {@code private}.
