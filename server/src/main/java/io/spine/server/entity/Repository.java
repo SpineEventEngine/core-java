@@ -372,7 +372,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     protected Lifecycle lifecycleOf(I id) {
         checkNotNull(id);
         SystemGateway gateway = getBoundedContext().getSystemGateway();
-        return new DefaultLifecycle<>(gateway, id, getEntityStateType());
+        return new DefaultLifecycle(gateway, id, getEntityStateType());
     }
 
     /**

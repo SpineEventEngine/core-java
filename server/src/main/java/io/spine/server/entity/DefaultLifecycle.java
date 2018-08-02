@@ -61,12 +61,12 @@ import static java.util.stream.Collectors.toList;
  * See the individual method descriptions for more info.
  */
 @SuppressWarnings("OverlyCoupledClass") // Posts system events.
-final class DefaultLifecycle<I> implements Repository.Lifecycle {
+final class DefaultLifecycle implements Repository.Lifecycle {
 
     private final SystemGateway systemGateway;
     private final EntityHistoryId id;
 
-    DefaultLifecycle(SystemGateway gateway, I id, TypeUrl entityType) {
+    DefaultLifecycle(SystemGateway gateway, Object id, TypeUrl entityType) {
         this.systemGateway = gateway;
         this.id = historyId(id, entityType);
     }
@@ -270,7 +270,7 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
         return dispatchedMessageIds;
     }
 
-    private EntityHistoryId historyId(I id, TypeUrl entityType) {
+    private static EntityHistoryId historyId(Object id, TypeUrl entityType) {
         EntityId entityId = EntityId
                 .newBuilder()
                 .setId(pack(id))
