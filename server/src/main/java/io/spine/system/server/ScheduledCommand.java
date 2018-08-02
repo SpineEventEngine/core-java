@@ -67,7 +67,8 @@ public final class ScheduledCommand
     }
 
     @Subscribe
-    public void on(CommandDispatched event) {
+    public void on(@SuppressWarnings("unused") // Defines the event type.
+                   CommandDispatched ignored) {
         setDeleted(true);
     }
 }
