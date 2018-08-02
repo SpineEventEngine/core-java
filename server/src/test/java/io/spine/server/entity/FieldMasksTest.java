@@ -30,9 +30,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
+import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.testing.Tests.assertMatchesMask;
@@ -116,7 +117,7 @@ class FieldMasksTest {
                                                   Project.TASK_FIELD_NUMBER);
             int count = 5;
 
-            Collection<Project> original = new LinkedList<>();
+            Collection<Project> original = newArrayListWithCapacity(count);
 
             for (int i = 0; i < count; i++) {
                 Project project = Given.newProject(format("project-%s", i));
@@ -128,7 +129,7 @@ class FieldMasksTest {
             assertSize(original.size(), masked);
 
             // Collection references are not the same
-            assertFalse(original == masked);
+            assertNotSame(original, masked);
 
             for (Project project : masked) {
                 assertMatchesMask(project, fieldMask);
@@ -168,7 +169,7 @@ class FieldMasksTest {
         void toMessageCollection() {
             FieldMask emptyMask = Given.fieldMask();
 
-            Collection<Project> original = new LinkedList<>();
+            Collection<Project> original = newLinkedList();
             int count = 5;
 
             for (int i = 0; i < count; i++) {

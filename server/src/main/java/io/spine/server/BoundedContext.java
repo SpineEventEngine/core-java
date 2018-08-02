@@ -29,7 +29,6 @@ import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandstore.CommandStore;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VisibilityGuard;
@@ -284,7 +283,6 @@ public abstract class BoundedContext
      *     <li>Closes {@link CommandBus}.
      *     <li>Closes {@link EventBus}.
      *     <li>Closes {@link IntegrationBus}.
-     *     <li>Closes {@link CommandStore}.
      *     <li>Closes {@link io.spine.server.event.EventStore EventStore}.
      *     <li>Closes {@link Stand}.
      *     <li>Shuts down all registered repositories. Each registered repository is:

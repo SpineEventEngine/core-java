@@ -75,7 +75,7 @@ public class InvalidCommandException extends CommandException implements Message
      * Creates an exception for a command with missing {@code tenant_id} attribute in
      * the {@code CommandContext}, which is required in a multitenant application.
      */
-    public static InvalidCommandException onMissingTenantId(Command command) {
+    public static InvalidCommandException missingTenantId(Command command) {
         CommandEnvelope envelope = CommandEnvelope.of(command);
         Message commandMessage = envelope.getMessage();
         String errMsg = format(
@@ -95,20 +95,22 @@ public class InvalidCommandException extends CommandException implements Message
      * attribute in the {@code CommandContext}, which is required in a multitenant application.
      */
     public static Error unknownTenantError(Message commandMessage, String errorText) {
-        Error.Builder error = Error.newBuilder()
-                                   .setType(InvalidCommandException.class.getCanonicalName())
-                                   .setCode(CommandValidationError.TENANT_UNKNOWN.getNumber())
-                                   .setMessage(errorText)
-                                   .putAllAttributes(commandTypeAttribute(commandMessage));
-        return error.build();
+        Error error = Error
+                .newBuilder()
+                .setType(InvalidCommandException.class.getCanonicalName())
+                .setCode(CommandValidationError.TENANT_UNKNOWN.getNumber())
+                .setMessage(errorText)
+                .putAllAttributes(commandTypeAttribute(commandMessage))
+                .build();
+        return error;
     }
 
-    public static InvalidCommandException onInapplicableTenantId(Command command) {
+    public static InvalidCommandException inapplicableTenantId(Command command) {
         CommandEnvelope cmd = CommandEnvelope.of(command);
         TypeName typeName = TypeName.of(cmd.getMessage());
         String errMsg = format(
                 "The command (class: %s, type: %s, id: %s) was posted to single-tenant " +
-                        "CommandBus, but has tenant_id: %s attribute set in the command context.",
+                "CommandBus, but has tenant_id: %s attribute set in the command context.",
                 cmd.getMessageClass(),
                 typeName,
                 cmd.getId(),
@@ -118,12 +120,14 @@ public class InvalidCommandException extends CommandException implements Message
     }
 
     private static Error inapplicableTenantError(Message commandMessage, String errMsg) {
-        Error.Builder error = Error.newBuilder()
-                                   .setType(InvalidCommandException.class.getCanonicalName())
-                                   .setCode(CommandValidationError.TENANT_INAPPLICABLE.getNumber())
-                                   .setMessage(errMsg)
-                                   .putAllAttributes(commandTypeAttribute(commandMessage));
-        return error.build();
+        Error error = Error
+                .newBuilder()
+                .setType(InvalidCommandException.class.getCanonicalName())
+                .setCode(CommandValidationError.TENANT_INAPPLICABLE.getNumber())
+                .setMessage(errMsg)
+                .putAllAttributes(commandTypeAttribute(commandMessage))
+                .build();
+        return error;
     }
     /**
      * A helper utility aimed to create an {@code InvalidCommandException} to report the

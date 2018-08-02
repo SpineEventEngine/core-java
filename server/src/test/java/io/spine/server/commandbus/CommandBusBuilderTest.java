@@ -23,21 +23,25 @@ package io.spine.server.commandbus;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.bus.BusBuilderTest;
-import io.spine.server.commandstore.CommandStore;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.SystemGateway;
 import io.spine.testing.Tests;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.testing.server.tenant.TenantAwareTest.createTenantIndex;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -50,11 +54,15 @@ import static org.mockito.Mockito.mock;
 class CommandBusBuilderTest
         extends BusBuilderTest<CommandBus.Builder, CommandEnvelope, Command> {
 
-    private CommandStore commandStore;
+    private static final SystemGateway SYSTEM_GATEWAY = NoOpSystemGateway.INSTANCE;
+
+    private TenantIndex tenantIndex;
 
     @Override
     protected CommandBus.Builder builder() {
-        return CommandBus.newBuilder();
+        return CommandBus.newBuilder()
+                         .injectSystemGateway(SYSTEM_GATEWAY)
+                         .injectTenantIndex(tenantIndex);
     }
 
     @BeforeEach
@@ -63,29 +71,42 @@ class CommandBusBuilderTest
         InMemoryStorageFactory storageFactory =
                 InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()),
                                                    multitenant);
-        TenantIndex tenantIndex = createTenantIndex(multitenant, storageFactory);
-        commandStore = new CommandStore(storageFactory, tenantIndex);
+        tenantIndex = createTenantIndex(multitenant, storageFactory);
     }
 
     @Test
     @DisplayName("create new CommandBus instance")
     void createNewInstance() {
-        CommandBus commandBus = builder().setCommandStore(commandStore)
-                                         .build();
+        CommandBus commandBus = CommandBus.newBuilder()
+                                          .injectTenantIndex(tenantIndex)
+                                          .injectSystemGateway(SYSTEM_GATEWAY)
+                                          .build();
         assertNotNull(commandBus);
     }
 
     @Test
     @DisplayName("not accept null CommandStore")
     void notAcceptNullCommandStore() {
-        assertThrows(NullPointerException.class, () -> builder().setCommandStore(Tests.nullRef()));
+        assertThrows(NullPointerException.class,
+                     () -> builder().injectTenantIndex(Tests.nullRef()));
     }
 
     @Test
     @DisplayName("not allow to omit setting CommandStore")
     void neverOmitCommandStore() {
-        assertThrows(IllegalStateException.class, () -> CommandBus.newBuilder()
-                                                                  .build());
+        assertThrows(IllegalStateException.class,
+                     () -> CommandBus.newBuilder()
+                                     .injectSystemGateway(SYSTEM_GATEWAY)
+                                     .build());
+    }
+
+    @Test
+    @DisplayName("not allow to omit setting SystemGateway")
+    void neverOmitSystemGateway() {
+        assertThrows(IllegalStateException.class,
+                     () -> CommandBus.newBuilder()
+                                     .injectTenantIndex(tenantIndex)
+                                     .build());
     }
 
     @Nested
@@ -97,8 +118,7 @@ class CommandBusBuilderTest
         void commandScheduler() {
             CommandScheduler expectedScheduler = mock(CommandScheduler.class);
 
-            CommandBus.Builder builder = builder().setCommandStore(commandStore)
-                                                  .setCommandScheduler(expectedScheduler);
+            CommandBus.Builder builder = builder().setCommandScheduler(expectedScheduler);
 
             assertTrue(builder.getCommandScheduler()
                               .isPresent());
@@ -117,23 +137,11 @@ class CommandBusBuilderTest
         void rejectionBus() {
             RejectionBus expectedRejectionBus = mock(RejectionBus.class);
 
-            CommandBus.Builder builder = builder().setCommandStore(commandStore)
-                                                  .setRejectionBus(expectedRejectionBus);
+            CommandBus.Builder builder = builder().setRejectionBus(expectedRejectionBus);
             assertTrue(builder.getRejectionBus()
                               .isPresent());
             assertEquals(expectedRejectionBus, builder.getRejectionBus()
                                                       .get());
-        }
-
-        @Test
-        @DisplayName("if thread spawn is allowed")
-        void ifThreadSpawnAllowed() {
-            assertTrue(builder().setThreadSpawnAllowed(true)
-                                .isThreadSpawnAllowed());
-
-            assertFalse(CommandBus.newBuilder()
-                                  .setThreadSpawnAllowed(false)
-                                  .isThreadSpawnAllowed());
         }
 
         @Test
@@ -146,12 +154,23 @@ class CommandBusBuilderTest
         }
 
         @Test
-        @DisplayName("CommandStore")
-        void commandStore() {
-            CommandStore commandStore = mock(CommandStore.class);
+        @DisplayName("system gateway")
+        void gateway() {
+            SystemGateway systemGateway = mock(SystemGateway.class);
+            CommandBus.Builder builder = builder().injectSystemGateway(systemGateway);
+            Optional<SystemGateway> actual = builder.getSystemGateway();
+            assertTrue(actual.isPresent());
+            assertSame(systemGateway, actual.get());
+        }
 
-            assertEquals(commandStore, builder().setCommandStore(commandStore)
-                                                .getCommandStore());
+        @Test
+        @DisplayName("tenant index")
+        void tenantIndex() {
+            TenantIndex index = mock(TenantIndex.class);
+            CommandBus.Builder builder = builder().injectTenantIndex(index);
+            Optional<TenantIndex> actual = builder.getTenantIndex();
+            assertTrue(actual.isPresent());
+            assertSame(index, actual.get());
         }
     }
 }

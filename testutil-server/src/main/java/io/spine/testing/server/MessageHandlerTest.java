@@ -51,6 +51,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -205,9 +207,9 @@ public abstract class MessageHandlerTest<I,
             @SuppressWarnings("unchecked")
             Class<? extends Message> messageType = (Class<? extends Message>) cls;
             CommandClass commandClass = CommandClass.of(messageType);
-            return Optional.of(commandClass);
+            return of(commandClass);
         } else {
-            return Optional.empty();
+            return empty();
         }
     }
 
@@ -279,12 +281,7 @@ public abstract class MessageHandlerTest<I,
         public Optional<Ack> accept(CommandEnvelope envelope) {
             interceptedCommands.add(unpack(envelope.getCommand()
                                                    .getMessage()));
-            return Optional.empty();
-        }
-
-        @Override
-        public void close() {
-            // NoOp.
+            return empty();
         }
     }
 

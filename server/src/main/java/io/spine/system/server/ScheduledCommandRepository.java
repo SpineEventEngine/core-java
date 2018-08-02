@@ -18,25 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.system.server;
 
-import io.spine.annotation.Internal;
-import io.spine.core.MessageEnvelope;
+import io.spine.core.CommandId;
+import io.spine.server.projection.ProjectionRepository;
+import io.spine.server.route.EventRouting;
+
+import java.util.Optional;
+import java.util.Set;
+
+import static com.google.common.collect.ImmutableSet.of;
 
 /**
- * The implementation base for the {@linkplain BusFilter BusFilters}.
- *
- * <p>This class defines the default no-op {@link BusFilter#close() BusFilter.close()} behavior.
+ * A repository for {@link ScheduledCommand}s.
  *
  * @author Dmytro Dashenkov
  */
-@Internal
-public abstract class AbstractBusFilter<E extends MessageEnvelope<?, ?, ?>>
-        implements BusFilter<E> {
+public final class ScheduledCommandRepository
+        extends ProjectionRepository<CommandId, ScheduledCommand, ScheduledCommandRecord> {
 
-    @SuppressWarnings("NoopMethodInAbstractClass")
     @Override
-    public void close() throws Exception {
-        // Do nothing by default, but allow customization.
+    public void onRegistered() {
+        super.onRegistered();
+        EventRouting<CommandId> routing = getEventRouting();
+        routing.route(CommandDispatched.class,
+                      (message, context) -> routeToExisting(message));
+    }
+
+    private Set<CommandId> routeToExisting(CommandDispatched event) {
+        CommandId id = event.getId();
+        Optional<ScheduledCommand> existing = find(id);
+        return existing.isPresent()
+               ? of(id)
+               : of();
     }
 }

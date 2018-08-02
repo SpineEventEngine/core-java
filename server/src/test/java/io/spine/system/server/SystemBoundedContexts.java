@@ -18,14 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.system.server;
+
+import io.spine.server.BoundedContext;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+
 /**
- * Test environment for tests of the {@code io.spine.server.commandstore} package.
+ * A test utility for working with system {@link BoundedContext}s.
+ *
+ * @author Dmytro Dashenkov
  */
+public final class SystemBoundedContexts {
 
-@CheckReturnValue
-@ParametersAreNonnullByDefault
-package io.spine.server.commandstore.given;
+    /**
+     * Prevents the utility class instantiation.
+     */
+    private SystemBoundedContexts() {
+    }
 
-import com.google.errorprone.annotations.CheckReturnValue;
-
-import javax.annotation.ParametersAreNonnullByDefault;
+    /**
+     * Extracts the {@code System} bounded context from the given bounded context.
+     */
+    public static BoundedContext systemOf(BoundedContext context) {
+        SystemGateway systemGateway = context.getSystemGateway();
+        assertThat(systemGateway, instanceOf(DefaultSystemGateway.class));
+        DefaultSystemGateway gateway = (DefaultSystemGateway) systemGateway;
+        return gateway.target();
+    }
+}

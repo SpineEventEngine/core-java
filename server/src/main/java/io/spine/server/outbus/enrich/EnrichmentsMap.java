@@ -33,8 +33,6 @@ import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -42,8 +40,10 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Sets.newHashSet;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static io.spine.io.PropertyFiles.loadAllProperties;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A map from an event enrichment Protobuf type name to the corresponding
@@ -162,7 +162,7 @@ class EnrichmentsMap {
         private static Set<String> getBoundFields(String enrichmentType) {
             Descriptor enrichmentDescriptor = TypeName.of(enrichmentType)
                                                       .getMessageDescriptor();
-            Set<String> result = new HashSet<>();
+            Set<String> result = newHashSet();
             for (FieldDescriptor field : enrichmentDescriptor.getFields()) {
                 String extension = field.getOptions()
                                         .getExtension(OptionsProto.by);
@@ -173,16 +173,12 @@ class EnrichmentsMap {
         }
 
         private static Collection<String> parseFieldNames(String qualifiers) {
-            Collection<String> result = new LinkedList<>();
-            String[] fieldNames = pipeSeparatorPattern.split(qualifiers);
-            for (String singleFieldName : fieldNames) {
-                String normalizedFieldName = singleFieldName.trim();
-                if (normalizedFieldName.isEmpty()) {
-                    continue;
-                }
-                String fieldName = getSimpleFieldName(normalizedFieldName);
-                result.add(fieldName);
-            }
+            Collection<String> result =
+                    pipeSeparatorPattern.splitAsStream(qualifiers)
+                                        .map(String::trim)
+                                        .filter(fieldName -> !fieldName.isEmpty())
+                                        .map(Builder::getSimpleFieldName)
+                                        .collect(toList());
             return result;
         }
 

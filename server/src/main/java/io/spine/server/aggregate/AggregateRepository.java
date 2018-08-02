@@ -25,6 +25,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -48,6 +49,7 @@ import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.rejection.DelegatingRejectionDispatcher;
+import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
@@ -57,6 +59,7 @@ import io.spine.server.route.RejectionRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.system.server.SystemGateway;
 
 import java.util.List;
 import java.util.Optional;
@@ -183,8 +186,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         registerExtMessageDispatcher(boundedContext, extEventDispatcher, extEventClasses);
         registerExtMessageDispatcher(boundedContext, extRejectionDispatcher, extRejectionClasses);
 
-        this.commandErrorHandler = CommandErrorHandler.with(boundedContext.getRejectionBus());
-
+        RejectionBus rejectionBus = boundedContext.getRejectionBus();
+        SystemGateway systemGateway = boundedContext.getSystemGateway();
+        this.commandErrorHandler = CommandErrorHandler.newBuilder()
+                                                      .setRejectionBus(rejectionBus)
+                                                      .setSystemGateway(systemGateway)
+                                                      .build();
         ServerEnvironment.getInstance()
                          .getSharding()
                          .register(this);
@@ -315,17 +322,18 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Logs the passed exception in the log associated with the class of the repository.
+     * Handles the given error.
      *
-     * <p>The exception is logged only if the root cause of it is not a
-     * {@linkplain io.spine.base.ThrowableMessage rejection} thrown by a command handling method.
+     * <p>If the given error is a rejection, posts it into
+     * the {@link io.spine.server.rejection.RejectionBus RejectionBus}. Otherwise, logs the error.
      *
      * @param envelope  the command which caused the error
      * @param exception the error occurred during processing of the command
      */
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        commandErrorHandler.handleError(envelope, exception);
+        commandErrorHandler.handleError(envelope, exception)
+                           .rethrow();
     }
 
     @Override
@@ -618,8 +626,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         lifecycleOf(id).onDispatchCommand(command);
     }
 
+    void onCommandHandled(I id, Command command) {
+        lifecycleOf(id).onCommandHandled(command);
+    }
+
     void onDispatchEvent(I id, Event event) {
         lifecycleOf(id).onDispatchEventToReactor(event);
+    }
+
+    void onCommandTargetSet(I id, CommandId commandId) {
+        lifecycleOf(id).onTargetAssignedToCommand(commandId);
     }
 
     @Override

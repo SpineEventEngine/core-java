@@ -22,6 +22,7 @@ package io.spine.server.event;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
@@ -32,7 +33,6 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
-import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
@@ -41,7 +41,6 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.validate.MessageValidator;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Deque;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -108,9 +107,6 @@ public class EventBus
     /** The handler for dead events. */
     private final DeadMessageHandler<EventEnvelope> deadMessageHandler;
 
-    /** Filters applied when an event is posted. */
-    private final Deque<BusFilter<EventEnvelope>> filterChain;
-
     /** The observer of post operations. */
     private final StreamObserver<Ack> streamObserver;
 
@@ -122,10 +118,10 @@ public class EventBus
 
     /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {
+        super(builder);
         this.eventStore = builder.eventStore;
         this.enricher = builder.enricher;
         this.eventMessageValidator = builder.eventValidator;
-        this.filterChain = builder.getFilters();
         this.streamObserver = LoggingObserver.forClass(getClass(), builder.logLevelForPost);
 
         this.deadMessageHandler = new DeadEventTap();
@@ -162,12 +158,6 @@ public class EventBus
     @Override
     protected OutputDispatcherRegistry<EventClass, EventDispatcher<?>> createRegistry() {
         return new EventDispatcherRegistry();
-    }
-
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
-    @Override
-    protected Deque<BusFilter<EventEnvelope>> createFilterChain() {
-        return filterChain;
     }
 
     @Override
@@ -246,6 +236,7 @@ public class EventBus
     }
 
     /** The {@code Builder} for {@code EventBus}. */
+    @CanIgnoreReturnValue
     public static class Builder extends AbstractBuilder<EventEnvelope, Event, Builder> {
 
         private static final String MSG_EVENT_STORE_CONFIGURED = "EventStore already configured.";
@@ -431,6 +422,7 @@ public class EventBus
          */
         @Override
         @Internal
+        @CheckReturnValue
         public EventBus build() {
             String message = "Either storageFactory or eventStore must be " +
                              "set to build the EventBus instance";

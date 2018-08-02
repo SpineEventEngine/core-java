@@ -40,7 +40,7 @@ import io.spine.grpc.MemoizingObserver;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.bus.AbstractBusFilter;
+import io.spine.server.bus.BusFilter;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventBusTest;
@@ -127,8 +127,9 @@ public class EventBusTestEnv {
     }
 
     public static Task newTask(boolean done) {
-        Task task = ((Task.Builder) Sample.builderForType(Task.class)).setDone(done)
-                                                                      .build();
+        Task task = ((Task.Builder) Sample.builderForType(Task.class))
+                                          .setDone(done)
+                                          .build();
         return task;
     }
 
@@ -246,7 +247,7 @@ public class EventBusTestEnv {
      * Filters out the {@link EBTaskAdded} events which have their {@link Task#getDone()}
      * property set to {@code true}.
      */
-    public static class TaskCreatedFilter extends AbstractBusFilter<EventEnvelope> {
+    public static class TaskCreatedFilter implements BusFilter<EventEnvelope> {
 
         private static final EventClass TASK_ADDED_CLASS = EventClass.of(EBTaskAdded.class);
 
@@ -275,7 +276,8 @@ public class EventBusTestEnv {
     /**
      * {@link EBProjectCreated} subscriber that does nothing.
      *
-     * <p>Can be used for the event to get pass the {@link io.spine.server.bus.DeadMessageFilter}.
+     * <p>Can be used for the event to get pass
+     * the {@link io.spine.server.bus.DeadMessageFilter DeadMessageFilter}.
      */
     public static class EBProjectCreatedNoOpSubscriber extends EventSubscriber {
 
@@ -321,7 +323,7 @@ public class EventBusTestEnv {
 
     /**
      * {@link EBTaskAdded} subscriber that does nothing. Can be used for the event to get pass the
-     * {@link io.spine.server.bus.DeadMessageFilter}.
+     * the {@link io.spine.server.bus.DeadMessageFilter DeadMessageFilter}.
      */
     public static class EBTaskAddedNoOpSubscriber extends EventSubscriber {
 

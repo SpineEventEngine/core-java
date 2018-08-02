@@ -34,6 +34,7 @@ import java.util.Optional;
  * @author Dmytro Dashenkov
  */
 @SPI
+@FunctionalInterface
 public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoCloseable {
 
     /**
@@ -53,4 +54,14 @@ public interface BusFilter<E extends MessageEnvelope<?, ?, ?>> extends AutoClose
      *         {@linkplain Ack posting result} with either status otherwise
      */
     Optional<Ack> accept(E envelope);
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>By default, performs no action.
+     */
+    @Override
+    default void close() throws Exception {
+        // NoOp by default.
+    }
 }

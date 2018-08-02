@@ -25,6 +25,8 @@ import com.google.protobuf.Timestamp;
 import io.spine.client.CommandFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.SystemGateway;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.core.given.GivenCommandContext;
 import org.junit.jupiter.api.AfterEach;
@@ -40,6 +42,7 @@ import static io.spine.time.Durations2.milliseconds;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
@@ -70,6 +73,13 @@ class ExecutorCommandSchedulerTest {
     void setUp() {
         scheduler = spy(ExecutorCommandScheduler.class);
         context = GivenCommandContext.withScheduledDelayOf(DELAY);
+
+        scheduler.setCommandBus(mock(CommandBus.class));
+
+        // System BC integration is NOT tested in this suite.
+        SystemGateway systemGateway = NoOpSystemGateway.INSTANCE;
+        CommandFlowWatcher flowWatcher = new CommandFlowWatcher(systemGateway);
+        scheduler.setFlowWatcher(flowWatcher);
     }
 
     @AfterEach

@@ -23,7 +23,6 @@ package io.spine.server.commandbus;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Error;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandValidationError;
@@ -49,8 +48,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -64,7 +61,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() throws NoSuchMethodException {
+    void passNullToleranceCheck() {
         new NullPointerTester()
                 .setDefault(Command.class, Command.getDefaultInstance())
                 .setDefault(StreamObserver.class, StreamObservers.noOpObserver())
@@ -86,7 +83,8 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         @DisplayName("default if no custom one was specified")
         void setToDefault() {
             CommandBus bus = CommandBus.newBuilder()
-                                       .setCommandStore(commandStore)
+                                       .injectTenantIndex(tenantIndex)
+                                       .injectSystemGateway(systemGateway)
                                        .build();
             assertNotNull(bus.rejectionBus());
         }
@@ -96,7 +94,8 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         void setToCustom() {
             RejectionBus expectedRejectionBus = mock(RejectionBus.class);
             CommandBus commandBus = CommandBus.newBuilder()
-                                              .setCommandStore(commandStore)
+                                              .injectTenantIndex(tenantIndex)
+                                              .injectSystemGateway(systemGateway)
                                               .setRejectionBus(expectedRejectionBus)
                                               .build();
             assertNotNull(commandBus);
@@ -106,23 +105,9 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         }
     }
 
-    @Test
-    @DisplayName("have log")
-    void haveLog() {
-        assertNotNull(Log.log());
-    }
-
     @Nested
     @DisplayName("when closed, shutdown")
     class ShutdownWhenClosed {
-
-        @Test
-        @DisplayName("CommandStore")
-        void commandStore() throws Exception {
-            commandBus.close();
-
-            verify(commandStore).close();
-        }
 
         @Test
         @DisplayName("RejectionBus")
@@ -239,33 +224,6 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         commandBus.post(command, observer);
 
         checkResult(command);
-    }
-
-    @Nested
-    @DisplayName("store")
-    class StoreWhenPosted {
-
-        @Test
-        @DisplayName("valid command when it is posted")
-        void validCommand() {
-            commandBus.register(createProjectHandler);
-            Command cmd = createProject();
-
-            commandBus.post(cmd, observer);
-
-            verify(commandStore).store(cmd);
-        }
-
-        @Test
-        @DisplayName("invalid command with `ERROR` status")
-        void invalidCommand() {
-            commandBus.register(createProjectHandler);
-            Command cmd = newCommandWithoutContext();
-
-            commandBus.post(cmd, observer);
-
-            verify(commandStore).store(eq(cmd), isA(Error.class));
-        }
     }
 
     @Nested

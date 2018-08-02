@@ -352,7 +352,6 @@ public class BlackBoxBoundedContext {
                                .build();
     }
 
-
     /*
      * Bounded context lifecycle.
      ******************************************************************************/

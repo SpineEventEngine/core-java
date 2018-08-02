@@ -70,7 +70,7 @@ public class PmEventEndpoint<I, P extends ProcessManager<I, ?, ?>>
 
     @Override
     protected List<Event> doDispatch(P processManager, EventEnvelope envelope) {
-        repository().onEventDispatched(processManager.getId(), envelope.getOuterObject());
+        repository().onDispatchEvent(processManager.getId(), envelope.getOuterObject());
         List<Event> events = processManager.dispatchEvent(envelope);
         return events;
     }

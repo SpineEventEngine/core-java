@@ -26,6 +26,9 @@ import io.spine.protobuf.MessageFieldException;
 
 import java.util.Optional;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+
 /**
  * Obtains a command target entity ID based on a command message and context.
  *
@@ -62,9 +65,9 @@ public class DefaultCommandRoute<I> extends FieldAtIndex<I, Message, CommandCont
         try {
             DefaultCommandRoute<I> function = newInstance();
             I id = function.apply(commandMessage, CommandContext.getDefaultInstance());
-            return Optional.of(id);
+            return of(id);
         } catch (MessageFieldException | ClassCastException ignored) {
-            return Optional.empty();
+            return empty();
         }
     }
 }

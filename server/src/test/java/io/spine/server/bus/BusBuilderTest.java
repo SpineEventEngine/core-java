@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Deque;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -54,17 +53,6 @@ public abstract class BusBuilderTest<B extends Bus.AbstractBuilder<E, T, ?>,
         assertTrue(builder().appendFilter(filter)
                             .getFilters()
                             .contains(filter));
-    }
-
-    @Test
-    @DisplayName("allow removing filter")
-    void allowRemovingFilter() {
-        @SuppressWarnings("unchecked") BusFilter<E> filter = mock(BusFilter.class);
-
-        assertFalse(builder().appendFilter(filter)
-                             .removeFilter(filter)
-                             .getFilters()
-                             .contains(filter));
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder

@@ -20,25 +20,26 @@
 package io.spine.server.rejection;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.core.Ack;
+import io.spine.annotation.Internal;
 import io.spine.core.MessageInvalid;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
 import io.spine.grpc.StreamObservers;
-import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
+import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Deque;
 import java.util.Optional;
 import java.util.Set;
 
@@ -60,18 +61,17 @@ public class RejectionBus extends CommandOutputBus<Rejection,
                                                    RejectionClass,
                                                    RejectionDispatcher<?>> {
 
-    /** Filters applied when a rejection is posted. */
-    private final Deque<BusFilter<RejectionEnvelope>> filterChain;
-
     /** The enricher for posted rejections or {@code null} if the enrichment is not supported. */
     private final @Nullable RejectionEnricher enricher;
+    private final SystemGateway systemGateway;
 
     /**
      * Creates a new instance according to the pre-configured {@code Builder}.
      */
     private RejectionBus(Builder builder) {
-        this.filterChain = builder.getFilters();
+        super(builder);
         this.enricher = builder.enricher;
+        this.systemGateway = builder.systemGateway;
     }
 
     /**
@@ -103,12 +103,6 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     @Override
     protected OutputDispatcherRegistry<RejectionClass, RejectionDispatcher<?>> createRegistry() {
         return new RejectionDispatcherRegistry();
-    }
-
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
-    @Override
-    protected Deque<BusFilter<RejectionEnvelope>> createFilterChain() {
-        return filterChain;
     }
 
     @Override
@@ -158,10 +152,11 @@ public class RejectionBus extends CommandOutputBus<Rejection,
      * @see #post(Message, StreamObserver)
      */
     public final void post(Rejection rejection) {
-        post(rejection, StreamObservers.<Ack>noOpObserver());
+        post(rejection, StreamObservers.noOpObserver());
     }
 
     /** The {@code Builder} for {@code RejectionBus}. */
+    @CanIgnoreReturnValue
     public static class Builder extends AbstractBuilder<RejectionEnvelope, Rejection, Builder> {
 
 
@@ -172,6 +167,8 @@ public class RejectionBus extends CommandOutputBus<Rejection,
          * in the {@code RejectionBus} instance built.
          */
         private @Nullable RejectionEnricher enricher;
+
+        private @Nullable SystemGateway systemGateway;
 
         /** Prevents direct instantiation. */
         private Builder() {
@@ -193,11 +190,18 @@ public class RejectionBus extends CommandOutputBus<Rejection,
             return this;
         }
 
+        @Internal
+        public Builder injectSystemGateway(SystemGateway systemGateway) {
+            this.systemGateway = systemGateway;
+            return this;
+        }
+
         public Optional<RejectionEnricher> getEnricher() {
             return Optional.ofNullable(enricher);
         }
 
         @Override
+        @CheckReturnValue
         public RejectionBus build() {
             return new RejectionBus(this);
         }

@@ -32,7 +32,9 @@ public interface SystemGateway {
     /**
      * Posts a system command.
      *
-     * <p>In a multitenant environment, the command is posted for the current tenant.
+     * <p>If the associated bounded context is
+     * {@linkplain io.spine.server.BoundedContext#isMultitenant() multitenant}, the command is
+     * posted for the {@linkplain io.spine.server.tenant.TenantAwareOperation current tenant}.
      *
      * @param systemCommand command message
      */
