@@ -57,7 +57,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
 public final class BoundedContextBuilder {
 
-    private BoundedContextName name = BoundedContextNames.defaultName();
+    private BoundedContextName name = BoundedContextNames.assumingTests();
     private boolean multitenant;
     private TenantIndex tenantIndex;
     private @Nullable Supplier<StorageFactory> storageFactorySupplier;
@@ -79,11 +79,11 @@ public final class BoundedContextBuilder {
     /**
      * Sets the value of the name for a new bounded context.
      *
-     * <p>If the name is not defined in the builder, the context will get
-     * {@link BoundedContextNames#defaultName()} name.
-     *
      * <p>It is the responsibility of an application developer to provide meaningful and unique
      * names for bounded contexts. The framework does not check for duplication of names.
+     *
+     * <p>If the name is not defined in the builder, the context will get
+     * {@link BoundedContextNames#assumingTests()} name.
      *
      * @param name an identifier string for a new bounded context.
      *             Cannot be null, empty, or blank
@@ -95,11 +95,11 @@ public final class BoundedContextBuilder {
     /**
      * Sets the name for a new bounded context.
      *
-     * <p>If the name is not defined in the builder, the context will get
-     * {@link BoundedContextNames#defaultName()} name.
-     *
      * <p>It is the responsibility of an application developer to provide meaningful and unique
      * names for bounded contexts. The framework does not check for duplication of names.
+     *
+     * <p>If the name is not defined in the builder, the context will get
+     * {@link BoundedContextNames#assumingTests()} name.
      *
      * @param name an identifier string for a new bounded context.
      *             Cannot be null, empty, or blank
@@ -111,7 +111,7 @@ public final class BoundedContextBuilder {
     }
 
     /**
-     * Returns the previously set name or {@link BoundedContextNames#defaultName()}
+     * Returns the previously set name or {@link BoundedContextNames#assumingTests()}
      * if the name was not explicitly set.
      */
     public BoundedContextName getName() {

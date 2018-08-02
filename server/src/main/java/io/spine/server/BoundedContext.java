@@ -237,7 +237,7 @@ public abstract class BoundedContext
      *
      * <p>The ID allows to identify a bounded context if a multi-context application.
      * If the ID was not defined, during the building process, the context would get
-     * {@link BoundedContextNames#defaultName()} name.
+     * {@link BoundedContextNames#assumingTests()} name.
      *
      * @return the ID of this {@code BoundedContext}
      */

@@ -71,7 +71,7 @@ public class Model {
         // If no name of a Bounded Context found, assume the default name.
         // This is a safety net for newcomers and our tests.
         // We may want to make this check strict, and require specifying Bounded Context names.
-        BoundedContextName context = optional.orElseGet(BoundedContextNames::defaultName);
+        BoundedContextName context = optional.orElseGet(BoundedContextNames::assumingTests);
 
         // Try to find a Model if it already exists.
         Optional<Model> alreadyAvailable =

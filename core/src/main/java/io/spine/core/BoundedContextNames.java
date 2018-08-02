@@ -38,7 +38,8 @@ import static java.lang.String.format;
  */
 public final class BoundedContextNames {
 
-    private static final BoundedContextName MAIN = newName("Main");
+    /** The name of a Bounded Context to be used if the name was explicitly set. */
+    private static final BoundedContextName ASSUMING_TESTS = newName("AssumingTests");
     private static final String SYSTEM_TEMPLATE = "%s_System";
 
     /**
@@ -84,8 +85,8 @@ public final class BoundedContextNames {
      * Obtains the name of the {@code Main} bounded context.
      */
     @Internal
-    public static BoundedContextName defaultName() {
-        return MAIN;
+    public static BoundedContextName assumingTests() {
+        return ASSUMING_TESTS;
     }
 
     /**
