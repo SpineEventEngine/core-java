@@ -19,24 +19,23 @@
 //
 syntax = "proto3";
 
-package spine.test.model.orders;
+package spine.test.model.contexts.orders;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.model.orders";
+option java_package="io.spine.test.model.contexts.orders.command";
 option java_multiple_files = true;
 
-message OrderId {
-    string uuid = 1;
-}
+import "spine/test/model/contexts/orders/order.proto";
 
-message Order {
+message CreateOrder {
     OrderId id = 1;
     string name = 2 [(required) = true];
+    string description = 3;
+}
 
-    message Item {
-        string name = 1 [(required) = true];
-        string description = 2;
-    }
+message AddItem {
+    OrderId id = 1;
+    Order.Item item = 2 [(required) = true];
 }

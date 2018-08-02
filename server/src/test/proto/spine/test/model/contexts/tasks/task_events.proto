@@ -19,21 +19,22 @@
 //
 syntax = "proto3";
 
-package spine.test.model.orders;
+package spine.test.model.contexts.tasks;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.model.orders.event";
+option java_package="io.spine.test.model.contexts.tasks.commands";
 option java_multiple_files = true;
 
-import "spine/test/model/orders/order.proto";
+import "spine/test/model/contexts/tasks/task.proto";
 
-message OrderCreated {
-    OrderId id = 1;
+message TaskCreated {
+    TaskId id = 1;
+    Task task = 2;
 }
 
-message ItemAdded {
-    OrderId id = 1;
-    Order.Item item = 2 [(required) = true];
+message TaskRenamed {
+    TaskId id = 1;
+    string new_name = 2;
 }

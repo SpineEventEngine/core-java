@@ -19,24 +19,24 @@
 //
 syntax = "proto3";
 
-package spine.test.model.tasks;
+package spine.test.model.contexts.orders;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.model.tasks.commands";
+option java_package="io.spine.test.model.contexts.orders";
 option java_multiple_files = true;
 
-import "spine/test/model/tasks/task.proto";
-
-message CreateTask {
-    TaskId id = 1;
-    string name = 2 [(required) = true];
-    string description = 3;
+message OrderId {
+    string uuid = 1;
 }
 
-message RenameTask {
-    TaskId id = 1;
-    string current_name = 2;
-    string new_name = 3 [(required) = true];
+message Order {
+    OrderId id = 1;
+    string name = 2 [(required) = true];
+    repeated Item item = 3;
+    message Item {
+        string name = 1 [(required) = true];
+        string description = 2;
+    }
 }

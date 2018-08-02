@@ -19,12 +19,12 @@
 //
 syntax = "proto3";
 
-package spine.test.model.tasks;
+package spine.test.model.contexts.tasks;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.model.tasks";
+option java_package="io.spine.test.model.contexts.tasks";
 option java_multiple_files = true;
 
 message TaskId {
