@@ -67,8 +67,20 @@ import static java.util.stream.Collectors.toList;
 @SuppressWarnings("OverlyCoupledClass") // Posts system commands.
 public class EntityLifecycle {
 
+    /**
+     * The {@link SystemGateway} which the system commands are posted into.
+     */
     private final SystemGateway systemGateway;
-    private final EntityHistoryId id;
+
+    /**
+     * The ID of {@linkplain io.spine.system.server.EntityHistory history} of the associated
+     * {@link Entity}.
+     *
+     * <p>Most commands posted by the {@code EntityLifecycle} are handled by
+     * the {@link io.spine.system.server.EntityHistoryAggregate EntityHistoryAggregate}. Thus,
+     * storing an ID as a field is convenient.
+     */
+    private final EntityHistoryId historyId;
 
     /**
      * Creates a new instance.
@@ -79,21 +91,21 @@ public class EntityLifecycle {
      *                                              the class
      */
     @VisibleForTesting
-    protected EntityLifecycle(Object id, TypeUrl entityType, SystemGateway gateway) {
+    protected EntityLifecycle(Object historyId, TypeUrl entityType, SystemGateway gateway) {
         this.systemGateway = gateway;
-        this.id = historyId(id, entityType);
+        this.historyId = historyId(historyId, entityType);
     }
 
     /**
      * Creates a new instance of {@code EntityLifecycle}.
      *
-     * @param id         the ID of the associated entity
+     * @param history    the ID of the associated entity history
      * @param entityType the type of the associated entity
      * @param gateway    the {@link SystemGateway} to post the system commands
      * @return new instance of {@code EntityLifecycle}
      */
-    static EntityLifecycle create(Object id, TypeUrl entityType, SystemGateway gateway) {
-        return new EntityLifecycle(id, entityType, gateway);
+    static EntityLifecycle create(Object history, TypeUrl entityType, SystemGateway gateway) {
+        return new EntityLifecycle(history, entityType, gateway);
     }
 
     /**
@@ -104,7 +116,7 @@ public class EntityLifecycle {
     public void onEntityCreated(EntityOption.Kind entityKind) {
         CreateEntity command = CreateEntity
                 .newBuilder()
-                .setId(id)
+                .setId(historyId)
                 .setKind(entityKind)
                 .build();
         systemGateway.postCommand(command);
@@ -119,8 +131,8 @@ public class EntityLifecycle {
     public void onTargetAssignedToCommand(CommandId commandId) {
         CommandTarget target = CommandTarget
                 .newBuilder()
-                .setEntityId(id.getEntityId())
-                .setTypeUrl(id.getTypeUrl())
+                .setEntityId(historyId.getEntityId())
+                .setTypeUrl(historyId.getTypeUrl())
                 .build();
         AssignTargetToCommand command = AssignTargetToCommand
                 .newBuilder()
@@ -138,7 +150,7 @@ public class EntityLifecycle {
     public void onDispatchCommand(Command command) {
         DispatchCommandToHandler systemCommand = DispatchCommandToHandler
                 .newBuilder()
-                .setReceiver(id)
+                .setReceiver(historyId)
                 .setCommandId(command.getId())
                 .build();
         systemGateway.postCommand(systemCommand);
@@ -165,7 +177,7 @@ public class EntityLifecycle {
     public void onDispatchEventToSubscriber(Event event) {
         DispatchEventToSubscriber systemCommand = DispatchEventToSubscriber
                 .newBuilder()
-                .setReceiver(id)
+                .setReceiver(historyId)
                 .setEventId(event.getId())
                 .build();
         systemGateway.postCommand(systemCommand);
@@ -179,7 +191,7 @@ public class EntityLifecycle {
     public void onDispatchEventToReactor(Event event) {
         DispatchEventToReactor systemCommand = DispatchEventToReactor
                 .newBuilder()
-                .setReceiver(id)
+                .setReceiver(historyId)
                 .setEventId(event.getId())
                 .build();
         systemGateway.postCommand(systemCommand);
@@ -217,7 +229,7 @@ public class EntityLifecycle {
         if (!oldState.equals(newState)) {
             ChangeEntityState command = ChangeEntityState
                     .newBuilder()
-                    .setId(id)
+                    .setId(historyId)
                     .setNewState(newState)
                     .addAllMessageId(messageIds)
                     .build();
@@ -236,7 +248,7 @@ public class EntityLifecycle {
         if (newValue && !oldValue) {
             ArchiveEntity command = ArchiveEntity
                     .newBuilder()
-                    .setId(id)
+                    .setId(historyId)
                     .addAllMessageId(messageIds)
                     .build();
             systemGateway.postCommand(command);
@@ -254,7 +266,7 @@ public class EntityLifecycle {
         if (newValue && !oldValue) {
             DeleteEntity command = DeleteEntity
                     .newBuilder()
-                    .setId(id)
+                    .setId(historyId)
                     .addAllMessageId(messageIds)
                     .build();
             systemGateway.postCommand(command);
@@ -272,7 +284,7 @@ public class EntityLifecycle {
         if (!newValue && oldValue) {
             ExtractEntityFromArchive command = ExtractEntityFromArchive
                     .newBuilder()
-                    .setId(id)
+                    .setId(historyId)
                     .addAllMessageId(messageIds)
                     .build();
             systemGateway.postCommand(command);
@@ -290,7 +302,7 @@ public class EntityLifecycle {
         if (!newValue && oldValue) {
             RestoreEntity command = RestoreEntity
                     .newBuilder()
-                    .setId(id)
+                    .setId(historyId)
                     .addAllMessageId(messageIds)
                     .build();
             systemGateway.postCommand(command);
