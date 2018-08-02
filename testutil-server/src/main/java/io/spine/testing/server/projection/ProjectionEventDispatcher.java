@@ -25,6 +25,7 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
+import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionEndpoint;
 import io.spine.server.projection.ProjectionRepository;
@@ -109,8 +110,8 @@ public class ProjectionEventDispatcher {
             extends ProjectionRepository<I, P, S> {
 
         @Override
-        protected Lifecycle lifecycleOf(I id) {
-            return NoOpLifecycle.INSTANCE;
+        protected EntityLifecycle lifecycleOf(I id) {
+            return NoOpLifecycle.instance();
         }
     }
 }

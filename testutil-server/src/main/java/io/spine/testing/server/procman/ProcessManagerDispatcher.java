@@ -25,6 +25,7 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.RejectionEnvelope;
+import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.procman.PmCommandEndpoint;
 import io.spine.server.procman.PmEventEndpoint;
 import io.spine.server.procman.PmRejectionEndpoint;
@@ -177,8 +178,8 @@ public class ProcessManagerDispatcher {
             extends ProcessManagerRepository<I, P, S> {
 
         @Override
-        protected Lifecycle lifecycleOf(I id) {
-            return NoOpLifecycle.INSTANCE;
+        protected EntityLifecycle lifecycleOf(I id) {
+            return NoOpLifecycle.instance();
         }
     }
 }

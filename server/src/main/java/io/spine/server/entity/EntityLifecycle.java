@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.EntityId;
@@ -28,7 +29,6 @@ import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.option.EntityOption;
-import io.spine.server.entity.Repository.Lifecycle;
 import io.spine.system.server.ArchiveEntity;
 import io.spine.system.server.AssignTargetToCommand;
 import io.spine.system.server.ChangeEntityState;
@@ -55,29 +55,36 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toList;
 
 /**
- * An observer of an entity {@linkplain Repository.Lifecycle lifecycle} which posts system commands.
+ * The lifecycle of an {@link Entity}.
  *
- * <p>On each callback, posts a number of system commands describing the interaction with
- * the entity. A call may not result in a system command at all.
- * See the individual method descriptions for more info.
+ * <p>On each call, posts from zero to few system commands. See the individual method descriptions
+ * for more info about the posted commands.
  *
- * @author Dmytro Dashenkov
+ * <p>An instance of {@code EntityLifecycle} is associated with a single instance of entity.
+ *
+ * @see Repository#lifecycleOf(Object) Repository.lifecycleOf(I)
  */
 @SuppressWarnings("OverlyCoupledClass") // Posts system commands.
-final class SystemPatrol implements Lifecycle {
+public class EntityLifecycle {
 
     private final SystemGateway systemGateway;
     private final EntityHistoryId id;
 
-    SystemPatrol(SystemGateway gateway, Object id, TypeUrl entityType) {
+    @VisibleForTesting
+    protected EntityLifecycle(SystemGateway gateway, Object id, TypeUrl entityType) {
         this.systemGateway = gateway;
         this.id = historyId(id, entityType);
     }
 
+    static EntityLifecycle create(SystemGateway gateway, Object id, TypeUrl entityType) {
+        return new EntityLifecycle(gateway, id, entityType);
+    }
+
     /**
      * Posts the {@link CreateEntity} system command.
+     *
+     * @param entityKind the {@link EntityOption.Kind} of the created entity
      */
-    @Override
     public void onEntityCreated(EntityOption.Kind entityKind) {
         CreateEntity command = CreateEntity
                 .newBuilder()
@@ -90,8 +97,9 @@ final class SystemPatrol implements Lifecycle {
     /**
      * Posts the {@link io.spine.system.server.AssignTargetToCommand AssignTargetToCommand}
      * system command.
+     *
+     * @param commandId the ID of the command which should be handled by the entity
      */
-    @Override
     public void onTargetAssignedToCommand(CommandId commandId) {
         CommandTarget target = CommandTarget
                 .newBuilder()
@@ -108,8 +116,9 @@ final class SystemPatrol implements Lifecycle {
 
     /**
      * Posts the {@link DispatchCommandToHandler} system command.
+     *
+     * @param command the dispatched command
      */
-    @Override
     public void onDispatchCommand(Command command) {
         DispatchCommandToHandler systemCommand = DispatchCommandToHandler
                 .newBuilder()
@@ -121,8 +130,9 @@ final class SystemPatrol implements Lifecycle {
 
     /**
      * Posts the {@link MarkCommandAsHandled} system command.
+     *
+     * @param command the handled command
      */
-    @Override
     public void onCommandHandled(Command command) {
         MarkCommandAsHandled systemCommand = MarkCommandAsHandled
                 .newBuilder()
@@ -133,8 +143,9 @@ final class SystemPatrol implements Lifecycle {
 
     /**
      * Posts the {@link DispatchEventToSubscriber} system command.
+     *
+     * @param event the dispatched event
      */
-    @Override
     public void onDispatchEventToSubscriber(Event event) {
         DispatchEventToSubscriber systemCommand = DispatchEventToSubscriber
                 .newBuilder()
@@ -146,8 +157,9 @@ final class SystemPatrol implements Lifecycle {
 
     /**
      * Posts the {@link DispatchEventToReactor} system command.
+     *
+     * @param event the dispatched event
      */
-    @Override
     public void onDispatchEventToReactor(Event event) {
         DispatchEventToReactor systemCommand = DispatchEventToReactor
                 .newBuilder()
@@ -163,10 +175,13 @@ final class SystemPatrol implements Lifecycle {
      *
      * <p>Only the actual changes in the entity attributes result into system commands.
      * If the previous and new values are equal, then no commands are posted.
+     *
+     * @param change     the change in the entity state and attributes
+     * @param messageIds the IDs of the messages which caused the {@code change}; typically,
+     *                   {@link io.spine.core.EventId EventId}s or {@link CommandId}s
      */
-    @Override
-    public void onStateChanged(EntityRecordChange change,
-                               Set<? extends Message> messageIds) {
+    protected void onStateChanged(EntityRecordChange change,
+                        Set<? extends Message> messageIds) {
         Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
 
         postIfChanged(change, dispatchedMessageIds);
@@ -178,8 +193,10 @@ final class SystemPatrol implements Lifecycle {
 
     private void postIfChanged(EntityRecordChange change,
                                Collection<DispatchedMessageId> messageIds) {
-        Any oldState = change.getPreviousValue().getState();
-        Any newState = change.getNewValue().getState();
+        Any oldState = change.getPreviousValue()
+                             .getState();
+        Any newState = change.getNewValue()
+                             .getState();
 
         if (!oldState.equals(newState)) {
             ChangeEntityState command = ChangeEntityState
@@ -268,7 +285,7 @@ final class SystemPatrol implements Lifecycle {
     toDispatched(Collection<? extends Message> messageIds) {
         Collection<DispatchedMessageId> dispatchedMessageIds =
                 messageIds.stream()
-                          .map(SystemPatrol::dispatchedMessageId)
+                          .map(EntityLifecycle::dispatchedMessageId)
                           .collect(toList());
         return dispatchedMessageIds;
     }

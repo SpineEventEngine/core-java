@@ -20,25 +20,33 @@
 
 package io.spine.testing.server;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.option.EntityOption;
+import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityRecordChange;
-import io.spine.server.entity.Repository;
+import io.spine.system.server.NoOpSystemGateway;
+import io.spine.type.TypeUrl;
 
 import java.util.Set;
 
 /**
- * A test implementation of {@link Repository.Lifecycle} which performs no action on any method
+ * A test implementation of {@link EntityLifecycle} which performs no action on any method
  * call.
  *
  * @author Dmytro Dashenkov
  */
-public enum  NoOpLifecycle implements Repository.Lifecycle {
+public final class NoOpLifecycle extends EntityLifecycle {
 
-    INSTANCE;
+    @SuppressWarnings("TestOnlyProblems") // OK for a test utility.
+    private NoOpLifecycle() {
+        super(NoOpSystemGateway.INSTANCE,
+              NoOpLifecycle.class.getSimpleName(),
+              TypeUrl.of(Any.class));
+    }
 
     @Override
     public void onEntityCreated(EntityOption.Kind entityKind) {
@@ -66,12 +74,22 @@ public enum  NoOpLifecycle implements Repository.Lifecycle {
     }
 
     @Override
-    public void onStateChanged(EntityRecordChange change, Set<? extends Message> messageIds) {
+    protected void onStateChanged(EntityRecordChange change, Set<? extends Message> messageIds) {
         // NoOp.
     }
 
     @Override
     public void onTargetAssignedToCommand(CommandId id) {
         // NoOp.
+    }
+
+    public static NoOpLifecycle instance() {
+        return Singleton.INSTANCE.value;
+    }
+
+    private enum Singleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final NoOpLifecycle value = new NoOpLifecycle();
     }
 }
