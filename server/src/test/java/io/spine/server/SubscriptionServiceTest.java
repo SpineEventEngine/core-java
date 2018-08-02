@@ -80,7 +80,7 @@ class SubscriptionServiceTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
     }
 
     @Nested

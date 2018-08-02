@@ -25,6 +25,8 @@ import io.spine.server.model.Model;
 /**
  * Utilities for tests that deal with {@link Model}.
  *
+ * @implNote The full name of this class is used by {@link Model#dropAllModels()} via a
+ *           string literal for security check.
  * @author Alexander Yevsyukov
  */
 public class ModelTests {
@@ -33,10 +35,14 @@ public class ModelTests {
     private ModelTests() {
     }
 
-    /** Clears the {@link Model}. */
-    @SuppressWarnings("TestOnlyProblems") // This is acceptable in testing utilities.
-    public static void clearModel() {
-        Model.getInstance()
-             .clear();
+    /**
+     * Clears all models.
+     *
+     * @implNote This method is the only way to drop models because {@link Model#dropAllModels()}
+     * verifies the name of the class which calls the method.
+     * It must be {@linkplain ModelTests this class}.
+     */
+    public static void dropAllModels() {
+        Model.dropAllModels();
     }
 }

@@ -49,7 +49,7 @@ class AggregateRootTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
         ProjectId projectId = ProjectId.newBuilder()

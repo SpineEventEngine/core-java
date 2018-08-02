@@ -20,6 +20,7 @@
 
 package io.spine.server.model;
 
+import io.spine.core.BoundedContextName;
 import io.spine.server.model.given.ModelTestEnv.MAggregate;
 import io.spine.server.model.given.ModelTestEnv.MCommandHandler;
 import io.spine.server.model.given.ModelTestEnv.MProcessManager;
@@ -28,10 +29,15 @@ import io.spine.test.reflect.command.RefStartProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import tres.quattro.Counter;
+import uno.dos.Encounter;
+
+import java.util.Optional;
 
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -45,11 +51,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 @DisplayName("Model should")
 class ModelTest {
 
-    private final Model model = Model.getInstance(MCommandHandler.class);
-
     @BeforeEach
     void setUp() {
-        model.clear();
+        Model.dropAllModels();
     }
 
     @SuppressWarnings("CheckReturnValue") // returned values are not used in this test
@@ -81,6 +85,25 @@ class ModelTest {
             assertContainsClassName(error, MAggregate.class);
             assertContainsClassName(error, MProcessManager.class);
         }
+    }
+
+    /**
+     * Tests that:
+     * <ol>
+     *   <li>{@code Model} obtains {@code BoundedContextName} specified in a package annotation.
+     *   <li>Packages that do not have a common “root”, can be annotated with the same Bounded
+     *       Context name.
+     * </ol>
+     */
+    @Test
+    @DisplayName("find BoundedContext package annotation")
+    void findBoundedContextAnnotation() {
+        Optional<BoundedContextName> ctx1 = Model.findContext(Counter.class);
+        Optional<BoundedContextName> ctx2 = Model.findContext(Encounter.class);
+        assertTrue(ctx1.isPresent());
+        assertEquals("Counting", ctx1.get()
+                                     .getValue());
+        assertEquals(ctx1, ctx2);
     }
 
     private static void assertContainsClassName(DuplicateCommandHandlerError error, Class<?> cls) {

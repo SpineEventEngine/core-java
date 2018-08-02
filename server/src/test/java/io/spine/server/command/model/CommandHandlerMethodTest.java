@@ -94,7 +94,7 @@ class CommandHandlerMethodTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
     }
 
     @Test

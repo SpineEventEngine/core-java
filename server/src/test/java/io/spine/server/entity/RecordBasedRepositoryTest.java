@@ -99,7 +99,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
 
     @BeforeEach
     protected void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         this.repository = createRepository();
         setCurrentTenant(newUuid());
     }

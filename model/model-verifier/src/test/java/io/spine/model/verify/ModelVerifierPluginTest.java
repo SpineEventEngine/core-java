@@ -20,6 +20,7 @@
 
 package io.spine.model.verify;
 
+import io.spine.testing.server.model.ModelTests;
 import io.spine.tools.gradle.GradleProject;
 import io.spine.tools.gradle.TaskName;
 import org.gradle.testkit.runner.BuildResult;
@@ -48,7 +49,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class ModelVerifierPluginTest {
 
     private static final String PROJECT_NAME = "model-verifier-test";
-    private static final String COMPILING_TEST_ENTITY_PATH =
+    private static final String VALID_AGGREGATE_JAVA =
             "io/spine/model/verify/ValidAggregate.java";
 
     private Path tempDir;
@@ -56,12 +57,13 @@ class ModelVerifierPluginTest {
     @BeforeEach
     void setUp(@TempDir Path junitCreatedDir) {
         tempDir = junitCreatedDir;
+        ModelTests.dropAllModels();
     }
 
     @Test
     @DisplayName("pass valid model classes")
     void passValidModelClasses() {
-        newProjectWithJava(COMPILING_TEST_ENTITY_PATH,
+        newProjectWithJava(VALID_AGGREGATE_JAVA,
                            "io/spine/model/verify/ValidProcMan.java",
                            "io/spine/model/verify/ValidCommandHandler.java")
                 .executeTask(VERIFY_MODEL);
@@ -81,9 +83,9 @@ class ModelVerifierPluginTest {
     }
 
     @Test
-    @DisplayName("ignore duplicate entries")
+    @DisplayName("ignore duplicate entries in a Gradle project")
     void ignoreDuplicateEntries() {
-        GradleProject project = newProjectWithJava(COMPILING_TEST_ENTITY_PATH);
+        GradleProject project = newProjectWithJava(VALID_AGGREGATE_JAVA);
         project.executeTask(VERIFY_MODEL);
         project.executeTask(VERIFY_MODEL);
     }

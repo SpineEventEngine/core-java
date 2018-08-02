@@ -114,7 +114,7 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("`ERROR` when handler throws exception")
         void errorForHandlerException() {
-            ModelTests.clearModel();
+            ModelTests.dropAllModels();
 
             RuntimeException exception = new IllegalStateException("handler throws");
             CommandStoreTestAssets assets =
@@ -136,7 +136,7 @@ abstract class CommandStoreTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("`REJECTED` when handler throws rejection")
         void rejectionForHandlerRejection() {
-            ModelTests.clearModel();
+            ModelTests.dropAllModels();
 
             TestRejection rejection = new TestRejection();
             CommandStoreTestAssets assets =

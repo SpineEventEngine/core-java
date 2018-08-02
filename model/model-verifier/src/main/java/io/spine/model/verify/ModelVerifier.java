@@ -54,13 +54,14 @@ import static java.util.Arrays.deepToString;
 /**
  * A utility for verifying Spine model.
  *
+ * @implNote The full name of this class is used by {@link Model#dropAllModels()} via a
+ *           string literal for security check.
  * @author Dmytro Dashenkov
  */
 final class ModelVerifier {
 
     private static final URL[] EMPTY_URL_ARRAY = new URL[0];
 
-    private final Model model = Model.getInstance();
     private final URLClassLoader projectClassLoader;
 
     /**
@@ -75,16 +76,19 @@ final class ModelVerifier {
     /**
      * Verifies Spine model upon the given Gradle project.
      *
-     * @param spineModel the listing of the Spine model classes
+     * @param handlers the listing of the Spine model classes
      */
-    void verify(CommandHandlers spineModel) {
+    void verify(CommandHandlers handlers) {
         Logger log = log();
-        model.clear();
-        for (String commandHandlingClass : spineModel.getCommandHandlingTypesList()) {
+
+        // Ensure there are no models from previous runs in the same JVM.
+        Model.dropAllModels();
+
+        for (String commandHandlingClass : handlers.getCommandHandlingTypesList()) {
             Class<?> cls;
             try {
                 log.debug("Trying to load class \'{}\'", commandHandlingClass);
-                cls = getModelClass(commandHandlingClass);
+                cls = createRawClass(commandHandlingClass);
             } catch (ClassNotFoundException e) {
                 log.warn("Failed to load class {}." +
                          " Consider using io.spine.tools.spine-model-verifier plugin" +
@@ -92,16 +96,23 @@ final class ModelVerifier {
                          commandHandlingClass);
                 continue;
             }
-            verifyClass(cls);
+            verifyCommandHandlingClass(cls);
         }
     }
 
+    /**
+     * Verifies if the passed raw Java class is accepted by
+     * {@link io.spine.server.model.Model Model} as a valid command handling class.
+     *
+     * <p>This means that commands handled by this class are not handled by other classes already
+     * known to the Model.
+     */
     @SuppressWarnings({
             "unchecked" /* Checked by the `if` statements */,
             "CheckReturnValue" /* Returned values for asXxxClass() are ignored because we use
                                   these methods only for verification of the classes. */
     })
-    private static void verifyClass(Class<?> cls) {
+    private static void verifyCommandHandlingClass(Class<?> cls) {
         Logger log = log();
         if (Aggregate.class.isAssignableFrom(cls)) {
             Class<? extends Aggregate> aggregateClass = (Class<? extends Aggregate>) cls;
@@ -122,7 +133,7 @@ final class ModelVerifier {
         }
     }
 
-    private Class<?> getModelClass(String fqn) throws ClassNotFoundException {
+    private Class<?> createRawClass(String fqn) throws ClassNotFoundException {
         return Class.forName(fqn, false, projectClassLoader);
     }
 

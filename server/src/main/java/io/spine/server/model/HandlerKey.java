@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import com.google.common.base.MoreObjects;
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Empty;
 import io.spine.core.CommandClass;
 import io.spine.type.MessageClass;
@@ -36,6 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Grankin
  */
+@Immutable
 public final class HandlerKey {
 
     private final MessageClass handledMessage;

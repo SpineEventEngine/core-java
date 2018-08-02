@@ -70,7 +70,7 @@ class CommandServiceTest {
 
     @BeforeEach
     void setUp() {
-        ModelTests.clearModel();
+        ModelTests.dropAllModels();
         // Create Projects Bounded Context with one repository.
         projectsContext = BoundedContext.newBuilder()
                                         .setMultitenant(true)
