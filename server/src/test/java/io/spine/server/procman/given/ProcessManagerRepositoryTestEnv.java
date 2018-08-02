@@ -32,7 +32,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
-import io.spine.server.event.EventSubscriber;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.procman.CommandSplit;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
@@ -330,7 +330,7 @@ public class ProcessManagerRepositoryTestEnv {
     /**
      * Helper event subscriber which remembers an event message.
      */
-    public static class RememberingSubscriber extends EventSubscriber {
+    public static class RememberingSubscriber extends AbstractEventSubscriber {
 
         private @Nullable PmTaskAdded remembered;
 

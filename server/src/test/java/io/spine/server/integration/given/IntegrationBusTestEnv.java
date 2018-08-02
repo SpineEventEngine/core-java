@@ -36,7 +36,7 @@ import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.event.EventSubscriber;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
@@ -97,7 +97,7 @@ public class IntegrationBusTestEnv {
     @CanIgnoreReturnValue
     public static BoundedContext contextWithExternalSubscribers(TransportFactory transportFactory) {
         BoundedContext boundedContext = contextWithTransport(transportFactory);
-        EventSubscriber eventSubscriber = new ProjectEventsSubscriber();
+        AbstractEventSubscriber eventSubscriber = new ProjectEventsSubscriber();
         boundedContext.getIntegrationBus()
                       .register(eventSubscriber);
         boundedContext.getEventBus()
@@ -385,7 +385,7 @@ public class IntegrationBusTestEnv {
     }
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-    public static class ProjectEventsSubscriber extends EventSubscriber {
+    public static class ProjectEventsSubscriber extends AbstractEventSubscriber {
 
         private static ItgProjectCreated externalEvent = null;
 
@@ -424,7 +424,7 @@ public class IntegrationBusTestEnv {
     }
 
     @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-    public static class ProjectStartedExtSubscriber extends EventSubscriber {
+    public static class ProjectStartedExtSubscriber extends AbstractEventSubscriber {
 
         private static ItgProjectStarted externalEvent = null;
 

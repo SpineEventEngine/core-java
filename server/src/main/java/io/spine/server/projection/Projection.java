@@ -28,6 +28,7 @@ import io.spine.core.EventContext;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.EventPlayers;
 import io.spine.server.entity.TransactionalEntity;
+import io.spine.server.event.EventSubscriber;
 import io.spine.server.event.model.EventSubscriberMethod;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.validate.ValidatingBuilder;
@@ -51,7 +52,7 @@ public abstract class Projection<I,
                                  M extends Message,
                                  B extends ValidatingBuilder<M, ? extends Message.Builder>>
         extends TransactionalEntity<I, M, B>
-        implements EventPlayer {
+        implements EventPlayer, EventSubscriber {
 
     /**
      * Creates a new instance.

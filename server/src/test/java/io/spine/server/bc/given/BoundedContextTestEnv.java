@@ -30,7 +30,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.event.EventSubscriber;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.procman.CommandTransformed;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
@@ -102,7 +102,7 @@ public class BoundedContextTestEnv {
     }
 
     @SuppressWarnings("unused") // OK to have unused parameters in this test env. class
-    public static class TestEventSubscriber extends EventSubscriber {
+    public static class TestEventSubscriber extends AbstractEventSubscriber {
 
         private Message handledEvent;
 

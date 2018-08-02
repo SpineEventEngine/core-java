@@ -27,7 +27,7 @@ import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregate;
 import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregateRepository;
-import io.spine.server.event.EventSubscriber;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.event.AggProjectCreated;
@@ -136,7 +136,7 @@ class AggregateCommandEndpointTest {
         ProjectAggregate.assertHandled(cmd);
     }
 
-    private static class Subscriber extends EventSubscriber {
+    private static class Subscriber extends AbstractEventSubscriber {
 
         private AggProjectCreated remembered;
 

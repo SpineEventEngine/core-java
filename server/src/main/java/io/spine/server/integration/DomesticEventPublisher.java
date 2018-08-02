@@ -26,7 +26,7 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.event.EventSubscriber;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.transport.Publisher;
 import io.spine.server.transport.PublisherHub;
 
@@ -45,7 +45,7 @@ import static io.spine.server.integration.IntegrationChannels.toId;
  *
  * @author Alex Tymchenko
  */
-final class DomesticEventPublisher extends EventSubscriber {
+final class DomesticEventPublisher extends AbstractEventSubscriber {
 
     private final BoundedContextName boundedContextName;
     private final PublisherHub publisherHub;

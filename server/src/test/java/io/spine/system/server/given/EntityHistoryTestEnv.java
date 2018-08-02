@@ -34,7 +34,7 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.AggregateRoot;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.event.EventSubscriber;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.projection.Projection;
@@ -95,7 +95,7 @@ public final class EntityHistoryTestEnv {
     private EntityHistoryTestEnv() {
     }
     
-    public static class HistoryEventSubscriber extends EventSubscriber {
+    public static class HistoryEventSubscriber extends AbstractEventSubscriber {
 
         private final List<Message> events = newLinkedList();
 

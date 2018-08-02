@@ -225,7 +225,7 @@ public class EventEnricherTest {
      */
     @SuppressWarnings({"OptionalGetWithoutIsPresent", "InstanceVariableNamingConvention",
                        "ConstantConditions"})
-    private static class TestEventSubscriber extends EventSubscriber {
+    private static class TestEventSubscriber extends AbstractEventSubscriber {
 
         private ProjectCreated.Enrichment projectCreatedEnrichment;
         private ProjectCreatedSeparateEnrichment projectCreatedSeparateEnrichment;
