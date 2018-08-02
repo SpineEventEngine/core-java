@@ -27,7 +27,7 @@ import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.EventProducer;
 import io.spine.server.entity.Entity;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
@@ -55,7 +55,7 @@ public abstract class CommandAcceptingMethod<T, R extends MethodResult>
 
     /**
      * Obtains ID of the passed object by attempting to cast it to {@link Entity} or
-     * {@link AbstractCommandHandler}.
+     * {@link EventProducer}.
      *
      * @return packed ID or empty optional if the object is of type for which we cannot get ID
      */
@@ -63,9 +63,10 @@ public abstract class CommandAcceptingMethod<T, R extends MethodResult>
     private static Optional<Any> idOf(Object target) {
         Any producerId;
         if (target instanceof Entity) {
-            producerId = Identifier.pack(((Entity) target).getId());
-        } else if (target instanceof AbstractCommandHandler) {
-            producerId = Identifier.pack(((AbstractCommandHandler) target).getId());
+            Object entityId = ((Entity) target).getId();
+            producerId = Identifier.pack(entityId);
+        } else if (target instanceof EventProducer) {
+            producerId = ((EventProducer) target).getProducerId();
         } else {
             return Optional.empty();
         }
@@ -89,13 +90,12 @@ public abstract class CommandAcceptingMethod<T, R extends MethodResult>
      * was caused by a thrown rejection.
      */
     @Override
-    protected HandlerMethodFailedException whyFailed(Object target,
-                                                     Message message,
-                                                     CommandContext context,
-                                                     Exception cause) {
+    protected HandlerMethodFailedException
+    whyFailed(Object target, Message message, CommandContext context, Exception cause) {
+        // Generate the exception.
         HandlerMethodFailedException exception =
                 super.whyFailed(target, message, context, cause);
-
+        // Find the root cause, and if it was thrown by handler method, set the producer.
         Throwable rootCause = getRootCause(exception);
         if (rootCause instanceof ThrowableMessage) {
             ThrowableMessage thrownMessage = (ThrowableMessage) rootCause;
