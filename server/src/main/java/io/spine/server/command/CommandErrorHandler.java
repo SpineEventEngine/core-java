@@ -90,17 +90,20 @@ public final class CommandErrorHandler {
     private HandledError handleRejection(CommandEnvelope envelope, RuntimeException exception) {
         Rejection rejection = Rejection.fromThrowable(envelope, exception);
         markRejected(envelope, rejection);
-        return HandledError.forRejection(exception, envelope);
+        return HandledError.ofRejection(exception, envelope);
     }
 
     private HandledError handleRuntimeError(CommandEnvelope envelope, RuntimeException exception) {
+        String commandTypeName = envelope.getMessage()
+                                         .getClass()
+                                         .getName();
+        String commandIdAsString = Stringifiers.toString(envelope.getId());
         log().error(format("Error dispatching command (class: %s id: %s).",
-                           envelope.getMessage().getClass(),
-                           Stringifiers.toString(envelope.getId())),
+                           commandTypeName, commandIdAsString),
                     exception);
         Error error = Errors.causeOf(exception);
         markErrored(envelope, error);
-        return HandledError.forRuntime(exception);
+        return HandledError.ofRuntime(exception);
     }
 
     private void markErrored(CommandEnvelope command, Error error) {

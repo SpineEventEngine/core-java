@@ -43,9 +43,9 @@ final class HandledRuntimeError implements HandledError {
 
     @Override
     public void rethrowOnce() {
-        if (!isPreProcessed()) {
+//        if (!isPreProcessed()) {
             throw exception;
-        }
+//        }
     }
 
     @Override

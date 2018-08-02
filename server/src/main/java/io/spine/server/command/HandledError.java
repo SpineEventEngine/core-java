@@ -51,11 +51,11 @@ public interface HandledError {
      */
     Optional<Event> asRejection();
 
-    static HandledError forRuntime(RuntimeException exception) {
+    static HandledError ofRuntime(RuntimeException exception) {
         return new HandledRuntimeError(exception);
     }
 
-    static HandledError forRejection(RuntimeException rejection, CommandEnvelope command) {
+    static HandledError ofRejection(RuntimeException rejection, CommandEnvelope command) {
         return new HandledRejection(command, rejection);
     }
 }
