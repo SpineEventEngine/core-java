@@ -26,7 +26,7 @@ import io.spine.core.Command;
 import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.event.EventSubscriber;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.rout.given.switchman.LogState;
 import io.spine.server.rout.given.switchman.SwitchId;
 import io.spine.server.rout.given.switchman.SwitchPosition;
@@ -136,7 +136,7 @@ class CommandRoutingRejectionTest {
                        .build();
     }
 
-    private static class SwitchmanObserver extends EventSubscriber {
+    private static class SwitchmanObserver extends AbstractEventSubscriber {
 
         private final List<SwitchPositionConfirmed> events = newLinkedList();
 

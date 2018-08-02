@@ -51,6 +51,7 @@ import static java.lang.String.format;
  */
 public abstract class AbstractEventSubscriber implements EventDispatcher<String>, EventSubscriber {
 
+    /** Model class for this subscriber. */
     private final EventSubscriberClass<?> thisClass = asEventSubscriberClass(getClass());
     /** Lazily initialized logger. */
     private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
