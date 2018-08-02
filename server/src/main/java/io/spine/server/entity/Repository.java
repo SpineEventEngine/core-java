@@ -441,6 +441,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * interacting with an {@link Entity}.
      *
      * <p>An instance of {@code Lifecycle} belongs to a single instance of {@link Entity}.
+     *
+     * @see Repository#lifecycleOf(Object)
      */
     @Internal
     public interface Lifecycle {
