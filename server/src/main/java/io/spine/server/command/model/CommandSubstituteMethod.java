@@ -41,7 +41,7 @@ import java.util.function.Predicate;
  */
 public final class CommandSubstituteMethod
         extends CommandAcceptingMethod<Object, Result>
-        implements CommandingMethod<CommandClass, CommandContext, Result> {
+        implements CommandingMethod<CommandClass, Result> {
 
     private CommandSubstituteMethod(Method method) {
         super(method);

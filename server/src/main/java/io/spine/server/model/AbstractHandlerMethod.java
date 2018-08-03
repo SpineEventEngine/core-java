@@ -20,8 +20,10 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
+import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -42,16 +44,19 @@ import static java.lang.String.format;
  * <p>Two message handlers are equivalent when they refer to the same method on the
  * same object (not class).
  *
- * @param <M> the type of the message class
- * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
- *            a context parameter is never used
+ * @param <T> the type of the target object
+ * @param <M> the type of the incoming message class
+ * @param <E> the type of the {@link MessageEnvelope} wrapping the method arguments
+ * @param <R> the type of the method result object
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
 @Immutable
-public abstract
-class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R extends MethodResult>
-        implements HandlerMethod<T, M, C, R> {
+public abstract class AbstractHandlerMethod<T,
+                                            M extends MessageClass,
+                                            E extends MessageEnvelope<?, ?, ?>,
+                                            R extends MethodResult>
+        implements HandlerMethod<T, M, E, R> {
 
     /** The method to be called. */
     @SuppressWarnings("Immutable")
@@ -148,11 +153,13 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
         return ImmutableSet.of(externalAttribute);
     }
 
+    @CanIgnoreReturnValue
     @Override
-    public R invoke(T target, Message message, C context) {
+    public R invoke(T target, E envelope) {
         checkNotNull(target);
-        checkNotNull(message);
-        checkNotNull(context);
+        checkNotNull(envelope);
+        Message message = envelope.getMessage();
+        Message context = envelope.getMessageContext();
         try {
             int paramCount = getParamCount();
             Object rawOutput = (paramCount == 1)
@@ -180,7 +187,7 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
      * @return the exception thrown during the invocation
      */
     protected HandlerMethodFailedException
-    whyFailed(Object target, Message message, C context, Exception cause) {
+    whyFailed(Object target, Message message, Message context, Exception cause) {
         return new HandlerMethodFailedException(target, message, context, cause);
     }
 

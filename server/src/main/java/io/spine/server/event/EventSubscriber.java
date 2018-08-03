@@ -112,6 +112,6 @@ public abstract class EventSubscriber implements EventDispatcher<String> {
 
     private void handle(EventEnvelope envelope) {
         EventSubscriberMethod method = thisClass.getSubscriber(envelope.getMessageClass());
-        method.invoke(this, envelope.getMessage(), envelope.getEventContext());
+        method.invoke(this, envelope);
     }
 }

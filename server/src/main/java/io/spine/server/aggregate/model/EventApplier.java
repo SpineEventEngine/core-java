@@ -24,11 +24,11 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
-import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
@@ -45,7 +45,7 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  * @author Alexander Yevsyukov
  */
 public final class EventApplier
-        extends AbstractHandlerMethod<Aggregate, EventClass, Empty, MethodResult<Empty>> {
+        extends AbstractHandlerMethod<Aggregate, EventClass, EventEnvelope, MethodResult<Empty>> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -77,21 +77,6 @@ public final class EventApplier
 
     public static AbstractHandlerMethod.Factory<EventApplier> factory() {
         return Factory.INSTANCE;
-    }
-
-    /**
-     * Invokes the applier method.
-     *
-     * <p>The method {@linkplain HandlerMethod#invoke(Object, Message, Message) delegates}
-     * the invocation passing {@linkplain Empty#getDefaultInstance() empty message}
-     * as the context parameter because event appliers do not have a context parameter.
-     *
-     * <p>Such redirection is correct because {@linkplain #getParamCount()} the number of parameters}
-     * is set to one during instance construction.
-     */
-    @SuppressWarnings("CheckReturnValue") // since method appliers do not return values
-    public void invoke(Aggregate aggregate, Message message) {
-        invoke(aggregate, message, Empty.getDefaultInstance());
     }
 
     @Override

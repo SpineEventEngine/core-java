@@ -140,7 +140,7 @@ public abstract class ProcessManager<I,
     protected List<Event> dispatchCommand(CommandEnvelope command) {
         CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         CommandHandlerMethod.Result result =
-                method.invoke(this, command.getMessage(), command.getCommandContext());
+                method.invoke(this, command);
         List<Event> events = result.produceEvents(command);
         return events;
     }
@@ -155,7 +155,7 @@ public abstract class ProcessManager<I,
     List<Event> dispatchEvent(EventEnvelope event) {
         EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
         ReactorMethodResult methodResult =
-                method.invoke(this, event.getMessage(), event.getEventContext());
+                method.invoke(this, event);
         List<Event> result = methodResult.produceEvents(event);
         return result;
     }

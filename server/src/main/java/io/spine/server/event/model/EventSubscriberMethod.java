@@ -20,11 +20,8 @@
 
 package io.spine.server.event.model;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
 import io.spine.core.EventClass;
-import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
@@ -44,7 +41,7 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  * @see Subscribe
  */
 public final class EventSubscriberMethod
-        extends AbstractHandlerMethod<Object, EventClass, EventContext, MethodResult<Empty>> {
+        extends EventHandlerMethod<Object, MethodResult<Empty>> {
 
     /** Creates a new instance. */
     private EventSubscriberMethod(Method method) {
@@ -68,13 +65,6 @@ public final class EventSubscriberMethod
     /** Returns the factory for filtering and creating event subscriber methods. */
     public static AbstractHandlerMethod.Factory<EventSubscriberMethod> factory() {
         return Factory.getInstance();
-    }
-
-    @CanIgnoreReturnValue // since event subscriber methods do not return values
-    @Override
-    public MethodResult<Empty> invoke(Object target, Message message, EventContext context) {
-        ensureExternalMatch(context.getExternal());
-        return super.invoke(target, message, context);
     }
 
     @Override

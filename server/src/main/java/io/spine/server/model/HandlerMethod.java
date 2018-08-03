@@ -20,8 +20,9 @@
 
 package io.spine.server.model;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
+import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.lang.reflect.Method;
@@ -34,17 +35,15 @@ import static com.google.common.base.Preconditions.checkArgument;
  *
  * @param <T> the type of the target object
  * @param <M> the type of the incoming message class
- * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
- *            a context parameter is never used
+ * @param <E> the type of the {@link MessageEnvelope} wrapping the method arguments
  * @param <R> the type of the method result object
- *            
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
 @Immutable
 public interface HandlerMethod<T,
                                M extends MessageClass,
-                               C extends Message,
+                               E extends MessageEnvelope<?, ?, ?>,
                                R extends MethodResult> {
 
     M getMessageClass();
@@ -58,12 +57,12 @@ public interface HandlerMethod<T,
     /**
      * Invokes the method to handle {@code message} with the {@code context}.
      *
-     * @param target  the target object on which call the method
-     * @param message the message to handle
-     * @param context the context of the message
+     * @param target   the target object on which call the method
+     * @param envelope the {@link MessageEnvelope} wrapping the method arguments
      * @return the result of message handling
      */
-    R invoke(T target, Message message, C context);
+    @CanIgnoreReturnValue
+    R invoke(T target, E envelope);
 
     /**
      * Verifies if the passed method is {@linkplain ExternalAttribute#EXTERNAL external}.

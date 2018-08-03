@@ -21,10 +21,12 @@
 package io.spine.server.command.model;
 
 import com.google.common.base.Throwables;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionEventContext;
 import io.spine.server.command.Assign;
@@ -79,12 +81,13 @@ public final class CommandHandlerMethod
         return result;
     }
 
+    @CanIgnoreReturnValue
     @Override
-    public Result invoke(EventProducer target, Message message, CommandContext context) {
+    public Result invoke(EventProducer target, CommandEnvelope envelope) {
         try {
-            return super.invoke(target, message, context);
+            return super.invoke(target, envelope);
         } catch (RuntimeException e) {
-            return err(e, message, target);
+            return err(e, envelope.getMessage(), target);
         }
     }
 

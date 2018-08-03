@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
-import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.entity.Entity;
 import io.spine.server.model.AbstractHandlerMethod;
@@ -47,7 +47,7 @@ import static com.google.common.base.Throwables.getRootCause;
  */
 @Immutable
 public abstract class CommandAcceptingMethod<T, R extends MethodResult>
-        extends AbstractHandlerMethod<T, CommandClass, CommandContext, R> {
+        extends AbstractHandlerMethod<T, CommandClass, CommandEnvelope, R> {
 
     CommandAcceptingMethod(Method method) {
         super(method);
@@ -91,7 +91,7 @@ public abstract class CommandAcceptingMethod<T, R extends MethodResult>
     @Override
     protected HandlerMethodFailedException whyFailed(Object target,
                                                      Message message,
-                                                     CommandContext context,
+                                                     Message context,
                                                      Exception cause) {
         HandlerMethodFailedException exception =
                 super.whyFailed(target, message, context, cause);

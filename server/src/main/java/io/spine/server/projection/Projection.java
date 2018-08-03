@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
-import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.EventPlayers;
 import io.spine.server.entity.TransactionalEntity;
@@ -105,9 +105,9 @@ public abstract class Projection<I,
         return projection.isChanged();
     }
 
-    void apply(Message eventMessage, EventContext eventContext) {
+    void apply(Message eventMessage, EventEnvelope event) {
         EventSubscriberMethod method = thisClass().getSubscriber(EventClass.of(eventMessage));
-        method.invoke(this, eventMessage, eventContext);
+        method.invoke(this, event);
     }
 
     @Override

@@ -22,6 +22,7 @@ package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.command.Command;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
@@ -38,8 +39,8 @@ import io.spine.type.MessageClass;
  * @author Alexander Yevsyukov
  */
 @Immutable
-public interface CommandingMethod<M extends MessageClass, C extends Message, R extends MethodResult>
-        extends HandlerMethod<Object, M, C, R> {
+public interface CommandingMethod<M extends MessageClass, R extends MethodResult>
+        extends HandlerMethod<Object, M, CommandEnvelope, R> {
 
     /**
      * Abstract base for commanding method predicates.

@@ -30,7 +30,6 @@ import io.spine.annotation.Internal;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
@@ -213,8 +212,7 @@ public abstract class Aggregate<I,
     protected List<Event> dispatchCommand(CommandEnvelope command) {
         idempotencyGuard.check(command);
         CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
-        EventsResult result = method.invoke(this, command.getMessage(),
-                                            command.getCommandContext());
+        EventsResult result = method.invoke(this, command);
         return result.produceEvents(command);
     }
 
@@ -231,19 +229,18 @@ public abstract class Aggregate<I,
     List<Event> reactOn(EventEnvelope event) {
         EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
         ReactorMethodResult result =
-                method.invoke(this, event.getMessage(), event.getEventContext());
+                method.invoke(this, event);
         return result.produceEvents(event);
     }
 
     /**
      * Invokes applier method for the passed event message.
      *
-     * @param eventMessage the event message to apply
+     * @param event the event to apply
      */
-    void invokeApplier(Message eventMessage) {
-        EventClass eventClass = EventClass.of(eventMessage);
-        EventApplier method = thisClass().getApplier(eventClass);
-        method.invoke(this, eventMessage);
+    void invokeApplier(EventEnvelope event) {
+        EventApplier method = thisClass().getApplier(event.getMessageClass());
+        method.invoke(this, event);
     }
 
     @Override
