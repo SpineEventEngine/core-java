@@ -20,32 +20,47 @@
 
 package io.spine.server.command.model;
 
-import com.google.errorprone.annotations.Immutable;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandContext;
-import io.spine.server.command.CommandReceiver;
+import com.google.protobuf.Message;
+import io.spine.core.EventClass;
+import io.spine.core.EventContext;
+import io.spine.server.command.model.CommandReactionMethod.Result;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodResult;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 
 /**
- * An abstract base for methods that accept a command message and optionally its context.
- *
- * @param <T> the type of the target object
- * @param <R> the type of the result object returned by the method
  * @author Alexander Yevsyukov
  */
-@Immutable
-public abstract class CommandAcceptingMethod<T extends CommandReceiver, R extends MethodResult>
-        extends AbstractHandlerMethod<T, CommandClass, CommandContext, R> {
+public final class CommandReactionMethod
+        extends AbstractHandlerMethod<Object, EventClass, EventContext, Result>
+        implements CommandingMethod<Object, EventClass, EventContext, Result> {
 
-    CommandAcceptingMethod(Method method) {
+    /**
+     * Creates a new instance to wrap {@code method} on {@code target}.
+     *
+     * @param method subscriber method
+     */
+    protected CommandReactionMethod(Method method) {
         super(method);
     }
 
     @Override
-    public CommandClass getMessageClass() {
-        return CommandClass.of(rawMessageClass());
+    protected Result toResult(Object target, Object rawMethodOutput) {
+        return null;
     }
+
+    @Override
+    public EventClass getMessageClass() {
+        return null;
+    }
+
+    public static final class Result extends MethodResult<Message> {
+
+        protected Result(@Nullable Object output) {
+            super(output);
+        }
+    }
+
 }

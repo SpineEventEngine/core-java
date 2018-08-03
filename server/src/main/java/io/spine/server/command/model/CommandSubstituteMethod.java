@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
+import io.spine.server.command.CommandReceiver;
 import io.spine.server.command.model.CommandSubstituteMethod.Result;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
@@ -40,15 +41,15 @@ import java.util.function.Predicate;
  * @author Alexander Yevsyukov
  */
 public final class CommandSubstituteMethod
-        extends CommandAcceptingMethod<Object, Result>
-        implements CommandingMethod<CommandClass, CommandContext, Result> {
+        extends CommandAcceptingMethod<CommandReceiver, Result>
+        implements CommandingMethod<CommandReceiver, CommandClass, CommandContext, Result> {
 
     private CommandSubstituteMethod(Method method) {
         super(method);
     }
 
     @Override
-    protected Result toResult(Object target, Object rawMethodOutput) {
+    protected Result toResult(CommandReceiver target, Object rawMethodOutput) {
         Result result = new Result(rawMethodOutput);
         return result;
     }

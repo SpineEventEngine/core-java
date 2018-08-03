@@ -35,5 +35,5 @@ package io.spine.server.command;
  * @author Alexander Yevsyukov
  * @see Command @Command
  */
-public interface Commander {
+public interface Commander extends CommandReceiver {
 }

@@ -29,5 +29,5 @@ import io.spine.server.EventProducer;
  * @author Alexander Yevsyukov
  * @see Assign @Assign
  */
-public interface CommandHandler extends EventProducer {
+public interface CommandHandler extends CommandReceiver, EventProducer {
 }

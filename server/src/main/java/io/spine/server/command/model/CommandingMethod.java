@@ -32,14 +32,15 @@ import io.spine.type.MessageClass;
  * Base interface for methods that generate one or more command messages in response to
  * an incoming message.
  *
+ * @param <T> the type of the target object
  * @param <M> the type of the message class
  * @param <C> the type of the message context
  *
  * @author Alexander Yevsyukov
  */
 @Immutable
-public interface CommandingMethod<M extends MessageClass, C extends Message, R extends MethodResult>
-        extends HandlerMethod<Object, M, C, R> {
+public interface CommandingMethod<T, M extends MessageClass, C extends Message, R extends MethodResult>
+        extends HandlerMethod<T, M, C, R> {
 
     /**
      * Abstract base for commanding method predicates.

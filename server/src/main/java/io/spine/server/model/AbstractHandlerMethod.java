@@ -41,6 +41,7 @@ import static io.spine.server.model.MethodExceptionChecker.forMethod;
  * <p>Two message handlers are equivalent when they refer to the same method on the
  * same object (not class).
  *
+ * @param <T> the type of the target object
  * @param <M> the type of the message class
  * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
  *            a context parameter is never used
