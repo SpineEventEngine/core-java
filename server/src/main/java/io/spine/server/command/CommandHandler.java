@@ -23,8 +23,8 @@ package io.spine.server.command;
 import io.spine.server.EventProducer;
 
 /**
- * A common interface for objects declares one or more methods {@linkplain Assign assigned}
- * to handle commands and produce events in response.
+ * A common interface for objects which declare one or more methods {@linkplain Assign assigned}
+ * to handle commands, producing events in response.
  *
  * @author Alexander Yevsyukov
  * @see Assign @Assign
