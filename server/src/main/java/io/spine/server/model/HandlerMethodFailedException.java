@@ -25,7 +25,6 @@ import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
-import io.spine.protobuf.TypeConverter;
 import io.spine.server.EventProducer;
 import io.spine.server.entity.Entity;
 
@@ -86,13 +85,13 @@ public class HandlerMethodFailedException extends RuntimeException {
     }
 
     /**
-     * Obtains an identity of an object which thrown {@link ThrowableMessage}.
+     * Obtains an identity of an object which threw {@link ThrowableMessage}.
      *
      * @implNote Attempts to cast the passed object to {@link Entity} or {@link EventProducer}.
      * If none of this works, returns the result of {@link Object#toString()}.
      */
     @SuppressWarnings("ChainOfInstanceofChecks")
-    public static Any idOf(Object target) {
+    private static Any idOf(Object target) {
         if (target instanceof Entity) {
             Object entityId = ((Entity) target).getId();
             return Identifier.pack(entityId);
@@ -102,7 +101,7 @@ public class HandlerMethodFailedException extends RuntimeException {
             return ((EventProducer) target).getProducerId();
         }
 
-        return TypeConverter.toAny(target.toString());
+        return Identifier.pack(target.toString());
     }
 
     /**
