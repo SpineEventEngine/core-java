@@ -76,6 +76,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Throwables.getRootCause;
+import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.CommandEnvelope.of;
 import static io.spine.core.Events.getRootCommandId;
@@ -704,13 +705,14 @@ public class AggregateTest {
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(createCommand, noOpObserver);
             commandBus.post(startCommand, noOpObserver);
-            commandBus.post(newArrayList(addTaskCommand, addTaskCommand2), noOpObserver);
+            commandBus.post(of(addTaskCommand, addTaskCommand2), noOpObserver);
 
             TestAggregate aggregate = repository.loadAggregate(tenantId, ID);
 
             Iterator<Event> history = aggregate.historyBackward();
 
-            assertEquals(addTaskCommand2.getId(), getRootCommandId(history.next()));
+            Event singleEvent = history.next();
+            assertEquals(addTaskCommand2.getId(), getRootCommandId(singleEvent));
             assertFalse(history.hasNext());
         }
     }
