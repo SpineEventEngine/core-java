@@ -40,7 +40,7 @@ class EventSubscriberTest {
 
     private final TestEventFactory factory = TestEventFactory.newInstance(getClass());
 
-    private EventSubscriber subscriber;
+    private AbstractEventSubscriber subscriber;
 
     @BeforeEach
     void setUp() {

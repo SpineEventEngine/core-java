@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
+import io.spine.server.EventProducer;
 import io.spine.server.event.EventFactory;
 
 import java.util.List;

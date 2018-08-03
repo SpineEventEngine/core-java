@@ -27,7 +27,6 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerKey;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 import io.spine.server.model.MethodResult;
@@ -55,11 +54,6 @@ public final class EventSubscriberMethod
     @Override
     public EventClass getMessageClass() {
         return EventClass.of(rawMessageClass());
-    }
-
-    @Override
-    public HandlerKey key() {
-        return HandlerKey.of(getMessageClass());
     }
 
     public static EventSubscriberMethod from(Method method) {

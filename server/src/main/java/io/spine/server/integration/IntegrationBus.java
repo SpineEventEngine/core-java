@@ -30,7 +30,7 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.EventSubscriber;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.server.transport.PublisherHub;
@@ -299,7 +299,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      *
      * @param eventSubscriber the subscriber to register.
      */
-    public void register(EventSubscriber eventSubscriber) {
+    public void register(AbstractEventSubscriber eventSubscriber) {
         ExternalEventSubscriber wrapped = new ExternalEventSubscriber(eventSubscriber);
         register(wrapped);
     }
@@ -321,7 +321,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
      *
      * @param eventSubscriber the subscriber to register.
      */
-    public void unregister(EventSubscriber eventSubscriber) {
+    public void unregister(AbstractEventSubscriber eventSubscriber) {
         ExternalEventSubscriber wrapped = new ExternalEventSubscriber(eventSubscriber);
         unregister(wrapped);
     }

@@ -23,8 +23,8 @@ package io.spine.server.model.given;
 import com.google.protobuf.StringValue;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.reflect.Project;
@@ -75,7 +75,7 @@ public class ModelTestEnv {
     }
 
     @SuppressWarnings("MethodMayBeStatic")
-    public static class MCommandHandler extends CommandHandler {
+    public static class MCommandHandler extends AbstractCommandHandler {
 
         private MCommandHandler(EventBus eventBus) {
             super(eventBus);

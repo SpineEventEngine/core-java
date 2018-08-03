@@ -27,7 +27,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandValidationError;
 import io.spine.grpc.StreamObservers;
-import io.spine.server.command.CommandHandler;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.commandbus.given.MultitenantCommandBusTestEnv.AddTaskDispatcher;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.test.command.CmdAddTask;
@@ -198,7 +198,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
         @Test
         @DisplayName("command handler")
         void commandHandler() {
-            CommandHandler handler = newCommandHandler();
+            AbstractCommandHandler handler = newCommandHandler();
 
             commandBus.register(handler);
             commandBus.unregister(handler);
