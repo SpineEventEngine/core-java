@@ -26,7 +26,6 @@ import io.spine.core.EventContext;
 import io.spine.core.React;
 import io.spine.server.event.EventReactor;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerKey;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 import io.spine.server.model.ReactorMethodResult;
@@ -53,11 +52,6 @@ public final class EventReactorMethod
     @Override
     public EventClass getMessageClass() {
         return EventClass.of(rawMessageClass());
-    }
-
-    @Override
-    public HandlerKey key() {
-        return HandlerKey.of(getMessageClass());
     }
 
     /**

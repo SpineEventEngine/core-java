@@ -79,7 +79,7 @@ abstract class RejectionHandlerMethod<T, R extends MethodResult>
                     (Class<? extends Message>) getRawMethod().getParameterTypes()[1];
             return HandlerKey.of(getMessageClass(), CommandClass.of(rawCommandClass));
         } else {
-            return HandlerKey.of(getMessageClass());
+            return super.key();
         }
     }
 

@@ -20,10 +20,17 @@
 
 package io.spine.server.model;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
+import io.spine.base.Identifier;
+import io.spine.base.ThrowableMessage;
+import io.spine.protobuf.TypeConverter;
+import io.spine.server.EventProducer;
+import io.spine.server.entity.Entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.getRootCause;
 
 /**
  * Signals that invocation of a message handling method failed with an exception.
@@ -40,6 +47,9 @@ public class HandlerMethodFailedException extends RuntimeException {
 
     /**
      * Creates new instance.
+     *
+     * <p>If the root cause of the exception was thrown by a handler method,
+     * {@linkplain ThrowableMessage#initProducer(Any) sets the identity} of the object which thrown.
      *
      * @param target             the object which method failed
      * @param dispatchedMessage  the message passed to the method which failed
@@ -59,6 +69,40 @@ public class HandlerMethodFailedException extends RuntimeException {
          */
         this.dispatchedMessage = (GeneratedMessageV3) checkNotNull(dispatchedMessage);
         this.messageContext = (GeneratedMessageV3) checkNotNull(messageContext);
+        setProducer(cause, target);
+    }
+
+    /**
+     * If the root cause of the exception was thrown by a handler method,
+     * {@linkplain ThrowableMessage#initProducer(Any) sets the identity} of the object which thrown.
+     */
+    private static void setProducer(Exception exception, Object target) {
+        Throwable rootCause = getRootCause(exception);
+        if (rootCause instanceof ThrowableMessage) {
+            ThrowableMessage thrownMessage = (ThrowableMessage) rootCause;
+            Any producerId = idOf(target);
+            thrownMessage.initProducer(producerId);
+        }
+    }
+
+    /**
+     * Obtains an identity of an object which thrown {@link ThrowableMessage}.
+     *
+     * @implNote Attempts to cast the passed object to {@link Entity} or {@link EventProducer}.
+     * If none of this works, returns the result of {@link Object#toString()}.
+     */
+    @SuppressWarnings("ChainOfInstanceofChecks")
+    public static Any idOf(Object target) {
+        if (target instanceof Entity) {
+            Object entityId = ((Entity) target).getId();
+            return Identifier.pack(entityId);
+        }
+
+        if (target instanceof EventProducer) {
+            return ((EventProducer) target).getProducerId();
+        }
+
+        return TypeConverter.toAny(target.toString());
     }
 
     /**

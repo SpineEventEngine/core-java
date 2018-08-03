@@ -21,23 +21,12 @@
 package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import io.spine.base.Identifier;
-import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.server.EventProducer;
-import io.spine.server.entity.Entity;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerKey;
-import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.MethodResult;
 
 import java.lang.reflect.Method;
-import java.util.Optional;
-
-import static com.google.common.base.Throwables.getRootCause;
 
 /**
  * An abstract base for methods that accept a command message and optionally its context.
@@ -53,57 +42,8 @@ public abstract class CommandAcceptingMethod<T, R extends MethodResult>
         super(method);
     }
 
-    /**
-     * Obtains ID of the passed object by attempting to cast it to {@link Entity} or
-     * {@link EventProducer}.
-     *
-     * @return packed ID or empty optional if the object is of type for which we cannot get ID
-     */
-    @SuppressWarnings("ChainOfInstanceofChecks")
-    private static Optional<Any> idOf(Object target) {
-        Any producerId;
-        if (target instanceof Entity) {
-            Object entityId = ((Entity) target).getId();
-            producerId = Identifier.pack(entityId);
-        } else if (target instanceof EventProducer) {
-            producerId = ((EventProducer) target).getProducerId();
-        } else {
-            return Optional.empty();
-        }
-        return Optional.of(producerId);
-    }
-
     @Override
     public CommandClass getMessageClass() {
         return CommandClass.of(rawMessageClass());
-    }
-
-    @Override
-    public HandlerKey key() {
-        return HandlerKey.of(getMessageClass());
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>{@linkplain ThrowableMessage#initProducer(Any) Initializes} producer ID if the exception
-     * was caused by a thrown rejection.
-     */
-    @Override
-    protected HandlerMethodFailedException
-    whyFailed(Object target, Message message, CommandContext context, Exception cause) {
-        // Generate the exception.
-        HandlerMethodFailedException exception =
-                super.whyFailed(target, message, context, cause);
-        // Find the root cause, and if it was thrown by handler method, set the producer.
-        Throwable rootCause = getRootCause(exception);
-        if (rootCause instanceof ThrowableMessage) {
-            ThrowableMessage thrownMessage = (ThrowableMessage) rootCause;
-
-            Optional<Any> producerId = idOf(target);
-            producerId.ifPresent(thrownMessage::initProducer);
-        }
-
-        return exception;
     }
 }
