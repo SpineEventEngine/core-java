@@ -30,7 +30,6 @@ import io.spine.server.procman.ProcessManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 import java.util.function.Function;
 
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
@@ -54,7 +53,7 @@ public class DuplicateHandlerCheck {
             "CheckReturnValue" /* Returned values for asXxxClass() are ignored because we use
                                   these methods only for verification of the classes. */
     })
-    private final Map<Class<?>, Appender> appenders =
+    private final ImmutableMap<Class<?>, Appender> appenders =
             ImmutableMap.<Class<?>, Appender>builder()
                     .put(Aggregate.class,
                          (c) -> asAggregateClass((Class<? extends Aggregate>) c))

@@ -37,7 +37,7 @@ import static io.spine.server.command.model.CommanderClass.asCommanderClass;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class AbstractCommander extends AbstractCommandDispatcher {
+public abstract class AbstractCommander extends AbstractCommandDispatcher implements Commander {
 
     private final CommanderClass<?> thisClass = asCommanderClass(getClass());
     private final CommandBus commandBus;
