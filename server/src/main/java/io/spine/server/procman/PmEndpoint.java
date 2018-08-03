@@ -73,7 +73,6 @@ abstract class PmEndpoint<I,
 
     protected List<Event> dispatchInTx(P processManager) {
         PmTransaction<?, ?, ?> tx = repository().beginTransactionFor(processManager);
-        @SuppressWarnings("unchecked") // all PM handlers return events.
         List<Event> events = doDispatch(processManager, envelope());
         tx.commit();
         return events;

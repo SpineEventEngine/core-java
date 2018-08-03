@@ -23,7 +23,6 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableList;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
-import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
@@ -40,6 +39,7 @@ import io.spine.server.delivery.Shardable;
 import io.spine.server.delivery.ShardedStreamConsumer;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
+import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
@@ -515,12 +515,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return commandDeliverySupplier.get();
     }
 
-    void onDispatchCommand(I id, Command command) {
-        lifecycleOf(id).onDispatchCommand(command);
-    }
-
-    void onCommandHandled(I id, Command command) {
-        lifecycleOf(id).onCommandHandled(command);
+    @Override
+    protected EntityLifecycle lifecycleOf(I id) {
+        return super.lifecycleOf(id);
     }
 
     void onDispatchEvent(I id, Event event) {
@@ -529,10 +526,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     void onCommandTargetSet(I id, CommandId commandId) {
         lifecycleOf(id).onTargetAssignedToCommand(commandId);
-    }
-
-    void onCommandRejected(I id, CommandId commandId, Event rejection) {
-        lifecycleOf(id).onCommandRejected(commandId, rejection);
     }
 
     @Override

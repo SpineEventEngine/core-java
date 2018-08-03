@@ -21,14 +21,12 @@
 package io.spine.server.procman;
 
 import io.spine.annotation.Internal;
-import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
+import io.spine.server.command.DispatchCommand;
+import io.spine.server.entity.EntityLifecycle;
 
 import java.util.List;
-import java.util.Optional;
-
-import static io.spine.core.Events.isRejection;
 
 /**
  * Dispatches command to process managers.
@@ -74,32 +72,14 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
 
     @Override
     protected List<Event> doDispatch(P processManager, CommandEnvelope envelope) {
-        I id = processManager.getId();
-        Command command = envelope.getCommand();
-        repository().onDispatchCommand(id, command);
-        List<Event> result = processManager.dispatchCommand(envelope);
-        onCommandResult(command, id, result);
-        return result;
-    }
-
-    private void onCommandResult(Command command, I aggregateId, List<Event> produced) {
-        Optional<Event> rejectionEvent = rejection(produced);
-        if (rejectionEvent.isPresent()) {
-            repository().onCommandRejected(aggregateId, command.getId(), rejectionEvent.get());
-        } else {
-            repository().onCommandHandled(aggregateId, command);
-        }
-    }
-
-    private static Optional<Event> rejection(List<Event> produced) {
-        if (produced.size() != 1) {
-            return Optional.empty();
-        }
-        Event singleEvent = produced.get(0);
-        Optional<Event> result = isRejection(singleEvent)
-                                 ? Optional.of(singleEvent)
-                                 : Optional.empty();
-        return result;
+        EntityLifecycle lifecycle = repository().lifecycleOf(processManager.getId());
+        DispatchCommand dispatch = DispatchCommand
+                .newBuilder()
+                .setCommand(envelope)
+                .setEntity(processManager)
+                .setLifecycle(lifecycle)
+                .build();
+        return dispatch.perform();
     }
 
     @Override

@@ -63,6 +63,11 @@ public final class NoOpLifecycle extends EntityLifecycle {
     }
 
     @Override
+    public void onCommandRejected(CommandId commandId, Event rejection) {
+        // NoOp.
+    }
+
+    @Override
     public void onDispatchEventToSubscriber(Event event) {
         // NoOp.
     }

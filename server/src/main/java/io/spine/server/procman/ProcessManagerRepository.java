@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
-import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
@@ -45,6 +44,7 @@ import io.spine.server.delivery.Shardable;
 import io.spine.server.delivery.ShardedStreamConsumer;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
+import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityLifecycleMonitor;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.TransactionListener;
@@ -304,16 +304,9 @@ public abstract class ProcessManagerRepository<I,
         }
     }
 
-    void onDispatchCommand(I id, Command command) {
-        lifecycleOf(id).onDispatchCommand(command);
-    }
-
-    void onCommandHandled(I id, Command command) {
-        lifecycleOf(id).onCommandHandled(command);
-    }
-
-    void onCommandRejected(I id, CommandId commandId, Event rejection) {
-        lifecycleOf(id).onCommandRejected(commandId, rejection);
+    @Override
+    protected EntityLifecycle lifecycleOf(I id) {
+        return super.lifecycleOf(id);
     }
 
     void onDispatchEvent(I id, Event event) {
