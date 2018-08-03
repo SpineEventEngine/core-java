@@ -27,6 +27,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.Rejection;
 import io.spine.server.EventProducer;
 import io.spine.server.command.Assign;
+import io.spine.server.command.CommandHandler;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.EventsResult;
 import io.spine.server.model.HandlerMethodPredicate;
@@ -46,7 +47,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @author Alexander Yevsyukov
  */
 public final class CommandHandlerMethod
-        extends CommandAcceptingMethod<EventProducer, CommandHandlerMethod.Result> {
+        extends CommandAcceptingMethod<CommandHandler, CommandHandlerMethod.Result> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -69,7 +70,7 @@ public final class CommandHandlerMethod
      * Transforms the passed raw method output into a list of event messages.
      */
     @Override
-    protected Result toResult(EventProducer target, Object rawMethodOutput) {
+    protected Result toResult(CommandHandler target, Object rawMethodOutput) {
         Result result = new Result(target, rawMethodOutput);
         return result;
     }
