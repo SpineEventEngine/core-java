@@ -57,10 +57,9 @@ final class Write<I> {
     }
 
     private int writeEvent(Event event, int eventCount) {
-        int newEventCount;
         storage.writeEvent(aggregate.getId(), event);
-        newEventCount = eventCount + 1;
-        if (eventCount >= snapshotTrigger) {
+        int newEventCount = eventCount + 1;
+        if (newEventCount >= snapshotTrigger) {
             writeSnapshot(aggregate);
             newEventCount = 0;
         }
