@@ -312,6 +312,10 @@ public abstract class ProcessManagerRepository<I,
         lifecycleOf(id).onCommandHandled(command);
     }
 
+    void onCommandRejected(I id, CommandId commandId, Event rejection) {
+        lifecycleOf(id).onCommandRejected(commandId, rejection);
+    }
+
     void onDispatchEvent(I id, Event event) {
         lifecycleOf(id).onDispatchEventToReactor(event);
     }

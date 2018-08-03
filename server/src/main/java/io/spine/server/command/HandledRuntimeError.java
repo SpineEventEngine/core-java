@@ -20,10 +20,6 @@
 
 package io.spine.server.command;
 
-import io.spine.core.Event;
-
-import java.util.Optional;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -37,19 +33,8 @@ final class HandledRuntimeError implements HandledError {
         this.exception = checkNotNull(exception);
     }
 
-    private boolean isPreProcessed() {
-        return exception instanceof CommandDispatchingException;
-    }
-
     @Override
-    public void rethrowOnce() {
-//        if (!isPreProcessed()) {
-            throw exception;
-//        }
-    }
-
-    @Override
-    public Optional<Event> asRejection() {
-        return Optional.empty();
+    public void rethrowOnce() throws CommandDispatchingException {
+        throw new CommandDispatchingException(exception);
     }
 }

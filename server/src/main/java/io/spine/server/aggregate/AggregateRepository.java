@@ -267,8 +267,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * Handles the given error.
      *
-     * <p>If the given error is a rejection, posts it into
-     * the {@link io.spine.server.rejection.RejectionBus RejectionBus}. Otherwise, logs the error.
+     * <p>If the given error is a rejection, posts the rejection event into
+     * the {@link EventBus}. Otherwise, logs the error.
      *
      * @param envelope  the command which caused the error
      * @param exception the error occurred during processing of the command
@@ -529,6 +529,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     void onCommandTargetSet(I id, CommandId commandId) {
         lifecycleOf(id).onTargetAssignedToCommand(commandId);
+    }
+
+    void onCommandRejected(I id, CommandId commandId, Event rejection) {
+        lifecycleOf(id).onCommandRejected(commandId, rejection);
     }
 
     @Override

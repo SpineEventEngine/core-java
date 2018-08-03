@@ -26,6 +26,9 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 
 import java.util.List;
+import java.util.Optional;
+
+import static io.spine.core.Events.isRejection;
 
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
@@ -61,7 +64,27 @@ public class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         Command command = envelope.getCommand();
         repository().onDispatchCommand(id, command);
         List<Event> result = aggregate.dispatchCommand(envelope);
-        repository().onCommandHandled(id, command);
+        onCommandResult(command, id, result);
+        return result;
+    }
+
+    private void onCommandResult(Command command, I aggregateId, List<Event> produced) {
+        Optional<Event> rejectionEvent = rejection(produced);
+        if (rejectionEvent.isPresent()) {
+            repository().onCommandRejected(aggregateId, command.getId(), rejectionEvent.get());
+        } else {
+            repository().onCommandHandled(aggregateId, command);
+        }
+    }
+
+    private static Optional<Event> rejection(List<Event> produced) {
+        if (produced.size() != 1) {
+            return Optional.empty();
+        }
+        Event singleEvent = produced.get(0);
+        Optional<Event> result = isRejection(singleEvent)
+                                 ? Optional.of(singleEvent)
+                                 : Optional.empty();
         return result;
     }
 

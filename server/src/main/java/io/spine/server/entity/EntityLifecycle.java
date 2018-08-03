@@ -42,6 +42,7 @@ import io.spine.system.server.DispatchedMessageId;
 import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.ExtractEntityFromArchive;
 import io.spine.system.server.MarkCommandAsHandled;
+import io.spine.system.server.MarkCommandAsRejected;
 import io.spine.system.server.RestoreEntity;
 import io.spine.system.server.SystemGateway;
 import io.spine.type.TypeUrl;
@@ -165,6 +166,15 @@ public class EntityLifecycle {
         MarkCommandAsHandled systemCommand = MarkCommandAsHandled
                 .newBuilder()
                 .setId(command.getId())
+                .build();
+        systemGateway.postCommand(systemCommand);
+    }
+
+    public void onCommandRejected(CommandId commandId, Event rejection) {
+        MarkCommandAsRejected systemCommand = MarkCommandAsRejected
+                .newBuilder()
+                .setId(commandId)
+                .setRejectionEvent(rejection)
                 .build();
         systemGateway.postCommand(systemCommand);
     }

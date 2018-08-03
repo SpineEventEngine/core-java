@@ -94,6 +94,15 @@ public final class CommandErrorHandler {
     }
 
     private HandledError handleRuntimeError(CommandEnvelope envelope, RuntimeException exception) {
+        if (isPreProcessed(exception)) {
+            return HandledError.ofPreProcessed();
+        } else {
+            return handleNewRuntimeError(envelope, exception);
+        }
+    }
+
+    private HandledError handleNewRuntimeError(CommandEnvelope envelope,
+                                               RuntimeException exception) {
         String commandTypeName = envelope.getMessage()
                                          .getClass()
                                          .getName();
@@ -104,6 +113,10 @@ public final class CommandErrorHandler {
         Error error = Errors.causeOf(exception);
         markErrored(envelope, error);
         return HandledError.ofRuntime(exception);
+    }
+
+    private static boolean isPreProcessed(RuntimeException exception) {
+        return exception instanceof CommandDispatchingException;
     }
 
     private void markErrored(CommandEnvelope command, Error error) {

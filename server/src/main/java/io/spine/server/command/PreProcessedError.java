@@ -20,33 +20,10 @@
 
 package io.spine.server.command;
 
-import io.spine.core.CommandEnvelope;
-import io.spine.core.Event;
-
-import java.util.Optional;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
- * A wrapper for a handled error.
- *
- * <p>{@linkplain #rethrowOnce() Rethrows} the encountered {@link RuntimeException} if it is not
- * caused by a rejection or has already been rethrown by a {@code CommandErrorHandler}.
+ * @author Dmytro Dashenkov
  */
-final class HandledRejection implements HandledError {
+enum PreProcessedError implements HandledError {
 
-    private final Rejection rejection;
-
-    HandledRejection(CommandEnvelope origin, RuntimeException exception) {
-        checkNotNull(origin);
-        checkNotNull(exception);
-
-        this.rejection = Rejection.fromThrowable(origin, exception);
-    }
-
-    @Override
-    public Optional<Event> asRejection() {
-        Event event = rejection.asEvent();
-        return Optional.of(event);
-    }
+    INSTANCE
 }

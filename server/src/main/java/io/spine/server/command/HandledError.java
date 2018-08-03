@@ -37,7 +37,9 @@ public interface HandledError {
      *
      * <p>Otherwise, preforms no action.
      */
-    void rethrowOnce();
+    default void rethrowOnce() throws CommandDispatchingException {
+        // Do nothing.
+    }
 
     /**
      * Converts the handled error into a rejection {@linkplain Event event}.
@@ -49,7 +51,13 @@ public interface HandledError {
      * @return the handled rejection event or {@link Optional#empty()} if the handled error is
      * not a command rejection
      */
-    Optional<Event> asRejection();
+    default Optional<Event> asRejection() {
+        return Optional.empty();
+    }
+
+    static HandledError ofPreProcessed() {
+        return PreProcessedError.INSTANCE;
+    }
 
     static HandledError ofRuntime(RuntimeException exception) {
         return new HandledRuntimeError(exception);
