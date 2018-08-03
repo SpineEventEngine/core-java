@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import io.spine.base.CommandMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
@@ -107,7 +108,7 @@ public final class CommandSubstituteMethod
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            boolean result = returnsMessageOrIterable(method);
+            boolean result = returnsMessageOrIterable(method, CommandMessage.class);
             return result;
         }
     }

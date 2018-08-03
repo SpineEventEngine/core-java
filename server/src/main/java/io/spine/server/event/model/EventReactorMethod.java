@@ -21,6 +21,7 @@
 package io.spine.server.event.model;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.React;
@@ -122,7 +123,7 @@ public final class EventReactorMethod
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            boolean returnsMessageOrIterable = returnsMessageOrIterable(method);
+            boolean returnsMessageOrIterable = returnsMessageOrIterable(method, EventMessage.class);
             if (returnsMessageOrIterable) {
                 checkOutputMessageType(method);
                 return true;

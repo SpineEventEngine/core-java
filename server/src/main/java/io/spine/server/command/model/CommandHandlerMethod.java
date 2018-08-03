@@ -22,6 +22,7 @@ package io.spine.server.command.model;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.Rejection;
@@ -132,7 +133,7 @@ public final class CommandHandlerMethod
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            boolean result = returnsMessageOrIterable(method);
+            boolean result = returnsMessageOrIterable(method, EventMessage.class);
             return result;
         }
     }

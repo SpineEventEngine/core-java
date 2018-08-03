@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import io.spine.base.CommandMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.server.command.model.CommandingMethod.Result;
@@ -54,5 +55,20 @@ public final class CommandReactionMethod
     @Override
     public EventClass getMessageClass() {
         return EventClass.of(rawMessageClass());
+    }
+
+    private static final class Filter extends AbstractPredicate<EventContext> {
+
+        private static final Filter INSTANCE = new Filter();
+
+        private Filter() {
+            super(EventContext.class);
+        }
+
+        @Override
+        protected boolean verifyReturnType(Method method) {
+            boolean result = returnsMessageOrIterable(method, CommandMessage.class);
+            return result;
+        }
     }
 }

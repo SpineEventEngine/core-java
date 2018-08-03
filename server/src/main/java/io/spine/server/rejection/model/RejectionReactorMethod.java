@@ -21,6 +21,7 @@ package io.spine.server.rejection.model;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.React;
 import io.spine.core.RejectionContext;
 import io.spine.server.model.HandlerMethod;
@@ -135,7 +136,7 @@ public class RejectionReactorMethod
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            boolean result = returnsMessageOrIterable(method);
+            boolean result = returnsMessageOrIterable(method, EventMessage.class);
             return result;
         }
     }
