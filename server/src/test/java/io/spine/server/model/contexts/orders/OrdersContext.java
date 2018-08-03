@@ -18,24 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package io.spine.server.model.contexts.orders;
+
+import io.spine.server.BoundedContext;
+
 /**
- *  The versions of the libraries used.
+ * Creates Orders Bounded Context.
  *
- *  This file is used in both module `build.gradle` scripts and in the integration tests,
- *  as we want to manage the versions in a single source.
+ * @author Alexander Yevsyukov
  */
- 
-def final SPINE_VERSION = '0.10.74-SNAPSHOT'
+public class OrdersContext {
 
-ext {
+    private OrdersContext() {
+    }
 
-    // The version of the modules in this project.
-    spineVersion = SPINE_VERSION
-
-    // Depend on `base` for the general definitions and a model compiler.
-    spineBaseVersion = '0.10.61-SNAPSHOT'
-
-    spineTimeVersion = '0.10.45-SNAPSHOT'
-
-    gRpcVersion = '1.13.0'
+    public static BoundedContext newInstance() {
+        BoundedContext result = BoundedContext
+                .newBuilder()
+                .setName("Orders")
+                .build();
+        result.register(new OrderRepository());
+        return result;
+    }
 }

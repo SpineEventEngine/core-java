@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.client.EntityId;
@@ -54,31 +55,68 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.util.stream.Collectors.toList;
 
 /**
- * The default implementation of {@link Repository.Lifecycle}.
+ * The lifecycle callbacks of an {@link Entity}.
  *
- * <p>On each callback, posts a number of system commands describing the interaction with
- * the entity. A call may not result in a system command at all.
- * See the individual method descriptions for more info.
+ * <p>On each call, posts from zero to several system commands. See the individual method
+ * descriptions for more info about the posted commands.
+ *
+ * <p>An instance of {@code EntityLifecycle} is associated with a single instance of entity.
+ *
+ * @see Repository#lifecycleOf(Object) Repository.lifecycleOf(I)
  */
-@SuppressWarnings("OverlyCoupledClass") // Posts system events.
-final class DefaultLifecycle<I> implements Repository.Lifecycle {
+@SuppressWarnings("OverlyCoupledClass") // Posts system commands.
+public class EntityLifecycle {
 
+    /**
+     * The {@link SystemGateway} which the system commands are posted into.
+     */
     private final SystemGateway systemGateway;
-    private final EntityHistoryId id;
 
-    DefaultLifecycle(SystemGateway gateway, I id, TypeUrl entityType) {
+    /**
+     * The ID of {@linkplain io.spine.system.server.EntityHistory history} of the associated
+     * {@link Entity}.
+     *
+     * <p>Most commands posted by the {@code EntityLifecycle} are handled by
+     * the {@link io.spine.system.server.EntityHistoryAggregate EntityHistoryAggregate}. Thus,
+     * storing an ID as a field is convenient.
+     */
+    private final EntityHistoryId historyId;
+
+    /**
+     * Creates a new instance.
+     *
+     * <p>Use this constructor for test purposes <b>only</b>.
+     *
+     * @see #create(Object, TypeUrl, SystemGateway) EntityLifecycle.create(...) to instantiate
+     *                                              the class
+     */
+    @VisibleForTesting
+    protected EntityLifecycle(Object historyId, TypeUrl entityType, SystemGateway gateway) {
         this.systemGateway = gateway;
-        this.id = historyId(id, entityType);
+        this.historyId = historyId(historyId, entityType);
+    }
+
+    /**
+     * Creates a new instance of {@code EntityLifecycle}.
+     *
+     * @param history    the ID of the associated entity history
+     * @param entityType the type of the associated entity
+     * @param gateway    the {@link SystemGateway} to post the system commands
+     * @return new instance of {@code EntityLifecycle}
+     */
+    static EntityLifecycle create(Object history, TypeUrl entityType, SystemGateway gateway) {
+        return new EntityLifecycle(history, entityType, gateway);
     }
 
     /**
      * Posts the {@link CreateEntity} system command.
+     *
+     * @param entityKind the {@link EntityOption.Kind} of the created entity
      */
-    @Override
     public void onEntityCreated(EntityOption.Kind entityKind) {
         CreateEntity command = CreateEntity
                 .newBuilder()
-                .setId(id)
+                .setId(historyId)
                 .setKind(entityKind)
                 .build();
         systemGateway.postCommand(command);
@@ -87,13 +125,14 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
     /**
      * Posts the {@link io.spine.system.server.AssignTargetToCommand AssignTargetToCommand}
      * system command.
+     *
+     * @param commandId the ID of the command which should be handled by the entity
      */
-    @Override
     public void onTargetAssignedToCommand(CommandId commandId) {
         CommandTarget target = CommandTarget
                 .newBuilder()
-                .setEntityId(id.getEntityId())
-                .setTypeUrl(id.getTypeUrl())
+                .setEntityId(historyId.getEntityId())
+                .setTypeUrl(historyId.getTypeUrl())
                 .build();
         AssignTargetToCommand command = AssignTargetToCommand
                 .newBuilder()
@@ -105,12 +144,13 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
 
     /**
      * Posts the {@link DispatchCommandToHandler} system command.
+     *
+     * @param command the dispatched command
      */
-    @Override
     public void onDispatchCommand(Command command) {
         DispatchCommandToHandler systemCommand = DispatchCommandToHandler
                 .newBuilder()
-                .setReceiver(id)
+                .setReceiver(historyId)
                 .setCommandId(command.getId())
                 .build();
         systemGateway.postCommand(systemCommand);
@@ -118,8 +158,9 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
 
     /**
      * Posts the {@link MarkCommandAsHandled} system command.
+     *
+     * @param command the handled command
      */
-    @Override
     public void onCommandHandled(Command command) {
         MarkCommandAsHandled systemCommand = MarkCommandAsHandled
                 .newBuilder()
@@ -130,12 +171,13 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
 
     /**
      * Posts the {@link DispatchEventToSubscriber} system command.
+     *
+     * @param event the dispatched event
      */
-    @Override
     public void onDispatchEventToSubscriber(Event event) {
         DispatchEventToSubscriber systemCommand = DispatchEventToSubscriber
                 .newBuilder()
-                .setReceiver(id)
+                .setReceiver(historyId)
                 .setEventId(event.getId())
                 .build();
         systemGateway.postCommand(systemCommand);
@@ -143,12 +185,13 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
 
     /**
      * Posts the {@link DispatchEventToReactor} system command.
+     *
+     * @param event the dispatched event
      */
-    @Override
     public void onDispatchEventToReactor(Event event) {
         DispatchEventToReactor systemCommand = DispatchEventToReactor
                 .newBuilder()
-                .setReceiver(id)
+                .setReceiver(historyId)
                 .setEventId(event.getId())
                 .build();
         systemGateway.postCommand(systemCommand);
@@ -160,10 +203,13 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
      *
      * <p>Only the actual changes in the entity attributes result into system commands.
      * If the previous and new values are equal, then no commands are posted.
+     *
+     * @param change     the change in the entity state and attributes
+     * @param messageIds the IDs of the messages which caused the {@code change}; typically,
+     *                   {@link io.spine.core.EventId EventId}s or {@link CommandId}s
      */
-    @Override
-    public void onStateChanged(EntityRecordChange change,
-                               Set<? extends Message> messageIds) {
+    protected void onStateChanged(EntityRecordChange change,
+                        Set<? extends Message> messageIds) {
         Collection<DispatchedMessageId> dispatchedMessageIds = toDispatched(messageIds);
 
         postIfChanged(change, dispatchedMessageIds);
@@ -175,13 +221,15 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
 
     private void postIfChanged(EntityRecordChange change,
                                Collection<DispatchedMessageId> messageIds) {
-        Any oldState = change.getPreviousValue().getState();
-        Any newState = change.getNewValue().getState();
+        Any oldState = change.getPreviousValue()
+                             .getState();
+        Any newState = change.getNewValue()
+                             .getState();
 
         if (!oldState.equals(newState)) {
             ChangeEntityState command = ChangeEntityState
                     .newBuilder()
-                    .setId(id)
+                    .setId(historyId)
                     .setNewState(newState)
                     .addAllMessageId(messageIds)
                     .build();
@@ -200,7 +248,7 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
         if (newValue && !oldValue) {
             ArchiveEntity command = ArchiveEntity
                     .newBuilder()
-                    .setId(id)
+                    .setId(historyId)
                     .addAllMessageId(messageIds)
                     .build();
             systemGateway.postCommand(command);
@@ -218,7 +266,7 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
         if (newValue && !oldValue) {
             DeleteEntity command = DeleteEntity
                     .newBuilder()
-                    .setId(id)
+                    .setId(historyId)
                     .addAllMessageId(messageIds)
                     .build();
             systemGateway.postCommand(command);
@@ -236,7 +284,7 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
         if (!newValue && oldValue) {
             ExtractEntityFromArchive command = ExtractEntityFromArchive
                     .newBuilder()
-                    .setId(id)
+                    .setId(historyId)
                     .addAllMessageId(messageIds)
                     .build();
             systemGateway.postCommand(command);
@@ -254,7 +302,7 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
         if (!newValue && oldValue) {
             RestoreEntity command = RestoreEntity
                     .newBuilder()
-                    .setId(id)
+                    .setId(historyId)
                     .addAllMessageId(messageIds)
                     .build();
             systemGateway.postCommand(command);
@@ -265,12 +313,12 @@ final class DefaultLifecycle<I> implements Repository.Lifecycle {
     toDispatched(Collection<? extends Message> messageIds) {
         Collection<DispatchedMessageId> dispatchedMessageIds =
                 messageIds.stream()
-                          .map(DefaultLifecycle::dispatchedMessageId)
+                          .map(EntityLifecycle::dispatchedMessageId)
                           .collect(toList());
         return dispatchedMessageIds;
     }
 
-    private EntityHistoryId historyId(I id, TypeUrl entityType) {
+    private static EntityHistoryId historyId(Object id, TypeUrl entityType) {
         EntityId entityId = EntityId
                 .newBuilder()
                 .setId(pack(id))

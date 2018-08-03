@@ -20,7 +20,6 @@
 
 package io.spine.server;
 
-import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventEnricher;
 import io.spine.system.server.CommandLifecycleRepository;
@@ -29,8 +28,6 @@ import io.spine.system.server.NoOpSystemGateway;
 import io.spine.system.server.ScheduledCommandRepository;
 import io.spine.system.server.SystemEnricher;
 import io.spine.system.server.SystemGateway;
-
-import java.util.stream.Stream;
 
 /**
  * An implementation of {@link BoundedContext} used for the System domain.
@@ -86,16 +83,9 @@ final class SystemBoundedContext extends BoundedContext {
     }
 
     private void init(CommandLifecycleRepository commandLifecycle) {
-        EntityHistoryRepository entityHistory = new EntityHistoryRepository();
-        ScheduledCommandRepository scheduledCommand = new ScheduledCommandRepository();
-        registerAll(entityHistory,
-                    commandLifecycle,
-                    scheduledCommand);
-    }
-
-    private void registerAll(Repository<?, ?>... repositories) {
-        Stream.of(repositories)
-              .forEach(this::register);
+        register(commandLifecycle);
+        register(new EntityHistoryRepository());
+        register(new ScheduledCommandRepository());
     }
 
     /**

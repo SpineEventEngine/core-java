@@ -22,15 +22,10 @@ package io.spine.server.entity;
 
 import com.google.common.collect.Iterators;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
-import io.spine.core.Command;
-import io.spine.core.CommandId;
-import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
-import io.spine.option.EntityOption;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.model.EntityClass;
@@ -47,7 +42,6 @@ import org.slf4j.Logger;
 
 import java.util.Iterator;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -363,16 +357,16 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * Obtains an instance of {@link Lifecycle} for the entity with the given ID.
+     * Obtains an instance of {@link EntityLifecycle} for the entity with the given ID.
      *
      * @param id the ID of the target entity
-     * @return {@link Lifecycle} of the given entity
+     * @return {@link EntityLifecycle} of the given entity
      */
     @Internal
-    protected Lifecycle lifecycleOf(I id) {
+    protected EntityLifecycle lifecycleOf(I id) {
         checkNotNull(id);
         SystemGateway gateway = getBoundedContext().getSystemGateway();
-        return new DefaultLifecycle<>(gateway, id, getEntityStateType());
+        return EntityLifecycle.create(id, getEntityStateType(), gateway);
     }
 
     /**
@@ -432,84 +426,5 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             E entity = loaded.get();
             return entity;
         }
-    }
-
-    /**
-     * The lifecycle of an {@link Entity}.
-     *
-     * <p>Represents a set of callbacks which are invoked at certain point when interacting with
-     * an {@link Entity}.
-     *
-     * <p>An instance of {@code Lifecycle} is associated with a single instance of entity.
-     *
-     * @see Repository#lifecycleOf(Object) Repository.lifecycleOf(I)
-     */
-    @Internal
-    public interface Lifecycle {
-
-        /**
-         * The callback invoked when the entity is created.
-         *
-         * <p>Invoked once per an entity instance. Not invoked when the entity is loaded from
-         * storage.
-         *
-         * @param entityKind the {@link EntityOption.Kind} of the created entity
-         */
-        void onEntityCreated(EntityOption.Kind entityKind);
-
-        /**
-         * The callback invoked when the associated entity is assigned to handle a {@link Command}.
-         *
-         * @param id the ID of the command which should be handled by the entity
-         */
-        void onTargetAssignedToCommand(CommandId id);
-
-        /**
-         * The callback invoked before a {@link Command} is dispatched to the handler in the entity.
-         *
-         * @param command the dispatched command
-         */
-        void onDispatchCommand(Command command);
-
-        /**
-         * The callback invoked after the given {@link Command} is handled by the entity.
-         *
-         * @param command the handled command
-         */
-        void onCommandHandled(Command command);
-
-        /**
-         * The callback invoked when an {@link Event} is dispatched to a subscriber in the entity.
-         *
-         * <p>This callback applies only to entities which
-         * {@link io.spine.core.Subscribe @Subscribe} to events, such as
-         * {@link io.spine.server.projection.Projection Projection}s.
-         *
-         * @param event the dispatched event
-         * @see #onDispatchEventToReactor(Event)
-         */
-        void onDispatchEventToSubscriber(Event event);
-
-        /**
-         * The callback invoked when an {@link Event} is dispatched to a reactor in the entity.
-         *
-         * <p>This callback applies only to entities which
-         * {@link io.spine.core.React @React} to events, such as
-         * {@link io.spine.server.aggregate.Aggregate Aggregate}s and
-         * {@link io.spine.server.procman.ProcessManager ProcessManager}s.
-         *
-         * @param event the dispatched event
-         * @see #onDispatchEventToReactor(Event)
-         */
-        void onDispatchEventToReactor(Event event);
-
-        /**
-         * The callback invoked when the entity state and/or attributes are changed.
-         *
-         * @param change     the change in the entity state and attributes
-         * @param messageIds the IDs of the messages which caused the {@code change}; typically,
-         *                   {@link io.spine.core.EventId EventId}s or {@link CommandId}s
-         */
-        void onStateChanged(EntityRecordChange change, Set<? extends Message> messageIds);
     }
 }

@@ -30,6 +30,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateCommandEndpoint;
 import io.spine.server.aggregate.AggregateEventEndpoint;
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.entity.EntityLifecycle;
 import io.spine.testing.server.NoOpLifecycle;
 
 import java.util.List;
@@ -169,8 +170,8 @@ public class AggregateMessageDispatcher {
             extends AggregateRepository<I, A> {
 
         @Override
-        protected Lifecycle lifecycleOf(I id) {
-            return NoOpLifecycle.INSTANCE;
+        protected EntityLifecycle lifecycleOf(I id) {
+            return NoOpLifecycle.instance();
         }
     }
 }

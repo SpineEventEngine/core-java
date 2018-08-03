@@ -106,7 +106,7 @@ public final class EventSubscriberMethod
         @Override
         public void checkAccessModifier(Method method) {
             MethodAccessChecker checker = forMethod(method);
-            checker.checkPublic("Event subscriber {} must be declared 'public'");
+            checker.checkPublic("Event subscriber `{}` must be declared `public`");
         }
 
         @Override
