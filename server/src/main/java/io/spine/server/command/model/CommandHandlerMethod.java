@@ -28,11 +28,11 @@ import io.spine.core.Rejection;
 import io.spine.server.EventProducer;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
-import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.EventsResult;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.procman.ProcessManager;
 
 import java.lang.reflect.Method;
@@ -62,7 +62,7 @@ public final class CommandHandlerMethod
         return new CommandHandlerMethod(method);
     }
 
-    public static AbstractHandlerMethod.Factory<CommandHandlerMethod> factory() {
+    public static MethodFactory<CommandHandlerMethod> factory() {
         return Factory.INSTANCE;
     }
 
@@ -78,7 +78,7 @@ public final class CommandHandlerMethod
     /**
      * The factory of {@link CommandHandlerMethod}s.
      */
-    private static class Factory extends AbstractHandlerMethod.Factory<CommandHandlerMethod> {
+    private static class Factory extends MethodFactory<CommandHandlerMethod> {
 
         private static final Factory INSTANCE = new Factory();
 

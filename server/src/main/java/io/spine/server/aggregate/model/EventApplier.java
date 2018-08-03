@@ -30,6 +30,7 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodPredicate;
 import io.spine.server.model.MethodResult;
 
@@ -69,7 +70,7 @@ public final class EventApplier
         return factory().getPredicate();
     }
 
-    public static AbstractHandlerMethod.Factory<EventApplier> factory() {
+    public static MethodFactory<EventApplier> factory() {
         return Factory.INSTANCE;
     }
 
@@ -94,7 +95,7 @@ public final class EventApplier
     }
 
     /** The factory for filtering methods that match {@code EventApplier} specification. */
-    private static class Factory extends AbstractHandlerMethod.Factory<EventApplier> {
+    private static class Factory extends MethodFactory<EventApplier> {
 
         private static final Factory INSTANCE = new Factory();
 

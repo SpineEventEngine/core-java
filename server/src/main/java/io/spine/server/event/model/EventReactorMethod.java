@@ -27,6 +27,7 @@ import io.spine.core.React;
 import io.spine.server.event.EventReactor;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodPredicate;
 import io.spine.server.model.ReactorMethodResult;
 
@@ -75,14 +76,14 @@ public final class EventReactorMethod
         return new EventReactorMethod(method);
     }
 
-    public static AbstractHandlerMethod.Factory<EventReactorMethod> factory() {
+    public static MethodFactory<EventReactorMethod> factory() {
         return Factory.INSTANCE;
     }
 
     /**
      * The factory for creating {@link EventReactorMethod event reactor} methods.
      */
-    private static class Factory extends AbstractHandlerMethod.Factory<EventReactorMethod> {
+    private static class Factory extends MethodFactory<EventReactorMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
@@ -141,7 +142,7 @@ public final class EventReactorMethod
         private static void checkOutputMessageType(Method method) {
             Class<?> returnType = method.getReturnType();
 
-            // The method returns List. We're OK.
+            // The method returns Iterable. We're OK.
             if (Iterable.class.isAssignableFrom(returnType)) {
                 return;
             }

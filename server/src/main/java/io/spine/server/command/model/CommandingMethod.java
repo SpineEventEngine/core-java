@@ -28,6 +28,8 @@ import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodResult;
 import io.spine.type.MessageClass;
 
+import java.util.List;
+
 /**
  * Base interface for methods that generate one or more command messages in response to
  * an incoming message.
@@ -50,6 +52,30 @@ interface CommandingMethod<T, M extends MessageClass, C extends Message, R exten
 
         AbstractPredicate(Class<C> contextClass) {
             super(Command.class, contextClass);
+        }
+    }
+
+    /**
+     * A command substitution method returns a one or more command messages.
+     */
+    final class Result extends MethodResult<Message> {
+
+        private final boolean optional;
+
+        Result(Object rawMethodOutput, boolean optional) {
+            super(rawMethodOutput);
+            this.optional = optional;
+            List<Message> messages = toMessages(rawMethodOutput);
+            checkMessages(messages);
+            setMessages(messages);
+        }
+
+        private void checkMessages(List<Message> messages) {
+            if (messages.isEmpty() && !optional) {
+                throw new IllegalStateException(
+                        "Commanding method did not produce command messages"
+                );
+            }
         }
     }
 }

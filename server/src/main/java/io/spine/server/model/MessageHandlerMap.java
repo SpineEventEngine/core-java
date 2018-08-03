@@ -58,7 +58,7 @@ public class MessageHandlerMap<M extends MessageClass,
      * @param cls     the class to inspect
      * @param factory the factory of methods
      */
-    public MessageHandlerMap(Class<?> cls, AbstractHandlerMethod.Factory<H> factory) {
+    public MessageHandlerMap(Class<?> cls, MethodFactory<H> factory) {
         this.map = scan(cls, factory);
     }
 
@@ -135,7 +135,7 @@ public class MessageHandlerMap<M extends MessageClass,
 
     private static <M extends MessageClass, H extends HandlerMethod<?, M, ?, ?>>
     ImmutableMap<HandlerKey, H> scan(Class<?> declaringClass,
-                                     AbstractHandlerMethod.Factory<H> factory) {
+                                     MethodFactory<H> factory) {
         Predicate<Method> filter = factory.getPredicate();
         Map<HandlerKey, H> tempMap = Maps.newHashMap();
         Method[] declaredMethods = declaringClass.getDeclaredMethods();

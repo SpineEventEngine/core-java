@@ -30,10 +30,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.model.MethodExceptionChecker.forMethod;
 
 /**
  * An abstract base for wrappers over methods handling messages.
@@ -239,63 +237,5 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
     public HandlerKey key() {
         HandlerKey result = HandlerKey.of(getMessageClass());
         return result;
-    }
-
-    /**
-     * The base class for factory objects that can filter {@link Method} objects
-     * that represent handler methods and create corresponding {@code HandlerMethod} instances
-     * that wrap those methods.
-     *
-     * @param <H> the type of the handler method objects to create
-     */
-    public abstract static class Factory<H extends HandlerMethod> {
-
-        /** Returns the class of the method wrapper. */
-        public abstract Class<H> getMethodClass();
-
-        /** Returns a predicate for filtering methods. */
-        public abstract Predicate<Method> getPredicate();
-
-        /**
-         * Checks an access modifier of the method and logs a warning if it is invalid.
-         *
-         * @param method the method to check
-         * @see MethodAccessChecker
-         */
-        public abstract void checkAccessModifier(Method method);
-
-        /**
-         * Creates a {@linkplain HandlerMethod handler method} from a raw method.
-         *
-         * <p>Performs various checks before wrapper creation, e.g. method access modifier or
-         * whether method throws any prohibited exceptions.
-         *
-         * @param method the method to create wrapper from
-         * @return a wrapper object created from the method
-         * @throws IllegalStateException in case some of the method checks fail
-         */
-        public H create(Method method) {
-            checkAccessModifier(method);
-            checkThrownExceptions(method);
-            return doCreate(method);
-        }
-
-        /** Creates a wrapper object from a method. */
-        protected abstract H doCreate(Method method);
-
-        /**
-         * Ensures method does not throw any prohibited exception types.
-         *
-         * <p>In case it does, the {@link IllegalStateException} containing diagnostics info is
-         * thrown.
-         *
-         * @param method the method to check
-         * @throws IllegalStateException if the method throws any prohibited exception types
-         * @see MethodExceptionChecker
-         */
-        protected void checkThrownExceptions(Method method) {
-            MethodExceptionChecker checker = forMethod(method);
-            checker.checkDeclaresNoExceptionsThrown();
-        }
     }
 }

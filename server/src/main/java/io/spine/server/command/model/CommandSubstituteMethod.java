@@ -20,19 +20,16 @@
 
 package io.spine.server.command.model;
 
-import com.google.protobuf.Message;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.server.command.CommandReceiver;
-import io.spine.server.command.model.CommandSubstituteMethod.Result;
-import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.command.model.CommandingMethod.Result;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
-import io.spine.server.model.MethodResult;
+import io.spine.server.model.MethodFactory;
 
 import java.lang.reflect.Method;
-import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -50,7 +47,7 @@ public final class CommandSubstituteMethod
 
     @Override
     protected Result toResult(CommandReceiver target, Object rawMethodOutput) {
-        Result result = new Result(rawMethodOutput);
+        Result result = new Result(rawMethodOutput, false);
         return result;
     }
 
@@ -58,12 +55,12 @@ public final class CommandSubstituteMethod
         return new CommandSubstituteMethod(method);
     }
 
-    static AbstractHandlerMethod.Factory<CommandSubstituteMethod> factory() {
+    static MethodFactory<CommandSubstituteMethod> factory() {
         return Factory.INSTANCE;
     }
 
     private static class Factory
-            extends AbstractHandlerMethod.Factory<CommandSubstituteMethod> {
+            extends MethodFactory<CommandSubstituteMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
@@ -112,18 +109,6 @@ public final class CommandSubstituteMethod
         protected boolean verifyReturnType(Method method) {
             boolean result = returnsMessageOrIterable(method);
             return result;
-        }
-    }
-
-    /**
-     * A command substitution method returns a one or more command messages.
-     */
-    public static final class Result extends MethodResult<Message> {
-
-        private Result(Object rawMethodOutput) {
-            super(rawMethodOutput);
-            List<Message> messages = toMessages(rawMethodOutput);
-            setMessages(messages);
         }
     }
 }

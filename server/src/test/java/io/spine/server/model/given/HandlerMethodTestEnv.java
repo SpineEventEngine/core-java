@@ -27,6 +27,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
 
 import java.io.IOException;
@@ -164,7 +165,7 @@ public class HandlerMethodTestEnv {
             return EventClass.of(rawMessageClass());
         }
 
-        private static class Factory extends AbstractHandlerMethod.Factory<OneParamMethod> {
+        private static class Factory extends MethodFactory<OneParamMethod> {
 
             private static final Factory INSTANCE = new Factory();
 

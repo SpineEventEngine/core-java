@@ -22,8 +22,8 @@ package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.core.CommandClass;
-import io.spine.server.model.AbstractHandlerMethod.Factory;
 import io.spine.server.model.MessageHandlerMap;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.model.ModelClass;
 
 import java.util.Set;
@@ -43,7 +43,7 @@ public abstract class AbstractCommandHandlingClass<C, H extends CommandAccepting
 
     private final MessageHandlerMap<CommandClass, H> commands;
 
-    AbstractCommandHandlingClass(Class<? extends C> cls, Factory<H> factory) {
+    AbstractCommandHandlingClass(Class<? extends C> cls, MethodFactory<H> factory) {
         super(cls);
         this.commands = new MessageHandlerMap<>(cls, factory);
     }

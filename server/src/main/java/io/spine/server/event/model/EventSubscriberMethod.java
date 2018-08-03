@@ -28,6 +28,7 @@ import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodPredicate;
 import io.spine.server.model.MethodResult;
 
@@ -61,7 +62,7 @@ public final class EventSubscriberMethod
     }
 
     /** Returns the factory for filtering and creating event subscriber methods. */
-    public static AbstractHandlerMethod.Factory<EventSubscriberMethod> factory() {
+    public static MethodFactory<EventSubscriberMethod> factory() {
         return Factory.getInstance();
     }
 
@@ -80,7 +81,7 @@ public final class EventSubscriberMethod
     /**
      * The factory for creating {@linkplain EventSubscriberMethod event subscriber} methods.
      */
-    private static class Factory extends AbstractHandlerMethod.Factory<EventSubscriberMethod> {
+    private static class Factory extends MethodFactory<EventSubscriberMethod> {
 
         private static final Factory INSTANCE = new Factory();
 

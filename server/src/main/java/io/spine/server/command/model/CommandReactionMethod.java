@@ -20,19 +20,16 @@
 
 package io.spine.server.command.model;
 
-import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
-import io.spine.server.command.model.CommandReactionMethod.Result;
+import io.spine.server.command.model.CommandingMethod.Result;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.MethodResult;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 
 /**
- * A method which generates one or more command messages in response to an event.
+ * A method which <em>may</em> generate one or more command messages in response to an event.
  *
  * @author Alexander Yevsyukov
  */
@@ -40,33 +37,22 @@ public final class CommandReactionMethod
         extends AbstractHandlerMethod<EventReceiver, EventClass, EventContext, Result>
         implements CommandingMethod<EventReceiver, EventClass, EventContext, Result> {
 
-    /**
-     * Creates a new instance to wrap {@code method} on {@code target}.
-     *
-     * @param method subscriber method
-     */
-    protected CommandReactionMethod(Method method) {
+    private CommandReactionMethod(Method method) {
         super(method);
+    }
+
+    static CommandReactionMethod from(Method method) {
+        return new CommandReactionMethod(method);
     }
 
     @Override
     protected Result toResult(EventReceiver target, Object rawMethodOutput) {
-        return null;
+        Result result = new Result(rawMethodOutput, true);
+        return result;
     }
 
     @Override
     public EventClass getMessageClass() {
-        return null;
+        return EventClass.of(rawMessageClass());
     }
-
-    /**
-     * The result of a method which reacts on
-     */
-    public static final class Result extends MethodResult<Message> {
-
-        protected Result(@Nullable Object output) {
-            super(output);
-        }
-    }
-
 }
