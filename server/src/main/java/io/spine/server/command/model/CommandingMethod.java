@@ -39,7 +39,8 @@ import io.spine.type.MessageClass;
  * @author Alexander Yevsyukov
  */
 @Immutable
-public interface CommandingMethod<T, M extends MessageClass, C extends Message, R extends MethodResult>
+public
+interface CommandingMethod<T, M extends MessageClass, C extends Message, R extends MethodResult>
         extends HandlerMethod<T, M, C, R> {
 
     /**

@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.server.command.model.CommandReactionMethod.Result;
+import io.spine.server.event.EventReceiver;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodResult;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -31,11 +32,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.lang.reflect.Method;
 
 /**
+ * A method which generates one or more command messages in response to an event.
+ *
  * @author Alexander Yevsyukov
  */
 public final class CommandReactionMethod
-        extends AbstractHandlerMethod<Object, EventClass, EventContext, Result>
-        implements CommandingMethod<Object, EventClass, EventContext, Result> {
+        extends AbstractHandlerMethod<EventReceiver, EventClass, EventContext, Result>
+        implements CommandingMethod<EventReceiver, EventClass, EventContext, Result> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -47,7 +50,7 @@ public final class CommandReactionMethod
     }
 
     @Override
-    protected Result toResult(Object target, Object rawMethodOutput) {
+    protected Result toResult(EventReceiver target, Object rawMethodOutput) {
         return null;
     }
 
@@ -56,6 +59,9 @@ public final class CommandReactionMethod
         return null;
     }
 
+    /**
+     * The result of a method which reacts on
+     */
     public static final class Result extends MethodResult<Message> {
 
         protected Result(@Nullable Object output) {
