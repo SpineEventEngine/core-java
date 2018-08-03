@@ -20,10 +20,14 @@
 
 package io.spine.core;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static io.spine.core.EventContext.OriginCase.COMMAND_CONTEXT;
+import static io.spine.core.Events.isRejection;
 
 /**
  * The holder of an {@code Event} which provides convenient access to its properties.
@@ -95,7 +99,6 @@ public final class EventEnvelope extends EnrichableMessageEnvelope<EventId, Even
         return getEventContext().getCommandContext()
                                 .getActorContext();
     }
-
     
     /**
      * Sets the origin fields of the event context being built using the data of the enclosed 
@@ -129,6 +132,21 @@ public final class EventEnvelope extends EnrichableMessageEnvelope<EventId, Even
      */
     public TypeName getTypeName() {
         TypeName result = TypeName.of(eventMessage);
+        return result;
+    }
+
+    public DispatchedCommand getRejectionOrigin() {
+        checkState(isRejection(getOuterObject()));
+        checkState(eventContext.getOriginCase() == COMMAND_CONTEXT);
+
+        RejectionEventContext rejection = eventContext.getRejection();
+        Any commandMessage = rejection.getCommandMessage();
+        CommandContext context = eventContext.getCommandContext();
+        DispatchedCommand result = DispatchedCommand
+                .newBuilder()
+                .setMessage(commandMessage)
+                .setContext(context)
+                .build();
         return result;
     }
 
