@@ -77,7 +77,7 @@ public abstract class EventsResult extends MethodResult<Message> {
     /**
      * Converts an event message into an {@link Event}.
      */
-    private final class ToEvent implements Function<Message, Event> {
+    private static final class ToEvent implements Function<Message, Event> {
 
         private final EventFactory eventFactory;
         private final @Nullable Version version;
