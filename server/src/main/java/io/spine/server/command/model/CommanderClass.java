@@ -20,17 +20,17 @@
 
 package io.spine.server.command.model;
 
-import io.spine.server.command.Commander;
+import io.spine.server.command.AbstractCommander;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Provides information on message handling for a class of {@link Commander}s.
+ * Provides information on message handling for a class of {@link AbstractCommander}s.
  *
  * @param <C> the type of commanders
  * @author Alexander Yevsyukov
  */
-public final class CommanderClass<C extends Commander>
+public final class CommanderClass<C extends AbstractCommander>
         extends AbstractCommandHandlingClass<C, CommandSubstituteMethod> {
 
     private static final long serialVersionUID = 0L;
@@ -40,7 +40,7 @@ public final class CommanderClass<C extends Commander>
         super(value, CommandSubstituteMethod.factory());
     }
 
-    public static <C extends Commander>
+    public static <C extends AbstractCommander>
     CommanderClass<C> asCommanderClass(Class<C> cls) {
         checkNotNull(cls);
         CommanderClass<C> result = (CommanderClass<C>)

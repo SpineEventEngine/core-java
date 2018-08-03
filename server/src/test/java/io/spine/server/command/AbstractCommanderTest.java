@@ -30,11 +30,11 @@ import org.junit.jupiter.api.BeforeEach;
 /**
  * @author Alexander Yevsyukov
  */
-class CommanderTest {
+class AbstractCommanderTest {
 
     private final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                                 .build();
-    private Commander commander;
+    private AbstractCommander commander;
 
     @BeforeEach
     void setUp() {
@@ -44,7 +44,7 @@ class CommanderTest {
     /**
      * Test environment class that generates new commands in response to incoming messages.
      */
-    private static final class Commendatore extends Commander {
+    private static final class Commendatore extends AbstractCommander {
 
         private Commendatore(CommandBus commandBus, EventBus eventBus) {
             super(commandBus, eventBus);
