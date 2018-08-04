@@ -20,7 +20,12 @@
 
 package io.spine.server.command.model;
 
+import io.spine.core.EventClass;
 import io.spine.server.command.AbstractCommander;
+import io.spine.server.event.model.EventReceiverClass;
+import io.spine.server.event.model.EventReceivingClassDelegate;
+
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -31,13 +36,19 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 public final class CommanderClass<C extends AbstractCommander>
-        extends AbstractCommandHandlingClass<C, CommandSubstituteMethod> {
+        extends AbstractCommandHandlingClass<C, CommandSubstituteMethod>
+        implements EventReceiverClass {
 
     private static final long serialVersionUID = 0L;
+    private final EventReceivingClassDelegate<C, CommandReactionMethod> delegate;
 
-    private CommanderClass(Class<C> value) {
-        //TODO:2018-07-25:alexander.yevsyukov: A commander may have not only Subst methods!
-        super(value, CommandSubstituteMethod.factory());
+    private CommanderClass(Class<C> rawClass) {
+        super(rawClass, CommandSubstituteMethod.factory());
+        this.delegate = new EventReceivingClassDelegate<>(
+                rawClass,
+                //TODO:2018-08-05:alexander.yevsyukov: pass factotry
+                null
+        );
     }
 
     public static <C extends AbstractCommander>
@@ -47,4 +58,16 @@ public final class CommanderClass<C extends AbstractCommander>
                 get(cls, CommanderClass.class, () -> new CommanderClass<>(cls));
         return result;
     }
+
+    @Override
+    public Set<EventClass> getEventClasses() {
+        return delegate.getEventClasses();
+    }
+
+    @Override
+    public Set<EventClass> getExternalEventClasses() {
+        return delegate.getExternalEventClasses();
+    }
+
+    //TODO:2018-08-05:alexander.yevsyukov: Get method for handling command reaction
 }

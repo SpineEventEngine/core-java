@@ -37,6 +37,7 @@ import java.util.List;
  * @param <T> the type of the target object
  * @param <M> the type of the message class
  * @param <C> the type of the message context
+ * @param <R> the type of the method result
  *
  * @author Alexander Yevsyukov
  */

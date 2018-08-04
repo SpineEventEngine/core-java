@@ -20,14 +20,12 @@
 
 package io.spine.server.projection.model;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.core.EventClass;
 import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.model.EventReceiverClass;
+import io.spine.server.event.model.EventReceivingClassDelegate;
 import io.spine.server.event.model.EventSubscriberMethod;
 import io.spine.server.event.model.SubscribingClass;
-import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.projection.Projection;
 
 import java.util.Set;
@@ -40,23 +38,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <P> the type of projections
  * @author Alexander Yevsyukov
  */
-public final class ProjectionClass<P extends Projection> extends EntityClass<P>
+public final class ProjectionClass<P extends Projection>
+        extends EntityClass<P>
         implements EventReceiverClass, SubscribingClass {
 
     private static final long serialVersionUID = 0L;
-
-    private final MessageHandlerMap<EventClass, EventSubscriberMethod> eventSubscriptions;
-    private final ImmutableSet<EventClass> domesticSubscriptions;
-    private final ImmutableSet<EventClass> externalSubscriptions;
+    private final EventReceivingClassDelegate<P, EventSubscriberMethod> delegate;
 
     private ProjectionClass(Class<P> cls) {
         super(cls);
-        this.eventSubscriptions = new MessageHandlerMap<>(cls, EventSubscriberMethod.factory());
-
-        this.domesticSubscriptions =
-                eventSubscriptions.getMessageClasses(HandlerMethod::isDomestic);
-        this.externalSubscriptions =
-                eventSubscriptions.getMessageClasses(HandlerMethod::isExternal);
+        this.delegate = new EventReceivingClassDelegate<>(cls, EventSubscriberMethod.factory());
     }
 
     /**
@@ -71,16 +62,16 @@ public final class ProjectionClass<P extends Projection> extends EntityClass<P>
 
     @Override
     public Set<EventClass> getEventClasses() {
-        return domesticSubscriptions;
+        return delegate.getEventClasses();
     }
 
     @Override
     public Set<EventClass> getExternalEventClasses() {
-        return externalSubscriptions;
+        return delegate.getExternalEventClasses();
     }
 
     @Override
     public EventSubscriberMethod getSubscriber(EventClass eventClass) {
-        return eventSubscriptions.getMethod(eventClass);
+        return delegate.getMethod(eventClass);
     }
 }
