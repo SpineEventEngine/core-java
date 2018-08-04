@@ -68,23 +68,23 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public Set<EventClass> getEventReactions() {
-        return delegate.getEventReactions();
+    public Set<EventClass> getEventClasses() {
+        return delegate.getEventClasses();
     }
 
     @Override
-    public Set<EventClass> getExternalEventReactions() {
-        return delegate.getExternalEventReactions();
+    public Set<EventClass> getExternalEventClasses() {
+        return delegate.getExternalEventClasses();
     }
 
     @Override
-    public Set<RejectionClass> getRejectionReactions() {
-        return delegate.getRejectionReactions();
+    public Set<RejectionClass> getRejectionClasses() {
+        return delegate.getRejectionClasses();
     }
 
     @Override
-    public Set<RejectionClass> getExternalRejectionReactions() {
-        return delegate.getExternalRejectionReactions();
+    public Set<RejectionClass> getExternalRejectionClasses() {
+        return delegate.getExternalRejectionClasses();
     }
 
     @Override

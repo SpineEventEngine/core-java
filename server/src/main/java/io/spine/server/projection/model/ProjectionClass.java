@@ -23,7 +23,9 @@ package io.spine.server.projection.model;
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.EventClass;
 import io.spine.server.entity.model.EntityClass;
+import io.spine.server.event.model.EventReceiverClass;
 import io.spine.server.event.model.EventSubscriberMethod;
+import io.spine.server.event.model.SubscribingClass;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.projection.Projection;
@@ -38,7 +40,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <P> the type of projections
  * @author Alexander Yevsyukov
  */
-public final class ProjectionClass<P extends Projection> extends EntityClass<P> {
+public final class ProjectionClass<P extends Projection> extends EntityClass<P>
+        implements EventReceiverClass, SubscribingClass {
 
     private static final long serialVersionUID = 0L;
 
@@ -66,14 +69,17 @@ public final class ProjectionClass<P extends Projection> extends EntityClass<P> 
         return result;
     }
 
-    public Set<EventClass> getEventSubscriptions() {
+    @Override
+    public Set<EventClass> getEventClasses() {
         return domesticSubscriptions;
     }
 
-    public Set<EventClass> getExternalEventSubscriptions() {
+    @Override
+    public Set<EventClass> getExternalEventClasses() {
         return externalSubscriptions;
     }
 
+    @Override
     public EventSubscriberMethod getSubscriber(EventClass eventClass) {
         return eventSubscriptions.getMethod(eventClass);
     }

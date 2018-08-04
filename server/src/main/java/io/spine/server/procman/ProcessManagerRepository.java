@@ -246,7 +246,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
     public Set<EventClass> getMessageClasses() {
-        return processManagerClass().getEventReactions();
+        return processManagerClass().getEventClasses();
     }
 
     /**
@@ -270,7 +270,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
     public Set<RejectionClass> getRejectionClasses() {
-        return processManagerClass().getRejectionReactions();
+        return processManagerClass().getRejectionClasses();
     }
 
     /**
@@ -283,7 +283,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
     public Set<RejectionClass> getExternalRejectionClasses() {
-        return processManagerClass().getExternalRejectionReactions();
+        return processManagerClass().getExternalRejectionClasses();
     }
 
     /**
@@ -508,7 +508,7 @@ public abstract class ProcessManagerRepository<I,
         @Override
         public Set<ExternalMessageClass> getMessageClasses() {
             ProcessManagerClass<?> pmClass = asProcessManagerClass(getEntityClass());
-            Set<EventClass> eventClasses = pmClass.getExternalEventReactions();
+            Set<EventClass> eventClasses = pmClass.getExternalEventClasses();
             return ExternalMessageClass.fromEventClasses(eventClasses);
         }
 

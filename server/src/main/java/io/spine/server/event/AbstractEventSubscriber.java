@@ -108,7 +108,7 @@ public abstract class AbstractEventSubscriber implements EventDispatcher<String>
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
     public Set<EventClass> getMessageClasses() {
-        return thisClass.getEventSubscriptions();
+        return thisClass.getEventClasses();
     }
 
     private void handle(EventEnvelope envelope) {

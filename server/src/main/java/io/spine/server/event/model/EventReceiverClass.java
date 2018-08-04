@@ -20,47 +20,37 @@
 
 package io.spine.server.event.model;
 
-import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
-import io.spine.core.RejectionClass;
-import io.spine.server.rejection.model.RejectionReactorMethod;
 
 import java.util.Set;
 
 /**
- * Provides message handling information on a class that reacts on messages.
+ * Describes a class of objects that receive events.
+ *
+ * <p>A class can declare methods to receive events from the same Bounded Context (“domestic”
+ * events), or events originated in another Bounded Context (“external” events).
  *
  * @author Alexander Yevsyukov
  */
-public interface ReactorClass extends EventReceiverClass {
+public interface EventReceiverClass {
 
     /**
-     * Obtains a set of rejection classes to which this class reacts.
+     * Obtains a set of event classes which this class receives.
      *
-     * <p>The returned set contains only rejection classes of the {@code BoundedContext}
+     * <p>The returned set contains only event classes of the {@code BoundedContext}
      * to which the class belongs.
      *
-     * <p>For reactions on external rejections, please see {@link #getExternalRejectionClasses()}.
+     * <p>For external events, please see {@link #getExternalEventClasses()}.
      */
-    Set<RejectionClass> getRejectionClasses();
+    Set<EventClass> getEventClasses();
 
     /**
-     * Obtains a set of external rejections to which this class reacts.
+     * Obtains a set of external events which this class receives.
      *
-     * <p>External rejections are those that are delivered to the {@code BoundedContext}
+     * <p>External events are those that are delivered to the {@code BoundedContext}
      * to which this class belongs from outside.
      *
-     * <p>For reactions on domestic rejections, please see {@link #getRejectionClasses()}.
+     * <p>For domestic events, please see {@link #getEventClasses()}.
      */
-    Set<RejectionClass> getExternalRejectionClasses();
-
-    /**
-     * Obtains the method that reacts on the passed event class.
-     */
-    EventReactorMethod getReactor(EventClass eventClass);
-
-    /**
-     * Obtains the method that reacts on the passed projection class.
-     */
-    RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls);
+    Set<EventClass> getExternalEventClasses();
 }

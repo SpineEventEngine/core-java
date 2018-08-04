@@ -64,22 +64,22 @@ public final class ReactorClassDelegate<T> extends ModelClass<T> implements Reac
     }
 
     @Override
-    public Set<EventClass> getEventReactions() {
+    public Set<EventClass> getEventClasses() {
         return domesticEventReactions;
     }
 
     @Override
-    public Set<EventClass> getExternalEventReactions() {
+    public Set<EventClass> getExternalEventClasses() {
         return externalEventReactions;
     }
 
     @Override
-    public Set<RejectionClass> getRejectionReactions() {
+    public Set<RejectionClass> getRejectionClasses() {
         return domesticRejectionReactions;
     }
 
     @Override
-    public Set<RejectionClass> getExternalRejectionReactions() {
+    public Set<RejectionClass> getExternalRejectionClasses() {
         return externalRejectionReactions;
     }
 
