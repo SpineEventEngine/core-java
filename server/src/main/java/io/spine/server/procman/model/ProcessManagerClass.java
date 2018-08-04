@@ -25,7 +25,7 @@ import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
 import io.spine.server.entity.model.CommandHandlingEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
-import io.spine.server.event.model.ReactorClass;
+import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.rejection.model.RejectionReactorMethod;
@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class ProcessManagerClass<P extends ProcessManager>
         extends CommandHandlingEntityClass<P>
-        implements ReactorClass {
+        implements ReactingClass {
 
     private static final long serialVersionUID = 0L;
 

@@ -32,7 +32,7 @@ import java.util.Set;
  *
  * @author Alexander Yevsyukov
  */
-public interface ReactorClass extends EventReceiverClass {
+public interface ReactingClass extends EventReceiverClass {
 
     /**
      * Obtains a set of rejection classes to which this class reacts.

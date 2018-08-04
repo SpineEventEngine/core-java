@@ -38,7 +38,7 @@ import java.util.Set;
  * @author Alex Tymchenko
  * @author Alexander Yevsyukov
  */
-public final class ReactorClassDelegate<T> extends ModelClass<T> implements ReactorClass {
+public final class ReactorClassDelegate<T> extends ModelClass<T> implements ReactingClass {
 
     private static final long serialVersionUID = 0L;
 
