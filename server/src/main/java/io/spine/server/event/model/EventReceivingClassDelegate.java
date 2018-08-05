@@ -54,6 +54,10 @@ public class EventReceivingClassDelegate<T, M extends HandlerMethod<?, EventClas
         this.externalEvents = events.getMessageClasses(HandlerMethod::isExternal);
     }
 
+    public boolean contains(EventClass eventClass) {
+        return events.containsClass(eventClass);
+    }
+
     /**
      * Obtains domestic event classes handled by the class.
      */

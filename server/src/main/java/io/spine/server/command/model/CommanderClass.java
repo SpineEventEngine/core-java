@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Commander;
@@ -38,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class CommanderClass<C extends Commander>
         extends AbstractCommandHandlingClass<C, CommandSubstituteMethod>
-        implements EventReceiverClass {
+        implements EventReceiverClass, CommandingClass {
 
     private static final long serialVersionUID = 0L;
     private final EventReceivingClassDelegate<C, CommandReactionMethod> delegate;
@@ -46,6 +47,12 @@ public final class CommanderClass<C extends Commander>
     private CommanderClass(Class<C> cls) {
         super(cls, CommandSubstituteMethod.factory());
         this.delegate = new EventReceivingClassDelegate<>(cls, CommandReactionMethod.factory());
+    }
+
+    public static <C extends Commander> CommanderClass<C> delegateFor(Class<C> cls) {
+        checkNotNull(cls);
+        CommanderClass<C> result = new CommanderClass<>(cls);
+        return result;
     }
 
     public static <C extends AbstractCommander>
@@ -69,7 +76,15 @@ public final class CommanderClass<C extends Commander>
     /**
      * Obtains the method which reacts on the passed event class.
      */
-    public CommandReactionMethod getReaction(EventClass eventClass) {
+    public CommandReactionMethod getCommander(EventClass eventClass) {
         return delegate.getMethod(eventClass);
+    }
+
+    public boolean substitutesCommand(CommandClass commandClass) {
+        return contains(commandClass);
+    }
+
+    public boolean producesCommandsOn(EventClass eventClass) {
+        return delegate.contains(eventClass);
     }
 }

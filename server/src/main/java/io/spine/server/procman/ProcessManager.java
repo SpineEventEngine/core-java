@@ -21,15 +21,20 @@
 package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
+import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.command.CommandHandlingEntity;
+import io.spine.server.command.Commander;
 import io.spine.server.command.model.CommandHandlerMethod;
+import io.spine.server.command.model.CommandReactionMethod;
+import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
@@ -44,6 +49,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine
@@ -72,11 +78,12 @@ import static io.spine.server.procman.model.ProcessManagerClass.asProcessManager
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("OverlyCoupledClass") // OK for this central class.
 public abstract class ProcessManager<I,
                                      S extends Message,
                                      B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends CommandHandlingEntity<I, S, B>
-        implements EventReactor, RejectionReactor {
+        implements EventReactor, RejectionReactor, Commander {
 
     /** The Command Bus to post routed commands. */
     private volatile @MonotonicNonNull CommandBus commandBus;
@@ -123,34 +130,85 @@ public abstract class ProcessManager<I,
     }
 
     /**
-     * Dispatches the command to the handler method and transforms the output
-     * into a list of events.
+     * Dispatches the command to the handling method.
      *
      * @param  command the envelope with the command to dispatch
-     * @return the list of events generated as the result of handling the command
+     * @return the list of events generated as the result of handling the command,
+     *         <em>if</em> the process manager <em>handles</em> the event.
+     *         Empty list, if the process manager substitutes the command
      */
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope command) {
-        CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
-        CommandHandlerMethod.Result result =
-                method.invoke(this, command.getMessage(), command.getCommandContext());
-        List<Event> events = result.produceEvents(command);
-        return events;
+        ProcessManagerClass<?> thisClass = thisClass();
+        CommandClass commandClass = command.getMessageClass();
+
+        if (thisClass.handlesCommand(commandClass)) {
+            CommandHandlerMethod method = thisClass.getHandler(commandClass);
+            CommandHandlerMethod.Result result =
+                    method.invoke(this, command.getMessage(), command.getCommandContext());
+            List<Event> events = result.produceEvents(command);
+            return events;
+        }
+
+        if (thisClass.substitutesCommand(commandClass)) {
+            CommandSubstituteMethod method = thisClass.getCommander(commandClass);
+            CommandSubstituteMethod.Result result =
+                    method.invoke(this, command.getMessage(), command.getCommandContext());
+            result.transformOrSplitAndPost(command, commandBus);
+            return noEvents();
+        }
+
+        // We could not normally get here since the dispatching table is a union of handled and
+        // substituted commands.
+        throw newIllegalStateException(
+                "ProcessManager `%s` neither handled nor transformed the command " +
+                        "(id: `%s` class: `%s`).",
+                this, command.getId(), commandClass
+        );
     }
 
     /**
-     * Dispatches an event to the event reactor method of the process manager.
+     * Dispatches an event the handling method.
      *
      * @param  event the envelope with the event
-     * @return a list of produced events or an empty list if the process manager does not
-     *         produce new events because of the passed event
+     * @return one of the following:
+     * <ul>
+     *  <li>a list of produced events, if the process manager chooses to react on the event;
+     *  <li>an empty list, if the process manager chooses <em>NOT</em> to react on the event;
+     *  <li>an empty list, if the process manager generates one or more commands in response
+     *      to the event.
+     * </ul>
      */
     List<Event> dispatchEvent(EventEnvelope event) {
-        EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
-        ReactorMethodResult methodResult =
-                method.invoke(this, event.getMessage(), event.getEventContext());
-        List<Event> result = methodResult.produceEvents(event);
-        return result;
+        ProcessManagerClass<?> thisClass = thisClass();
+        EventClass eventClass = event.getMessageClass();
+        if (thisClass.reactsOnEvent(eventClass)) {
+            EventReactorMethod method = thisClass.getReactor(eventClass);
+            ReactorMethodResult methodResult =
+                    method.invoke(this, event.getMessage(), event.getEventContext());
+            List<Event> result = methodResult.produceEvents(event);
+            return result;
+        }
+
+        if (thisClass.producesCommandsOn(eventClass)) {
+            CommandReactionMethod method = thisClass.getCommander(eventClass);
+            CommandReactionMethod.Result result =
+                    method.invoke(this, event.getMessage(), event.getEventContext());
+            result.produceAndPost(event, commandBus);
+            return noEvents();
+        }
+
+        // We could not normally get here since the dispatching table is a union of handled and
+        // substituted commands.
+        throw newIllegalStateException(
+                "ProcessManager `%s` neither reacted on the event (id: `%s` class: `%s`)," +
+                        " nor produced commands.",
+                this, event.getId(), eventClass
+        );
+    }
+
+    private static ImmutableList<Event> noEvents() {
+        return ImmutableList.of();
     }
 
     /**

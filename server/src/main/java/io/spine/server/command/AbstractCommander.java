@@ -85,7 +85,7 @@ public abstract class AbstractCommander
 
     @Override
     public Set<String> dispatchEvent(EventEnvelope event) {
-        CommandReactionMethod method = thisClass.getReaction(event.getMessageClass());
+        CommandReactionMethod method = thisClass.getCommander(event.getMessageClass());
         CommandingMethod.Result result =
                 method.invoke(this, event.getMessage(), event.getEventContext());
         result.produceAndPost(event, commandBus);
