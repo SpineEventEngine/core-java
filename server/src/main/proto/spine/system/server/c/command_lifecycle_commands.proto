@@ -127,3 +127,34 @@ message MarkCommandAsRejected {
     // The command rejection.
     spine.core.Rejection rejection = 2 [(valid) = true];
 }
+
+// A system command to mark a command as one which was transformed into another command.
+//
+// Posted when a commanding method created one command in response to an incoming one.
+// For the case of more than one produced command, please use `MarkSplit`.
+//
+message MarkTransformed {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // The ID of the command generated in response to the received command.
+    spine.core.CommandId produced = 2 [(required) = true];
+}
+
+// A system command to mark a command which cased two or more commands.
+//
+// Posted when a commanding method created two or more commands in response to an incoming one.
+//
+message MarkSplit {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // Identifiers of commands generated in response to the `source` command.
+    //
+    // There must be two or more produced commands.
+    // For one produced command please use `MarkTransformed`.
+    //
+    repeated core.CommandId produced = 2 [(required) = true];
+}

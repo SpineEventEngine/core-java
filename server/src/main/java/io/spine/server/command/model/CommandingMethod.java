@@ -115,6 +115,9 @@ interface CommandingMethod<T, M extends MessageClass, C extends Message, R exten
                 transform.post();
             } else {
                 Split split = split(commandMessage, context, bus);
+                for (Message message : messages) {
+                    split.add(message);
+                }
                 split.postAll();
             }
         }
