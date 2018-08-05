@@ -23,8 +23,11 @@ package io.spine.server.command.model;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.EventEnvelope;
 import io.spine.server.command.Command;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.OneCommand;
+import io.spine.server.commandbus.SeveralCommands;
 import io.spine.server.commandbus.Split;
 import io.spine.server.commandbus.Transform;
 import io.spine.server.model.HandlerMethod;
@@ -35,6 +38,8 @@ import io.spine.type.MessageClass;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.commandbus.CommandSequence.inResponseTo;
+import static io.spine.server.commandbus.CommandSequence.respondMany;
 import static io.spine.server.commandbus.CommandSequence.split;
 import static io.spine.server.commandbus.CommandSequence.transform;
 
@@ -108,14 +113,31 @@ interface CommandingMethod<T, M extends MessageClass, C extends Message, R exten
             checkNotNull(bus);
             List<? extends Message> messages = asMessages();
             if (messages.size() == 1) {
-                Transform transform = transform(cmd);
+                Transform transform = transform(cmd).to(messages.get(0));
                 transform.post(bus);
             } else {
-                Split split = split(cmd);
-                for (Message message : messages) {
-                    split.add(message);
-                }
+                Split split = split(cmd).addAll(messages);
                 split.postAll(bus);
+            }
+        }
+
+        /**
+         * Creates one or more commands in response to the event and posts the to the passed
+         * {@code CommandBus}.
+         *
+         * @implNote The number of commands generated is the same as the number of
+         *           {@linkplain #asMessages()} command messages} produced by the method.
+         */
+        public void produceAndPost(EventEnvelope event, CommandBus bus) {
+            checkNotNull(event);
+            checkNotNull(bus);
+            List<? extends Message> messages = asMessages();
+            if (messages.size() == 1) {
+                OneCommand seq = inResponseTo(event).produce(messages.get(0));
+                seq.post(bus);
+            } else {
+                SeveralCommands seq = respondMany(event);
+                seq.addAll(messages);
             }
         }
     }

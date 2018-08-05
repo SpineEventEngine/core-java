@@ -22,9 +22,11 @@ package io.spine.server.commandbus;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
-import io.spine.system.server.CommandSplit;
+import io.spine.system.server.MarkSplit;
+import io.spine.system.server.SystemGateway;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -34,7 +36,8 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * @author Alexander Yevsyukov
  */
-public final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, Split> {
+@Internal
+public final class Split extends OnCommand<MarkSplit, MarkSplit.Builder, Split> {
 
     Split(CommandEnvelope command) {
         super(command.getId(), command.getCommandContext()
@@ -42,9 +45,16 @@ public final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, S
     }
 
     @CanIgnoreReturnValue
-    @Override
-    public Split add(Message commandMessage) {
-        return super.add(commandMessage);
+    public Split addAll(Iterable<? extends Message> commandMessages) {
+        for (Message message : commandMessages) {
+            add(message);
+        }
+        checkState(size() >= 2,
+                   "The split sequence must have at least two commands. " +
+                           "For converting a command to another please use " +
+                           "`CommandSequence.transform()`."
+        );
+        return this;
     }
 
     @Override
@@ -53,8 +63,8 @@ public final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, S
     }
 
     @Override
-    protected CommandSplit.Builder newBuilder() {
-        CommandSplit.Builder result = CommandSplit
+    protected MarkSplit.Builder newBuilder() {
+        MarkSplit.Builder result = MarkSplit
                 .newBuilder()
                 .setId(origin());
         return result;
@@ -62,19 +72,19 @@ public final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, S
 
     @SuppressWarnings("CheckReturnValue") // calling builder method
     @Override
-    protected void addPosted(CommandSplit.Builder builder, Command command) {
+    protected void addPosted(MarkSplit.Builder builder, Command command,
+                             SystemGateway gateway) {
         builder.addProduced(command.getId());
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @apiNote Overrides to open the method for outside use.
+     */
     @Override
-    @CanIgnoreReturnValue // The resulting event is going to be deprecated in favor of system events.
-    public CommandSplit postAll(CommandBus bus) {
-        checkState(size() >= 2,
-                   "The split sequence must have at least two commands. " +
-                           "For converting a command to another please use " +
-                           "`CommandSequence.transform()`."
-        );
-        CommandSplit split = super.postAll(bus);
-        return split;
+    @CanIgnoreReturnValue
+    public MarkSplit postAll(CommandBus bus) {
+        return super.postAll(bus);
     }
 }

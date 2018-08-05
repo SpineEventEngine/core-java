@@ -27,7 +27,7 @@ import io.spine.core.CommandId;
 /**
  * Abstract base for command sequences initiated from a source command.
  *
- * @param <R> the type of the result generated when the command sequence is posted
+ * @param <R> the type of the system command generated when the command sequence is posted
  * @param <B> the type of the result builder
  * @param <S> the type of the sequence for the return type covariance
  * @author Alexander Yevsyukov

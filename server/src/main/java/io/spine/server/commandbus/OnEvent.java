@@ -22,7 +22,10 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
 import io.spine.core.ActorContext;
+import io.spine.core.CommandId;
 import io.spine.core.EventId;
+import io.spine.system.server.MarkReacted;
+import io.spine.system.server.SystemGateway;
 
 /**
  * Abstract base for command sequences initiated in response to an event.
@@ -38,5 +41,14 @@ OnEvent <R extends Message, B extends Message.Builder, S extends CommandSequence
 
     OnEvent(EventId origin, ActorContext actorContext) {
         super(origin, actorContext);
+    }
+
+    void markReacted(SystemGateway gateway, CommandId commandId) {
+        MarkReacted systemCommand = MarkReacted
+                .newBuilder()
+                .setId(commandId)
+                .setOrigin(origin())
+                .build();
+        gateway.postCommand(systemCommand);
     }
 }

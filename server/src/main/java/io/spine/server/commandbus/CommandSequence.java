@@ -35,6 +35,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
 import io.spine.system.server.SystemGateway;
@@ -91,23 +92,31 @@ class CommandSequence<O extends Message, R extends Message, B extends Message.Bu
     }
 
     /**
-     * Creates a sequence for splitting the source command into several ones.
-     *
-     * @return new empty sequence
+     * Creates an empty sequence for splitting the source command into several ones.
      */
-    @Internal
     public static Split split(CommandEnvelope command) {
         return new Split(command);
     }
 
     /**
-     * Creates a sequence for transforming incoming command into another one.
-     *
-     * @return new empty sequence
+     * Creates an empty sequence for transforming incoming command into another one.
      */
-    @Internal
     public static Transform transform(CommandEnvelope command) {
         return new Transform(command);
+    }
+
+    /**
+     * Creates an empty sequence for creating a command in response to the passed event.
+     */
+    public static OneCommand inResponseTo(EventEnvelope event) {
+        return new OneCommand(event.getId(), event.getActorContext());
+    }
+
+    /**
+     * Creates an empty sequence for creating two or more commands in response to the passed event.
+     */
+    public static SeveralCommands respondMany(EventEnvelope event) {
+        return new SeveralCommands(event.getId(), event.getActorContext());
     }
 
     /**
@@ -118,7 +127,8 @@ class CommandSequence<O extends Message, R extends Message, B extends Message.Bu
     /**
      * Adds the posted command to the result builder.
      */
-    protected abstract void addPosted(B builder, Command command);
+    protected abstract void addPosted(B builder, Command command,
+                                      SystemGateway gateway);
 
     /**
      * Adds a command message to the sequence of commands to be posted.
@@ -176,26 +186,26 @@ class CommandSequence<O extends Message, R extends Message, B extends Message.Bu
      * all the commands were posted successfully.
      */
     protected R postAll(CommandBus bus) {
+        SystemGateway gateway = gateway(bus);
         B builder = newBuilder();
         while (hasNext()) {
             Message message = next();
             Optional<Command> posted = post(message, bus);
             if (posted.isPresent()) {
                 Command command = posted.get();
-                addPosted(builder, command);
+                addPosted(builder, command, gateway);
             }
         }
         @SuppressWarnings("unchecked") /* The type is ensured by correct couples of R,B types passed
             to in the classes derived from `CommandSequence` that are limited to this package. */
         R result = (R) builder.build();
-        notifySystem(result, bus);
+        gateway.postCommand(result);
         return result;
     }
 
-    private void notifySystem(R commandMessage, CommandBus bus) {
+    private SystemGateway gateway(CommandBus bus) {
         TenantId tenantId = actorContext.getTenantId();
-        SystemGateway gateway = bus.gatewayFor(tenantId);
-        gateway.postCommand(commandMessage);
+        return bus.gatewayFor(tenantId);
     }
 
     /**
@@ -223,7 +233,7 @@ class CommandSequence<O extends Message, R extends Message, B extends Message.Bu
         return Optional.of(command);
     }
 
-    public static StreamObserver<Ack> newAckObserver(SettableFuture<Ack> finishFuture) {
+    private static StreamObserver<Ack> newAckObserver(SettableFuture<Ack> finishFuture) {
         return new StreamObserver<Ack>() {
             @Override
             public void onNext(Ack value) {
@@ -242,7 +252,7 @@ class CommandSequence<O extends Message, R extends Message, B extends Message.Bu
         };
     }
 
-    public static void checkSent(Command command, Ack ack) {
+    private static void checkSent(Command command, Ack ack) {
         Status status = ack.getStatus();
         CommandId routedCommandId = unpack(ack.getMessageId());
         CommandId commandId = command.getId();

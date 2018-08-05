@@ -211,6 +211,11 @@ public final class CommandLifecycleAggregate
         setStatus(status, event.getWhen());
     }
 
+    @Assign
+    private void on(MarkTransformed cmd) {
+        //TODO:2018-08-05:alexander.yevsyukov: Implement storing substitution result.
+    }
+
     private Command updateSchedule(Schedule schedule) {
         Command command = getBuilder().getCommand();
         CommandContext updatedContext =

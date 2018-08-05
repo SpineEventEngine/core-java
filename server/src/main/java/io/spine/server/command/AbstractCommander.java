@@ -86,11 +86,9 @@ public abstract class AbstractCommander
     @Override
     public Set<String> dispatchEvent(EventEnvelope event) {
         CommandReactionMethod method = thisClass.getReaction(event.getMessageClass());
-        //TODO:2018-08-05:alexander.yevsyukov: Add dispatching events
-
-        //TODO:2018-08-05:alexander.yevsyukov: How do we register instances for dispatching?
-        // AggregateRepository does this on onRegistered().
-
+        CommandingMethod.Result result =
+                method.invoke(this, event.getMessage(), event.getEventContext());
+        result.produceAndPost(event, commandBus);
         return identity();
     }
 

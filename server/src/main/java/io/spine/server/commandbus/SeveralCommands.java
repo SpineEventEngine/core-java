@@ -23,56 +23,52 @@ package io.spine.server.commandbus;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.core.ActorContext;
 import io.spine.core.Command;
-import io.spine.core.CommandEnvelope;
-import io.spine.system.server.MarkTransformed;
+import io.spine.core.CommandId;
+import io.spine.core.EventId;
+import io.spine.system.server.MarkCausedCommands;
 import io.spine.system.server.SystemGateway;
 
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * A command sequence containing only one element.
+ * A sequence with two or more commands generated in response to an incoming event.
+ *
+ * <p>The result of the sequence is the system command for event lifecycle aggregate.
  *
  * @author Alexander Yevsyukov
  */
 @Internal
-public final class Transform
-        extends OnCommand<MarkTransformed, MarkTransformed.Builder, Transform> {
+public class SeveralCommands
+        extends OnEvent<MarkCausedCommands, MarkCausedCommands.Builder, SeveralCommands> {
 
-    Transform(CommandEnvelope command) {
-        super(command.getId(), command.getCommandContext()
-                                      .getActorContext());
+    SeveralCommands(EventId origin, ActorContext actorContext) {
+        super(origin, actorContext);
     }
 
-    /**
-     * Sets the message for the target command.
-     */
-    public Transform to(Message targetMessage) {
-        return add(targetMessage);
-    }
-
-    /**
-     * Posts the command to the bus and returns resulting event.
-     */
     @CanIgnoreReturnValue
-    public MarkTransformed post(CommandBus bus) {
-        checkState(size() == 1, "The transformation sequence must have exactly one command.");
-        MarkTransformed result = postAll(bus);
-        return result;
+    @SuppressWarnings("CheckReturnValue") // calling builder
+    public SeveralCommands addAll(Iterable<? extends Message> commandMessage) {
+        for (Message message : commandMessage) {
+            add(message);
+        }
+        checkState(size() > 1, "This sequence must have more than one message");
+        return this;
     }
 
     @Override
-    protected MarkTransformed.Builder newBuilder() {
-        MarkTransformed.Builder result = MarkTransformed
-                .newBuilder()
-                .setId(origin());
-        return result;
+    protected MarkCausedCommands.Builder newBuilder() {
+        return MarkCausedCommands.newBuilder()
+                                 .setId(origin());
     }
 
-    @SuppressWarnings("CheckReturnValue") // calling builder method
     @Override
-    protected void addPosted(MarkTransformed.Builder builder, Command command,
-                             SystemGateway gateway) {
-        builder.setProduced(command.getId());
+    @SuppressWarnings("CheckReturnValue") // calling builder
+    protected void
+    addPosted(MarkCausedCommands.Builder builder, Command command, SystemGateway gateway) {
+        CommandId commandId = command.getId();
+        builder.addProduced(commandId);
+        markReacted(gateway, commandId);
     }
 }
