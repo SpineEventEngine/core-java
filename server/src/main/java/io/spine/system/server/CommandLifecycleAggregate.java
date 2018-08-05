@@ -151,11 +151,14 @@ public final class CommandLifecycleAggregate
                     .setStatus(status);
     }
 
+    private CommandTimeline.Builder statusBuilder() {
+        return getBuilder().getStatus()
+                           .toBuilder();
+    }
+
     @Apply
     private void on(CommandAcknowledged event) {
-        CommandTimeline status = getBuilder()
-                .getStatus()
-                .toBuilder()
+        CommandTimeline status = statusBuilder()
                 .setWhenAcknowledged(event.getWhen())
                 .build();
         getBuilder().setStatus(status);
@@ -164,9 +167,7 @@ public final class CommandLifecycleAggregate
     @Apply
     private void on(CommandScheduled event) {
         Command updatedCommand = updateSchedule(event.getSchedule());
-        CommandTimeline status = getBuilder()
-                .getStatus()
-                .toBuilder()
+        CommandTimeline status = statusBuilder()
                 .setWhenScheduled(event.getWhen())
                 .build();
         getBuilder().setCommand(updatedCommand)
@@ -175,9 +176,7 @@ public final class CommandLifecycleAggregate
 
     @Apply
     private void on(CommandDispatched event) {
-        CommandTimeline status = getBuilder()
-                .getStatus()
-                .toBuilder()
+        CommandTimeline status = statusBuilder()
                 .setWhenDispatched(event.getWhen())
                 .build();
         getBuilder().setStatus(status);
@@ -213,22 +212,21 @@ public final class CommandLifecycleAggregate
     }
 
     private Command updateSchedule(Schedule schedule) {
-        CommandContext updatedContext = getBuilder().getCommand()
-                                                    .getContext()
-                                                    .toBuilder()
-                                                    .setSchedule(schedule)
-                                                    .build();
-        Command updatedCommand = getBuilder().getCommand()
-                                             .toBuilder()
-                                             .setContext(updatedContext)
-                                             .build();
+        Command command = getBuilder().getCommand();
+        CommandContext updatedContext =
+                command.getContext()
+                       .toBuilder()
+                       .setSchedule(schedule)
+                       .build();
+        Command updatedCommand =
+                command.toBuilder()
+                       .setContext(updatedContext)
+                       .build();
         return updatedCommand;
     }
 
     private void setStatus(Status status, Timestamp whenProcessed) {
-        CommandTimeline commandStatus = getBuilder()
-                .getStatus()
-                .toBuilder()
+        CommandTimeline commandStatus = statusBuilder()
                 .setWhenHandled(whenProcessed)
                 .setHowHandled(status)
                 .build();

@@ -22,13 +22,22 @@ package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.command.Command;
+import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.Split;
+import io.spine.server.commandbus.Transform;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodResult;
 import io.spine.type.MessageClass;
 
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.commandbus.CommandSequence.split;
+import static io.spine.server.commandbus.CommandSequence.transform;
 
 /**
  * Base interface for methods that generate one or more command messages in response to
@@ -85,6 +94,28 @@ interface CommandingMethod<T, M extends MessageClass, C extends Message, R exten
                 throw new IllegalStateException(
                         "Commanding method did not produce command messages"
                 );
+            }
+        }
+
+        /**
+         * Transforms the passed command into one or more, and posts new command(s) to the passed
+         * {@code CommandBus}.
+         *
+         * @implNote The number of commands generated is the same as the number of
+         *           {@linkplain #asMessages()} command messages} produced by the method.
+         */
+        public void transformOrSplitAndPost(CommandEnvelope cmd, CommandBus bus) {
+            checkNotNull(cmd);
+            checkNotNull(bus);
+            List<? extends Message> messages = asMessages();
+            Message commandMessage = cmd.getMessage();
+            CommandContext context = cmd.getCommandContext();
+            if (messages.size() == 1) {
+                Transform transform = transform(commandMessage, context, bus);
+                transform.post();
+            } else {
+                Split split = split(commandMessage, context, bus);
+                split.postAll();
             }
         }
     }

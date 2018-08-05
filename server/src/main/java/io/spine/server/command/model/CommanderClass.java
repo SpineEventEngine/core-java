@@ -42,13 +42,9 @@ public final class CommanderClass<C extends AbstractCommander>
     private static final long serialVersionUID = 0L;
     private final EventReceivingClassDelegate<C, CommandReactionMethod> delegate;
 
-    private CommanderClass(Class<C> rawClass) {
-        super(rawClass, CommandSubstituteMethod.factory());
-        this.delegate = new EventReceivingClassDelegate<>(
-                rawClass,
-                //TODO:2018-08-05:alexander.yevsyukov: pass factotry
-                null
-        );
+    private CommanderClass(Class<C> cls) {
+        super(cls, CommandSubstituteMethod.factory());
+        this.delegate = new EventReceivingClassDelegate<>(cls, CommandReactionMethod.factory());
     }
 
     public static <C extends AbstractCommander>
@@ -69,5 +65,10 @@ public final class CommanderClass<C extends AbstractCommander>
         return delegate.getExternalEventClasses();
     }
 
-    //TODO:2018-08-05:alexander.yevsyukov: Get method for handling command reaction
+    /**
+     * Obtains the method which reacts on the passed event class.
+     */
+    public CommandReactionMethod getReaction(EventClass eventClass) {
+        return delegate.getMethod(eventClass);
+    }
 }

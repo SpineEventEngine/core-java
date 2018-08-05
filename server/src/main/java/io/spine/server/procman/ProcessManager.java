@@ -33,6 +33,8 @@ import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandSequence;
+import io.spine.server.commandbus.Split;
+import io.spine.server.commandbus.Transform;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.model.ReactorMethodResult;
@@ -206,11 +208,10 @@ public abstract class ProcessManager<I,
      * @param context the context of the command
      * @return new empty sequence
      */
-    protected CommandSequence.Split split(Message commandMessage, CommandContext context) {
+    protected Split split(Message commandMessage, CommandContext context) {
         checkNotNull(commandMessage);
         checkNotNull(context);
-        CommandSequence.Split result =
-                CommandSequence.split(commandMessage, context, getCommandBus());
+        Split result = CommandSequence.split(commandMessage, context, getCommandBus());
         return result;
     }
 
@@ -234,11 +235,10 @@ public abstract class ProcessManager<I,
      * @param context the context of the command
      * @return new empty sequence
      */
-    protected CommandSequence.Transform transform(Message commandMessage, CommandContext context) {
+    protected Transform transform(Message commandMessage, CommandContext context) {
         checkNotNull(commandMessage);
         checkNotNull(context);
-        CommandSequence.Transform result =
-            CommandSequence.transform(commandMessage, context, getCommandBus());
+        Transform result = CommandSequence.transform(commandMessage, context, getCommandBus());
         return result;
     }
 

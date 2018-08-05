@@ -40,7 +40,7 @@ import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandbus.CommandSequence;
+import io.spine.server.commandbus.Split;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.procman.given.DirectQuizProcmanRepository;
 import io.spine.server.procman.given.ProcessManagerTestEnv.AddTaskDispatcher;
@@ -350,7 +350,7 @@ class ProcessManagerTest {
 
             processManager.injectCommandBus(mock(CommandBus.class));
 
-            CommandSequence.Split sequence = processManager.split(commandMessage, commandContext);
+            Split sequence = processManager.split(commandMessage, commandContext);
             assertNotNull(sequence);
             assertEquals(0, sequence.size());
         }

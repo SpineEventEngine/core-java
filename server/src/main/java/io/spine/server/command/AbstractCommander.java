@@ -25,6 +25,7 @@ import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
+import io.spine.server.command.model.CommandingMethod;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 
@@ -37,7 +38,9 @@ import static io.spine.server.command.model.CommanderClass.asCommanderClass;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class AbstractCommander extends AbstractCommandDispatcher implements Commander {
+public abstract class AbstractCommander
+        extends AbstractCommandDispatcher
+        implements Commander {
 
     private final CommanderClass<?> thisClass = asCommanderClass(getClass());
     private final CommandBus commandBus;
@@ -56,10 +59,9 @@ public abstract class AbstractCommander extends AbstractCommandDispatcher implem
     @Override
     public String dispatch(CommandEnvelope envelope) {
         CommandSubstituteMethod method = thisClass.getHandler(envelope.getMessageClass());
-        //TODO:2018-07-20:alexander.yevsyukov: Dispatch the envelope to the method.
-        // Post resulting events of command transformations to the EventBus.
-//        Dispatch<CommandEnvelope> dispatch = Dispatch.of(envelope)
-//                                                     .to(this, method);
+        CommandingMethod.Result result =
+                method.invoke(this, envelope.getMessage(), envelope.getCommandContext());
+        result.transformOrSplitAndPost(envelope, commandBus);
         return getId();
     }
 }

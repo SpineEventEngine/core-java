@@ -34,10 +34,7 @@ import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
-import io.spine.core.DispatchedCommand;
 import io.spine.core.Status;
-import io.spine.server.procman.CommandSplit;
-import io.spine.server.procman.CommandTransformed;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -74,7 +71,7 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
     /** The handler for the posting errors. */
     private ErrorHandler errorHandler = new DefaultErrorHandler();
 
-    private CommandSequence(ActorContext actorContext, CommandBus bus) {
+    CommandSequence(ActorContext actorContext, CommandBus bus) {
         this.commandBus = checkNotNull(bus);
         this.queue = Queues.newConcurrentLinkedQueue();
         this.commandFactory = ActorRequestFactory.fromContext(actorContext)
@@ -89,6 +86,7 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
      * @param bus the command bus to post commands
      * @return new empty sequence
      */
+    @Internal
     public static Split split(Message commandMessage, CommandContext context, CommandBus bus) {
         return new Split(bus, commandMessage, context);
     }
@@ -101,6 +99,7 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
      * @param bus the command bus to post commands
      * @return new empty sequence
      */
+    @Internal
     public static Transform transform(Message commandMessage,
                                       CommandContext context,
                                       CommandBus bus) {
@@ -269,117 +268,4 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
         }
     }
 
-    /**
-     * Abstract base for command sequences initiated from a source command.
-     */
-    private abstract static
-    class OnCommand<R extends Message,
-                    B extends Message.Builder,
-                    S extends CommandSequence<R, B, S>>
-            extends CommandSequence<R, B, S> {
-
-        private final Message sourceMessage;
-        private final CommandContext sourceContext;
-
-        protected OnCommand(Message message, CommandContext context, CommandBus bus) {
-            super(context.getActorContext(), bus);
-            this.sourceMessage = message;
-            this.sourceContext = context;
-        }
-
-        protected DispatchedCommand source() {
-            return toDispatched(this.sourceMessage, this.sourceContext);
-        }
-    }
-
-    /**
-     * A {@code CommandSequence} of two or more commands which is generated in response to
-     * a source command.
-     */
-    public static final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, Split> {
-
-        private Split(CommandBus commandBus, Message sourceMessage, CommandContext sourceContext) {
-            super(sourceMessage, sourceContext, commandBus);
-        }
-
-        /** {@inheritDoc} */
-        @CanIgnoreReturnValue
-        @Override
-        public Split add(Message commandMessage) {
-            return super.add(commandMessage);
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public int size() {
-            return super.size();
-        }
-
-        @Override
-        protected CommandSplit.Builder newBuilder() {
-            CommandSplit.Builder result = CommandSplit
-                    .newBuilder()
-                    .setSource(source());
-            return result;
-        }
-
-        @SuppressWarnings("CheckReturnValue") // calling builder method
-        @Override
-        protected void addPosted(CommandSplit.Builder builder,
-                                 Message message,
-                                 CommandContext context) {
-            builder.addProduced(toDispatched(message, context));
-        }
-
-        @Override
-        public CommandSplit postAll() {
-            checkState(size() >= 2,
-                       "The split sequence must have at least two commands. " +
-                               "For converting a command to another please use " +
-                               "`CommandSequence.transform()`."
-            );
-            return super.postAll();
-        }
-    }
-
-    /**
-     * A command sequence containing only one element
-     */
-    public static final class Transform
-            extends OnCommand<CommandTransformed, CommandTransformed.Builder, Transform> {
-
-        private Transform(CommandBus commandBus, Message sourceMessage, CommandContext context) {
-            super(sourceMessage, context, commandBus);
-        }
-
-        /**
-         * Sets the message for the target command.
-         */
-        public Transform to(Message targetMessage) {
-            return add(targetMessage);
-        }
-
-        /**
-         * Posts the command to the bus and returns resulting event.
-         */
-        public CommandTransformed post() {
-            checkState(size() == 1, "The conversion sequence must have exactly one command.");
-            return postAll();
-        }
-
-        @Override
-        protected CommandTransformed.Builder newBuilder() {
-            CommandTransformed.Builder result = CommandTransformed
-                    .newBuilder()
-                    .setSource(source());
-            return result;
-        }
-
-        @SuppressWarnings("CheckReturnValue") // calling builder method
-        @Override
-        protected void addPosted(CommandTransformed.Builder builder, Message message,
-                                 CommandContext context) {
-            builder.setProduced(toDispatched(message, context));
-        }
-    }
 }
