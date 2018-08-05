@@ -30,6 +30,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.model.CommandHandlerMethod;
+import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.model.ReactorMethodResult;
@@ -37,9 +38,11 @@ import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.rejection.RejectionReactor;
 import io.spine.server.rejection.model.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 
 /**
@@ -75,6 +78,9 @@ public abstract class ProcessManager<I,
         extends CommandHandlingEntity<I, S, B>
         implements EventReactor, RejectionReactor {
 
+    /** The Command Bus to post routed commands. */
+    private volatile @MonotonicNonNull CommandBus commandBus;
+
     /**
      * Creates a new instance.
      *
@@ -94,6 +100,11 @@ public abstract class ProcessManager<I,
     @Override
     protected ProcessManagerClass<?> thisClass() {
         return (ProcessManagerClass<?>) super.thisClass();
+    }
+
+    /** The method to inject {@code CommandBus} instance from the repository. */
+    void setCommandBus(CommandBus commandBus) {
+        this.commandBus = checkNotNull(commandBus);
     }
 
     /**

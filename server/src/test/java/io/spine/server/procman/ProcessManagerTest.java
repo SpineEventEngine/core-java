@@ -33,7 +33,6 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.DispatchedCommand;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Events;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
@@ -75,8 +74,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.core.Commands.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.commandbus.Given.ACommand;
@@ -91,8 +90,6 @@ import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
 import static io.spine.testing.server.procman.ProcessManagerDispatcher.dispatch;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -147,6 +144,11 @@ class ProcessManagerTest {
         Command command = ACommand.withMessage(Sample.messageOfType(commandMessageCls));
         Rejection rejection = Rejections.createRejection(rejectionMessage, command);
         return RejectionEnvelope.of(rejection);
+    }
+
+    static Message getMessage(DispatchedCommand command) {
+        checkNotNull(command);
+        return AnyPacker.unpack(command.getMessage());
     }
 
     @BeforeEach
@@ -268,44 +270,25 @@ class ProcessManagerTest {
     /**
      * Tests command routing.
      *
-     * @see TestProcessManager#handle(PmStartProject, CommandContext)
+     * @see TestProcessManager#transform(PmStartProject, CommandContext)
      */
     @Test
     @DisplayName("route commands")
     void routeCommands() {
-        // Add dispatcher for the routed command. Otherwise the command would reject the command.
+        // Add dispatcher for the routed command.
+        // Otherwise the Command Bus would reject the command.
         AddTaskDispatcher dispatcher = new AddTaskDispatcher();
         commandBus.register(dispatcher);
         processManager.injectCommandBus(commandBus);
 
-        List<Event> events = testDispatchCommand(startProject());
+        testDispatchCommand(startProject());
 
-        // There's only one event generated.
-        assertEquals(1, events.size());
-
-        Event event = events.get(0);
-
-        // The producer of the event is our Process Manager.
-        assertEquals(processManager.getId(), Events.getProducer(event.getContext()));
-
-        Message message = AnyPacker.unpack(event.getMessage());
-
-        // The event type is CommandRouted.
-        assertThat(message, instanceOf(CommandTransformed.class));
-
-        CommandTransformed commandRouted = (CommandTransformed) message;
-
-        // The source of the command is StartProject.
-        assertThat(getMessage(commandRouted.getSource()), instanceOf(PmStartProject.class));
         List<CommandEnvelope> dispatchedCommands = dispatcher.getCommands();
         assertSize(1, dispatchedCommands);
         CommandEnvelope dispatchedCommand = dispatcher.getCommands()
                                                       .get(0);
-        DispatchedCommand generated = commandRouted.getProduced();
-        assertEquals(generated.getMessage(), dispatchedCommand.getCommand()
-                                                              .getMessage());
-        assertEquals(generated.getContext(), dispatchedCommand.getCommand()
-                                                              .getContext());
+
+        assertTrue(dispatchedCommand.getMessage() instanceof PmAddTask);
     }
 
     @Nested

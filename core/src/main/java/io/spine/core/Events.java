@@ -26,7 +26,6 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
-import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
@@ -217,26 +216,6 @@ public final class Events {
 
         TenantId result = Commands.getTenantId(commandContext.get());
         return result;
-    }
-
-    /**
-     * Creates a {@code DispatchedEvent} with the passed event message and context.
-     *
-     * @param eventMessage the message of the event, can be already packed into {@code Any}
-     * @param eventContext the context of the event
-     * @return new instance of {@code DispatchedEvent}
-     */
-    public static DispatchedEvent toDispatched(Message eventMessage, EventContext eventContext) {
-        checkNotNull(eventMessage);
-        checkNotNull(eventContext);
-        Any packed = eventMessage instanceof Any
-            ? (Any) eventMessage
-            : AnyPacker.pack(eventMessage);
-        DispatchedEvent.Builder result = DispatchedEvent
-                .newBuilder()
-                .setMessage(packed)
-                .setContext(eventContext);
-        return result.build();
     }
 
     /**
