@@ -71,7 +71,7 @@ public class CommandHandlerTestEnv {
         @Override
         public Set<String> dispatch(EventEnvelope envelope) {
             dispatched.add(envelope);
-            return Identity.of(this);
+            return identity();
         }
 
         @Override

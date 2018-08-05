@@ -77,7 +77,7 @@ public abstract class AbstractEventSubscriber implements EventDispatcher<String>
             onError(envelope, exception);
             return ImmutableSet.of();
         }
-        return Identity.of(this);
+        return identity();
     }
 
     /**

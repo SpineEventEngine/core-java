@@ -23,24 +23,32 @@ package io.spine.server.command;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
+import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
 import io.spine.server.command.model.CommandingMethod;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.string.Stringifiers;
+import io.spine.type.MessageClass;
 
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.command.model.CommanderClass.asCommanderClass;
+import static java.lang.String.format;
 
 /**
- * The abstract base for classes
+ * The abstract base for classes that generate commands in response to incoming messages.
  *
  * @author Alexander Yevsyukov
  */
 public abstract class AbstractCommander
         extends AbstractCommandDispatcher
-        implements Commander {
+        implements Commander, EventDispatcherDelegate<String> {
 
     private final CommanderClass<?> thisClass = asCommanderClass(getClass());
     private final CommandBus commandBus;
@@ -57,11 +65,41 @@ public abstract class AbstractCommander
 
     @CanIgnoreReturnValue
     @Override
-    public String dispatch(CommandEnvelope envelope) {
-        CommandSubstituteMethod method = thisClass.getHandler(envelope.getMessageClass());
+    public String dispatch(CommandEnvelope command) {
+        CommandSubstituteMethod method = thisClass.getHandler(command.getMessageClass());
         CommandingMethod.Result result =
-                method.invoke(this, envelope.getMessage(), envelope.getCommandContext());
-        result.transformOrSplitAndPost(envelope, commandBus);
+                method.invoke(this, command.getMessage(), command.getCommandContext());
+        result.transformOrSplitAndPost(command, commandBus);
         return getId();
+    }
+
+    @Override
+    public Set<EventClass> getEventClasses() {
+        return thisClass.getEventClasses();
+    }
+
+    @Override
+    public Set<EventClass> getExternalEventClasses() {
+        return thisClass.getExternalEventClasses();
+    }
+
+    @Override
+    public Set<String> dispatchEvent(EventEnvelope event) {
+        CommandReactionMethod method = thisClass.getReaction(event.getMessageClass());
+        //TODO:2018-08-05:alexander.yevsyukov: Add dispatching events
+
+        return identity();
+    }
+
+    @Override
+    public void onError(EventEnvelope envelope, RuntimeException exception) {
+        checkNotNull(envelope);
+        checkNotNull(exception);
+        MessageClass messageClass = envelope.getMessageClass();
+        String messageId = Stringifiers.toString(envelope.getId());
+        String errorMessage =
+                format("Unable to create a command from event (class: %s id: %s).",
+                       messageClass, messageId);
+        log().error(errorMessage, exception);
     }
 }

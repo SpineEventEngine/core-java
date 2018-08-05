@@ -20,6 +20,7 @@
 
 package io.spine.server.event;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -64,4 +65,17 @@ public interface EventDispatcherDelegate<I> {
      * @param exception the error
      */
     void onError(EventEnvelope envelope, RuntimeException exception);
+
+    /**
+     * Returns immutable set with one element with the identity of the multicast dispatcher
+     * that dispatches messages to itself.
+     *
+     * @implNote The identity obtained as the result of {@link Object#toString()
+     * EventDispatcherDelegate.toString()}.
+     *
+     * @return immutable set with the dispatcher delegate identity
+     */
+    default Set<String> identity() {
+        return ImmutableSet.of(this.toString());
+    }
 }
