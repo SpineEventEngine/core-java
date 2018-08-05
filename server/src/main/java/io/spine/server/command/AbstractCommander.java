@@ -88,6 +88,9 @@ public abstract class AbstractCommander
         CommandReactionMethod method = thisClass.getReaction(event.getMessageClass());
         //TODO:2018-08-05:alexander.yevsyukov: Add dispatching events
 
+        //TODO:2018-08-05:alexander.yevsyukov: How do we register instances for dispatching?
+        // AggregateRepository does this on onRegistered().
+
         return identity();
     }
 
