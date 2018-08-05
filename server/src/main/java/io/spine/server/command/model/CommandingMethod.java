@@ -108,14 +108,14 @@ interface CommandingMethod<T, M extends MessageClass, C extends Message, R exten
             checkNotNull(bus);
             List<? extends Message> messages = asMessages();
             if (messages.size() == 1) {
-                Transform transform = transform(cmd, bus);
-                transform.post();
+                Transform transform = transform(cmd);
+                transform.post(bus);
             } else {
-                Split split = split(cmd, bus);
+                Split split = split(cmd);
                 for (Message message : messages) {
                     split.add(message);
                 }
-                split.postAll();
+                split.postAll(bus);
             }
         }
     }

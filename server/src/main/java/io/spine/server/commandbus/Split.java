@@ -36,8 +36,8 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, Split> {
 
-    Split(CommandEnvelope command, CommandBus commandBus) {
-        super(command.getId(), command.getMessage(), command.getCommandContext(), commandBus);
+    Split(CommandEnvelope command) {
+        super(command.getId(), command.getMessage(), command.getCommandContext());
     }
 
     @CanIgnoreReturnValue
@@ -67,13 +67,13 @@ public final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, S
 
     @Override
     @CanIgnoreReturnValue // The resulting event is going to be deprecated in favor of system events.
-    public CommandSplit postAll() {
+    public CommandSplit postAll(CommandBus bus) {
         checkState(size() >= 2,
                    "The split sequence must have at least two commands. " +
                            "For converting a command to another please use " +
                            "`CommandSequence.transform()`."
         );
-        CommandSplit split = super.postAll();
+        CommandSplit split = super.postAll(bus);
         return split;
     }
 }

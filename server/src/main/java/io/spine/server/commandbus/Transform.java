@@ -36,8 +36,8 @@ import static com.google.common.base.Preconditions.checkState;
 public final class Transform
         extends OnCommand<CommandTransformed, CommandTransformed.Builder, Transform> {
 
-    Transform(CommandEnvelope command, CommandBus commandBus) {
-        super(command.getId(), command.getMessage(), command.getCommandContext(), commandBus);
+    Transform(CommandEnvelope command) {
+        super(command.getId(), command.getMessage(), command.getCommandContext());
     }
 
     /**
@@ -51,9 +51,9 @@ public final class Transform
      * Posts the command to the bus and returns resulting event.
      */
     @CanIgnoreReturnValue // The resulting event is going to be deprecated in favor of system events.
-    public CommandTransformed post() {
+    public CommandTransformed post(CommandBus bus) {
         checkState(size() == 1, "The conversion sequence must have exactly one command.");
-        CommandTransformed result = postAll();
+        CommandTransformed result = postAll(bus);
         return result;
     }
 

@@ -43,8 +43,8 @@ OnEvent <R extends Message, B extends Message.Builder, S extends CommandSequence
     private final Message sourceMessage;
     private final EventContext sourceContext;
 
-    OnEvent(EventEnvelope event, CommandBus bus) {
-        super(event.getId(), event.getActorContext(), bus);
+    OnEvent(EventEnvelope event) {
+        super(event.getId(), event.getActorContext());
         this.sourceMessage = event.getMessage();
         this.sourceContext = event.getEventContext();
     }

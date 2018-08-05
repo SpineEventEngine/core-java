@@ -66,9 +66,6 @@ class CommandSequence<O extends Message, R extends Message, B extends Message.Bu
     /** The ID of the message which caused the sequence. */
     private final O origin;
 
-    /** The bus to post commands. */
-    private final CommandBus commandBus;
-
     /** The context in which the sequence is generated. */
     private final ActorContext actorContext;
 
@@ -81,9 +78,8 @@ class CommandSequence<O extends Message, R extends Message, B extends Message.Bu
     /** The handler for the posting errors. */
     private ErrorHandler errorHandler = new DefaultErrorHandler();
 
-    CommandSequence(O origin, ActorContext actorContext, CommandBus bus) {
+    CommandSequence(O origin, ActorContext actorContext) {
         this.origin = checkNotNull(origin);
-        this.commandBus = checkNotNull(bus);
         this.queue = Queues.newConcurrentLinkedQueue();
         this.actorContext = actorContext;
         this.commandFactory = ActorRequestFactory.fromContext(actorContext)
@@ -100,8 +96,8 @@ class CommandSequence<O extends Message, R extends Message, B extends Message.Bu
      * @return new empty sequence
      */
     @Internal
-    public static Split split(CommandEnvelope command, CommandBus bus) {
-        return new Split(command, bus);
+    public static Split split(CommandEnvelope command) {
+        return new Split(command);
     }
 
     /**
@@ -110,8 +106,8 @@ class CommandSequence<O extends Message, R extends Message, B extends Message.Bu
      * @return new empty sequence
      */
     @Internal
-    public static Transform transform(CommandEnvelope command, CommandBus bus) {
-        return new Transform(command, bus);
+    public static Transform transform(CommandEnvelope command) {
+        return new Transform(command);
     }
 
     /**
@@ -178,14 +174,12 @@ class CommandSequence<O extends Message, R extends Message, B extends Message.Bu
      *
      * <p>The {@linkplain #size() size} of the sequence after this method is zero <em>if</em>
      * all the commands were posted successfully.
-     *
-     * @return the result
      */
-    protected R postAll() {
+    protected R postAll(CommandBus bus) {
         B builder = newBuilder();
         while (hasNext()) {
             Message message = next();
-            Optional<Command> posted = post(message);
+            Optional<Command> posted = post(message, bus);
             if (posted.isPresent()) {
                 Command command = posted.get();
                 addPosted(builder, command);
@@ -194,13 +188,13 @@ class CommandSequence<O extends Message, R extends Message, B extends Message.Bu
         @SuppressWarnings("unchecked") /* The type is ensured by correct couples of R,B types passed
             to in the classes derived from `CommandSequence` that are limited to this package. */
         R result = (R) builder.build();
-        notifySystem(result);
+        notifySystem(result, bus);
         return result;
     }
 
-    private void notifySystem(R commandMessage) {
+    private void notifySystem(R commandMessage, CommandBus bus) {
         TenantId tenantId = actorContext.getTenantId();
-        SystemGateway gateway = commandBus.gatewayFor(tenantId);
+        SystemGateway gateway = bus.gatewayFor(tenantId);
         gateway.postCommand(commandMessage);
     }
 
@@ -209,15 +203,13 @@ class CommandSequence<O extends Message, R extends Message, B extends Message.Bu
      * to the {@code CommandBus}.
      *
      * <p>This method waits till the posting of the command is finished.
-     *
-     * @param message the command message for the new command
      * @return the created and posted {@code Command}
      */
-    private Optional<Command> post(Message message) {
+    private Optional<Command> post(Message message, CommandBus bus) {
         Command command = commandFactory.create(message);
         SettableFuture<Ack> finishFuture = SettableFuture.create();
         StreamObserver<Ack> observer = newAckObserver(finishFuture);
-        commandBus.post(command, observer);
+        bus.post(command, observer);
         Ack ack;
         // Wait till the call is completed.
         try {
@@ -282,5 +274,4 @@ class CommandSequence<O extends Message, R extends Message, B extends Message.Bu
             throw new CommandPostingException(commandMessage, context, throwable);
         }
     }
-
 }

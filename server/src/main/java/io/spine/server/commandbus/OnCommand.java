@@ -43,8 +43,8 @@ abstract class OnCommand<R extends Message,
     private final Message sourceMessage;
     private final CommandContext sourceContext;
 
-    OnCommand(CommandId origin, Message message, CommandContext context, CommandBus bus) {
-        super(origin, context.getActorContext(), bus);
+    OnCommand(CommandId origin, Message message, CommandContext context) {
+        super(origin, context.getActorContext());
         this.sourceMessage = message;
         this.sourceContext = context;
     }
