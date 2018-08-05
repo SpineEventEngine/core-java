@@ -33,6 +33,7 @@ option java_multiple_files = true;
 
 import "spine/base/error.proto";
 import "spine/core/command.proto";
+import "spine/core/event.proto";
 import "spine/core/rejection.proto";
 import "spine/client/entities.proto";
 import "spine/system/server/command_lifecycle.proto";
@@ -157,4 +158,17 @@ message MarkSplit {
     // For one produced command please use `MarkTransformed`.
     //
     repeated core.CommandId produced = 2 [(required) = true];
+}
+
+// A system command to mark a command as one which was created in response to an event.
+//
+// Posted when a commanding method creates one or more commands in response to an incoming event.
+//
+message MarkReacted {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // The ID of the event which cased the command.
+    spine.core.EventId origin = 2;
 }
