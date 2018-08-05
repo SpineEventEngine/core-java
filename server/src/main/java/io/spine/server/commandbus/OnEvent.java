@@ -21,12 +21,8 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
-import io.spine.core.DispatchedEvent;
-import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
+import io.spine.core.ActorContext;
 import io.spine.core.EventId;
-
-import static io.spine.core.Events.toDispatched;
 
 /**
  * Abstract base for command sequences initiated in response to an event.
@@ -40,16 +36,7 @@ abstract class
 OnEvent <R extends Message, B extends Message.Builder, S extends CommandSequence<EventId, R, B, S>>
         extends CommandSequence<EventId, R, B, S> {
 
-    private final Message sourceMessage;
-    private final EventContext sourceContext;
-
-    OnEvent(EventEnvelope event) {
-        super(event.getId(), event.getActorContext());
-        this.sourceMessage = event.getMessage();
-        this.sourceContext = event.getEventContext();
-    }
-
-    protected DispatchedEvent source() {
-        return toDispatched(this.sourceMessage, this.sourceContext);
+    OnEvent(EventId origin, ActorContext actorContext) {
+        super(origin, actorContext);
     }
 }

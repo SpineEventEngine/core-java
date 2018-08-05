@@ -21,11 +21,8 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
-import io.spine.core.CommandContext;
+import io.spine.core.ActorContext;
 import io.spine.core.CommandId;
-import io.spine.core.DispatchedCommand;
-
-import static io.spine.core.Commands.toDispatched;
 
 /**
  * Abstract base for command sequences initiated from a source command.
@@ -40,16 +37,7 @@ abstract class OnCommand<R extends Message,
                          S extends CommandSequence<CommandId, R, B, S>>
         extends CommandSequence<CommandId, R, B, S> {
 
-    private final Message sourceMessage;
-    private final CommandContext sourceContext;
-
-    OnCommand(CommandId origin, Message message, CommandContext context) {
-        super(origin, context.getActorContext());
-        this.sourceMessage = message;
-        this.sourceContext = context;
-    }
-
-    protected DispatchedCommand source() {
-        return toDispatched(this.sourceMessage, this.sourceContext);
+    OnCommand(CommandId origin, ActorContext actorContext) {
+        super(origin, actorContext);
     }
 }
