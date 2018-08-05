@@ -23,6 +23,7 @@ package io.spine.testing.server.procman.given;
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.server.command.Assign;
+import io.spine.server.command.Command;
 import io.spine.server.entity.Repository;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
@@ -30,7 +31,6 @@ import io.spine.testing.server.TUAssignTask;
 import io.spine.testing.server.TUCreateTask;
 import io.spine.testing.server.TUProjectId;
 import io.spine.testing.server.TUTaskAssigned;
-import io.spine.testing.server.TUTaskCreated;
 import io.spine.testing.server.TUTaskCreationPm;
 import io.spine.testing.server.TUTaskCreationPmVBuilder;
 import io.spine.testing.server.entity.given.Given;
@@ -78,14 +78,12 @@ public class ProcessManagerCommandTestShouldEnv {
             super(id);
         }
 
-        @Assign
+        @Command
         @SuppressWarnings("CheckReturnValue")
-        TUTaskCreated handle(TUCreateTask command, CommandContext context) {
-            transform(command, context).to(NESTED_COMMAND)
-                                       .post();
-            return TUTaskCreated.newBuilder()
-                                .setId(command.getId())
-                                .build();
+        TUAssignTask handle(TUCreateTask command, CommandContext context) {
+            return TUAssignTask.newBuilder()
+                               .setId(command.getId())
+                               .build();
         }
 
         @Assign

@@ -22,11 +22,11 @@ package io.spine.server.commandbus;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
-import io.spine.core.CommandContext;
-import io.spine.server.procman.CommandSplit;
+import io.spine.core.Command;
+import io.spine.core.CommandEnvelope;
+import io.spine.system.server.CommandSplit;
 
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.core.Commands.toDispatched;
 
 /**
  * A {@code CommandSequence} of two or more commands which is generated in response to
@@ -36,8 +36,8 @@ import static io.spine.core.Commands.toDispatched;
  */
 public final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, Split> {
 
-    Split(CommandBus commandBus, Message sourceMessage, CommandContext sourceContext) {
-        super(sourceMessage, sourceContext, commandBus);
+    Split(CommandEnvelope command, CommandBus commandBus) {
+        super(command.getId(), command.getMessage(), command.getCommandContext(), commandBus);
     }
 
     @CanIgnoreReturnValue
@@ -55,15 +55,14 @@ public final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, S
     protected CommandSplit.Builder newBuilder() {
         CommandSplit.Builder result = CommandSplit
                 .newBuilder()
-                .setSource(source());
+                .setId(origin());
         return result;
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder method
     @Override
-    protected
-    void addPosted(CommandSplit.Builder builder, Message message, CommandContext context) {
-        builder.addProduced(toDispatched(message, context));
+    protected void addPosted(CommandSplit.Builder builder, Command command) {
+        builder.addProduced(command.getId());
     }
 
     @Override
@@ -75,7 +74,6 @@ public final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, S
                            "`CommandSequence.transform()`."
         );
         CommandSplit split = super.postAll();
-        //TODO:2018-08-05:alexander.yevsyukov: post system command MarkCommandSplit
         return split;
     }
 }

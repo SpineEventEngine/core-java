@@ -55,12 +55,12 @@ class CommandReceivedTapTest {
 
     private void initSingleTenant() {
         gateway = MemoizingGateway.singleTenant();
-        filter = new CommandReceivedTap(gateway);
+        filter = new CommandReceivedTap((t) -> CommandBus.gatewayFor(t, gateway));
     }
 
     private void initMultitenant() {
         gateway = MemoizingGateway.multitenant();
-        filter = new CommandReceivedTap(gateway);
+        filter = new CommandReceivedTap((t) -> CommandBus.gatewayFor(t, gateway));
     }
 
     @Test

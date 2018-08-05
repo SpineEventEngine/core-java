@@ -30,10 +30,10 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.EventContext;
 import io.spine.core.React;
 import io.spine.server.command.Assign;
+import io.spine.server.command.Command;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
-import io.spine.server.procman.CommandTransformed;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmAddTask;
@@ -153,18 +153,15 @@ public class ProcessManagerTestEnv {
                     .build();
         }
 
-        @Assign
-        CommandTransformed handle(PmStartProject command, CommandContext context) {
+        @Command
+        PmAddTask transform(PmStartProject command, CommandContext context) {
             getBuilder().mergeFrom(pack(command));
 
-            Message addTask = ((PmAddTask.Builder)
+            PmAddTask addTask = ((PmAddTask.Builder)
                     Sample.builderForType(PmAddTask.class))
                     .setProjectId(command.getProjectId())
                     .build();
-            CommandTransformed event = transform(command, context)
-                    .to(addTask)
-                    .post();
-            return event;
+            return addTask;
         }
 
         /*

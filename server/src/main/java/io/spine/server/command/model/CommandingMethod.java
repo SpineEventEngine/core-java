@@ -22,7 +22,6 @@ package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.command.Command;
 import io.spine.server.commandbus.CommandBus;
@@ -108,13 +107,11 @@ interface CommandingMethod<T, M extends MessageClass, C extends Message, R exten
             checkNotNull(cmd);
             checkNotNull(bus);
             List<? extends Message> messages = asMessages();
-            Message commandMessage = cmd.getMessage();
-            CommandContext context = cmd.getCommandContext();
             if (messages.size() == 1) {
-                Transform transform = transform(commandMessage, context, bus);
+                Transform transform = transform(cmd, bus);
                 transform.post();
             } else {
-                Split split = split(commandMessage, context, bus);
+                Split split = split(cmd, bus);
                 for (Message message : messages) {
                     split.add(message);
                 }

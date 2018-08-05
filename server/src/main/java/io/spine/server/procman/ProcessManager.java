@@ -24,17 +24,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.model.CommandHandlerMethod;
-import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandbus.CommandSequence;
-import io.spine.server.commandbus.Split;
-import io.spine.server.commandbus.Transform;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.model.ReactorMethodResult;
@@ -42,11 +37,9 @@ import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.rejection.RejectionReactor;
 import io.spine.server.rejection.model.RejectionReactorMethod;
 import io.spine.validate.ValidatingBuilder;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 
 /**
@@ -82,9 +75,6 @@ public abstract class ProcessManager<I,
         extends CommandHandlingEntity<I, S, B>
         implements EventReactor, RejectionReactor {
 
-    /** The Command Bus to post routed commands. */
-    private volatile @MonotonicNonNull CommandBus commandBus;
-
     /**
      * Creates a new instance.
      *
@@ -104,20 +94,6 @@ public abstract class ProcessManager<I,
     @Override
     protected ProcessManagerClass<?> thisClass() {
         return (ProcessManagerClass<?>) super.thisClass();
-    }
-
-    /** The method to inject {@code CommandBus} instance from the repository. */
-    void setCommandBus(CommandBus commandBus) {
-        this.commandBus = checkNotNull(commandBus);
-    }
-
-    /**
-     * Returns the {@code CommandBus} to which the commands produced by this process manager
-     * are to be posted.
-     */
-    private CommandBus getCommandBus() {
-        checkNotNull(commandBus, "CommandBus is not set in ProcessManager %s", this);
-        return commandBus;
     }
 
     /**
@@ -180,65 +156,6 @@ public abstract class ProcessManager<I,
         ReactorMethodResult methodResult =
                 method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
         List<Event> result = methodResult.produceEvents(rejection);
-        return result;
-    }
-
-    /**
-     * Creates a new empty command sequence for posting two or more commands in response to
-     * an incoming command.
-     *
-     * <p>A typical usage looks like this:
-     *
-     * <pre>
-     *     {@literal @}Assign
-     *     CommandSplit on(MyCommand message, CommandContext context) {
-     *         // Create new command messages here.
-     *         return split(message, context)
-     *                  .add(messageOne)
-     *                  .add(messageTwo)
-     *                  .postAll();
-     *     }
-     * </pre>
-     *
-     * <p>The routed commands are created on behalf of the actor of the original command.
-     * That is, the {@code actor} and {@code zoneOffset} fields of created {@code CommandContext}
-     * instances will be the same as in the incoming command.
-     *
-     * @param commandMessage the message of the command to split
-     * @param context the context of the command
-     * @return new empty sequence
-     */
-    protected Split split(Message commandMessage, CommandContext context) {
-        checkNotNull(commandMessage);
-        checkNotNull(context);
-        Split result = CommandSequence.split(commandMessage, context, getCommandBus());
-        return result;
-    }
-
-    /**
-     * Creates a new empty command transformation sequence for posting exactly one command
-     * in response to incoming one.
-     *
-     * <p>A typical usage looks like this:
-     *
-     * <pre>
-     *     {@literal @}Assign
-     *     CommandTransformed on(MyCommand message, CommandContext context) {
-     *         // Create new command message here.
-     *         return transform(message, context)
-     *                  .to(anotherMessage)
-     *                  .post();
-     *     }
-     * </pre>
-     *
-     * @param commandMessage the message of the command which we transform
-     * @param context the context of the command
-     * @return new empty sequence
-     */
-    protected Transform transform(Message commandMessage, CommandContext context) {
-        checkNotNull(commandMessage);
-        checkNotNull(context);
-        Transform result = CommandSequence.transform(commandMessage, context, getCommandBus());
         return result;
     }
 

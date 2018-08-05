@@ -22,11 +22,11 @@ package io.spine.server.commandbus;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
-import io.spine.core.CommandContext;
-import io.spine.server.procman.CommandTransformed;
+import io.spine.core.Command;
+import io.spine.core.CommandEnvelope;
+import io.spine.system.server.CommandTransformed;
 
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.core.Commands.toDispatched;
 
 /**
  * A command sequence containing only one element.
@@ -36,8 +36,8 @@ import static io.spine.core.Commands.toDispatched;
 public final class Transform
         extends OnCommand<CommandTransformed, CommandTransformed.Builder, Transform> {
 
-    Transform(CommandBus commandBus, Message sourceMessage, CommandContext context) {
-        super(sourceMessage, context, commandBus);
+    Transform(CommandEnvelope command, CommandBus commandBus) {
+        super(command.getId(), command.getMessage(), command.getCommandContext(), commandBus);
     }
 
     /**
@@ -54,7 +54,6 @@ public final class Transform
     public CommandTransformed post() {
         checkState(size() == 1, "The conversion sequence must have exactly one command.");
         CommandTransformed result = postAll();
-        //TODO:2018-08-05:alexander.yevsyukov: post system command MarkCommandTransformed
         return result;
     }
 
@@ -62,14 +61,13 @@ public final class Transform
     protected CommandTransformed.Builder newBuilder() {
         CommandTransformed.Builder result = CommandTransformed
                 .newBuilder()
-                .setSource(source());
+                .setId(origin());
         return result;
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder method
     @Override
-    protected void addPosted(CommandTransformed.Builder builder, Message message,
-                             CommandContext context) {
-        builder.setProduced(toDispatched(message, context));
+    protected void addPosted(CommandTransformed.Builder builder, Command command) {
+        builder.setProduced(command.getId());
     }
 }

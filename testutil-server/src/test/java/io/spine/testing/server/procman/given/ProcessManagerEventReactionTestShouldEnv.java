@@ -23,7 +23,7 @@ package io.spine.testing.server.procman.given;
 import com.google.protobuf.Message;
 import io.spine.core.Enrichment;
 import io.spine.core.EventContext;
-import io.spine.core.React;
+import io.spine.server.command.Command;
 import io.spine.server.entity.Repository;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
@@ -64,9 +64,7 @@ public class ProcessManagerEventReactionTestShouldEnv {
      * routes a nested command.
      */
     public static class EventReactingProcessManager
-            extends ProcessManager<TUProjectId,
-            TUTaskCreationPm,
-            TUTaskCreationPmVBuilder> {
+            extends ProcessManager<TUProjectId, TUTaskCreationPm, TUTaskCreationPmVBuilder> {
 
         public static final TUTaskAssigned RESULT_EVENT =
                 TUTaskAssigned.newBuilder()
@@ -81,12 +79,13 @@ public class ProcessManagerEventReactionTestShouldEnv {
             super(id);
         }
 
-        @React
+        @Command
         @SuppressWarnings("CheckReturnValue")
-        TUTaskAssigned on(TUTaskCreated event, EventContext context) {
-            transform(event, context.getCommandContext()).to(NESTED_COMMAND)
-                                                         .post();
-            return RESULT_EVENT;
+        TUAssignTask on(TUTaskCreated event, EventContext context) {
+            return TUAssignTask
+                    .newBuilder()
+                    .setId(event.getId())
+                    .build();
         }
     }
 

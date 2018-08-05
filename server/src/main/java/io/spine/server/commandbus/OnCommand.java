@@ -22,6 +22,7 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
 import io.spine.core.DispatchedCommand;
 
 import static io.spine.core.Commands.toDispatched;
@@ -34,15 +35,16 @@ import static io.spine.core.Commands.toDispatched;
  * @param <S> the type of the sequence for the return type covariance
  * @author Alexander Yevsyukov
  */
-abstract
-class OnCommand<R extends Message, B extends Message.Builder, S extends CommandSequence<R, B, S>>
-        extends CommandSequence<R, B, S> {
+abstract class OnCommand<R extends Message,
+                         B extends Message.Builder,
+                         S extends CommandSequence<CommandId, R, B, S>>
+        extends CommandSequence<CommandId, R, B, S> {
 
     private final Message sourceMessage;
     private final CommandContext sourceContext;
 
-    OnCommand(Message message, CommandContext context, CommandBus bus) {
-        super(context.getActorContext(), bus);
+    OnCommand(CommandId origin, Message message, CommandContext context, CommandBus bus) {
+        super(origin, context.getActorContext(), bus);
         this.sourceMessage = message;
         this.sourceContext = context;
     }

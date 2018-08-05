@@ -40,7 +40,6 @@ import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandbus.Split;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.procman.given.DirectQuizProcmanRepository;
 import io.spine.server.procman.given.ProcessManagerTestEnv.AddTaskDispatcher;
@@ -80,7 +79,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.Commands.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.commandbus.Given.ACommand;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.answerQuestion;
 import static io.spine.server.procman.given.ProcessManagerTestEnv.newAnswer;
@@ -99,7 +97,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 /**
@@ -336,32 +333,6 @@ class ProcessManagerTest {
 
             assertThrows(IllegalStateException.class, () -> dispatch(processManager, envelope));
         }
-    }
-
-    @Nested
-    @DisplayName("create")
-    class Create {
-
-        @Test
-        @DisplayName("split sequence")
-        void commandRouter() {
-            StringValue commandMessage = toMessage("create_router");
-            CommandContext commandContext = requestFactory.createCommandContext();
-
-            processManager.injectCommandBus(mock(CommandBus.class));
-
-            Split sequence = processManager.split(commandMessage, commandContext);
-            assertNotNull(sequence);
-            assertEquals(0, sequence.size());
-        }
-    }
-
-    @Test
-    @DisplayName("require CommandBus when creating router")
-    void requireCommandBusForRouter() {
-        assertThrows(NullPointerException.class,
-                     () -> processManager.split(StringValue.getDefaultInstance(),
-                                                CommandContext.getDefaultInstance()));
     }
 
     @Nested

@@ -20,36 +20,21 @@
 
 package io.spine.server.commandbus;
 
-import com.google.protobuf.Message;
-import io.spine.core.DispatchedEvent;
-import io.spine.core.EventContext;
-import io.spine.core.EventEnvelope;
-import io.spine.core.EventId;
+import io.spine.core.TenantId;
+import io.spine.system.server.SystemGateway;
 
-import static io.spine.core.Events.toDispatched;
+import java.util.function.Function;
 
 /**
- * Abstract base for command sequences initiated in response to an event.
+ * Obtains a gateway in a multi-tenant environment.
  *
- * @param <R> the type of the result generated when the command sequence is posted
- * @param <B> the type of the result builder
- * @param <S> the type of the sequence for the return type covariance
  * @author Alexander Yevsyukov
  */
-abstract class
-OnEvent <R extends Message, B extends Message.Builder, S extends CommandSequence<EventId, R, B, S>>
-        extends CommandSequence<EventId, R, B, S> {
+@FunctionalInterface
+interface GatewayFunction extends Function<TenantId, SystemGateway> {
 
-    private final Message sourceMessage;
-    private final EventContext sourceContext;
-
-    OnEvent(EventEnvelope event, CommandBus bus) {
-        super(event.getId(), event.getActorContext(), bus);
-        this.sourceMessage = event.getMessage();
-        this.sourceContext = event.getEventContext();
-    }
-
-    protected DispatchedEvent source() {
-        return toDispatched(this.sourceMessage, this.sourceContext);
+    /** Obtains system gateway for the given tenant. */
+    default SystemGateway get(TenantId tenantId) {
+        return apply(tenantId);
     }
 }

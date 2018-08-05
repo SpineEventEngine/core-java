@@ -29,13 +29,14 @@ import io.spine.core.EventContext;
 import io.spine.core.React;
 import io.spine.core.Subscribe;
 import io.spine.server.command.Assign;
+import io.spine.server.command.Command;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.event.AbstractEventSubscriber;
-import io.spine.server.procman.CommandSplit;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.tuple.Pair;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.ProjectVBuilder;
@@ -153,24 +154,20 @@ public class ProcessManagerRepositoryTestEnv {
             return event;
         }
 
-        @Assign
-        CommandSplit handle(PmStartProject command, CommandContext context) {
+        @Command
+        Pair<PmAddTask, PmDoNothing> handle(PmStartProject command, CommandContext context) {
             keep(command);
 
             ProjectId projectId = command.getProjectId();
-            Message addTask = ((PmAddTask.Builder)
+            PmAddTask addTask = ((PmAddTask.Builder)
                     Sample.builderForType(PmAddTask.class))
                     .setProjectId(projectId)
                     .build();
-            Message doNothing = ((PmDoNothing.Builder)
+            PmDoNothing doNothing = ((PmDoNothing.Builder)
                     Sample.builderForType(PmDoNothing.class))
                     .setProjectId(projectId)
                     .build();
-
-            return split(command, context)
-                    .add(addTask)
-                    .add(doNothing)
-                    .postAll();
+            return Pair.of(addTask, doNothing);
         }
 
         @Assign

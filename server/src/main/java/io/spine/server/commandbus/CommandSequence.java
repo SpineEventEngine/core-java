@@ -33,8 +33,11 @@ import io.spine.core.Ack;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.Status;
+import io.spine.core.TenantId;
+import io.spine.system.server.SystemGateway;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -43,12 +46,12 @@ import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.core.Commands.toDispatched;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * A sequence of commands to be posted to {@code CommandBus}.
  *
+ * @param <O> the type of origin ID which caused the sequence
  * @param <R> the type of the result generated when the command sequence is posted
  * @param <B> the type of the result builder
  * @param <S> the type of the sequence for the return type covariance
@@ -56,11 +59,18 @@ import static io.spine.protobuf.AnyPacker.unpack;
  */
 @SuppressWarnings("ClassReferencesSubclass")
 @Internal
-public abstract class CommandSequence<R extends Message, B extends Message.Builder,
-        S extends CommandSequence<R, B, S>> {
+public abstract
+class CommandSequence<O extends Message, R extends Message, B extends Message.Builder,
+        S extends CommandSequence<O, R, B, S>> {
+
+    /** The ID of the message which caused the sequence. */
+    private final O origin;
 
     /** The bus to post commands. */
     private final CommandBus commandBus;
+
+    /** The context in which the sequence is generated. */
+    private final ActorContext actorContext;
 
     /** The factory for producing commands. */
     private final CommandFactory commandFactory;
@@ -71,39 +81,37 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
     /** The handler for the posting errors. */
     private ErrorHandler errorHandler = new DefaultErrorHandler();
 
-    CommandSequence(ActorContext actorContext, CommandBus bus) {
+    CommandSequence(O origin, ActorContext actorContext, CommandBus bus) {
+        this.origin = checkNotNull(origin);
         this.commandBus = checkNotNull(bus);
         this.queue = Queues.newConcurrentLinkedQueue();
+        this.actorContext = actorContext;
         this.commandFactory = ActorRequestFactory.fromContext(actorContext)
                                                  .command();
+    }
+
+    protected O origin() {
+        return origin;
     }
 
     /**
      * Creates a sequence for splitting the source command into several ones.
      *
-     * @param commandMessage the message of the source command
-     * @param context the context of the source command
-     * @param bus the command bus to post commands
      * @return new empty sequence
      */
     @Internal
-    public static Split split(Message commandMessage, CommandContext context, CommandBus bus) {
-        return new Split(bus, commandMessage, context);
+    public static Split split(CommandEnvelope command, CommandBus bus) {
+        return new Split(command, bus);
     }
 
     /**
      * Creates a sequence for transforming incoming command into another one.
      *
-     * @param commandMessage the message of the source command
-     * @param context the context of the source command
-     * @param bus the command bus to post commands
      * @return new empty sequence
      */
     @Internal
-    public static Transform transform(Message commandMessage,
-                                      CommandContext context,
-                                      CommandBus bus) {
-        return new Transform(bus, commandMessage, context);
+    public static Transform transform(CommandEnvelope command, CommandBus bus) {
+        return new Transform(command, bus);
     }
 
     /**
@@ -114,7 +122,7 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
     /**
      * Adds the posted command to the result builder.
      */
-    protected abstract void addPosted(B builder, Message message, CommandContext context);
+    protected abstract void addPosted(B builder, Command command);
 
     /**
      * Adds a command message to the sequence of commands to be posted.
@@ -180,13 +188,20 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
             Optional<Command> posted = post(message);
             if (posted.isPresent()) {
                 Command command = posted.get();
-                addPosted(builder, message, command.getContext());
+                addPosted(builder, command);
             }
         }
         @SuppressWarnings("unchecked") /* The type is ensured by correct couples of R,B types passed
             to in the classes derived from `CommandSequence` that are limited to this package. */
         R result = (R) builder.build();
+        notifySystem(result);
         return result;
+    }
+
+    private void notifySystem(R commandMessage) {
+        TenantId tenantId = actorContext.getTenantId();
+        SystemGateway gateway = commandBus.gatewayFor(tenantId);
+        gateway.postCommand(commandMessage);
     }
 
     /**
