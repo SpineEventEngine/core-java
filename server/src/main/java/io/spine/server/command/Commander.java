@@ -20,6 +20,8 @@
 
 package io.spine.server.command;
 
+import io.spine.server.event.EventReceiver;
+
 /**
  * An interface common for objects that post one or more command in response to an incoming message.
  *
@@ -35,5 +37,5 @@ package io.spine.server.command;
  * @author Alexander Yevsyukov
  * @see Command @Command
  */
-public interface Commander extends CommandReceiver {
+public interface Commander extends CommandReceiver, EventReceiver {
 }

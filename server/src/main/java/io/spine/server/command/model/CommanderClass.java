@@ -22,6 +22,7 @@ package io.spine.server.command.model;
 
 import io.spine.core.EventClass;
 import io.spine.server.command.AbstractCommander;
+import io.spine.server.command.Commander;
 import io.spine.server.event.model.EventReceiverClass;
 import io.spine.server.event.model.EventReceivingClassDelegate;
 
@@ -30,12 +31,12 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Provides information on message handling for a class of {@link AbstractCommander}s.
+ * Provides information on message handling for a class of {@link Commander}s.
  *
  * @param <C> the type of commanders
  * @author Alexander Yevsyukov
  */
-public final class CommanderClass<C extends AbstractCommander>
+public final class CommanderClass<C extends Commander>
         extends AbstractCommandHandlingClass<C, CommandSubstituteMethod>
         implements EventReceiverClass {
 
