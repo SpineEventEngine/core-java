@@ -23,6 +23,7 @@ package io.spine.server.model;
 import java.lang.reflect.Method;
 import java.util.function.Predicate;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.model.MethodExceptionChecker.forMethod;
 
 /**
@@ -35,11 +36,27 @@ import static io.spine.server.model.MethodExceptionChecker.forMethod;
  */
 public abstract class MethodFactory<H extends HandlerMethod> {
 
-    /** Returns the class of the method wrapper. */
-    public abstract Class<H> getMethodClass();
+    private final Class<H> methodClass;
+    private final Predicate<Method> predicate;
 
-    /** Returns a predicate for filtering methods. */
-    public abstract Predicate<Method> getPredicate();
+    protected MethodFactory(Class<H> methodClass, Predicate<Method> predicate) {
+        this.methodClass = checkNotNull(methodClass);
+        this.predicate = checkNotNull(predicate);
+    }
+
+    /**
+     * Returns the class of the method wrapper.
+     */
+    public final Class<H> getMethodClass() {
+        return this.methodClass;
+    }
+
+    /**
+     * Returns a predicate for filtering methods.
+     */
+    public final Predicate<Method> getPredicate() {
+        return this.predicate;
+    }
 
     /**
      * Checks an access modifier of the method and logs a warning if it is invalid.

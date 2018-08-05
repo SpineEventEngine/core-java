@@ -29,11 +29,9 @@ import io.spine.core.Subscribe;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodFactory;
-import io.spine.server.model.MethodPredicate;
 import io.spine.server.model.MethodResult;
 
 import java.lang.reflect.Method;
-import java.util.function.Predicate;
 
 import static io.spine.core.Rejections.isRejection;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
@@ -57,13 +55,11 @@ public final class EventSubscriberMethod
         return EventClass.of(rawMessageClass());
     }
 
-    public static EventSubscriberMethod from(Method method) {
-        return new EventSubscriberMethod(method);
-    }
-
-    /** Returns the factory for filtering and creating event subscriber methods. */
+    /**
+     * Returns the factory for filtering and creating event subscriber methods.
+     */
     public static MethodFactory<EventSubscriberMethod> factory() {
-        return Factory.getInstance();
+        return Factory.INSTANCE;
     }
 
     @CanIgnoreReturnValue // since event subscriber methods do not return values
@@ -85,18 +81,8 @@ public final class EventSubscriberMethod
 
         private static final Factory INSTANCE = new Factory();
 
-        private static Factory getInstance() {
-            return INSTANCE;
-        }
-
-        @Override
-        public Class<EventSubscriberMethod> getMethodClass() {
-            return EventSubscriberMethod.class;
-        }
-
-        @Override
-        public Predicate<Method> getPredicate() {
-            return Filter.INSTANCE;
+        private Factory() {
+            super(EventSubscriberMethod.class, new Filter());
         }
 
         @Override
@@ -107,7 +93,7 @@ public final class EventSubscriberMethod
 
         @Override
         protected EventSubscriberMethod doCreate(Method method) {
-            return from(method);
+            return new EventSubscriberMethod(method);
         }
     }
 
@@ -117,8 +103,6 @@ public final class EventSubscriberMethod
      * <p>Please see {@link Subscribe} annotation for more information.
      */
     private static class Filter extends EventMethodPredicate {
-
-        private static final MethodPredicate INSTANCE = new Filter();
 
         private Filter() {
             super(Subscribe.class);

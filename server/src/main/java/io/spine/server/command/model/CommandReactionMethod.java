@@ -26,8 +26,12 @@ import io.spine.core.EventContext;
 import io.spine.server.command.model.CommandingMethod.Result;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.MethodAccessChecker;
+import io.spine.server.model.MethodFactory;
 
 import java.lang.reflect.Method;
+
+import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
  * A method which <em>may</em> generate one or more command messages in response to an event.
@@ -42,14 +46,14 @@ public final class CommandReactionMethod
         super(method);
     }
 
-    static CommandReactionMethod from(Method method) {
-        return new CommandReactionMethod(method);
-    }
-
     @Override
     protected Result toResult(EventReceiver target, Object rawMethodOutput) {
         Result result = new Result(rawMethodOutput, true);
         return result;
+    }
+
+    static MethodFactory<CommandReactionMethod> factory() {
+        return Factory.INSTANCE;
     }
 
     @Override
@@ -57,9 +61,28 @@ public final class CommandReactionMethod
         return EventClass.of(rawMessageClass());
     }
 
-    private static final class Filter extends AbstractPredicate<EventContext> {
+    private static final class Factory extends MethodFactory<CommandReactionMethod> {
 
-        private static final Filter INSTANCE = new Filter();
+        private static final Factory INSTANCE = new Factory();
+
+        private Factory() {
+            super(CommandReactionMethod.class, new Filter());
+        }
+
+        @Override
+        public void checkAccessModifier(Method method) {
+            MethodAccessChecker checker = forMethod(method);
+            checker.checkPublic("Commanding event reaction `{}` must be declared `public`");
+        }
+
+        @Override
+        protected CommandReactionMethod doCreate(Method method) {
+            CommandReactionMethod result = new CommandReactionMethod(method);
+            return result;
+        }
+    }
+
+    private static final class Filter extends AbstractPredicate<EventContext> {
 
         private Filter() {
             super(EventContext.class);

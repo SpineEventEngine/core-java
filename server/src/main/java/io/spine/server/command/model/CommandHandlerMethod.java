@@ -38,7 +38,6 @@ import io.spine.server.procman.ProcessManager;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -83,14 +82,8 @@ public final class CommandHandlerMethod
 
         private static final Factory INSTANCE = new Factory();
 
-        @Override
-        public Class<CommandHandlerMethod> getMethodClass() {
-            return CommandHandlerMethod.class;
-        }
-
-        @Override
-        public Predicate<Method> getPredicate() {
-            return Filter.INSTANCE;
+        private Factory() {
+            super(CommandHandlerMethod.class, new Filter());
         }
 
         @Override
@@ -124,8 +117,6 @@ public final class CommandHandlerMethod
      * <p>See {@link Assign} annotation for more info about such methods.
      */
     private static class Filter extends HandlerMethodPredicate<CommandContext> {
-
-        private static final Filter INSTANCE = new Filter();
 
         private Filter() {
             super(Assign.class, CommandContext.class);

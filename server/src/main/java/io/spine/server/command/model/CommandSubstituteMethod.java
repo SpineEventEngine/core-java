@@ -31,7 +31,6 @@ import io.spine.server.model.MethodExceptionChecker;
 import io.spine.server.model.MethodFactory;
 
 import java.lang.reflect.Method;
-import java.util.function.Predicate;
 
 /**
  * A method that produces one or more command messages in response to an incoming command.
@@ -52,27 +51,17 @@ public final class CommandSubstituteMethod
         return result;
     }
 
-    static CommandSubstituteMethod from(Method method) {
-        return new CommandSubstituteMethod(method);
-    }
-
     static MethodFactory<CommandSubstituteMethod> factory() {
         return Factory.INSTANCE;
     }
 
-    private static class Factory
+    private static final class Factory
             extends MethodFactory<CommandSubstituteMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
-        @Override
-        public Class<CommandSubstituteMethod> getMethodClass() {
-            return CommandSubstituteMethod.class;
-        }
-
-        @Override
-        public Predicate<Method> getPredicate() {
-            return Filter.INSTANCE;
+        private Factory() {
+            super(CommandSubstituteMethod.class, new Filter());
         }
 
         @Override
@@ -91,7 +80,7 @@ public final class CommandSubstituteMethod
 
         @Override
         protected CommandSubstituteMethod doCreate(Method method) {
-            return from(method);
+            return new CommandSubstituteMethod(method);
         }
     }
 
@@ -99,8 +88,6 @@ public final class CommandSubstituteMethod
      * Filters command substitution methods.
      */
     private static final class Filter extends AbstractPredicate<CommandContext> {
-
-        private static final Filter INSTANCE = new Filter();
 
         private Filter() {
             super(CommandContext.class);

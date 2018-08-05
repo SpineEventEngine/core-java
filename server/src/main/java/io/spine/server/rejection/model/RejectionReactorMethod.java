@@ -31,7 +31,6 @@ import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.rejection.RejectionReactor;
 
 import java.lang.reflect.Method;
-import java.util.function.Predicate;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 
@@ -98,14 +97,8 @@ public class RejectionReactorMethod
 
         private static final Factory INSTANCE = new Factory();
 
-        @Override
-        public Class<RejectionReactorMethod> getMethodClass() {
-            return RejectionReactorMethod.class;
-        }
-
-        @Override
-        public Predicate<Method> getPredicate() {
-            return Filter.INSTANCE;
+        private Factory() {
+            super(RejectionReactorMethod.class, new Filter());
         }
 
         @Override
@@ -127,8 +120,6 @@ public class RejectionReactorMethod
      * <p>Please see {@link React} annotation for more information.
      */
     private static class Filter extends AbstractPredicate {
-
-        private static final Filter INSTANCE = new Filter();
 
         private Filter() {
             super(React.class);

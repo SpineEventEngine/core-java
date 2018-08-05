@@ -32,7 +32,6 @@ import io.spine.server.model.MethodResult;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.function.Predicate;
 
 /**
  * @author Alexander Litus
@@ -169,18 +168,12 @@ public class HandlerMethodTestEnv {
 
             private static final Factory INSTANCE = new Factory();
 
+            private Factory() {
+                super(OneParamMethod.class, method -> true);
+            }
+
             private static Factory getInstance() {
                 return INSTANCE;
-            }
-
-            @Override
-            public Class<OneParamMethod> getMethodClass() {
-                return OneParamMethod.class;
-            }
-
-            @Override
-            public Predicate<Method> getPredicate() {
-                throw new IllegalStateException("The test factory cannot provide the predicate.");
             }
 
             @Override

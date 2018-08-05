@@ -57,12 +57,21 @@ interface CommandingMethod<T, M extends MessageClass, C extends Message, R exten
     }
 
     /**
-     * A command substitution method returns a one or more command messages.
+     * A commanding method returns one or more command messages.
      */
     final class Result extends MethodResult<Message> {
 
         private final boolean optional;
 
+        /**
+         * Creates new instance of method result.
+         *
+         * @param rawMethodOutput
+         *        output of the raw method call
+         * @param optional
+         *        {@code true} if this kind of methods may not return a value,
+         *        {@code false} otherwise
+         */
         Result(Object rawMethodOutput, boolean optional) {
             super(rawMethodOutput);
             this.optional = optional;

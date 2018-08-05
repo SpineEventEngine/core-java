@@ -83,20 +83,11 @@ class EventApplierTest {
     }
 
     @Test
-    @DisplayName("be properly created from factory")
-    void beCreatedFromFactory() {
-        Method method = new ValidApplier().getMethod();
-
-        EventApplier actual = factory.create(method);
-
-        assertEquals(EventApplier.from(method), actual);
-    }
-
-    @Test
     @DisplayName("allow invocation")
     void invokeApplierMethod() {
         ValidApplier applierObject = new ValidApplier();
-        EventApplier applier = EventApplier.from(applierObject.getMethod());
+        EventApplier applier = EventApplier.factory()
+                                           .create(applierObject.getMethod());
         RefProjectCreated event = Sample.messageOfType(RefProjectCreated.class);
 
         applier.invoke(applierObject, event);

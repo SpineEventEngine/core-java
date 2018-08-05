@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.event.model;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
@@ -34,7 +34,6 @@ import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidTwoParams
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.ValidButPrivate;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.ValidOneParam;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.ValidTwoParams;
-import io.spine.server.event.model.EventSubscriberMethod;
 import io.spine.server.model.given.Given;
 import io.spine.test.reflect.event.RefProjectCreated;
 import org.junit.jupiter.api.DisplayName;
@@ -71,7 +70,9 @@ class EventSubscriberMethodTest {
     void invokeSubscriberMethod() {
         ValidTwoParams subscriberObject;
         subscriberObject = spy(new ValidTwoParams());
-        EventSubscriberMethod subscriber = EventSubscriberMethod.from(subscriberObject.getMethod());
+        EventSubscriberMethod subscriber =
+                EventSubscriberMethod.factory()
+                                     .create(subscriberObject.getMethod());
         RefProjectCreated msg = Given.EventMessage.projectCreated();
 
         subscriber.invoke(subscriberObject, msg, EventContext.getDefaultInstance());
