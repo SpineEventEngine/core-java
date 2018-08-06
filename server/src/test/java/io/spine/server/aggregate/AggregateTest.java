@@ -76,6 +76,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Throwables.getRootCause;
+import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.ImmutableList.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.CommandEnvelope.of;
@@ -453,10 +454,8 @@ public class AggregateTest {
             aggregate.dispatchCommands(command(createProject),
                                        command(addTask),
                                        command(startProject));
-
-            List<Event> events = aggregate().commitEvents();
-
-            assertEventClasses(getEventClasses(events),
+            aggregate().commitEvents();
+            assertEventClasses(getEventClasses(copyOf(aggregate().historyBackward())),
                                AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class);
         }
 
@@ -484,10 +483,9 @@ public class AggregateTest {
 
         @Test
         @DisplayName("which are being committed")
-        void beingCommitedByDefault() {
-            List<Event> events = aggregate().commitEvents();
-
-            assertTrue(events.isEmpty());
+        void beingCommittedByDefault() {
+            aggregate().commitEvents();
+            assertFalse(aggregate.historyBackward().hasNext());
         }
     }
 
@@ -497,12 +495,9 @@ public class AggregateTest {
         aggregate.dispatchCommands(command(createProject),
                                    command(addTask),
                                    command(startProject));
-
-        List<Event> events = aggregate().commitEvents();
-        assertFalse(events.isEmpty());
-
-        List<Event> emptyList = aggregate().commitEvents();
-        assertTrue(emptyList.isEmpty());
+        assertTrue(aggregate().getUncommittedEvents().nonEmpty());
+        aggregate().commitEvents();
+        assertFalse(aggregate().getUncommittedEvents().nonEmpty());
     }
 
     @Test
@@ -796,7 +791,8 @@ public class AggregateTest {
                     .with(new TaskAggregateRepository())
                     .receivesCommand(reassignTask())
                     .verifiesThat(acked(once()).withoutErrorsOrRejections())
-                    .verifiesThat(emitted(once()))
+                    .verifiesThat(emitted(twice()))
+                    .verifiesThat(emitted(Rejections.AggCannotReassignUnassignedTask.class))
                     .verifiesThat(emitted(AggUserNotified.class))
                     .close();
         }
