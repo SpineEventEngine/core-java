@@ -100,6 +100,7 @@ enum EventAcceptor {
                 () -> newIllegalStateException("Method %s is not a valid event acceptor.",
                                                method.toString())
         );
+        method.setAccessible(true);
         Object result = acceptor.doAccept(receiver, method, envelope);
         return result;
     }
