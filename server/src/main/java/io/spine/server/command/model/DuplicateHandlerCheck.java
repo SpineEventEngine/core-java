@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.AbstractCommander;
 import io.spine.server.model.Model;
 import io.spine.server.model.ModelClass;
 import io.spine.server.procman.ProcessManager;
@@ -34,6 +35,7 @@ import java.util.function.Function;
 
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
+import static io.spine.server.command.model.CommanderClass.asCommanderClass;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
@@ -61,9 +63,8 @@ public class DuplicateHandlerCheck {
                          (c) -> asProcessManagerClass((Class<? extends ProcessManager>) c))
                     .put(AbstractCommandHandler.class,
                          (c) -> asCommandHandlerClass((Class<? extends AbstractCommandHandler>) c))
-
-                    //TODO:2018-08-03:alexander.yevsyukov: Add CommanderClass here.
-
+                    .put(AbstractCommander.class,
+                         (c) -> asCommanderClass((Class<? extends AbstractCommander>) c))
                     .build();
 
     private DuplicateHandlerCheck() {
