@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.procman.given;
+package io.spine.testing.server.procman.given.pm;
 
 import io.spine.core.EventContext;
 import io.spine.server.command.Command;

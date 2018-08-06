@@ -23,15 +23,15 @@ package io.spine.testing.server.procman;
 import io.spine.testing.server.TUAssignTask;
 import io.spine.testing.server.TUTaskCreationPm;
 import io.spine.testing.server.expected.CommandHandlerExpected;
-import io.spine.testing.server.procman.given.ProcessManagerCommandTestShouldEnv.CommandHandlingProcessManager;
-import io.spine.testing.server.procman.given.ProcessManagerCommandTestShouldEnv.TaskCreationProcessManagerTest;
+import io.spine.testing.server.procman.given.SamplePmCommandTest;
+import io.spine.testing.server.procman.given.pm.CommandHandlingPm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.server.procman.given.ProcessManagerCommandTestShouldEnv.CommandHandlingProcessManager.NESTED_COMMAND;
-import static io.spine.testing.server.procman.given.ProcessManagerCommandTestShouldEnv.TaskCreationProcessManagerTest.TEST_COMMAND;
-import static io.spine.testing.server.procman.given.ProcessManagerCommandTestShouldEnv.processManager;
+import static io.spine.testing.server.procman.given.SamplePmCommandTest.TEST_COMMAND;
+import static io.spine.testing.server.procman.given.pm.CommandHandlingPm.NESTED_COMMAND;
+import static io.spine.testing.server.procman.given.pm.CommandHandlingPm.newInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -41,11 +41,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DisplayName("ProcessManagerCommandTest should")
 class PmCommandTestShould {
 
-    private TaskCreationProcessManagerTest pmCommandTest;
+    private SamplePmCommandTest pmCommandTest;
 
     @BeforeEach
     void setUp() {
-        pmCommandTest = new TaskCreationProcessManagerTest();
+        pmCommandTest = new SamplePmCommandTest();
     }
 
     @Test
@@ -61,7 +61,7 @@ class PmCommandTestShould {
     void shouldDispatchCommand() {
         pmCommandTest.setUp();
         pmCommandTest.init();
-        CommandHandlingProcessManager testPm = processManager();
+        CommandHandlingPm testPm = newInstance();
         CommandHandlerExpected<TUTaskCreationPm> expected =
                 pmCommandTest.expectThat(testPm);
 

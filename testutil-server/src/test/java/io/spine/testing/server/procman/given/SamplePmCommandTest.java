@@ -22,26 +22,28 @@ package io.spine.testing.server.procman.given;
 
 import com.google.protobuf.Message;
 import io.spine.server.entity.Repository;
+import io.spine.testing.server.TUCreateTask;
 import io.spine.testing.server.TUProjectId;
-import io.spine.testing.server.TUTaskCreated;
 import io.spine.testing.server.TUTaskCreationPm;
-import io.spine.testing.server.expected.CommanderExpected;
-import io.spine.testing.server.procman.PmCommandOnEventTest;
-import io.spine.testing.server.procman.given.pm.CommandingPm;
-import io.spine.testing.server.procman.given.pm.CommandingPmRepo;
+import io.spine.testing.server.procman.PmCommandTest;
+import io.spine.testing.server.procman.given.pm.CommandHandlingPm;
+import io.spine.testing.server.procman.given.pm.CommandHandlingPmRepository;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
- * The test class for the {@code TUTaskCreated} event handler in
- * {@code EventReactingProcessManager}.
+ * The test class for the {@code TUCreateTask} command handler in
+ * {@code CommandHandlingProcessManager}.
  */
-public class CommandingPmTest
-        extends PmCommandOnEventTest<TUProjectId, TUTaskCreated, TUTaskCreationPm, CommandingPm> {
+public class SamplePmCommandTest
+        extends PmCommandTest<TUProjectId,
+                              TUCreateTask,
+                              TUTaskCreationPm,
+        CommandHandlingPm> {
 
-    public static final TUTaskCreated TEST_EVENT =
-            TUTaskCreated.newBuilder()
-                         .setId(CommandingPm.ID)
-                         .build();
+    public static final TUCreateTask TEST_COMMAND =
+            TUCreateTask.newBuilder()
+                        .setId(CommandHandlingPm.ID)
+                        .build();
 
     @BeforeEach
     @Override
@@ -51,23 +53,20 @@ public class CommandingPmTest
 
     @Override
     protected TUProjectId newId() {
-        return CommandingPm.ID;
+        return CommandHandlingPm.ID;
     }
 
     @Override
-    protected TUTaskCreated createMessage() {
-        return TEST_EVENT;
+    protected TUCreateTask createMessage() {
+        return TEST_COMMAND;
     }
 
     @Override
-    protected Repository<TUProjectId, CommandingPm> createEntityRepository() {
-        return new CommandingPmRepo();
+    protected Repository<TUProjectId, CommandHandlingPm>
+    createEntityRepository() {
+        return new CommandHandlingPmRepository();
     }
 
-    /**
-     * Exposes {@link #message() to the test.
-     * @apiNote we cannot override, since {@codd message()} is {@code final}.
-     */
     public Message storedMessage() {
         return message();
     }
@@ -77,11 +76,5 @@ public class CommandingPmTest
      */
     public void init() {
         configureBoundedContext();
-    }
-
-    @Override
-    public CommanderExpected<TUTaskCreationPm>
-    expectThat(CommandingPm entity) {
-        return super.expectThat(entity);
     }
 }

@@ -18,12 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.procman.given;
+package io.spine.testing.server.procman.given.pm;
 
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.testing.server.TUProjectId;
 import io.spine.testing.server.TUTaskCreationPm;
 
-class CommandingPmRepo
-        extends ProcessManagerRepository<TUProjectId, CommandingPm, TUTaskCreationPm> {
+public class CommandHandlingPmRepository
+        extends ProcessManagerRepository<TUProjectId, CommandHandlingPm, TUTaskCreationPm> {
 }
