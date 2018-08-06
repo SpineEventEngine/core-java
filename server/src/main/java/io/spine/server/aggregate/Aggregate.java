@@ -22,7 +22,6 @@ package io.spine.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -278,12 +277,15 @@ public abstract class Aggregate<I,
      *
      * @param events the events to apply
      * @param origin the envelope of a message which caused the events
+     * @return the exact list of {@code events} but with adjusted version
+     * @see io.spine.server.entity.EntityVersioning#AUTO_INCREMENT
      */
-    void apply(List<Event> events, MessageEnvelope origin) {
+    List<Event> apply(List<Event> events, MessageEnvelope origin) {
         ImmutableList<Event> versionedEvents = prepareEvents(events, origin);
         List<Event> eventsToApply = notRejections(versionedEvents);
         play(eventsToApply);
         uncommittedEvents = uncommittedEvents.append(versionedEvents);
+        return versionedEvents;
     }
 
     private static List<Event> notRejections(Collection<Event> events) {
@@ -393,16 +395,13 @@ public abstract class Aggregate<I,
     }
 
     /**
-     * Returns and clears all the events that were uncommitted before the call of this method.
-     *
-     * @return the list of events
+     * {@linkplain #remember Remembers} the uncommitted events as
+     * the {@link io.spine.server.entity.RecentHistory RecentHistory} and clears them.
      */
-    @CanIgnoreReturnValue
-    List<Event> commitEvents() {
-        List<Event> result = uncommittedEvents.list();
+    void commitEvents() {
+        List<Event> recentEvents = uncommittedEvents.list();
+        remember(recentEvents);
         uncommittedEvents = UncommittedEvents.ofNone();
-        remember(result);
-        return result;
     }
 
     /**
