@@ -24,15 +24,12 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
-import io.spine.core.Rejection;
-import io.spine.core.RejectionId;
 import io.spine.testing.server.Rejections.TUFailedToAssignProject;
 import io.spine.testing.server.TUProjectId;
 import io.spine.testing.server.expected.CommandHandlerExpected;
 
 import java.util.List;
 
-import static com.google.protobuf.Any.pack;
 import static io.spine.testing.server.expected.given.EventHandlerExpectedTestEnv.events;
 import static io.spine.testing.server.expected.given.EventHandlerExpectedTestEnv.newState;
 import static io.spine.testing.server.expected.given.EventHandlerExpectedTestEnv.oldState;
@@ -75,21 +72,11 @@ public class CommandExpectedTestEnv {
     commandExpectedWithRejection(Message rejectionMessage) {
         CommandHandlerExpected<UInt64Value> expected =
                 new CommandHandlerExpected<>(events(),
-                                             rejection(rejectionMessage),
+                                             rejectionMessage,
                                              oldState(),
                                              newState(),
                                              interceptedCommands());
         return expected;
-    }
-
-    private static Rejection rejection(Message rejectionMessage) {
-        RejectionId id = RejectionId.newBuilder()
-                                    .setValue("test rejection")
-                                    .build();
-        return Rejection.newBuilder()
-                        .setId(id)
-                        .setMessage(pack(rejectionMessage))
-                        .build();
     }
 
     public static CommandHandlerExpected<UInt64Value> commandExpectedWithEvent(Message event) {
