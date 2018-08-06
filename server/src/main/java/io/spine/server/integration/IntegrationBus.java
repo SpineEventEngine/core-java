@@ -77,7 +77,7 @@ import static java.lang.String.format;
  *
  * <p>Bounded context "Projects" has the external event handler method in the projection as follows:
  * <pre>
- * public class ProjectListView extends Projection ...  {
+ * public class ProjectListView extends Projection {
  *
  *      {@literal @}Subscribe(external = true)
  *      public void on(UserDeleted event) {

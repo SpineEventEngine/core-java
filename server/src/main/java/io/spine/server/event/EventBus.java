@@ -194,13 +194,13 @@ public class EventBus
      * Posts the events for handling.
      *
      * <p>Performs the same action as the
-     * {@linkplain CommandOutputBus#post(Iterable, StreamObserver)} parent method}, but does not
-     * require any response observer.
+     * {@linkplain io.spine.server.bus.Bus#post(Iterable, StreamObserver)} parent method}, but
+     * does not require any response observer.
      *
      * <p>This method should be used if the callee does not care about the events acknowledgement.
      *
      * @param events the events to be handled
-     * @see CommandOutputBus#post(Message, StreamObserver)
+     * @see io.spine.server.bus.Bus#post(Message, StreamObserver)
      */
     public final void post(Iterable<Event> events) {
         post(events, streamObserver);
