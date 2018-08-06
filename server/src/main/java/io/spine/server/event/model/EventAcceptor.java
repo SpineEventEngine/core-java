@@ -20,6 +20,7 @@
 
 package io.spine.server.event.model;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
@@ -103,7 +104,8 @@ enum EventAcceptor {
         return result;
     }
 
-    private static Optional<EventAcceptor> from(Method method) {
+    @VisibleForTesting // Would be private otherwise.
+    static Optional<EventAcceptor> from(Method method) {
         List<Class<?>> parameters = copyOf(method.getParameterTypes());
         Optional<EventAcceptor> result = Stream.of(values())
                                                .filter(acceptor -> acceptor.matches(parameters))
@@ -130,7 +132,7 @@ enum EventAcceptor {
         for (int i = 0; i < methodParams.size(); i++) {
             Class<?> actual = methodParams.get(i);
             Class<?> expected = expectedParameters.get(i);
-            if (!actual.isAssignableFrom(expected)) {
+            if (!expected.isAssignableFrom(actual)) {
                 return false;
             }
         }
