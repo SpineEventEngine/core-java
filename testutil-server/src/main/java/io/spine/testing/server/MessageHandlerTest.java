@@ -21,7 +21,6 @@
 package io.spine.testing.server;
 
 import com.google.common.collect.ImmutableList;
-import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
 import io.spine.core.CommandClass;
@@ -75,14 +74,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @see CommandHandlerTest
  * @see EventReactionTest
  */
-@CheckReturnValue
 public abstract class MessageHandlerTest<I,
                                          M extends Message,
                                          S extends Message,
                                          E extends Entity<I, S>,
                                          X extends AbstractExpected<S, X>> {
 
+    @SuppressWarnings("unused")
     protected static final String BE_REJECTED_TEST_NAME = "be rejected";
+    @SuppressWarnings("unused")
     protected static final String CHANGE_STATE_TEST_NAME = "change a state of the entity";
 
     private I id;
@@ -157,7 +157,7 @@ public abstract class MessageHandlerTest<I,
      *
      * @return the message to handle
      */
-    protected final M message() {
+    protected final @Nullable M message() {
         return message;
     }
 
@@ -188,9 +188,10 @@ public abstract class MessageHandlerTest<I,
 
         Set<CommandClass> commandClasses = getAllCommandClasses();
         CommandBus commandBus = boundedContext().getCommandBus();
-        commandBus.register(new VoidCommandDispatcher<>(commandClasses));
+        commandBus.register(new VoidCommandDispatcher(commandClasses));
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // checked when filtering
     private static Set<CommandClass> getAllCommandClasses() {
         return KnownTypes
                 .instance()
@@ -230,7 +231,7 @@ public abstract class MessageHandlerTest<I,
         }
     }
 
-    ImmutableList<Message> interceptedCommands() {
+    protected final ImmutableList<Message> interceptedCommands() {
         return copyOf(interceptedCommands);
     }
 
@@ -244,11 +245,11 @@ public abstract class MessageHandlerTest<I,
     protected abstract X expectThat(E entity);
 
     /**
-     * A command dispatcher to dispatch commands into nothing.
+     * Dispatches all expected commands into nowhere.
      *
-     * @param <I> the type of entity ID.
+     * <p>This class is needed to accept commands and pass it further to filtering.
      */
-    private static class VoidCommandDispatcher<I> implements CommandDispatcher<I> {
+    private static class VoidCommandDispatcher implements CommandDispatcher<String> {
 
         private final Set<CommandClass> expectedCommands;
 
@@ -261,14 +262,19 @@ public abstract class MessageHandlerTest<I,
             return newHashSet(expectedCommands);
         }
 
+        /**
+         * Does nothing.
+         *
+         * @return fully qualified class name
+         */
         @Override
-        public I dispatch(CommandEnvelope envelope) {
-            return null;
+        public String dispatch(CommandEnvelope envelope) {
+            return getClass().getName();
         }
 
         @Override
         public void onError(CommandEnvelope envelope, RuntimeException exception) {
-            log().info("Error while dispatching a command during the unit test");
+            log().error("Error while dispatching a command during the unit test");
         }
     }
 
@@ -292,6 +298,7 @@ public abstract class MessageHandlerTest<I,
         private final Logger value = LoggerFactory.getLogger(MessageHandlerTest.class);
     }
 
+    @SuppressWarnings("MethodOnlyUsedFromInnerClass")
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }

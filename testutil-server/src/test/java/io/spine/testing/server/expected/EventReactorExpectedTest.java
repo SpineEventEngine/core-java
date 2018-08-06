@@ -40,12 +40,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  */
 @SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("EventHandlerExpected should")
-class EventHandlerExpectedTest {
+class EventReactorExpectedTest {
 
     @Test
     @DisplayName("validate state")
     void validateState() {
-        EventHandlerExpected<UInt64Value> expected = expected();
+        EventReactorExpected<UInt64Value> expected = expected();
         expected.hasState(state -> {
             assertEquals(newState(), state);
         });
@@ -54,9 +54,9 @@ class EventHandlerExpectedTest {
     @Test
     @DisplayName("track produced events")
     void trackEvents() {
-        EventHandlerExpected<UInt64Value> expected = expected();
-        expected.producesEvents(StringValue.class, StringValue.class);
-        assertThrows(AssertionFailedError.class, () -> expected.producesEvents(StringValue.class));
+        EventReactorExpected<UInt64Value> expected = expected();
+        expected.producesMessages(StringValue.class, StringValue.class);
+        assertThrows(AssertionFailedError.class, () -> expected.producesMessages(StringValue.class));
     }
 
     @Test
@@ -65,8 +65,8 @@ class EventHandlerExpectedTest {
         StringValue expectedEvent = StringValue.newBuilder()
                                                .setValue("single produced event")
                                                .build();
-        EventHandlerExpected<UInt64Value> expected = expectedWithEvent(expectedEvent);
-        expected.producesEvent(StringValue.class, event -> {
+        EventReactorExpected<UInt64Value> expected = expectedWithEvent(expectedEvent);
+        expected.producesMessage(StringValue.class, event -> {
             assertEquals(expectedEvent, event);
         });
     }
@@ -74,9 +74,9 @@ class EventHandlerExpectedTest {
     @Test
     @DisplayName("track routed commands")
     void trackCommands() {
-        EventHandlerExpected<UInt64Value> expected = expected();
-        expected.routesCommands(StringValue.class, StringValue.class);
-        assertThrows(AssertionFailedError.class, () -> expected.routesCommands(StringValue.class));
+        EventReactorExpected<UInt64Value> expected = expected();
+        expected.producesCommands(StringValue.class, StringValue.class);
+        assertThrows(AssertionFailedError.class, () -> expected.producesCommands(StringValue.class));
     }
 
     @Test
@@ -85,8 +85,8 @@ class EventHandlerExpectedTest {
         StringValue expectedCommand = StringValue.newBuilder()
                                                  .setValue("single routed command")
                                                  .build();
-        EventHandlerExpected<UInt64Value> expected = expectedWithCommand(expectedCommand);
-        expected.routesCommand(StringValue.class, command -> {
+        EventReactorExpected<UInt64Value> expected = expectedWithCommand(expectedCommand);
+        expected.producesCommand(StringValue.class, command -> {
             assertEquals(expectedCommand, command);
         });
     }
@@ -94,14 +94,14 @@ class EventHandlerExpectedTest {
     @Test
     @DisplayName("ignore message if no events were generated")
     void ignoreNoEvents() {
-        EventHandlerExpected<UInt64Value> expected = blankExpected();
+        EventReactorExpected<UInt64Value> expected = blankExpected();
         expected.ignoresMessage();
     }
 
     @Test
     @DisplayName("ignore message if the single Empty was generated")
     void ignoreEmptyEvent() {
-        EventHandlerExpected<UInt64Value> expected = emptyExpected();
+        EventReactorExpected<UInt64Value> expected = emptyExpected();
         expected.ignoresMessage();
     }
 }

@@ -23,53 +23,54 @@ package io.spine.testing.server.expected;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 
+import java.util.List;
 import java.util.function.Consumer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 /**
- * The implementation base for the assertions of message handling results.
+ * Assertions for a commanding method results.
  *
- * @param <S> the state type of the tested entity
- * @param <E> the type of the tested entity
- * @author Dmytro Dashenkov
- * @author Vladyslav Lubenskyi
- * @see MessageProducingExpected
+ * @param <S> the type of the tested entity state
+ * @author Alexander Yevsyukov
  */
-public abstract class AbstractExpected<S extends Message, E extends AbstractExpected<S, E>> {
+public class CommanderExpected<S extends Message>
+    extends MessageProducingExpected<S, CommanderExpected<S>>{
 
-    private final S initialState;
-    private final S state;
-
-    protected AbstractExpected(S initialState, S state) {
-        this.initialState = initialState;
-        this.state = state;
+    public CommanderExpected(List<? extends Message> events,
+                             S initialState,
+                             S state,
+                             List<Message> interceptedCommands) {
+        super(events, initialState, state, interceptedCommands);
     }
 
-    /**
-     * Applies the given assertions to the given entity.
-     *
-     * @param validator a {@link Consumer} that performs all required assertions for the state
-     */
-    @SuppressWarnings("UnusedReturnValue")
+    @Override
+    protected CommanderExpected<S> self() {
+        return this;
+    }
+
     @CanIgnoreReturnValue
-    public E hasState(Consumer<S> validator) {
-        validator.accept(state);
-        return self();
+    @Override
+    public CommanderExpected<S> producesCommands(Class<?>... messageClass) {
+        return super.producesCommands(messageClass);
     }
 
     /**
-     * Asserts that the message was ignored by the entity.
+     * A commander method may ignore incoming <em>event</em> message.
+     * It must process incoming command message.
      */
-    @SuppressWarnings("UnusedReturnValue")
     @CanIgnoreReturnValue
-    protected E ignoresMessage() {
-        assertEquals(initialState, state);
-        return self();
+    @Override
+    public CommanderExpected<S> ignoresMessage() {
+        return super.ignoresMessage();
     }
 
     /**
-     * @return {@code this} with the required compile-time type
+     * {@inheritDoc}
+     * @apiNote Overrides to expose the method.
      */
-    protected abstract E self();
+    @CanIgnoreReturnValue
+    @Override
+    public <M extends Message>
+    CommanderExpected<S> producesCommand(Class<M> messageClass, Consumer<M> validator) {
+        return super.producesCommand(messageClass, validator);
+    }
 }

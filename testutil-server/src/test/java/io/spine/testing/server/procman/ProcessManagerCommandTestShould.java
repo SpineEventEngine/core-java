@@ -65,7 +65,7 @@ class ProcessManagerCommandTestShould {
         CommandHandlerExpected<TUTaskCreationPm> expected =
                 pmCommandTest.expectThat(testPm);
 
-        expected.routesCommand(TUAssignTask.class, command -> {
+        expected.producesCommand(TUAssignTask.class, command -> {
             assertEquals(NESTED_COMMAND, command);
         });
     }

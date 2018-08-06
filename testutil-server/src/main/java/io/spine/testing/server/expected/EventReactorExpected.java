@@ -23,53 +23,37 @@ package io.spine.testing.server.expected;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 
+import java.util.List;
 import java.util.function.Consumer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 /**
- * The implementation base for the assertions of message handling results.
+ * Assertions for an event reactor invocation results.
  *
- * @param <S> the state type of the tested entity
- * @param <E> the type of the tested entity
  * @author Dmytro Dashenkov
- * @author Vladyslav Lubenskyi
- * @see MessageProducingExpected
  */
-public abstract class AbstractExpected<S extends Message, E extends AbstractExpected<S, E>> {
+public class EventReactorExpected<S extends Message>
+        extends MessageProducingExpected<S, EventReactorExpected<S>> {
 
-    private final S initialState;
-    private final S state;
-
-    protected AbstractExpected(S initialState, S state) {
-        this.initialState = initialState;
-        this.state = state;
+    public EventReactorExpected(List<? extends Message> events,
+                                S initialState,
+                                S state,
+                                List<Message> interceptedCommands) {
+        super(events, initialState, state, interceptedCommands);
     }
 
-    /**
-     * Applies the given assertions to the given entity.
-     *
-     * @param validator a {@link Consumer} that performs all required assertions for the state
-     */
-    @SuppressWarnings("UnusedReturnValue")
+    @Override
+    protected EventReactorExpected<S> self() {
+        return this;
+    }
+
     @CanIgnoreReturnValue
-    public E hasState(Consumer<S> validator) {
-        validator.accept(state);
-        return self();
+    public <M extends Message>
+    EventReactorExpected<S> producesEvent(Class<M> eventClass, Consumer<M> validator) {
+        return producesMessage(eventClass, validator);
     }
 
-    /**
-     * Asserts that the message was ignored by the entity.
-     */
-    @SuppressWarnings("UnusedReturnValue")
     @CanIgnoreReturnValue
-    protected E ignoresMessage() {
-        assertEquals(initialState, state);
-        return self();
+    public EventReactorExpected<S> producesEvents(Class<?>... eventClasses) {
+        return producesMessages(eventClasses);
     }
-
-    /**
-     * @return {@code this} with the required compile-time type
-     */
-    protected abstract E self();
 }

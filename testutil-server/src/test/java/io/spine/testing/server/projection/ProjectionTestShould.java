@@ -21,7 +21,7 @@
 package io.spine.testing.server.projection;
 
 import com.google.protobuf.StringValue;
-import io.spine.testing.server.EventSubscriptionTest;
+import io.spine.testing.server.expected.EventSubscriberExpected;
 import io.spine.testing.server.projection.given.ProjectionTestShouldEnv.TestProjection;
 import io.spine.testing.server.projection.given.ProjectionTestShouldEnv.TestProjectionTest;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,7 +60,7 @@ class ProjectionTestShould {
         projectionTest.setUp();
         projectionTest.init();
         TestProjection aggregate = projection();
-        EventSubscriptionTest.Expected<StringValue> expected = projectionTest.expectThat(aggregate);
+        EventSubscriberExpected<StringValue> expected = projectionTest.expectThat(aggregate);
         expected.hasState(state -> {
             assertEquals(state.getValue(), TEST_EVENT.getValue());
         });

@@ -21,18 +21,15 @@
 package io.spine.testing.server.procman;
 
 import io.spine.testing.server.TUAssignTask;
-import io.spine.testing.server.TUTaskAssigned;
 import io.spine.testing.server.TUTaskCreationPm;
-import io.spine.testing.server.expected.EventHandlerExpected;
+import io.spine.testing.server.expected.CommanderExpected;
 import io.spine.testing.server.procman.given.CommandingPm;
 import io.spine.testing.server.procman.given.CommandingPmTest;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.server.procman.given.CommandingPm.NESTED_COMMAND;
-import static io.spine.testing.server.procman.given.CommandingPm.RESULT_EVENT;
 import static io.spine.testing.server.procman.given.CommandingPm.processManager;
 import static io.spine.testing.server.procman.given.CommandingPmTest.TEST_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,39 +37,33 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * @author Vladyslav Lubenskyi
  */
-@SuppressWarnings("DuplicateStringLiteralInspection")
-@DisplayName("ProcessManagerEventReactionTest should")
-class ProcessManagerEventReactionTestShould {
+@DisplayName("PmCommandOnCommandTest should")
+class PmCommandOnEventTestShould {
 
-    private CommandingPmTest pmEventTest;
+    private CommandingPmTest pmCommandingTest;
 
     @BeforeEach
     void setUp() {
-        pmEventTest = new CommandingPmTest();
+        pmCommandingTest = new CommandingPmTest();
     }
 
     @Test
-    @DisplayName("store tested event")
-    @Disabled("Until Testing library gets support for Command Substitution and Command Reaction methods")
-    void shouldStoreCommand() {
-        pmEventTest.setUp();
-        assertEquals(pmEventTest.storedMessage(), TEST_EVENT);
+    @DisplayName("store incoming command")
+    void storeGeneratedCommand() {
+        pmCommandingTest.setUp();
+        assertEquals(pmCommandingTest.storedMessage(), TEST_EVENT);
     }
 
     @Test
     @DisplayName("dispatch tested event and store results")
-    @SuppressWarnings("CheckReturnValue")
-    @Disabled("Until Testing library gets support for Command Substitution and Command Reaction methods")
     void shouldDispatchCommand() {
-        pmEventTest.setUp();
-        pmEventTest.init();
+        pmCommandingTest.setUp();
+        pmCommandingTest.init();
         CommandingPm testPm = processManager();
-        EventHandlerExpected<TUTaskCreationPm> expected = pmEventTest.expectThat(testPm);
-        expected.routesCommand(TUAssignTask.class, command -> {
-            assertEquals(command, NESTED_COMMAND);
-        });
-        expected.producesEvent(TUTaskAssigned.class, event -> {
-            assertEquals(event, RESULT_EVENT);
-        });
+        CommanderExpected<TUTaskCreationPm> expected = pmCommandingTest.expectThat(testPm);
+        expected.producesCommand(
+                TUAssignTask.class,
+                c -> assertEquals(c, NESTED_COMMAND)
+        );
     }
 }

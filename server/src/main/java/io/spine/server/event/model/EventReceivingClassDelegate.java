@@ -21,6 +21,7 @@
 package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.Immutable;
 import io.spine.core.EventClass;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
@@ -35,6 +36,7 @@ import java.util.Set;
  *
  * @author Alexander Yevsyukov
  */
+@Immutable(containerOf = "M")
 public class EventReceivingClassDelegate<T, M extends HandlerMethod<?, EventClass, ?, ?>>
         extends ModelClass<T> {
 

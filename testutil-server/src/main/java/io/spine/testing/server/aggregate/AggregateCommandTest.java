@@ -25,7 +25,6 @@ import io.spine.testing.server.CommandHandlerTest;
 
 import java.util.List;
 
-import static io.spine.core.CommandEnvelope.of;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 
 /**
@@ -45,6 +44,6 @@ public abstract class AggregateCommandTest<I,
 
     @Override
     protected List<? extends Message> dispatchTo(A entity) {
-        return dispatchCommand(entity, of(createCommand(message())));
+        return dispatchCommand(entity, createCommand());
     }
 }

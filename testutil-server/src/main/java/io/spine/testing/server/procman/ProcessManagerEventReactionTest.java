@@ -25,15 +25,15 @@ import io.spine.core.Enrichment;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Events;
 import io.spine.server.procman.ProcessManager;
 import io.spine.testing.server.EventReactionTest;
-import io.spine.testing.server.expected.EventHandlerExpected;
+import io.spine.testing.server.expected.EventReactorExpected;
 
 import java.util.List;
 
-import static io.spine.protobuf.AnyPacker.unpack;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.testing.server.procman.CommandBusInjection.inject;
-import static java.util.stream.Collectors.toList;
 
 /**
  * The implementation base for testing a single event reactor in a {@link ProcessManager}.
@@ -52,28 +52,31 @@ public abstract class ProcessManagerEventReactionTest<I,
 
     @Override
     protected List<? extends Message> dispatchTo(P entity) {
-        Event sourceEvent = createEvent(message());
-        EventContext context = sourceEvent.getContext()
-                                          .toBuilder()
-                                          .setEnrichment(enrichment())
-                                          .build();
-        Event enrichedEvent = sourceEvent.toBuilder()
-                                         .setContext(context)
-                                         .build();
-        EventEnvelope envelope = EventEnvelope.of(enrichedEvent);
-        List<Event> events = ProcessManagerDispatcher.dispatch(entity, envelope);
-
-        return events.stream()
-                     .map(ProcessManagerEventReactionTest::eventToMessage)
-                     .collect(toList());
+        EventEnvelope event = createEnriched();
+        List<Event> events = ProcessManagerDispatcher.dispatch(entity, event);
+        List<? extends Message> result = Events.toMessages(events);
+        return result;
     }
 
-    private static Message eventToMessage(Event event) {
-        return unpack(event.getMessage());
+    private EventEnvelope createEnriched() {
+        E message = message();
+        checkNotNull(message);
+        Event sourceEvent = createEvent(message);
+
+        EventContext context = sourceEvent
+                .getContext()
+                .toBuilder()
+                .setEnrichment(enrichment())
+                .build();
+        Event enrichedEvent = sourceEvent
+                .toBuilder()
+                .setContext(context)
+                .build();
+        return EventEnvelope.of(enrichedEvent);
     }
 
     @Override
-    protected EventHandlerExpected<S> expectThat(P entity) {
+    protected EventReactorExpected<S> expectThat(P entity) {
         inject(entity, boundedContext().getCommandBus());
         return super.expectThat(entity);
     }

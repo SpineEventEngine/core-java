@@ -30,7 +30,10 @@
  * @see io.spine.testing.server.projection.ProjectionTest
  * @see io.spine.testing.server.EventSubscriptionTest
  */
+@CheckReturnValue
 @ParametersAreNonnullByDefault
 package io.spine.testing.server;
+
+import com.google.errorprone.annotations.CheckReturnValue;
 
 import javax.annotation.ParametersAreNonnullByDefault;

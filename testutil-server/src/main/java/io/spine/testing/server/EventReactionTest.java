@@ -26,7 +26,7 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.CommandHandlingEntity;
-import io.spine.testing.server.expected.EventHandlerExpected;
+import io.spine.testing.server.expected.EventReactorExpected;
 
 import java.util.List;
 
@@ -51,17 +51,19 @@ public abstract class EventReactionTest<I,
                                         M extends Message,
                                         S extends Message,
                                         E extends CommandHandlingEntity<I, S, ?>>
-        extends MessageHandlerTest<I, M, S, E, EventHandlerExpected<S>> {
+        extends MessageHandlerTest<I, M, S, E, EventReactorExpected<S>> {
+
+    private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
     protected EventReactionTest() {
         super();
     }
 
     @Override
-    protected EventHandlerExpected<S> expectThat(E entity) {
+    protected EventReactorExpected<S> expectThat(E entity) {
         S initialState = entity.getState();
         List<? extends Message> events = dispatchTo(entity);
-        return new EventHandlerExpected<>(events, initialState, entity.getState(),
+        return new EventReactorExpected<>(events, initialState, entity.getState(),
                                           interceptedCommands());
     }
 
@@ -72,7 +74,6 @@ public abstract class EventReactionTest<I,
      * @return a new {@link Event}
      */
     protected final Event createEvent(M message) {
-        TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
         Event event = eventFactory.createEvent(message);
         EventContext context = event.getContext()
                                     .toBuilder()

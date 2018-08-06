@@ -22,25 +22,20 @@ package io.spine.testing.server.expected;
 
 import com.google.protobuf.Message;
 
-import java.util.List;
-
 /**
- * Assertions for an event applier or reactor invocation results.
+ * Assertions for results of an event subscriber method.
  *
- * @author Dmytro Dashenkov
+ * @param <S> the type of the state message of the handling entity
  */
-public class EventHandlerExpected<S extends Message>
-        extends MessageProducingExpected<S, EventHandlerExpected<S>> {
+public class EventSubscriberExpected<S extends Message>
+        extends AbstractExpected<S, EventSubscriberExpected<S>> {
 
-    public EventHandlerExpected(List<? extends Message> events,
-                                S initialState,
-                                S state,
-                                List<Message> interceptedCommands) {
-        super(events, initialState, state, interceptedCommands);
+    public EventSubscriberExpected(S initialState, S state) {
+        super(initialState, state);
     }
 
     @Override
-    protected EventHandlerExpected<S> self() {
+    protected EventSubscriberExpected<S> self() {
         return this;
     }
 }

@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.expected;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
@@ -41,73 +42,78 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * Assertions for any messages produced by handling the tested message.
  *
  * @param <S> the type of the tested entity state
+ * @param <X> the type of {@code MessageProducingExpected} for type covariance of returned values
  * @author Vladyslav Lubenskyi
  */
 public abstract class MessageProducingExpected<S extends Message,
                                                X extends MessageProducingExpected<S, X>>
         extends AbstractExpected<S, X> {
 
-    private final ImmutableList<? extends Message> events;
+    private final ImmutableList<? extends Message> generatedMessages;
     private final ImmutableList<Message> commands;
 
-    public MessageProducingExpected(List<? extends Message> events,
-                                    S initialState,
-                                    S state,
-                                    List<Message> interceptedCommands) {
+    MessageProducingExpected(List<? extends Message> generatedMessages,
+                             S initialState,
+                             S state,
+                             List<Message> interceptedCommands) {
         super(initialState, state);
-        this.events = copyOf(events);
+        this.generatedMessages = copyOf(generatedMessages);
         this.commands = copyOf(interceptedCommands);
     }
 
     @Override
     @CanIgnoreReturnValue
-    public X ignoresMessage() {
+    protected X ignoresMessage() {
         assertTrue(commands.isEmpty(), format("Message produced commands: %s", commands));
-        if (!events.isEmpty()) {
-            assertEquals(1, events.size());
-            assertTrue(Empty.class.isInstance(events.get(0)));
+        if (!generatedMessages.isEmpty()) {
+            assertEquals(1, generatedMessages.size());
+            assertTrue(generatedMessages.get(0) instanceof Empty);
         }
         return super.ignoresMessage();
     }
 
     /**
-     * Ensures that the command produces an event of {@code eventClass} type and performs
-     * validation of the produced event.
+     * Ensures that the handler produces a message of the passed class and
+     * performs validation of the produced message.
      *
-     * @param eventClass type of the event expected to be produced
-     * @param validator  a {@link Consumer} that performs all required assertions for
-     *                   the resulting event
-     * @param <M>        class of the event's Protobuf message
+     * @param messageClass
+     *         type of the messages expected to be produced
+     * @param validator
+     *         a {@link Consumer} that performs all required assertions for the resulting event
+     * @param <M>
+     *         class of the event's Protobuf message
      */
     @SuppressWarnings({"unchecked", "UnusedReturnValue"})
     @CanIgnoreReturnValue
-    public <M extends Message> X producesEvent(Class<M> eventClass, Consumer<M> validator) {
+    protected <M extends Message> X producesMessage(Class<M> messageClass, Consumer<M> validator) {
         assertNotNull(validator);
-        assertEquals(1, events.size());
-        assertSingleEvent(events.get(0), eventClass, validator);
+        assertEquals(1, generatedMessages.size());
+        assertSingleEvent(generatedMessages.get(0), messageClass, validator);
         return self();
     }
 
     /**
      * Ensures that the command produces events of the given types.
      *
-     * @param eventClasses types of the expected events
+     * @param messageClasses types of the expected events
      */
     @SuppressWarnings("UnusedReturnValue")
     @CanIgnoreReturnValue
-    public X producesEvents(Class<?>... eventClasses) {
-        assertEquals(eventClasses.length, events.size(), () -> format(
-                "Unexpected number of events: %s (%s). Expected %s",
-                events.size(), events.stream()
-                                     .map(Message::getClass)
-                                     .map(Class::getSimpleName)
-                                     .collect(toList()),
-                eventClasses.length
-        ));
-        List<? extends Class<?>> actualClasses = events.stream()
-                                                       .map(Message::getClass)
-                                                       .collect(toList());
-        assertThat(actualClasses, containsInAnyOrder(eventClasses));
+    protected X producesMessages(Class<?>... messageClasses) {
+        List<? extends Class<?>> actualClasses =
+                generatedMessages.stream()
+                                 .map(Message::getClass)
+                                 .collect(toList());
+        assertEquals(
+                messageClasses.length, generatedMessages.size(),
+                format(
+                        "Unexpected number of messages: %s. Expected: %s. Generated messages: %s.",
+                        generatedMessages.size(),
+                        messageClasses.length,
+                        toString(actualClasses)
+                )
+        );
+        assertThat(actualClasses, containsInAnyOrder(messageClasses));
         return self();
     }
 
@@ -117,14 +123,16 @@ public abstract class MessageProducingExpected<S extends Message,
      *
      * <p>It is applicable for process managers.
      *
-     * @param commandClass type of the command expected to be posted
-     * @param validator    a {@link Consumer} that performs all required assertions for
-     *                     the resulting command
-     * @param <M>          class of the command's Protobuf message
+     * @param commandClass
+     *         type of the command expected to be posted
+     * @param validator
+     *         a {@link Consumer} that performs all required assertions for the resulting command
+     * @param <M>
+     *         class of the command's Protobuf message
      */
     @SuppressWarnings({"unchecked", "UnusedReturnValue"})
     @CanIgnoreReturnValue
-    public <M extends Message> X routesCommand(Class<M> commandClass, Consumer<M> validator) {
+    protected <M extends Message> X producesCommand(Class<M> commandClass, Consumer<M> validator) {
         assertNotNull(validator);
         assertEquals(1, commands.size());
         assertSingleCommand(commands.get(0), commandClass, validator);
@@ -134,41 +142,56 @@ public abstract class MessageProducingExpected<S extends Message,
     /**
      * Ensures that the message handler posts commands of the given types.
      *
-     * <p>It is applicable for process managers.
-     *
      * @param commandClasses types of the expected commands
      */
     @SuppressWarnings("UnusedReturnValue")
     @CanIgnoreReturnValue
-    public X routesCommands(Class<?>... commandClasses) {
-        assertEquals(commandClasses.length, commands.size(), () -> format(
-                "Unexpected number of commands: %s (%s). Expected %s",
-                commands.size(), commands.stream()
-                                         .map(Message::getClass)
-                                         .map(Class::getSimpleName)
-                                         .collect(toList()),
-                commandClasses.length
-        ));
-        List<? extends Class<?>> actualClasses = commands.stream()
-                                                         .map(Message::getClass)
-                                                         .collect(toList());
+    protected X producesCommands(Class<?>... commandClasses) {
+        List<? extends Class<?>> actualClasses =
+                commands.stream()
+                        .map(Message::getClass)
+                        .collect(toList());
+
+        assertEquals(
+                commandClasses.length, commands.size(),
+                format(
+                        "Unexpected number of commands: %s. Expected: %s. " +
+                                "Intercepted commands: %s.",
+                        commands.size(),
+                        commandClasses.length,
+                        toString(actualClasses)
+                )
+        );
         assertThat(actualClasses, containsInAnyOrder(commandClasses));
         return self();
+    }
+
+    private static String toString(List<? extends Class<?>> classes) {
+        return Joiner.on(", ")
+                     .join(classes.stream()
+                                  .map(Class::getName)
+                                  .map(s -> format("`%s`", s))
+                                  .collect(toList())
+              );
     }
 
     /**
      * Checks that the given command is as expected.
      *
-     * @param generatedCommand     message produced by the message handler
-     * @param expectedCommandClass an expected class of the {@code generatedCommand}
-     * @param validator            a {@link Consumer} that performs all required assertions for
-     *                             the command
-     * @param <M>                  an expected class of the {@code generatedCommand}
+     * @param generatedCommand
+     *         message produced by the message handler
+     * @param expectedCommandClass
+     *         an expected class of the {@code generatedCommand}
+     * @param validator
+     *         a {@link Consumer} that performs all required assertions for the command
+     * @param <M>
+     *         an expected class of the {@code generatedCommand}
      */
     @SuppressWarnings("unchecked") // Type check is performed manually using assertion.
-    private static <M extends Message> void assertSingleCommand(Message generatedCommand,
-                                                                Class<M> expectedCommandClass,
-                                                                Consumer<M> validator) {
+    private static <M extends Message>
+    void assertSingleCommand(Message generatedCommand,
+                             Class<M> expectedCommandClass,
+                             Consumer<M> validator) {
         assertTrue(expectedCommandClass.isInstance(generatedCommand));
         validator.accept((M) generatedCommand);
     }
@@ -176,16 +199,20 @@ public abstract class MessageProducingExpected<S extends Message,
     /**
      * Checks that the given event is as expected.
      *
-     * @param emittedEvent       message produced by the message handler
-     * @param expectedEventClass an expected class of the {@code emittedMessage}
-     * @param validator          a {@link Consumer} that performs all required assertions for
-     *                           the event
-     * @param <M>                an expected class of the {@code emittedMessage}
+     * @param emittedEvent
+     *         message produced by the message handler
+     * @param expectedEventClass
+     *         an expected class of the {@code emittedMessage}
+     * @param validator
+     *         a {@link Consumer} that performs all required assertions for the event
+     * @param <M>
+     *         an expected class of the {@code emittedMessage}
      */
     @SuppressWarnings("unchecked") // Type check is performed manually using assertion.
-    private static <M extends Message> void assertSingleEvent(Message emittedEvent,
-                                                              Class<M> expectedEventClass,
-                                                              Consumer<M> validator) {
+    private static <M extends Message>
+    void assertSingleEvent(Message emittedEvent,
+                           Class<M> expectedEventClass,
+                           Consumer<M> validator) {
         assertTrue(expectedEventClass.isInstance(emittedEvent));
         validator.accept((M) emittedEvent);
     }

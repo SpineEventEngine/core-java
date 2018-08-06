@@ -45,7 +45,7 @@ class CommandBusInjection {
      * Injects {@link CommandBus} instance into the process manager via reflection.
      *
      * @param processManager tested process manager.
-     * @see {@link ProcessManager#setCommandBus(CommandBus)}
+     * @see ProcessManager#setCommandBus(CommandBus)
      */
     static void inject(ProcessManager processManager, CommandBus commandBus) {
         try {

@@ -33,7 +33,7 @@ import io.spine.testing.server.TUProjectCreated;
 import io.spine.testing.server.TUProjectId;
 import io.spine.testing.server.aggregate.AggregateEventReactionTest;
 import io.spine.testing.server.entity.given.Given;
-import io.spine.testing.server.expected.EventHandlerExpected;
+import io.spine.testing.server.expected.EventReactorExpected;
 import org.junit.jupiter.api.BeforeEach;
 
 import static com.google.protobuf.util.Timestamps.fromMillis;
@@ -128,7 +128,7 @@ public class AggregateEventReactionTestShouldEnv {
         }
 
         @Override
-        public EventHandlerExpected<TUProjectAggregate> expectThat(EventReactingAggregate entity) {
+        public EventReactorExpected<TUProjectAggregate> expectThat(EventReactingAggregate entity) {
             return super.expectThat(entity);
         }
 

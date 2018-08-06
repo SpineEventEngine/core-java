@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.base.ThrowableMessage;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Command;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.Rejection;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.model.HandlerMethodFailedException;
@@ -33,6 +34,7 @@ import io.spine.testing.server.expected.CommandHandlerExpected;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
 import static io.spine.core.Rejections.causedByRejection;
 import static io.spine.core.Rejections.toRejection;
@@ -77,10 +79,19 @@ public abstract class CommandHandlerTest<I,
      * @param commandMessage command message
      * @return {@link Command} ready to be dispatched
      */
-    protected final Command createCommand(C commandMessage) {
+    private Command createCommand(C commandMessage) {
         Command command = requestFactory.command()
                                         .create(commandMessage);
         return command;
+    }
+
+    /**
+     * Creates new command for the command message associated with this test.
+     */
+    protected final CommandEnvelope createCommand() {
+        C message = message();
+        checkNotNull(message);
+        return CommandEnvelope.of(createCommand(message));
     }
 
     @Override
@@ -95,7 +106,7 @@ public abstract class CommandHandlerTest<I,
             Throwable cause = getRootCause(e);
             if (causedByRejection(cause)) {
                 ThrowableMessage throwableMessage = (ThrowableMessage) cause;
-                rejection = toRejection(throwableMessage, createCommand(message()));
+                rejection = toRejection(throwableMessage, createCommand().getCommand());
             } else {
                 throw e;
             }

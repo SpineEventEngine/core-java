@@ -105,8 +105,8 @@ class CommandHandlerExpectedTest {
     @DisplayName("track routed commands")
     void trackCommands() {
         CommandHandlerExpected<UInt64Value> expected = commandExpected();
-        expected.routesCommands(StringValue.class, StringValue.class);
-        assertThrows(AssertionFailedError.class, () -> expected.routesCommands(StringValue.class));
+        expected.producesCommands(StringValue.class, StringValue.class);
+        assertThrows(AssertionFailedError.class, () -> expected.producesCommands(StringValue.class));
     }
 
     @Test
@@ -116,7 +116,7 @@ class CommandHandlerExpectedTest {
                                                  .setValue("single routed command")
                                                  .build();
         CommandHandlerExpected<UInt64Value> expected = commandExpectedWithCommand(expectedCommand);
-        expected.routesCommand(StringValue.class, command -> {
+        expected.producesCommand(StringValue.class, command -> {
             assertEquals(expectedCommand, command);
         });
     }

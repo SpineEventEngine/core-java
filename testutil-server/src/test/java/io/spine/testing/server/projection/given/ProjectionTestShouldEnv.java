@@ -27,6 +27,7 @@ import io.spine.server.entity.Repository;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.testing.server.entity.given.Given;
+import io.spine.testing.server.expected.EventSubscriberExpected;
 import io.spine.testing.server.projection.ProjectionTest;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.jupiter.api.BeforeEach;
@@ -100,7 +101,7 @@ public class ProjectionTestShouldEnv {
         }
 
         @Override
-        public Expected<StringValue> expectThat(TestProjection entity) {
+        public EventSubscriberExpected<StringValue> expectThat(TestProjection entity) {
             return super.expectThat(entity);
         }
 

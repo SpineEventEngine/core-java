@@ -22,7 +22,7 @@ package io.spine.testing.server.aggregate;
 
 import io.spine.testing.server.TUProjectAggregate;
 import io.spine.testing.server.TUProjectAssigned;
-import io.spine.testing.server.expected.EventHandlerExpected;
+import io.spine.testing.server.expected.EventReactorExpected;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,14 +64,12 @@ class AggregateEventReactionTestShould {
         aggregateEventTest.setUp();
         aggregateEventTest.init();
         EventReactingAggregate aggregate = aggregate();
-        EventHandlerExpected<TUProjectAggregate> expected = aggregateEventTest.expectThat(aggregate);
+        EventReactorExpected<TUProjectAggregate> expected = aggregateEventTest.expectThat(aggregate);
 
         expected.producesEvent(TUProjectAssigned.class, event -> {
             assertNotNull(event);
             assertTrue(isNotDefault(aggregate.getState().getTimestamp()));
         });
-        expected.hasState(state -> {
-            assertTrue(isNotDefault(state.getTimestamp()));
-        });
+        expected.hasState(state -> assertTrue(isNotDefault(state.getTimestamp())));
     }
 }

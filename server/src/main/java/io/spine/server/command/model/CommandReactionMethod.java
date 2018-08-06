@@ -61,6 +61,9 @@ public final class CommandReactionMethod
         return EventClass.of(rawMessageClass());
     }
 
+    /**
+     * Obtains {@code CommandReactionMethod}s from a class.
+     */
     private static final class Factory extends MethodFactory<CommandReactionMethod> {
 
         private static final Factory INSTANCE = new Factory();
@@ -82,6 +85,9 @@ public final class CommandReactionMethod
         }
     }
 
+    /**
+     * Recognizes methods that accept events and generate command messages.
+     */
     private static final class Filter extends AbstractPredicate<EventContext> {
 
         private Filter() {

@@ -21,24 +21,20 @@
 package io.spine.testing.server.procman.given;
 
 import com.google.protobuf.Message;
-import io.spine.core.Enrichment;
 import io.spine.server.entity.Repository;
-import io.spine.testing.server.TUAssignTask;
 import io.spine.testing.server.TUProjectId;
 import io.spine.testing.server.TUTaskCreated;
 import io.spine.testing.server.TUTaskCreationPm;
-import io.spine.testing.server.expected.EventHandlerExpected;
-import io.spine.testing.server.procman.ProcessManagerEventReactionTest;
+import io.spine.testing.server.expected.CommanderExpected;
+import io.spine.testing.server.procman.PmCommandOnEventTest;
 import org.junit.jupiter.api.BeforeEach;
-
-import static io.spine.testing.server.procman.given.CommandingPm.NESTED_COMMAND;
 
 /**
  * The test class for the {@code TUTaskCreated} event handler in
  * {@code EventReactingProcessManager}.
  */
 public class CommandingPmTest
-        extends ProcessManagerEventReactionTest<TUProjectId, TUAssignTask, TUTaskCreationPm, CommandingPm> {
+        extends PmCommandOnEventTest<TUProjectId, TUTaskCreated, TUTaskCreationPm, CommandingPm> {
 
     public static final TUTaskCreated TEST_EVENT =
             TUTaskCreated.newBuilder()
@@ -57,8 +53,8 @@ public class CommandingPmTest
     }
 
     @Override
-    protected TUAssignTask createMessage() {
-        return NESTED_COMMAND;
+    protected TUTaskCreated createMessage() {
+        return TEST_EVENT;
     }
 
     @Override
@@ -66,6 +62,10 @@ public class CommandingPmTest
         return new CommandingPmRepo();
     }
 
+    /**
+     * Exposes {@link #message() to the test.
+     * @apiNote we cannot override, since {@codd message()} is {@code final}.
+     */
     public Message storedMessage() {
         return message();
     }
@@ -78,13 +78,7 @@ public class CommandingPmTest
     }
 
     @Override
-    protected Enrichment enrichment() {
-        return Enrichment.newBuilder()
-                         .build();
-    }
-
-    @Override
-    public EventHandlerExpected<TUTaskCreationPm>
+    public CommanderExpected<TUTaskCreationPm>
     expectThat(CommandingPm entity) {
         return super.expectThat(entity);
     }

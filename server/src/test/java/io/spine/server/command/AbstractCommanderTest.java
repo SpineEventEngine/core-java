@@ -20,12 +20,16 @@
 
 package io.spine.server.command;
 
+import com.google.common.collect.Sets;
+import com.google.protobuf.Message;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.FirstCmdCreateProject;
 import org.junit.jupiter.api.BeforeEach;
+
+import java.util.Set;
 
 /**
  * @author Alexander Yevsyukov
@@ -56,6 +60,15 @@ class AbstractCommanderTest {
                     .newBuilder()
                     .setId(command.getProjectId())
                     .build();
+        }
+    }
+
+    private static class MemoizingHandler extends AbstractCommandHandler {
+
+        private final Set<Message> commands = Sets.newHashSet();
+
+        MemoizingHandler(EventBus eventBus) {
+            super(eventBus);
         }
     }
 }
