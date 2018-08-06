@@ -30,7 +30,6 @@ import io.spine.core.CommandEnvelope;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.entity.Entity;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.model.MethodResult;
 
@@ -75,11 +74,6 @@ public abstract class CommandAcceptingMethod<T, R extends MethodResult>
     @Override
     public CommandClass getMessageClass() {
         return CommandClass.of(rawMessageClass());
-    }
-
-    @Override
-    public HandlerKey key() {
-        return HandlerKey.of(getMessageClass());
     }
 
     /**

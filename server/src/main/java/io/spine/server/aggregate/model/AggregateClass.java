@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate.model;
 
-import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.model.CommandHandlingEntityClass;
@@ -28,6 +27,7 @@ import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactorClass;
 import io.spine.server.event.model.ReactorClassDelegate;
 import io.spine.server.model.MessageHandlerMap;
+import io.spine.type.MessageClass;
 
 import java.util.Set;
 
@@ -76,7 +76,7 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public EventReactorMethod getReactor(EventClass eventClass, CommandClass commandClass) {
+    public EventReactorMethod getReactor(EventClass eventClass, MessageClass commandClass) {
         return delegate.getReactor(eventClass, commandClass);
     }
 

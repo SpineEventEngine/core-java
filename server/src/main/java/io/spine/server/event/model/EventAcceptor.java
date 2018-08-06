@@ -20,13 +20,15 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
+import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.DispatchedCommand;
+import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.server.model.HandlerKey;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -44,14 +46,14 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 enum EventAcceptor {
 
-    MESSAGE(of(Message.class)) {
+    MESSAGE(of(Message.class), false) {
         @Override
         List<?> arguments(EventEnvelope envelope) {
             Message message = envelope.getMessage();
             return of(message);
         }
     },
-    MESSAGE_EVENT_CXT(of(Message.class, EventContext.class)) {
+    MESSAGE_EVENT_CXT(of(Message.class, EventContext.class), false) {
         @Override
         List<?> arguments(EventEnvelope envelope) {
             Message message = envelope.getMessage();
@@ -59,7 +61,7 @@ enum EventAcceptor {
             return of(message, context);
         }
     },
-    MESSAGE_COMMAND_CXT(of(Message.class, CommandContext.class)) {
+    MESSAGE_COMMAND_CXT(of(Message.class, CommandContext.class), false) {
         @Override
         List<?> arguments(EventEnvelope envelope) {
             Message message = envelope.getMessage();
@@ -68,7 +70,7 @@ enum EventAcceptor {
             return of(message, context);
         }
     },
-    MESSAGE_COMMAND_MSG(of(Message.class, Message.class)) {
+    MESSAGE_COMMAND_MSG(of(Message.class, Message.class), true) {
         @Override
         List<?> arguments(EventEnvelope envelope) {
             Message message = envelope.getMessage();
@@ -77,7 +79,7 @@ enum EventAcceptor {
             return of(message, commandMessage);
         }
     },
-    MESSAGE_COMMAND_MSG_COMMAND_CXT(of(Message.class, Message.class, CommandContext.class)) {
+    MESSAGE_COMMAND_MSG_COMMAND_CXT(of(Message.class, Message.class, CommandContext.class), true) {
         @Override
         List<?> arguments(EventEnvelope envelope) {
             Message message = envelope.getMessage();
@@ -89,24 +91,14 @@ enum EventAcceptor {
     };
 
     private final ImmutableList<Class<?>> expectedParameters;
+    private final boolean awareOfCommandType;
 
-    EventAcceptor(ImmutableList<Class<?>> types) {
+    EventAcceptor(ImmutableList<Class<?>> types, boolean type) {
         this.expectedParameters = types;
+        awareOfCommandType = type;
     }
 
-    static Object accept(Object receiver, Method method, EventEnvelope envelope)
-            throws InvocationTargetException {
-        EventAcceptor acceptor = from(method).orElseThrow(
-                () -> newIllegalStateException("Method %s is not a valid event acceptor.",
-                                               method.toString())
-        );
-        method.setAccessible(true);
-        Object result = acceptor.doAccept(receiver, method, envelope);
-        return result;
-    }
-
-    @VisibleForTesting // Would be private otherwise.
-    static Optional<EventAcceptor> from(Method method) {
+    static Optional<EventAcceptor> findFor(Method method) {
         List<Class<?>> parameters = copyOf(method.getParameterTypes());
         Optional<EventAcceptor> result = Stream.of(values())
                                                .filter(acceptor -> acceptor.matches(parameters))
@@ -114,15 +106,39 @@ enum EventAcceptor {
         return result;
     }
 
+    static EventAcceptor from(Method method) {
+        EventAcceptor acceptor = findFor(method)
+                .orElseThrow(() -> newIllegalStateException(
+                        "Method %s is not a valid event acceptor.", method.toString())
+                );
+        method.setAccessible(true);
+        return acceptor;
+    }
+
     abstract List<?> arguments(EventEnvelope envelope);
 
-    private Object doAccept(Object receiver, Method acceptorMethod, EventEnvelope envelope)
+    Object accept(Object receiver, Method acceptorMethod, EventEnvelope envelope)
             throws InvocationTargetException {
         Object[] arguments = arguments(envelope).toArray();
         try {
             return acceptorMethod.invoke(receiver, arguments);
         } catch (IllegalAccessException e) {
             throw newIllegalStateException(e, "Method %s is inaccessible.", acceptorMethod);
+        }
+    }
+
+    HandlerKey createKey(Method method) {
+        Class<?>[] types = method.getParameterTypes();
+        @SuppressWarnings("unchecked")
+        Class<? extends Message> eventMessageClass = (Class<? extends Message>) types[0];
+        EventClass eventClass = EventClass.of(eventMessageClass);
+        if (!awareOfCommandType) {
+            return HandlerKey.of(eventClass);
+        } else {
+            @SuppressWarnings("unchecked")
+            Class<? extends Message> commandMessageClass = (Class<? extends Message>) types[1];
+            CommandClass commandClass = CommandClass.of(commandMessageClass);
+            return HandlerKey.of(eventClass, commandClass);
         }
     }
 

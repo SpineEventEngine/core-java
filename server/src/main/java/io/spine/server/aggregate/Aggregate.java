@@ -227,7 +227,8 @@ public abstract class Aggregate<I,
      *         an empty list if the aggregate state does not change in reaction to the event
      */
     List<Event> reactOn(EventEnvelope event) {
-        EventReactorMethod method = thisClass().getReactor(event.getMessageClass());
+        EventReactorMethod method =
+                thisClass().getReactor(event.getMessageClass(), event.getOriginClass());
         ReactorMethodResult result =
                 method.invoke(this, event);
         return result.produceEvents(event);

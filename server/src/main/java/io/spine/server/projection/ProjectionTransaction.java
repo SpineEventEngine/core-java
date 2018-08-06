@@ -56,7 +56,7 @@ public class ProjectionTransaction<I,
 
     @Override
     protected void dispatch(Projection projection, EventEnvelope event) {
-        projection.apply(event.getMessage(), event);
+        projection.apply(event);
     }
 
     /**

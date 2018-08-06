@@ -23,7 +23,7 @@ package io.spine.server.model;
 import com.google.common.base.MoreObjects;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Empty;
-import io.spine.core.CommandClass;
+import io.spine.core.EmptyClass;
 import io.spine.type.MessageClass;
 
 import java.util.Objects;
@@ -63,7 +63,7 @@ public final class HandlerKey {
      * @return a new instance
      */
     public static HandlerKey of(MessageClass handledMessage) {
-        return new HandlerKey(handledMessage, CommandClass.of(Empty.class));
+        return new HandlerKey(handledMessage, EmptyClass.instance());
     }
 
     /**

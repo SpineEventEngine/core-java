@@ -21,8 +21,8 @@ package io.spine.server.model;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
-import io.spine.core.React;
 import io.spine.core.Subscribe;
+import io.spine.server.event.React;
 
 import java.lang.reflect.Method;
 
@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * produced outside of the current bounded context.
  *
  * @see io.spine.core.Subscribe#external()
- * @see io.spine.core.React#external()
+ * @see React#external()
  * @author Alex Tymchenko
  */
 @Immutable

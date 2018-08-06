@@ -26,6 +26,7 @@ import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
+import io.spine.type.MessageClass;
 
 import java.util.Set;
 
@@ -73,7 +74,7 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
         return externalSubscriptions;
     }
 
-    public EventSubscriberMethod getSubscriber(EventClass eventClass) {
-        return eventSubscriptions.getMethod(eventClass);
+    public EventSubscriberMethod getSubscriber(EventClass eventClass, MessageClass originClass) {
+        return eventSubscriptions.getMethod(eventClass, originClass);
     }
 }

@@ -27,6 +27,7 @@ import io.spine.server.event.model.EventSubscriberMethod;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.projection.Projection;
+import io.spine.type.MessageClass;
 
 import java.util.Set;
 
@@ -74,7 +75,7 @@ public final class ProjectionClass<P extends Projection> extends EntityClass<P> 
         return externalSubscriptions;
     }
 
-    public EventSubscriberMethod getSubscriber(EventClass eventClass) {
-        return eventSubscriptions.getMethod(eventClass);
+    public EventSubscriberMethod getSubscriber(EventClass eventClass, MessageClass originClass) {
+        return eventSubscriptions.getMethod(eventClass, originClass);
     }
 }

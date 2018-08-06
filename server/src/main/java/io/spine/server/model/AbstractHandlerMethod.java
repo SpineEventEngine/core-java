@@ -120,6 +120,11 @@ public abstract class AbstractHandlerMethod<T,
         return method;
     }
 
+    @Override
+    public HandlerKey key() {
+        return HandlerKey.of(getMessageClass());
+    }
+
     private int getModifiers() {
         return method.getModifiers();
     }

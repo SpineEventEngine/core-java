@@ -20,9 +20,8 @@
 
 package io.spine.server.event.model;
 
-import com.google.protobuf.Empty;
-import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
+import io.spine.type.MessageClass;
 
 import java.util.Set;
 
@@ -56,13 +55,5 @@ public interface ReactorClass {
     /**
      * Obtains the method that reacts on the passed projection class.
      */
-    EventReactorMethod getReactor(EventClass eventClass, CommandClass commandClass);
-
-    /**
-     * Obtains the method that reacts on the passed event class.
-     */
-    default EventReactorMethod getReactor(EventClass eventClass) {
-        CommandClass emptyCommand = CommandClass.of(Empty.class);
-        return getReactor(eventClass, emptyCommand);
-    }
+    EventReactorMethod getReactor(EventClass eventClass, MessageClass commandClass);
 }

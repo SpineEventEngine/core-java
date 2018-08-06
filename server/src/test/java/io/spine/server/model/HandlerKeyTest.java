@@ -22,9 +22,9 @@ package io.spine.server.model;
 
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.spine.core.CommandClass;
+import io.spine.core.EmptyClass;
 import io.spine.type.MessageClass;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,7 +38,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DisplayName("HandlerKey should")
 class HandlerKeyTest {
 
-    private final CommandClass emptyClass = CommandClass.of(Empty.class);
+    private final MessageClass emptyClass = EmptyClass.instance();
     private final CommandClass stringClass = CommandClass.of(StringValue.class);
 
     @Test
@@ -50,7 +50,7 @@ class HandlerKeyTest {
     }
 
     @Test
-    @DisplayName("return command class of Empty if there is no origin")
+    @DisplayName("return class of Empty if there is no origin")
     void getEmptyClassWhenNoOrigin() {
         CommandClass handledMessage = stringClass;
         HandlerKey key = HandlerKey.of(handledMessage);

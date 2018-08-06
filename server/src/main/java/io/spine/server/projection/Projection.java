@@ -23,7 +23,6 @@ package io.spine.server.projection;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
-import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.EventPlayers;
@@ -105,8 +104,9 @@ public abstract class Projection<I,
         return projection.isChanged();
     }
 
-    void apply(Message eventMessage, EventEnvelope event) {
-        EventSubscriberMethod method = thisClass().getSubscriber(EventClass.of(eventMessage));
+    void apply(EventEnvelope event) {
+        EventSubscriberMethod method =
+                thisClass().getSubscriber(event.getMessageClass(), event.getOriginClass());
         method.invoke(this, event);
     }
 

@@ -20,11 +20,11 @@
 
 package io.spine.server.aggregate.given.aggregate;
 
-import io.spine.core.React;
 import io.spine.core.UserId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.event.React;
 import io.spine.server.tuple.Pair;
 import io.spine.test.aggregate.command.AggAssignTask;
 import io.spine.test.aggregate.command.AggCreateTask;

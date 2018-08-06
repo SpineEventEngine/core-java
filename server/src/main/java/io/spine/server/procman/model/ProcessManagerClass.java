@@ -20,13 +20,13 @@
 
 package io.spine.server.procman.model;
 
-import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.server.entity.model.CommandHandlingEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactorClass;
 import io.spine.server.event.model.ReactorClassDelegate;
 import io.spine.server.procman.ProcessManager;
+import io.spine.type.MessageClass;
 
 import java.util.Set;
 
@@ -73,7 +73,7 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     @Override
-    public EventReactorMethod getReactor(EventClass eventClass, CommandClass commandClass) {
-        return delegate.getReactor(eventClass, commandClass);
+    public EventReactorMethod getReactor(EventClass eventClass, MessageClass originClass) {
+        return delegate.getReactor(eventClass, originClass);
     }
 }

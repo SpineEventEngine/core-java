@@ -21,8 +21,8 @@
 package io.spine.server.procman.given;
 
 import com.google.protobuf.Empty;
-import io.spine.core.React;
 import io.spine.server.command.Assign;
+import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.EitherOfThree;
 import io.spine.test.procman.quiz.PmAnswer;

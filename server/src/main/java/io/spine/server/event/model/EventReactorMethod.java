@@ -21,15 +21,15 @@
 package io.spine.server.event.model;
 
 import io.spine.core.EventClass;
-import io.spine.core.React;
 import io.spine.server.event.EventReactor;
+import io.spine.server.event.React;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerKey;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 import io.spine.server.model.ReactorMethodResult;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
@@ -51,11 +51,6 @@ public final class EventReactorMethod
     @Override
     public EventClass getMessageClass() {
         return EventClass.of(rawMessageClass());
-    }
-
-    @Override
-    public HandlerKey key() {
-        return HandlerKey.of(getMessageClass());
     }
 
     @Override
@@ -119,6 +114,12 @@ public final class EventReactorMethod
                 return true;
             }
             return false;
+        }
+
+        @Override
+        protected boolean verifyParams(Method method) {
+            Optional<EventAcceptor> acceptor = EventAcceptor.findFor(method);
+            return acceptor.isPresent();
         }
 
         /**

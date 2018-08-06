@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.errorprone.annotations.Immutable;
+import io.spine.core.EmptyClass;
 import io.spine.type.MessageClass;
 
 import java.io.Serializable;
@@ -86,7 +87,7 @@ public class MessageHandlerMap<M extends MessageClass,
      * @return a handler method
      * @throws IllegalStateException if there is no method found in the map
      */
-    public H getMethod(HandlerKey handlerKey) {
+    private H getMethod(HandlerKey handlerKey) {
         H handlerMethod = map.get(handlerKey);
         checkState(handlerMethod != null,
                    "Unable to find handler with key %s", handlerKey);
@@ -106,10 +107,10 @@ public class MessageHandlerMap<M extends MessageClass,
      */
     public H getMethod(M messageClass, MessageClass originClass) {
         HandlerKey keyWithOrigin = HandlerKey.of(messageClass, originClass);
-        if (map.containsKey(keyWithOrigin)) {
-            return getMethod(keyWithOrigin);
-        }
-        return getMethod(messageClass);
+        HandlerKey presentKey = map.containsKey(keyWithOrigin)
+                                ? keyWithOrigin
+                                : HandlerKey.of(messageClass);
+        return getMethod(presentKey);
     }
 
     /**
@@ -120,8 +121,7 @@ public class MessageHandlerMap<M extends MessageClass,
      * @throws IllegalStateException if there is no method found in the map
      */
     public H getMethod(M messageClass) {
-        HandlerKey key = HandlerKey.of(messageClass);
-        return getMethod(key);
+        return getMethod(messageClass, EmptyClass.instance());
     }
 
     private static <M extends MessageClass, H extends HandlerMethod<?, M, ?, ?>>

@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Optional;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -58,7 +57,6 @@ import static io.spine.server.event.model.given.EventAccessorTestEnv.findMessage
 import static io.spine.server.event.model.given.EventAccessorTestEnv.findMessageOnly;
 import static io.spine.server.event.model.given.EventAccessorTestEnv.rejectionMessage;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Dmytro Dashenkov
@@ -128,9 +126,8 @@ class EventAcceptorTest {
         }
 
         private void assertMethod(Method method, EventAcceptor expectedAcceptor) {
-            Optional<EventAcceptor> actualAcceptor = EventAcceptor.from(method);
-            assertTrue(actualAcceptor.isPresent());
-            assertEquals(expectedAcceptor, actualAcceptor.get());
+            EventAcceptor actualAcceptor = EventAcceptor.from(method);
+            assertEquals(expectedAcceptor, actualAcceptor);
         }
     }
 
@@ -193,8 +190,8 @@ class EventAcceptorTest {
             }
             Event event = builder.build();
             EventEnvelope envelope = EventEnvelope.of(event);
-            EventAcceptor.accept(receiver, method, envelope);
-
+            EventAcceptor.from(method)
+                         .accept(receiver, method, envelope);
             receiver.assertEvent(eventMessage);
             receiver.assertEventContext(eventContext);
         }
@@ -223,8 +220,8 @@ class EventAcceptorTest {
             builder.setContext(contextBuilder);
             Event event = builder.build();
             EventEnvelope envelope = EventEnvelope.of(event);
-            EventAcceptor.accept(receiver, method, envelope);
-
+            EventAcceptor.from(method)
+                         .accept(receiver, method, envelope);
             receiver.assertEvent(rejectionMessage);
             receiver.assertCommand(commandMessage);
             receiver.assertCommandContext(commandContext);

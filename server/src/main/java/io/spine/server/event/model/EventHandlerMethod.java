@@ -25,6 +25,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.HandlerKey;
 import io.spine.server.model.MethodResult;
 
 import java.lang.reflect.InvocationTargetException;
@@ -36,6 +37,8 @@ import java.lang.reflect.Method;
 abstract class EventHandlerMethod<T, R extends MethodResult>
         extends AbstractHandlerMethod<T, EventClass, EventEnvelope, R> {
 
+    private final EventAcceptor acceptor;
+
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
@@ -43,6 +46,13 @@ abstract class EventHandlerMethod<T, R extends MethodResult>
      */
     protected EventHandlerMethod(Method method) {
         super(method);
+        this.acceptor = EventAcceptor.from(method);
+    }
+
+    @Override
+    public HandlerKey key() {
+        HandlerKey key = acceptor.createKey(getRawMethod());
+        return key;
     }
 
     /**
@@ -58,7 +68,7 @@ abstract class EventHandlerMethod<T, R extends MethodResult>
 
         Object rawResult;
         try {
-            rawResult = EventAcceptor.accept(target, getRawMethod(), event);
+            rawResult = acceptor.accept(target, getRawMethod(), event);
         } catch (InvocationTargetException e) {
             throw whyFailed(target, event.getMessage(), context, e);
         }

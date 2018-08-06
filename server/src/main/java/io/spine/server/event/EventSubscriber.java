@@ -110,8 +110,9 @@ public abstract class EventSubscriber implements EventDispatcher<String> {
         return thisClass.getEventSubscriptions();
     }
 
-    private void handle(EventEnvelope envelope) {
-        EventSubscriberMethod method = thisClass.getSubscriber(envelope.getMessageClass());
-        method.invoke(this, envelope);
+    private void handle(EventEnvelope event) {
+        EventSubscriberMethod method =
+                thisClass.getSubscriber(event.getMessageClass(), event.getOriginClass());
+        method.invoke(this, event);
     }
 }

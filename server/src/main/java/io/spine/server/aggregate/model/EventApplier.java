@@ -28,7 +28,6 @@ import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerKey;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
@@ -59,11 +58,6 @@ public final class EventApplier
     @Override
     public EventClass getMessageClass() {
         return EventClass.of(rawMessageClass());
-    }
-
-    @Override
-    public HandlerKey key() {
-        return HandlerKey.of(getMessageClass());
     }
 
     static EventApplier from(Method method) {

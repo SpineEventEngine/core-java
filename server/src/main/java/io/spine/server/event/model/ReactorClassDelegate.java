@@ -21,11 +21,11 @@
 package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
+import io.spine.type.MessageClass;
 
 import java.util.Set;
 
@@ -66,7 +66,7 @@ public final class ReactorClassDelegate<T> extends ModelClass<T> implements Reac
     }
 
     @Override
-    public EventReactorMethod getReactor(EventClass eventClass, CommandClass commandClass) {
-        return eventReactions.getMethod(eventClass, commandClass);
+    public EventReactorMethod getReactor(EventClass eventClass, MessageClass originClass) {
+        return eventReactions.getMethod(eventClass, originClass);
     }
 }

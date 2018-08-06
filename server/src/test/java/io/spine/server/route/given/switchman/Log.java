@@ -22,10 +22,10 @@ package io.spine.server.route.given.switchman;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.base.Time;
-import io.spine.core.React;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
+import io.spine.server.event.React;
 import io.spine.server.rout.given.switchman.LogState;
 import io.spine.server.rout.given.switchman.LogStateVBuilder;
 import io.spine.server.route.given.switchman.event.SwitchPositionConfirmed;
