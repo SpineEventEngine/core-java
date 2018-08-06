@@ -20,10 +20,10 @@
 
 package io.spine.testing.server.blackbox.given;
 
-import io.spine.core.React;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.server.event.React;
 import io.spine.testing.server.blackbox.BbCreateReport;
 import io.spine.testing.server.blackbox.BbReportCreated;
 import io.spine.testing.server.blackbox.BbTaskAdded;

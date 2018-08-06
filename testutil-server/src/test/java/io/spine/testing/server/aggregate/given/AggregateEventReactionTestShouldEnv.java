@@ -21,11 +21,11 @@
 package io.spine.testing.server.aggregate.given;
 
 import com.google.protobuf.Message;
-import io.spine.core.React;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.entity.Repository;
+import io.spine.server.event.React;
 import io.spine.testing.server.TUProjectAggregate;
 import io.spine.testing.server.TUProjectAggregateVBuilder;
 import io.spine.testing.server.TUProjectAssigned;
