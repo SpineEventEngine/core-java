@@ -25,6 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
+import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
@@ -66,6 +67,7 @@ import java.util.List;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.testing.Helpers.assertEmpty;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.command.model.CommandHandlerMethod.from;
 import static io.spine.server.model.given.Given.CommandMessage.createProject;
 import static io.spine.server.model.given.Given.CommandMessage.startProject;
@@ -118,8 +120,9 @@ class CommandHandlerMethodTest {
             ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
             CommandHandlerMethod handler = from(handlerObject.getHandler());
             RefCreateProject cmd = createProject();
+            CommandEnvelope envelope = envelope(cmd);
 
-            CommandHandlerMethod.Result result = handler.invoke(handlerObject, cmd, emptyContext);
+            CommandHandlerMethod.Result result = handler.invoke(handlerObject, envelope);
             List<? extends Message> events = result.asMessages();
 
             verify(handlerObject, times(1))
@@ -136,8 +139,9 @@ class CommandHandlerMethodTest {
                     spy(new ValidHandlerOneParamReturnsList());
             CommandHandlerMethod handler = from(handlerObject.getHandler());
             RefCreateProject cmd = createProject();
+            CommandEnvelope envelope = envelope(cmd);
 
-            CommandHandlerMethod.Result result = handler.invoke(handlerObject, cmd, emptyContext);
+            CommandHandlerMethod.Result result = handler.invoke(handlerObject, envelope);
             List<? extends Message> events = result.asMessages();
 
             verify(handlerObject, times(1)).handleTest(cmd);
@@ -157,9 +161,10 @@ class CommandHandlerMethodTest {
             HandlerReturnsEmptyList handlerObject = new HandlerReturnsEmptyList();
             CommandHandlerMethod handler = from(handlerObject.getHandler());
             RefCreateProject cmd = createProject();
+            CommandEnvelope envelope = envelope(cmd);
 
             assertThrows(IllegalStateException.class,
-                         () -> handler.invoke(handlerObject, cmd, emptyContext));
+                         () -> handler.invoke(handlerObject, envelope));
         }
 
         @Test
@@ -168,9 +173,10 @@ class CommandHandlerMethodTest {
             HandlerReturnsEmpty handlerObject = new HandlerReturnsEmpty();
             CommandHandlerMethod handler = from(handlerObject.getHandler());
             RefCreateProject cmd = createProject();
+            CommandEnvelope envelope = envelope(cmd);
 
             assertThrows(IllegalStateException.class,
-                         () -> handler.invoke(handlerObject, cmd, emptyContext));
+                         () -> handler.invoke(handlerObject, envelope));
         }
     }
 
@@ -350,5 +356,15 @@ class CommandHandlerMethodTest {
                      CommandHandlerMethod.factory()
                                          .getPredicate()
                                          .test(handler));
+    }
+
+    private static CommandEnvelope envelope(Message commandMessage) {
+        Any cmd = pack(commandMessage);
+        Command command = Command
+                .newBuilder()
+                .setMessage(cmd)
+                .build();
+        CommandEnvelope envelope = CommandEnvelope.of(command);
+        return envelope;
     }
 }

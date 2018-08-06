@@ -22,7 +22,9 @@ package io.spine.server.event;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
+import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.ARejectionSubscriber;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidNoAnnotation;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidNoParams;
@@ -43,6 +45,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.spy;
@@ -74,7 +77,13 @@ class EventSubscriberMethodTest {
         EventSubscriberMethod subscriber = EventSubscriberMethod.from(subscriberObject.getMethod());
         RefProjectCreated msg = Given.EventMessage.projectCreated();
 
-        subscriber.invoke(subscriberObject, msg, EventContext.getDefaultInstance());
+        Event event = Event
+                .newBuilder()
+                .setMessage(pack(msg))
+                .build();
+
+        EventEnvelope envelope = EventEnvelope.of(event);
+        subscriber.invoke(subscriberObject, envelope);
 
         verify(subscriberObject, times(1))
                 .handle(msg, EventContext.getDefaultInstance());

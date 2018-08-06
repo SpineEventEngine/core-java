@@ -23,8 +23,10 @@ package io.spine.server.model;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
+import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.server.model.given.HandlerMethodTestEnv.OneParamMethod;
 import io.spine.server.model.given.HandlerMethodTestEnv.StubHandler;
 import io.spine.server.model.given.HandlerMethodTestEnv.TwoParamMethod;
@@ -33,6 +35,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.model.AbstractHandlerMethod.getFirstParamType;
 import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,8 +53,10 @@ class AbstractHandlerMethodTest {
 
     private final AbstractHandlerMethod.Factory<OneParamMethod> factory = OneParamMethod.factory();
 
-    private AbstractHandlerMethod<Object, EventClass, EventContext, MethodResult<Empty>> twoParamMethod;
-    private AbstractHandlerMethod<Object, EventClass, Empty, MethodResult<Empty>> oneParamMethod;
+    private
+    AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> twoParamMethod;
+    private
+    AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> oneParamMethod;
     private Object target;
 
     @BeforeEach
@@ -104,9 +109,12 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("with one parameter")
         void withOneParam() {
-            oneParamMethod.invoke(target,
-                                  BoolValue.getDefaultInstance(),
-                                  Empty.getDefaultInstance());
+            Event event = Event
+                    .newBuilder()
+                    .setMessage(pack(BoolValue.getDefaultInstance()))
+                    .build();
+            EventEnvelope envelope = EventEnvelope.of(event);
+            oneParamMethod.invoke(target, envelope);
 
             assertTrue(((StubHandler) target).wasHandleInvoked());
         }
@@ -115,9 +123,13 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("with two parameters")
         void withTwoParams() {
-            twoParamMethod.invoke(target,
-                                  StringValue.getDefaultInstance(),
-                                  EventContext.getDefaultInstance());
+            Event event = Event
+                    .newBuilder()
+                    .setMessage(pack(StringValue.getDefaultInstance()))
+                    .setContext(EventContext.getDefaultInstance())
+                    .build();
+            EventEnvelope envelope = EventEnvelope.of(event);
+            twoParamMethod.invoke(target, envelope);
 
             assertTrue(((StubHandler) target).wasOnInvoked());
         }
@@ -154,7 +166,7 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("all fields are compared")
         void allFieldsAreCompared() {
-            AbstractHandlerMethod<Object, EventClass, EventContext, MethodResult<Empty>>
+            AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>>
                     anotherMethod = new TwoParamMethod(StubHandler.getTwoParameterMethod());
 
             assertEquals(twoParamMethod, anotherMethod);

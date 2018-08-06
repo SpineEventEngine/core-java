@@ -24,6 +24,8 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
 import io.spine.core.CommandContext;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.model.AbstractHandlerMethod;
@@ -36,6 +38,7 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -97,11 +100,15 @@ class EventApplierTest {
     void invokeApplierMethod() {
         ValidApplier applierObject = new ValidApplier();
         EventApplier applier = EventApplier.from(applierObject.getMethod());
-        RefProjectCreated event = Sample.messageOfType(RefProjectCreated.class);
+        RefProjectCreated eventMessage = Sample.messageOfType(RefProjectCreated.class);
+        Event event = Event
+                .newBuilder()
+                .setMessage(pack(eventMessage))
+                .build();
+        EventEnvelope envelope = EventEnvelope.of(event);
+        applier.invoke(applierObject, envelope);
 
-        applier.invoke(applierObject, event);
-
-        assertEquals(event, applierObject.eventApplied);
+        assertEquals(eventMessage, applierObject.eventApplied);
     }
 
     @Test
