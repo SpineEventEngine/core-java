@@ -30,6 +30,7 @@ import io.spine.core.Status;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.system.server.Substituted.Sequence;
 
 import static io.spine.base.Time.getCurrentTime;
 
@@ -57,7 +58,7 @@ import static io.spine.base.Time.getCurrentTime;
 
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings("OverlyCoupledClass") // OK for an aggregate class.
+@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // OK for an aggregate class.
 public final class CommandLifecycleAggregate
         extends Aggregate<CommandId, CommandLifecycle, CommandLifecycleVBuilder> {
 
@@ -212,8 +213,44 @@ public final class CommandLifecycleAggregate
     }
 
     @Assign
-    private void on(MarkTransformed cmd) {
-        //TODO:2018-08-05:alexander.yevsyukov: Implement storing substitution result.
+    CommandTransformed on(MarkTransformed cmd) {
+        return CommandTransformed.newBuilder()
+                                 .setId(cmd.getId())
+                                 .setProduced(cmd.getProduced())
+                                 .build();
+    }
+
+    @Apply
+    void event(CommandTransformed event) {
+        Substituted.Builder substituted = Substituted
+                .newBuilder()
+                .setCommand(event.getId());
+        CommandTimeline.Builder newStatus =
+                getState().getStatus()
+                          .toBuilder()
+                          .setSubstitued(substituted);
+        getBuilder().setStatus(newStatus.build());
+    }
+
+    @Assign
+    CommandSplit on(MarkSplit cmd) {
+        return CommandSplit.newBuilder()
+                           .setId(cmd.getId())
+                           .addAllProduced(cmd.getProducedList())
+                           .build();
+    }
+
+    @Apply
+    void event(CommandSplit event) {
+        Substituted.Builder substituted = Substituted
+                .newBuilder()
+                .setSequence(Sequence.newBuilder()
+                                     .addAllItem(event.getProducedList()));
+        CommandTimeline.Builder newStatus =
+                getState().getStatus()
+                          .toBuilder()
+                          .setSubstitued(substituted);
+        getBuilder().setStatus(newStatus.build());
     }
 
     private Command updateSchedule(Schedule schedule) {

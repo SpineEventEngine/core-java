@@ -24,16 +24,17 @@ import io.spine.testing.server.TUAssignTask;
 import io.spine.testing.server.TUTaskAssigned;
 import io.spine.testing.server.TUTaskCreationPm;
 import io.spine.testing.server.expected.EventHandlerExpected;
-import io.spine.testing.server.procman.given.ProcessManagerEventReactionTestShouldEnv.EventReactingProcessManager;
-import io.spine.testing.server.procman.given.ProcessManagerEventReactionTestShouldEnv.EventReactingProcessManagerTest;
+import io.spine.testing.server.procman.given.CommandingPm;
+import io.spine.testing.server.procman.given.CommandingPmTest;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.server.procman.given.ProcessManagerEventReactionTestShouldEnv.EventReactingProcessManager.NESTED_COMMAND;
-import static io.spine.testing.server.procman.given.ProcessManagerEventReactionTestShouldEnv.EventReactingProcessManager.RESULT_EVENT;
-import static io.spine.testing.server.procman.given.ProcessManagerEventReactionTestShouldEnv.EventReactingProcessManagerTest.TEST_EVENT;
-import static io.spine.testing.server.procman.given.ProcessManagerEventReactionTestShouldEnv.processManager;
+import static io.spine.testing.server.procman.given.CommandingPm.NESTED_COMMAND;
+import static io.spine.testing.server.procman.given.CommandingPm.RESULT_EVENT;
+import static io.spine.testing.server.procman.given.CommandingPm.processManager;
+import static io.spine.testing.server.procman.given.CommandingPmTest.TEST_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -43,15 +44,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DisplayName("ProcessManagerEventReactionTest should")
 class ProcessManagerEventReactionTestShould {
 
-    private EventReactingProcessManagerTest pmEventTest;
+    private CommandingPmTest pmEventTest;
 
     @BeforeEach
     void setUp() {
-        pmEventTest = new EventReactingProcessManagerTest();
+        pmEventTest = new CommandingPmTest();
     }
 
     @Test
     @DisplayName("store tested event")
+    @Disabled("Until Testing library gets support for Command Substitution and Command Reaction methods")
     void shouldStoreCommand() {
         pmEventTest.setUp();
         assertEquals(pmEventTest.storedMessage(), TEST_EVENT);
@@ -60,10 +62,11 @@ class ProcessManagerEventReactionTestShould {
     @Test
     @DisplayName("dispatch tested event and store results")
     @SuppressWarnings("CheckReturnValue")
+    @Disabled("Until Testing library gets support for Command Substitution and Command Reaction methods")
     void shouldDispatchCommand() {
         pmEventTest.setUp();
         pmEventTest.init();
-        EventReactingProcessManager testPm = processManager();
+        CommandingPm testPm = processManager();
         EventHandlerExpected<TUTaskCreationPm> expected = pmEventTest.expectThat(testPm);
         expected.routesCommand(TUAssignTask.class, command -> {
             assertEquals(command, NESTED_COMMAND);
