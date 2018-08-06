@@ -59,27 +59,6 @@ final class UncommittedEvents {
     }
 
     /**
-     * Creates a new instance of {@code UncommittedEvents} with the given events.
-     *
-     * @param events the events produces by an {@link Aggregate}
-     * @return new instance of {@code UncommittedEvents}
-     */
-    static UncommittedEvents of(Iterable<Event> events) {
-        ImmutableList<Event> eventList = copyOf(events);
-        boolean rejection = rejection(eventList);
-        if (rejection) {
-            eventList = ImmutableList.of();
-        }
-        return new UncommittedEvents(eventList, rejection);
-    }
-
-    private static boolean rejection(List<Event> events) {
-        boolean singleEvent = events.size() == 1;
-        boolean result = singleEvent && Events.isRejection(events.get(0));
-        return result;
-    }
-
-    /**
      * Tells whether or not this {@code UncommittedEvents} list is empty.
      *
      * @return {@code true} if the list is not empty, {@code false} otherwise
@@ -111,13 +90,20 @@ final class UncommittedEvents {
      */
     UncommittedEvents append(Iterable<Event> events) {
         ImmutableList<Event> newEvents = copyOf(events);
-        ImmutableList<Event> newList = ImmutableList
-                .<Event>builder()
-                .addAll(list())
-                .addAll(newEvents)
-                .build();
-        boolean rejection = rejection(newEvents) || this.rejection;
-        return new UncommittedEvents(newList, rejection);
+        boolean rejection = rejection(newEvents);
+        ImmutableList.Builder<Event> newList = ImmutableList.builder();
+        newList.addAll(list());
+        if (!rejection) {
+            newList.addAll(newEvents);
+        }
+        boolean newRejection = rejection || this.rejection;
+        return new UncommittedEvents(newList.build(), newRejection);
+    }
+
+    private static boolean rejection(List<Event> events) {
+        boolean singleEvent = events.size() == 1;
+        boolean result = singleEvent && Events.isRejection(events.get(0));
+        return result;
     }
 
     @Override
