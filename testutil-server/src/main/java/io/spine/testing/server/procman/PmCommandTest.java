@@ -21,52 +21,43 @@
 package io.spine.testing.server.procman;
 
 import com.google.protobuf.Message;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.MessageEnvelope;
+import io.spine.core.Events;
 import io.spine.server.procman.ProcessManager;
-import io.spine.testing.server.MessageHandlerTest;
-import io.spine.testing.server.expected.CommanderExpected;
+import io.spine.testing.server.CommandHandlerTest;
+import io.spine.testing.server.expected.CommandHandlerExpected;
 
 import java.util.List;
 
 import static io.spine.testing.server.procman.CommandBusInjection.inject;
+import static io.spine.testing.server.procman.PmDispatcher.dispatch;
 
 /**
- * Base class for testing a commander method of a {@code ProcessManager}.
+ * The implementation base for testing a single command handling in a {@link ProcessManager}.
  *
  * @param <I> ID message of the process manager
- * @param <M> type of the command to test
+ * @param <C> type of the command to test
  * @param <S> the process manager state type
  * @param <P> the {@link ProcessManager} type
- *
- * @author Alexander Yevsyukov
+ * @author Vladyslav Lubenskyi
  */
-public abstract
-class PmCommandGenerationTest<I,
-                              M extends Message,
-                              S extends Message,
-                              P extends ProcessManager<I, S, ?>,
-                              E extends MessageEnvelope>
-        extends MessageHandlerTest<I, M, S, P, CommanderExpected<S>> {
+public abstract class PmCommandTest<I,
+                                    C extends Message,
+                                    S extends Message,
+                                    P extends ProcessManager<I, S, ?>>
+        extends CommandHandlerTest<I, C, S, P> {
 
     @Override
-    protected List<Event> dispatchTo(P entity) {
-        E envelope = createEnvelope();
-        List<Event> result = PmDispatcher.dispatch(entity, envelope);
-        return result;
+    protected List<? extends Message> dispatchTo(P entity) {
+        CommandEnvelope command = createCommand();
+        List<Event> events = dispatch(entity, command);
+        return Events.toMessages(events);
     }
 
-    protected abstract E createEnvelope();
-
     @Override
-    protected CommanderExpected<S> expectThat(P entity) {
+    public CommandHandlerExpected<S> expectThat(P entity) {
         inject(entity, boundedContext().getCommandBus());
-        S initialState = entity.getState();
-        List<? extends Message> messages = dispatchTo(entity);
-        CommanderExpected<S> result = new CommanderExpected<>(messages,
-                                                              initialState,
-                                                              entity.getState(),
-                                                              interceptedCommands());
-        return result;
+        return super.expectThat(entity);
     }
 }

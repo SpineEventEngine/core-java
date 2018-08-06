@@ -89,7 +89,7 @@ import static io.spine.testing.client.blackbox.Count.none;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
-import static io.spine.testing.server.procman.ProcessManagerDispatcher.dispatch;
+import static io.spine.testing.server.procman.PmDispatcher.dispatch;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;

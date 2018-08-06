@@ -21,43 +21,68 @@
 package io.spine.testing.server.procman;
 
 import com.google.protobuf.Message;
-import io.spine.core.CommandEnvelope;
+import io.spine.core.Enrichment;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
 import io.spine.server.procman.ProcessManager;
-import io.spine.testing.server.CommandHandlerTest;
-import io.spine.testing.server.expected.CommandHandlerExpected;
+import io.spine.testing.server.EventReactionTest;
+import io.spine.testing.server.expected.EventReactorExpected;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.testing.server.procman.CommandBusInjection.inject;
-import static io.spine.testing.server.procman.ProcessManagerDispatcher.dispatch;
 
 /**
- * The implementation base for testing a single command handling in a {@link ProcessManager}.
+ * The implementation base for testing a single event reactor in a {@link ProcessManager}.
  *
  * @param <I> ID message of the process manager
- * @param <C> type of the command to test
+ * @param <E> type of the event to test
  * @param <S> the process manager state type
  * @param <P> the {@link ProcessManager} type
  * @author Vladyslav Lubenskyi
  */
-public abstract class ProcessManagerCommandTest<I,
-                                                C extends Message,
-                                                S extends Message,
-                                                P extends ProcessManager<I, S, ?>>
-        extends CommandHandlerTest<I, C, S, P> {
+public abstract class PmEventReactionTest<I,
+                                          E extends Message,
+                                          S extends Message,
+                                          P extends ProcessManager<I, S, ?>>
+        extends EventReactionTest<I, E, S, P> {
 
     @Override
     protected List<? extends Message> dispatchTo(P entity) {
-        CommandEnvelope command = createCommand();
-        List<Event> events = dispatch(entity, command);
-        return Events.toMessages(events);
+        EventEnvelope event = createEnriched();
+        List<Event> events = PmDispatcher.dispatch(entity, event);
+        List<? extends Message> result = Events.toMessages(events);
+        return result;
+    }
+
+    private EventEnvelope createEnriched() {
+        E message = message();
+        checkNotNull(message);
+        Event sourceEvent = createEvent(message);
+
+        EventContext context = sourceEvent
+                .getContext()
+                .toBuilder()
+                .setEnrichment(enrichment())
+                .build();
+        Event enrichedEvent = sourceEvent
+                .toBuilder()
+                .setContext(context)
+                .build();
+        return EventEnvelope.of(enrichedEvent);
     }
 
     @Override
-    public CommandHandlerExpected<S> expectThat(P entity) {
+    protected EventReactorExpected<S> expectThat(P entity) {
         inject(entity, boundedContext().getCommandBus());
         return super.expectThat(entity);
     }
+
+    /**
+     * Creates an {@link Enrichment} to enrich the tested event.
+     */
+    protected abstract Enrichment enrichment();
 }

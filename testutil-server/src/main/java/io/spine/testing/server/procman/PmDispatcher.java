@@ -37,6 +37,7 @@ import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.testing.server.NoOpLifecycle;
 
 import java.util.List;
+import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -49,40 +50,23 @@ import static org.mockito.Mockito.when;
  * @author Alex Tymchenko
  */
 @VisibleForTesting
-public class ProcessManagerDispatcher {
+public class PmDispatcher {
 
-    @SuppressWarnings({"unchecked", "Convert2Lambda"})
-    // casts are ensured by type matching in key-value
-    private static final ImmutableMap<
-            Class<? extends MessageEnvelope>, EndpointFn> endpoints =
+    @SuppressWarnings("unchecked") // casts are ensured by type matching in key-value pairs
+    private static final
+    ImmutableMap<Class<? extends MessageEnvelope>, EndpointFn> endpoints =
             ImmutableMap.<Class<? extends MessageEnvelope>, EndpointFn>
                     builder()
                     .put(CommandEnvelope.class,
-                         new EndpointFn() {
-                             @Override
-                             public List<Event> dispatch(ProcessManager p, MessageEnvelope m) {
-                                 return TestPmCommandEndpoint.dispatch(p, (CommandEnvelope) m);
-                             }
-                         })
+                         (p, m) -> TestPmCommandEndpoint.dispatch(p, (CommandEnvelope) m))
                     .put(EventEnvelope.class,
-                         new EndpointFn() {
-                             @Override
-                             public List<Event> dispatch(ProcessManager p, MessageEnvelope m) {
-                                 return TestPmEventEndpoint.dispatch(p, (EventEnvelope) m);
-                             }
-                         })
+                         (p, m) -> TestPmEventEndpoint.dispatch(p, (EventEnvelope) m))
                     .put(RejectionEnvelope.class,
-                         new EndpointFn() {
-                             @Override
-                             public List<Event> dispatch(ProcessManager p, MessageEnvelope m) {
-                                 return TestPmRejectionEndpoint.dispatch(p, (RejectionEnvelope) m);
-                             }
-                         }
-                    )
-            .build();
+                         (p, m) -> TestPmRejectionEndpoint.dispatch(p, (RejectionEnvelope) m))
+                    .build();
 
     /** Prevents this utility class from instantiation. */
-    private ProcessManagerDispatcher() {
+    private PmDispatcher() {
     }
 
     /**
@@ -95,7 +79,7 @@ public class ProcessManagerDispatcher {
         checkNotNull(pm);
         checkNotNull(envelope);
         EndpointFn fn = endpoints.get(envelope.getClass());
-        List<Event> events = fn.dispatch(pm, envelope);
+        List<Event> events = fn.apply(pm, envelope);
         return events;
     }
 
@@ -104,9 +88,8 @@ public class ProcessManagerDispatcher {
      * class with a test endpoint which dispatches such envelopes.
      * @see #endpoints
      */
-    @FunctionalInterface
-    private interface EndpointFn {
-        List<Event> dispatch(ProcessManager p, MessageEnvelope m);
+    private interface EndpointFn
+            extends BiFunction<ProcessManager<?, ?, ?>, MessageEnvelope, List<Event>> {
     }
 
     /**

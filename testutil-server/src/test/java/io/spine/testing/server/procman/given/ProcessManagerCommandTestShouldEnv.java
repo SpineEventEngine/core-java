@@ -34,7 +34,7 @@ import io.spine.testing.server.TUTaskAssigned;
 import io.spine.testing.server.TUTaskCreationPm;
 import io.spine.testing.server.TUTaskCreationPmVBuilder;
 import io.spine.testing.server.entity.given.Given;
-import io.spine.testing.server.procman.ProcessManagerCommandTest;
+import io.spine.testing.server.procman.PmCommandTest;
 import org.junit.jupiter.api.BeforeEach;
 
 import static com.google.protobuf.util.Timestamps.fromNanos;
@@ -106,10 +106,10 @@ public class ProcessManagerCommandTestShouldEnv {
      * {@code CommandHandlingProcessManager}.
      */
     public static class TaskCreationProcessManagerTest
-            extends ProcessManagerCommandTest<TUProjectId,
-                                              TUCreateTask,
-                                              TUTaskCreationPm,
-                                              CommandHandlingProcessManager> {
+            extends PmCommandTest<TUProjectId,
+                                                          TUCreateTask,
+                                                          TUTaskCreationPm,
+                                                          CommandHandlingProcessManager> {
 
         public static final TUCreateTask TEST_COMMAND =
                 TUCreateTask.newBuilder()

@@ -42,12 +42,12 @@ import static org.mockito.Mockito.mock;
  * @author Alexander Yevsyukov
  */
 @DisplayName("ProcessManagerDispatcher utility should")
-class ProcessManagerDispatcherTest {
+class PmDispatcherTest {
 
     @Test
     @DisplayName(HAVE_PARAMETERLESS_CTOR)
     void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(ProcessManagerDispatcher.class);
+        assertHasPrivateParameterlessCtor(PmDispatcher.class);
     }
 
     @Test
@@ -66,6 +66,6 @@ class ProcessManagerDispatcherTest {
                 .setDefault(RejectionEnvelope.class,
                             RejectionEnvelope.of(createRejection(newUuidValue(), command)))
                 .setDefault(ProcessManager.class, mock(ProcessManager.class))
-                .testAllPublicStaticMethods(ProcessManagerDispatcher.class);
+                .testAllPublicStaticMethods(PmDispatcher.class);
     }
 }
