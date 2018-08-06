@@ -42,11 +42,11 @@ import java.util.Optional;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.event.model.EventAcceptor.MESSAGE;
 import static io.spine.server.event.model.EventAcceptor.MESSAGE_COMMAND_CXT;
 import static io.spine.server.event.model.EventAcceptor.MESSAGE_COMMAND_MSG;
 import static io.spine.server.event.model.EventAcceptor.MESSAGE_COMMAND_MSG_COMMAND_CXT;
 import static io.spine.server.event.model.EventAcceptor.MESSAGE_EVENT_CXT;
+import static io.spine.server.event.model.given.EventAccessorTestEnv.MESSAGE_ONLY;
 import static io.spine.server.event.model.given.EventAccessorTestEnv.commandContext;
 import static io.spine.server.event.model.given.EventAccessorTestEnv.commandMessage;
 import static io.spine.server.event.model.given.EventAccessorTestEnv.eventContext;
@@ -64,8 +64,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Dmytro Dashenkov
  */
 @DisplayName("EventAcceptor should")
-@SuppressWarnings("InnerClassMayBeStatic") // Nested test suites.
+@SuppressWarnings("InnerClassMayBeStatic") // Nested test suites
 class EventAcceptorTest {
+
+    private static final String MESSAGE = "(Message)";
+    private static final String MESSAGE_CONTEXT = "(Message, EventContext)";
+    private static final String MESSAGE_CMD_CONTEXT = "(Message, CommandContext)";
+    private static final String MESSAGE_MESSAGE = "(Message, Message)";
+    private static final String MESSAGE_MESSAGE_CONTEXT = "(Message, Message, CommandContext)";
 
     @Test
     @DisplayName("not accept nulls")
@@ -75,7 +81,7 @@ class EventAcceptorTest {
                 .setMessage(pack(Time.getCurrentTime()))
                 .build();
         Method defaultMethod =
-                EventReceiver.class.getDeclaredMethod("messageOnly", ProjectCreated.class);
+                EventReceiver.class.getDeclaredMethod(MESSAGE_ONLY, ProjectCreated.class);
         new NullPointerTester()
                 .setDefault(Method.class, defaultMethod)
                 .setDefault(EventEnvelope.class, EventEnvelope.of(dummyEvent))
@@ -87,35 +93,35 @@ class EventAcceptorTest {
     class FactoryTest {
 
         @Test
-        @DisplayName("(Message)")
+        @DisplayName(MESSAGE)
         void onlyMessage() {
             Method method = findMessageOnly();
-            assertMethod(method, MESSAGE);
+            assertMethod(method, EventAcceptor.MESSAGE);
         }
 
         @Test
-        @DisplayName("(Message, EventContext)")
+        @DisplayName(MESSAGE_CONTEXT)
         void messageAndContext() {
             Method method = findMessageAndContext();
             assertMethod(method, MESSAGE_EVENT_CXT);
         }
 
         @Test
-        @DisplayName("(Message, CommandContext)")
+        @DisplayName(MESSAGE_CMD_CONTEXT)
         void messageAndCmdContext() {
             Method method = findMessageAndCmdContext();
             assertMethod(method, MESSAGE_COMMAND_CXT);
         }
 
         @Test
-        @DisplayName("(Message, Message)")
+        @DisplayName(MESSAGE_MESSAGE)
         void messageAndCommand() {
             Method method = findMessageAndCommand();
             assertMethod(method, MESSAGE_COMMAND_MSG);
         }
 
         @Test
-        @DisplayName("(Message, Message, CommandContext)")
+        @DisplayName(MESSAGE_MESSAGE_CONTEXT)
         void messageAndCommandMessageAndContext() {
             Method method = findMessageAndCommandMessageAndContext();
             assertMethod(method, MESSAGE_COMMAND_MSG_COMMAND_CXT);
@@ -140,35 +146,35 @@ class EventAcceptorTest {
         }
 
         @Test
-        @DisplayName("(Message)")
+        @DisplayName(MESSAGE)
         void onlyMessage() throws InvocationTargetException {
             Method method = findMessageOnly();
             invokeEvent(method, eventMessage(), null);
         }
 
         @Test
-        @DisplayName("(Message, EventContext)")
+        @DisplayName(MESSAGE_CONTEXT)
         void messageAndContext() throws InvocationTargetException {
             Method method = findMessageAndContext();
             invokeEvent(method, eventMessage(), eventContext());
         }
 
         @Test
-        @DisplayName("(Message, CommandContext)")
+        @DisplayName(MESSAGE_CMD_CONTEXT)
         void messageAndCmdContext() throws InvocationTargetException {
             Method method = findMessageAndCmdContext();
             invokeRejection(method, rejectionMessage(), null, commandContext());
         }
 
         @Test
-        @DisplayName("(Message, Message)")
+        @DisplayName(MESSAGE_MESSAGE)
         void messageAndCommand() throws InvocationTargetException {
             Method method = findMessageAndCommand();
             invokeRejection(method, rejectionMessage(), commandMessage(), null);
         }
 
         @Test
-        @DisplayName("(Message, Message, CommandContext)")
+        @DisplayName(MESSAGE_MESSAGE_CONTEXT)
         void messageAndCommandMessageAndContext() throws InvocationTargetException {
             Method method = findMessageAndCommandMessageAndContext();
             invokeRejection(method, rejectionMessage(), commandMessage(), commandContext());

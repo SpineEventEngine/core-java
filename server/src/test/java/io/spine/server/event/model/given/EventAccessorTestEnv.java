@@ -41,6 +41,8 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class EventAccessorTestEnv {
 
+    public static final String MESSAGE_ONLY = "messageOnly";
+
     /**
      * Prevents the utility class instantiation.
      */
@@ -48,7 +50,7 @@ public class EventAccessorTestEnv {
     }
 
     public static Method findMessageOnly() {
-        Method method = findMethod("messageOnly", ProjectCreated.class);
+        Method method = findMethod(MESSAGE_ONLY, ProjectCreated.class);
         return method;
     }
 
