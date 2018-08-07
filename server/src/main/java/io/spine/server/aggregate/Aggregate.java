@@ -31,7 +31,6 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Events;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.core.Versions;
@@ -57,6 +56,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
+import static io.spine.core.Events.isRejection;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.validate.Validate.isNotDefault;
@@ -289,8 +289,8 @@ public abstract class Aggregate<I,
 
     private static List<Event> notRejections(Collection<Event> events) {
         List<Event> result = events.stream()
-                                    .filter(event -> !Events.isRejection(event))
-                                    .collect(toList());
+                                   .filter(event -> !isRejection(event))
+                                   .collect(toList());
         return result;
     }
 
