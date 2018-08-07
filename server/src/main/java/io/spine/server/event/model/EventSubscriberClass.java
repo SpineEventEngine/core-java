@@ -22,7 +22,7 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.EventClass;
-import io.spine.server.event.EventSubscriber;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
@@ -33,12 +33,12 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Provides type information on an {@link EventSubscriber} class.
+ * Provides type information on an {@link AbstractEventSubscriber} class.
  *
  * @param <S> the type of event subscribers
  * @author Alexander Yevsyukov
  */
-public final class EventSubscriberClass<S extends EventSubscriber> extends ModelClass<S> {
+public final class EventSubscriberClass<S extends AbstractEventSubscriber> extends ModelClass<S> {
 
     private static final long serialVersionUID = 0L;
 
@@ -58,7 +58,7 @@ public final class EventSubscriberClass<S extends EventSubscriber> extends Model
     /**
      * Creates new instance for the passed raw class.
      */
-    public static <S extends EventSubscriber>
+    public static <S extends AbstractEventSubscriber>
     EventSubscriberClass<S> asEventSubscriberClass(Class<S> cls) {
         checkNotNull(cls);
         EventSubscriberClass<S> result = (EventSubscriberClass<S>)

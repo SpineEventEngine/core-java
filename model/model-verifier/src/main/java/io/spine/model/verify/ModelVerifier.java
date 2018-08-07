@@ -23,7 +23,7 @@ package io.spine.model.verify;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.model.CommandHandlers;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.command.CommandHandler;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.model.Model;
 import io.spine.server.procman.ProcessManager;
 import io.spine.tools.gradle.ProjectHierarchy;
@@ -122,8 +122,8 @@ final class ModelVerifier {
             Class<? extends ProcessManager> procManClass = (Class<? extends ProcessManager>) cls;
             asProcessManagerClass(procManClass);
             log.debug("\'{}\' classified as ProcessManager type.", procManClass);
-        } else if (CommandHandler.class.isAssignableFrom(cls)) {
-            Class<? extends CommandHandler> commandHandler = (Class<? extends CommandHandler>) cls;
+        } else if (AbstractCommandHandler.class.isAssignableFrom(cls)) {
+            Class<? extends AbstractCommandHandler> commandHandler = (Class<? extends AbstractCommandHandler>) cls;
             asCommandHandlerClass(commandHandler);
             log.debug("\'{}\' classified as CommandHandler type.", commandHandler);
         } else {

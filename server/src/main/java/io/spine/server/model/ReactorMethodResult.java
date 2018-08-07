@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import com.google.protobuf.Message;
+import io.spine.server.EventProducer;
 
 import java.util.List;
 

@@ -50,7 +50,7 @@ import io.spine.server.event.EventBusTest;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.event.EventSubscriber;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.event.EBProjectArchived;
 import io.spine.test.event.EBProjectCreated;
@@ -287,7 +287,7 @@ public class EventBusTestEnv {
      * <p>Can be used for the event to get pass
      * the {@link io.spine.server.bus.DeadMessageFilter DeadMessageFilter}.
      */
-    public static class EBProjectCreatedNoOpSubscriber extends EventSubscriber {
+    public static class EBProjectCreatedNoOpSubscriber extends AbstractEventSubscriber {
 
         @Subscribe
         public void on(EBProjectCreated message, EventContext context) {
@@ -295,7 +295,7 @@ public class EventBusTestEnv {
         }
     }
 
-    public static class EBProjectArchivedSubscriber extends EventSubscriber {
+    public static class EBProjectArchivedSubscriber extends AbstractEventSubscriber {
 
         private Message eventMessage;
 
@@ -309,7 +309,7 @@ public class EventBusTestEnv {
         }
     }
 
-    public static class ProjectCreatedSubscriber extends EventSubscriber {
+    public static class ProjectCreatedSubscriber extends AbstractEventSubscriber {
 
         private Message eventMessage;
         private EventContext eventContext;
@@ -333,7 +333,7 @@ public class EventBusTestEnv {
      * {@link EBTaskAdded} subscriber that does nothing. Can be used for the event to get pass the
      * the {@link io.spine.server.bus.DeadMessageFilter DeadMessageFilter}.
      */
-    public static class EBTaskAddedNoOpSubscriber extends EventSubscriber {
+    public static class EBTaskAddedNoOpSubscriber extends AbstractEventSubscriber {
 
         @Subscribe
         public void on(EBTaskAdded message, EventContext context) {

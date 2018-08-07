@@ -26,7 +26,7 @@ import com.google.protobuf.UInt32Value;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
-import io.spine.server.event.EventSubscriber;
+import io.spine.server.event.AbstractEventSubscriber;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -39,7 +39,7 @@ public class EventSubscriberTestEnv {
     }
 
     /** The subscriber which throws exception from the subscriber method. */
-    public static class FailingSubscriber extends EventSubscriber {
+    public static class FailingSubscriber extends AbstractEventSubscriber {
 
         private boolean methodCalled = false;
         private @Nullable EventEnvelope lastErrorEnvelope;

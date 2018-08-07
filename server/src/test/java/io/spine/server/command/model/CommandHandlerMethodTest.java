@@ -30,7 +30,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.command.CommandHandler;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.HandlerReturnsEmpty;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.HandlerReturnsEmptyList;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.InvalidHandlerNoAnnotation;
@@ -305,7 +305,7 @@ class CommandHandlerMethodTest {
         @Test
         @DisplayName("command handler")
         void onDispatchToHandler() {
-            CommandHandler handler = new RejectingHandler();
+            AbstractCommandHandler handler = new RejectingHandler();
             CommandEnvelope envelope = requestFactory.createEnvelope(createProject());
             try {
                 handler.dispatch(envelope);
@@ -345,7 +345,7 @@ class CommandHandlerMethodTest {
     @Test
     @DisplayName("throw ISE when dispatching command of non-handled type")
     void notDispatchNonHandledCmd() {
-        CommandHandler handler = new ValidHandlerOneParam();
+        AbstractCommandHandler handler = new ValidHandlerOneParam();
         CommandEnvelope cmd = requestFactory.createEnvelope(startProject());
 
         assertThrows(IllegalStateException.class, () -> handler.dispatch(cmd));

@@ -148,7 +148,7 @@ public class EventBusTest {
 
         // Pass just String instance.
         assertThrows(IllegalArgumentException.class,
-                     () -> eventBus.register(new EventSubscriber() {
+                     () -> eventBus.register(new AbstractEventSubscriber() {
                      }));
     }
 
@@ -159,8 +159,8 @@ public class EventBusTest {
         @Test
         @DisplayName("event subscriber")
         void eventSubscriber() {
-            EventSubscriber subscriberOne = new ProjectCreatedSubscriber();
-            EventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
+            AbstractEventSubscriber subscriberOne = new ProjectCreatedSubscriber();
+            AbstractEventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
 
             eventBus.register(subscriberOne);
             eventBus.register(subscriberTwo);
@@ -193,8 +193,8 @@ public class EventBusTest {
         @Test
         @DisplayName("event subscriber")
         void eventSubscriber() {
-            EventSubscriber subscriberOne = new ProjectCreatedSubscriber();
-            EventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
+            AbstractEventSubscriber subscriberOne = new ProjectCreatedSubscriber();
+            AbstractEventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
             eventBus.register(subscriberOne);
             eventBus.register(subscriberTwo);
             EventClass eventClass = EventClass.of(ProjectCreated.class);

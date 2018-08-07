@@ -21,7 +21,6 @@
 package io.spine.server.command.given;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
@@ -29,14 +28,13 @@ import io.spine.core.CommandContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
-import io.spine.validate.AnyVBuilder;
 import io.spine.validate.EmptyVBuilder;
 
 import java.lang.reflect.Method;
@@ -208,7 +206,7 @@ public class CommandHandlerMethodTestEnv {
     /**
      * Abstract base for test environment command handlers.
      */
-    public abstract static class TestCommandHandler extends CommandHandler {
+    public abstract static class TestCommandHandler extends AbstractCommandHandler {
 
         private static final String HANDLER_METHOD_NAME = "handleTest";
 

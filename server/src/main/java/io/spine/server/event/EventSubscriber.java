@@ -20,99 +20,12 @@
 
 package io.spine.server.event;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.core.EventClass;
-import io.spine.core.EventEnvelope;
-import io.spine.logging.Logging;
-import io.spine.server.bus.MessageDispatcher;
-import io.spine.server.event.model.EventSubscriberClass;
-import io.spine.server.event.model.EventSubscriberMethod;
-import io.spine.server.tenant.EventOperation;
-import io.spine.string.Stringifiers;
-import io.spine.type.MessageClass;
-import org.slf4j.Logger;
-
-import java.util.Set;
-import java.util.function.Supplier;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
-import static java.lang.String.format;
-
 /**
- * The abstract base for objects that can be subscribed to receive events from {@link EventBus}.
- *
- * <p>Objects may also receive events via {@link EventDispatcher}s that can be
- * registered with {@code EventBus}.
+ * An event subscriber declares one or more methods {@linkplain io.spine.core.Subscribe subscribed}
+ * to events.
  *
  * @author Alexander Yevsyukov
- * @author Alex Tymchenko
- * @see EventBus#register(MessageDispatcher)
+ * @see io.spine.core.Subscribe @Subscribe
  */
-public abstract class EventSubscriber implements EventDispatcher<String> {
-
-    private final EventSubscriberClass<?> thisClass = asEventSubscriberClass(getClass());
-    /** Lazily initialized logger. */
-    private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
-
-    /**
-     * {@inheritDoc}
-     *
-     * @param envelope the envelope with the message
-     * @return a one element set with the result of {@link #toString()}
-     * as the identify of the subscriber, or empty set if dispatching failed
-     */
-    @Override
-    public Set<String> dispatch(EventEnvelope envelope) {
-        EventOperation op = new EventOperation(envelope.getOuterObject()) {
-            @Override
-            public void run() {
-                handle(envelope);
-            }
-        };
-        try {
-            op.execute();
-        } catch (RuntimeException exception) {
-            onError(envelope, exception);
-            return ImmutableSet.of();
-        }
-        return Identity.of(this);
-    }
-
-    /**
-     * Logs the error into the subscriber {@linkplain #log() log}.
-     *
-     * @param envelope  the message which caused the error
-     * @param exception the error
-     */
-    @Override
-    public void onError(EventEnvelope envelope, RuntimeException exception) {
-        checkNotNull(envelope);
-        checkNotNull(exception);
-        MessageClass messageClass = envelope.getMessageClass();
-        String messageId = Stringifiers.toString(envelope.getId());
-        String errorMessage =
-                format("Error handling event subscription (class: %s id: %s).",
-                       messageClass, messageId);
-        log().error(errorMessage, exception);
-    }
-
-    /**
-     * Obtains the instance of logger associated with the class of the subscriber.
-     */
-    protected Logger log() {
-        return loggerSupplier.get();
-    }
-
-    @Override
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
-    public Set<EventClass> getMessageClasses() {
-        return thisClass.getEventSubscriptions();
-    }
-
-    private void handle(EventEnvelope event) {
-        EventSubscriberMethod method =
-                thisClass.getSubscriber(event.getMessageClass(), event.getOriginClass());
-        method.invoke(this, event);
-    }
+public interface EventSubscriber {
 }

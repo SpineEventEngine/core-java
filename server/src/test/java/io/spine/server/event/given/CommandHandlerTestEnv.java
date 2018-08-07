@@ -30,8 +30,8 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
 import io.spine.server.command.CommandHistory;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
@@ -87,7 +87,7 @@ public class CommandHandlerTestEnv {
 
     @SuppressWarnings({"OverloadedMethodsWithSameNumberOfParameters",
                        "ReturnOfCollectionOrArrayField"})
-    public static class TestCommandHandler extends CommandHandler {
+    public static class TestCommandHandler extends AbstractCommandHandler {
 
         private final ImmutableList<Message> eventsOnStartProjectCmd =
                 createEventsOnStartProjectCmd();

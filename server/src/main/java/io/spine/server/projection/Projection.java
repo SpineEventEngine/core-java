@@ -27,6 +27,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.server.entity.EventPlayer;
 import io.spine.server.entity.EventPlayers;
 import io.spine.server.entity.TransactionalEntity;
+import io.spine.server.event.EventSubscriber;
 import io.spine.server.event.model.EventSubscriberMethod;
 import io.spine.server.projection.model.ProjectionClass;
 import io.spine.validate.ValidatingBuilder;
@@ -50,7 +51,7 @@ public abstract class Projection<I,
                                  M extends Message,
                                  B extends ValidatingBuilder<M, ? extends Message.Builder>>
         extends TransactionalEntity<I, M, B>
-        implements EventPlayer {
+        implements EventPlayer, EventSubscriber {
 
     /**
      * Creates a new instance.
@@ -97,8 +98,8 @@ public abstract class Projection<I,
      *
      * @return {@code true} if the projection state was changed as the result of playing the events
      */
-    static boolean play(Projection projection, Iterable<Event> events) {
-        ProjectionTransaction tx = ProjectionTransaction.start(projection);
+    static boolean play(Projection<?, ?, ?> projection, Iterable<Event> events) {
+        ProjectionTransaction<?, ?, ?> tx = ProjectionTransaction.start(projection);
         projection.play(events);
         tx.commit();
         return projection.isChanged();

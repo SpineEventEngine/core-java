@@ -25,7 +25,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.event.EventSubscriber;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.model.EventSubscriberClass;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
@@ -43,7 +43,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.lang.String.format;
 
 /**
- * An internal wrapper class, which exposes an {@link EventSubscriber}
+ * An internal wrapper class, which exposes an {@link AbstractEventSubscriber}
  * as an {@link ExternalMessageDispatcher}.
  *
  * <p>Allows to register {@code EventSubscriber}s as dispatchers of
@@ -56,9 +56,9 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
     /** Lazily initialized logger. */
     private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
 
-    private final EventSubscriber delegate;
+    private final AbstractEventSubscriber delegate;
 
-    ExternalEventSubscriber(EventSubscriber delegate) {
+    ExternalEventSubscriber(AbstractEventSubscriber delegate) {
         this.delegate = delegate;
     }
 

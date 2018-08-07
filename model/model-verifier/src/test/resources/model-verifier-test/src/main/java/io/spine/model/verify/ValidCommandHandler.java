@@ -20,12 +20,10 @@
 
 package io.spine.model.verify;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.UInt32Value;
 import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.event.EventBus;
-import io.spine.validate.AnyVBuilder;
 
 import java.util.List;
 
@@ -38,7 +36,7 @@ import static java.util.Collections.singletonList;
  *
  * @author Dmytro Dashenkov
  */
-public class ValidCommandHandler extends CommandHandler {
+public class ValidCommandHandler extends AbstractCommandHandler {
 
     protected ValidCommandHandler(EventBus eventBus) {
         super(eventBus);

@@ -28,6 +28,7 @@ import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;

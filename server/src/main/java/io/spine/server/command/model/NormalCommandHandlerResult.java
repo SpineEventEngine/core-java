@@ -20,7 +20,7 @@
 
 package io.spine.server.command.model;
 
-import io.spine.server.model.EventProducer;
+import io.spine.server.EventProducer;
 
 /**
  * @author Dmytro Dashenkov

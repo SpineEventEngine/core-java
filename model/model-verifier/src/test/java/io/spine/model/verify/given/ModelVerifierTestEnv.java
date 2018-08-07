@@ -25,8 +25,8 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.command.AbstractCommandHandler;
 import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManager;
 import io.spine.validate.AnyVBuilder;
@@ -50,7 +50,7 @@ public class ModelVerifierTestEnv {
         return result;
     }
 
-    public static class AnyCommandHandler extends CommandHandler {
+    public static class AnyCommandHandler extends AbstractCommandHandler {
 
         protected AnyCommandHandler(EventBus eventBus) {
             super(eventBus);
@@ -92,7 +92,7 @@ public class ModelVerifierTestEnv {
         }
     }
 
-    public static class DuplicateAnyCommandHandler extends CommandHandler {
+    public static class DuplicateAnyCommandHandler extends AbstractCommandHandler {
 
         protected DuplicateAnyCommandHandler(EventBus eventBus) {
             super(eventBus);
