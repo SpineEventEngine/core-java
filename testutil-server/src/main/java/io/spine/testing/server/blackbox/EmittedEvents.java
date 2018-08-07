@@ -25,13 +25,16 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
+import io.spine.core.Version;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Contains the data on the events emitted in the {@link BlackBoxBoundedContext Bounded Context}.
@@ -113,5 +116,19 @@ public class EmittedEvents {
      */
     public boolean contain(EventClass eventClass) {
         return countOfTypes.containsKey(eventClass);
+    }
+
+    public boolean haveVersions(int... versionNumbers) {
+        assertEquals(versionNumbers.length, events.size());
+        Iterator<Event> events = this.events.iterator();
+        for (int version : versionNumbers) {
+            Version actualVersion = events.next()
+                                          .getContext()
+                                          .getVersion();
+            if (version != actualVersion.getNumber()) {
+                return false;
+            }
+        }
+        return true;
     }
 }
