@@ -27,7 +27,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * An {@link Aggregate} write operation.
  *
- * <p>Stores the given aggregate into
+ * <p>Stores the given aggregate into the associated storage.
  *
  * @author Dmytro Dashenkov
  */

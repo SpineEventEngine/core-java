@@ -34,7 +34,7 @@ import static io.spine.core.Events.isRejection;
 /**
  * A command dispatch operation.
  *
- * <p>Dispatched the given {@linkplain CommandEnvelope command} to the given
+ * <p>Dispatches the given {@linkplain CommandEnvelope command} to the given
  * {@linkplain CommandHandlingEntity entity} and triggers the {@link EntityLifecycle}.
  *
  * @author Dmytro Dashenkov
