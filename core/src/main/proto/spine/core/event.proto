@@ -131,6 +131,10 @@ message EventContext {
     // Iff the accociated event is a rejection event, this field is present.
     //
     RejectionEventContext rejection = 10;
+
+    // Deleted fields.
+    reserved 7;
+    reserved "rejection_context";
 }
 
 // Meta-information about a rejection event.
