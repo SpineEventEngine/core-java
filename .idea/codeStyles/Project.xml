@@ -10,6 +10,7 @@
       <REPEAT_ANNOTATIONS>
         <ANNO name="com.google.errorprone.annotations.CanIgnoreReturnValue" />
         <ANNO name="com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper" />
+        <ANNO name="io.spine.annotation.Internal" />
         <ANNO name="org.junit.After" />
         <ANNO name="org.junit.Before" />
         <ANNO name="org.junit.Test" />
