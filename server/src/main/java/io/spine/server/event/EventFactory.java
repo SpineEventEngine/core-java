@@ -91,6 +91,18 @@ public class EventFactory {
         return doCreateEvent(messageOrAny, context);
     }
 
+    /**
+     * Creates a rejection event for the passed rejection message.
+     *
+     * @param messageOrAny     the rejection message
+     * @param version          the version of the event to create
+     * @param rejectionContext the rejection context
+     * @return new rejection event
+     * @throws ValidationException if the passed message does not satisfy the constraints
+     *                             set for it in its Protobuf definition
+     * @see #createEvent(Message, Version) createEvent(Message, Version) - for general rules of
+     *                                     the event construction
+     */
     public Event createRejectionEvent(Message messageOrAny,
                                       @Nullable Version version,
                                       RejectionEventContext rejectionContext)
