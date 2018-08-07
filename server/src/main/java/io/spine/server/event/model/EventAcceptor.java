@@ -156,7 +156,8 @@ enum EventAcceptor {
     }
 
     /**
-     * Constructs a list of arguments of the event accepting method according to its signature.
+     * Constructs a list of arguments of the event accepting method according to the signature
+     * represented by this instance.
      *
      * <p>Do not call this method directly. See {@link #invoke(Object, Method, EventEnvelope)}
      * instead.
@@ -186,6 +187,13 @@ enum EventAcceptor {
         }
     }
 
+    /**
+     * Creates the {@link HandlerKey} for the given method according to the signature represented by
+     * this instance.
+     *
+     * @param method handler method
+     * @return {@link HandlerKey} for the given method
+     */
     HandlerKey createKey(Method method) {
         Class<?>[] types = method.getParameterTypes();
         @SuppressWarnings("unchecked")
