@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
 import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
@@ -34,9 +35,11 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Status;
 import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
+import io.spine.json.Json;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
@@ -71,10 +74,15 @@ import java.util.Optional;
 import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.core.EventValidationError.UNSUPPORTED_EVENT_VALUE;
+import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.bus.Buses.reject;
+import static java.lang.String.format;
 import static java.util.Optional.empty;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test environment classes for the {@code server.event} package.
@@ -333,6 +341,31 @@ public class EventBusTestEnv {
         }
     }
 
+    public static class EBExternalTaskAddedSubscriber extends EventSubscriber {
+
+        @Subscribe(external = true)
+        public void on(EBTaskAdded message, EventContext context) {
+            if (!context.getExternal()) {
+                fail(format(
+                        "Domestic event %s was delivered to an external subscriber.",
+                        message.getClass()
+                ));
+            }
+        }
+
+        /**
+         * Must be present in order for the subscriber to be valid for EventBus registration.
+         *
+         * <p>This subscriber should never be called.
+         *
+         * @param event ignored
+         */
+        @Subscribe
+        public void on(ProjectCreated event) {
+            fail("Unexpected event " + Json.toJson(event));
+        }
+    }
+
     /**
      * A simple dispatcher class, which only dispatch and does not have own event
      * subscribing methods.
@@ -412,6 +445,48 @@ public class EventBusTestEnv {
             ProjectCreated msg = EventMessage.projectCreated(projectId);
             Event event = eventFactory().createEvent(msg);
             return event;
+        }
+    }
+
+    public static class UnsupportedEventAckObserver implements StreamObserver<Ack> {
+
+        private boolean intercepted;
+        private boolean completed;
+
+        public UnsupportedEventAckObserver() {
+            this.intercepted = false;
+            this.completed = false;
+        }
+
+        @Override
+        public void onNext(Ack value) {
+            Status status = value.getStatus();
+            if (status.getStatusCase() == ERROR) {
+                Error error = status.getError();
+                int code = error.getCode();
+                assertEquals(UNSUPPORTED_EVENT_VALUE, code);
+            } else {
+                fail(Json.toJson(value));
+            }
+            intercepted = true;
+        }
+
+        @Override
+        public void onError(Throwable t) {
+            fail(t);
+        }
+
+        @Override
+        public void onCompleted() {
+            completed = true;
+        }
+
+        public boolean isCompleted() {
+            return completed;
+        }
+
+        public boolean observedUnsupportedEvent() {
+            return intercepted;
         }
     }
 }

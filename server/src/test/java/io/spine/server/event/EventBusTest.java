@@ -32,17 +32,22 @@ import io.spine.server.BoundedContext;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.given.EventBusTestEnv.BareDispatcher;
+import io.spine.server.event.given.EventBusTestEnv.EBExternalTaskAddedSubscriber;
 import io.spine.server.event.given.EventBusTestEnv.EBProjectArchivedSubscriber;
 import io.spine.server.event.given.EventBusTestEnv.EBProjectCreatedNoOpSubscriber;
 import io.spine.server.event.given.EventBusTestEnv.EBTaskAddedNoOpSubscriber;
 import io.spine.server.event.given.EventBusTestEnv.GivenEvent;
 import io.spine.server.event.given.EventBusTestEnv.ProjectCreatedSubscriber;
 import io.spine.server.event.given.EventBusTestEnv.ProjectRepository;
+import io.spine.server.event.given.EventBusTestEnv.UnsupportedEventAckObserver;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.event.EBTaskAdded;
 import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.ProjectId;
 import io.spine.test.event.Task;
+import io.spine.testdata.Sample;
+import io.spine.testing.server.TestEventFactory;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -89,11 +94,13 @@ import static org.mockito.Mockito.verify;
 @DisplayName("EventBus should")
 public class EventBusTest {
 
+    private TestEventFactory eventFactory;
     private EventBus eventBus;
     private CommandBus commandBus;
     private BoundedContext bc;
 
     private void setUp(@Nullable EventEnricher enricher) {
+        this.eventFactory = TestEventFactory.newInstance(EventBusTest.class);
         EventBus.Builder eventBusBuilder = eventBusBuilder(enricher);
 
         bc = BoundedContext.newBuilder()
@@ -457,6 +464,25 @@ public class EventBusTest {
             Task task = contents.getTask();
             assertFalse(task.getDone());
         }
+    }
+
+    @Test
+    @DisplayName("not dispatch domestic event to external handler")
+    void domesticEventToExternalMethod() {
+        eventBus.register(new EBExternalTaskAddedSubscriber());
+
+        ProjectId projectId = Sample.messageOfType(ProjectId.class);
+        Task task = Sample.messageOfType(Task.class);
+        EBTaskAdded eventMessage = EBTaskAdded
+                .newBuilder()
+                .setProjectId(projectId)
+                .setTask(task)
+                .build();
+        Event event = eventFactory.createEvent(eventMessage);
+        UnsupportedEventAckObserver observer = new UnsupportedEventAckObserver();
+        eventBus.post(event, observer);
+        assertTrue(observer.observedUnsupportedEvent());
+        assertTrue(observer.isCompleted());
     }
 
     /**
