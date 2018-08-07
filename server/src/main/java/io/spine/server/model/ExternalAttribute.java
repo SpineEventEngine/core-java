@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A meta-attribute of the {@code Method}, telling whether this method handles the objects,
  * produced outside of the current bounded context.
  *
- * @see io.spine.core.Subscribe#external()
+ * @see Subscribe#external()
  * @see React#external()
  * @author Alex Tymchenko
  */
