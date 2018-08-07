@@ -76,21 +76,4 @@ public final class ExternalMessageClass extends MessageClass {
         }
         return builder.build();
     }
-
-    /**
-     * Transforms a given set of {@linkplain RejectionClass rejection classes} into a set
-     * of {@code ExternalMessageClass}es by wrapping each rejection class
-     * into an external message class.
-     *
-     * @param classes the set of rejection classes to transform
-     * @return a set of {@code ExternalMessageClass}es, each wrapping an item from the original set
-     */
-    public static Set<ExternalMessageClass> fromRejectionClasses(Set<RejectionClass> classes) {
-        checkNotNull(classes);
-        ImmutableSet.Builder<ExternalMessageClass> builder = ImmutableSet.builder();
-        for (RejectionClass rejectionClass : classes) {
-            builder.add(of(rejectionClass));
-        }
-        return builder.build();
-    }
 }
