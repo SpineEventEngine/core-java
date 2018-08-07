@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.procman.given;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.server.entity.Repository;
 import io.spine.testing.server.TUCreateTask;
@@ -27,18 +28,14 @@ import io.spine.testing.server.TUProjectId;
 import io.spine.testing.server.TUTaskCreationPm;
 import io.spine.testing.server.procman.PmCommandTest;
 import io.spine.testing.server.procman.given.pm.CommandHandlingPm;
-import io.spine.testing.server.procman.given.pm.CommandHandlingPmRepository;
+import io.spine.testing.server.procman.given.pm.CommandHandlingPmRepo;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
- * The test class for the {@code TUCreateTask} command handler in
- * {@code CommandHandlingProcessManager}.
+ * The test class for the {@code TUCreateTask} command handler in {@link CommandHandlingPm}.
  */
 public class SamplePmCommandTest
-        extends PmCommandTest<TUProjectId,
-                              TUCreateTask,
-                              TUTaskCreationPm,
-        CommandHandlingPm> {
+        extends PmCommandTest<TUProjectId, TUCreateTask, TUTaskCreationPm, CommandHandlingPm> {
 
     public static final TUCreateTask TEST_COMMAND =
             TUCreateTask.newBuilder()
@@ -64,16 +61,19 @@ public class SamplePmCommandTest
     @Override
     protected Repository<TUProjectId, CommandHandlingPm>
     createEntityRepository() {
-        return new CommandHandlingPmRepository();
+        return new CommandHandlingPmRepo();
     }
 
+    /** Exposes protected method for test verification. */
+    @VisibleForTesting
     public Message storedMessage() {
         return message();
     }
 
     /**
-     * Exposes internal configuration method.
+     * Exposes internal configuration method so that the test can invoke it directly.
      */
+    @VisibleForTesting
     public void init() {
         configureBoundedContext();
     }

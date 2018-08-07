@@ -23,13 +23,13 @@ package io.spine.testing.server.procman;
 import io.spine.testing.server.TUAssignTask;
 import io.spine.testing.server.TUTaskCreationPm;
 import io.spine.testing.server.expected.CommanderExpected;
-import io.spine.testing.server.procman.given.CommandingPmTest;
+import io.spine.testing.server.procman.given.SamplePmCommandOnEventTest;
 import io.spine.testing.server.procman.given.pm.CommandingPm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.server.procman.given.CommandingPmTest.TEST_EVENT;
+import static io.spine.testing.server.procman.given.SamplePmCommandOnEventTest.TEST_EVENT;
 import static io.spine.testing.server.procman.given.pm.CommandingPm.NESTED_COMMAND;
 import static io.spine.testing.server.procman.given.pm.CommandingPm.processManager;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,11 +40,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DisplayName("PmCommandOnCommandTest should")
 class PmCommandOnEventTestShould {
 
-    private CommandingPmTest pmCommandingTest;
+    private SamplePmCommandOnEventTest pmCommandingTest;
 
     @BeforeEach
     void setUp() {
-        pmCommandingTest = new CommandingPmTest();
+        pmCommandingTest = new SamplePmCommandOnEventTest();
     }
 
     @Test

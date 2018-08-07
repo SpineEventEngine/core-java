@@ -22,6 +22,7 @@ package io.spine.testing.server.procman.given;
 
 import com.google.protobuf.Message;
 import io.spine.server.entity.Repository;
+import io.spine.testing.server.TUAssignTask;
 import io.spine.testing.server.TUProjectId;
 import io.spine.testing.server.TUTaskCreated;
 import io.spine.testing.server.TUTaskCreationPm;
@@ -32,10 +33,15 @@ import io.spine.testing.server.procman.given.pm.CommandingPmRepo;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
- * The test class for the {@code TUTaskCreated} event handler in
- * {@code EventReactingProcessManager}.
+ * A sample test class which we use for testing {@link PmCommandOnEventTest}.
+ *
+ * <p>It creates test environment for checking that a {@link CommandingPm ProcessManager}
+ * creates {@linkplain TUAssignTask a command} in response to an
+ * incoming {@linkplain TUTaskCreated event}.
+ *
+ * @see io.spine.server.procman.given
  */
-public class CommandingPmTest
+public class SamplePmCommandOnEventTest
         extends PmCommandOnEventTest<TUProjectId, TUTaskCreated, TUTaskCreationPm, CommandingPm> {
 
     public static final TUTaskCreated TEST_EVENT =

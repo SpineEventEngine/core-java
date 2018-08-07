@@ -24,6 +24,6 @@ import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.testing.server.TUProjectId;
 import io.spine.testing.server.TUTaskCreationPm;
 
-public class CommandHandlingPmRepository
+public class CommandHandlingPmRepo
         extends ProcessManagerRepository<TUProjectId, CommandHandlingPm, TUTaskCreationPm> {
 }
