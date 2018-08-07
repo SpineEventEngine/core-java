@@ -241,12 +241,6 @@ public abstract class AbstractHandlerMethod<T,
         return getFullName();
     }
 
-    @Override
-    public HandlerKey key() {
-        HandlerKey result = HandlerKey.of(getMessageClass());
-        return result;
-    }
-
     /**
      * The base class for factory objects that can filter {@link Method} objects
      * that represent handler methods and create corresponding {@code HandlerMethod} instances

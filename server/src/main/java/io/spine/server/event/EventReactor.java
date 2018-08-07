@@ -23,13 +23,13 @@ package io.spine.server.event;
 import io.spine.server.EventProducer;
 
 /**
- * A event reactor declares methods that receive events and {@linkplain io.spine.core.React
+ * A event reactor declares methods that receive events and {@linkplain io.spine.server.event.React
  * may generate}  other events in response.
  *
  * <p>This means that a reactor does <em>not</em> have to <em>always</em> generate an event.
  *
  * @author Alexander Yevsyukov
- * @see io.spine.core.React @React
+ * @see io.spine.server.event.React @React
  */
 public interface EventReactor extends EventProducer {
 }

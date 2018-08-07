@@ -19,27 +19,20 @@
  */
 package io.spine.server.procman.given;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.Rejection;
-import io.spine.core.RejectionContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv;
 import io.spine.server.command.Assign;
-import io.spine.server.delivery.ShardingStrategy;
-import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.delivery.given.ThreadStats;
 import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.server.route.RejectionRoute;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmCreateProject;
-import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.rejection.Rejections.PmCannotStartArchivedProject;
@@ -48,9 +41,7 @@ import io.spine.testing.server.TestEventFactory;
 import io.spine.validate.StringValueVBuilder;
 
 import java.util.List;
-import java.util.Set;
 
-import static io.spine.core.Rejections.toRejection;
 import static java.util.Collections.emptyList;
 
 /**
@@ -91,39 +82,10 @@ public class PmMessageDeliveryTestEnv {
                         .build();
     }
 
-    public static Rejection cannotStartProject() {
-        ProjectId projectId = projectId();
-
-        PmStartProject cmdMessage = PmStartProject.newBuilder()
-                                                  .setProjectId(projectId)
-                                                  .build();
-        Command command = createCommand(cmdMessage);
-        Rejection result = toRejection(throwableWith(projectId), command);
-        return result;
-    }
-
-    private static io.spine.test.procman.rejection.PmCannotStartArchivedProject
-    throwableWith(ProjectId projectId) {
-        return new io.spine.test.procman.rejection.PmCannotStartArchivedProject(projectId);
-    }
-
     private static Command createCommand(Message cmdMessage) {
         Command result = TestActorRequestFactory.newInstance(AggregateMessageDeliveryTestEnv.class)
                                                 .createCommand(cmdMessage);
         return result;
-    }
-
-    public static RejectionRoute<ProjectId, Message> routeByProjectId() {
-        return new RejectionRoute<ProjectId, Message>() {
-
-            private static final long serialVersionUID = 1L;
-
-            @Override
-            public Set<ProjectId> apply(Message raw, RejectionContext context) {
-                PmCannotStartArchivedProject msg = (PmCannotStartArchivedProject) raw;
-                return ImmutableSet.of(msg.getProjectId());
-            }
-        };
     }
 
     /**
@@ -173,22 +135,9 @@ public class PmMessageDeliveryTestEnv {
 
     public static class SingleShardPmRepository
             extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
-        public SingleShardPmRepository() {
-            getRejectionRouting().replaceDefault(routeByProjectId());
-        }
-
     }
 
     public static class QuadrupleShardPmRepository
             extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
-
-        public QuadrupleShardPmRepository() {
-            getRejectionRouting().replaceDefault(routeByProjectId());
-        }
-
-        @Override
-        public ShardingStrategy getShardingStrategy() {
-            return UniformAcrossTargets.forNumber(4);
-        }
     }
 }

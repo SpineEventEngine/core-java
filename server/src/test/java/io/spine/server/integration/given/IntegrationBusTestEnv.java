@@ -49,7 +49,6 @@ import io.spine.test.integration.command.ItgStartProject;
 import io.spine.test.integration.event.ItgProjectCreated;
 import io.spine.test.integration.event.ItgProjectStarted;
 import io.spine.test.integration.rejection.IntegrationRejections.ItgCannotStartArchivedProject;
-import io.spine.test.integration.rejection.IntegrationRejections.ItgProjectAlreadyExists;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.validate.Int32ValueVBuilder;
@@ -427,42 +426,11 @@ public class IntegrationBusTestEnv {
         }
     }
 
-    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")  // OK to preserve the state.
-    public static class ProjectRejectionsExtSubscriber extends EventSubscriber {
-
-        private static ItgCannotStartArchivedProject externalRejection = null;
-
-        private static ItgProjectAlreadyExists domesticRejection = null;
-
-        @Subscribe(external = true)
-        public void on(ItgCannotStartArchivedProject rejection) {
-            externalRejection = rejection;
-        }
-
-        @Subscribe
-        public void on(ItgProjectAlreadyExists rejection) {
-            domesticRejection = rejection;
-        }
-
-        public static void clear() {
-            externalRejection = null;
-            domesticRejection = null;
-        }
-
-        /**
-         * Rethrow all the issues, so that they are visible to tests.
-         */
-        @Override
-        public void onError(EventEnvelope envelope, RuntimeException exception) {
-            throw illegalStateWithCauseOf(exception);
-        }
-    }
-
     /**
      * A subscriber for testing of external attribute mismatch check.
      */
     @SuppressWarnings("unused") // OK to have unused params in this test env. class
-    public static final class ExternalMismatchSubscriber extends EventSubscriber {
+    public static final class ExternalMismatchSubscriber extends AbstractEventSubscriber {
 
         @Subscribe(external = true)
         public void on(ItgCannotStartArchivedProject rejection, ItgStartProject command) {

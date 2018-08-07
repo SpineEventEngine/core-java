@@ -34,7 +34,6 @@ import io.spine.server.integration.given.IntegrationBusTestEnv.ContextAwareProje
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectCountAggregate;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectDetails;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectEventsSubscriber;
-import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectRejectionsExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectWizard;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
@@ -79,7 +78,6 @@ class IntegrationBusTest {
         ContextAwareProjectDetails.clear();
         ProjectEventsSubscriber.clear();
         ProjectStartedExtSubscriber.clear();
-        ProjectRejectionsExtSubscriber.clear();
     }
 
     @Nested

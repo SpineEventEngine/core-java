@@ -56,8 +56,6 @@ import io.spine.server.procman.model.ProcessManagerClass;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
-import io.spine.server.route.RejectionProducers;
-import io.spine.server.route.RejectionRouting;
 import io.spine.system.server.SystemGateway;
 
 import java.util.Set;
@@ -88,10 +86,6 @@ public abstract class ProcessManagerRepository<I,
 
     /** The command routing schema used by this repository. */
     private final CommandRouting<I> commandRouting = CommandRouting.newInstance();
-
-    /** The rejection routing schema used by this repository. */
-    private final RejectionRouting<I> rejectionRouting =
-            RejectionRouting.withDefault(RejectionProducers.fromContext());
 
     private final Supplier<PmCommandDelivery<I, P>> commandDeliverySupplier =
             memoize(() -> {
@@ -241,13 +235,6 @@ public abstract class ProcessManagerRepository<I,
      */
     protected final CommandRouting<I> getCommandRouting() {
         return commandRouting;
-    }
-
-    /**
-     * Obtains rejection routing schema used by this repository.
-     */
-    protected final RejectionRouting<I> getRejectionRouting() {
-        return rejectionRouting;
     }
 
     /**

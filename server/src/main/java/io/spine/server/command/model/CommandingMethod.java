@@ -34,7 +34,7 @@ import io.spine.type.MessageClass;
  * an incoming message.
  *
  * @param <M> the type of the message class
- * @param <C> the type of the message context
+ * @param <R> the type of the method result
  *
  * @author Alexander Yevsyukov
  */

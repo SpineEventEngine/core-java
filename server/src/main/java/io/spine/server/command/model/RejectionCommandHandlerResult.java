@@ -26,8 +26,8 @@ import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.RejectionEventContext;
 import io.spine.core.Version;
+import io.spine.server.EventProducer;
 import io.spine.server.event.EventFactory;
-import io.spine.server.model.EventProducer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.Function;

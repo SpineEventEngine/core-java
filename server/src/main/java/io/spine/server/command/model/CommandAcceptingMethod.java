@@ -22,7 +22,7 @@ package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.core.CommandClass;
-import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodResult;
 
