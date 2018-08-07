@@ -23,6 +23,8 @@ package io.spine.server.command.model;
 import io.spine.server.EventProducer;
 
 /**
+ * A non-erroneous command handling result.
+ *
  * @author Dmytro Dashenkov
  */
 final class NormalCommandHandlerResult extends CommandHandlerMethod.Result {
@@ -31,7 +33,10 @@ final class NormalCommandHandlerResult extends CommandHandlerMethod.Result {
         super(producer, rawMethodResult);
     }
 
-    static NormalCommandHandlerResult of(Object events, EventProducer eventProducer) {
-        return new NormalCommandHandlerResult(eventProducer, events);
+    /**
+     * Creates a new instance of {@code NormalCommandHandlerResult}.
+     */
+    static NormalCommandHandlerResult of(EventProducer eventProducer, Object rawMethodResult) {
+        return new NormalCommandHandlerResult(eventProducer, rawMethodResult);
     }
 }

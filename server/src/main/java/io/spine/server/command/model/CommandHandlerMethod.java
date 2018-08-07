@@ -76,7 +76,7 @@ public final class CommandHandlerMethod
      */
     @Override
     protected Result toResult(EventProducer target, Object rawMethodOutput) {
-        Result result = NormalCommandHandlerResult.of(rawMethodOutput, target);
+        Result result = NormalCommandHandlerResult.of(target, rawMethodOutput);
         return result;
     }
 

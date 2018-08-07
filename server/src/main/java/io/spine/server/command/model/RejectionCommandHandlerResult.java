@@ -33,6 +33,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.function.Function;
 
 /**
+ * A command handling result representing a command rejection.
+ *
  * @author Dmytro Dashenkov
  */
 final class RejectionCommandHandlerResult extends CommandHandlerMethod.Result {
@@ -46,6 +48,9 @@ final class RejectionCommandHandlerResult extends CommandHandlerMethod.Result {
         this.context = context;
     }
 
+    /**
+     * Creates a new instance of {@code RejectionCommandHandlerResult}.
+     */
     static RejectionCommandHandlerResult of(ThrowableMessage rejection,
                                             RejectionEventContext context,
                                             EventProducer eventProducer) {
