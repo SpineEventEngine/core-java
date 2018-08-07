@@ -30,9 +30,7 @@ import io.spine.grpc.StreamObservers;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.EventSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ContextAwareProjectDetails;
-import io.spine.server.integration.given.IntegrationBusTestEnv.ExternalMismatchSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectCountAggregate;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectDetails;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectEventsSubscriber;
@@ -50,7 +48,6 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.server.integration.ExternalMessageValidationError.UNSUPPORTED_EXTERNAL_MESSAGE;
-import static io.spine.server.integration.given.IntegrationBusTestEnv.cannotStartArchivedProject;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithContextAwareEntitySubscriber;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExtEntitySubscribers;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExternalSubscribers;
@@ -59,13 +56,11 @@ import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWit
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithTransport;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectCreated;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectStarted;
-import static io.spine.testing.Verify.assertContains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Alex Tymchenko
@@ -295,26 +290,6 @@ class IntegrationBusTest {
         assertNull(ProjectEventsSubscriber.getExternalEvent());
         assertEquals(AnyPacker.unpack(eventB.getMessage()),
                      ProjectStartedExtSubscriber.getExternalEvent());
-    }
-
-    @Test
-    @DisplayName("throw exception on mismatch of external attribute during dispatching")
-    void throwOnExtAttributeMismatch() {
-        InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-
-        BoundedContext sourceContext = contextWithTransport(transportFactory);
-        EventSubscriber subscriber = new ExternalMismatchSubscriber();
-        sourceContext.getIntegrationBus()
-                     .register(subscriber);
-        Event rejection = cannotStartArchivedProject();
-        try {
-            sourceContext.getEventBus()
-                         .post(rejection);
-            fail("An exception is expected.");
-        } catch (Exception e) {
-            String exceptionMsg = e.getMessage();
-            assertContains("external", exceptionMsg);
-        }
     }
 
     @Nested
