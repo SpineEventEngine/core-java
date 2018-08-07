@@ -118,6 +118,14 @@ public class EmittedEvents {
         return countOfTypes.containsKey(eventClass);
     }
 
+    /**
+     * Checks that the emitted events have given version numbers.
+     *
+     * <p>Fails if the number of emitted events is different then the number of given versions.
+     *
+     * @param versionNumbers the versions to check
+     * @return {@code true} if the events have given version numbers, {@code false} otherwise
+     */
     public boolean haveVersions(int... versionNumbers) {
         assertEquals(versionNumbers.length, events.size());
         Iterator<Event> events = this.events.iterator();
