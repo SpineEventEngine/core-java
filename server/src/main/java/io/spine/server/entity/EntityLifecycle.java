@@ -170,6 +170,12 @@ public class EntityLifecycle {
         systemGateway.postCommand(systemCommand);
     }
 
+    /**
+     * Posts the {@link MarkCommandAsRejected} system command.
+     *
+     * @param commandId the ID of the rejected command
+     * @param rejection the rejection event
+     */
     public void onCommandRejected(CommandId commandId, Event rejection) {
         MarkCommandAsRejected systemCommand = MarkCommandAsRejected
                 .newBuilder()
