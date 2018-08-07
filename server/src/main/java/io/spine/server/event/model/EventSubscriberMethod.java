@@ -27,6 +27,7 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 import io.spine.server.model.MethodResult;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.function.Predicate;
@@ -62,7 +63,7 @@ public final class EventSubscriberMethod
     }
 
     @Override
-    protected MethodResult<Empty> toResult(Object target, Object rawMethodOutput) {
+    protected MethodResult<Empty> toResult(Object target, @Nullable Object rawMethodOutput) {
         return MethodResult.empty();
     }
 

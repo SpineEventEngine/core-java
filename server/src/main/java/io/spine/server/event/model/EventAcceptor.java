@@ -29,6 +29,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.HandlerKey;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -42,10 +43,18 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
+ * The strategy of event accepting method invocation.
+ *
+ * <p>An event accepting method is an event {@linkplain io.spine.core.Subscribe subscriber} or
+ * an event {@link io.spine.server.event.React reactor}.
+ *
  * @author Dmytro Dashenkov
  */
 enum EventAcceptor {
 
+    /**
+     * Method accepting only the event message.
+     */
     MESSAGE(of(Message.class), false) {
         @Override
         List<?> arguments(EventEnvelope envelope) {
@@ -53,6 +62,10 @@ enum EventAcceptor {
             return of(message);
         }
     },
+
+    /**
+     * Method accepting the event message and the {@link EventContext}.
+     */
     MESSAGE_EVENT_CXT(of(Message.class, EventContext.class), false) {
         @Override
         List<?> arguments(EventEnvelope envelope) {
@@ -61,6 +74,10 @@ enum EventAcceptor {
             return of(message, context);
         }
     },
+
+    /**
+     * Method accepting the rejection event message and the {@link CommandContext}.
+     */
     MESSAGE_COMMAND_CXT(of(Message.class, CommandContext.class), false) {
         @Override
         List<?> arguments(EventEnvelope envelope) {
@@ -70,6 +87,10 @@ enum EventAcceptor {
             return of(message, context);
         }
     },
+
+    /**
+     * Method accepting the rejection event message and the rejected command message.
+     */
     MESSAGE_COMMAND_MSG(of(Message.class, Message.class), true) {
         @Override
         List<?> arguments(EventEnvelope envelope) {
@@ -79,6 +100,11 @@ enum EventAcceptor {
             return of(message, commandMessage);
         }
     },
+
+    /**
+     * Method accepting the rejection event message, the rejected command message, and
+     * its {@link CommandContext}.
+     */
     MESSAGE_COMMAND_MSG_COMMAND_CXT(of(Message.class, Message.class, CommandContext.class), true) {
         @Override
         List<?> arguments(EventEnvelope envelope) {
@@ -98,6 +124,13 @@ enum EventAcceptor {
         awareOfCommandType = type;
     }
 
+    /**
+     * Obtains an instance of {@code EventAcceptor} for the given method.
+     *
+     * @param method the event accepting method
+     * @return instance of {@code EventAcceptor} or {@link Optional#empty()} if the given method is
+     * not an event accepting method.
+     */
     static Optional<EventAcceptor> findFor(Method method) {
         List<Class<?>> parameters = copyOf(method.getParameterTypes());
         Optional<EventAcceptor> result = Stream.of(values())
@@ -106,6 +139,13 @@ enum EventAcceptor {
         return result;
     }
 
+    /**
+     * Obtains an instance of {@code EventAcceptor} for the given method and throws an
+     * {@link IllegalStateException} if the method is not an event accepting method.
+     *
+     * @param method the event accepting method
+     * @return instance of {@code EventAcceptor}
+     */
     static EventAcceptor from(Method method) {
         EventAcceptor acceptor = findFor(method)
                 .orElseThrow(() -> newIllegalStateException(
@@ -115,11 +155,30 @@ enum EventAcceptor {
         return acceptor;
     }
 
+    /**
+     * Constructs a list of arguments of the event accepting method according to its signature.
+     *
+     * <p>Do not call this method directly. See {@link #invoke(Object, Method, EventEnvelope)}
+     * instead.
+     *
+     * @param envelope the {@link EventEnvelope} to disassemble into method arguments
+     * @return list of arguments for an event accepting method with the signature matching this
+     *         instance
+     */
     abstract List<?> arguments(EventEnvelope envelope);
 
-    Object accept(Object receiver, Method acceptorMethod, EventEnvelope envelope)
+    /**
+     * Invokes the given event accepting method with the given event as an argument.
+     *
+     * @param receiver       the object which owns the method
+     * @param acceptorMethod the event accepting method
+     * @param event          the event argument
+     * @return the method invocation result
+     * @throws InvocationTargetException if the method throws
+     */
+    @Nullable Object invoke(Object receiver, Method acceptorMethod, EventEnvelope event)
             throws InvocationTargetException {
-        Object[] arguments = arguments(envelope).toArray();
+        Object[] arguments = arguments(event).toArray();
         try {
             return acceptorMethod.invoke(receiver, arguments);
         } catch (IllegalAccessException e) {

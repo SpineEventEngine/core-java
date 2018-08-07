@@ -27,11 +27,13 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodPredicate;
 import io.spine.server.model.ReactorMethodResult;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -54,7 +56,8 @@ public final class EventReactorMethod
     }
 
     @Override
-    protected ReactorMethodResult toResult(EventReactor target, Object rawMethodOutput) {
+    protected ReactorMethodResult toResult(EventReactor target, @Nullable Object rawMethodOutput) {
+        checkNotNull(rawMethodOutput, "Event reactor method %s returned null.", getRawMethod());
         return new ReactorMethodResult(target, rawMethodOutput);
     }
 

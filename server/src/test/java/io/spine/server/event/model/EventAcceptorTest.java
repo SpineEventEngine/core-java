@@ -191,7 +191,7 @@ class EventAcceptorTest {
             Event event = builder.build();
             EventEnvelope envelope = EventEnvelope.of(event);
             EventAcceptor.from(method)
-                         .accept(receiver, method, envelope);
+                         .invoke(receiver, method, envelope);
             receiver.assertEvent(eventMessage);
             receiver.assertEventContext(eventContext);
         }
@@ -221,7 +221,7 @@ class EventAcceptorTest {
             Event event = builder.build();
             EventEnvelope envelope = EventEnvelope.of(event);
             EventAcceptor.from(method)
-                         .accept(receiver, method, envelope);
+                         .invoke(receiver, method, envelope);
             receiver.assertEvent(rejectionMessage);
             receiver.assertCommand(commandMessage);
             receiver.assertCommandContext(commandContext);

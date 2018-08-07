@@ -27,11 +27,14 @@ import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
 import io.spine.server.model.MethodResult;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
+ * An abstract base for methods handling events.
+ *
  * @author Dmytro Dashenkov
  */
 abstract class EventHandlerMethod<T, R extends MethodResult>
@@ -68,11 +71,20 @@ abstract class EventHandlerMethod<T, R extends MethodResult>
 
         Object rawResult;
         try {
-            rawResult = acceptor.accept(target, getRawMethod(), event);
+            rawResult = acceptor.invoke(target, getRawMethod(), event);
         } catch (InvocationTargetException e) {
             throw whyFailed(target, event.getMessage(), context, e);
         }
         R result = toResult(target, rawResult);
         return result;
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @apiNote
+     * Overridden to mark {@code rawMethodOutput} argument as nullable.
+     */
+    @Override
+    protected abstract R toResult(T target, @Nullable Object rawMethodOutput);
 }
