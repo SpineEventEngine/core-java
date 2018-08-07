@@ -74,7 +74,7 @@ message EventId {
 // A rejection event represents erroneous conditions in business, which do not allow to execute
 // a command. The event is a rejection event iff the `EventContext.rejection` field is present.
 //
-// See `EventContext.kind` to detemine the event kind.
+// See `EventContext.rejection` to detemine the event kind.
 //
 message Event {
 
@@ -100,9 +100,6 @@ message EventContext {
 
         // The context of the event which generated this event.
         EventContext event_context = 6 [(required) = true];
-
-        // The context of a rejection which generated this event.
-        RejectionContext rejection_context = 7 [(required) = true];
     }
 
     // An ID of the root command, which lead to this event.
