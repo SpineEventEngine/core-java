@@ -20,12 +20,10 @@
 
 package io.spine.testing.client.blackbox;
 
-import io.spine.core.Rejection;
-
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Verifies that a command or an event was handled responding with some {@link Rejection rejection}.
+ * Verifies that a command was handled with a {@link io.spine.base.ThrowableMessage rejection}.
  *
  * @author Mykhailo Drachuk
  */

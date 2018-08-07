@@ -27,7 +27,6 @@ import com.google.protobuf.Message;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.Rejection;
 import io.spine.core.RejectionEventContext;
 import io.spine.server.EventProducer;
 import io.spine.server.command.Assign;
@@ -91,7 +90,6 @@ public final class CommandHandlerMethod
         }
     }
 
-    // TODO:2018-07-30:dmytro.dashenkov: Naming.
     private static Result handleError(RuntimeException exception,
                                       Message commandMessage,
                                       EventProducer target) {
@@ -143,7 +141,7 @@ public final class CommandHandlerMethod
          * {@inheritDoc}
          *
          * <p>For the {@link CommandHandlerMethod}, the {@link ThrowableMessage} checked exception
-         * type is allowed, because the mechanism of {@linkplain Rejection
+         * type is allowed, because the mechanism of {@linkplain ThrowableMessage
          * command rejections} is based on this type.
          */
         @Override

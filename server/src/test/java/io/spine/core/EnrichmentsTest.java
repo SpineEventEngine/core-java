@@ -100,7 +100,6 @@ class EnrichmentsTest {
         new NullPointerTester()
                 .setDefault(StringValue.class, StringValue.getDefaultInstance())
                 .setDefault(EventContext.class, context())
-                .setDefault(RejectionContext.class, RejectionContext.getDefaultInstance())
                 .testAllPublicStaticMethods(Enrichments.class);
     }
 

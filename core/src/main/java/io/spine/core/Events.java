@@ -37,8 +37,8 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.core.EventContext.OriginCase.EVENT_CONTEXT;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static io.spine.validate.Validate.isDefault;
 
@@ -271,17 +271,9 @@ public final class Events {
                 case EVENT_CONTEXT:
                     ctx = ctx.getEventContext();
                     break;
-
                 case COMMAND_CONTEXT:
                     commandContext = ctx.getCommandContext();
                     break;
-
-                case REJECTION_CONTEXT:
-                    commandContext = ctx.getRejectionContext()
-                                        .getCommand()
-                                        .getContext();
-                    break;
-
                 case ORIGIN_NOT_SET:
                 default:
                     return Optional.empty();
@@ -357,26 +349,10 @@ public final class Events {
         EventContext.Builder resultContext = context.toBuilder()
                                                           .clearEnrichment();
         EventContext.OriginCase originCase = resultContext.getOriginCase();
-        switch (originCase) {
-            case EVENT_CONTEXT:
-                resultContext.setEventContext(context.getEventContext()
-                                                     .toBuilder()
-                                                     .clearEnrichment());
-                break;
-            case REJECTION_CONTEXT:
-                resultContext.setRejectionContext(context.getRejectionContext()
-                                                         .toBuilder()
-                                                         .clearEnrichment());
-                break;
-            case COMMAND_CONTEXT:
-                // Nothing to remove.
-                break;
-            case ORIGIN_NOT_SET:
-                // Does nothing because there is no origin for this event.
-                break;
-            default:
-                throw newIllegalStateException("Unsupported origin case is encountered: %s",
-                                               originCase);
+        if (originCase == EVENT_CONTEXT) {
+            resultContext.setEventContext(context.getEventContext()
+                                                 .toBuilder()
+                                                 .clearEnrichment());
         }
         Event result = event.toBuilder()
                             .setContext(resultContext)

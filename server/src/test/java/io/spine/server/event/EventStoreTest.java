@@ -28,7 +28,6 @@ import io.spine.core.ActorContext;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.RejectionContext;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.event.given.EventStoreTestEnv.ResponseObserver;
@@ -271,30 +270,6 @@ public class EventStoreTest {
                                            .get(0)
                                            .getContext();
             assertTrue(isDefault(context.getEnrichment()));
-        }
-
-        @Test
-        @DisplayName("origin of RejectionContext type")
-        void rejectionContextOrigin() {
-            RejectionContext originContext = RejectionContext
-                    .newBuilder()
-                    .setEnrichment(withOneAttribute())
-                    .build();
-            Event event = projectCreated(Time.getCurrentTime());
-            Event enriched = event
-                    .toBuilder()
-                    .setContext(event.getContext()
-                                     .toBuilder()
-                                     .setRejectionContext(originContext))
-                    .build();
-            eventStore.append(enriched);
-            MemoizingObserver<Event> observer = memoizingObserver();
-            eventStore.read(EventStreamQuery.getDefaultInstance(), observer);
-            RejectionContext loadedOriginContext = observer.responses()
-                                                           .get(0)
-                                                           .getContext()
-                                                           .getRejectionContext();
-            assertTrue(isDefault(loadedOriginContext.getEnrichment()));
         }
 
         @Test

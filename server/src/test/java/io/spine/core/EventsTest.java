@@ -286,21 +286,6 @@ public class EventsTest {
         }
 
         @Test
-        @DisplayName("for event with rejection context without command")
-        void forRejectionContextWithoutCommand() {
-            RejectionContext rejectionContext = EventsTestEnv.rejectionContext();
-            EventContext context = contextWithoutOrigin().setRejectionContext(
-                    rejectionContext)
-                                                         .build();
-            Event event = EventsTestEnv.event(context);
-
-            TenantId tenantId = Events.getTenantId(event);
-
-            TenantId defaultTenantId = TenantId.getDefaultInstance();
-            assertEquals(defaultTenantId, tenantId);
-        }
-
-        @Test
         @DisplayName("for event with event context without origin")
         void forEventContextWithoutOrigin() {
             EventContext context = contextWithoutOrigin().setEventContext(
@@ -335,22 +320,6 @@ public class EventsTest {
         }
 
         @Test
-        @DisplayName("from event with rejection context")
-        void fromRejectionContext() {
-            TenantId targetTenantId = tenantId();
-            RejectionContext rejectionContext = EventsTestEnv.rejectionContext(
-                    targetTenantId);
-            EventContext context = contextWithoutOrigin().setRejectionContext(
-                    rejectionContext)
-                                                         .build();
-            Event event = EventsTestEnv.event(context);
-
-            TenantId tenantId = Events.getTenantId(event);
-
-            assertEquals(targetTenantId, tenantId);
-        }
-
-        @Test
         @DisplayName("from event with event context originated from command context")
         void fromEventContextWithCommandContext() {
             TenantId targetTenantId = tenantId();
@@ -358,24 +327,6 @@ public class EventsTest {
             EventContext outerContext = contextWithoutOrigin().setCommandContext(
                     commandContext)
                                                               .build();
-            EventContext context = contextWithoutOrigin().setEventContext(outerContext)
-                                                         .build();
-            Event event = EventsTestEnv.event(context);
-
-            TenantId tenantId = Events.getTenantId(event);
-
-            assertEquals(targetTenantId, tenantId);
-        }
-
-        @Test
-        @DisplayName("from event with event context originated from rejection context")
-        void fromEventContextWithRejectionContext() {
-            TenantId targetTenantId = tenantId();
-            RejectionContext rejectionContext = EventsTestEnv.rejectionContext(
-                    targetTenantId);
-            EventContext outerContext =
-                    contextWithoutOrigin().setRejectionContext(rejectionContext)
-                                          .build();
             EventContext context = contextWithoutOrigin().setEventContext(outerContext)
                                                          .build();
             Event event = EventsTestEnv.event(context);

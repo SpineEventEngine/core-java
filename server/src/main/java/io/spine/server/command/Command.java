@@ -37,17 +37,16 @@ import java.lang.annotation.Target;
  *     more commands;
  *     <li>accept one of the following as the first parameter:
  *     <ul>
- *        <li>a {@linkplain com.google.protobuf.Message command message}
- *        <li>an {@linkplain com.google.protobuf.Message event message}
- *        <li>a {@linkplain com.google.protobuf.Message rejection message}
+ *        <li>a {@linkplain com.google.protobuf.Message command message};
+ *        <li>an {@linkplain com.google.protobuf.Message event message};
+ *        <li>a {@linkplain com.google.protobuf.Message rejection message}.
  *     </ul>
  * </ul>
  *
  * <p>A commanding method <strong>may</strong> accept a context of the incoming message
- * ({@link io.spine.core.CommandContext CommandContext},
- * {@link io.spine.core.EventContext EventContext}, or
- * {@link io.spine.core.RejectionContext RejectionContext} correspondingly)
- * as the second parameter, if handling of the command requires its context.
+ * ({@link io.spine.core.CommandContext CommandContext} or
+ * {@link io.spine.core.EventContext EventContext} correspondingly) as the second parameter, if
+ * handling of the command requires its context.
  *
  * <p>If the annotation is applied to a method which doesn't satisfy any of these requirements,
  * this method is not considered a command handler and is <strong>not</strong> registered for

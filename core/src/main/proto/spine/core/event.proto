@@ -33,7 +33,6 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 import "spine/core/command.proto";
-import "spine/core/rejection.proto";
 import "spine/core/version.proto";
 import "spine/core/enrichment.proto";
 

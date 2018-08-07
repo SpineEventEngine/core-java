@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.Ack;
 import io.spine.core.Event;
-import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.Status;
 import io.spine.type.TypeUrl;
@@ -203,7 +202,8 @@ public class Acknowledgements {
     }
 
     /**
-     * A predicate filtering the {@link Rejection rejections} which match the provided predicate.
+     * A predicate filtering the {@link io.spine.base.ThrowableMessage rejections} which match
+     * the provided predicate.
      */
     private static class RejectionFilter<T extends Message> implements Predicate<Event> {
 
