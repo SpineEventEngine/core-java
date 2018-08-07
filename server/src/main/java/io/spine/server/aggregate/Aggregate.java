@@ -278,7 +278,6 @@ public abstract class Aggregate<I,
      * @param events the events to apply
      * @param origin the envelope of a message which caused the events
      * @return the exact list of {@code events} but with adjusted version
-     * @see io.spine.server.entity.EntityVersioning#AUTO_INCREMENT
      */
     List<Event> apply(List<Event> events, MessageEnvelope origin) {
         ImmutableList<Event> versionedEvents = prepareEvents(events, origin);
