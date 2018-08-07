@@ -21,9 +21,9 @@
 package io.spine.testing.server.procman.given.pm;
 
 import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.testing.server.TUProjectId;
-import io.spine.testing.server.TUTaskCreationPm;
+import io.spine.testing.server.given.entity.TuPmState;
+import io.spine.testing.server.given.entity.TuTaskId;
 
 public class CommandHandlingPmRepo
-        extends ProcessManagerRepository<TUProjectId, CommandHandlingPm, TUTaskCreationPm> {
+        extends ProcessManagerRepository<TuTaskId, CommandHandlingPm, TuPmState> {
 }

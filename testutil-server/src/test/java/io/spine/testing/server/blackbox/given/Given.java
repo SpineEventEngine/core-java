@@ -20,55 +20,54 @@
 
 package io.spine.testing.server.blackbox.given;
 
-import io.spine.testing.server.blackbox.BbAddTask;
-import io.spine.testing.server.blackbox.BbCreateProject;
-import io.spine.testing.server.blackbox.BbCreateReport;
-import io.spine.testing.server.blackbox.BbTaskAdded;
-import io.spine.testing.server.blackbox.ProjectId;
-import io.spine.testing.server.blackbox.ReportId;
-import io.spine.testing.server.blackbox.Task;
+import io.spine.testing.server.blackbox.BbProjectId;
+import io.spine.testing.server.blackbox.BbReportId;
+import io.spine.testing.server.blackbox.BbTask;
+import io.spine.testing.server.blackbox.command.BbAddTask;
+import io.spine.testing.server.blackbox.command.BbCreateProject;
+import io.spine.testing.server.blackbox.command.BbCreateReport;
+import io.spine.testing.server.blackbox.event.BbTaskAdded;
 
 import static io.spine.base.Identifier.newUuid;
 
 /**
  * @author Mykhailo Drachuk
  */
-public class BlackBoxBoundedContextTestEnv {
+public class Given {
 
     /** Prevents instantiation of this utility class. */
-    private BlackBoxBoundedContextTestEnv() {
-        // Does nothing.
+    private Given() {
     }
 
-    public static BbAddTask addTask(ProjectId projectId) {
+    public static BbAddTask addTask(BbProjectId projectId) {
         return BbAddTask.newBuilder()
                         .setProjectId(projectId)
                         .setTask(newTask())
                         .build();
     }
 
-    public static BbTaskAdded taskAdded(ProjectId projectId) {
+    public static BbTaskAdded taskAdded(BbProjectId projectId) {
         return BbTaskAdded.newBuilder()
                            .setProjectId(projectId)
                            .setTask(newTask())
                            .build();
     }
 
-    private static Task newTask() {
-        return Task.newBuilder()
+    private static BbTask newTask() {
+        return BbTask.newBuilder()
                    .setTitle(newUuid())
                    .build();
     }
 
-    public static BbCreateReport createReport(ProjectId projectId) {
+    public static BbCreateReport createReport(BbProjectId projectId) {
         return BbCreateReport.newBuilder()
                              .setReportId(newReportId())
                              .addProjectId(projectId)
                              .build();
     }
 
-    private static ReportId newReportId() {
-        return ReportId.newBuilder()
+    private static BbReportId newReportId() {
+        return BbReportId.newBuilder()
                        .setId(newUuid())
                        .build();
     }
@@ -77,14 +76,14 @@ public class BlackBoxBoundedContextTestEnv {
         return createProject(newProjectId());
     }
 
-    public static BbCreateProject createProject(ProjectId projectId) {
+    public static BbCreateProject createProject(BbProjectId projectId) {
         return BbCreateProject.newBuilder()
                                .setProjectId(projectId)
                                .build();
     }
 
-    public static ProjectId newProjectId() {
-        return ProjectId.newBuilder()
+    public static BbProjectId newProjectId() {
+        return BbProjectId.newBuilder()
                         .setId(newUuid())
                         .build();
     }

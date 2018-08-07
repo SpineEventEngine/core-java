@@ -18,13 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.given;
+package io.spine.testing.server.projection.given.prj;
 
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.testing.server.blackbox.BbProjectId;
+import com.google.protobuf.StringValue;
+import io.spine.server.projection.ProjectionRepository;
 
-/**
- * @author Mykhailo Drachuk
- */
-public class BbProjectRepository extends AggregateRepository<BbProjectId, BbProjectAggregate> {
+public class TuProjectionRepository
+        extends ProjectionRepository<Long, TuProjection, StringValue> {
 }

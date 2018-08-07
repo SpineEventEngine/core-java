@@ -18,32 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.aggregate.given;
+package io.spine.testing.server.aggregate.given.agg;
 
-import com.google.protobuf.Timestamp;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.testing.server.aggregate.AggregateBuilder;
-import io.spine.validate.TimestampVBuilder;
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.testing.server.given.entity.TuProjectId;
 
-/**
- * @author Dmytro Dashenkov
- * @author Dmytro Kuzmin
- */
-public class AggregateBuilderTestEnv {
-
-    /** Prevents instantiation of this utility class. */
-    private AggregateBuilderTestEnv() {
-    }
-
-    public static AggregateBuilder<TestAggregate, Integer, Timestamp> givenAggregate() {
-        AggregateBuilder<TestAggregate, Integer, Timestamp> result = new AggregateBuilder<>();
-        result.setResultClass(TestAggregate.class);
-        return result;
-    }
-
-    public static class TestAggregate extends Aggregate<Integer, Timestamp, TimestampVBuilder> {
-        protected TestAggregate(Integer id) {
-            super(id);
-        }
-    }
+public class TuReactingAggregateRepository
+        extends AggregateRepository<TuProjectId, TuReactingAggregate> {
 }

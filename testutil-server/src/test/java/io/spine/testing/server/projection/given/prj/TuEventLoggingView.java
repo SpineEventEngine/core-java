@@ -18,48 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.projection.given;
+package io.spine.testing.server.projection.given.prj;
 
 import io.spine.core.Subscribe;
 import io.spine.server.projection.Projection;
-import io.spine.testing.server.TUEventLoggingProjection;
-import io.spine.testing.server.TUEventLoggingProjectionVBuilder;
-import io.spine.testing.server.TUProjectAssigned;
-import io.spine.testing.server.TUProjectCreated;
-import io.spine.testing.server.TUProjectId;
+import io.spine.testing.server.given.entity.TuEventLog;
+import io.spine.testing.server.given.entity.TuEventLogVBuilder;
+import io.spine.testing.server.given.entity.TuProjectId;
+import io.spine.testing.server.given.entity.event.TuProjectAssigned;
+import io.spine.testing.server.given.entity.event.TuProjectCreated;
 
 import static io.spine.protobuf.AnyPacker.pack;
 
 /**
- * @author Vladyslav Lubenskyi
+ * A sample projection for being used as the subject of tests under tests.
  */
-public class ProjectionEventDispatcherTestEnv {
+public class TuEventLoggingView
+        extends Projection<TuProjectId, TuEventLog, TuEventLogVBuilder> {
 
-    /**
-     * Prevents direct instantiation.
-     */
-    private ProjectionEventDispatcherTestEnv() {
+    public TuEventLoggingView(TuProjectId id) {
+        super(id);
     }
 
-    public static class EventLoggingView
-            extends Projection<TUProjectId,
-                               TUEventLoggingProjection,
-                               TUEventLoggingProjectionVBuilder> {
-
-        public EventLoggingView(TUProjectId id) {
-            super(id);
-        }
-
-
-        @Subscribe
-        public void on(TUProjectAssigned event) {
-            getBuilder().addEvent(pack(event));
-        }
-
-        @Subscribe
-        public void on(TUProjectCreated event) {
-            getBuilder().addEvent(pack(event));
-        }
+    @Subscribe
+    public void on(TuProjectAssigned event) {
+        getBuilder().addEvent(pack(event));
     }
 
+    @Subscribe
+    public void on(TuProjectCreated event) {
+        getBuilder().addEvent(pack(event));
+    }
 }

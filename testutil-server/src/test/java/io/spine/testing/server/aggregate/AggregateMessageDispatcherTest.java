@@ -28,13 +28,13 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
+import io.spine.testing.server.aggregate.given.agg.TuMessageLog;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static io.spine.testing.server.aggregate.given.AggregateMessageDispatcherTestEnv.MessageLog;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -45,11 +45,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("AggregateMessageDispatcher should")
 class AggregateMessageDispatcherTest {
 
-    private MessageLog aggregate;
+    private TuMessageLog aggregate;
 
     @BeforeEach
     void setUp() {
-        aggregate = new MessageLog(1L);
+        aggregate = new TuMessageLog(1L);
     }
 
     @Test

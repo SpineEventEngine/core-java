@@ -18,29 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.procman.given;
+package io.spine.testing.server.projection.given;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import io.spine.server.entity.Repository;
-import io.spine.testing.server.given.entity.TuPmState;
-import io.spine.testing.server.given.entity.TuTaskId;
-import io.spine.testing.server.given.entity.command.TuCreateTask;
-import io.spine.testing.server.procman.PmCommandTest;
-import io.spine.testing.server.procman.given.pm.CommandHandlingPm;
-import io.spine.testing.server.procman.given.pm.CommandHandlingPmRepo;
+import io.spine.testing.server.expected.EventSubscriberExpected;
+import io.spine.testing.server.projection.ProjectionTest;
+import io.spine.testing.server.projection.given.prj.TuProjection;
+import io.spine.testing.server.projection.given.prj.TuProjectionRepository;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
- * The test class for the {@code TUCreateTask} command handler in {@link CommandHandlingPm}.
+ * The test class for the {@code StringValue} event handler in {@code TestProjection}.
  */
-public class SamplePmCommandTest
-        extends PmCommandTest<TuTaskId, TuCreateTask, TuPmState, CommandHandlingPm> {
+public class SampleProjectionTest
+        extends ProjectionTest<Long, StringValue, StringValue, TuProjection> {
 
-    public static final TuCreateTask TEST_COMMAND =
-            TuCreateTask.newBuilder()
-                        .setId(CommandHandlingPm.ID)
-                        .build();
+    public static final StringValue TEST_EVENT = StringValue.newBuilder()
+                                                            .setValue("test projection event")
+                                                            .build();
 
     @BeforeEach
     @Override
@@ -49,31 +46,32 @@ public class SamplePmCommandTest
     }
 
     @Override
-    protected TuTaskId newId() {
-        return CommandHandlingPm.ID;
+    protected Long newId() {
+        return TuProjection.ID;
     }
 
     @Override
-    protected TuCreateTask createMessage() {
-        return TEST_COMMAND;
+    protected StringValue createMessage() {
+        return TEST_EVENT;
     }
 
     @Override
-    protected Repository<TuTaskId, CommandHandlingPm>
-    createEntityRepository() {
-        return new CommandHandlingPmRepo();
+    public EventSubscriberExpected<StringValue> expectThat(TuProjection entity) {
+        return super.expectThat(entity);
     }
 
-    /** Exposes protected method for test verification. */
-    @VisibleForTesting
+    @Override
+    protected Repository<Long, TuProjection> createEntityRepository() {
+        return new TuProjectionRepository();
+    }
+
     public Message storedMessage() {
         return message();
     }
 
     /**
-     * Exposes internal configuration method so that the test can invoke it directly.
+     * Exposes internal configuration method.
      */
-    @VisibleForTesting
     public void init() {
         configureBoundedContext();
     }

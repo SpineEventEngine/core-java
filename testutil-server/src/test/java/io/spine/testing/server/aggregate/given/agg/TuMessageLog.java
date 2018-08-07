@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.aggregate.given;
+package io.spine.testing.server.aggregate.given.agg;
 
 import com.google.protobuf.FloatValue;
 import com.google.protobuf.StringValue;
@@ -31,46 +31,36 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.validate.StringValueVBuilder;
 
-/**
- * @author Alexander Yevsyukov
- */
-public class AggregateMessageDispatcherTestEnv {
+public class TuMessageLog extends Aggregate<Long, StringValue, StringValueVBuilder> {
 
-    /** Prevents instantiation of this utility class. */
-    private AggregateMessageDispatcherTestEnv() {
+    public TuMessageLog(Long id) {
+        super(id);
     }
 
-    public static class MessageLog extends Aggregate<Long, StringValue, StringValueVBuilder> {
+    @Assign
+    StringValue handle(UInt32Value value) {
+        String digitalPart = String.valueOf(value.getValue());
+        return logItem(digitalPart);
+    }
 
-        public MessageLog(Long id) {
-            super(id);
-        }
+    @React
+    StringValue handle(FloatValue value) {
+        String digitalPart = String.valueOf(value.getValue());
+        return logItem(digitalPart);
+    }
 
-        @Assign
-        StringValue handle(UInt32Value value) {
-            String digitalPart = String.valueOf(value.getValue());
-            return logItem(digitalPart);
-        }
+    @Apply
+    void newLine(StringValue line) {
+        String current = getState().getValue();
+        getBuilder().setValue(current + System.lineSeparator() + line.getValue());
+    }
 
-        @React
-        StringValue handle(FloatValue value) {
-            String digitalPart = String.valueOf(value.getValue());
-            return logItem(digitalPart);
-        }
-
-        @Apply
-        void newLine(StringValue line) {
-            String current = getState().getValue();
-            getBuilder().setValue(current + System.lineSeparator() + line.getValue());
-        }
-
-        private static StringValue logItem(String digitalPart) {
-            String str = Timestamps.toString(Time.getCurrentTime())
-                    + " - "
-                    + digitalPart;
-            return StringValue.newBuilder()
-                              .setValue(str)
-                              .build();
-        }
+    private static StringValue logItem(String digitalPart) {
+        String str = Timestamps.toString(Time.getCurrentTime())
+                + " - "
+                + digitalPart;
+        return StringValue.newBuilder()
+                          .setValue(str)
+                          .build();
     }
 }

@@ -18,13 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.given;
+package io.spine.testing.server.aggregate.given.agg;
 
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.testing.server.blackbox.BbProjectId;
+import io.spine.server.BoundedContext;
+import io.spine.server.aggregate.AggregateRoot;
+import io.spine.testing.server.given.entity.TuTaskId;
 
-/**
- * @author Mykhailo Drachuk
- */
-public class BbProjectRepository extends AggregateRepository<BbProjectId, BbProjectAggregate> {
+public class TuAggregateRoot extends AggregateRoot<TuTaskId> {
+
+    private TuAggregateRoot(BoundedContext boundedContext, TuTaskId id) {
+        super(boundedContext, id);
+    }
+
+    public static TuAggregateRoot newInstance(TuTaskId id) {
+        BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                      .build();
+        return new TuAggregateRoot(boundedContext, id);
+    }
 }

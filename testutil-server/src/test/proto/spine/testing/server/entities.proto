@@ -24,7 +24,7 @@ package spine.testing.server;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.testing.server";
+option java_package = "io.spine.testing.server.given.entity";
 option java_outer_classname = "EntitiesProto";
 option java_multiple_files = true;
 
@@ -32,34 +32,53 @@ import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 import "spine/core/user_id.proto";
 
-message TUProjectId {
+//
+// This file provides entity definitions for tests under `io.spine.testing.server`.
+//
+// The prefix `Tu` is used to distinguish these types from other similarly named types used
+// for general purpose tests of the framework.
+//
+
+message TuProjectId {
     string value = 1;
 }
 
-message TUProjectAggregate {
+message TuTaskId {
+    string value = 1;
+}
 
-    TUProjectId id = 1;
+// A state for an aggregate.
+message TuProject {
+
+    TuProjectId id = 1;
 
     google.protobuf.Timestamp timestamp = 2;
 }
 
-message TUCommentsAggregatePart {
+// A state of an aggregate part.
+message TuComments {
 
-    TUProjectId id = 1;
-
-    google.protobuf.Timestamp timestamp = 2;
-}
-
-message TUTaskCreationPm {
-
-    TUProjectId id = 1;
+    TuProjectId id = 1;
 
     google.protobuf.Timestamp timestamp = 2;
 }
 
-message TUEventLoggingProjection {
+// A state of a process manager.
+//
+// Holds only the `Timestamp` value for being able to test that the state changes.
+// Shared among several test classes for the sake of brevity.
+//
+message TuPmState {
 
-    TUProjectId id = 1;
+    TuProjectId id = 1;
+
+    google.protobuf.Timestamp timestamp = 2;
+}
+
+// A state of a projection.
+message TuEventLog {
+
+    TuProjectId id = 1;
 
     repeated google.protobuf.Any event = 2;
 }

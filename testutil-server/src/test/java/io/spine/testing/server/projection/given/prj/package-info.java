@@ -18,13 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.given;
-
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.testing.server.blackbox.BbProjectId;
-
 /**
- * @author Mykhailo Drachuk
+ * Test environment projections and repositories.
  */
-public class BbProjectRepository extends AggregateRepository<BbProjectId, BbProjectAggregate> {
-}
+
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.testing.server.projection.given.prj;
+
+import com.google.errorprone.annotations.CheckReturnValue;
+
+import javax.annotation.ParametersAreNonnullByDefault;

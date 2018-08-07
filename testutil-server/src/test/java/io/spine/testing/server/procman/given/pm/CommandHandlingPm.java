@@ -24,13 +24,13 @@ import io.spine.core.CommandContext;
 import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
 import io.spine.server.procman.ProcessManager;
-import io.spine.testing.server.TUAssignTask;
-import io.spine.testing.server.TUCreateTask;
-import io.spine.testing.server.TUProjectId;
-import io.spine.testing.server.TUTaskAssigned;
-import io.spine.testing.server.TUTaskCreationPm;
-import io.spine.testing.server.TUTaskCreationPmVBuilder;
 import io.spine.testing.server.entity.given.Given;
+import io.spine.testing.server.given.entity.TuPmState;
+import io.spine.testing.server.given.entity.TuPmStateVBuilder;
+import io.spine.testing.server.given.entity.TuTaskId;
+import io.spine.testing.server.given.entity.command.TuAssignTask;
+import io.spine.testing.server.given.entity.command.TuCreateTask;
+import io.spine.testing.server.given.entity.event.TuTaskAssigned;
 
 import static com.google.protobuf.util.Timestamps.fromNanos;
 
@@ -39,19 +39,19 @@ import static com.google.protobuf.util.Timestamps.fromNanos;
  * command.
  */
 public class CommandHandlingPm
-        extends ProcessManager<TUProjectId,
-                               TUTaskCreationPm,
-                               TUTaskCreationPmVBuilder> {
+        extends ProcessManager<TuTaskId, TuPmState, TuPmStateVBuilder> {
 
-    public static final TUProjectId ID = TUProjectId.newBuilder()
-                                                     .setValue("test pm id")
-                                                     .build();
-    public static final TUAssignTask NESTED_COMMAND =
-            TUAssignTask.newBuilder()
+    public static final TuTaskId ID = TuTaskId
+            .newBuilder()
+            .setValue("handling-pm-id")
+            .build();
+
+    public static final TuAssignTask NESTED_COMMAND =
+            TuAssignTask.newBuilder()
                         .setId(ID)
                         .build();
 
-    protected CommandHandlingPm(TUProjectId id) {
+    protected CommandHandlingPm(TuTaskId id) {
         super(id);
     }
 
@@ -62,17 +62,16 @@ public class CommandHandlingPm
     }
 
     @Command
-    @SuppressWarnings("CheckReturnValue")
-    TUAssignTask handle(TUCreateTask command, CommandContext context) {
-        return TUAssignTask.newBuilder()
+    TuAssignTask handle(TuCreateTask command, CommandContext context) {
+        return TuAssignTask.newBuilder()
                            .setId(command.getId())
                            .build();
     }
 
     @Assign
-    TUTaskAssigned handle(TUAssignTask command) {
+    TuTaskAssigned handle(TuAssignTask command) {
         getBuilder().setTimestamp(fromNanos(123456));
-        return TUTaskAssigned.newBuilder()
+        return TuTaskAssigned.newBuilder()
                              .setId(command.getId())
                              .build();
     }

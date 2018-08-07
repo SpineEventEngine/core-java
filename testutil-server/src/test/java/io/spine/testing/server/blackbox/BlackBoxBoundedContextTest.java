@@ -20,6 +20,10 @@
 
 package io.spine.testing.server.blackbox;
 
+import io.spine.testing.server.blackbox.event.BbProjectCreated;
+import io.spine.testing.server.blackbox.event.BbReportCreated;
+import io.spine.testing.server.blackbox.event.BbTaskAdded;
+import io.spine.testing.server.blackbox.event.BbTaskAddedToReport;
 import io.spine.testing.server.blackbox.given.BbProjectRepository;
 import io.spine.testing.server.blackbox.given.BbReportRepository;
 import io.spine.testing.server.blackbox.given.RepositoryThrowingExceptionOnClose;
@@ -34,11 +38,11 @@ import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
-import static io.spine.testing.server.blackbox.given.BlackBoxBoundedContextTestEnv.addTask;
-import static io.spine.testing.server.blackbox.given.BlackBoxBoundedContextTestEnv.createProject;
-import static io.spine.testing.server.blackbox.given.BlackBoxBoundedContextTestEnv.createReport;
-import static io.spine.testing.server.blackbox.given.BlackBoxBoundedContextTestEnv.newProjectId;
-import static io.spine.testing.server.blackbox.given.BlackBoxBoundedContextTestEnv.taskAdded;
+import static io.spine.testing.server.blackbox.given.Given.addTask;
+import static io.spine.testing.server.blackbox.given.Given.createProject;
+import static io.spine.testing.server.blackbox.given.Given.createReport;
+import static io.spine.testing.server.blackbox.given.Given.newProjectId;
+import static io.spine.testing.server.blackbox.given.Given.taskAdded;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -72,7 +76,7 @@ class BlackBoxBoundedContextTest {
     @Test
     @DisplayName("receive and handle multiple commands")
     void receivesCommands() {
-        ProjectId projectId = newProjectId();
+        BbProjectId projectId = newProjectId();
         project.receivesCommand(createProject(projectId))
                .receivesCommands(addTask(projectId), addTask(projectId), addTask(projectId))
                .verifiesThat(acked(count(4)).withoutErrorsOrRejections())
@@ -85,7 +89,7 @@ class BlackBoxBoundedContextTest {
     @Test
     @DisplayName("receive and react on single event")
     void receivesEvent() {
-        ProjectId projectId = newProjectId();
+        BbProjectId projectId = newProjectId();
         project.andWith(new BbReportRepository())
                .receivesCommand(createReport(projectId))
                .receivesEvent(taskAdded(projectId))
@@ -99,7 +103,7 @@ class BlackBoxBoundedContextTest {
     @Test
     @DisplayName("receive and react on multiple events")
     void receivesEvents() {
-        ProjectId projectId = newProjectId();
+        BbProjectId projectId = newProjectId();
         project.andWith(new BbReportRepository())
                .receivesCommand(createReport(projectId))
                .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))

@@ -20,9 +20,9 @@
 
 package io.spine.testing.server.procman;
 
-import io.spine.testing.server.TUAssignTask;
-import io.spine.testing.server.TUTaskCreationPm;
 import io.spine.testing.server.expected.CommanderExpected;
+import io.spine.testing.server.given.entity.TuPmState;
+import io.spine.testing.server.given.entity.command.TuAssignProject;
 import io.spine.testing.server.procman.given.SamplePmCommandOnEventTest;
 import io.spine.testing.server.procman.given.pm.CommandingPm;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,8 +30,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.server.procman.given.SamplePmCommandOnEventTest.TEST_EVENT;
-import static io.spine.testing.server.procman.given.pm.CommandingPm.NESTED_COMMAND;
-import static io.spine.testing.server.procman.given.pm.CommandingPm.processManager;
+import static io.spine.testing.server.procman.given.pm.CommandingPm.newInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -59,11 +58,11 @@ class PmCommandOnEventTestShould {
     void shouldDispatchCommand() {
         pmCommandingTest.setUp();
         pmCommandingTest.init();
-        CommandingPm testPm = processManager();
-        CommanderExpected<TUTaskCreationPm> expected = pmCommandingTest.expectThat(testPm);
+        CommandingPm testPm = newInstance();
+        CommanderExpected<TuPmState> expected = pmCommandingTest.expectThat(testPm);
         expected.producesCommand(
-                TUAssignTask.class,
-                c -> assertEquals(c, NESTED_COMMAND)
+                TuAssignProject.class,
+                c -> assertEquals(c.getId(), testPm.getId())
         );
     }
 }

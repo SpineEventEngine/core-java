@@ -20,6 +20,9 @@
 
 package io.spine.testing.server.blackbox;
 
+import io.spine.testing.server.blackbox.event.BbProjectCreated;
+import io.spine.testing.server.blackbox.event.BbProjectStarted;
+import io.spine.testing.server.blackbox.event.BbTaskAdded;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -18,13 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.given;
+package io.spine.testing.server.projection.given.prj;
 
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.testing.server.blackbox.BbProjectId;
+import com.google.protobuf.StringValue;
+import io.spine.core.Subscribe;
+import io.spine.server.projection.Projection;
+import io.spine.testing.server.entity.given.Given;
+import io.spine.validate.StringValueVBuilder;
 
 /**
- * @author Mykhailo Drachuk
+ * A dummy projection that is subscribed to a {@code StringValue} event.
  */
-public class BbProjectRepository extends AggregateRepository<BbProjectId, BbProjectAggregate> {
+public final class TuProjection
+        extends Projection<Long, StringValue, StringValueVBuilder> {
+
+    public static final long ID = 1L;
+
+    TuProjection(Long id) {
+        super(id);
+    }
+
+    public static TuProjection newInstance() {
+        TuProjection result =
+                Given.projectionOfClass(TuProjection.class)
+                     .withId(ID)
+                     .withVersion(64)
+                     .build();
+        return result;
+    }
+
+    @Subscribe
+    public void on(StringValue command) {
+        getBuilder().setValue(command.getValue());
+    }
 }

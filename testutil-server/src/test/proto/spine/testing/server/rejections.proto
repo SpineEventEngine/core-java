@@ -24,11 +24,11 @@ package spine.testing.server;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.testing.server";
+option java_package = "io.spine.testing.server.given.entity.rejection";
 option java_generate_equals_and_hash = true;
 
-import "spine/testing/server/entity.proto";
+import "spine/testing/server/entities.proto";
 
-message TUFailedToAssignProject {
-    TUProjectId id = 1;
+message TuFailedToAssignProject {
+    TuProjectId id = 1;
 }

@@ -18,13 +18,36 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.given;
+package io.spine.testing.server.procman.given;
 
-import io.spine.server.aggregate.AggregateRepository;
-import io.spine.testing.server.blackbox.BbProjectId;
+import io.spine.server.entity.Repository;
+import io.spine.testing.server.given.entity.TuPmState;
+import io.spine.testing.server.given.entity.TuProjectId;
+import io.spine.testing.server.given.entity.command.TuAssignTask;
+import io.spine.testing.server.procman.PmCommandOnCommandTest;
+import io.spine.testing.server.procman.given.pm.CommandingPm;
 
 /**
- * @author Mykhailo Drachuk
+ * A sample class which we use for testing
+ * {@link io.spine.testing.server.procman.PmCommandOnCommandTest PmCommandOnCommandTest}.
+ *
+ * @author Alexander Yevsyukov
  */
-public class BbProjectRepository extends AggregateRepository<BbProjectId, BbProjectAggregate> {
+public class SamplePmCommandOnCommandTest
+        extends PmCommandOnCommandTest<TuProjectId, TuAssignTask, TuPmState, CommandingPm> {
+
+    @Override
+    protected TuProjectId newId() {
+        return CommandingPm.ID;
+    }
+
+    @Override
+    protected TuAssignTask createMessage() {
+        return null;
+    }
+
+    @Override
+    protected Repository<TuProjectId, CommandingPm> createEntityRepository() {
+        return null;
+    }
 }

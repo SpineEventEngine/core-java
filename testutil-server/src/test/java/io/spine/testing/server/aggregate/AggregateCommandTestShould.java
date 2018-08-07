@@ -21,18 +21,18 @@
 package io.spine.testing.server.aggregate;
 
 import com.google.protobuf.Timestamp;
-import io.spine.testing.server.Rejections.TUFailedToAssignProject;
-import io.spine.testing.server.TUProjectAggregate;
-import io.spine.testing.server.aggregate.given.AggregateCommandTestShouldEnv.CommandHandlingAggregate;
+import io.spine.testing.server.aggregate.given.SampleCommandTest;
+import io.spine.testing.server.aggregate.given.SampleRejectionThrowingTest;
+import io.spine.testing.server.aggregate.given.agg.TuAggregate;
 import io.spine.testing.server.expected.CommandHandlerExpected;
+import io.spine.testing.server.given.entity.TuProject;
+import io.spine.testing.server.given.entity.rejection.Rejections.TuFailedToAssignProject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.server.aggregate.given.AggregateCommandTestShouldEnv.CommandHandlingTest;
-import static io.spine.testing.server.aggregate.given.AggregateCommandTestShouldEnv.CommandHandlingTest.TEST_COMMAND;
-import static io.spine.testing.server.aggregate.given.AggregateCommandTestShouldEnv.RejectionCommandHandlerTest;
-import static io.spine.testing.server.aggregate.given.AggregateCommandTestShouldEnv.aggregate;
+import static io.spine.testing.server.aggregate.given.SampleCommandTest.TEST_COMMAND;
+import static io.spine.testing.server.aggregate.given.agg.TuAggregate.newInstance;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -44,13 +44,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("AggregateCommandTest should")
 class AggregateCommandTestShould {
 
-    private CommandHandlingTest aggregateCommandTest;
-    private RejectionCommandHandlerTest aggregateRejectionCommandTest;
+    private SampleCommandTest aggregateCommandTest;
+    private SampleRejectionThrowingTest aggregateRejectionCommandTest;
 
     @BeforeEach
     void setUp() {
-        aggregateCommandTest = new CommandHandlingTest();
-        aggregateRejectionCommandTest = new RejectionCommandHandlerTest();
+        aggregateCommandTest = new SampleCommandTest();
+        aggregateRejectionCommandTest = new SampleRejectionThrowingTest();
     }
 
     @Test
@@ -64,7 +64,7 @@ class AggregateCommandTestShould {
     @DisplayName("dispatch tested command")
     void shouldDispatchCommand() {
         aggregateCommandTest.setUp();
-        CommandHandlingAggregate testAggregate = aggregate();
+        TuAggregate testAggregate = newInstance();
         aggregateCommandTest.expectThat(testAggregate);
         Timestamp newState = testAggregate.getState()
                                           .getTimestamp();
@@ -75,10 +75,10 @@ class AggregateCommandTestShould {
     @DisplayName("track rejection")
     void trackGeneratedRejection() {
         aggregateRejectionCommandTest.setUp();
-        CommandHandlingAggregate testAggregate = aggregate();
-        CommandHandlerExpected<TUProjectAggregate> expected =
+        TuAggregate testAggregate = newInstance();
+        CommandHandlerExpected<TuProject> expected =
                 aggregateRejectionCommandTest.expectThat(testAggregate);
-        expected.throwsRejection(TUFailedToAssignProject.class);
+        expected.throwsRejection(TuFailedToAssignProject.class);
     }
 }
 

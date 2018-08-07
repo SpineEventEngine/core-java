@@ -22,14 +22,14 @@ package io.spine.testing.server.projection;
 
 import com.google.protobuf.StringValue;
 import io.spine.testing.server.expected.EventSubscriberExpected;
-import io.spine.testing.server.projection.given.ProjectionTestShouldEnv.TestProjection;
-import io.spine.testing.server.projection.given.ProjectionTestShouldEnv.TestProjectionTest;
+import io.spine.testing.server.projection.given.SampleProjectionTest;
+import io.spine.testing.server.projection.given.prj.TuProjection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.server.projection.given.ProjectionTestShouldEnv.TestProjectionTest.TEST_EVENT;
-import static io.spine.testing.server.projection.given.ProjectionTestShouldEnv.projection;
+import static io.spine.testing.server.projection.given.SampleProjectionTest.TEST_EVENT;
+import static io.spine.testing.server.projection.given.prj.TuProjection.newInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -39,11 +39,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DisplayName("ProjectionTest should")
 class ProjectionTestShould {
 
-    private TestProjectionTest projectionTest;
+    private SampleProjectionTest projectionTest;
 
     @BeforeEach
     void setUp() {
-        projectionTest = new TestProjectionTest();
+        projectionTest = new SampleProjectionTest();
     }
 
     @Test
@@ -59,7 +59,7 @@ class ProjectionTestShould {
     void shouldDispatchCommand() {
         projectionTest.setUp();
         projectionTest.init();
-        TestProjection aggregate = projection();
+        TuProjection aggregate = newInstance();
         EventSubscriberExpected<StringValue> expected = projectionTest.expectThat(aggregate);
         expected.hasState(state -> {
             assertEquals(state.getValue(), TEST_EVENT.getValue());

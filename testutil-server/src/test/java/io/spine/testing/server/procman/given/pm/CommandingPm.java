@@ -23,41 +23,44 @@ package io.spine.testing.server.procman.given.pm;
 import io.spine.core.EventContext;
 import io.spine.server.command.Command;
 import io.spine.server.procman.ProcessManager;
-import io.spine.testing.server.TUAssignTask;
-import io.spine.testing.server.TUProjectId;
-import io.spine.testing.server.TUTaskCreated;
-import io.spine.testing.server.TUTaskCreationPm;
-import io.spine.testing.server.TUTaskCreationPmVBuilder;
 import io.spine.testing.server.entity.given.Given;
+import io.spine.testing.server.given.entity.TuPmState;
+import io.spine.testing.server.given.entity.TuPmStateVBuilder;
+import io.spine.testing.server.given.entity.TuProjectId;
+import io.spine.testing.server.given.entity.command.TuAssignProject;
+import io.spine.testing.server.given.entity.event.TuProjectCreated;
 
 /**
  * The dummy process manager that reacts on {@code TUTaskCreated} event and
  * routes a nested command.
  */
 public class CommandingPm
-        extends ProcessManager<TUProjectId, TUTaskCreationPm, TUTaskCreationPmVBuilder> {
+        extends ProcessManager<TuProjectId, TuPmState, TuPmStateVBuilder> {
 
-    public static final TUProjectId ID = TUProjectId.newBuilder()
-                                                     .setValue("test pm id")
-                                                     .build();
+    public static final TuProjectId ID =
+            TuProjectId.newBuilder()
+                       .setValue("comanding-pm-id")
+                       .build();
 
-    public static final TUAssignTask NESTED_COMMAND =
-            TUAssignTask.newBuilder()
-                        .setId(ID)
-                        .build();
-
-    protected CommandingPm(TUProjectId id) {
+    protected CommandingPm(TuProjectId id) {
         super(id);
     }
 
-    public static CommandingPm processManager() {
+    public static CommandingPm newInstance() {
         return Given.processManagerOfClass(CommandingPm.class)
                     .withId(ID)
                     .build();
     }
 
+    /**
+     * Creates the command {@link TuAssignProject} in response to project creation.
+     *
+     * @implNote Suppose, we do not want to have un-assigned projects.
+     */
     @Command
-    TUAssignTask on(TUTaskCreated event, EventContext context) {
-        return NESTED_COMMAND;
+    TuAssignProject on(TuProjectCreated event, EventContext context) {
+        return TuAssignProject.newBuilder()
+                              .setId(event.getId())
+                              .build();
     }
 }

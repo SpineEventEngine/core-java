@@ -18,13 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.blackbox.given;
+package io.spine.testing.server.aggregate.given.agg;
 
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.testing.server.blackbox.BbProjectId;
+import io.spine.testing.server.given.entity.TuProjectId;
 
-/**
- * @author Mykhailo Drachuk
- */
-public class BbProjectRepository extends AggregateRepository<BbProjectId, BbProjectAggregate> {
+public final class TuAggregateRepository extends AggregateRepository<TuProjectId, TuAggregate> {
 }

@@ -18,37 +18,33 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testing.server.procman.given;
+package io.spine.testing.server.aggregate.given;
 
 import com.google.protobuf.Message;
 import io.spine.server.entity.Repository;
-import io.spine.testing.server.expected.CommanderExpected;
-import io.spine.testing.server.given.entity.TuPmState;
+import io.spine.testing.server.aggregate.AggregateEventReactionTest;
+import io.spine.testing.server.aggregate.given.agg.TuReactingAggregate;
+import io.spine.testing.server.aggregate.given.agg.TuReactingAggregateRepository;
+import io.spine.testing.server.expected.EventReactorExpected;
+import io.spine.testing.server.given.entity.TuProject;
 import io.spine.testing.server.given.entity.TuProjectId;
-import io.spine.testing.server.given.entity.command.TuAssignTask;
 import io.spine.testing.server.given.entity.event.TuProjectCreated;
-import io.spine.testing.server.given.entity.event.TuTaskCreated;
-import io.spine.testing.server.procman.PmCommandOnEventTest;
-import io.spine.testing.server.procman.given.pm.CommandingPm;
-import io.spine.testing.server.procman.given.pm.CommandingPmRepo;
 import org.junit.jupiter.api.BeforeEach;
 
 /**
- * A sample test class which we use for testing {@link PmCommandOnEventTest}.
- *
- * <p>It creates test environment for checking that a {@link CommandingPm ProcessManager}
- * creates {@linkplain TuAssignTask a command} in response to an
- * incoming {@linkplain TuTaskCreated event}.
- *
- * @see io.spine.testing.server.procman.PmCommandOnEventTestShould
+ * The test class for the {@code TUProjectAssigned} event handler in
+ * {@code EventReactingAggregate}.
  */
-public class SamplePmCommandOnEventTest
-        extends PmCommandOnEventTest<TuProjectId, TuProjectCreated, TuPmState, CommandingPm> {
+public class SampleEventReactionTest
+        extends AggregateEventReactionTest<TuProjectId,
+                                           TuProjectCreated,
+                                           TuProject,
+                                           TuReactingAggregate> {
 
     public static final TuProjectCreated TEST_EVENT =
             TuProjectCreated.newBuilder()
-                         .setId(CommandingPm.ID)
-                         .build();
+                            .setId(TuReactingAggregate.ID)
+                            .build();
 
     @BeforeEach
     @Override
@@ -58,7 +54,7 @@ public class SamplePmCommandOnEventTest
 
     @Override
     protected TuProjectId newId() {
-        return CommandingPm.ID;
+        return TuReactingAggregate.ID;
     }
 
     @Override
@@ -67,14 +63,15 @@ public class SamplePmCommandOnEventTest
     }
 
     @Override
-    protected Repository<TuProjectId, CommandingPm> createEntityRepository() {
-        return new CommandingPmRepo();
+    protected Repository<TuProjectId, TuReactingAggregate> createEntityRepository() {
+        return new TuReactingAggregateRepository();
     }
 
-    /**
-     * Exposes {@link #message() to the test.
-     * @apiNote we cannot override, since {@codd message()} is {@code final}.
-     */
+    @Override
+    public EventReactorExpected<TuProject> expectThat(TuReactingAggregate entity) {
+        return super.expectThat(entity);
+    }
+
     public Message storedMessage() {
         return message();
     }
@@ -84,11 +81,5 @@ public class SamplePmCommandOnEventTest
      */
     public void init() {
         configureBoundedContext();
-    }
-
-    @Override
-    public CommanderExpected<TuPmState>
-    expectThat(CommandingPm entity) {
-        return super.expectThat(entity);
     }
 }

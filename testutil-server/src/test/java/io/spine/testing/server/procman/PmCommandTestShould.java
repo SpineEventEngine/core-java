@@ -20,9 +20,9 @@
 
 package io.spine.testing.server.procman;
 
-import io.spine.testing.server.TUAssignTask;
-import io.spine.testing.server.TUTaskCreationPm;
 import io.spine.testing.server.expected.CommandHandlerExpected;
+import io.spine.testing.server.given.entity.TuPmState;
+import io.spine.testing.server.given.entity.command.TuAssignTask;
 import io.spine.testing.server.procman.given.SamplePmCommandTest;
 import io.spine.testing.server.procman.given.pm.CommandHandlingPm;
 import org.junit.jupiter.api.BeforeEach;
@@ -62,10 +62,10 @@ class PmCommandTestShould {
         pmCommandTest.setUp();
         pmCommandTest.init();
         CommandHandlingPm testPm = newInstance();
-        CommandHandlerExpected<TUTaskCreationPm> expected =
+        CommandHandlerExpected<TuPmState> expected =
                 pmCommandTest.expectThat(testPm);
 
-        expected.producesCommand(TUAssignTask.class, command -> {
+        expected.producesCommand(TuAssignTask.class, command -> {
             assertEquals(NESTED_COMMAND, command);
         });
     }
