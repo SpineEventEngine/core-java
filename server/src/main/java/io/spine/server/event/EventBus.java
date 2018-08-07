@@ -36,7 +36,6 @@ import io.spine.grpc.LoggingObserver.Level;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
-import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.storage.StorageFactory;
 import io.spine.validate.MessageValidator;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -180,11 +179,11 @@ public class EventBus
      * Posts the event for handling.
      *
      * <p>Performs the same action as the
-     * {@linkplain CommandOutputBus#post(Message, StreamObserver)} parent method}, but does not
+     * {@linkplain io.spine.server.bus.Bus#post(Message, StreamObserver)} parent method}, but does not
      * require any response observer.
      *
      * @param event the event to be handled
-     * @see CommandOutputBus#post(Message, StreamObserver)
+     * @see io.spine.server.bus.Bus#post(Message, StreamObserver)
      */
     public final void post(Event event) {
         post(event, streamObserver);
