@@ -25,8 +25,11 @@ import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeName;
 
+import java.util.Map;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.core.Enrichments.createEnrichment;
 import static io.spine.core.EventContext.OriginCase.COMMAND_CONTEXT;
 
 /**
@@ -35,7 +38,9 @@ import static io.spine.core.EventContext.OriginCase.COMMAND_CONTEXT;
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-public final class EventEnvelope extends EnrichableMessageEnvelope<EventId, Event, EventContext> {
+public final class EventEnvelope
+        extends AbstractMessageEnvelope<EventId, Event, EventContext>
+        implements ActorMessageEnvelope<EventId, Event, EventContext> {
 
     private final Message eventMessage;
     private final EventClass eventClass;
@@ -99,15 +104,15 @@ public final class EventEnvelope extends EnrichableMessageEnvelope<EventId, Even
         return getEventContext().getCommandContext()
                                 .getActorContext();
     }
-    
+
     /**
-     * Sets the origin fields of the event context being built using the data of the enclosed 
+     * Sets the origin fields of the event context being built using the data of the enclosed
      * event.
-     * 
-     * <p>In particular: 
+     *
+     * <p>In particular:
      * <ul>
-     *     <li>the root command identifier replicates the one defined in the enclosed event;</li>
-     *     <li>the context of the enclosed event is set as the origin.</li>
+     * <li>the root command identifier replicates the one defined in the enclosed event;</li>
+     * <li>the context of the enclosed event is set as the origin.</li>
      * </ul>
      *
      * @param builder event context builder into which the origin related fields are set
@@ -135,6 +140,15 @@ public final class EventEnvelope extends EnrichableMessageEnvelope<EventId, Even
         return result;
     }
 
+    /**
+     * Obtains the class of the origin message if available.
+     *
+     * <p>If this envelope represents a {@linkplain Events#isRejection(Event) rejection}, returns
+     * the type of rejected command.
+     *
+     * @return the class of origin message or {@link EmptyClass} if the origin message type is
+     * unknown
+     */
     public MessageClass getOriginClass() {
         if (isRejection()) {
             RejectionEventContext rejection = eventContext.getRejection();
@@ -145,6 +159,14 @@ public final class EventEnvelope extends EnrichableMessageEnvelope<EventId, Even
         }
     }
 
+    /**
+     * Obtains the origin {@linkplain DispatchedCommand command} of the rejection represented by
+     * this envelope.
+     *
+     * <p>Throws an {@linkplain IllegalStateException} if this event is not a rejection.
+     *
+     * @return the rejected command
+     */
     public DispatchedCommand getRejectionOrigin() {
         checkState(isRejection());
         checkState(eventContext.getOriginCase() == COMMAND_CONTEXT);
@@ -164,17 +186,39 @@ public final class EventEnvelope extends EnrichableMessageEnvelope<EventId, Even
         return Events.isRejection(getOuterObject());
     }
 
-    @Override
+    /**
+     * Verifies if the enrichment of the message is enabled.
+     *
+     * @see Enrichment.Builder#setDoNotEnrich(boolean)
+     */
+    public final boolean isEnrichmentEnabled() {
+        boolean result = getEnrichment().getModeCase() != Enrichment.ModeCase.DO_NOT_ENRICH;
+        return result;
+    }
+
     public Enrichment getEnrichment() {
         return getEventContext().getEnrichment();
     }
 
-    @Override
-    protected EventEnvelope enrich(Enrichment enrichment) {
-        Event.Builder enrichedCopy =
-                getOuterObject().toBuilder()
-                                .setContext(getMessageContext().toBuilder()
-                                                               .setEnrichment(enrichment));
+    /**
+     * Creates a new version of the message with the enrichments applied.
+     *
+     * @param enrichments the enrichments to apply
+     * @return new enriched envelope
+     */
+    public EventEnvelope toEnriched(Map<String, Any> enrichments) {
+        checkNotNull(enrichments);
+        Enrichment enrichment = createEnrichment(enrichments);
+        EventEnvelope result = enrich(enrichment);
+        return result;
+    }
+
+    private EventEnvelope enrich(Enrichment enrichment) {
+        EventContext context = getMessageContext().toBuilder()
+                                                  .setEnrichment(enrichment)
+                                                  .build();
+        Event.Builder enrichedCopy = getOuterObject().toBuilder()
+                                                     .setContext(context);
         return of(enrichedCopy.build());
     }
 }

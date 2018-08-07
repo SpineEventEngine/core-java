@@ -29,7 +29,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
-import io.spine.core.EnrichableMessageEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.type.TypeName;
 
@@ -155,7 +154,7 @@ public class EventEnricher {
                       "No registered enrichment for the message %s", message);
     }
 
-    private static <M extends EnrichableMessageEnvelope> void checkEnabled(M envelope) {
+    private static void checkEnabled(EventEnvelope envelope) {
         checkArgument(envelope.isEnrichmentEnabled(),
                       "Enrichment is disabled for the message %s", envelope.getOuterObject());
     }
