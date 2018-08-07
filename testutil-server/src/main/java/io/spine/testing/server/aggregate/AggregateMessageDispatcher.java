@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
-import io.spine.core.RejectionEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateCommandEndpoint;
 import io.spine.server.aggregate.AggregateEventEndpoint;
@@ -83,18 +82,6 @@ public class AggregateMessageDispatcher {
         List<? extends Message> eventMessages =
                 TestAggregateEventEndpoint.dispatch(aggregate, envelope);
         return eventMessages;
-    }
-
-    /**
-     * Dispatches the {@linkplain RejectionEnvelope rejection envelope} and applies the
-     * resulting events to the given {@code Aggregate}.
-     *
-     * @return the list of event messages.
-     */
-    @CanIgnoreReturnValue
-    public static List<? extends Message> dispatchRejection(Aggregate<?, ?, ?> aggregate,
-                                                            RejectionEnvelope envelope) {
-        throw new UnsupportedOperationException("Method dispatchRejection is not implemented!");
     }
 
     /**

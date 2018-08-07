@@ -24,14 +24,12 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
-import io.spine.core.RejectionEnvelope;
 import io.spine.server.procman.ProcessManager;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.core.Rejections.createRejection;
 import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.TestValues.newUuidValue;
@@ -63,8 +61,6 @@ class ProcessManagerDispatcherTest {
                             CommandEnvelope.of(command))
                 .setDefault(EventEnvelope.class,
                             EventEnvelope.of(eventFactory.createEvent(newUuidValue())))
-                .setDefault(RejectionEnvelope.class,
-                            RejectionEnvelope.of(createRejection(newUuidValue(), command)))
                 .setDefault(ProcessManager.class, mock(ProcessManager.class))
                 .testAllPublicStaticMethods(ProcessManagerDispatcher.class);
     }

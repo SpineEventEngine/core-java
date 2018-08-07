@@ -24,7 +24,6 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
-import io.spine.core.RejectionEnvelope;
 import io.spine.server.entity.model.EntityClass;
 
 import java.util.Objects;
@@ -108,20 +107,6 @@ public final class DeliveryTag<E extends MessageEnvelope<?, ?, ?>> {
         return forEnvelope(shardable.getBoundedContextName(),
                            shardable.getShardedModelClass(),
                            EventEnvelope.class);
-    }
-
-    /**
-     * Creates an instance of {@code DeliveryTag} that identifies the need to deliver rejection
-     * envelopes to entities that are sharded within the given {@code Shardable}.
-     *
-     * @param shardable the shardable, which entities declare the need in command rejection
-     * @return the new instance of {@code DeliveryTag}
-     */
-    public static DeliveryTag<RejectionEnvelope> forRejectionsOf(Shardable shardable) {
-        checkNotNull(shardable);
-        return forEnvelope(shardable.getBoundedContextName(),
-                           shardable.getShardedModelClass(),
-                           RejectionEnvelope.class);
     }
 
     private static <E extends MessageEnvelope<?, ?, ?>> DeliveryTag<E>

@@ -36,7 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Rejections.causedByRejection;
+import static io.spine.server.command.Rejection.causedByRejection;
 import static java.lang.String.format;
 
 /**

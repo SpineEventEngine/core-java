@@ -44,8 +44,8 @@ import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.core.Rejections.causedByRejection;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.command.Rejection.causedByRejection;
 
 /**
  * The wrapper for a command handler method.
@@ -87,14 +87,14 @@ public final class CommandHandlerMethod
         try {
             return super.invoke(target, envelope);
         } catch (RuntimeException e) {
-            return err(e, envelope.getMessage(), target);
+            return handleError(e, envelope.getMessage(), target);
         }
     }
 
     // TODO:2018-07-30:dmytro.dashenkov: Naming.
-    private static Result err(RuntimeException exception,
-                              Message commandMessage,
-                              EventProducer target) {
+    private static Result handleError(RuntimeException exception,
+                                      Message commandMessage,
+                                      EventProducer target) {
         boolean rejection = causedByRejection(exception);
         if (rejection) {
             ThrowableMessage throwableMessage = (ThrowableMessage) getRootCause(exception);
