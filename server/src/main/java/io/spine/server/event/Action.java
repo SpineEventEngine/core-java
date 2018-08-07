@@ -59,9 +59,7 @@ final class Action {
 
     EventEnvelope perform() {
         createEnrichments();
-        @SuppressWarnings("unchecked")
-            // The cast is safe because envelopes produce enriched versions of the same type.
-        EventEnvelope enriched = (EventEnvelope) envelope.toEnriched(enrichments);
+        EventEnvelope enriched = envelope.toEnriched(enrichments);
         return enriched;
     }
 
