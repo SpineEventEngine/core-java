@@ -232,9 +232,9 @@ public final class BoundedContextBuilder {
      * <p>The System bounded contexts shares some configuration with the domain bounded context,
      * such as:
      * <ul>
-     * <li>{@linkplain #getTenantIndex()} tenancy;
-     * <li>{@linkplain #getStorageFactory()} storage facilities;
-     * <li>{@linkplain #getTransportFactory()} transport facilities.
+     *     <li>{@linkplain #getTenantIndex()} tenancy;
+     *     <li>{@linkplain #getStorageFactory()} storage facilities;
+     *     <li>{@linkplain #getTransportFactory()} transport facilities.
      * </ul>
      *
      * <p>All the other configuration is NOT shared.
