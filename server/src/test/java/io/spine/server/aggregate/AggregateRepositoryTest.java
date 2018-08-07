@@ -35,6 +35,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.grpc.StreamObservers;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.AnemicAggregateRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.FailingAggregateRepository;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.GivenAggregate;
@@ -46,15 +47,24 @@ import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectingRepos
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingAggregate;
 import io.spine.server.aggregate.given.AggregateRepositoryTestEnv.RejectionReactingRepository;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.delivery.InProcessSharding;
 import io.spine.server.model.HandlerMethodFailedException;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.test.aggregate.Task;
+import io.spine.test.aggregate.command.AggAddTask;
+import io.spine.test.aggregate.command.AggCreateProject;
 import io.spine.test.aggregate.command.AggCreateProjectWithChildren;
+import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.command.AggStartProjectWithChildren;
 import io.spine.test.aggregate.event.AggProjectArchived;
 import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.testdata.Sample;
 import io.spine.testing.server.TestEventFactory;
+import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import io.spine.testing.server.blackbox.EmittedEvents;
+import io.spine.testing.server.blackbox.EmittedEventsVerifier;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -458,6 +468,97 @@ public class AggregateRepositoryTest {
                                        .getValue();
                 assertEquals(RejectionReactingAggregate.PARENT_ARCHIVED, value);
             }
+        }
+    }
+
+    @Nested
+    @DisplayName("post produced events to EventBus")
+    class PostEventsToBus {
+
+        @BeforeEach
+        void setUp() {
+            InMemoryTransportFactory transport = InMemoryTransportFactory.newInstance();
+            InProcessSharding sharding = new InProcessSharding(transport);
+            ServerEnvironment.getInstance()
+                             .replaceSharding(sharding);
+        }
+
+        @Test
+        @DisplayName("after command dispatching")
+        void afterCommand() {
+            ProjectId id = givenAggregateId(Identifier.newUuid());
+            AggCreateProject create = AggCreateProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .setName("Command Dispatching")
+                    .build();
+            Task task = Task
+                    .newBuilder()
+                    .setTitle("Dummy Task")
+                    .setDescription("Dummy Task Description")
+                    .build();
+            AggAddTask addTask = AggAddTask
+                    .newBuilder()
+                    .setProjectId(id)
+                    .setTask(task)
+                    .build();
+            AggStartProject start = AggStartProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .build();
+            BlackBoxBoundedContext.with(repository())
+                                  .receivesCommands(create, addTask, start)
+                                  .verifiesThat(eventsHaveVersions(1, 2, 3));
+        }
+
+        @Test
+        @DisplayName("after event dispatching")
+        void afterEvent() {
+            ProjectId id = givenAggregateId(Identifier.newUuid());
+            AggCreateProject create = AggCreateProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .setName("Command Dispatching")
+                    .build();
+            AggStartProject start = AggStartProject
+                    .newBuilder()
+                    .setProjectId(id)
+                    .build();
+            ProjectId parent = givenAggregateId(Identifier.newUuid());
+            AggProjectArchived archived = AggProjectArchived
+                    .newBuilder()
+                    .setProjectId(parent)
+                    .addChildProjectId(id)
+                    .build();
+            BlackBoxBoundedContext.with(repository())
+                                  .receivesCommands(create, start)
+                                  .receivesEvent(archived)
+                                  .verifiesThat(eventsHaveVersions(
+                                          1, 2, // Product creation
+                                          0,    // Manually assembled event (`archived`)
+                                          3     // Event produced in response to `archived` event
+                                  ));
+        }
+
+        private EmittedEventsVerifier eventsHaveVersions(int... versionNumbers) {
+            return new EventVersionsVerifier(versionNumbers);
+        }
+    }
+
+    /**
+     * An event verifier which checks that the emitted events have the given version numbers.
+     */
+    private static final class EventVersionsVerifier extends EmittedEventsVerifier {
+
+        private final int[] versions;
+
+        private EventVersionsVerifier(int[] versions) {
+            this.versions = versions;
+        }
+
+        @Override
+        public void verify(EmittedEvents events) {
+            assertTrue(events.haveVersions(versions));
         }
     }
 
