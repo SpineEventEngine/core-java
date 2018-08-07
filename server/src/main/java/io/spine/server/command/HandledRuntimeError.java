@@ -23,6 +23,13 @@ package io.spine.server.command;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A wrapper of a handled {@link RuntimeException}.
+ *
+ * <p>On {@link #rethrowOnce()}, rethrows the given exception wrapped into
+ * a {@link CommandDispatchingException}.
+ *
+ * <p>On {@link #asRejection()}, returns {@link java.util.Optional#empty() Optional.empty()}
+ *
  * @author Dmytro Dashenkov
  */
 final class HandledRuntimeError implements HandledError {

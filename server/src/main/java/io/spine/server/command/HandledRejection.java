@@ -28,10 +28,10 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A wrapper for a handled error.
+ * A wrapper for a handled {@linkplain io.spine.base.ThrowableMessage rejection}.
  *
- * <p>{@linkplain #rethrowOnce() Rethrows} the encountered {@link RuntimeException} if it is not
- * caused by a rejection or has already been rethrown by a {@code CommandErrorHandler}.
+ * <p>Performs no action on {@link #rethrowOnce()} and returns the given rejection event
+ * on {@link #asRejection()}.
  */
 final class HandledRejection implements HandledError {
 

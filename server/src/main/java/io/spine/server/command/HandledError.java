@@ -27,6 +27,8 @@ import io.spine.core.Version;
 import java.util.Optional;
 
 /**
+ * A wrapper of a handled command handling error.
+ *
  * @author Dmytro Dashenkov
  */
 public interface HandledError {
@@ -55,14 +57,32 @@ public interface HandledError {
         return Optional.empty();
     }
 
+    /**
+     * Obtains a {@link HandledError} for a previously handled error.
+     */
     static HandledError ofPreProcessed() {
         return PreProcessedError.INSTANCE;
     }
 
+    /**
+     * Obtains a {@link HandledError} for the given {@link RuntimeException}.
+     *
+     * @param exception the handled error
+     * @return wrapped error
+     */
     static HandledError ofRuntime(RuntimeException exception) {
         return new HandledRuntimeError(exception);
     }
 
+    /**
+     * Obtains a {@link HandledError} for the given {@linkplain io.spine.base.ThrowableMessage
+     * rejection}.
+     *
+     * @param rejection the {@link RuntimeException} caused by
+     *                  a {@linkplain io.spine.base.ThrowableMessage ThrowableMessage}
+     * @param command   the rejected command
+     * @return wrapped rejection
+     */
     static HandledError ofRejection(RuntimeException rejection, CommandEnvelope command) {
         return new HandledRejection(command, rejection);
     }
