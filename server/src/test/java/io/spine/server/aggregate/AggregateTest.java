@@ -418,7 +418,7 @@ public class AggregateTest {
     void restoreSnapshot() {
         dispatchCommand(aggregate, env(createProject));
 
-        Snapshot snapshot = aggregate().toShapshot();
+        Snapshot snapshot = aggregate().toSnapshot();
 
         Aggregate anotherAggregate = newAggregate(aggregate.getId());
 
@@ -506,7 +506,7 @@ public class AggregateTest {
 
         dispatchCommand(aggregate, env(createProject));
 
-        Snapshot snapshot = aggregate().toShapshot();
+        Snapshot snapshot = aggregate().toSnapshot();
         Project state = unpack(snapshot.getState());
 
         assertEquals(ID, state.getId());
@@ -519,7 +519,7 @@ public class AggregateTest {
 
         dispatchCommand(aggregate, env(createProject));
 
-        Snapshot snapshotNewProject = aggregate().toShapshot();
+        Snapshot snapshotNewProject = aggregate().toSnapshot();
 
         Aggregate anotherAggregate = newAggregate(aggregate.getId());
 

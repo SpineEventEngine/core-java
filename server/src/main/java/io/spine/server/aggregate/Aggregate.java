@@ -417,7 +417,7 @@ public abstract class Aggregate<I,
      *
      * @return new snapshot
      */
-    Snapshot toShapshot() {
+    Snapshot toSnapshot() {
         Any state = AnyPacker.pack(getState());
         Snapshot.Builder builder = Snapshot
                 .newBuilder()
