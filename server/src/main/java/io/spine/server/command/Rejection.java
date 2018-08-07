@@ -49,6 +49,11 @@ import static io.spine.protobuf.AnyPacker.unpack;
 @Internal
 public final class Rejection {
 
+    /**
+     * The default ID of the rejection event producer.
+     *
+     * <p>Used to generate events if the {@link ThrowableMessage#producerId()} is not set.
+     */
     private static final Any DEFAULT_PRODUCER_ID = Identifier.pack("Unknown");
 
     private final Event event;
