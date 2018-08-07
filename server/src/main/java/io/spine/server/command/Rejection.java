@@ -22,7 +22,6 @@ package io.spine.server.command;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.base.Throwables;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
@@ -175,7 +174,7 @@ public final class Rejection {
      * @return {@code true} if {@code throwable} is caused by a rejection, {@code false} otherwise
      */
     public static boolean causedByRejection(Throwable throwable) {
-        Throwable rootCause = Throwables.getRootCause(throwable);
+        Throwable rootCause = getRootCause(throwable);
         boolean result = rootCause instanceof ThrowableMessage;
         return result;
     }
