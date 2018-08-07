@@ -23,49 +23,45 @@ package io.spine.testing.server.procman;
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.procman.ProcessManager;
+import io.spine.testing.UtilityClassTest;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 
 import static io.spine.core.Rejections.createRejection;
-import static io.spine.testing.DisplayNames.HAVE_PARAMETERLESS_CTOR;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.TestValues.newUuidValue;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
 import static org.mockito.Mockito.mock;
 
 /**
  * @author Alexander Yevsyukov
  */
 @DisplayName("ProcessManagerDispatcher utility should")
-class PmDispatcherTest {
+class PmDispatcherTest extends UtilityClassTest<PmDispatcher> {
 
-    @Test
-    @DisplayName(HAVE_PARAMETERLESS_CTOR)
-    void haveUtilityConstructor() {
-        assertHasPrivateParameterlessCtor(PmDispatcher.class);
+    private final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(getClass());
+    private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
+
+    PmDispatcherTest() {
+        super(PmDispatcher.class);
     }
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        TestActorRequestFactory requestFactory =
-                TestActorRequestFactory.newInstance(getClass());
-        TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
-
+    @Override
+    protected void setDefaults(NullPointerTester tester) {
         Command command = requestFactory.generateCommand();
-        new NullPointerTester()
-                .setDefault(CommandEnvelope.class,
-                            CommandEnvelope.of(command))
-                .setDefault(EventEnvelope.class,
-                            EventEnvelope.of(eventFactory.createEvent(newUuidValue())))
-                .setDefault(RejectionEnvelope.class,
-                            RejectionEnvelope.of(createRejection(newUuidValue(), command)))
-                .setDefault(ProcessManager.class, mock(ProcessManager.class))
-                .testAllPublicStaticMethods(PmDispatcher.class);
+        Event event = eventFactory.createEvent(newUuidValue());
+        Rejection rejection = createRejection(newUuidValue(), command);
+        tester.setDefault(CommandEnvelope.class,
+                          CommandEnvelope.of(command))
+              .setDefault(EventEnvelope.class,
+                          EventEnvelope.of(event))
+              .setDefault(RejectionEnvelope.class,
+                          RejectionEnvelope.of(rejection))
+              .setDefault(ProcessManager.class, mock(ProcessManager.class));
     }
 }
