@@ -24,6 +24,8 @@ import com.google.protobuf.Empty;
 import io.spine.type.MessageClass;
 
 /**
+ * The class of an {@link Empty} message.
+ *
  * @author Dmytro Dashenkov
  */
 public final class EmptyClass extends MessageClass {
@@ -34,6 +36,9 @@ public final class EmptyClass extends MessageClass {
         super(Empty.class);
     }
 
+    /**
+     * @return the single instance of the {@code EmptyClass}
+     */
     public static EmptyClass instance() {
         return Singleton.INSTANCE.value;
     }
