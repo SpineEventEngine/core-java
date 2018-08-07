@@ -141,7 +141,7 @@ class CommandBusBuilderTest
 
         @Test
         @DisplayName("EventBus")
-        void rejectionBus() {
+        void eventBus() {
             EventBus expectedEventBus = mock(EventBus.class);
 
             CommandBus.Builder builder = builder().injectEventBus(expectedEventBus);
