@@ -50,6 +50,10 @@ public abstract class PmEventReactionTest<I,
                                           P extends ProcessManager<I, S, ?>>
         extends EventReactionTest<I, E, S, P> {
 
+    protected PmEventReactionTest(I processManagerId, E eventMessage) {
+        super(processManagerId, eventMessage);
+    }
+
     @Override
     protected List<? extends Message> dispatchTo(P entity) {
         EventEnvelope event = createEnriched();

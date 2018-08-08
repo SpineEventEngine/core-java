@@ -48,6 +48,10 @@ public abstract class PmCommandTest<I,
                                     P extends ProcessManager<I, S, ?>>
         extends CommandHandlerTest<I, C, S, P> {
 
+    protected PmCommandTest(I processManagerId, C commandMessage) {
+        super(processManagerId, commandMessage);
+    }
+
     @Override
     protected List<? extends Message> dispatchTo(P entity) {
         CommandEnvelope command = createCommand();

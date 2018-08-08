@@ -66,10 +66,13 @@ public abstract class CommandHandlerTest<I,
     private final ActorRequestFactory requestFactory;
 
     /**
-     * Creates a new instance with {@link TestActorRequestFactory}.
+     * Creates a new instance of the test suite.
+     *
+     * @param entityId       the ID of an aggregate under the tests
+     * @param commandMessage the command message to be dispatched to the aggregate
      */
-    protected CommandHandlerTest() {
-        super();
+    protected CommandHandlerTest(I entityId, C commandMessage) {
+        super(entityId, commandMessage);
         requestFactory = TestActorRequestFactory.newInstance(getClass());
     }
 

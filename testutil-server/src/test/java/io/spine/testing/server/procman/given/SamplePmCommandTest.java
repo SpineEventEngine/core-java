@@ -42,20 +42,14 @@ public class SamplePmCommandTest
                         .setId(CommandHandlingPm.ID)
                         .build();
 
+    public SamplePmCommandTest() {
+        super(CommandHandlingPm.ID, TEST_COMMAND);
+    }
+
     @BeforeEach
     @Override
     public void setUp() {
         super.setUp();
-    }
-
-    @Override
-    protected TuTaskId entityId() {
-        return CommandHandlingPm.ID;
-    }
-
-    @Override
-    protected TuCreateTask createMessage() {
-        return TEST_COMMAND;
     }
 
     @Override
@@ -68,13 +62,5 @@ public class SamplePmCommandTest
     @VisibleForTesting
     public Message storedMessage() {
         return message();
-    }
-
-    /**
-     * Exposes internal configuration method so that the test can invoke it directly.
-     */
-    @VisibleForTesting
-    public void init() {
-        configureBoundedContext();
     }
 }

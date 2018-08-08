@@ -25,6 +25,7 @@ import io.spine.testing.server.given.entity.TuPmState;
 import io.spine.testing.server.given.entity.command.TuAssignTask;
 import io.spine.testing.server.procman.given.SamplePmCommandTest;
 import io.spine.testing.server.procman.given.pm.CommandHandlingPm;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,27 +47,30 @@ class PmCommandTestShould {
     @BeforeEach
     void setUp() {
         pmCommandTest = new SamplePmCommandTest();
+        pmCommandTest.setUp();
+    }
+
+    @AfterEach
+    void tearDown() {
+        pmCommandTest.tearDown();
     }
 
     @Test
     @DisplayName("store tested command")
     void shouldStoreCommand() {
-        pmCommandTest.setUp();
         assertEquals(pmCommandTest.storedMessage(), TEST_COMMAND);
     }
 
     @Test
     @DisplayName("dispatch tested command and store results")
-    @SuppressWarnings("CheckReturnValue")
     void shouldDispatchCommand() {
-        pmCommandTest.setUp();
-        pmCommandTest.init();
         CommandHandlingPm testPm = newInstance();
         CommandHandlerExpected<TuPmState> expected =
                 pmCommandTest.expectThat(testPm);
 
-        expected.producesCommand(TuAssignTask.class, command -> {
-            assertEquals(NESTED_COMMAND, command);
-        });
+        expected.producesCommand(
+                TuAssignTask.class,
+                command -> assertEquals(NESTED_COMMAND, command)
+        );
     }
 }

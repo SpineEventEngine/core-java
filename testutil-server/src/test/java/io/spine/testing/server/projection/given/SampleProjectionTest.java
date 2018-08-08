@@ -27,7 +27,6 @@ import io.spine.testing.server.expected.EventSubscriberExpected;
 import io.spine.testing.server.projection.ProjectionTest;
 import io.spine.testing.server.projection.given.prj.TuProjection;
 import io.spine.testing.server.projection.given.prj.TuProjectionRepository;
-import org.junit.jupiter.api.BeforeEach;
 
 /**
  * The test class for the {@code StringValue} event handler in {@code TestProjection}.
@@ -35,24 +34,13 @@ import org.junit.jupiter.api.BeforeEach;
 public class SampleProjectionTest
         extends ProjectionTest<Long, StringValue, StringValue, TuProjection> {
 
-    public static final StringValue TEST_EVENT = StringValue.newBuilder()
-                                                            .setValue("test projection event")
-                                                            .build();
+    public static final StringValue TEST_EVENT =
+            StringValue.newBuilder()
+                       .setValue("test projection event")
+                       .build();
 
-    @BeforeEach
-    @Override
-    public void setUp() {
-        super.setUp();
-    }
-
-    @Override
-    protected Long entityId() {
-        return TuProjection.ID;
-    }
-
-    @Override
-    protected StringValue createMessage() {
-        return TEST_EVENT;
+    public SampleProjectionTest() {
+        super(TuProjection.ID, TEST_EVENT);
     }
 
     @Override
@@ -67,12 +55,5 @@ public class SampleProjectionTest
 
     public Message storedMessage() {
         return message();
-    }
-
-    /**
-     * Exposes internal configuration method.
-     */
-    public void init() {
-        configureBoundedContext();
     }
 }

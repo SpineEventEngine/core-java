@@ -29,7 +29,6 @@ import io.spine.testing.server.expected.EventReactorExpected;
 import io.spine.testing.server.given.entity.TuProject;
 import io.spine.testing.server.given.entity.TuProjectId;
 import io.spine.testing.server.given.entity.event.TuProjectCreated;
-import org.junit.jupiter.api.BeforeEach;
 
 /**
  * The test class for the {@code TUProjectAssigned} event handler in
@@ -46,20 +45,8 @@ public class SampleEventReactionTest
                             .setId(TuReactingAggregate.ID)
                             .build();
 
-    @BeforeEach
-    @Override
-    public void setUp() {
-        super.setUp();
-    }
-
-    @Override
-    protected TuProjectId entityId() {
-        return TuReactingAggregate.ID;
-    }
-
-    @Override
-    protected TuProjectCreated createMessage() {
-        return TEST_EVENT;
+    public SampleEventReactionTest() {
+        super(TuReactingAggregate.ID, TEST_EVENT);
     }
 
     @Override
@@ -74,12 +61,5 @@ public class SampleEventReactionTest
 
     public Message storedMessage() {
         return message();
-    }
-
-    /**
-     * Exposes internal configuration method.
-     */
-    public void init() {
-        configureBoundedContext();
     }
 }

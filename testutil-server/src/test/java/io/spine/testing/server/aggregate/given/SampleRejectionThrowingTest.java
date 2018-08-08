@@ -29,7 +29,6 @@ import io.spine.testing.server.expected.CommandHandlerExpected;
 import io.spine.testing.server.given.entity.TuProject;
 import io.spine.testing.server.given.entity.TuProjectId;
 import io.spine.testing.server.given.entity.command.TuAssignProject;
-import org.junit.jupiter.api.BeforeEach;
 
 /**
  * The test class for verifying that rejection was thrown.
@@ -37,25 +36,13 @@ import org.junit.jupiter.api.BeforeEach;
 public class SampleRejectionThrowingTest
         extends AggregateCommandTest<TuProjectId, TuAssignProject, TuProject, TuAggregate> {
 
-    public static final TuAssignProject TEST_COMMAND =
+    private static final TuAssignProject TEST_COMMAND =
             TuAssignProject.newBuilder()
                            .setId(TuAggregate.ID)
                            .build();
 
-    @Override
-    protected TuProjectId entityId() {
-        return TuAggregate.ID;
-    }
-
-    @Override
-    protected TuAssignProject createMessage() {
-        return TEST_COMMAND;
-    }
-
-    @BeforeEach
-    @Override
-    public void setUp() {
-        super.setUp();
+    public SampleRejectionThrowingTest() {
+        super(TuAggregate.ID, TEST_COMMAND);
     }
 
     @Override

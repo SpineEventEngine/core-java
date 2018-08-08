@@ -31,7 +31,6 @@ import io.spine.testing.server.given.entity.event.TuTaskCreated;
 import io.spine.testing.server.procman.PmCommandOnEventTest;
 import io.spine.testing.server.procman.given.pm.CommandingPm;
 import io.spine.testing.server.procman.given.pm.CommandingPmRepo;
-import org.junit.jupiter.api.BeforeEach;
 
 /**
  * A sample test class which we use for testing {@link PmCommandOnEventTest}.
@@ -50,20 +49,8 @@ public class SamplePmCommandOnEventTest
                          .setId(CommandingPm.ID)
                          .build();
 
-    @BeforeEach
-    @Override
-    public void setUp() {
-        super.setUp();
-    }
-
-    @Override
-    protected TuProjectId entityId() {
-        return CommandingPm.ID;
-    }
-
-    @Override
-    protected TuProjectCreated createMessage() {
-        return TEST_EVENT;
+    public SamplePmCommandOnEventTest() {
+        super(CommandingPm.ID, TEST_EVENT);
     }
 
     @Override
@@ -77,13 +64,6 @@ public class SamplePmCommandOnEventTest
      */
     public Message storedMessage() {
         return message();
-    }
-
-    /**
-     * Exposes internal configuration method.
-     */
-    public void init() {
-        configureBoundedContext();
     }
 
     @Override

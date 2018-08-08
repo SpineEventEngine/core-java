@@ -42,6 +42,10 @@ public abstract class AggregateCommandTest<I,
                                            A extends Aggregate<I, S, ?>>
         extends CommandHandlerTest<I, C, S, A> {
 
+    protected AggregateCommandTest(I aggregateId, C commandMessage) {
+        super(aggregateId, commandMessage);
+    }
+
     @Override
     protected List<? extends Message> dispatchTo(A entity) {
         return dispatchCommand(entity, createCommand());

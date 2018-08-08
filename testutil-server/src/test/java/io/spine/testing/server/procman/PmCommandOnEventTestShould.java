@@ -44,20 +44,18 @@ class PmCommandOnEventTestShould {
     @BeforeEach
     void setUp() {
         pmCommandingTest = new SamplePmCommandOnEventTest();
+        pmCommandingTest.setUp();
     }
 
     @Test
     @DisplayName("store incoming command")
     void storeGeneratedCommand() {
-        pmCommandingTest.setUp();
         assertEquals(pmCommandingTest.storedMessage(), TEST_EVENT);
     }
 
     @Test
     @DisplayName("dispatch tested event and store results")
     void shouldDispatchCommand() {
-        pmCommandingTest.setUp();
-        pmCommandingTest.init();
         CommandingPm testPm = newInstance();
         CommanderExpected<TuPmState> expected = pmCommandingTest.expectThat(testPm);
         expected.producesCommand(

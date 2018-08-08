@@ -24,6 +24,7 @@ import com.google.protobuf.StringValue;
 import io.spine.testing.server.expected.EventSubscriberExpected;
 import io.spine.testing.server.projection.given.SampleProjectionTest;
 import io.spine.testing.server.projection.given.prj.TuProjection;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,12 +45,17 @@ class ProjectionTestShould {
     @BeforeEach
     void setUp() {
         projectionTest = new SampleProjectionTest();
+        projectionTest.setUp();
+    }
+
+    @AfterEach
+    void tearDown() {
+        projectionTest.tearDown();
     }
 
     @Test
     @DisplayName("store tested event")
     void shouldStoreCommand() {
-        projectionTest.setUp();
         assertEquals(projectionTest.storedMessage(), TEST_EVENT);
     }
 
@@ -57,12 +63,8 @@ class ProjectionTestShould {
     @DisplayName("dispatch tested event and store results")
     @SuppressWarnings("CheckReturnValue")
     void shouldDispatchCommand() {
-        projectionTest.setUp();
-        projectionTest.init();
         TuProjection aggregate = newInstance();
         EventSubscriberExpected<StringValue> expected = projectionTest.expectThat(aggregate);
-        expected.hasState(state -> {
-            assertEquals(state.getValue(), TEST_EVENT.getValue());
-        });
+        expected.hasState(state -> assertEquals(state.getValue(), TEST_EVENT.getValue()));
     }
 }

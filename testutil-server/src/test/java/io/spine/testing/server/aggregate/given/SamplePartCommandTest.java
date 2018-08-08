@@ -30,7 +30,6 @@ import io.spine.testing.server.expected.CommandHandlerExpected;
 import io.spine.testing.server.given.entity.TuComments;
 import io.spine.testing.server.given.entity.TuTaskId;
 import io.spine.testing.server.given.entity.command.TuAddComment;
-import org.junit.jupiter.api.BeforeEach;
 
 /**
  * The test class for checking handling aggregate part command.
@@ -49,25 +48,13 @@ public class SamplePartCommandTest
                         .setId(TuAggregatePart.ID)
                         .build();
 
-    @Override
-    protected TuTaskId entityId() {
-        return TuAggregatePart.ID;
-    }
-
-    @Override
-    protected TuAddComment createMessage() {
-        return TEST_COMMAND;
+    public SamplePartCommandTest() {
+        super(TuAggregatePart.ID, TEST_COMMAND);
     }
 
     @Override
     protected Repository<TuTaskId, TuAggregatePart> createEntityRepository() {
         return new TuAggregatePartRepository();
-    }
-
-    @BeforeEach
-    @Override
-    public void setUp() {
-        super.setUp();
     }
 
     @Override

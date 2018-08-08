@@ -46,6 +46,10 @@ class PmCommandOnEventTest <I,
 
     private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
+    protected PmCommandOnEventTest(I processManagerId, M eventMessage) {
+        super(processManagerId, eventMessage);
+    }
+
     @Override
     protected final EventEnvelope createEnvelope() {
         M message = message();

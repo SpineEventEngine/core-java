@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.procman;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
@@ -49,6 +50,10 @@ class PmCommandGenerationTest<I,
                               E extends MessageEnvelope>
         extends MessageHandlerTest<I, M, S, P, CommanderExpected<S>> {
 
+    protected PmCommandGenerationTest(I processManagerId, M message) {
+        super(processManagerId, message);
+    }
+
     @Override
     protected List<Event> dispatchTo(P entity) {
         E envelope = createEnvelope();
@@ -63,10 +68,10 @@ class PmCommandGenerationTest<I,
         inject(entity, boundedContext().getCommandBus());
         S initialState = entity.getState();
         List<? extends Message> messages = dispatchTo(entity);
-        CommanderExpected<S> result = new CommanderExpected<>(messages,
-                                                              initialState,
-                                                              entity.getState(),
-                                                              interceptedCommands());
+        ImmutableList<Message> commands = interceptedCommands();
+        S updatedState = entity.getState();
+        CommanderExpected<S> result =
+                new CommanderExpected<>(messages, initialState, updatedState, commands);
         return result;
     }
 }

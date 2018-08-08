@@ -56,14 +56,12 @@ class AggregateCommandTestShould {
     @Test
     @DisplayName("store tested command")
     void shouldStoreCommand() {
-        aggregateCommandTest.setUp();
         assertEquals(aggregateCommandTest.storedMessage(), TEST_COMMAND);
     }
 
     @Test
     @DisplayName("dispatch tested command")
     void shouldDispatchCommand() {
-        aggregateCommandTest.setUp();
         TuAggregate testAggregate = newInstance();
         aggregateCommandTest.expectThat(testAggregate);
         Timestamp newState = testAggregate.getState()
@@ -74,7 +72,6 @@ class AggregateCommandTestShould {
     @Test
     @DisplayName("track rejection")
     void trackGeneratedRejection() {
-        aggregateRejectionCommandTest.setUp();
         TuAggregate testAggregate = newInstance();
         CommandHandlerExpected<TuProject> expected =
                 aggregateRejectionCommandTest.expectThat(testAggregate);

@@ -46,6 +46,10 @@ public abstract class EventSubscriptionTest<I,
 
     private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
+    protected EventSubscriptionTest(I entityId, M eventMessage) {
+        super(entityId, eventMessage);
+    }
+
     @Override
     @SuppressWarnings("CheckReturnValue")
     protected EventSubscriberExpected<S> expectThat(E entity) {

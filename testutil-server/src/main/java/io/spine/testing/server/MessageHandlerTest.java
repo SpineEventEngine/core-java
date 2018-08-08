@@ -21,6 +21,7 @@
 package io.spine.testing.server;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
 import io.spine.core.CommandClass;
@@ -40,7 +41,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -85,8 +85,9 @@ public abstract class MessageHandlerTest<I,
     @SuppressWarnings("unused")
     protected static final String CHANGE_STATE_TEST_NAME = "change a state of the entity";
 
-    private I id;
-    private @Nullable M message;
+    private final I entityId;
+    private final M message;
+
     private @Nullable Repository<I, E> entityRepository;
 
     /**
@@ -100,14 +101,9 @@ public abstract class MessageHandlerTest<I,
      */
     private BoundedContext boundedContext;
 
-    /**
-     * Creates and stores the reference to the command message being tested.
-     */
-    @BeforeEach
-    @OverridingMethodsMustInvokeSuper
-    protected void setUp() {
-        id = entityId();
-        storeMessage(createMessage());
+    protected MessageHandlerTest(I entityId, M message) {
+        this.entityId = entityId;
+        this.message = message;
     }
 
     /**
@@ -115,16 +111,18 @@ public abstract class MessageHandlerTest<I,
      *
      * @return new ID
      */
-    protected abstract I entityId();
+    protected final I entityId() {
+        return entityId;
+    }
 
     /**
-     * Creates a new message to test.
+     * Obtains the message dispatched to the entity.
      *
-     * <p>This message is then dispatched to the entity.
-     *
-     * @return a new message to test
+     * @return the message to handle
      */
-    protected abstract M createMessage();
+    protected final M message() {
+        return message;
+    }
 
     /**
      * Dispatches the {@linkplain #message() message} to the given entity.
@@ -143,34 +141,6 @@ public abstract class MessageHandlerTest<I,
     protected abstract Repository<I, E> createEntityRepository();
 
     /**
-     * Retrieves the ID of the tested entity.
-     */
-    protected final I id() {
-        return id;
-    }
-
-    /**
-     * Retrieves the message dispatched to the entity.
-     *
-     * <p>By default, this message is created by {@link #createMessage()}. Call
-     * {@link #storeMessage(Message)} to override.
-     *
-     * @return the message to handle
-     */
-    protected final @Nullable M message() {
-        return message;
-    }
-
-    /**
-     * Overrides the handled message with the given one.
-     *
-     * @param message the new message to handle
-     */
-    protected void storeMessage(M message) {
-        this.message = message;
-    }
-
-    /**
      * Returns instance of {@link BoundedContext} which is being used in this test suite.
      *
      * @return {@link BoundedContext} instance
@@ -180,8 +150,13 @@ public abstract class MessageHandlerTest<I,
         return boundedContext;
     }
 
+    /**
+     * Creates new test instance of a Bounded Context and configures it for intercepting
+     * all commands that will be generated during the next test.
+     */
     @BeforeEach
-    protected final void configureBoundedContext() {
+    @OverridingMethodsMustInvokeSuper
+    public void setUp() {
         boundedContext = TestBoundedContext.create(new MemoizingBusFilter());
         entityRepository = createEntityRepository();
         assertNotNull(entityRepository);
@@ -189,6 +164,23 @@ public abstract class MessageHandlerTest<I,
         Set<CommandClass> commandClasses = getAllCommandClasses();
         CommandBus commandBus = boundedContext().getCommandBus();
         commandBus.register(new VoidCommandDispatcher(commandClasses));
+    }
+
+    /**
+     * Resets the state of the test case, so test methods can't share it.
+     */
+    @AfterEach
+    @OverridingMethodsMustInvokeSuper
+    public void tearDown() {
+        entityRepository = null;
+        interceptedCommands.clear();
+        if (boundedContext != null) {
+            try {
+                boundedContext.close();
+            } catch (Exception e) {
+                throw illegalStateWithCauseOf(e);
+            }
+        }
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // checked when filtering
@@ -211,23 +203,6 @@ public abstract class MessageHandlerTest<I,
             return of(commandClass);
         } else {
             return empty();
-        }
-    }
-
-    /**
-     * Resets the state of the test case, so test methods can't share it.
-     */
-    @AfterEach
-    protected void resetTestCase() {
-        message = null;
-        entityRepository = null;
-        interceptedCommands.clear();
-        if (boundedContext != null) {
-            try {
-                boundedContext.close();
-            } catch (Exception e) {
-                throw illegalStateWithCauseOf(e);
-            }
         }
     }
 

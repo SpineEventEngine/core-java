@@ -49,6 +49,10 @@ class PmCommandOnCommandTest<I,
             TestActorRequestFactory.newInstance(getClass())
                                    .command();
 
+    protected PmCommandOnCommandTest(I processManagerId, M commandMessage) {
+        super(processManagerId, commandMessage);
+    }
+
     @Override
     protected final CommandEnvelope createEnvelope() {
         M message = message();

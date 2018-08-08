@@ -25,6 +25,7 @@ import io.spine.testing.server.aggregate.given.agg.TuReactingAggregate;
 import io.spine.testing.server.expected.EventReactorExpected;
 import io.spine.testing.server.given.entity.TuProject;
 import io.spine.testing.server.given.entity.event.TuProjectAssigned;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,12 +49,17 @@ class AggregateEventReactionTestShould {
     @BeforeEach
     void setUp() {
         aggregateEventTest = new SampleEventReactionTest();
+        aggregateEventTest.setUp();
+    }
+
+    @AfterEach
+    void tearDown() {
+        aggregateEventTest.tearDown();
     }
 
     @Test
     @DisplayName("store tested event")
     void shouldStoreCommand() {
-        aggregateEventTest.setUp();
         assertEquals(aggregateEventTest.storedMessage(), TEST_EVENT);
     }
 
@@ -61,8 +67,6 @@ class AggregateEventReactionTestShould {
     @DisplayName("dispatch tested event and store results")
     @SuppressWarnings("CheckReturnValue")
     void shouldDispatchCommand() {
-        aggregateEventTest.setUp();
-        aggregateEventTest.init();
         TuReactingAggregate aggregate = newInstance();
         EventReactorExpected<TuProject> expected = aggregateEventTest.expectThat(aggregate);
 

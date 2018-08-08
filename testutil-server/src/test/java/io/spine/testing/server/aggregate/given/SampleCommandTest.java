@@ -30,7 +30,6 @@ import io.spine.testing.server.expected.CommandHandlerExpected;
 import io.spine.testing.server.given.entity.TuProject;
 import io.spine.testing.server.given.entity.TuProjectId;
 import io.spine.testing.server.given.entity.command.TuCreateProject;
-import org.junit.jupiter.api.BeforeEach;
 
 /**
  * The test class checking handling a command.
@@ -45,20 +44,8 @@ public class SampleCommandTest
                            .setId(TuAggregate.ID)
                            .build();
 
-    @Override
-    protected TuProjectId entityId() {
-        return TuAggregate.ID;
-    }
-
-    @Override
-    protected TuCreateProject createMessage() {
-        return TEST_COMMAND;
-    }
-
-    @BeforeEach
-    @Override
-    public void setUp() {
-        super.setUp();
+    public SampleCommandTest() {
+        super(TuAggregate.ID, TEST_COMMAND);
     }
 
     @Override

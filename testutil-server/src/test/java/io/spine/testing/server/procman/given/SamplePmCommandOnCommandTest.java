@@ -23,9 +23,10 @@ package io.spine.testing.server.procman.given;
 import io.spine.server.entity.Repository;
 import io.spine.testing.server.given.entity.TuPmState;
 import io.spine.testing.server.given.entity.TuProjectId;
-import io.spine.testing.server.given.entity.command.TuAssignTask;
+import io.spine.testing.server.given.entity.command.TuCreateProject;
 import io.spine.testing.server.procman.PmCommandOnCommandTest;
 import io.spine.testing.server.procman.given.pm.CommandingPm;
+import io.spine.testing.server.procman.given.pm.CommandingPmRepo;
 
 /**
  * A sample class which we use for testing
@@ -34,22 +35,17 @@ import io.spine.testing.server.procman.given.pm.CommandingPm;
  * @author Alexander Yevsyukov
  */
 public class SamplePmCommandOnCommandTest
-        extends PmCommandOnCommandTest<TuProjectId, TuAssignTask, TuPmState, CommandingPm> {
+        extends PmCommandOnCommandTest<TuProjectId, TuCreateProject, TuPmState, CommandingPm> {
 
-    @Override
-    protected TuProjectId entityId() {
-        return CommandingPm.ID;
-    }
-
-    @Override
-    protected TuAssignTask createMessage() {
-        //TODO:2018-08-08:alexander.yevsyukov: Implement
-        return null;
+    public SamplePmCommandOnCommandTest() {
+        super(CommandingPm.ID,
+              TuCreateProject.newBuilder()
+                             .setId(CommandingPm.ID)
+                             .build());
     }
 
     @Override
     protected Repository<TuProjectId, CommandingPm> createEntityRepository() {
-    //TODO:2018-08-08:alexander.yevsyukov: Implement
-        return null;
+        return new CommandingPmRepo();
     }
 }
