@@ -18,12 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given.aggregate;
+package io.spine.server.entity.given;
 
+import io.spine.server.aggregate.given.aggregate.AbstractAggregateTestRepository;
+import io.spine.server.aggregate.given.aggregate.IgTestAggregate;
 import io.spine.test.aggregate.ProjectId;
 
 /**
- * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardTest
+ * Test environment repository for {@linkplain io.spine.server.entity.IdempotencyGuardTest
  * IdempotencyGuard tests}.
  *
  * @author Mykhailo Drachuk

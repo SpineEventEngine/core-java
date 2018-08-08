@@ -27,23 +27,24 @@ import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Repositories;
 import io.spine.server.aggregate.given.aggregate.IgTestAggregate;
-import io.spine.server.aggregate.given.aggregate.IgTestAggregateRepository;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
+import io.spine.server.entity.given.IgTestAggregateRepository;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.core.CommandEnvelope.of;
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.command;
-import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.createProject;
-import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.newProjectId;
-import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.newTenantId;
-import static io.spine.server.aggregate.given.IdempotencyGuardTestEnv.startProject;
+import static io.spine.server.entity.given.IdempotencyGuardTestEnv.command;
+import static io.spine.server.entity.given.IdempotencyGuardTestEnv.createProject;
+import static io.spine.server.entity.given.IdempotencyGuardTestEnv.newProjectId;
+import static io.spine.server.entity.given.IdempotencyGuardTestEnv.newTenantId;
+import static io.spine.server.entity.given.IdempotencyGuardTestEnv.startProject;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -72,68 +73,75 @@ class IdempotencyGuardTest {
         boundedContext.close();
     }
 
-    @Test
-    @DisplayName("throw DuplicateCommandException when command was handled since last snapshot")
-    void throwExceptionForDuplicateCommand() {
-        TenantId tenantId = newTenantId();
-        ProjectId projectId = newProjectId();
-        Command createCommand = command(createProject(projectId), tenantId);
+    @Nested
+    @DisplayName("check commands and")
+    class Commands {
 
-        CommandBus commandBus = boundedContext.getCommandBus();
-        StreamObserver<Ack> noOpObserver = noOpObserver();
-        commandBus.post(createCommand, noOpObserver);
+        @Test
+        @DisplayName("throw DuplicateCommandException when command was handled since last snapshot")
+        void throwExceptionForDuplicateCommand() {
+            TenantId tenantId = newTenantId();
+            ProjectId projectId = newProjectId();
+            Command createCommand = command(createProject(projectId), tenantId);
 
-        IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
-        IdempotencyGuard guard = aggregate.idempotencyGuard();
-        assertThrows(DuplicateCommandException.class, () -> guard.check(of(createCommand)));
+            CommandBus commandBus = boundedContext.getCommandBus();
+            StreamObserver<Ack> noOpObserver = noOpObserver();
+            commandBus.post(createCommand, noOpObserver);
+
+            IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
+            IdempotencyGuard guard = aggregate.idempotencyGuard();
+            assertThrows(DuplicateCommandException.class, () -> guard.check(of(createCommand)));
+        }
+
+        @Test
+        @DisplayName("not throw exception when command was handled but snapshot was made")
+        void notThrowForCommandHandledAfterSnapshot() {
+            Repositories.setSnapshotTrigger(repository, 1);
+
+            TenantId tenantId = newTenantId();
+            ProjectId projectId = newProjectId();
+            Command createCommand = command(createProject(projectId), tenantId);
+
+            CommandBus commandBus = boundedContext.getCommandBus();
+            StreamObserver<Ack> noOpObserver = noOpObserver();
+            commandBus.post(createCommand, noOpObserver);
+
+            IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
+
+            IdempotencyGuard guard = aggregate.idempotencyGuard();
+            guard.check(of(createCommand));
+        }
+
+        @Test
+        @DisplayName("not throw exception if command was not handled")
+        void notThrowForCommandNotHandled() {
+            TenantId tenantId = newTenantId();
+            ProjectId projectId = newProjectId();
+            Command createCommand = command(createProject(projectId), tenantId);
+            IgTestAggregate aggregate = new IgTestAggregate(projectId);
+
+            IdempotencyGuard guard = aggregate.idempotencyGuard();
+            guard.check(of(createCommand));
+        }
+
+        @Test
+        @DisplayName("not throw exception if another command was handled")
+        void notThrowIfAnotherCommandHandled() {
+            TenantId tenantId = newTenantId();
+            ProjectId projectId = newProjectId();
+            Command createCommand = command(createProject(projectId), tenantId);
+            Command startCommand = command(startProject(projectId), tenantId);
+
+            CommandBus commandBus = boundedContext.getCommandBus();
+            StreamObserver<Ack> noOpObserver = noOpObserver();
+            commandBus.post(createCommand, noOpObserver);
+
+            IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
+
+            IdempotencyGuard guard = aggregate.idempotencyGuard();
+            guard.check(of(startCommand));
+        }
     }
 
-    @Test
-    @DisplayName("not throw exception when command was handled but snapshot was made")
-    void notThrowForCommandHandledAfterSnapshot() {
-        Repositories.setSnapshotTrigger(repository, 1);
 
-        TenantId tenantId = newTenantId();
-        ProjectId projectId = newProjectId();
-        Command createCommand = command(createProject(projectId), tenantId);
-
-        CommandBus commandBus = boundedContext.getCommandBus();
-        StreamObserver<Ack> noOpObserver = noOpObserver();
-        commandBus.post(createCommand, noOpObserver);
-
-        IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
-
-        IdempotencyGuard guard = aggregate.idempotencyGuard();
-        guard.check(of(createCommand));
-    }
-
-    @Test
-    @DisplayName("not throw exception if command was not handled")
-    void notThrowForCommandNotHandled() {
-        TenantId tenantId = newTenantId();
-        ProjectId projectId = newProjectId();
-        Command createCommand = command(createProject(projectId), tenantId);
-        IgTestAggregate aggregate = new IgTestAggregate(projectId);
-
-        IdempotencyGuard guard = aggregate.idempotencyGuard();
-        guard.check(of(createCommand));
-    }
-
-    @Test
-    @DisplayName("not throw exception if another command was handled")
-    void notThrowIfAnotherCommandHandled() {
-        TenantId tenantId = newTenantId();
-        ProjectId projectId = newProjectId();
-        Command createCommand = command(createProject(projectId), tenantId);
-        Command startCommand = command(startProject(projectId), tenantId);
-
-        CommandBus commandBus = boundedContext.getCommandBus();
-        StreamObserver<Ack> noOpObserver = noOpObserver();
-        commandBus.post(createCommand, noOpObserver);
-
-        IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
-
-        IdempotencyGuard guard = aggregate.idempotencyGuard();
-        guard.check(of(startCommand));
-    }
 }
