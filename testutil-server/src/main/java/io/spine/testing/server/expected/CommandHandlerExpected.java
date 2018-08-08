@@ -70,7 +70,6 @@ public class CommandHandlerExpected<S extends Message>
         return this;
     }
 
-    @SuppressWarnings("UnusedReturnValue")
     @CanIgnoreReturnValue
     public <M extends Message>
     CommandHandlerExpected<S> producesEvent(Class<M> eventClass, Consumer<M> validator) {
@@ -78,7 +77,6 @@ public class CommandHandlerExpected<S extends Message>
         return producesMessage(eventClass, validator);
     }
 
-    @SuppressWarnings("UnusedReturnValue")
     @CanIgnoreReturnValue
     public CommandHandlerExpected<S> producesEvents(Class<?>... eventClasses) {
         assertNotRejected(Stream.of(eventClasses)
@@ -119,7 +117,6 @@ public class CommandHandlerExpected<S extends Message>
      *
      * @param rejectionClass type of the rejection expected to be produced
      */
-    @SuppressWarnings("UnusedReturnValue")
     @CanIgnoreReturnValue
     public CommandHandlerExpected<S> throwsRejection(Class<? extends Message> rejectionClass) {
         assertNotNull(rejection, format("No rejection encountered. Expected %s",

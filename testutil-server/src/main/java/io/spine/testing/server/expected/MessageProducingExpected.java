@@ -97,7 +97,6 @@ public abstract class MessageProducingExpected<S extends Message,
      *
      * @param messageClasses types of the expected events
      */
-    @SuppressWarnings("UnusedReturnValue")
     @CanIgnoreReturnValue
     protected X producesMessages(Class<?>... messageClasses) {
         List<? extends Class<?>> actualClasses =
@@ -144,7 +143,6 @@ public abstract class MessageProducingExpected<S extends Message,
      *
      * @param commandClasses types of the expected commands
      */
-    @SuppressWarnings("UnusedReturnValue")
     @CanIgnoreReturnValue
     protected X producesCommands(Class<?>... commandClasses) {
         List<? extends Class<?>> actualClasses =
