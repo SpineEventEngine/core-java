@@ -24,6 +24,8 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventEnricher;
 import io.spine.system.server.CommandLifecycleRepository;
 import io.spine.system.server.EntityHistoryRepository;
+import io.spine.system.server.HandledCommandsRepository;
+import io.spine.system.server.HandledEventsRepository;
 import io.spine.system.server.NoOpSystemGateway;
 import io.spine.system.server.ScheduledCommandRepository;
 import io.spine.system.server.SystemEnricher;
@@ -86,6 +88,8 @@ final class SystemBoundedContext extends BoundedContext {
         register(commandLifecycle);
         register(new EntityHistoryRepository());
         register(new ScheduledCommandRepository());
+        register(new HandledCommandsRepository());
+        register(new HandledEventsRepository());
     }
 
     /**
