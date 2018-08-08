@@ -30,13 +30,16 @@ import io.spine.server.projection.Projection;
 public class HandledCommandsProjection
         extends Projection<EntityHistoryId, HandledCommands, HandledCommandsVBuilder> {
 
+    private static final int DEFAULT_MEMORY_LIMIT = 100;
+
     public HandledCommandsProjection(EntityHistoryId id) {
         super(id);
     }
 
     @Subscribe
     public void on(EntityCreated event) {
-        getBuilder().setId(event.getId());
+        getBuilder().setId(event.getId())
+                    .setMemoryLimit(DEFAULT_MEMORY_LIMIT);
     }
 
     @Subscribe
@@ -44,5 +47,18 @@ public class HandledCommandsProjection
         CommandId commandId = event.getPayload()
                                    .getCommand();
         getBuilder().addCommand(commandId);
+        trimTail();
+    }
+
+    private void trimTail() {
+        HandledCommandsVBuilder builder = getBuilder();
+        int size = builder.getCommand().size();
+        int limit = builder.getMemoryLimit();
+        while (size > limit) {
+            int lastElementIndex = size - 1;
+            builder.removeCommand(lastElementIndex);
+
+            size = builder.getCommand().size();
+        }
     }
 }

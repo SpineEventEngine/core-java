@@ -25,9 +25,9 @@ import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
-import io.spine.option.EntityOption;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.EntityRecordChange;
+import io.spine.server.entity.Repository;
 import io.spine.system.server.NoOpSystemGateway;
 import io.spine.type.TypeUrl;
 
@@ -48,7 +48,7 @@ public final class NoOpLifecycle extends EntityLifecycle {
     }
 
     @Override
-    public void onEntityCreated(EntityOption.Kind entityKind) {
+    public void onEntityCreated(Repository<?, ?> repository) {
         // NoOp.
     }
 

@@ -47,6 +47,7 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.server.entity.EntityKind.GENERIC_ENTITY;
 import static io.spine.server.entity.Repository.GenericParameter.ENTITY;
 import static io.spine.server.entity.model.EntityClass.asEntityClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -64,6 +65,16 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         implements RepositoryView<I, E>, AutoCloseable {
 
     private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
+
+    private static final int DEFAULT_IDEMPOTENCY_THRESHOLD = 100;
+
+    private static final IdempotencySpec DEFAULT_IDEMPOTENCY_SPEC = IdempotencySpec
+            .newBuilder()
+            .setCommandIdempotencyThreashold(DEFAULT_IDEMPOTENCY_THRESHOLD)
+            .setEventIdempotencyThreashold(DEFAULT_IDEMPOTENCY_THRESHOLD)
+            .build();
+
+    private RepositorySpec spec;
 
     /**
      * The {@link BoundedContext} to which the repository belongs.
@@ -94,7 +105,16 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * Creates the repository.
      */
+    protected Repository(EntityKind kind) {
+        this.spec = RepositorySpec
+                .newBuilder()
+                .setIdempotency(DEFAULT_IDEMPOTENCY_SPEC)
+                .setKind(kind)
+                .build();
+    }
+
     protected Repository() {
+        this(GENERIC_ENTITY);
     }
 
     /**
@@ -306,6 +326,21 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @return the created storage instance
      */
     protected abstract Storage<I, ?, ?> createStorage(StorageFactory factory);
+
+    RepositorySpec spec() {
+        return spec;
+    }
+
+    protected void setIdempotencySpec(int commands, int events) {
+        IdempotencySpec idempotency = IdempotencySpec
+                .newBuilder()
+                .setCommandIdempotencyThreashold(commands)
+                .setEventIdempotencyThreashold(events)
+                .build();
+        this.spec = spec.toBuilder()
+                        .mergeIdempotency(idempotency)
+                        .build();
+    }
 
     /**
      * Closes the repository by closing the underlying storage.

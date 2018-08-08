@@ -30,13 +30,16 @@ import io.spine.server.projection.Projection;
 public class HandledEventsProjection
         extends Projection<EntityHistoryId, HandledEvents, HandledEventsVBuilder> {
 
+    private static final int DEFAULT_MEMORY_LIMIT = 100;
+
     public HandledEventsProjection(EntityHistoryId id) {
         super(id);
     }
 
     @Subscribe
     public void on(EntityCreated event) {
-        getBuilder().setId(event.getId());
+        getBuilder().setId(event.getId())
+                    .setMemoryLimit(DEFAULT_MEMORY_LIMIT);
     }
 
     @Subscribe
@@ -44,6 +47,7 @@ public class HandledEventsProjection
         EventId eventId = event.getPayload()
                                .getEvent();
         getBuilder().addEvent(eventId);
+        trimTail();
     }
 
     @Subscribe
@@ -51,5 +55,18 @@ public class HandledEventsProjection
         EventId eventId = event.getPayload()
                                .getEvent();
         getBuilder().addEvent(eventId);
+        trimTail();
+    }
+
+    private void trimTail() {
+        HandledEventsVBuilder builder = getBuilder();
+        int size = builder.getEvent().size();
+        int limit = builder.getMemoryLimit();
+        while (size > limit) {
+            int lastElementIndex = size - 1;
+            builder.removeEvent(lastElementIndex);
+
+            size = builder.getEvent().size();
+        }
     }
 }

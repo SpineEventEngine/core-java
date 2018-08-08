@@ -40,4 +40,6 @@ message HandledCommands {
     EntityHistoryId id = 1;
 
     repeated core.CommandId command = 2;
+
+    uint32 memory_limit = 3 [(required) = true];
 }

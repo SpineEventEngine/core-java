@@ -28,7 +28,6 @@ import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
-import io.spine.option.EntityOption;
 import io.spine.system.server.ArchiveEntity;
 import io.spine.system.server.AssignTargetToCommand;
 import io.spine.system.server.ChangeEntityState;
@@ -112,13 +111,13 @@ public class EntityLifecycle {
     /**
      * Posts the {@link CreateEntity} system command.
      *
-     * @param entityKind the {@link EntityOption.Kind} of the created entity
+     * @param creator the {@link Repository} which created the entity
      */
-    public void onEntityCreated(EntityOption.Kind entityKind) {
+    public void onEntityCreated(Repository<?, ?> creator) {
         CreateEntity command = CreateEntity
                 .newBuilder()
                 .setId(historyId)
-                .setKind(entityKind)
+                .setRepositorySpec(creator.spec())
                 .build();
         systemGateway.postCommand(command);
     }

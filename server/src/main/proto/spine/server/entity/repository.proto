@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package spine.server.entity;
+
+import "spine/options.proto";
+
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.entity";
+option java_outer_classname = "RepositoryProto";
+option java_multiple_files = true;
+
+import "spine/server/entity/entity.proto";
+
+message RepositorySpec {
+
+    IdempotencySpec idempotency = 1;
+
+    EntityKind kind = 2;
+}
+
+message IdempotencySpec {
+
+    uint32 command_idempotency_threashold = 1 [(required) = true];
+
+    uint32 event_idempotency_threashold = 2 [(required) = true];
+}

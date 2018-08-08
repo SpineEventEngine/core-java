@@ -63,7 +63,7 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
-import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
+import static io.spine.server.entity.EntityKind.PROCESS_MANAGER;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -111,7 +111,7 @@ public abstract class ProcessManagerRepository<I,
      * Creates a new instance with the event routing by the first message field.
      */
     protected ProcessManagerRepository() {
-        super(EventProducers.fromFirstMessageField());
+        super(PROCESS_MANAGER, EventProducers.fromFirstMessageField());
     }
 
     /** Obtains class information of process managers managed by this repository. */
@@ -326,7 +326,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public P create(I id) {
         P procman = super.create(id);
-        lifecycleOf(id).onEntityCreated(PROCESS_MANAGER);
+        lifecycleOf(id).onEntityCreated(this);
         return procman;
     }
 

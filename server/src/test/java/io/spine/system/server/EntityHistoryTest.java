@@ -30,13 +30,13 @@ import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.option.EntityOption;
 import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.delivery.InProcessSharding;
 import io.spine.server.delivery.Sharding;
+import io.spine.server.entity.EntityKind;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.system.server.given.EntityHistoryTestEnv.HistoryEventWatcher;
@@ -61,10 +61,10 @@ import java.util.Optional;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.option.EntityOption.Kind.AGGREGATE;
-import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
-import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.entity.EntityKind.AGGREGATE;
+import static io.spine.server.entity.EntityKind.PROCESS_MANAGER;
+import static io.spine.server.entity.EntityKind.PROJECTION;
 import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -329,13 +329,13 @@ class EntityHistoryTest {
             assertEquals(command, commandMessage);
         }
 
-        private void checkEntityCreated(EntityOption.Kind entityKind,
+        private void checkEntityCreated(EntityKind entityKind,
                                         TypeUrl entityType) {
             EntityCreated entityCreatedEvent = eventAccumulator.nextEvent(EntityCreated.class);
             assertId(entityCreatedEvent.getId());
             assertEquals(entityType.value(), entityCreatedEvent.getId()
                                                                .getTypeUrl());
-            assertEquals(entityKind, entityCreatedEvent.getKind());
+            assertEquals(entityKind, entityCreatedEvent.getRepositorySpec().getKind());
         }
 
         private void checkEventDispatchedToSubscriber() {

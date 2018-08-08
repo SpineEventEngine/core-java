@@ -98,3 +98,14 @@ enum EntityStateValidationError {
     // The entity state does not pass the validation.
     INVALID_ENTITY_STATE = 1;
 }
+
+enum EntityKind {
+
+    GENERIC_ENTITY = 0;
+
+    AGGREGATE = 1;
+
+    PROJECTION = 2;
+
+    PROCESS_MANAGER = 3;
+}

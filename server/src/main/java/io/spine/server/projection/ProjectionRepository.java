@@ -37,6 +37,7 @@ import io.spine.server.delivery.Shardable;
 import io.spine.server.delivery.ShardedStreamConsumer;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
+import io.spine.server.entity.EntityKind;
 import io.spine.server.entity.EntityStorageConverter;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.event.EventFilter;
@@ -59,7 +60,6 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
-import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.server.projection.model.ProjectionClass.asProjectionClass;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -87,7 +87,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Creates a new {@code ProjectionRepository}.
      */
     protected ProjectionRepository() {
-        super(EventProducers.fromContext());
+        super(EntityKind.PROJECTION, EventProducers.fromContext());
     }
 
     @VisibleForTesting
@@ -119,7 +119,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     public P create(I id) {
         P projection = super.create(id);
-        lifecycleOf(id).onEntityCreated(PROJECTION);
+        lifecycleOf(id).onEntityCreated(this);
         return projection;
     }
 
