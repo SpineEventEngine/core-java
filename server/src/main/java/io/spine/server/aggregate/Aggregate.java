@@ -139,9 +139,6 @@ public abstract class Aggregate<I,
      */
     private UncommittedEvents uncommittedEvents = UncommittedEvents.ofNone();
 
-    /** A guard for ensuring idempotency of messages dispatched by this aggregate. */
-    private IdempotencyGuard idempotencyGuard;
-
     /**
      * Creates a new instance.
      *
@@ -162,14 +159,6 @@ public abstract class Aggregate<I,
      */
     protected Aggregate(I id) {
         super(id);
-        setIdempotencyGuard();
-    }
-
-    /**
-     * Creates and assigns the aggregate an {@link IdempotencyGuard idempotency guard}.
-     */
-    private void setIdempotencyGuard() {
-        idempotencyGuard = new IdempotencyGuard(this);
     }
 
     /**
@@ -209,7 +198,7 @@ public abstract class Aggregate<I,
      */
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope command) {
-        idempotencyGuard.check(command);
+        idempotencyGuard().check(command);
         CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         EventsResult result = method.invoke(this, command);
         return result.produceEvents(command);

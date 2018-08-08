@@ -18,16 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate;
+package io.spine.server.entity;
 
+import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.Event;
+import io.spine.server.aggregate.Aggregate;
 import io.spine.server.commandbus.DuplicateCommandException;
 
 import java.util.Iterator;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Events.getRootCommandId;
 
 /**
@@ -35,13 +38,20 @@ import static io.spine.core.Events.getRootCommandId;
  * If it was the exception is thrown.
  *
  * @author Mykhailo Drachuk
+ * @author Dmytro Dashenkov
  */
-class IdempotencyGuard {
+@Internal
+public final class IdempotencyGuard {
 
-    private final Aggregate<?, ?, ?> aggregate;
+    private final RecentHistory history;
 
-    IdempotencyGuard(Aggregate<?, ?, ?> aggregate) {
-        this.aggregate = aggregate;
+    private IdempotencyGuard(RecentHistory history) {
+        this.history = history;
+    }
+
+    static IdempotencyGuard lookingAt(RecentHistory history) {
+        checkNotNull(history);
+        return new IdempotencyGuard(history);
     }
 
     /**
@@ -51,7 +61,7 @@ class IdempotencyGuard {
      * @param envelope an envelope with a command to check
      * @throws DuplicateCommandException if the command was dispatched to the aggregate
      */
-    void check(CommandEnvelope envelope) {
+    public void check(CommandEnvelope envelope) {
         if (didHandleSinceLastSnapshot(envelope)) {
             Command command = envelope.getOuterObject();
             throw DuplicateCommandException.of(command);
@@ -72,9 +82,9 @@ class IdempotencyGuard {
      */
     private boolean didHandleSinceLastSnapshot(CommandEnvelope envelope) {
         CommandId newCommandId = envelope.getId();
-        Iterator<Event> iterator = aggregate.historyBackward();
-        while (iterator.hasNext()) {
-            Event event = iterator.next();
+        Iterator<Event> events = history.iterator();
+        while (events.hasNext()) {
+            Event event = events.next();
             CommandId eventRootCommandId = getRootCommandId(event);
             if (newCommandId.equals(eventRootCommandId)) {
                 return true;

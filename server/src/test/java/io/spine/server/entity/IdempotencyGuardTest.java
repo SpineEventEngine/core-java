@@ -18,13 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate;
+package io.spine.server.entity;
 
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
+import io.spine.server.aggregate.Repositories;
 import io.spine.server.aggregate.given.aggregate.IgTestAggregate;
 import io.spine.server.aggregate.given.aggregate.IgTestAggregateRepository;
 import io.spine.server.commandbus.CommandBus;
@@ -83,14 +84,14 @@ class IdempotencyGuardTest {
         commandBus.post(createCommand, noOpObserver);
 
         IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
-        IdempotencyGuard guard = new IdempotencyGuard(aggregate);
+        IdempotencyGuard guard = aggregate.idempotencyGuard();
         assertThrows(DuplicateCommandException.class, () -> guard.check(of(createCommand)));
     }
 
     @Test
     @DisplayName("not throw exception when command was handled but snapshot was made")
     void notThrowForCommandHandledAfterSnapshot() {
-        repository.setSnapshotTrigger(1);
+        Repositories.setSnapshotTrigger(repository, 1);
 
         TenantId tenantId = newTenantId();
         ProjectId projectId = newProjectId();
@@ -102,7 +103,7 @@ class IdempotencyGuardTest {
 
         IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
 
-        IdempotencyGuard guard = new IdempotencyGuard(aggregate);
+        IdempotencyGuard guard = aggregate.idempotencyGuard();
         guard.check(of(createCommand));
     }
 
@@ -114,7 +115,7 @@ class IdempotencyGuardTest {
         Command createCommand = command(createProject(projectId), tenantId);
         IgTestAggregate aggregate = new IgTestAggregate(projectId);
 
-        IdempotencyGuard guard = new IdempotencyGuard(aggregate);
+        IdempotencyGuard guard = aggregate.idempotencyGuard();
         guard.check(of(createCommand));
     }
 
@@ -132,7 +133,7 @@ class IdempotencyGuardTest {
 
         IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
 
-        IdempotencyGuard guard = new IdempotencyGuard(aggregate);
+        IdempotencyGuard guard = aggregate.idempotencyGuard();
         guard.check(of(startCommand));
     }
 }

@@ -48,7 +48,7 @@ public abstract class TransactionalEntity<I,
                                           B extends ValidatingBuilder<S, ? extends Message.Builder>>
                       extends AbstractVersionableEntity<I, S> {
 
-    private final RecentHistory recentHistory = new RecentHistory();
+    private final RecentHistory recentHistory;
 
     /**
      * The flag, which becomes {@code true}, if the state of the entity has been changed
@@ -59,6 +59,8 @@ public abstract class TransactionalEntity<I,
     private volatile
     @Nullable Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> transaction;
 
+    private final IdempotencyGuard idempotencyGuard;
+
     /**
      * Creates a new instance.
      *
@@ -68,6 +70,8 @@ public abstract class TransactionalEntity<I,
      */
     protected TransactionalEntity(I id) {
         super(id);
+        this.recentHistory = new RecentHistory();
+        this.idempotencyGuard = IdempotencyGuard.lookingAt(recentHistory);
     }
 
     /**
@@ -89,6 +93,11 @@ public abstract class TransactionalEntity<I,
      */
     protected void clearRecentHistory() {
         recentHistory.clear();
+    }
+
+    @Internal
+    protected IdempotencyGuard idempotencyGuard() {
+        return idempotencyGuard;
     }
 
     /**
