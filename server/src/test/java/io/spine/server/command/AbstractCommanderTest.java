@@ -20,29 +20,72 @@
 
 package io.spine.server.command;
 
-import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import io.spine.client.CommandFactory;
+import io.spine.core.CommandClass;
+import io.spine.core.CommandEnvelope;
+import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.FirstCmdCreateProject;
+import io.spine.test.command.ProjectId;
+import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
+
+import static io.spine.base.Identifier.newUuid;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
+@DisplayName("AbstractCommander should")
 class AbstractCommanderTest {
 
+    private final CommandFactory factory = TestActorRequestFactory.newInstance(getClass())
+                                                                  .command();
     private final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                                 .build();
-    private AbstractCommander commander;
+    private CommandInterceptor interceptor;
 
     @BeforeEach
     void setUp() {
-        commander = new Commendatore(boundedContext.getCommandBus(), boundedContext.getEventBus());
+        CommandBus commandBus = boundedContext.getCommandBus();
+        AbstractCommander commander = new Commendatore(commandBus, boundedContext.getEventBus());
+        interceptor = new CommandInterceptor(boundedContext, FirstCmdCreateProject.class);
+        commandBus.register(commander);
+    }
+
+    @Test
+    @DisplayName("create a command in response to a command")
+    void commandOnCommand() {
+        CmdCreateProject commandMessage = CmdCreateProject
+                .newBuilder()
+                .setProjectId(newId())
+                .build();
+        createAndPost(commandMessage);
+
+        assertTrue(interceptor.contains(FirstCmdCreateProject.class));
+    }
+
+    private static ProjectId newId() {
+        return ProjectId.newBuilder()
+                        .setId(newUuid())
+                        .build();
+    }
+
+    private void createAndPost(CmdCreateProject commandMessage) {
+        io.spine.core.Command command = factory.create(commandMessage);
+        boundedContext.getCommandBus()
+                      .post(command, StreamObservers.noOpObserver());
     }
 
     /**
@@ -63,12 +106,41 @@ class AbstractCommanderTest {
         }
     }
 
-    private static class MemoizingHandler extends AbstractCommandHandler {
+    /**
+     * Utility class that remembers all commands issued by a commander class.
+     */
+    static class CommandInterceptor extends AbstractCommandHandler {
 
-        private final Set<Message> commands = Sets.newHashSet();
+        private final Set<CommandClass> intercept;
+        private final CommandHistory history = new CommandHistory();
 
-        MemoizingHandler(EventBus eventBus) {
-            super(eventBus);
+        @SafeVarargs
+        @SuppressWarnings("ThisEscapedInObjectConstruction") // already configured
+        private CommandInterceptor(BoundedContext context,
+                                   Class<? extends Message>... commandClass) {
+            super(context.getEventBus());
+            this.intercept = ImmutableSet.copyOf(
+                    Arrays.stream(commandClass)
+                          .map(CommandClass::of)
+                          .collect(Collectors.toSet())
+            );
+            context.getCommandBus()
+                   .register(this);
+        }
+
+        @Override
+        public String dispatch(CommandEnvelope envelope) {
+            history.add(envelope);
+            return getClass().getName();
+        }
+
+        @Override
+        public Set<CommandClass> getMessageClasses() {
+            return intercept;
+        }
+
+        public boolean contains(Class<? extends Message> commandClass) {
+            return history.contains(commandClass);
         }
     }
 }
