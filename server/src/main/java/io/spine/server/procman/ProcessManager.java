@@ -138,6 +138,7 @@ public abstract class ProcessManager<I,
      */
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope command) {
+        idempotencyGuard().check(command);
         CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         CommandHandlerMethod.Result result =
                 method.invoke(this, command);
@@ -153,6 +154,7 @@ public abstract class ProcessManager<I,
      *         produce new events because of the passed event
      */
     List<Event> dispatchEvent(EventEnvelope event) {
+        idempotencyGuard().check(event);
         EventReactorMethod method =
                 thisClass().getReactor(event.getMessageClass(), event.getOriginClass());
         ReactorMethodResult methodResult =

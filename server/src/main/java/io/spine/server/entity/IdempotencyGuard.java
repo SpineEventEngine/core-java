@@ -23,8 +23,11 @@ package io.spine.server.entity;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.commandbus.DuplicateCommandException;
+import io.spine.server.event.DuplicateEventException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -49,18 +52,19 @@ public final class IdempotencyGuard {
         return new IdempotencyGuard(history);
     }
 
-    /**
-     * Checks that the command was not dispatched to the aggregate.
-     * If it was a {@link DuplicateCommandException} is thrown.
-     *
-     * @param envelope an envelope with a command to check
-     * @throws DuplicateCommandException if the command was dispatched to the aggregate
-     */
     public void check(CommandEnvelope envelope) {
         Command command = envelope.getCommand();
         boolean duplicate = history.contains(command);
         if (duplicate) {
             throw DuplicateCommandException.of(command);
+        }
+    }
+
+    public void check(EventEnvelope envelope) {
+        Event event = envelope.getOuterObject();
+        boolean duplicate = history.contains(event);
+        if (duplicate) {
+            throw new DuplicateEventException(history.entity(), envelope);
         }
     }
 }

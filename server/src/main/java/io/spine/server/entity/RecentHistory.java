@@ -65,6 +65,10 @@ public final class RecentHistory {
         return gateway.hasHandled(entityId, eventId);
     }
 
+    EntityHistoryId entity() {
+        return entityId;
+    }
+
     /**
      * Creates a new instance of {@code Builder} for {@code RecentHistory} instances.
      *
