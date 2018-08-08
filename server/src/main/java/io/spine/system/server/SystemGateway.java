@@ -21,6 +21,8 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Message;
+import io.spine.core.CommandId;
+import io.spine.core.EventId;
 
 /**
  * A gateway for sending messages into a system bounded context.
@@ -39,4 +41,8 @@ public interface SystemGateway {
      * @param systemCommand command message
      */
     void postCommand(Message systemCommand);
+
+    boolean hasHandled(EntityHistoryId entity, CommandId commandId);
+
+    boolean hasHandled(EntityHistoryId entity, EventId eventId);
 }

@@ -21,6 +21,8 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Message;
+import io.spine.core.CommandId;
+import io.spine.core.EventId;
 
 /**
  * An implementation of {@link SystemGateway} which never performs an operation.
@@ -40,4 +42,15 @@ public enum NoOpSystemGateway implements SystemGateway {
     public void postCommand(Message systemCommand) {
         // NOP.
     }
+
+    @Override
+    public boolean hasHandled(EntityHistoryId entity, CommandId commandId) {
+        return false;
+    }
+
+    @Override
+    public boolean hasHandled(EntityHistoryId entity, EventId eventId) {
+        return false;
+    }
+
 }

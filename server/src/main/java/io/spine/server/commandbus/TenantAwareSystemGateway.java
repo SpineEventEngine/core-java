@@ -22,8 +22,11 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.spine.core.CommandId;
+import io.spine.core.EventId;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.system.server.EntityHistoryId;
 import io.spine.system.server.SystemGateway;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -61,6 +64,16 @@ final class TenantAwareSystemGateway implements SystemGateway {
         Runnable action = () -> delegate.postCommand(systemCommand);
         TenantAwareOperation operation = new Operation(tenantId, action);
         operation.execute();
+    }
+
+    @Override
+    public boolean hasHandled(EntityHistoryId entity, CommandId commandId) {
+        return false;
+    }
+
+    @Override
+    public boolean hasHandled(EntityHistoryId entity, EventId eventId) {
+        return false;
     }
 
     @VisibleForTesting

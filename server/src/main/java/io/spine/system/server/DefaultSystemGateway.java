@@ -25,13 +25,20 @@ import com.google.protobuf.Message;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.CommandFactory;
 import io.spine.core.Command;
+import io.spine.core.CommandId;
+import io.spine.core.EventId;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
+import io.spine.server.entity.Entity;
+import io.spine.server.entity.Repository;
 import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Optional;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 
 /**
@@ -64,6 +71,36 @@ public final class DefaultSystemGateway implements SystemGateway {
         Command command = commandFactory.create(systemCommand);
         system.getCommandBus()
               .post(command, noOpObserver());
+    }
+
+    @Override
+    public boolean hasHandled(EntityHistoryId entity, CommandId commandId) {
+        boolean result = findProjection(entity, HandledCommands.class)
+                .map(projection -> projection.getCommandList()
+                                             .contains(commandId))
+                .orElse(false);
+        return result;
+    }
+
+    @Override
+    public boolean hasHandled(EntityHistoryId entity, EventId eventId) {
+        boolean result = findProjection(entity, HandledEvents.class)
+                .map(projection -> projection.getEventList().contains(eventId))
+                .orElse(false);
+        return result;
+    }
+
+    private <S extends Message> Optional<S> findProjection(EntityHistoryId id,
+                                                           Class<S> projectionClass) {
+        Optional<Repository> foundRepository = system.findRepository(projectionClass);
+        checkState(foundRepository.isPresent(),
+                   "Cannot find repository for %s in %s.",
+                   projectionClass.getSimpleName(), system.getName());
+        @SuppressWarnings("unchecked") // Logically OK.
+        Repository<EntityHistoryId, ? extends Entity<EntityHistoryId, S>> repository =
+                foundRepository.get();
+        Optional<S> foundProjection = repository.find(id).map(Entity::getState);
+        return foundProjection;
     }
 
     @VisibleForTesting
