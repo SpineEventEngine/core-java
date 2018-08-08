@@ -20,11 +20,7 @@
 
 package io.spine.server.command;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
 import io.spine.client.CommandFactory;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
@@ -36,10 +32,6 @@ import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import static io.spine.base.Identifier.newUuid;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -106,41 +98,4 @@ class AbstractCommanderTest {
         }
     }
 
-    /**
-     * Utility class that remembers all commands issued by a commander class.
-     */
-    static class CommandInterceptor extends AbstractCommandHandler {
-
-        private final Set<CommandClass> intercept;
-        private final CommandHistory history = new CommandHistory();
-
-        @SafeVarargs
-        @SuppressWarnings("ThisEscapedInObjectConstruction") // already configured
-        private CommandInterceptor(BoundedContext context,
-                                   Class<? extends Message>... commandClass) {
-            super(context.getEventBus());
-            this.intercept = ImmutableSet.copyOf(
-                    Arrays.stream(commandClass)
-                          .map(CommandClass::of)
-                          .collect(Collectors.toSet())
-            );
-            context.getCommandBus()
-                   .register(this);
-        }
-
-        @Override
-        public String dispatch(CommandEnvelope envelope) {
-            history.add(envelope);
-            return getClass().getName();
-        }
-
-        @Override
-        public Set<CommandClass> getMessageClasses() {
-            return intercept;
-        }
-
-        public boolean contains(Class<? extends Message> commandClass) {
-            return history.contains(commandClass);
-        }
-    }
 }
