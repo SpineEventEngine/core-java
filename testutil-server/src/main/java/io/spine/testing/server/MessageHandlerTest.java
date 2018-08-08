@@ -111,7 +111,7 @@ public abstract class MessageHandlerTest<I,
     }
 
     /**
-     * Creates a new ID of the tested entity.
+     * Obtains the ID of the tested entity.
      *
      * @return new ID
      */
