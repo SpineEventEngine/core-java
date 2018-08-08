@@ -106,7 +106,7 @@ public abstract class MessageHandlerTest<I,
     @BeforeEach
     @OverridingMethodsMustInvokeSuper
     protected void setUp() {
-        id = newId();
+        id = entityId();
         storeMessage(createMessage());
     }
 
@@ -115,7 +115,7 @@ public abstract class MessageHandlerTest<I,
      *
      * @return new ID
      */
-    protected abstract I newId();
+    protected abstract I entityId();
 
     /**
      * Creates a new message to test.

@@ -46,7 +46,7 @@ public class SampleProjectionTest
     }
 
     @Override
-    protected Long newId() {
+    protected Long entityId() {
         return TuProjection.ID;
     }
 

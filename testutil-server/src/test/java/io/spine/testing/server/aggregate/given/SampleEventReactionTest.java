@@ -53,7 +53,7 @@ public class SampleEventReactionTest
     }
 
     @Override
-    protected TuProjectId newId() {
+    protected TuProjectId entityId() {
         return TuReactingAggregate.ID;
     }
 

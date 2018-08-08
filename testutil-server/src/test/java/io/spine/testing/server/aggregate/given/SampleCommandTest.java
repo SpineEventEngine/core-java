@@ -46,7 +46,7 @@ public class SampleCommandTest
                            .build();
 
     @Override
-    protected TuProjectId newId() {
+    protected TuProjectId entityId() {
         return TuAggregate.ID;
     }
 

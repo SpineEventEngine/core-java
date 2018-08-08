@@ -50,7 +50,7 @@ public class SamplePartCommandTest
                         .build();
 
     @Override
-    protected TuTaskId newId() {
+    protected TuTaskId entityId() {
         return TuAggregatePart.ID;
     }
 

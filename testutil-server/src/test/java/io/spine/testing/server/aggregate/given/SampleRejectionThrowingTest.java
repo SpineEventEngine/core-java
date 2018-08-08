@@ -43,7 +43,7 @@ public class SampleRejectionThrowingTest
                            .build();
 
     @Override
-    protected TuProjectId newId() {
+    protected TuProjectId entityId() {
         return TuAggregate.ID;
     }
 

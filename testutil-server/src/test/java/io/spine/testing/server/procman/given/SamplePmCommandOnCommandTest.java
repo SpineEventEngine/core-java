@@ -37,17 +37,19 @@ public class SamplePmCommandOnCommandTest
         extends PmCommandOnCommandTest<TuProjectId, TuAssignTask, TuPmState, CommandingPm> {
 
     @Override
-    protected TuProjectId newId() {
+    protected TuProjectId entityId() {
         return CommandingPm.ID;
     }
 
     @Override
     protected TuAssignTask createMessage() {
+        //TODO:2018-08-08:alexander.yevsyukov: Implement
         return null;
     }
 
     @Override
     protected Repository<TuProjectId, CommandingPm> createEntityRepository() {
+    //TODO:2018-08-08:alexander.yevsyukov: Implement
         return null;
     }
 }

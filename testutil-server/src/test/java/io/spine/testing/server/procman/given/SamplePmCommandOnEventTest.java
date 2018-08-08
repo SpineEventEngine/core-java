@@ -57,7 +57,7 @@ public class SamplePmCommandOnEventTest
     }
 
     @Override
-    protected TuProjectId newId() {
+    protected TuProjectId entityId() {
         return CommandingPm.ID;
     }
 

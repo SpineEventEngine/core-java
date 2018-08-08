@@ -49,7 +49,7 @@ public class SamplePmCommandTest
     }
 
     @Override
-    protected TuTaskId newId() {
+    protected TuTaskId entityId() {
         return CommandHandlingPm.ID;
     }
 
