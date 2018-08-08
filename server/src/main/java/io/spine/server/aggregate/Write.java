@@ -68,7 +68,6 @@ final class Write<I> {
 
     private void writeSnapshot(Aggregate<I, ? ,?> aggregate) {
         Snapshot snapshot = aggregate.toSnapshot();
-        aggregate.clearRecentHistory();
         storage.writeSnapshot(aggregate.getId(), snapshot);
     }
 

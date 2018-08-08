@@ -42,13 +42,12 @@ import static io.spine.server.entity.TransactionalEntity.GenericParameter.STATE_
  * to modify the state from the descendants.
  *
  * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
 public abstract class TransactionalEntity<I,
                                           S extends Message,
                                           B extends ValidatingBuilder<S, ? extends Message.Builder>>
                       extends AbstractVersionableEntity<I, S> {
-
-    private final RecentHistory recentHistory;
 
     /**
      * The flag, which becomes {@code true}, if the state of the entity has been changed
@@ -70,29 +69,12 @@ public abstract class TransactionalEntity<I,
      */
     protected TransactionalEntity(I id) {
         super(id);
-        this.recentHistory = new RecentHistory();
+        RecentHistory recentHistory = RecentHistory
+                .create()
+                .of(this)
+                .readingFrom(null) // TODO:2018-08-08:dmytro.dashenkov: Complete.
+                .build();
         this.idempotencyGuard = IdempotencyGuard.lookingAt(recentHistory);
-    }
-
-    /**
-     * Obtains recent history of events of this entity.
-     */
-    protected RecentHistory recentHistory() {
-        return recentHistory;
-    }
-
-    /**
-     * Adds events to the {@linkplain #recentHistory() recent history}.
-     */
-    protected void remember(Iterable<Event> events) {
-        recentHistory.addAll(events);
-    }
-
-    /**
-     * Clears {@linkplain #recentHistory() recent history}.
-     */
-    protected void clearRecentHistory() {
-        recentHistory.clear();
     }
 
     @Internal

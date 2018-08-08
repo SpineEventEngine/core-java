@@ -23,15 +23,10 @@ package io.spine.server.entity;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.CommandId;
-import io.spine.core.Event;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.commandbus.DuplicateCommandException;
 
-import java.util.Iterator;
-
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.core.Events.getRootCommandId;
 
 /**
  * This guard ensures that the message was not yet dispatched to the {@link Aggregate aggregate}.
@@ -62,34 +57,10 @@ public final class IdempotencyGuard {
      * @throws DuplicateCommandException if the command was dispatched to the aggregate
      */
     public void check(CommandEnvelope envelope) {
-        if (didHandleSinceLastSnapshot(envelope)) {
-            Command command = envelope.getOuterObject();
+        Command command = envelope.getCommand();
+        boolean duplicate = history.contains(command);
+        if (duplicate) {
             throw DuplicateCommandException.of(command);
         }
-    }
-
-    /**
-     * Checks if the command was already handled by the aggregate since last snapshot.
-     *
-     * <p>The check is performed by searching for an event caused by this command that was
-     * committed since last snapshot.
-     *
-     * <p>This functionality supports the ability to stop duplicate commands from being dispatched
-     * to the aggregate.
-     *
-     * @param envelope the command to check
-     * @return {@code true} if the command was handled since last snapshot, {@code false} otherwise
-     */
-    private boolean didHandleSinceLastSnapshot(CommandEnvelope envelope) {
-        CommandId newCommandId = envelope.getId();
-        Iterator<Event> events = history.iterator();
-        while (events.hasNext()) {
-            Event event = events.next();
-            CommandId eventRootCommandId = getRootCommandId(event);
-            if (newCommandId.equals(eventRootCommandId)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

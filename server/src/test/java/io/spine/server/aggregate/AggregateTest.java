@@ -450,7 +450,7 @@ public class AggregateTest {
 
         @Test
         @DisplayName("which are being committed")
-        void beingCommitedAfterDispatch() {
+        void beingCommittedAfterDispatch() {
             aggregate.dispatchCommands(command(createProject),
                                        command(addTask),
                                        command(startProject));

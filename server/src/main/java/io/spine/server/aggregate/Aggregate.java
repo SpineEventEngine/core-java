@@ -258,7 +258,6 @@ public abstract class Aggregate<I,
         List<Event> events = aggregateStateRecord.getEventList();
 
         play(events);
-        remember(events);
     }
 
     /**
@@ -382,13 +381,7 @@ public abstract class Aggregate<I,
         return uncommittedEvents;
     }
 
-    /**
-     * {@linkplain #remember Remembers} the uncommitted events as
-     * the {@link io.spine.server.entity.RecentHistory RecentHistory} and clears them.
-     */
     void commitEvents() {
-        List<Event> recentEvents = uncommittedEvents.list();
-        remember(recentEvents);
         uncommittedEvents = UncommittedEvents.ofNone();
     }
 
@@ -417,16 +410,6 @@ public abstract class Aggregate<I,
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * <p>Opens the method for the repository.
-     */
-    @Override
-    protected void clearRecentHistory() {
-        super.clearRecentHistory();
-    }
-
-    /**
      * Creates an iterator of the aggregate event history with reverse traversal.
      *
      * <p>The records are returned sorted by timestamp in a descending order (from newer to older).
@@ -436,7 +419,7 @@ public abstract class Aggregate<I,
      * @return new iterator instance
      */
     protected Iterator<Event> historyBackward() {
-        return recentHistory().iterator();
+        return null;
     }
 
     /**
