@@ -22,6 +22,7 @@ package io.spine.system.server;
 
 import io.spine.core.CommandId;
 import io.spine.core.Subscribe;
+import io.spine.server.entity.IdempotencySpec;
 import io.spine.server.projection.Projection;
 
 /**
@@ -30,16 +31,16 @@ import io.spine.server.projection.Projection;
 public class HandledCommandsProjection
         extends Projection<EntityHistoryId, HandledCommands, HandledCommandsVBuilder> {
 
-    private static final int DEFAULT_MEMORY_LIMIT = 100;
-
     public HandledCommandsProjection(EntityHistoryId id) {
         super(id);
     }
 
     @Subscribe
     public void on(EntityCreated event) {
+        IdempotencySpec idempotency = event.getRepositorySpec()
+                                           .getIdempotency();
         getBuilder().setId(event.getId())
-                    .setMemoryLimit(DEFAULT_MEMORY_LIMIT);
+                    .setMemoryLimit(idempotency.getCommandIdempotencyThreashold());
     }
 
     @Subscribe
