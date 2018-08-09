@@ -28,6 +28,8 @@ import io.spine.server.entity.EntityLifecycle;
 
 import java.util.List;
 
+import static io.spine.server.command.DispatchCommand.operationFor;
+
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
  *
@@ -59,12 +61,7 @@ public class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     @Override
     protected List<Event> doDispatch(A aggregate, CommandEnvelope envelope) {
         EntityLifecycle lifecycle = repository().lifecycleOf(aggregate.getId());
-        DispatchCommand dispatch = DispatchCommand
-                .newBuilder()
-                .setCommand(envelope)
-                .setEntity(aggregate)
-                .setLifecycle(lifecycle)
-                .build();
+        DispatchCommand dispatch = operationFor(lifecycle, aggregate, envelope);
         return dispatch.perform();
     }
 
