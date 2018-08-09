@@ -68,7 +68,7 @@ public class SamplePmCommandOnEventTest
 
     @Override
     public CommanderExpected<TuPmState>
-    expectThat(CommandingPm entity) {
-        return super.expectThat(entity);
+    expectThat(CommandingPm processManager) {
+        return super.expectThat(processManager);
     }
 }

@@ -20,12 +20,14 @@
 
 package io.spine.testing.server.procman;
 
+import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.procman.ProcessManager;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
@@ -33,12 +35,34 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
  *
  * @author Vladyslav Lubenskyi
  */
-class CommandBusInjection {
+public class InjectCommandBus {
+
+    private final CommandBus bus;
+
+    private InjectCommandBus(CommandBus bus) {
+        this.bus = bus;
+    }
 
     /**
-     * Prevent instantiation.
+     * Creates new instance for injecting the passed Command Bus.
      */
-    private CommandBusInjection() {
+    public static InjectCommandBus of(CommandBus bus) {
+        checkNotNull(bus);
+        return new InjectCommandBus(bus);
+    }
+
+    /**
+     * Creates new instance for injecting a Command Bus of the passed Bounded Context.
+     */
+    public static InjectCommandBus of(BoundedContext boundedContext) {
+        checkNotNull(boundedContext);
+        CommandBus bus = boundedContext.getCommandBus();
+        checkNotNull(bus);
+        return of(bus);
+    }
+
+    public void to(ProcessManager processManager) {
+        inject(processManager, bus);
     }
 
     /**

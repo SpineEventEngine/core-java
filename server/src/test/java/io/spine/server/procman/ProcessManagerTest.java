@@ -27,18 +27,13 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
-import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.DispatchedCommand;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Rejection;
 import io.spine.core.RejectionEnvelope;
-import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.procman.given.pm.AddTaskDispatcher;
 import io.spine.server.procman.given.pm.DirectQuizProcmanRepository;
 import io.spine.server.procman.given.pm.QuizProcmanRepository;
@@ -47,9 +42,8 @@ import io.spine.server.procman.given.pm.TestProcessManagerRepo;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.NoOpSystemGateway;
-import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmAddTask;
-import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.command.PmReviewBacklog;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
@@ -60,12 +54,12 @@ import io.spine.test.procman.quiz.command.PmAnswerQuestion;
 import io.spine.test.procman.quiz.command.PmStartQuiz;
 import io.spine.test.procman.quiz.event.PmQuestionAnswered;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
-import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.model.ModelTests;
+import io.spine.testing.server.procman.InjectCommandBus;
 import io.spine.testing.server.tenant.TenantAwareTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -74,15 +68,19 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.commandbus.Given.ACommand;
+import static io.spine.server.procman.given.pm.GivenMessages.addTask;
+import static io.spine.server.procman.given.pm.GivenMessages.createProject;
+import static io.spine.server.procman.given.pm.GivenMessages.entityAlreadyArchived;
+import static io.spine.server.procman.given.pm.GivenMessages.ownerChanged;
+import static io.spine.server.procman.given.pm.GivenMessages.startProject;
 import static io.spine.server.procman.given.pm.QuizGiven.answerQuestion;
 import static io.spine.server.procman.given.pm.QuizGiven.newAnswer;
 import static io.spine.server.procman.given.pm.QuizGiven.newQuizId;
 import static io.spine.server.procman.given.pm.QuizGiven.startQuiz;
+import static io.spine.testdata.Sample.messageOfType;
 import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.testing.client.blackbox.Count.none;
 import static io.spine.testing.client.blackbox.Count.once;
@@ -108,56 +106,21 @@ import static org.mockito.Mockito.spy;
 @DisplayName("ProcessManager should")
 class ProcessManagerTest {
 
-    private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
-
     private final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(Identifier.pack(ID), getClass());
+            TestEventFactory.newInstance(Identifier.pack(TestProcessManager.ID), getClass());
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
 
     private CommandBus commandBus;
     private TestProcessManager processManager;
 
-    private static PmCreateProject createProject() {
-        return ((PmCreateProject.Builder) Sample.builderForType(PmCreateProject.class))
-                .setProjectId(ID)
-                .build();
-    }
-
-    private static PmStartProject startProject() {
-        return ((PmStartProject.Builder) Sample.builderForType(PmStartProject.class))
-                .setProjectId(ID)
-                .build();
-    }
-
-    private static PmAddTask addTask() {
-        return ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
-                .setProjectId(ID)
-                .build();
-    }
-
-    private static RejectionEnvelope entityAlreadyArchived(
-            Class<? extends Message> commandMessageCls) {
-        Any id = Identifier.pack(ProcessManagerTest.class.getName());
-        EntityAlreadyArchived rejectionMessage = EntityAlreadyArchived.newBuilder()
-                                                                      .setEntityId(id)
-                                                                      .build();
-        Command command = ACommand.withMessage(Sample.messageOfType(commandMessageCls));
-        Rejection rejection = Rejections.createRejection(rejectionMessage, command);
-        return RejectionEnvelope.of(rejection);
-    }
-
-    static Message getMessage(DispatchedCommand command) {
-        checkNotNull(command);
-        return AnyPacker.unpack(command.getMessage());
-    }
-
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        BoundedContext bc = BoundedContext.newBuilder()
-                                          .setMultitenant(true)
-                                          .build();
+        BoundedContext bc = BoundedContext
+                .newBuilder()
+                .setMultitenant(true)
+                .build();
         StorageFactory storageFactory = bc.getStorageFactory();
         TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false, storageFactory);
 
@@ -166,7 +129,7 @@ class ProcessManagerTest {
                                    .injectSystemGateway(NoOpSystemGateway.INSTANCE)
                                    .build());
         processManager = Given.processManagerOfClass(TestProcessManager.class)
-                              .withId(ID)
+                              .withId(TestProcessManager.ID)
                               .withVersion(2)
                               .withState(Any.getDefaultInstance())
                               .build();
@@ -203,7 +166,7 @@ class ProcessManagerTest {
         @DisplayName("event")
         void event() {
             List<? extends Message> eventMessages =
-                    testDispatchEvent(Sample.messageOfType(PmProjectStarted.class));
+                    testDispatchEvent(messageOfType(PmProjectStarted.class));
 
             assertEquals(1, eventMessages.size());
             assertTrue(eventMessages.get(0) instanceof Event);
@@ -219,7 +182,7 @@ class ProcessManagerTest {
         Event event = events.get(0);
         assertNotNull(event);
         PmProjectCreated message = unpack(event.getMessage());
-        assertEquals(ID, message.getProjectId());
+        assertEquals(TestProcessManager.ID, message.getProjectId());
     }
 
     @Nested
@@ -252,7 +215,8 @@ class ProcessManagerTest {
         @DisplayName("commands")
         void commands() {
             commandBus.register(new AddTaskDispatcher());
-            processManager.injectCommandBus(commandBus);
+            InjectCommandBus.of(commandBus)
+                            .to(processManager);
 
             testDispatchCommand(createProject());
             testDispatchCommand(addTask());
@@ -262,9 +226,9 @@ class ProcessManagerTest {
         @Test
         @DisplayName("events")
         void events() {
-            testDispatchEvent(Sample.messageOfType(PmProjectCreated.class));
-            testDispatchEvent(Sample.messageOfType(PmTaskAdded.class));
-            testDispatchEvent(Sample.messageOfType(PmProjectStarted.class));
+            testDispatchEvent(messageOfType(PmProjectCreated.class));
+            testDispatchEvent(messageOfType(PmTaskAdded.class));
+            testDispatchEvent(messageOfType(PmProjectStarted.class));
         }
     }
 
@@ -272,21 +236,30 @@ class ProcessManagerTest {
     @DisplayName("Create command")
     class Commanding {
 
+        private BlackBoxBoundedContext boundedContext;
+
+        @BeforeEach
+        void setUp() {
+            boundedContext = BlackBoxBoundedContext.with(new TestProcessManagerRepo());
+        }
+
         /**
          * Tests transformation of a command into another command.
-         *
          * @see TestProcessManager#transform(PmStartProject)
          */
         @Test
-        @DisplayName("transform command")
+        @DisplayName("by transform incoming command")
         void transformCommand() {
-            BlackBoxBoundedContext
-                    .with(new TestProcessManagerRepo())
-                    .receivesCommand(startProject())
-                    .assertThat(emittedCommand(PmAddTask.class, once()));
+            boundedContext.receivesCommand(startProject())
+                          .assertThat(emittedCommand(PmAddTask.class, once()));
         }
 
-        //TODO:2018-08-09:alexander.yevsyukov: Test command by event
+        @Test
+        @DisplayName("on incoming event")
+        void commandOnEvent() {
+            boundedContext.receivesEvent(ownerChanged())
+                          .assertThat(emittedCommand(PmReviewBacklog.class));
+        }
     }
 
     @Nested

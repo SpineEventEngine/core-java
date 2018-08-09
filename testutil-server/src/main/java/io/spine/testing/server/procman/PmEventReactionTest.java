@@ -33,7 +33,6 @@ import io.spine.testing.server.expected.EventReactorExpected;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.testing.server.procman.CommandBusInjection.inject;
 
 /**
  * The implementation base for testing a single event reactor in a {@link ProcessManager}.
@@ -81,7 +80,8 @@ public abstract class PmEventReactionTest<I,
 
     @Override
     protected EventReactorExpected<S> expectThat(P entity) {
-        inject(entity, boundedContext().getCommandBus());
+        InjectCommandBus.of(boundedContext())
+                        .to(entity);
         return super.expectThat(entity);
     }
 

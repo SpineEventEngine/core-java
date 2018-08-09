@@ -23,29 +23,26 @@ package io.spine.server.procman.given.pm;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.core.EventContext;
 import io.spine.core.React;
 import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
-import io.spine.server.commandbus.CommandBus;
-import io.spine.server.entity.rejection.StandardRejections;
+import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmAddTask;
 import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.command.PmReviewBacklog;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmNotificationSent;
+import io.spine.test.procman.event.PmOwnerChanged;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
-import io.spine.testdata.Sample;
 import io.spine.validate.AnyVBuilder;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import static io.spine.testdata.Sample.builderForType;
+import static io.spine.testdata.Sample.messageOfType;
 
 /**
  * A test Process Manager which remembers past message as its state.
@@ -53,24 +50,15 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 public class TestProcessManager
         extends ProcessManager<ProjectId, Any, AnyVBuilder> {
 
+    public static final ProjectId ID = messageOfType(ProjectId.class);
+
     public TestProcessManager(ProjectId id) {
         super(id);
     }
 
-    /**
-     * Injects the passed CommandBus instance via Reflection since
-     * {@link #setCommandBus(CommandBus)} is package-private and this
-     * test environment class is outside of the parent's class package.
-     */
-    public void injectCommandBus(CommandBus commandBus) {
-        try {
-            Method method = ProcessManager.class.getDeclaredMethod("setCommandBus",
-                                                                   CommandBus.class);
-            method.setAccessible(true);
-            method.invoke(this, commandBus);
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw illegalStateWithCauseOf(e);
-        }
+    /** Updates the state with putting incoming message.*/
+    void remember(Message incoming) {
+        getBuilder().mergeFrom(pack(incoming));
     }
 
     /*
@@ -79,29 +67,46 @@ public class TestProcessManager
 
     @Assign
     PmProjectCreated handle(PmCreateProject command) {
-        getBuilder().mergeFrom(pack(command));
-        return ((PmProjectCreated.Builder) Sample.builderForType(PmProjectCreated.class))
+        remember(command);
+        return ((PmProjectCreated.Builder) builderForType(PmProjectCreated.class))
                 .setProjectId(command.getProjectId())
                 .build();
     }
 
     @Assign
     PmTaskAdded handle(PmAddTask command) {
-        getBuilder().mergeFrom(pack(command));
-        return ((PmTaskAdded.Builder) Sample.builderForType(PmTaskAdded.class))
+        remember(command);
+        return ((PmTaskAdded.Builder) builderForType(PmTaskAdded.class))
                 .setProjectId(command.getProjectId())
                 .build();
     }
 
+    @Assign
+    PmNotificationSent handle(PmReviewBacklog command) {
+        remember(command);
+        return ((PmNotificationSent.Builder) builderForType(PmNotificationSent.class))
+                .setProjectId(command.getProjectId())
+                .build();
+    }
+
+    /*
+     * Command generation
+     *************************************/
+
     @Command
     PmAddTask transform(PmStartProject command) {
-        getBuilder().mergeFrom(pack(command));
-
+        remember(command);
         PmAddTask addTask = ((PmAddTask.Builder)
-                Sample.builderForType(PmAddTask.class))
+                builderForType(PmAddTask.class))
                 .setProjectId(command.getProjectId())
                 .build();
         return addTask;
+    }
+
+    @Command
+    PmReviewBacklog on(PmOwnerChanged event) {
+        remember(event);
+        return messageOfType(PmReviewBacklog.class);
     }
 
     /*
@@ -109,37 +114,36 @@ public class TestProcessManager
      ************************/
 
     @React
-    public Empty on(PmProjectCreated event, EventContext ignored) {
-        getBuilder().mergeFrom(pack(event));
+    public Empty on(PmProjectCreated event) {
+        remember(event);
         return Empty.getDefaultInstance();
     }
 
     @React
-    public Empty on(PmTaskAdded event, EventContext ignored) {
-        getBuilder().mergeFrom(pack(event));
+    public Empty on(PmTaskAdded event) {
+        remember(event);
         return Empty.getDefaultInstance();
     }
 
     @React
-    public Message on(PmProjectStarted event, EventContext ignored) {
-        getBuilder().mergeFrom(pack(event));
-        return Sample.messageOfType(PmNotificationSent.class);
+    public PmNotificationSent on(PmProjectStarted event) {
+        remember(event);
+        return messageOfType(PmNotificationSent.class);
     }
-
 
     /*
      * Reactions on rejections
      **************************/
 
     @React
-    Empty on(StandardRejections.EntityAlreadyArchived rejection, PmAddTask command) {
-        getBuilder().mergeFrom(pack(command));
+    Empty on(EntityAlreadyArchived rejection, PmAddTask command) {
+        remember(command); // We check the command in the test.
         return Empty.getDefaultInstance();
     }
 
     @React
-    Empty on(StandardRejections.EntityAlreadyArchived rejection) {
-        getBuilder().mergeFrom(pack(rejection));
+    Empty on(EntityAlreadyArchived rejection) {
+        remember(rejection);
         return Empty.getDefaultInstance();
     }
 }

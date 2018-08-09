@@ -30,8 +30,6 @@ import io.spine.testing.server.expected.CommanderExpected;
 
 import java.util.List;
 
-import static io.spine.testing.server.procman.CommandBusInjection.inject;
-
 /**
  * Base class for testing a commander method of a {@code ProcessManager}.
  *
@@ -64,12 +62,13 @@ class PmCommandGenerationTest<I,
     protected abstract E createEnvelope();
 
     @Override
-    protected CommanderExpected<S> expectThat(P entity) {
-        inject(entity, boundedContext().getCommandBus());
-        S initialState = entity.getState();
-        List<? extends Message> messages = dispatchTo(entity);
+    protected CommanderExpected<S> expectThat(P processManager) {
+        InjectCommandBus.of(boundedContext())
+                        .to(processManager);
+        S initialState = processManager.getState();
+        List<? extends Message> messages = dispatchTo(processManager);
         ImmutableList<Message> commands = interceptedCommands();
-        S updatedState = entity.getState();
+        S updatedState = processManager.getState();
         CommanderExpected<S> result =
                 new CommanderExpected<>(messages, initialState, updatedState, commands);
         return result;

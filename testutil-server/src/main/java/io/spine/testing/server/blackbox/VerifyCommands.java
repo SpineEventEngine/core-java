@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.testing.client.blackbox.Count;
 
+import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.server.blackbox.AbstractVerify.classes;
 import static io.spine.testing.server.blackbox.AbstractVerify.count;
 import static io.spine.testing.server.blackbox.AbstractVerify.countAndClass;
@@ -54,6 +55,13 @@ public class VerifyCommands extends DelegatingVerify<EmittedCommands> {
      */
     public static VerifyCommands emittedCommand(Count expected) {
         return new VerifyCommands(count(expected));
+    }
+
+    /**
+     * Verifies that the command of the passed class was emitted one time.
+     */
+    public static VerifyCommands emittedCommand(Class<? extends Message> commandClass) {
+        return emittedCommand(commandClass, once());
     }
 
     /**

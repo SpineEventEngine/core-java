@@ -30,7 +30,6 @@ import io.spine.testing.server.expected.CommandHandlerExpected;
 
 import java.util.List;
 
-import static io.spine.testing.server.procman.CommandBusInjection.inject;
 import static io.spine.testing.server.procman.PmDispatcher.dispatch;
 
 /**
@@ -53,15 +52,16 @@ public abstract class PmCommandTest<I,
     }
 
     @Override
-    protected List<? extends Message> dispatchTo(P entity) {
+    protected List<? extends Message> dispatchTo(P processManager) {
         CommandEnvelope command = createCommand();
-        List<Event> events = dispatch(entity, command);
+        List<Event> events = dispatch(processManager, command);
         return Events.toMessages(events);
     }
 
     @Override
-    public CommandHandlerExpected<S> expectThat(P entity) {
-        inject(entity, boundedContext().getCommandBus());
-        return super.expectThat(entity);
+    public CommandHandlerExpected<S> expectThat(P processManager) {
+        InjectCommandBus.of(boundedContext())
+                        .to(processManager);
+        return super.expectThat(processManager);
     }
 }
