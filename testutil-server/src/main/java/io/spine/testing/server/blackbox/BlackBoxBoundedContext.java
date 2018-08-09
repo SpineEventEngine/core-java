@@ -296,7 +296,7 @@ public class BlackBoxBoundedContext {
      * @return current {@link BlackBoxBoundedContext black box} instance
      */
     @CanIgnoreReturnValue
-    public BlackBoxBoundedContext verifiesThat(VerifyEvents verifier) {
+    public BlackBoxBoundedContext assertThat(VerifyEvents verifier) {
         EmittedEvents events = emittedEvents();
         verifier.verify(events);
         return this;
@@ -315,7 +315,7 @@ public class BlackBoxBoundedContext {
      * @return current {@link BlackBoxBoundedContext black box} instance
      */
     @CanIgnoreReturnValue
-    public BlackBoxBoundedContext verifiesThat(AcknowledgementsVerifier verifier) {
+    public BlackBoxBoundedContext assertThat(AcknowledgementsVerifier verifier) {
         Acknowledgements acks = commandAcks();
         verifier.verify(acks);
         return this;
@@ -328,7 +328,7 @@ public class BlackBoxBoundedContext {
      * @return current {@link BlackBoxBoundedContext black box} instance
      */
     @CanIgnoreReturnValue
-    public BlackBoxBoundedContext verifiesThat(VerifyCommands verifier) {
+    public BlackBoxBoundedContext assertThat(VerifyCommands verifier) {
         EmittedCommands commands = emittedCommands();
         verifier.verify(commands);
         return this;

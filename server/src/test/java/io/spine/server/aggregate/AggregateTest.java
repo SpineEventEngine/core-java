@@ -775,8 +775,8 @@ public class AggregateTest {
             BlackBoxBoundedContext
                     .with(new TaskAggregateRepository())
                     .receivesCommand(createTask())
-                    .verifiesThat(acked(once()).withoutErrorsOrRejections())
-                    .verifiesThat(emitted(once()))
+                    .assertThat(acked(once()).withoutErrorsOrRejections())
+                    .assertThat(emitted(once()))
                     .close();
         }
 
@@ -795,10 +795,10 @@ public class AggregateTest {
             BlackBoxBoundedContext
                     .with(new TaskAggregateRepository())
                     .receivesCommand(assignTask())
-                    .verifiesThat(acked(once()).withoutErrorsOrRejections())
-                    .verifiesThat(emitted(twice()))
-                    .verifiesThat(emitted(AggTaskAssigned.class))
-                    .verifiesThat(emitted(AggUserNotified.class))
+                    .assertThat(acked(once()).withoutErrorsOrRejections())
+                    .assertThat(emitted(twice()))
+                    .assertThat(emitted(AggTaskAssigned.class))
+                    .assertThat(emitted(AggUserNotified.class))
                     .close();
         }
 
@@ -817,9 +817,9 @@ public class AggregateTest {
             BlackBoxBoundedContext
                     .with(new TaskAggregateRepository())
                     .receivesCommand(reassignTask())
-                    .verifiesThat(acked(once()).withoutErrorsOrRejections())
-                    .verifiesThat(emitted(once()))
-                    .verifiesThat(emitted(AggUserNotified.class))
+                    .assertThat(acked(once()).withoutErrorsOrRejections())
+                    .assertThat(emitted(once()))
+                    .assertThat(emitted(AggUserNotified.class))
                     .close();
         }
     }

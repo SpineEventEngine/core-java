@@ -68,8 +68,8 @@ class BlackBoxBoundedContextTest {
     @DisplayName("receive and handle a single commands")
     void receivesACommand() {
         project.receivesCommand(createProject())
-               .verifiesThat(acked(once()).withoutErrorsOrRejections())
-               .verifiesThat(emitted(BbProjectCreated.class, once()));
+               .assertThat(acked(once()).withoutErrorsOrRejections())
+               .assertThat(emitted(BbProjectCreated.class, once()));
     }
 
     @SuppressWarnings("ReturnValueIgnored")
@@ -79,10 +79,10 @@ class BlackBoxBoundedContextTest {
         BbProjectId projectId = newProjectId();
         project.receivesCommand(createProject(projectId))
                .receivesCommands(addTask(projectId), addTask(projectId), addTask(projectId))
-               .verifiesThat(acked(count(4)).withoutErrorsOrRejections())
-               .verifiesThat(emitted(count(4)))
-               .verifiesThat(emitted(BbProjectCreated.class, once()))
-               .verifiesThat(emitted(BbTaskAdded.class, thrice()));
+               .assertThat(acked(count(4)).withoutErrorsOrRejections())
+               .assertThat(emitted(count(4)))
+               .assertThat(emitted(BbProjectCreated.class, once()))
+               .assertThat(emitted(BbTaskAdded.class, thrice()));
     }
 
     @SuppressWarnings("ReturnValueIgnored")
@@ -93,10 +93,10 @@ class BlackBoxBoundedContextTest {
         project.andWith(new BbReportRepository())
                .receivesCommand(createReport(projectId))
                .receivesEvent(taskAdded(projectId))
-               .verifiesThat(acked(twice()).withoutErrorsOrRejections())
-               .verifiesThat(emitted(thrice()))
-               .verifiesThat(emitted(BbReportCreated.class, once()))
-               .verifiesThat(emitted(BbTaskAddedToReport.class, once()));
+               .assertThat(acked(twice()).withoutErrorsOrRejections())
+               .assertThat(emitted(thrice()))
+               .assertThat(emitted(BbReportCreated.class, once()))
+               .assertThat(emitted(BbTaskAddedToReport.class, once()));
     }
 
     @SuppressWarnings("ReturnValueIgnored")
@@ -107,10 +107,10 @@ class BlackBoxBoundedContextTest {
         project.andWith(new BbReportRepository())
                .receivesCommand(createReport(projectId))
                .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
-               .verifiesThat(acked(count(4)).withoutErrorsOrRejections())
-               .verifiesThat(emitted(count(7)))
-               .verifiesThat(emitted(BbReportCreated.class, once()))
-               .verifiesThat(emitted(BbTaskAddedToReport.class, thrice()));
+               .assertThat(acked(count(4)).withoutErrorsOrRejections())
+               .assertThat(emitted(count(7)))
+               .assertThat(emitted(BbReportCreated.class, once()))
+               .assertThat(emitted(BbTaskAddedToReport.class, thrice()));
     }
 
     @Test

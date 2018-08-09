@@ -293,6 +293,12 @@ class ProcessManagerTest {
 
             assertTrue(dispatchedCommand.getMessage() instanceof PmAddTask);
         }
+
+        @Test
+        @DisplayName("transform command")
+        void transformCommand() {
+
+        }
     }
 
     @Nested
@@ -358,11 +364,11 @@ class ProcessManagerTest {
             BlackBoxBoundedContext
                     .with(new QuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
-                    .verifiesThat(acked(twice()).withoutErrorsOrRejections())
-                    .verifiesThat(emitted(twice()))
-                    .verifiesThat(emitted(PmQuizStarted.class))
-                    .verifiesThat(emitted(PmQuestionAnswered.class))
-                    .verifiesThat(emitted(Empty.class, none()))
+                    .assertThat(acked(twice()).withoutErrorsOrRejections())
+                    .assertThat(emitted(twice()))
+                    .assertThat(emitted(PmQuizStarted.class))
+                    .assertThat(emitted(PmQuestionAnswered.class))
+                    .assertThat(emitted(Empty.class, none()))
                     .close();
         }
 
@@ -396,10 +402,10 @@ class ProcessManagerTest {
             BlackBoxBoundedContext
                     .with(new DirectQuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
-                    .verifiesThat(acked(twice()).withoutErrorsOrRejections())
-                    .verifiesThat(emitted(once()))
-                    .verifiesThat(emitted(PmQuizStarted.class))
-                    .verifiesThat(emitted(Empty.class, none()))
+                    .assertThat(acked(twice()).withoutErrorsOrRejections())
+                    .assertThat(emitted(once()))
+                    .assertThat(emitted(PmQuizStarted.class))
+                    .assertThat(emitted(Empty.class, none()))
                     .close();
         }
     }
