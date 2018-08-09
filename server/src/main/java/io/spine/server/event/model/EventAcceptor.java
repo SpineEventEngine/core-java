@@ -28,6 +28,7 @@ import io.spine.core.DispatchedCommand;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.RejectionEnvelope;
 import io.spine.server.model.HandlerKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -82,8 +83,9 @@ enum EventAcceptor {
         @Override
         List<?> arguments(EventEnvelope envelope) {
             Message message = envelope.getMessage();
-            CommandContext context = envelope.getRejectionOrigin()
-                                             .getContext();
+            RejectionEnvelope rejection = RejectionEnvelope.from(envelope);
+            CommandContext context = rejection.getOrigin()
+                                              .getContext();
             return of(message, context);
         }
     },
@@ -95,8 +97,8 @@ enum EventAcceptor {
         @Override
         List<?> arguments(EventEnvelope envelope) {
             Message message = envelope.getMessage();
-            Message commandMessage = unpack(envelope.getRejectionOrigin()
-                                                    .getMessage());
+            RejectionEnvelope rejection = RejectionEnvelope.from(envelope);
+            Message commandMessage = rejection.getOriginMessage();
             return of(message, commandMessage);
         }
     },
@@ -109,7 +111,8 @@ enum EventAcceptor {
         @Override
         List<?> arguments(EventEnvelope envelope) {
             Message message = envelope.getMessage();
-            DispatchedCommand origin = envelope.getRejectionOrigin();
+            RejectionEnvelope rejection = RejectionEnvelope.from(envelope);
+            DispatchedCommand origin = rejection.getOrigin();
             Message commandMessage = unpack(origin.getMessage());
             CommandContext context = origin.getContext();
             return of(message, commandMessage, context);

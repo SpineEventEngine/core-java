@@ -28,9 +28,7 @@ import io.spine.type.TypeName;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static io.spine.core.Enrichments.createEnrichment;
-import static io.spine.core.EventContext.OriginCase.COMMAND_CONTEXT;
 
 /**
  * The holder of an {@code Event} which provides convenient access to its properties.
@@ -45,12 +43,14 @@ public final class EventEnvelope
     private final Message eventMessage;
     private final EventClass eventClass;
     private final EventContext eventContext;
+    private final boolean rejection;
 
     private EventEnvelope(Event event) {
         super(event);
         this.eventMessage = Events.getMessage(event);
         this.eventClass = EventClass.of(this.eventMessage);
         this.eventContext = event.getContext();
+        this.rejection = Events.isRejection(event);
     }
 
     /**
@@ -160,30 +160,10 @@ public final class EventEnvelope
     }
 
     /**
-     * Obtains the origin {@linkplain DispatchedCommand command} of the rejection represented by
-     * this envelope.
-     *
-     * <p>Throws an {@linkplain IllegalStateException} if this event is not a rejection.
-     *
-     * @return the rejected command
+     * @return {@code true} if the wrapped event is a rejection, {@code false} otherwise
      */
-    public DispatchedCommand getRejectionOrigin() {
-        checkState(isRejection());
-        checkState(eventContext.getOriginCase() == COMMAND_CONTEXT);
-
-        RejectionEventContext rejection = eventContext.getRejection();
-        Any commandMessage = rejection.getCommandMessage();
-        CommandContext context = eventContext.getCommandContext();
-        DispatchedCommand result = DispatchedCommand
-                .newBuilder()
-                .setMessage(commandMessage)
-                .setContext(context)
-                .build();
-        return result;
-    }
-
-    private boolean isRejection() {
-        return Events.isRejection(getOuterObject());
+    boolean isRejection() {
+        return rejection;
     }
 
     /**
