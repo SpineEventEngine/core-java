@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -18,14 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman.given;
+package io.spine.server.procman.given.tx;
 
-import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.test.procman.quiz.PmQuiz;
-import io.spine.test.procman.quiz.PmQuizId;
+import io.spine.server.entity.ThrowingValidatingBuilder;
+import io.spine.test.procman.Project;
 
 /**
- * @author Mykhailo Drachuk
+ * Custom implementation of {@code ValidatingBuilder}, which allows to simulate an error
+ * during the state building.
+ *
+ * <p>Must be declared {@code public} to allow accessing from the
+ * {@linkplain io.spine.validate.ValidatingBuilders#newInstance(Class) factory method}.
  */
-public class DirectQuizProcmanRepository extends ProcessManagerRepository<PmQuizId, DirectQuizProcman, PmQuiz> {
+public class PatchedProjectBuilder
+        extends ThrowingValidatingBuilder<Project, Project.Builder> {
+
+    public static PatchedProjectBuilder newBuilder() {
+        return new PatchedProjectBuilder();
+    }
 }

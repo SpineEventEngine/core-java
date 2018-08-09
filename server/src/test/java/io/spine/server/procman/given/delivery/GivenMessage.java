@@ -17,49 +17,37 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.procman.given;
+package io.spine.server.procman.given.delivery;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.React;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv;
-import io.spine.server.command.Assign;
-import io.spine.server.delivery.ShardingStrategy;
-import io.spine.server.delivery.UniformAcrossTargets;
-import io.spine.server.delivery.given.ThreadStats;
-import io.spine.server.procman.ProcessManager;
-import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.route.RejectionRoute;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmStartProject;
-import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.rejection.Rejections.PmCannotStartArchivedProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.validate.StringValueVBuilder;
 
-import java.util.List;
 import java.util.Set;
 
 import static io.spine.core.Rejections.toRejection;
-import static java.util.Collections.emptyList;
 
 /**
  * @author Alex Tymchenko
  */
-public class PmMessageDeliveryTestEnv {
+public class GivenMessage {
 
     /** Prevents instantiation of this test environment class. */
-    private PmMessageDeliveryTestEnv() {
+    private GivenMessage() {
     }
 
     public static Command createProject() {
@@ -74,7 +62,7 @@ public class PmMessageDeliveryTestEnv {
         ProjectId projectId = projectId();
         TestEventFactory eventFactory =
                 TestEventFactory.newInstance(AnyPacker.pack(projectId),
-                                             PmMessageDeliveryTestEnv.class
+                                             GivenMessage.class
                 );
 
         PmProjectStarted msg = PmProjectStarted.newBuilder()
@@ -124,71 +112,5 @@ public class PmMessageDeliveryTestEnv {
                 return ImmutableSet.of(msg.getProjectId());
             }
         };
-    }
-
-    /**
-     * A process manager class, which remembers the threads in which its handler methods
-     * were invoked.
-     *
-     * <p>Message handlers are invoked via reflection, so some of them are considered unused.
-     *
-     * <p>The handler method parameters are not used, as they aren't needed for tests.
-     * They are still present, as long as they are required according to the handler
-     * declaration rules.
-     */
-    @SuppressWarnings("unused")
-    public static class DeliveryPm
-            extends ProcessManager<ProjectId, StringValue, StringValueVBuilder> {
-
-        private static final ThreadStats<ProjectId> stats = new ThreadStats<>();
-
-        protected DeliveryPm(ProjectId id) {
-            super(id);
-        }
-
-        @Assign
-        PmProjectCreated on(PmCreateProject command) {
-            stats.recordCallingThread(command.getProjectId());
-            return PmProjectCreated.newBuilder()
-                                   .setProjectId(command.getProjectId())
-                                   .build();
-        }
-
-        @React
-        List<Message> on(PmProjectStarted event) {
-            stats.recordCallingThread(getId());
-            return emptyList();
-        }
-
-        @React
-        List<Message> on(PmCannotStartArchivedProject rejection) {
-            stats.recordCallingThread(getId());
-            return emptyList();
-        }
-
-        public static ThreadStats<ProjectId> getStats() {
-            return stats;
-        }
-    }
-
-    public static class SingleShardPmRepository
-            extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
-        public SingleShardPmRepository() {
-            getRejectionRouting().replaceDefault(routeByProjectId());
-        }
-
-    }
-
-    public static class QuadrupleShardPmRepository
-            extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
-
-        public QuadrupleShardPmRepository() {
-            getRejectionRouting().replaceDefault(routeByProjectId());
-        }
-
-        @Override
-        public ShardingStrategy getShardingStrategy() {
-            return UniformAcrossTargets.forNumber(4);
-        }
     }
 }

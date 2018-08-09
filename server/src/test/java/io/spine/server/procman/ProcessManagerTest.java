@@ -40,10 +40,10 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
-import io.spine.server.procman.given.DirectQuizProcmanRepository;
-import io.spine.server.procman.given.ProcessManagerTestEnv.AddTaskDispatcher;
-import io.spine.server.procman.given.ProcessManagerTestEnv.TestProcessManager;
-import io.spine.server.procman.given.QuizProcmanRepository;
+import io.spine.server.procman.given.pm.AddTaskDispatcher;
+import io.spine.server.procman.given.pm.DirectQuizProcmanRepository;
+import io.spine.server.procman.given.pm.QuizProcmanRepository;
+import io.spine.server.procman.given.pm.TestProcessManager;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.NoOpSystemGateway;
@@ -79,10 +79,10 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.commandbus.Given.ACommand;
-import static io.spine.server.procman.given.ProcessManagerTestEnv.answerQuestion;
-import static io.spine.server.procman.given.ProcessManagerTestEnv.newAnswer;
-import static io.spine.server.procman.given.ProcessManagerTestEnv.newQuizId;
-import static io.spine.server.procman.given.ProcessManagerTestEnv.startQuiz;
+import static io.spine.server.procman.given.pm.QuizGiven.answerQuestion;
+import static io.spine.server.procman.given.pm.QuizGiven.newAnswer;
+import static io.spine.server.procman.given.pm.QuizGiven.newQuizId;
+import static io.spine.server.procman.given.pm.QuizGiven.startQuiz;
 import static io.spine.testing.Verify.assertSize;
 import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.testing.client.blackbox.Count.none;
@@ -267,28 +267,33 @@ class ProcessManagerTest {
         }
     }
 
-    /**
-     * Tests command routing.
-     *
-     * @see TestProcessManager#transform(PmStartProject, CommandContext)
-     */
-    @Test
-    @DisplayName("route commands")
-    void routeCommands() {
-        // Add dispatcher for the routed command.
-        // Otherwise the Command Bus would reject the command.
-        AddTaskDispatcher dispatcher = new AddTaskDispatcher();
-        commandBus.register(dispatcher);
-        processManager.injectCommandBus(commandBus);
+    @Nested
+    @DisplayName("Create command")
+    class Commanding {
 
-        testDispatchCommand(startProject());
+        /**
+         * Tests command routing.
+         *
+         * @see TestProcessManager#transform(PmStartProject, CommandContext)
+         */
+        @Test
+        @DisplayName("route commands")
+        void routeCommands() {
+            // Add dispatcher for the routed command.
+            // Otherwise the Command Bus would reject the command.
+            AddTaskDispatcher dispatcher = new AddTaskDispatcher();
+            commandBus.register(dispatcher);
+            processManager.injectCommandBus(commandBus);
 
-        List<CommandEnvelope> dispatchedCommands = dispatcher.getCommands();
-        assertSize(1, dispatchedCommands);
-        CommandEnvelope dispatchedCommand = dispatcher.getCommands()
-                                                      .get(0);
+            testDispatchCommand(startProject());
 
-        assertTrue(dispatchedCommand.getMessage() instanceof PmAddTask);
+            List<CommandEnvelope> dispatchedCommands = dispatcher.getCommands();
+            assertSize(1, dispatchedCommands);
+            CommandEnvelope dispatchedCommand = dispatcher.getCommands()
+                                                          .get(0);
+
+            assertTrue(dispatchedCommand.getMessage() instanceof PmAddTask);
+        }
     }
 
     @Nested
@@ -341,7 +346,7 @@ class ProcessManagerTest {
          * containing {@link com.google.protobuf.Empty Empty}. This is done because the answered
          * question is not part of a quiz.
          *
-         * @see io.spine.server.procman.given.QuizProcman
+         * @see io.spine.server.procman.given.pm.QuizProcman
          */
         @Test
         @DisplayName("for an either of three event reaction")
@@ -379,7 +384,7 @@ class ProcessManagerTest {
          * {@link io.spine.server.tuple.EitherOfThree Either Of Three}
          * containing {@link com.google.protobuf.Empty Empty}.
          *
-         * @see io.spine.server.procman.given.DirectQuizProcman
+         * @see io.spine.server.procman.given.pm.DirectQuizProcman
          */
         @Test
         @DisplayName("for an either of three emitted upon handling a command")

@@ -56,8 +56,8 @@ import static java.util.Collections.singletonList;
  * Black Box Bounded Context is aimed at facilitating writing literate integration tests.
  *
  * <p>Using its API commands and events are sent to a Bounded Context. Their effect is afterwards
- * verified in using various verifiers (e.g. {@link AcknowledgementsVerifier acknowledgement verfier},
- * {@link EmittedEventsVerifier emitted events verifier}).
+ * verified in using various verifiers (e.g. {@link AcknowledgementsVerifier acknowledgement
+ * verfier}, {@link EmittedEventsVerifier emitted events verifier}).
  *
  * @author Mykhailo Drachuk
  */
@@ -102,7 +102,8 @@ public class BlackBoxBoundedContext {
 
     /**
      * Creates a new {@link io.spine.server.event.EventFactory event factory} for tests which uses
-     * the actor and the origin from the provided {@link io.spine.client.ActorRequestFactory request factory}.
+     * the actor and the origin from the provided {@link io.spine.client.ActorRequestFactory
+     * request factory}.
      *
      * @param requestFactory a request factory bearing the actor and able to provide an origin for
      *                       factory generated events
@@ -288,7 +289,8 @@ public class BlackBoxBoundedContext {
      ******************************************************************************/
 
     /**
-     * Executes the provided verifier, which throws an assertion error in case of unexpected results.
+     * Executes the provided verifier, which throws an assertion error in case of
+     * unexpected results.
      *
      * @param verifier a verifier that checks the events emitted in this Bounded Context
      * @return current {@link BlackBoxBoundedContext black box} instance
@@ -306,7 +308,8 @@ public class BlackBoxBoundedContext {
     }
 
     /**
-     * Executes the provided verifier, which throws an assertion error in case of unexpected results.
+     * Executes the provided verifier, which throws an assertion error in case of
+     * unexpected results.
      *
      * @param verifier a verifier that checks the acknowledgements in this Bounded Context
      * @return current {@link BlackBoxBoundedContext black box} instance

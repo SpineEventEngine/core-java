@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman.given;
+package io.spine.server.procman.given.pm;
 
 import com.google.protobuf.Empty;
 import io.spine.core.React;
@@ -43,7 +43,7 @@ import java.util.List;
  * A quiz is started using {@link PmStartQuiz Start Quiz command} which defines a question set, and 
  * the questions are answered using {@link PmAnswerQuestion Answer Question commands}.
  * 
- * <p>Differs from the {@link QuizProcman} by scarcing the interjacent 
+ * <p>Differs from the {@link QuizProcman} by scarcing the interjacent
  * {@link PmQuestionAnswered Question Answered event} and emits 
  * either of three when handling a command.
  * 

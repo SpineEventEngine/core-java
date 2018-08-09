@@ -1,5 +1,5 @@
 /*
- * Copyright 2018, TeamDev Ltd. All rights reserved.
+ * Copyright 2018, TeamDev. All rights reserved.
  *
  * Redistribution and use in source and/or binary forms, with or without
  * modification, must retain the above copyright notice and the following
@@ -18,14 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman.given;
+package io.spine.server.procman.given.repo;
 
-import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.test.procman.quiz.PmQuiz;
-import io.spine.test.procman.quiz.PmQuizId;
+import io.spine.core.Subscribe;
+import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.test.procman.event.PmTaskAdded;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
- * @author Mykhailo Drachuk
+ * Helper event subscriber which remembers an event message.
  */
-public class QuizProcmanRepository extends ProcessManagerRepository<PmQuizId, QuizProcman, PmQuiz> {
+public class RememberingSubscriber extends AbstractEventSubscriber {
+
+    private @Nullable PmTaskAdded remembered;
+
+    @Subscribe
+    void on(PmTaskAdded msg) {
+        remembered = msg;
+    }
+
+    public @Nullable PmTaskAdded getRemembered() {
+        return remembered;
+    }
 }
