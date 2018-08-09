@@ -116,6 +116,18 @@ public final class CommandErrorHandler {
         return HandledError.ofRuntime(exception);
     }
 
+    /**
+     * Determined if the given {@code exception} was previously handled by
+     * a {@code CommandErrorHandler}.
+     *
+     * <p>When a {@code CommandErrorHandler} rethrows a caught exception, it always wraps it into
+     * a {@link CommandDispatchingException}. If the exception is NOT an instance of
+     * {@link CommandDispatchingException}, it is NOT considered pre-processed. Otherwise,
+     * the exception IS considered pre-processed.
+     *
+     * @param exception
+     * @return
+     */
     private static boolean isPreProcessed(RuntimeException exception) {
         return exception instanceof CommandDispatchingException;
     }
