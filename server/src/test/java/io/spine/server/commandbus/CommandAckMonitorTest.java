@@ -34,8 +34,8 @@ import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.Buses;
-import io.spine.server.command.Rejection;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.system.server.MarkCommandAsAcknowledged;
 import io.spine.system.server.MarkCommandAsErrored;
 import io.spine.system.server.MemoizingGateway;
@@ -265,7 +265,7 @@ class CommandAckMonitorTest {
         Any entityId = Identifier.pack(CommandAckMonitorTest.class.getSimpleName());
         CannotModifyArchivedEntity rejectionThrowable = new CannotModifyArchivedEntity(entityId);
         RuntimeException wrapperThrowable = new RuntimeException(rejectionThrowable);
-        Rejection rejection = Rejection.fromThrowable(envelope, wrapperThrowable);
+        RejectionEnvelope rejection = RejectionEnvelope.from(envelope, wrapperThrowable);
 
         return Buses.reject(commandId, rejection);
     }

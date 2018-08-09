@@ -44,7 +44,7 @@ import java.util.function.Predicate;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.command.Rejection.causedByRejection;
+import static io.spine.server.command.Rejections.causedByRejection;
 
 /**
  * The wrapper for a command handler method.

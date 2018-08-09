@@ -28,7 +28,7 @@ import io.spine.core.DispatchedCommand;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.core.RejectionEnvelope;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.model.HandlerKey;
 import org.checkerframework.checker.nullness.qual.Nullable;
 

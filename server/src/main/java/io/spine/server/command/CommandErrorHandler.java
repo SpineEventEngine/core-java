@@ -28,6 +28,7 @@ import io.spine.base.Errors;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.string.Stringifiers;
 import io.spine.system.server.MarkCommandAsErrored;
 import io.spine.system.server.MarkCommandAsRejected;
@@ -36,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.command.Rejection.causedByRejection;
+import static io.spine.server.command.Rejections.causedByRejection;
 import static java.lang.String.format;
 
 /**
@@ -88,7 +89,7 @@ public final class CommandErrorHandler {
     }
 
     private HandledError handleRejection(CommandEnvelope envelope, RuntimeException exception) {
-        Rejection rejection = Rejection.fromThrowable(envelope, exception);
+        RejectionEnvelope rejection = RejectionEnvelope.from(envelope, exception);
         markRejected(envelope, rejection);
         return HandledError.ofRejection(exception, envelope);
     }
@@ -129,13 +130,13 @@ public final class CommandErrorHandler {
         postSystem(systemCommand);
     }
 
-    private void markRejected(CommandEnvelope command, Rejection rejection) {
+    private void markRejected(CommandEnvelope command, RejectionEnvelope rejection) {
         CommandId commandId = command.getId();
 
         MarkCommandAsRejected systemCommand = MarkCommandAsRejected
                 .newBuilder()
                 .setId(commandId)
-                .setRejectionEvent(rejection.asEvent())
+                .setRejectionEvent(rejection.getOuterObject())
                 .build();
         postSystem(systemCommand);
     }

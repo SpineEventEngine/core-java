@@ -26,6 +26,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
+import io.spine.base.ThrowableMessage;
 import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
@@ -38,7 +39,9 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Throwables.getStackTraceAsString;
 import static io.spine.core.EventContext.OriginCase.EVENT_CONTEXT;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static io.spine.validate.Validate.isDefault;
@@ -242,6 +245,26 @@ public final class Events {
         boolean hasCorrectSuffix = enclosingClass.getName()
                                                  .endsWith(REJECTION_CLASS_SUFFIX);
         return hasCorrectSuffix;
+    }
+
+    /**
+     * Constructs a new {@link RejectionEventContext} from the given command message and
+     * {@link ThrowableMessage}.
+     *
+     * @param commandMessage   rejected command
+     * @param throwableMessage thrown rejection
+     * @return new instance of {@code RejectionEventContext}
+     */
+    public static RejectionEventContext rejectionContext(Message commandMessage,
+                                                         ThrowableMessage throwableMessage) {
+        checkNotNull(commandMessage);
+        checkNotNull(throwableMessage);
+
+        String stacktrace = getStackTraceAsString(throwableMessage);
+        return RejectionEventContext.newBuilder()
+                                    .setCommandMessage(pack(commandMessage))
+                                    .setStacktrace(stacktrace)
+                                    .build();
     }
 
     /**

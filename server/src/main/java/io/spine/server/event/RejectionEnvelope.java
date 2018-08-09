@@ -18,16 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.server.event;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.ThrowableMessage;
+import io.spine.core.AbstractMessageEnvelope;
+import io.spine.core.ActorContext;
+import io.spine.core.ActorMessageEnvelope;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.DispatchedCommand;
+import io.spine.core.Event;
+import io.spine.core.EventClass;
+import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
+import io.spine.core.EventId;
+import io.spine.core.RejectionClass;
+import io.spine.core.RejectionEventContext;
+import io.spine.core.TenantId;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.getRootCause;
+import static io.spine.core.Events.rejectionContext;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
+ * The holder of a rejection {@code Event} which provides convenient access to its properties.
+ *
  * @author Dmytro Dashenkov
  */
 public final class RejectionEnvelope
@@ -45,6 +66,48 @@ public final class RejectionEnvelope
         checkNotNull(event);
         checkArgument(event.isRejection(), "%s is not a rejection", event.getMessageClass());
         return new RejectionEnvelope(event);
+    }
+
+    /**
+     * Creates an instance of {@code Rejection} from the rejected command and a {@link Throwable}
+     * caused by the {@link ThrowableMessage}.
+     *
+     * @param origin    the rejected command
+     * @param throwable the caught error
+     * @return new instance of {@code Rejection}
+     * @throws IllegalArgumentException if the given {@link Throwable} is not caused by
+     *                                  a {@link ThrowableMessage}
+     */
+    public static RejectionEnvelope from(CommandEnvelope origin, Throwable throwable) {
+        checkNotNull(origin);
+        checkNotNull(throwable);
+
+        ThrowableMessage throwableMessage = unwrap(throwable);
+        Event rejectionEvent = produceEvent(origin, throwableMessage);
+        EventEnvelope envelope = EventEnvelope.of(rejectionEvent);
+
+        return from(envelope);
+    }
+
+    private static ThrowableMessage unwrap(Throwable causedByRejection) {
+        Throwable cause = getRootCause(causedByRejection);
+        boolean correctType = cause instanceof ThrowableMessage;
+        checkArgument(correctType);
+        ThrowableMessage throwableMessage = (ThrowableMessage) cause;
+        return throwableMessage;
+    }
+
+    private static Event produceEvent(CommandEnvelope origin, ThrowableMessage throwableMessage) {
+        Any producerId = throwableMessage.producerId()
+                                         .orElseThrow(() -> newIllegalArgumentException(
+                                                 "ThrowableMessage has no producer: %s",
+                                                 throwableMessage
+                                         ));
+        EventFactory factory = EventFactory.on(origin, producerId);
+        Message thrownMessage = throwableMessage.getMessageThrown();
+        RejectionEventContext context = rejectionContext(origin.getMessage(), throwableMessage);
+        Event rejectionEvent = factory.createRejectionEvent(thrownMessage, null, context);
+        return rejectionEvent;
     }
 
     @Override
@@ -84,11 +147,13 @@ public final class RejectionEnvelope
         event.setOriginFields(builder);
     }
 
+    @VisibleForTesting
+    public EventEnvelope getEvent() {
+        return event;
+    }
+
     /**
-     * Obtains the origin {@linkplain DispatchedCommand command} of the rejection represented by
-     * this envelope.
-     *
-     * <p>Throws an {@linkplain IllegalStateException} if this event is not a rejection.
+     * Obtains the origin {@linkplain DispatchedCommand command}.
      *
      * @return the rejected command
      */
@@ -105,6 +170,11 @@ public final class RejectionEnvelope
         return result;
     }
 
+    /**
+     * Obtains the origin command message
+     *
+     * @return the rejected command message
+     */
     public Message getOriginMessage() {
         RejectionEventContext context = getMessageContext().getRejection();
         Any commandMessage = context.getCommandMessage();

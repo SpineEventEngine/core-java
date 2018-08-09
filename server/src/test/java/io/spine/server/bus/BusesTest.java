@@ -27,8 +27,8 @@ import io.spine.base.Error;
 import io.spine.base.Time;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
-import io.spine.server.command.Rejection;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
+import io.spine.server.event.RejectionEnvelope;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -56,16 +56,20 @@ class BusesTest {
                 .newBuilder()
                 .setMessage(pack(Time.getCurrentTime()))
                 .build();
-        Rejection defaultRejection = Rejection.from(
+        CannotModifyArchivedEntity throwable = new CannotModifyArchivedEntity(
+                Any.getDefaultInstance()
+        );
+        throwable.initProducer(Any.getDefaultInstance());
+        RejectionEnvelope defaultRejection = RejectionEnvelope.from(
                 CommandEnvelope.of(command),
-                new CannotModifyArchivedEntity(Any.getDefaultInstance())
+                throwable
         );
         new NullPointerTester()
                 .setDefault(Message.class, Any.getDefaultInstance())
                 .setDefault(Error.class, Error.newBuilder()
                                               .setCode(1)
                                               .build())
-                .setDefault(Rejection.class, defaultRejection)
+                .setDefault(RejectionEnvelope.class, defaultRejection)
                 .testAllPublicStaticMethods(Buses.class);
     }
 }

@@ -20,34 +20,36 @@
 
 package io.spine.server.command;
 
-import io.spine.core.CommandEnvelope;
-import io.spine.core.Event;
-import io.spine.server.event.RejectionEnvelope;
-
-import java.util.Optional;
+import io.spine.base.ThrowableMessage;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.getRootCause;
 
 /**
- * A wrapper for a handled {@linkplain io.spine.base.ThrowableMessage rejection}.
+ * A set of utilities for working with rejections and {@link ThrowableMessage}s.
  *
- * <p>Performs no action on {@link #rethrowOnce()} and returns the given rejection event
- * on {@link #asRejection()}.
+ * @author Dmytro Dashenkov
  */
-final class HandledRejection implements HandledError {
+public final class Rejections {
 
-    private final RejectionEnvelope rejection;
-
-    HandledRejection(CommandEnvelope origin, RuntimeException exception) {
-        checkNotNull(origin);
-        checkNotNull(exception);
-
-        this.rejection = RejectionEnvelope.from(origin, exception);
+    /**
+     * Prevents the utility class instantiation.
+     */
+    private Rejections() {
     }
 
-    @Override
-    public Optional<Event> asRejection() {
-        Event event = rejection.getOuterObject();
-        return Optional.of(event);
+    /**
+     * Tells whether or not the given {@code throwable} is caused by a {@link ThrowableMessage}.
+     *
+     * @param throwable the {@link Throwable} to check
+     * @return {@code true} is the given {@code throwable} is caused by a rejection, {@code false}
+     *         otherwise
+     */
+    public static boolean causedByRejection(Throwable throwable) {
+        checkNotNull(throwable);
+
+        Throwable cause = getRootCause(throwable);
+        boolean result = cause instanceof ThrowableMessage;
+        return result;
     }
 }

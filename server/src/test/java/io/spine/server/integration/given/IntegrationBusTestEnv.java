@@ -33,7 +33,6 @@ import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.command.Rejection;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.React;
 import io.spine.server.integration.IntegrationBus;
@@ -147,21 +146,6 @@ public class IntegrationBusTestEnv {
                                  .setProjectId(projectId)
                                  .build()
         );
-    }
-
-    @SuppressWarnings("ThrowableNotThrown")     // used to create a rejection
-    public static Event cannotStartArchivedProject() {
-        ProjectId projectId = projectId();
-        ItgStartProject cmdMessage = ItgStartProject
-                .newBuilder()
-                .setProjectId(projectId)
-                .build();
-        Command startProjectCmd = toCommand(cmdMessage);
-        io.spine.test.integration.rejection.ItgCannotStartArchivedProject throwable =
-                new io.spine.test.integration.rejection.ItgCannotStartArchivedProject(projectId);
-        throwable.initProducer(pack(projectId));
-        Rejection rejection = Rejection.from(CommandEnvelope.of(startProjectCmd), throwable);
-        return rejection.asEvent();
     }
 
     private static Command toCommand(ItgStartProject cmdMessage) {
