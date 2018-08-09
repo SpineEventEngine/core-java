@@ -20,72 +20,15 @@
 
 package io.spine.server.command;
 
-import io.spine.annotation.Internal;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.Event;
-import io.spine.core.Version;
-
-import java.util.Optional;
-
 /**
- * A wrapper of a handled command handling error.
+ * An already handled {@link CaughtError}.
+ *
+ * <p>Performs no action on {@link #rethrowOnce()} and always returns
+ * {@link java.util.Optional#empty() Optional.empty()} on {@link #asRejection()}.
  *
  * @author Dmytro Dashenkov
  */
-@Internal
-public interface HandledError {
+enum HandledError implements CaughtError {
 
-    /**
-     * Rethrows the handled exception if it was <b>not</b> caused by a rejection or
-     * rethrown earlier.
-     *
-     * <p>Otherwise, preforms no action.
-     */
-    default void rethrowOnce() throws CommandDispatchingException {
-        // Do nothing.
-    }
-
-    /**
-     * Converts the handled error into a rejection {@linkplain Event event}.
-     *
-     * <p>The produced {@link Event} does not have a {@link Version}.
-     * The {@linkplain io.spine.core.EventContext#getProducerId() producer ID} is a string with
-     * the value equal to {@code "CommandErrorHandler"}.
-     *
-     * @return the handled rejection event or {@link Optional#empty()} if the handled error is
-     * not a command rejection
-     */
-    default Optional<Event> asRejection() {
-        return Optional.empty();
-    }
-
-    /**
-     * Obtains a {@link HandledError} for a previously handled error.
-     */
-    static HandledError ofPreProcessed() {
-        return PreProcessedError.INSTANCE;
-    }
-
-    /**
-     * Obtains a {@link HandledError} for the given {@link RuntimeException}.
-     *
-     * @param exception the handled error
-     * @return wrapped error
-     */
-    static HandledError ofRuntime(RuntimeException exception) {
-        return new HandledRuntimeError(exception);
-    }
-
-    /**
-     * Obtains a {@link HandledError} for the given {@linkplain io.spine.base.ThrowableMessage
-     * rejection}.
-     *
-     * @param rejection the {@link RuntimeException} caused by
-     *                  a {@linkplain io.spine.base.ThrowableMessage ThrowableMessage}
-     * @param command   the rejected command
-     * @return wrapped rejection
-     */
-    static HandledError ofRejection(RuntimeException rejection, CommandEnvelope command) {
-        return new HandledRejection(command, rejection);
-    }
+    INSTANCE
 }

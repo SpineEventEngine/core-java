@@ -20,28 +20,34 @@
 
 package io.spine.server.command;
 
+import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
+import io.spine.server.event.RejectionEnvelope;
+
+import java.util.Optional;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A wrapper of a handled {@link RuntimeException}.
+ * A wrapper for a handled {@linkplain io.spine.base.ThrowableMessage rejection}.
  *
- * <p>On {@link #rethrowOnce()}, rethrows the given exception wrapped into
- * a {@link CommandDispatchingException}.
- *
- * <p>On {@link #asRejection()}, returns {@link java.util.Optional#empty() Optional.empty()}
- *
- * @author Dmytro Dashenkov
+ * <p>Performs no action on {@link #rethrowOnce()} and returns the given rejection event
+ * on {@link #asRejection()}.
  */
-final class HandledRuntimeError implements HandledError {
+final class CaughtRejection implements CaughtError {
 
-    private final RuntimeException exception;
+    private final RejectionEnvelope rejection;
 
-    HandledRuntimeError(RuntimeException exception) {
-        this.exception = checkNotNull(exception);
+    CaughtRejection(CommandEnvelope origin, RuntimeException exception) {
+        checkNotNull(origin);
+        checkNotNull(exception);
+
+        this.rejection = RejectionEnvelope.from(origin, exception);
     }
 
     @Override
-    public void rethrowOnce() throws CommandDispatchingException {
-        throw new CommandDispatchingException(exception);
+    public Optional<Event> asRejection() {
+        Event event = rejection.getOuterObject();
+        return Optional.of(event);
     }
 }
