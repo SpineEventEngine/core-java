@@ -83,7 +83,6 @@ import static io.spine.server.procman.given.pm.QuizGiven.answerQuestion;
 import static io.spine.server.procman.given.pm.QuizGiven.newAnswer;
 import static io.spine.server.procman.given.pm.QuizGiven.newQuizId;
 import static io.spine.server.procman.given.pm.QuizGiven.startQuiz;
-import static io.spine.testing.Verify.assertSize;
 import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.testing.client.blackbox.Count.none;
 import static io.spine.testing.client.blackbox.Count.once;
@@ -279,25 +278,6 @@ class ProcessManagerTest {
          * @see TestProcessManager#transform(PmStartProject)
          */
         @Test
-        @DisplayName("route commands")
-        void routeCommands() {
-            // Add dispatcher for the routed command.
-            // Otherwise the Command Bus would reject the command.
-            AddTaskDispatcher dispatcher = new AddTaskDispatcher();
-            commandBus.register(dispatcher);
-            processManager.injectCommandBus(commandBus);
-
-            testDispatchCommand(startProject());
-
-            List<CommandEnvelope> dispatchedCommands = dispatcher.getCommands();
-            assertSize(1, dispatchedCommands);
-            CommandEnvelope dispatchedCommand = dispatcher.getCommands()
-                                                          .get(0);
-
-            assertTrue(dispatchedCommand.getMessage() instanceof PmAddTask);
-        }
-
-        @Test
         @DisplayName("transform command")
         void transformCommand() {
             BlackBoxBoundedContext
@@ -305,6 +285,8 @@ class ProcessManagerTest {
                     .receivesCommand(startProject())
                     .assertThat(emittedCommand(PmAddTask.class, once()));
         }
+
+        //TODO:2018-08-09:alexander.yevsyukov: Test command by event
     }
 
     @Nested
