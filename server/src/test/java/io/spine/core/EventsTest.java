@@ -115,6 +115,8 @@ public class EventsTest {
         new NullPointerTester()
                 .setDefault(StringValue.class, StringValue.getDefaultInstance())
                 .setDefault(EventContext.class, GivenEvent.context())
+                .setDefault(Version.class, Version.getDefaultInstance())
+                .setDefault(Event.class, Event.getDefaultInstance())
                 .testAllPublicStaticMethods(Events.class);
     }
 
