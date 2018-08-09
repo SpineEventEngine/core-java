@@ -20,6 +20,7 @@
 
 package io.spine.server.command;
 
+import io.spine.annotation.Internal;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.Version;
@@ -31,6 +32,7 @@ import java.util.Optional;
  *
  * @author Dmytro Dashenkov
  */
+@Internal
 public interface HandledError {
 
     /**
