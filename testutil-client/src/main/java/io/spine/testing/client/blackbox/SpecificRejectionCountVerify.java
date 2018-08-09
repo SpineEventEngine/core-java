@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * @param <T> a domain rejection type
  * @author Mykhailo Drachuk
  */
-class SpecificRejectionCountVerify<T extends Message> extends VerifyAcknowledgements {
+final class SpecificRejectionCountVerify<T extends Message> extends VerifyAcknowledgements {
 
     private final Count expectedCount;
     private final Class<T> type;

@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  * @author Mykhailo Drachuk
  */
-class RejectionOfTypeCountVerify extends VerifyAcknowledgements {
+final class RejectionOfTypeCountVerify extends VerifyAcknowledgements {
 
     private final RejectionClass type;
     private final Count expectedCount;

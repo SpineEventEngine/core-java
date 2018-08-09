@@ -29,7 +29,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  * @author Mykhailo Drachuk
  */
-class ErrorPresenceVerify extends VerifyAcknowledgements {
+final class ErrorPresenceVerify extends VerifyAcknowledgements {
 
     @Override
     public void verify(Acknowledgements acks) {

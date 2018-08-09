@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  * @author Mykhailo Drachuk
  */
-class SpecificErrorPresenceVerify extends VerifyAcknowledgements {
+final class SpecificErrorPresenceVerify extends VerifyAcknowledgements {
 
     private final ErrorCriterion criterion;
 

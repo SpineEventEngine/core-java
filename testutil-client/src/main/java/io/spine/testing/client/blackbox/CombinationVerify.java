@@ -35,7 +35,7 @@ import static com.google.common.collect.Lists.newArrayList;
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
-class CombinationVerify extends VerifyAcknowledgements {
+final class CombinationVerify extends VerifyAcknowledgements {
 
     private final List<VerifyAcknowledgements> verifiers;
 

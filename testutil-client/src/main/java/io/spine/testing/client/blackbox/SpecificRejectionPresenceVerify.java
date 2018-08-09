@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  * @param <T> a domain rejection type
  * @author Mykhailo Drachuk
  */
-class SpecificRejectionPresenceVerify<T extends Message> extends VerifyAcknowledgements {
+final class SpecificRejectionPresenceVerify<T extends Message> extends VerifyAcknowledgements {
 
     private final Class<T> type;
     private final RejectionCriterion<T> criterion;

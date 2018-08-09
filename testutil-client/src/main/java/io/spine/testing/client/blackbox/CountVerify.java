@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  * @author Mykhailo Drachuk
  */
-class CountVerify extends VerifyAcknowledgements {
+final class CountVerify extends VerifyAcknowledgements {
 
     private final Count expectedCount;
 

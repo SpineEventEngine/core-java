@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.fail;
  *
  * @author Mykhailo Drachuk
  */
-class RejectionOfTypePresenceVerify extends VerifyAcknowledgements {
+final class RejectionOfTypePresenceVerify extends VerifyAcknowledgements {
 
     private final RejectionClass type;
 
