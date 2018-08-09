@@ -23,6 +23,7 @@ package io.spine.server.aggregate;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.Immutable;
 import io.spine.core.Event;
 import io.spine.core.Events;
 
@@ -33,11 +34,9 @@ import static com.google.common.collect.ImmutableList.copyOf;
 /**
  * The list of uncommitted events of an {@link Aggregate}.
  *
- * <p>This type is immutable. To add more events to {@code UncommittedEvents}, see
- * {@link #append(Iterable)}.
- *
  * @author Dmytro Dashenkov
  */
+@Immutable
 final class UncommittedEvents {
 
     private static final UncommittedEvents EMPTY =

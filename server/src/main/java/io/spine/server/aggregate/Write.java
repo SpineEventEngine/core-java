@@ -22,7 +22,11 @@ package io.spine.server.aggregate;
 
 import io.spine.core.Event;
 
+import java.util.Collection;
+import java.util.List;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 
 /**
  * An {@link Aggregate} write operation.
@@ -35,14 +39,17 @@ final class Write<I> {
 
     private final AggregateStorage<I> storage;
     private final Aggregate<I, ?, ?> aggregate;
+    private final I id;
     private final int snapshotTrigger;
 
     private Write(AggregateStorage<I> storage,
                   Aggregate<I, ?, ?> aggregate,
+                  I id,
                   int snapshotTrigger) {
         this.storage = storage;
-        this.snapshotTrigger = snapshotTrigger;
         this.aggregate = aggregate;
+        this.id = id;
+        this.snapshotTrigger = snapshotTrigger;
     }
 
     /**
@@ -63,36 +70,57 @@ final class Write<I> {
 
         AggregateStorage<I> storage = repository.aggregateStorage();
         int snapshotTrigger = repository.getSnapshotTrigger();
-        return new Write<>(storage, aggregate, snapshotTrigger);
+        I id = aggregate.getId();
+        return new Write<>(storage, aggregate, id, snapshotTrigger);
     }
 
     /**
      * Performs this write operation.
      */
     void perform() {
-        I id = aggregate.getId();
-        int eventCount = storage.readEventCountAfterLastSnapshot(id);
         UncommittedEvents uncommittedEvents = aggregate.getUncommittedEvents();
-        for (Event event : uncommittedEvents.list()) {
-            eventCount = writeEvent(event, eventCount);
+        List<Event> eventsToStore = uncommittedEvents.list();
+        writeEvents(eventsToStore);
+    }
+
+    private void writeEvents(List<Event> events) {
+        int eventCount = storage.readEventCountAfterLastSnapshot(aggregate.getId());
+        Collection<Event> eventBatch = newArrayListWithCapacity(snapshotTrigger);
+        for (Event event : events) {
+            eventBatch.add(event);
+            eventCount++;
+            if (eventCount >= snapshotTrigger) {
+                persist(events, aggregate.toSnapshot());
+                aggregate.clearRecentHistory();
+                eventBatch.clear();
+                eventCount = 0;
+            }
+        }
+        if (!eventBatch.isEmpty()) {
+            persist(eventBatch);
         }
         commit(eventCount);
     }
 
-    private int writeEvent(Event event, int eventCount) {
-        storage.writeEvent(aggregate.getId(), event);
-        int newEventCount = eventCount + 1;
-        if (newEventCount >= snapshotTrigger) {
-            writeSnapshot(aggregate);
-            newEventCount = 0;
-        }
-        return newEventCount;
+    private void persist(Collection<Event> events, Snapshot snapshot) {
+        AggregateStateRecord record = AggregateStateRecord
+                .newBuilder()
+                .addAllEvent(events)
+                .setSnapshot(snapshot)
+                .build();
+        persist(record);
     }
 
-    private void writeSnapshot(Aggregate<I, ? ,?> aggregate) {
-        Snapshot snapshot = aggregate.toSnapshot();
-        aggregate.clearRecentHistory();
-        storage.writeSnapshot(aggregate.getId(), snapshot);
+    private void persist(Collection<Event> events) {
+        AggregateStateRecord record = AggregateStateRecord
+                .newBuilder()
+                .addAllEvent(events)
+                .build();
+        persist(record);
+    }
+
+    private void persist(AggregateStateRecord record) {
+        storage.write(id, record);
     }
 
     private void commit(int eventCount) {
