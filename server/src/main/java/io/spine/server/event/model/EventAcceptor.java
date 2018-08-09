@@ -67,7 +67,7 @@ enum EventAcceptor {
     /**
      * Method accepting the event message and the {@link EventContext}.
      */
-    MESSAGE_EVENT_CXT(of(Message.class, EventContext.class), false) {
+    MESSAGE_EVENT_CTX(of(Message.class, EventContext.class), false) {
         @Override
         List<?> arguments(EventEnvelope envelope) {
             Message message = envelope.getMessage();
@@ -79,7 +79,7 @@ enum EventAcceptor {
     /**
      * Method accepting the rejection event message and the {@link CommandContext}.
      */
-    MESSAGE_COMMAND_CXT(of(Message.class, CommandContext.class), false) {
+    MESSAGE_COMMAND_CTX(of(Message.class, CommandContext.class), false) {
         @Override
         List<?> arguments(EventEnvelope envelope) {
             Message message = envelope.getMessage();
@@ -107,7 +107,7 @@ enum EventAcceptor {
      * Method accepting the rejection event message, the rejected command message, and
      * its {@link CommandContext}.
      */
-    MESSAGE_COMMAND_MSG_COMMAND_CXT(of(Message.class, Message.class, CommandContext.class), true) {
+    MESSAGE_COMMAND_MSG_COMMAND_CTX(of(Message.class, Message.class, CommandContext.class), true) {
         @Override
         List<?> arguments(EventEnvelope envelope) {
             Message message = envelope.getMessage();

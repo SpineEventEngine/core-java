@@ -41,10 +41,10 @@ import java.lang.reflect.Method;
 
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.event.model.EventAcceptor.MESSAGE_COMMAND_CXT;
+import static io.spine.server.event.model.EventAcceptor.MESSAGE_COMMAND_CTX;
 import static io.spine.server.event.model.EventAcceptor.MESSAGE_COMMAND_MSG;
-import static io.spine.server.event.model.EventAcceptor.MESSAGE_COMMAND_MSG_COMMAND_CXT;
-import static io.spine.server.event.model.EventAcceptor.MESSAGE_EVENT_CXT;
+import static io.spine.server.event.model.EventAcceptor.MESSAGE_COMMAND_MSG_COMMAND_CTX;
+import static io.spine.server.event.model.EventAcceptor.MESSAGE_EVENT_CTX;
 import static io.spine.server.event.model.given.EventAccessorTestEnv.MESSAGE_ONLY;
 import static io.spine.server.event.model.given.EventAccessorTestEnv.commandContext;
 import static io.spine.server.event.model.given.EventAccessorTestEnv.commandMessage;
@@ -101,14 +101,14 @@ class EventAcceptorTest {
         @DisplayName(MESSAGE_CONTEXT)
         void messageAndContext() {
             Method method = findMessageAndContext();
-            assertMethod(method, MESSAGE_EVENT_CXT);
+            assertMethod(method, MESSAGE_EVENT_CTX);
         }
 
         @Test
         @DisplayName(MESSAGE_CMD_CONTEXT)
         void messageAndCmdContext() {
             Method method = findMessageAndCmdContext();
-            assertMethod(method, MESSAGE_COMMAND_CXT);
+            assertMethod(method, MESSAGE_COMMAND_CTX);
         }
 
         @Test
@@ -122,7 +122,7 @@ class EventAcceptorTest {
         @DisplayName(MESSAGE_MESSAGE_CONTEXT)
         void messageAndCommandMessageAndContext() {
             Method method = findMessageAndCommandMessageAndContext();
-            assertMethod(method, MESSAGE_COMMAND_MSG_COMMAND_CXT);
+            assertMethod(method, MESSAGE_COMMAND_MSG_COMMAND_CTX);
         }
 
         private void assertMethod(Method method, EventAcceptor expectedAcceptor) {
