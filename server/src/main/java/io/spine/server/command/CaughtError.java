@@ -22,8 +22,6 @@ package io.spine.server.command;
 
 import io.spine.annotation.Internal;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.Event;
-import io.spine.core.Version;
 import io.spine.server.event.RejectionEnvelope;
 
 import java.util.Optional;
@@ -55,11 +53,7 @@ public interface CaughtError {
     }
 
     /**
-     * Converts the handled error into a rejection {@linkplain Event event}.
-     *
-     * <p>The produced {@link Event} does not have a {@link Version}.
-     * The {@linkplain io.spine.core.EventContext#getProducerId() producer ID} is a string with
-     * the value equal to {@code "CommandErrorHandler"}.
+     * Converts the handled error into a {@linkplain RejectionEnvelope rejection}.
      *
      * @return the handled rejection event or {@link Optional#empty()} if the handled error is
      * not a command rejection
