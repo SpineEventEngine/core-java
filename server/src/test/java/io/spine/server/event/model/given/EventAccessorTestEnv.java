@@ -25,7 +25,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
-import io.spine.test.event.Rejections.CannotCreateExistingProject;
+import io.spine.test.event.Rejections.ProjectAlreadyExists;
 import io.spine.test.event.command.CreateProject;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -62,21 +62,21 @@ public class EventAccessorTestEnv {
 
     public static Method findMessageAndCmdContext() {
         Method method = findMethod("messageAndCmdContext",
-                                   CannotCreateExistingProject.class,
+                                   ProjectAlreadyExists.class,
                                    CommandContext.class);
         return method;
     }
 
     public static Method findMessageAndCommand() {
         Method method = findMethod("messageAndCommand",
-                                   CannotCreateExistingProject.class,
+                                   ProjectAlreadyExists.class,
                                    CreateProject.class);
         return method;
     }
 
     public static Method findMessageAndCommandMessageAndContext() {
         Method method = findMethod("messageAndCommandMessageAndContext",
-                                   CannotCreateExistingProject.class,
+                                   ProjectAlreadyExists.class,
                                    CreateProject.class,
                                    CommandContext.class);
         return method;
@@ -103,12 +103,12 @@ public class EventAccessorTestEnv {
         return result;
     }
 
-    public static CannotCreateExistingProject rejectionMessage() {
+    public static ProjectAlreadyExists rejectionMessage() {
         ProjectId id = ProjectId
                 .newBuilder()
                 .setId(newUuid())
                 .build();
-        CannotCreateExistingProject result = CannotCreateExistingProject
+        ProjectAlreadyExists result = ProjectAlreadyExists
                 .newBuilder()
                 .setProjectId(id)
                 .build();
@@ -161,19 +161,19 @@ public class EventAccessorTestEnv {
             this.eventContext = eventContext;
         }
 
-        private void messageAndCmdContext(CannotCreateExistingProject rejection,
+        private void messageAndCmdContext(ProjectAlreadyExists rejection,
                                           CommandContext commandContext) {
             this.event = rejection;
             this.commandContext = commandContext;
         }
 
-        private void messageAndCommand(CannotCreateExistingProject rejection,
+        private void messageAndCommand(ProjectAlreadyExists rejection,
                                        CreateProject command) {
             this.event = rejection;
             this.command = command;
         }
 
-        private void messageAndCommandMessageAndContext(CannotCreateExistingProject rejection,
+        private void messageAndCommandMessageAndContext(ProjectAlreadyExists rejection,
                                                         CreateProject command,
                                                         CommandContext commandContext) {
             this.event = rejection;

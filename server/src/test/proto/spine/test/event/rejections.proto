@@ -28,6 +28,6 @@ option java_package="io.spine.test.event";
 
 import "spine/test/event/project.proto";
 
-message CannotCreateExistingProject {
+message ProjectAlreadyExists {
     ProjectId project_id = 1;
 }
