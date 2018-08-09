@@ -25,7 +25,6 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.core.Event;
-import io.spine.core.Events;
 
 import java.util.List;
 
@@ -40,14 +39,12 @@ import static com.google.common.collect.ImmutableList.copyOf;
 final class UncommittedEvents {
 
     private static final UncommittedEvents EMPTY =
-            new UncommittedEvents(ImmutableList.of(), false);
+            new UncommittedEvents(ImmutableList.of());
 
     private final ImmutableList<Event> events;
-    private final boolean rejection;
 
-    private UncommittedEvents(ImmutableList<Event> events, boolean rejection) {
+    private UncommittedEvents(ImmutableList<Event> events) {
         this.events = events;
-        this.rejection = rejection;
     }
 
     /**
@@ -63,15 +60,13 @@ final class UncommittedEvents {
      * @return {@code true} if the list is not empty, {@code false} otherwise
      */
     boolean nonEmpty() {
-        return !events.isEmpty() || rejection;
+        return !events.isEmpty();
     }
 
     /**
      * Obtains the list of events.
      *
-     * <p>The returned list DOES NOT contain rejection events.
-     *
-     * @return the list of non-rejection uncommitted events
+     * @return the list of uncommitted events
      */
     List<Event> list() {
         return copyOf(events);
@@ -89,20 +84,12 @@ final class UncommittedEvents {
      */
     UncommittedEvents append(Iterable<Event> events) {
         ImmutableList<Event> newEvents = copyOf(events);
-        boolean rejection = rejection(newEvents);
-        ImmutableList.Builder<Event> newList = ImmutableList.builder();
-        newList.addAll(list());
-        if (!rejection) {
-            newList.addAll(newEvents);
-        }
-        boolean newRejection = rejection || this.rejection;
-        return new UncommittedEvents(newList.build(), newRejection);
-    }
-
-    private static boolean rejection(List<Event> events) {
-        boolean singleEvent = events.size() == 1;
-        boolean result = singleEvent && Events.isRejection(events.get(0));
-        return result;
+        ImmutableList<Event> newList = ImmutableList
+                .<Event>builder()
+                .addAll(list())
+                .addAll(newEvents)
+                .build();
+        return new UncommittedEvents(newList);
     }
 
     @Override
@@ -114,13 +101,12 @@ final class UncommittedEvents {
             return false;
         }
         UncommittedEvents events1 = (UncommittedEvents) o;
-        return rejection == events1.rejection &&
-                Objects.equal(events, events1.events);
+        return Objects.equal(events, events1.events);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(events, rejection);
+        return Objects.hashCode(events);
     }
 
     @SuppressWarnings("DuplicateStringLiteralInspection") // Common terms used all over the core.
@@ -128,7 +114,6 @@ final class UncommittedEvents {
     public String toString() {
         return MoreObjects.toStringHelper(this)
                           .add("events", events)
-                          .add("rejection", rejection)
                           .toString();
     }
 }
