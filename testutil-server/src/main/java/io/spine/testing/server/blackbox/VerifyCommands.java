@@ -44,14 +44,15 @@ public class VerifyCommands extends DelegatingVerify<EmittedCommands> {
     /**
      * Verifies that there was a specific number of commands of the provided class.
      */
-    public static VerifyCommands emitted(Class<? extends Message> commandClass, Count expected) {
+    public static VerifyCommands emittedCommand(Class<? extends Message> commandClass,
+                                                Count expected) {
         return new VerifyCommands(countAndClass(expected, commandClass));
     }
 
     /**
      * Verifies that there was an expected amount of commands of any classes.
      */
-    public static VerifyCommands emitted(Count expected) {
+    public static VerifyCommands emittedCommand(Count expected) {
         return new VerifyCommands(count(expected));
     }
 
@@ -59,8 +60,8 @@ public class VerifyCommands extends DelegatingVerify<EmittedCommands> {
      * Verifies that there were events of each of the provided command classes.
      */
     @SafeVarargs
-    public static VerifyCommands emitted(Class<? extends Message> commandClass,
-                                         Class<? extends Message>... otherCommandClasses) {
+    public static VerifyCommands emittedCommands(Class<? extends Message> commandClass,
+                                                 Class<? extends Message>... otherCommandClasses) {
         return new VerifyCommands(classes(commandClass, otherCommandClasses));
     }
 }

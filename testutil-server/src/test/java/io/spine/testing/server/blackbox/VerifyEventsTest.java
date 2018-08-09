@@ -32,7 +32,8 @@ import static io.spine.testing.client.blackbox.Count.none;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.Count.twice;
-import static io.spine.testing.server.blackbox.VerifyEvents.emitted;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
 import static io.spine.testing.server.blackbox.given.EmittedEventsTestEnv.event;
 import static io.spine.testing.server.blackbox.given.EmittedEventsTestEnv.projectCreated;
 import static io.spine.testing.server.blackbox.given.EmittedEventsTestEnv.taskAdded;
@@ -59,34 +60,34 @@ class VerifyEventsTest {
     @Test
     @DisplayName("verify count")
     void countEvents() {
-        emitted(thrice()).verify(emittedEvents);
+        emittedEvent(thrice()).verify(emittedEvents);
 
-        assertThrows(AssertionError.class, () -> verify(emitted(twice())));
-        assertThrows(AssertionError.class, () -> verify(emitted(count(4))));
+        assertThrows(AssertionError.class, () -> verify(emittedEvent(twice())));
+        assertThrows(AssertionError.class, () -> verify(emittedEvent(count(4))));
     }
 
     @Test
     @DisplayName("verify contains classes")
     void containsClasses() {
-        verify(emitted(BbProjectCreated.class, BbTaskAdded.class));
+        verify(emittedEvents(BbProjectCreated.class, BbTaskAdded.class));
 
-        assertThrows(AssertionError.class, () -> verify(emitted(BbProjectStarted.class)));
-        assertThrows(AssertionError.class, () -> verify(emitted(BbTaskAdded.class,
-                                                                BbProjectCreated.class,
-                                                                BbProjectStarted.class)));
+        assertThrows(AssertionError.class, () -> verify(emittedEvents(BbProjectStarted.class)));
+        assertThrows(AssertionError.class, () -> verify(emittedEvents(BbTaskAdded.class,
+                                                                      BbProjectCreated.class,
+                                                                      BbProjectStarted.class)));
     }
 
     @Test
     @DisplayName("verify contains classes represented by list")
     void verifyNumberOfEvents() {
-        verify(emitted(BbProjectStarted.class, none()));
-        verify(emitted(BbProjectCreated.class, once()));
-        verify(emitted(BbTaskAdded.class, twice()));
+        verify(emittedEvent(BbProjectStarted.class, none()));
+        verify(emittedEvent(BbProjectCreated.class, once()));
+        verify(emittedEvent(BbTaskAdded.class, twice()));
 
         assertThrows(AssertionError.class,
-                     () -> verify(emitted(BbProjectStarted.class, once())));
+                     () -> verify(emittedEvent(BbProjectStarted.class, once())));
         assertThrows(AssertionError.class,
-                     () -> verify(emitted(BbTaskAdded.class, thrice())));
+                     () -> verify(emittedEvent(BbTaskAdded.class, thrice())));
     }
 
     private void verify(VerifyEvents verifier) {

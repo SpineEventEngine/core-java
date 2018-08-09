@@ -46,7 +46,7 @@ public class VerifyEvents extends DelegatingVerify<EmittedEvents> {
      * Verifies that there was a specific number of events of the provided class emitted
      * in the Bounded Context.
      */
-    public static VerifyEvents emitted(Class<? extends Message> eventClass, Count expected) {
+    public static VerifyEvents emittedEvent(Class<? extends Message> eventClass, Count expected) {
         return new VerifyEvents(countAndClass(expected, eventClass));
     }
 
@@ -54,7 +54,7 @@ public class VerifyEvents extends DelegatingVerify<EmittedEvents> {
      * Verifies that there was an expected amount of events of any classes emitted
      * in the Bounded Context.
      */
-    public static VerifyEvents emitted(Count expected) {
+    public static VerifyEvents emittedEvent(Count expected) {
         return new VerifyEvents(count(expected));
     }
 
@@ -62,8 +62,8 @@ public class VerifyEvents extends DelegatingVerify<EmittedEvents> {
      * Verifies that there were events of each of the provided event classes.
      */
     @SafeVarargs
-    public static VerifyEvents emitted(Class<? extends Message> firstEventClass,
-                                       Class<? extends Message>... otherEventClasses) {
+    public static VerifyEvents emittedEvents(Class<? extends Message> firstEventClass,
+                                             Class<? extends Message>... otherEventClasses) {
         return new VerifyEvents(classes(firstEventClass, otherEventClasses));
     }
 }

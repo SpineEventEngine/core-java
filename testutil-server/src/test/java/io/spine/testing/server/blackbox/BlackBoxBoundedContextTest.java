@@ -37,7 +37,6 @@ import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.Count.twice;
-import static io.spine.testing.server.blackbox.VerifyEvents.emitted;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
@@ -69,7 +68,7 @@ class BlackBoxBoundedContextTest {
     void receivesACommand() {
         project.receivesCommand(createProject())
                .assertThat(acked(once()).withoutErrorsOrRejections())
-               .assertThat(emitted(BbProjectCreated.class, once()));
+               .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()));
     }
 
     @SuppressWarnings("ReturnValueIgnored")
@@ -80,9 +79,9 @@ class BlackBoxBoundedContextTest {
         project.receivesCommand(createProject(projectId))
                .receivesCommands(addTask(projectId), addTask(projectId), addTask(projectId))
                .assertThat(acked(count(4)).withoutErrorsOrRejections())
-               .assertThat(emitted(count(4)))
-               .assertThat(emitted(BbProjectCreated.class, once()))
-               .assertThat(emitted(BbTaskAdded.class, thrice()));
+               .assertThat(VerifyEvents.emittedEvent(count(4)))
+               .assertThat(VerifyEvents.emittedEvent(BbProjectCreated.class, once()))
+               .assertThat(VerifyEvents.emittedEvent(BbTaskAdded.class, thrice()));
     }
 
     @SuppressWarnings("ReturnValueIgnored")
@@ -94,9 +93,9 @@ class BlackBoxBoundedContextTest {
                .receivesCommand(createReport(projectId))
                .receivesEvent(taskAdded(projectId))
                .assertThat(acked(twice()).withoutErrorsOrRejections())
-               .assertThat(emitted(thrice()))
-               .assertThat(emitted(BbReportCreated.class, once()))
-               .assertThat(emitted(BbTaskAddedToReport.class, once()));
+               .assertThat(VerifyEvents.emittedEvent(thrice()))
+               .assertThat(VerifyEvents.emittedEvent(BbReportCreated.class, once()))
+               .assertThat(VerifyEvents.emittedEvent(BbTaskAddedToReport.class, once()));
     }
 
     @SuppressWarnings("ReturnValueIgnored")
@@ -108,9 +107,9 @@ class BlackBoxBoundedContextTest {
                .receivesCommand(createReport(projectId))
                .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
                .assertThat(acked(count(4)).withoutErrorsOrRejections())
-               .assertThat(emitted(count(7)))
-               .assertThat(emitted(BbReportCreated.class, once()))
-               .assertThat(emitted(BbTaskAddedToReport.class, thrice()));
+               .assertThat(VerifyEvents.emittedEvent(count(7)))
+               .assertThat(VerifyEvents.emittedEvent(BbReportCreated.class, once()))
+               .assertThat(VerifyEvents.emittedEvent(BbTaskAddedToReport.class, thrice()));
     }
 
     @Test

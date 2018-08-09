@@ -101,7 +101,8 @@ import static io.spine.testing.server.Assertions.assertCommandClasses;
 import static io.spine.testing.server.Assertions.assertEventClasses;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchRejection;
-import static io.spine.testing.server.blackbox.VerifyEvents.emitted;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -776,7 +777,7 @@ public class AggregateTest {
                     .with(new TaskAggregateRepository())
                     .receivesCommand(createTask())
                     .assertThat(acked(once()).withoutErrorsOrRejections())
-                    .assertThat(emitted(once()))
+                    .assertThat(emittedEvent(once()))
                     .close();
         }
 
@@ -796,9 +797,9 @@ public class AggregateTest {
                     .with(new TaskAggregateRepository())
                     .receivesCommand(assignTask())
                     .assertThat(acked(once()).withoutErrorsOrRejections())
-                    .assertThat(emitted(twice()))
-                    .assertThat(emitted(AggTaskAssigned.class))
-                    .assertThat(emitted(AggUserNotified.class))
+                    .assertThat(emittedEvent(twice()))
+                    .assertThat(emittedEvents(AggTaskAssigned.class))
+                    .assertThat(emittedEvents(AggUserNotified.class))
                     .close();
         }
 
@@ -818,8 +819,8 @@ public class AggregateTest {
                     .with(new TaskAggregateRepository())
                     .receivesCommand(reassignTask())
                     .assertThat(acked(once()).withoutErrorsOrRejections())
-                    .assertThat(emitted(once()))
-                    .assertThat(emitted(AggUserNotified.class))
+                    .assertThat(emittedEvent(once()))
+                    .assertThat(emittedEvents(AggUserNotified.class))
                     .close();
         }
     }

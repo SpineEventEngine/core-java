@@ -43,6 +43,7 @@ import io.spine.server.procman.given.pm.AddTaskDispatcher;
 import io.spine.server.procman.given.pm.DirectQuizProcmanRepository;
 import io.spine.server.procman.given.pm.QuizProcmanRepository;
 import io.spine.server.procman.given.pm.TestProcessManager;
+import io.spine.server.procman.given.pm.TestProcessManagerRepo;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.NoOpSystemGateway;
@@ -87,7 +88,9 @@ import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.testing.client.blackbox.Count.none;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
-import static io.spine.testing.server.blackbox.VerifyEvents.emitted;
+import static io.spine.testing.server.blackbox.VerifyCommands.emittedCommand;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
 import static io.spine.testing.server.procman.PmDispatcher.dispatch;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -297,7 +300,10 @@ class ProcessManagerTest {
         @Test
         @DisplayName("transform command")
         void transformCommand() {
-
+            BlackBoxBoundedContext
+                    .with(new TestProcessManagerRepo())
+                    .receivesCommand(startProject())
+                    .assertThat(emittedCommand(PmAddTask.class, once()));
         }
     }
 
@@ -365,10 +371,10 @@ class ProcessManagerTest {
                     .with(new QuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
                     .assertThat(acked(twice()).withoutErrorsOrRejections())
-                    .assertThat(emitted(twice()))
-                    .assertThat(emitted(PmQuizStarted.class))
-                    .assertThat(emitted(PmQuestionAnswered.class))
-                    .assertThat(emitted(Empty.class, none()))
+                    .assertThat(emittedEvent(twice()))
+                    .assertThat(emittedEvents(PmQuizStarted.class))
+                    .assertThat(emittedEvents(PmQuestionAnswered.class))
+                    .assertThat(emittedEvent(Empty.class, none()))
                     .close();
         }
 
@@ -403,9 +409,9 @@ class ProcessManagerTest {
                     .with(new DirectQuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
                     .assertThat(acked(twice()).withoutErrorsOrRejections())
-                    .assertThat(emitted(once()))
-                    .assertThat(emitted(PmQuizStarted.class))
-                    .assertThat(emitted(Empty.class, none()))
+                    .assertThat(emittedEvent(once()))
+                    .assertThat(emittedEvents(PmQuizStarted.class))
+                    .assertThat(emittedEvent(Empty.class, none()))
                     .close();
         }
     }
