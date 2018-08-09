@@ -21,7 +21,6 @@
 package io.spine.server.command;
 
 import io.spine.core.CommandEnvelope;
-import io.spine.core.Event;
 import io.spine.server.event.RejectionEnvelope;
 
 import java.util.Optional;
@@ -46,8 +45,7 @@ final class CaughtRejection implements CaughtError {
     }
 
     @Override
-    public Optional<Event> asRejection() {
-        Event event = rejection.getOuterObject();
-        return Optional.of(event);
+    public Optional<RejectionEnvelope> asRejection() {
+        return Optional.of(rejection);
     }
 }

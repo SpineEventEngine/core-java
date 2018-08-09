@@ -24,11 +24,20 @@ import io.spine.annotation.Internal;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.Version;
+import io.spine.server.event.RejectionEnvelope;
 
 import java.util.Optional;
 
 /**
- * A wrapper of a handled command handling error.
+ * A result of an error handling.
+ *
+ * <p>Provides capabilities for further dealing with the error.
+ *
+ * <p>If the error is not handled before, it can be {@linkplain #rethrowOnce() rethrown}.
+ * A rethrown error is considered handled, thus will not be rethrown if caught again.
+ *
+ * <p>If the error represents a command rejection, the rejection can be
+ * {@linkplain #asRejection() obtained} for further manipulations. A rejection cannot be rethrown.
  *
  * @author Dmytro Dashenkov
  */
@@ -55,7 +64,7 @@ public interface CaughtError {
      * @return the handled rejection event or {@link Optional#empty()} if the handled error is
      * not a command rejection
      */
-    default Optional<Event> asRejection() {
+    default Optional<RejectionEnvelope> asRejection() {
         return Optional.empty();
     }
 

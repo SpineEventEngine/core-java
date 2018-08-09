@@ -42,6 +42,7 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -199,7 +200,8 @@ public class CommandBus extends Bus<Command,
 
     private void onError(CommandEnvelope envelope, RuntimeException exception) {
         Optional<Event> rejection = errorHandler.handleError(envelope, exception)
-                                                .asRejection();
+                                                .asRejection()
+                                                .map(RejectionEnvelope::getOuterObject);
         rejection.ifPresent(eventBus::post);
     }
 
