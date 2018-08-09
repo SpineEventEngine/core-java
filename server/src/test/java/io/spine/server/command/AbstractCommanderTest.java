@@ -20,15 +20,24 @@
 
 package io.spine.server.command;
 
+import com.google.protobuf.Message;
 import io.spine.client.CommandFactory;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventFactory;
 import io.spine.test.command.CmdCreateProject;
+import io.spine.test.command.CmdSetTaskDescription;
 import io.spine.test.command.FirstCmdCreateProject;
 import io.spine.test.command.ProjectId;
+import io.spine.test.command.Task;
+import io.spine.test.command.TaskId;
+import io.spine.test.command.event.CmdTaskAdded;
+import io.spine.testing.TestValues;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,8 +51,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("AbstractCommander should")
 class AbstractCommanderTest {
 
-    private final CommandFactory factory = TestActorRequestFactory.newInstance(getClass())
-                                                                  .command();
+    private final CommandFactory commandFactory =
+            TestActorRequestFactory.newInstance(getClass())
+                                   .command();
+    private final EventFactory eventFactory =
+            TestEventFactory.newInstance(getClass());
+
     private final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                                 .build();
     private CommandInterceptor interceptor;
@@ -51,9 +64,13 @@ class AbstractCommanderTest {
     @BeforeEach
     void setUp() {
         CommandBus commandBus = boundedContext.getCommandBus();
+        EventBus eventBus = boundedContext.getEventBus();
         AbstractCommander commander = new Commendatore(commandBus, boundedContext.getEventBus());
-        interceptor = new CommandInterceptor(boundedContext, FirstCmdCreateProject.class);
+        interceptor = new CommandInterceptor(boundedContext,
+                                             FirstCmdCreateProject.class,
+                                             CmdSetTaskDescription.class);
         commandBus.register(commander);
+        eventBus.register(DelegatingEventDispatcher.of(commander));
     }
 
     @Test
@@ -61,23 +78,56 @@ class AbstractCommanderTest {
     void commandOnCommand() {
         CmdCreateProject commandMessage = CmdCreateProject
                 .newBuilder()
-                .setProjectId(newId())
+                .setProjectId(newProjectId())
                 .build();
-        createAndPost(commandMessage);
+        createCommandAndPost(commandMessage);
 
         assertTrue(interceptor.contains(FirstCmdCreateProject.class));
     }
 
-    private static ProjectId newId() {
-        return ProjectId.newBuilder()
-                        .setId(newUuid())
-                        .build();
+    @Test
+    @DisplayName("create a command on an event")
+    void commandOnEvent() {
+        CmdTaskAdded eventMessage = CmdTaskAdded
+                .newBuilder()
+                .setProjectId(newProjectId())
+                .setTask(Task.newBuilder().setTaskId(newTaskId()))
+                .build();
+
+        createEventAndPost(eventMessage);
+
+        assertTrue(interceptor.contains(CmdSetTaskDescription.class));
     }
 
-    private void createAndPost(CmdCreateProject commandMessage) {
-        io.spine.core.Command command = factory.create(commandMessage);
+    /*
+     * Test Environment
+     *******************************/
+
+    private static ProjectId newProjectId() {
+        return ProjectId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
+    }
+
+    private static TaskId newTaskId() {
+        return TaskId
+                .newBuilder()
+                .setId(TestValues.random(100))
+                .build();
+
+    }
+
+    private void createCommandAndPost(Message commandMessage) {
+        io.spine.core.Command command = commandFactory.create(commandMessage);
         boundedContext.getCommandBus()
                       .post(command, StreamObservers.noOpObserver());
+    }
+
+    private void createEventAndPost(Message eventMessage) {
+        io.spine.core.Event event = eventFactory.createEvent(eventMessage, null);
+        boundedContext.getEventBus()
+                      .post(event);
     }
 
     /**
@@ -96,6 +146,15 @@ class AbstractCommanderTest {
                     .setId(command.getProjectId())
                     .build();
         }
-    }
 
+        @Command
+        CmdSetTaskDescription on(CmdTaskAdded event) {
+            return CmdSetTaskDescription
+                    .newBuilder()
+                    .setTaskId(event.getTask()
+                                    .getTaskId())
+                    .setDescription("Testing command creation on event")
+                    .build();
+        }
+    }
 }
