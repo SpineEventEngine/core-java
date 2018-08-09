@@ -58,7 +58,7 @@ import static org.mockito.Mockito.when;
 class ReferenceValidatorTest {
 
     private static final String USER_GOOGLE_UID_FIELD = "user_google_uid";
-    private final EventEnricher enricher = Enrichment.newEventEnricher();
+    private final Enricher enricher = Enrichment.newEventEnricher();
 
     @Test
     @DisplayName("initialize with valid enricher")
@@ -123,7 +123,7 @@ class ReferenceValidatorTest {
     @DisplayName("skip mapping if no mapping function is defined")
     void skipMappingIfNoFuncDefined() {
         // TODO:2018-07-30:dmytro.dashenkov: Moack does not work.
-        EventEnricher mockEnricher = mock(EventEnricher.class);
+        Enricher mockEnricher = mock(Enricher.class);
         when(mockEnricher.functionFor(any(Class.class), any(Class.class)))
                 .thenReturn(Optional.empty());
         ReferenceValidator validator

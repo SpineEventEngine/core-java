@@ -43,7 +43,7 @@ class MessageEnrichmentTest {
 
     @BeforeEach
     void setUp() {
-        EventEnricher enricher = Enrichment.newEventEnricher();
+        Enricher enricher = Enrichment.newEventEnricher();
         this.enricher = MessageEnrichment.create(
                 enricher,
                 ProjectCreated.class,

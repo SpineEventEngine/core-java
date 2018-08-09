@@ -46,10 +46,10 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.command.Assign;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventBusTest;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.event.EBProjectArchived;
@@ -178,7 +178,7 @@ public class EventBusTestEnv {
     }
 
     @SuppressWarnings("CheckReturnValue") // Conditionally calling builder.
-    public static EventBus.Builder eventBusBuilder(@Nullable EventEnricher enricher) {
+    public static EventBus.Builder eventBusBuilder(@Nullable Enricher enricher) {
         EventBus.Builder busBuilder = EventBus
                 .newBuilder()
                 .appendFilter(new TaskCreatedFilter());

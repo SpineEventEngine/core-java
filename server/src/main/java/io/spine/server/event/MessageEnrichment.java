@@ -48,7 +48,7 @@ class MessageEnrichment<S extends Message, T extends Message, C extends Message>
         extends EnrichmentFunction<S, T, C> {
 
     /** A parent instance holding this instance and its siblings. */
-    private final EventEnricher enricher;
+    private final Enricher enricher;
 
     /** Tells, whether this instance is active or not. */
     private boolean active = false;
@@ -61,13 +61,13 @@ class MessageEnrichment<S extends Message, T extends Message, C extends Message>
 
     /** Creates a new message enricher instance. */
     static <S extends Message, T extends Message, C extends Message>
-    MessageEnrichment<S, T, C> create(EventEnricher enricher,
+    MessageEnrichment<S, T, C> create(Enricher enricher,
                                       Class<S> messageClass,
                                       Class<T> enrichmentClass) {
         return new MessageEnrichment<>(enricher, messageClass, enrichmentClass);
     }
 
-    private MessageEnrichment(EventEnricher enricher,
+    private MessageEnrichment(Enricher enricher,
                               Class<S> eventClass,
                               Class<T> enrichmentClass) {
         super(eventClass, enrichmentClass);

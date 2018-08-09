@@ -49,7 +49,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * <p>Enrichment schema is constructed like this:
  * <pre>
  *     {@code
- *     EventEnricher enricher = EventEnricher.newBuilder()
+ *     Enricher enricher = Enricher.newBuilder()
  *         .add(ProjectId.class, String.class, new Function<ProjectId, String> { ... } )
  *         .add(ProjectId.class, UserId.class, new Function<ProjectId, UserId> { ... } )
  *         ...
@@ -61,7 +61,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * @author Dmytro Dashenkov
  */
 @SPI
-public class EventEnricher {
+public class Enricher {
 
     /** Available enrichment functions per Java class. */
     private final ImmutableMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> functions;
@@ -71,7 +71,7 @@ public class EventEnricher {
      *
      * <p>Also adds {@link MessageEnrichment}s for all enrichments defined in Protobuf.
      */
-    private EventEnricher(Builder builder) {
+    private Enricher(Builder builder) {
         LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?, ?>> funcMap = create();
         for (EnrichmentFunction<?, ?, ?> function : builder.getFunctions()) {
             funcMap.put(function.getSourceClass(), function);
@@ -232,8 +232,8 @@ public class EventEnricher {
         }
 
         /** Creates a new {@code Enricher}. */
-        public EventEnricher build() {
-            EventEnricher result = new EventEnricher(this);
+        public Enricher build() {
+            Enricher result = new Enricher(this);
             validate(result.functions());
             return result;
         }

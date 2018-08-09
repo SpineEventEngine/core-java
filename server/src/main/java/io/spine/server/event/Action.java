@@ -46,7 +46,7 @@ final class Action {
 
     private final Map<String, Any> enrichments = Maps.newHashMap();
 
-    Action(EventEnricher parent, EventEnvelope envelope) {
+    Action(Enricher parent, EventEnvelope envelope) {
         this.envelope = envelope;
         Class<? extends Message> sourceClass = envelope.getMessageClass()
                                                        .value();
@@ -80,7 +80,7 @@ final class Action {
      * <p>We suppress the {@code "unchecked"} because we ensure types when we...
      * <ol>
      *      <li>create enrichments,
-     *      <li>put them into {@linkplain EventEnricher#functions} by their message class.
+     *      <li>put them into {@linkplain Enricher#functions} by their message class.
      * </ol>
      */
     @SuppressWarnings("unchecked")

@@ -24,7 +24,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.event.EventEnricher;
+import io.spine.server.event.Enricher;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -32,7 +32,7 @@ import java.util.function.Function;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A factory of {@link EventEnricher} instances for the system bounded context.
+ * A factory of {@link Enricher} instances for the system bounded context.
  *
  * @author Dmytro Dashenkov
  */
@@ -46,17 +46,17 @@ public final class SystemEnricher {
     }
 
     /**
-     * Creates a new {@link EventEnricher} for the system bounded context.
+     * Creates a new {@link Enricher} for the system bounded context.
      *
      * @param commandRepository repository to find enrichment values in
-     * @return new {@link EventEnricher}
+     * @return new {@link Enricher}
      */
-    public static EventEnricher create(CommandLifecycleRepository commandRepository) {
+    public static Enricher create(CommandLifecycleRepository commandRepository) {
         checkNotNull(commandRepository);
-        EventEnricher enricher = EventEnricher.newBuilder()
-                                              .add(CommandId.class, Command.class,
+        Enricher enricher = Enricher.newBuilder()
+                                    .add(CommandId.class, Command.class,
                                                    commandLookup(commandRepository))
-                                              .build();
+                                    .build();
         return enricher;
     }
 

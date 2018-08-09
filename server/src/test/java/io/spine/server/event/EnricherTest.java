@@ -59,13 +59,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@DisplayName("EventEnricher should")
-public class EventEnricherTest {
+@DisplayName("Enricher should")
+public class EnricherTest {
 
     private BoundedContext boundedContext;
     private EventBus eventBus;
     private TestEventSubscriber subscriber;
-    private EventEnricher enricher;
+    private Enricher enricher;
     private final Function<ProjectId, String> getProjectName = new GetProjectName();
     private final Function<ProjectId, UserId> getProjectOwnerId = new GetProjectOwnerId();
 
@@ -87,7 +87,7 @@ public class EventEnricherTest {
     @Test
     @DisplayName("have builder")
     void haveBuilder() {
-        assertNotNull(EventEnricher.newBuilder());
+        assertNotNull(Enricher.newBuilder());
     }
 
     @Nested

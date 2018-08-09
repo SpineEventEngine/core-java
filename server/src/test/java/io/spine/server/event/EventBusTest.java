@@ -99,7 +99,7 @@ public class EventBusTest {
     private CommandBus commandBus;
     private BoundedContext bc;
 
-    private void setUp(@Nullable EventEnricher enricher) {
+    private void setUp(@Nullable Enricher enricher) {
         this.eventFactory = TestEventFactory.newInstance(EventBusTest.class);
         EventBus.Builder eventBusBuilder = eventBusBuilder(enricher);
 
@@ -294,7 +294,7 @@ public class EventBusTest {
         @Test
         @DisplayName("for event that can be enriched")
         void forEnrichable() {
-            EventEnricher enricher = mock(EventEnricher.class);
+            Enricher enricher = mock(Enricher.class);
             EventEnvelope event = EventEnvelope.of(GivenEvent.projectCreated());
             doReturn(true).when(enricher)
                           .canBeEnriched(any(EventEnvelope.class));
@@ -314,7 +314,7 @@ public class EventBusTest {
         @Test
         @DisplayName("for event that cannot be enriched")
         void forNonEnrichable() {
-            EventEnricher enricher = mock(EventEnricher.class);
+            Enricher enricher = mock(Enricher.class);
             doReturn(false).when(enricher)
                            .canBeEnriched(any(EventEnvelope.class));
 
