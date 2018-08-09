@@ -221,10 +221,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         // ignore result of `commitEvents()` because we obtain them in the block before the call. 
     @Override
     protected void store(A aggregate) {
-        Write<I> operation = Write.<I>operation()
-                                  .into(this)
-                                  .write(aggregate)
-                                  .prepare();
+        Write<I> operation = Write.operationFor(this, aggregate);
         operation.perform();
     }
 

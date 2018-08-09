@@ -37,10 +37,33 @@ final class Write<I> {
     private final Aggregate<I, ?, ?> aggregate;
     private final int snapshotTrigger;
 
-    private Write(Builder<I> builder) {
-        this.storage = builder.repository.aggregateStorage();
-        this.snapshotTrigger = builder.repository.getSnapshotTrigger();
-        this.aggregate = builder.aggregate;
+    private Write(AggregateStorage<I> storage,
+                  Aggregate<I, ?, ?> aggregate,
+                  int snapshotTrigger) {
+        this.storage = storage;
+        this.snapshotTrigger = snapshotTrigger;
+        this.aggregate = aggregate;
+    }
+
+    /**
+     * Creates a new instance of {@code Write} operation.
+     *
+     * <p>The resulting operation stores the given {@link Aggregate} into the given
+     * {@link AggregateRepository}.
+     *
+     * @param repository the target {@link AggregateRepository}
+     * @param aggregate  the {@link Aggregate} to write
+     * @param <I>        the type of the aggregate ID
+     * @return new {@code Write} operation
+     */
+    static <I> Write<I> operationFor(AggregateRepository<I, ?> repository,
+                                     Aggregate<I, ?, ?> aggregate) {
+        checkNotNull(repository);
+        checkNotNull(aggregate);
+
+        AggregateStorage<I> storage = repository.aggregateStorage();
+        int snapshotTrigger = repository.getSnapshotTrigger();
+        return new Write<>(storage, aggregate, snapshotTrigger);
     }
 
     /**
@@ -78,61 +101,6 @@ final class Write<I> {
 
         if (aggregate.lifecycleFlagsChanged()) {
             storage.writeLifecycleFlags(aggregate.getId(), aggregate.getLifecycleFlags());
-        }
-    }
-
-    /**
-     * Creates a new {@link Builder} for a {@code Write} operation.
-     *
-     * @param <I> the type of ID of the {@link Aggregate} which is written
-     * @return new {@link Builder}
-     */
-    static <I> Builder<I> operation() {
-        return new Builder<>();
-    }
-
-    /**
-     * A builder for a {@code Write} operation.
-     *
-     * @param <I> the type of ID of the {@link Aggregate} which is written
-     */
-    static final class Builder<I> {
-
-        private AggregateRepository<I, ? extends Aggregate<I, ?, ?>> repository;
-        private Aggregate<I, ?, ?> aggregate;
-
-        /**
-         * Prevents direct instantiation.
-         */
-        private Builder() {
-        }
-
-        /**
-         * @param aggregate the {@link Aggregate} to store
-         */
-        Builder<I> write(Aggregate<I, ?, ?> aggregate) {
-            this.aggregate = checkNotNull(aggregate);
-            return this;
-        }
-
-        /**
-         * @param repository the {@link AggregateRepository} to store the aggregate into
-         */
-        Builder<I> into(AggregateRepository<I, ? extends Aggregate<I, ?, ?>> repository) {
-            this.repository = checkNotNull(repository);
-            return this;
-        }
-
-        /**
-         * Creates a new instance of {@code Write} with the set attributes.
-         *
-         * @return new instance of {@code Write} operation
-         */
-        Write<I> prepare() {
-            checkNotNull(aggregate);
-            checkNotNull(repository);
-
-            return new Write<>(this);
         }
     }
 }
