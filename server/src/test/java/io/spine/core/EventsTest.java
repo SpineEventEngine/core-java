@@ -20,15 +20,18 @@
 package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
+import io.spine.base.ThrowableMessage;
 import io.spine.base.Time;
 import io.spine.core.given.EventsTestEnv;
 import io.spine.core.given.GivenEvent;
+import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.event.EventFactory;
 import io.spine.string.Stringifiers;
 import io.spine.testing.Tests;
@@ -112,11 +115,14 @@ public class EventsTest {
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
+        EntityAlreadyArchived defaultThrowableMessage =
+                new EntityAlreadyArchived(Any.getDefaultInstance());
         new NullPointerTester()
                 .setDefault(StringValue.class, StringValue.getDefaultInstance())
                 .setDefault(EventContext.class, GivenEvent.context())
                 .setDefault(Version.class, Version.getDefaultInstance())
                 .setDefault(Event.class, Event.getDefaultInstance())
+                .setDefault(ThrowableMessage.class, defaultThrowableMessage)
                 .testAllPublicStaticMethods(Events.class);
     }
 

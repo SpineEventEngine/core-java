@@ -143,6 +143,7 @@ class ProcessManagerTest {
     private static RejectionEnvelope entityAlreadyArchived(Class<? extends Message> commandMessageCls) {
         Any id = Identifier.pack(ProcessManagerTest.class.getName());
         EntityAlreadyArchived throwable = new EntityAlreadyArchived(id);
+        throwable.initProducer(id);
         Command command = ACommand.withMessage(Sample.messageOfType(commandMessageCls));
         CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
         return RejectionEnvelope.from(commandEnvelope, throwable);
@@ -240,8 +241,8 @@ class ProcessManagerTest {
         void rejectionAndCommandMessage() {
             RejectionEnvelope rejection = entityAlreadyArchived(PmAddTask.class);
             dispatch(processManager, rejection.getEvent());
-            assertEquals(rejection.getOrigin(),
-                         unpack(processManager.getState()));
+            assertEquals(rejection.getOrigin().getMessage(),
+                         processManager.getState());
         }
     }
 
