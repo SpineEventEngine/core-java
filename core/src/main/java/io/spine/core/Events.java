@@ -31,7 +31,6 @@ import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -45,7 +44,6 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static io.spine.validate.Validate.isDefault;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Utility class for working with {@link Event} objects.
@@ -214,22 +212,6 @@ public final class Events {
         EventContext context = event.getContext();
         boolean result = context.hasRejection()
                       || !isDefault(context.getRejection());
-        return result;
-    }
-
-    /**
-     * Filters out the rejection events from the given {@code Collection} and returns a list of
-     * the same events except those that are {@link #isRejection(Event) rejections}.
-     *
-     * <p>Does not change the given {@link Collection}, but copies the required entries.
-     *
-     * @param events the {@link Event}s to filter
-     * @return same events but rejections
-     */
-    public static List<Event> notRejections(Collection<Event> events) {
-        List<Event> result = events.stream()
-                                   .filter(event -> !isRejection(event))
-                                   .collect(toList());
         return result;
     }
 

@@ -55,7 +55,6 @@ import java.util.stream.Stream;
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
-import static io.spine.core.Events.notRejections;
 import static io.spine.core.Events.substituteVersion;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
@@ -291,8 +290,7 @@ public abstract class Aggregate<I,
      */
     List<Event> apply(List<Event> events, MessageEnvelope origin) {
         ImmutableList<Event> versionedEvents = prepareEvents(events, origin);
-        List<Event> eventsToApply = notRejections(versionedEvents);
-        play(eventsToApply);
+        play(versionedEvents);
         uncommittedEvents = uncommittedEvents.append(versionedEvents);
         return versionedEvents;
     }
