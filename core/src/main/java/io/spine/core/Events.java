@@ -30,6 +30,7 @@ import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +42,7 @@ import static io.spine.core.EventContext.OriginCase.EVENT_CONTEXT;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static io.spine.validate.Validate.isDefault;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Utility class for working with {@link Event} objects.
@@ -48,6 +50,7 @@ import static io.spine.validate.Validate.isDefault;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("ClassWithTooManyMethods") // OK for this utility class.
 public final class Events {
 
     private static final String REJECTION_CLASS_SUFFIX = "Rejections";
@@ -212,6 +215,22 @@ public final class Events {
     }
 
     /**
+     * Filters out the rejection events from the given {@code Collection} and returns a list of
+     * the same events except those that are {@link #isRejection(Event) rejections}.
+     *
+     * <p>Does not change the given {@link Collection}, but copies the required entries.
+     *
+     * @param events the {@link Event}s to filter
+     * @return same events but rejections
+     */
+    public static List<Event> notRejections(Collection<Event> events) {
+        List<Event> result = events.stream()
+                                   .filter(event -> !isRejection(event))
+                                   .collect(toList());
+        return result;
+    }
+
+    /**
      * Tells whether the passed message class represents a rejection message.
      */
     public static boolean isRejection(Class<? extends Message> messageClass) {
@@ -357,6 +376,25 @@ public final class Events {
         Event result = event.toBuilder()
                             .setContext(resultContext)
                             .build();
+        return result;
+    }
+
+    /**
+     * Replaces the event version with the given {@code newVersion}.
+     *
+     * @param event      original event
+     * @param newVersion the version to set
+     * @return the copy of the original event but with the new version
+     */
+    @Internal
+    public static Event substituteVersion(Event event, Version newVersion) {
+        EventContext newContext = event.getContext()
+                                          .toBuilder()
+                                          .setVersion(newVersion)
+                                          .build();
+        Event result = event.toBuilder()
+                               .setContext(newContext)
+                               .build();
         return result;
     }
 
