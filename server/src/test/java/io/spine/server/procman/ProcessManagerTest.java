@@ -81,7 +81,7 @@ import static io.spine.server.procman.given.pm.QuizGiven.newAnswer;
 import static io.spine.server.procman.given.pm.QuizGiven.newQuizId;
 import static io.spine.server.procman.given.pm.QuizGiven.startQuiz;
 import static io.spine.testdata.Sample.messageOfType;
-import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.client.blackbox.Count.none;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;

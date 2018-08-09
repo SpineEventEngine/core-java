@@ -20,29 +20,40 @@
 
 package io.spine.testing.client.blackbox;
 
-import io.spine.base.Error;
+import com.google.protobuf.Message;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Verifies that a command or an event was handled responding with specified number of
- * {@link Error errors}.
+ * Verifies that a command or an event was handled responding with a provided domain rejection
+ * specified amount of times.
  *
+ * @param <T> a domain rejection type
  * @author Mykhailo Drachuk
  */
-class AcksErrorCountVerifier extends AcknowledgementsVerifier {
+class SpecificRejectionCountVerify<T extends Message> extends VerifyAcknowledgements {
 
     private final Count expectedCount;
+    private final Class<T> type;
+    private final RejectionCriterion<T> criterion;
 
-    /** @param expectedCount an amount of errors that are expected to be observed in acks */
-    AcksErrorCountVerifier(Count expectedCount) {
+    /**
+     * @param type          a type of a domain rejection specified by a message class
+     * @param expectedCount an amount of rejection that are expected in Bounded Context
+     * @param criterion     a criterion filtering domain rejections
+     */
+    SpecificRejectionCountVerify(Class<T> type, Count expectedCount,
+                                 RejectionCriterion<T> criterion) {
         super();
         this.expectedCount = expectedCount;
+        this.type = type;
+        this.criterion = criterion;
     }
 
     @Override
     public void verify(Acknowledgements acks) {
-        assertEquals(expectedCount.value(), acks.countErrors(),
-                     "Bounded context did not contain an expected amount of errors");
+        assertEquals(expectedCount.value(), acks.countRejections(type, criterion),
+                     "Bounded Context did not contain a rejection expected amount of times:"
+                             + criterion.description());
     }
 }

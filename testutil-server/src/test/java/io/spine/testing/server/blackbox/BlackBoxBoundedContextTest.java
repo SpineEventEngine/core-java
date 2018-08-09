@@ -32,7 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;

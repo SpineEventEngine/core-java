@@ -20,34 +20,21 @@
 
 package io.spine.testing.client.blackbox;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import io.spine.base.Error;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Verifies that a command or an event was handled responding with an error matching a provided
- * {@link ErrorCriterion error criterion}.
+ * Verifies that a command or an event was handled responding with some {@link Error error}.
  *
  * @author Mykhailo Drachuk
  */
-class AcksSpecificErrorCountVerifier extends AcknowledgementsVerifier {
-
-    private final Count expectedCount;
-    private final ErrorCriterion criterion;
-
-    /**
-     * @param criterion      an error criterion specifying which kind of error should be a part
-     *                      of acknowledgement
-     * @param expectedCount an amount of errors that are expected to match the criterion
-     */
-    AcksSpecificErrorCountVerifier(ErrorCriterion criterion, Count expectedCount) {
-        super();
-        this.expectedCount = expectedCount;
-        this.criterion = criterion;
-    }
+class ErrorPresenceVerify extends VerifyAcknowledgements {
 
     @Override
     public void verify(Acknowledgements acks) {
-        assertEquals(expectedCount.value(), acks.countErrors(criterion),
-                     "Bounded Context did not contain an expected count of errors. "
-                             + criterion.description());
+        if (!acks.containErrors()) {
+            fail("Bounded Context unexpectedly did not throw an error");
+        }
     }
 }

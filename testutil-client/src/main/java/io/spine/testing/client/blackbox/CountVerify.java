@@ -28,12 +28,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  * @author Mykhailo Drachuk
  */
-class AcksCountVerifier extends AcknowledgementsVerifier {
+class CountVerify extends VerifyAcknowledgements {
 
     private final Count expectedCount;
 
     /** @param expectedCount an amount acks that are expected be observed */
-    AcksCountVerifier(Count expectedCount) {
+    CountVerify(Count expectedCount) {
         super();
         this.expectedCount = expectedCount;
     }

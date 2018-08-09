@@ -94,7 +94,7 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.event;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.newTenantId;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.reassignTask;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
-import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.server.Assertions.assertCommandClasses;

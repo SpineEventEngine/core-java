@@ -29,61 +29,61 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 
 /**
- * A special kind of a {@link AcknowledgementsVerifier Acknowledgements Verifier} that
+ * A special kind of a {@link VerifyAcknowledgements Acknowledgements Verifier} that
  * executes a list of assertions one by one.
  * 
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
-class AcksVerifierCombination extends AcknowledgementsVerifier {
+class CombinationVerify extends VerifyAcknowledgements {
 
-    private final List<AcknowledgementsVerifier> verifiers;
+    private final List<VerifyAcknowledgements> verifiers;
 
     /**
      * Creates a combination of two verifiers. More verifiers are appended using
-     * {@link #and(AcknowledgementsVerifier) and()}.
+     * {@link #and(VerifyAcknowledgements) and()}.
      */
-    private AcksVerifierCombination(Collection<AcknowledgementsVerifier> verifiers) {
+    private CombinationVerify(Collection<VerifyAcknowledgements> verifiers) {
         super();
         this.verifiers = ImmutableList.copyOf(verifiers);
     }
 
     /**
-     * Creates a new {@link AcksVerifierCombination AcksVerifierCombination} from two regular
-     * {@link AcknowledgementsVerifier ack verifiers}.
+     * Creates a new {@link CombinationVerify AcksVerifierCombination} from two regular
+     * {@link VerifyAcknowledgements ack verifiers}.
      *
      * @param first  a verifier that will be executed first upon {@link #verify(Acknowledgements)}
      * @param second a verifier executed second
      * @return a new verifier instance
      */
-    static AcksVerifierCombination of(AcknowledgementsVerifier first,
-                                      AcknowledgementsVerifier second) {
-        List<AcknowledgementsVerifier> verifiers = newArrayList();
+    static CombinationVerify of(VerifyAcknowledgements first,
+                                VerifyAcknowledgements second) {
+        List<VerifyAcknowledgements> verifiers = newArrayList();
         addVerifierToList(first, verifiers);
         addVerifierToList(second, verifiers);
-        return new AcksVerifierCombination(verifiers);
+        return new CombinationVerify(verifiers);
     }
 
     /**
-     * Creates a new {@link AcksVerifierCombination AcksVerifierCombination} from a list of
-     * {@link AcknowledgementsVerifier verifiers} and a new verifier.
+     * Creates a new {@link CombinationVerify AcksVerifierCombination} from a list of
+     * {@link VerifyAcknowledgements verifiers} and a new verifier.
      *
      * @param items       verifiers that will be executed first upon
      *                    {@link #verify(Acknowledgements)}
      * @param newVerifier a verifier executed added to the end of the verifiers list
      * @return a new verifier instance
      */
-    static AcksVerifierCombination of(Iterable<AcknowledgementsVerifier> items,
-                                      AcknowledgementsVerifier newVerifier) {
-        List<AcknowledgementsVerifier> verifiers = newArrayList(items);
+    static CombinationVerify of(Iterable<VerifyAcknowledgements> items,
+                                VerifyAcknowledgements newVerifier) {
+        List<VerifyAcknowledgements> verifiers = newArrayList(items);
         addVerifierToList(newVerifier, verifiers);
-        return new AcksVerifierCombination(verifiers);
+        return new CombinationVerify(verifiers);
     }
 
-    private static void addVerifierToList(AcknowledgementsVerifier verifier,
-                                          Collection<AcknowledgementsVerifier> items) {
-        if (verifier instanceof AcksVerifierCombination) {
-            items.addAll(((AcksVerifierCombination) verifier).verifiers);
+    private static void addVerifierToList(VerifyAcknowledgements verifier,
+                                          Collection<VerifyAcknowledgements> items) {
+        if (verifier instanceof CombinationVerify) {
+            items.addAll(((CombinationVerify) verifier).verifiers);
         } else {
             items.add(verifier);
         }
@@ -91,13 +91,13 @@ class AcksVerifierCombination extends AcknowledgementsVerifier {
 
     /**
      * Executes all of the verifiers that were combined using
-     * {@link #and(AcknowledgementsVerifier) and()}.
+     * {@link #and(VerifyAcknowledgements) and()}.
      *
      * @param acks acknowledgements of handling commands by the Bounded Context
      */
     @Override
     public void verify(Acknowledgements acks) {
-        for (AcknowledgementsVerifier verifier : verifiers) {
+        for (VerifyAcknowledgements verifier : verifiers) {
             verifier.verify(acks);
         }
     }
@@ -109,7 +109,7 @@ class AcksVerifierCombination extends AcknowledgementsVerifier {
      * @return a new verifier instance
      */
     @Override
-    public AcksVerifierCombination and(AcknowledgementsVerifier verifier) {
+    public CombinationVerify and(VerifyAcknowledgements verifier) {
         return of(verifiers, verifier);
     }
 }

@@ -33,7 +33,7 @@ import io.spine.core.RejectionClass;
  * <p>Contains static factory methods for creating acknowledgement verifiers, checking that
  * commands were acknowledged, responded with rejections, and errors.
  *
- * <p>Allows combining verifiers using {@link #and(AcknowledgementsVerifier) and()} or factory
+ * <p>Allows combining verifiers using {@link #and(VerifyAcknowledgements) and()} or factory
  * method shortcuts: {@code ackedWithoutErrors().and(ackedWithRejection(rej))} can be simplified
  * to {@code ackedWithoutErrors().withRejection(rej)}.
  *
@@ -41,7 +41,7 @@ import io.spine.core.RejectionClass;
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 @VisibleForTesting
-public abstract class AcknowledgementsVerifier {
+public abstract class VerifyAcknowledgements {
 
     /**
      * Executes the acknowledgement verifier throwing an assertion error if the
@@ -55,10 +55,10 @@ public abstract class AcknowledgementsVerifier {
      * Verifies that Bounded Context responded with a specified number of acknowledgements.
      *
      * @param expectedCount an expected amount of acknowledgements observed in Bounded Context
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public static AcknowledgementsVerifier acked(Count expectedCount) {
-        return new AcksCountVerifier(expectedCount);
+    public static VerifyAcknowledgements acked(Count expectedCount) {
+        return new CountVerify(expectedCount);
     }
 
     /*
@@ -68,19 +68,19 @@ public abstract class AcknowledgementsVerifier {
     /**
      * Verifies that the command handling did not respond with {@link Error error}.
      *
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public static AcknowledgementsVerifier ackedWithoutErrors() {
-        return new AcksErrorAbsenceVerifier();
+    public static VerifyAcknowledgements ackedWithoutErrors() {
+        return new ErrorAbsenceVerify();
     }
 
     /**
      * Verifies that a command or an event was handled responding with some {@link Error error}.
      *
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public static AcknowledgementsVerifier ackedWithErrors() {
-        return new AcksErrorPresenceVerifier();
+    public static VerifyAcknowledgements ackedWithErrors() {
+        return new ErrorPresenceVerify();
     }
 
     /**
@@ -88,10 +88,10 @@ public abstract class AcknowledgementsVerifier {
      * {@link Error errors}.
      *
      * @param expectedCount an amount of errors that are expected to be observed
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public static AcknowledgementsVerifier ackedWithErrors(Count expectedCount) {
-        return new AcksErrorCountVerifier(expectedCount);
+    public static VerifyAcknowledgements ackedWithErrors(Count expectedCount) {
+        return new ErrorCountVerify(expectedCount);
     }
 
     /**
@@ -100,10 +100,10 @@ public abstract class AcknowledgementsVerifier {
      *
      * @param criterion an error criterion specifying which kind of error should be a part
      *                  of acknowledgement
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public static AcknowledgementsVerifier ackedWithErrors(ErrorCriterion criterion) {
-        return new AcksSpecificErrorPresenceVerifier(criterion);
+    public static VerifyAcknowledgements ackedWithErrors(ErrorCriterion criterion) {
+        return new SpecificErrorPresenceVerify(criterion);
     }
 
     /**
@@ -113,11 +113,11 @@ public abstract class AcknowledgementsVerifier {
      * @param criterion     an error criterion specifying which kind of error should be a part
      *                      of acknowledgement
      * @param expectedCount an amount of errors that are expected to match the criterion
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public static AcknowledgementsVerifier ackedWithErrors(ErrorCriterion criterion,
-                                                           Count expectedCount) {
-        return new AcksSpecificErrorCountVerifier(criterion, expectedCount);
+    public static VerifyAcknowledgements ackedWithErrors(ErrorCriterion criterion,
+                                                         Count expectedCount) {
+        return new SpecificErrorCountVerify(criterion, expectedCount);
     }
 
     /*
@@ -127,20 +127,20 @@ public abstract class AcknowledgementsVerifier {
     /**
      * Verifies that a command handling did not respond with any {@link Rejection rejections}.
      *
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public static AcknowledgementsVerifier ackedWithoutRejections() {
-        return new AcksRejectionAbsenceVerifier();
+    public static VerifyAcknowledgements ackedWithoutRejections() {
+        return new RejectionAbsenceVerify();
     }
 
     /**
      * Verifies that a command or an event was handled responding with some
      * {@link Rejection rejection}.
      *
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public static AcknowledgementsVerifier ackedWithRejections() {
-        return new AcksRejectionPresenceVerifier();
+    public static VerifyAcknowledgements ackedWithRejections() {
+        return new RejectionPresenceVerify();
     }
 
     /**
@@ -148,9 +148,9 @@ public abstract class AcknowledgementsVerifier {
      * of the provided type.
      *
      * @param type rejection type in a form of message class
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public static AcknowledgementsVerifier ackedWithRejections(Class<? extends Message> type) {
+    public static VerifyAcknowledgements ackedWithRejections(Class<? extends Message> type) {
         RejectionClass rejectionClass = RejectionClass.of(type);
         return ackedWithRejections(rejectionClass);
     }
@@ -160,10 +160,10 @@ public abstract class AcknowledgementsVerifier {
      * of the provided type.
      *
      * @param type rejection type in a form of {@link RejectionClass RejectionClass}
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public static AcknowledgementsVerifier ackedWithRejections(RejectionClass type) {
-        return new AcksRejectionOfTypePresenceVerifier(type);
+    public static VerifyAcknowledgements ackedWithRejections(RejectionClass type) {
+        return new RejectionOfTypePresenceVerify(type);
     }
 
     /**
@@ -173,11 +173,11 @@ public abstract class AcknowledgementsVerifier {
      * @param type      a type of a domain rejection specified by a message class
      * @param predicate a predicate filtering the domain rejections
      * @param <T>       a domain rejection type
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public static <T extends Message> AcknowledgementsVerifier
+    public static <T extends Message> VerifyAcknowledgements
     ackedWithRejections(Class<T> type, RejectionCriterion<T> predicate) {
-        return new AcksSpecificRejectionPresenceVerifier<>(type, predicate);
+        return new SpecificRejectionPresenceVerify<>(type, predicate);
     }
 
     /**
@@ -185,10 +185,10 @@ public abstract class AcknowledgementsVerifier {
      * amount of times.
      *
      * @param expectedCount an amount of rejection that are expected in Bounded Context
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public static AcknowledgementsVerifier ackedWithRejections(Count expectedCount) {
-        return new AcksRejectionCountVerifier(expectedCount);
+    public static VerifyAcknowledgements ackedWithRejections(Count expectedCount) {
+        return new RejectionCountVerify(expectedCount);
     }
 
     /**
@@ -197,10 +197,10 @@ public abstract class AcknowledgementsVerifier {
      *
      * @param type          rejection type in a form of message class
      * @param expectedCount an amount of rejection that are expected in Bounded Context
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public static AcknowledgementsVerifier ackedWithRejections(Class<? extends Message> type,
-                                                               Count expectedCount) {
+    public static VerifyAcknowledgements ackedWithRejections(Class<? extends Message> type,
+                                                             Count expectedCount) {
         RejectionClass rejectionClass = RejectionClass.of(type);
         return ackedWithRejections(rejectionClass, expectedCount);
     }
@@ -211,11 +211,11 @@ public abstract class AcknowledgementsVerifier {
      *
      * @param type          rejection type in a form of {@link RejectionClass RejectionClass}
      * @param expectedCount an amount of rejection that are expected in Bounded Context
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public static AcknowledgementsVerifier ackedWithRejections(RejectionClass type,
-                                                               Count expectedCount) {
-        return new AcksRejectionOfTypeCountVerifier(type, expectedCount);
+    public static VerifyAcknowledgements ackedWithRejections(RejectionClass type,
+                                                             Count expectedCount) {
+        return new RejectionOfTypeCountVerify(type, expectedCount);
     }
 
     /**
@@ -226,11 +226,11 @@ public abstract class AcknowledgementsVerifier {
      * @param type          a type of a domain rejection specified by a message class
      * @param expectedCount an amount of rejection that are expected in Bounded Context
      * @param criterion     a criterion filtering domain rejections
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public static <T extends Message> AcknowledgementsVerifier
+    public static <T extends Message> VerifyAcknowledgements
     ackedWithRejections(Class<T> type, Count expectedCount, RejectionCriterion<T> criterion) {
-        return new AcksSpecificRejectionCountVerifier<>(type, expectedCount, criterion);
+        return new SpecificRejectionCountVerify<>(type, expectedCount, criterion);
     }
 
     /*
@@ -243,27 +243,27 @@ public abstract class AcknowledgementsVerifier {
      * @param otherVerifier a verifier executed after the current verifier
      * @return a verifier that executes both current and provided assertions
      */
-    public AcknowledgementsVerifier and(AcknowledgementsVerifier otherVerifier) {
-        return AcksVerifierCombination.of(this, otherVerifier);
+    public VerifyAcknowledgements and(VerifyAcknowledgements otherVerifier) {
+        return CombinationVerify.of(this, otherVerifier);
     }
 
     /**
      * Creates a new verifier adding a check to not contain any {@link Error errors}.
      *
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public AcknowledgementsVerifier withoutErrors() {
-        AcknowledgementsVerifier noErrors = ackedWithoutErrors();
+    public VerifyAcknowledgements withoutErrors() {
+        VerifyAcknowledgements noErrors = ackedWithoutErrors();
         return this.and(noErrors);
     }
 
     /**
      * Creates a new verifier adding a check to contain at least one {@link Error error}.
      *
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public AcknowledgementsVerifier withErrors() {
-        AcknowledgementsVerifier withError = ackedWithErrors();
+    public VerifyAcknowledgements withErrors() {
+        VerifyAcknowledgements withError = ackedWithErrors();
         return this.and(withError);
     }
 
@@ -271,10 +271,10 @@ public abstract class AcknowledgementsVerifier {
      * Creates a new verifier adding a check to contain specified amount of {@link Error errors}.
      *
      * @param expectedCount an amount of errors that are expected to be observed in Bounded Context
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public AcknowledgementsVerifier withErrors(Count expectedCount) {
-        AcknowledgementsVerifier withError = ackedWithErrors(expectedCount);
+    public VerifyAcknowledgements withErrors(Count expectedCount) {
+        VerifyAcknowledgements withError = ackedWithErrors(expectedCount);
         return this.and(withError);
     }
 
@@ -284,10 +284,10 @@ public abstract class AcknowledgementsVerifier {
      *
      * @param criterion an error criterion specifying which kind of error should be a part
      *                  of acknowledgement
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public AcknowledgementsVerifier withErrors(ErrorCriterion criterion) {
-        AcknowledgementsVerifier withError = ackedWithErrors(criterion);
+    public VerifyAcknowledgements withErrors(ErrorCriterion criterion) {
+        VerifyAcknowledgements withError = ackedWithErrors(criterion);
         return this.and(withError);
     }
 
@@ -298,10 +298,10 @@ public abstract class AcknowledgementsVerifier {
      * @param criterion     an error criterion specifying which kind of error should be a part
      *                      of acknowledgement
      * @param expectedCount an amount of errors that are expected to match the criterion
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public AcknowledgementsVerifier withErrors(ErrorCriterion criterion, Count expectedCount) {
-        AcknowledgementsVerifier withError = ackedWithErrors(criterion, expectedCount);
+    public VerifyAcknowledgements withErrors(ErrorCriterion criterion, Count expectedCount) {
+        VerifyAcknowledgements withError = ackedWithErrors(criterion, expectedCount);
         return this.and(withError);
     }
 
@@ -309,31 +309,31 @@ public abstract class AcknowledgementsVerifier {
      * Creates a new verifier adding a check to not contain any {@link Error errors} or
      * {@link Rejection rejections}.
      *
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public AcknowledgementsVerifier withoutErrorsOrRejections() {
-        AcknowledgementsVerifier noRejections = ackedWithoutRejections();
-        AcknowledgementsVerifier noErrors = ackedWithoutErrors();
+    public VerifyAcknowledgements withoutErrorsOrRejections() {
+        VerifyAcknowledgements noRejections = ackedWithoutRejections();
+        VerifyAcknowledgements noErrors = ackedWithoutErrors();
         return this.and(noErrors.and(noRejections));
     }
 
     /**
      * Creates a new verifier adding a check to not contain any {@link Rejection rejections}.
      *
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public AcknowledgementsVerifier withoutRejections() {
-        AcknowledgementsVerifier noRejections = ackedWithoutRejections();
+    public VerifyAcknowledgements withoutRejections() {
+        VerifyAcknowledgements noRejections = ackedWithoutRejections();
         return this.and(noRejections);
     }
 
     /**
      * Creates a new verifier adding a check to contain some {@link Rejection rejection}.
      *
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public AcknowledgementsVerifier withRejections() {
-        AcknowledgementsVerifier someRejection = ackedWithRejections();
+    public VerifyAcknowledgements withRejections() {
+        VerifyAcknowledgements someRejection = ackedWithRejections();
         return this.and(someRejection);
     }
 
@@ -342,10 +342,10 @@ public abstract class AcknowledgementsVerifier {
      * type specified by {@code class}.
      *
      * @param type a type of a domain rejection specified by message class
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public AcknowledgementsVerifier withRejections(Class<? extends Message> type) {
-        AcknowledgementsVerifier rejectedType = ackedWithRejections(type);
+    public VerifyAcknowledgements withRejections(Class<? extends Message> type) {
+        VerifyAcknowledgements rejectedType = ackedWithRejections(type);
         return this.and(rejectedType);
     }
 
@@ -354,10 +354,10 @@ public abstract class AcknowledgementsVerifier {
      * type specified by a {@link RejectionClass rejection class}.
      *
      * @param type a type of a domain rejection specified by a {@link RejectionClass}
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public AcknowledgementsVerifier withRejections(RejectionClass type) {
-        AcknowledgementsVerifier rejectedType = ackedWithRejections(type);
+    public VerifyAcknowledgements withRejections(RejectionClass type) {
+        VerifyAcknowledgements rejectedType = ackedWithRejections(type);
         return this.and(rejectedType);
     }
 
@@ -367,11 +367,11 @@ public abstract class AcknowledgementsVerifier {
      *
      * @param type          rejection type in a form of message class
      * @param expectedCount an amount of rejection that are expected in Bounded Context
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public AcknowledgementsVerifier withRejections(Class<? extends Message> type,
-                                                   Count expectedCount) {
-        AcknowledgementsVerifier rejectedType = ackedWithRejections(type, expectedCount);
+    public VerifyAcknowledgements withRejections(Class<? extends Message> type,
+                                                 Count expectedCount) {
+        VerifyAcknowledgements rejectedType = ackedWithRejections(type, expectedCount);
         return this.and(rejectedType);
     }
 
@@ -381,10 +381,10 @@ public abstract class AcknowledgementsVerifier {
      *
      * @param type          rejection type in a form of {@link RejectionClass RejectionClass}
      * @param expectedCount an amount of rejection that are expected in Bounded Context
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public AcknowledgementsVerifier withRejections(RejectionClass type, Count expectedCount) {
-        AcknowledgementsVerifier rejectedType = ackedWithRejections(type, expectedCount);
+    public VerifyAcknowledgements withRejections(RejectionClass type, Count expectedCount) {
+        VerifyAcknowledgements rejectedType = ackedWithRejections(type, expectedCount);
         return this.and(rejectedType);
     }
 
@@ -394,11 +394,11 @@ public abstract class AcknowledgementsVerifier {
      * @param type      a type of a domain rejection specified by a {@link RejectionClass}
      * @param predicate a predicate filtering domain rejections
      * @param <T>       a domain rejection type
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public <T extends Message> AcknowledgementsVerifier
+    public <T extends Message> VerifyAcknowledgements
     withRejections(Class<T> type, RejectionCriterion<T> predicate) {
-        AcknowledgementsVerifier oneRejection = ackedWithRejections(type, predicate);
+        VerifyAcknowledgements oneRejection = ackedWithRejections(type, predicate);
         return this.and(oneRejection);
     }
 
@@ -409,11 +409,11 @@ public abstract class AcknowledgementsVerifier {
      * @param type          a type of a domain rejection specified by a {@link RejectionClass}
      * @param expectedCount an amount of rejection that are expected in Bounded Context
      * @param predicate     a predicate filtering domain rejections
-     * @return a new {@link AcknowledgementsVerifier} instance
+     * @return a new {@link VerifyAcknowledgements} instance
      */
-    public <T extends Message> AcknowledgementsVerifier
+    public <T extends Message> VerifyAcknowledgements
     withRejections(Class<T> type, Count expectedCount, RejectionCriterion<T> predicate) {
-        AcknowledgementsVerifier oneRejection = ackedWithRejections(type, expectedCount, predicate);
+        VerifyAcknowledgements oneRejection = ackedWithRejections(type, expectedCount, predicate);
         return this.and(oneRejection);
     }
 }

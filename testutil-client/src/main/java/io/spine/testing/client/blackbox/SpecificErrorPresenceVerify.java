@@ -20,40 +20,32 @@
 
 package io.spine.testing.client.blackbox;
 
-import com.google.protobuf.Message;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Verifies that a command or an event was handled responding with a provided domain rejection
- * specified amount of times.
+ * Verifies that a command or an event was handled responding with an error matching a provided
+ * {@link ErrorCriterion error criterion}.
  *
- * @param <T> a domain rejection type
  * @author Mykhailo Drachuk
  */
-class AcksSpecificRejectionCountVerifier<T extends Message> extends AcknowledgementsVerifier {
+class SpecificErrorPresenceVerify extends VerifyAcknowledgements {
 
-    private final Count expectedCount;
-    private final Class<T> type;
-    private final RejectionCriterion<T> criterion;
+    private final ErrorCriterion criterion;
 
     /**
-     * @param type          a type of a domain rejection specified by a message class
-     * @param expectedCount an amount of rejection that are expected in Bounded Context
-     * @param criterion     a criterion filtering domain rejections
+     * @param criterion an error criterion specifying which kind of error should be a part
+     *                 of acknowledgement
      */
-    AcksSpecificRejectionCountVerifier(Class<T> type, Count expectedCount,
-                                       RejectionCriterion<T> criterion) {
+    SpecificErrorPresenceVerify(ErrorCriterion criterion) {
         super();
-        this.expectedCount = expectedCount;
-        this.type = type;
         this.criterion = criterion;
     }
 
     @Override
     public void verify(Acknowledgements acks) {
-        assertEquals(expectedCount.value(), acks.countRejections(type, criterion),
-                     "Bounded Context did not contain a rejection expected amount of times:"
-                             + criterion.description());
+        if (!acks.containErrors(criterion)) {
+            fail("Bounded Context did not contain an expected error. "
+                         + criterion.description());
+        }
     }
 }

@@ -20,21 +20,21 @@
 
 package io.spine.testing.client.blackbox;
 
-import io.spine.base.Error;
+import io.spine.core.Rejection;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Verifies that a command or an event was handled responding with some {@link Error error}.
+ * Verifies that a command or an event was handled responding with some {@link Rejection rejection}.
  *
  * @author Mykhailo Drachuk
  */
-class AcksErrorPresenceVerifier extends AcknowledgementsVerifier {
+class RejectionPresenceVerify extends VerifyAcknowledgements {
 
     @Override
     public void verify(Acknowledgements acks) {
-        if (!acks.containErrors()) {
-            fail("Bounded Context unexpectedly did not throw an error");
+        if (!acks.containRejections()) {
+            fail("Bounded Context did not reject any messages");
         }
     }
 }

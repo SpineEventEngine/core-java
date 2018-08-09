@@ -20,34 +20,21 @@
 
 package io.spine.testing.client.blackbox;
 
-import com.google.protobuf.Message;
-import io.spine.core.Rejection;
-import io.spine.core.RejectionClass;
+import io.spine.base.Error;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Verifies that a command or an event was handled responding with a {@link Rejection rejection}
- * of the provided type.
+ * Verifies that the command handling did not respond with {@link Error error}.
  *
  * @author Mykhailo Drachuk
  */
-class AcksRejectionOfTypePresenceVerifier extends AcknowledgementsVerifier {
-
-    private final RejectionClass type;
-
-    /** @param type rejection type in a form of {@link RejectionClass RejectionClass} */
-    AcksRejectionOfTypePresenceVerifier(RejectionClass type) {
-        super();
-        this.type = type;
-    }
+class ErrorAbsenceVerify extends VerifyAcknowledgements {
 
     @Override
     public void verify(Acknowledgements acks) {
-        if (!acks.containRejections(type)) {
-            Class<? extends Message> domainRejection = type.value();
-            fail("Bounded Context did not reject a message of type:" +
-                         domainRejection.getSimpleName());
+        if (acks.containErrors()) {
+            fail("Bounded Context unexpectedly thrown an error");
         }
     }
 }

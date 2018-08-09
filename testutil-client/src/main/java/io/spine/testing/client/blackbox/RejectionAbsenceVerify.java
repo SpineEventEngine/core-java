@@ -20,32 +20,21 @@
 
 package io.spine.testing.client.blackbox;
 
+import io.spine.core.Rejection;
+
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Verifies that a command or an event was handled responding with an error matching a provided
- * {@link ErrorCriterion error criterion}.
- *
+ * Verifies that a command handling did not respond with any {@link Rejection rejections}.
+ * 
  * @author Mykhailo Drachuk
  */
-class AcksSpecificErrorPresenceVerifier extends AcknowledgementsVerifier {
-
-    private final ErrorCriterion criterion;
-
-    /**
-     * @param criterion an error criterion specifying which kind of error should be a part
-     *                 of acknowledgement
-     */
-    AcksSpecificErrorPresenceVerifier(ErrorCriterion criterion) {
-        super();
-        this.criterion = criterion;
-    }
+class RejectionAbsenceVerify extends VerifyAcknowledgements {
 
     @Override
     public void verify(Acknowledgements acks) {
-        if (!acks.containErrors(criterion)) {
-            fail("Bounded Context did not contain an expected error. "
-                         + criterion.description());
+        if (acks.containRejections()) {
+            fail("Bounded Context unexpectedly rejected a message");
         }
     }
 }

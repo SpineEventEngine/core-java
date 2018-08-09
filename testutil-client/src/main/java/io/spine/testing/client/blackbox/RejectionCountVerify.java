@@ -20,38 +20,27 @@
 
 package io.spine.testing.client.blackbox;
 
-import com.google.protobuf.Message;
-
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Verifies that a command or an event was handled responding with rejection matching the
- * provided criterion.
+ * Verifies that a command or an event was handled responding with a rejection specified
+ * amount of times.
  *
- * @param <T> a domain rejection type
  * @author Mykhailo Drachuk
  */
-class AcksSpecificRejectionPresenceVerifier<T extends Message> extends AcknowledgementsVerifier {
+class RejectionCountVerify extends VerifyAcknowledgements {
 
-    private final Class<T> type;
-    private final RejectionCriterion<T> criterion;
+    private final Count expectedCount;
 
-    /**
-     * @param type      a type of a domain rejection specified by a message class
-     * @param criterion a criterion filtering the domain rejections
-     */
-    AcksSpecificRejectionPresenceVerifier(Class<T> type,
-                                          RejectionCriterion<T> criterion) {
+    /** @param expectedCount an amount of rejection that are expected in Bounded Context */
+    RejectionCountVerify(Count expectedCount) {
         super();
-        this.type = type;
-        this.criterion = criterion;
+        this.expectedCount = expectedCount;
     }
 
     @Override
     public void verify(Acknowledgements acks) {
-        if (!acks.containRejection(type, criterion)) {
-            fail("Bounded Context did not reject a message:"
-                         + criterion.description());
-        }
+        assertEquals(expectedCount.value(), acks.countRejections(),
+                     "Bounded Context did not contain a rejection expected amount of times.");
     }
 }

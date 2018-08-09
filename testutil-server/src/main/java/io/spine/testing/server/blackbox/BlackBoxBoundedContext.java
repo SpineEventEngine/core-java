@@ -37,7 +37,7 @@ import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
-import io.spine.testing.client.blackbox.AcknowledgementsVerifier;
+import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.util.Exceptions;
 
@@ -56,7 +56,7 @@ import static java.util.Collections.singletonList;
  * Black Box Bounded Context is aimed at facilitating writing literate integration tests.
  *
  * <p>Using its API commands and events are sent to a Bounded Context. Their effect is afterwards
- * verified in using various verifiers (e.g. {@link AcknowledgementsVerifier acknowledgement
+ * verified in using various verifiers (e.g. {@link VerifyAcknowledgements acknowledgement
  * verfier}, {@link VerifyEvents emitted events verifier}).
  *
  * @author Mykhailo Drachuk
@@ -315,7 +315,7 @@ public class BlackBoxBoundedContext {
      * @return current {@link BlackBoxBoundedContext black box} instance
      */
     @CanIgnoreReturnValue
-    public BlackBoxBoundedContext assertThat(AcknowledgementsVerifier verifier) {
+    public BlackBoxBoundedContext assertThat(VerifyAcknowledgements verifier) {
         Acknowledgements acks = commandAcks();
         verifier.verify(acks);
         return this;

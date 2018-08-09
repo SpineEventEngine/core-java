@@ -32,7 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  *
  * @author Mykhailo Drachuk
  */
-class AcksRejectionOfTypeCountVerifier extends AcknowledgementsVerifier {
+class RejectionOfTypeCountVerify extends VerifyAcknowledgements {
 
     private final RejectionClass type;
     private final Count expectedCount;
@@ -41,7 +41,7 @@ class AcksRejectionOfTypeCountVerifier extends AcknowledgementsVerifier {
      * @param expectedCount an amount of rejection that are expected in Bounded Context
      * @param type          rejection type in a form of {@link RejectionClass RejectionClass}
      */
-    AcksRejectionOfTypeCountVerifier(RejectionClass type, Count expectedCount) {
+    RejectionOfTypeCountVerify(RejectionClass type, Count expectedCount) {
         super();
         this.type = type;
         this.expectedCount = expectedCount;

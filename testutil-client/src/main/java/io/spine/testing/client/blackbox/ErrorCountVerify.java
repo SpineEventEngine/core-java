@@ -20,21 +20,29 @@
 
 package io.spine.testing.client.blackbox;
 
-import io.spine.core.Rejection;
+import io.spine.base.Error;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Verifies that a command or an event was handled responding with some {@link Rejection rejection}.
+ * Verifies that a command or an event was handled responding with specified number of
+ * {@link Error errors}.
  *
  * @author Mykhailo Drachuk
  */
-class AcksRejectionPresenceVerifier extends AcknowledgementsVerifier {
+class ErrorCountVerify extends VerifyAcknowledgements {
+
+    private final Count expectedCount;
+
+    /** @param expectedCount an amount of errors that are expected to be observed in acks */
+    ErrorCountVerify(Count expectedCount) {
+        super();
+        this.expectedCount = expectedCount;
+    }
 
     @Override
     public void verify(Acknowledgements acks) {
-        if (!acks.containRejections()) {
-            fail("Bounded Context did not reject any messages");
-        }
+        assertEquals(expectedCount.value(), acks.countErrors(),
+                     "Bounded context did not contain an expected amount of errors");
     }
 }

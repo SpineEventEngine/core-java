@@ -20,21 +20,38 @@
 
 package io.spine.testing.client.blackbox;
 
-import io.spine.core.Rejection;
+import com.google.protobuf.Message;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Verifies that a command handling did not respond with any {@link Rejection rejections}.
- * 
+ * Verifies that a command or an event was handled responding with rejection matching the
+ * provided criterion.
+ *
+ * @param <T> a domain rejection type
  * @author Mykhailo Drachuk
  */
-class AcksRejectionAbsenceVerifier extends AcknowledgementsVerifier {
+class SpecificRejectionPresenceVerify<T extends Message> extends VerifyAcknowledgements {
+
+    private final Class<T> type;
+    private final RejectionCriterion<T> criterion;
+
+    /**
+     * @param type      a type of a domain rejection specified by a message class
+     * @param criterion a criterion filtering the domain rejections
+     */
+    SpecificRejectionPresenceVerify(Class<T> type,
+                                    RejectionCriterion<T> criterion) {
+        super();
+        this.type = type;
+        this.criterion = criterion;
+    }
 
     @Override
     public void verify(Acknowledgements acks) {
-        if (acks.containRejections()) {
-            fail("Bounded Context unexpectedly rejected a message");
+        if (!acks.containRejection(type, criterion)) {
+            fail("Bounded Context did not reject a message:"
+                         + criterion.description());
         }
     }
 }

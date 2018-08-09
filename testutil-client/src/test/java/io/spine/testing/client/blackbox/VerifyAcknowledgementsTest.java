@@ -29,9 +29,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
-import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.ackedWithErrors;
-import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.ackedWithRejections;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.ackedWithErrors;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.ackedWithRejections;
 import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
@@ -58,7 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author Mykhailo Drachuk
  */
 @DisplayName("Acknowledgements Verifier should")
-class AcknowledgementsVerifierTest {
+class VerifyAcknowledgementsTest {
 
     private Acknowledgements acks;
 
@@ -223,11 +223,11 @@ class AcknowledgementsVerifierTest {
                        rejectionAcks));
     }
 
-    private void verify(AcknowledgementsVerifier verifier) {
+    private void verify(VerifyAcknowledgements verifier) {
         verify(verifier, acks);
     }
 
-    private static void verify(AcknowledgementsVerifier verifier, Acknowledgements acks) {
+    private static void verify(VerifyAcknowledgements verifier, Acknowledgements acks) {
         verifier.verify(acks);
     }
 }
