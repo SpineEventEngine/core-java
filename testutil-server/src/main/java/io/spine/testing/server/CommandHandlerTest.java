@@ -24,14 +24,18 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Command;
+import io.spine.core.CommandEnvelope;
+import io.spine.server.command.CaughtError;
+import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.command.CommandHandlingEntity;
+import io.spine.server.event.RejectionEnvelope;
+import io.spine.system.server.NoOpSystemGateway;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.expected.CommandHandlerExpected;
 
 import java.util.List;
 import java.util.Optional;
 
-import static io.spine.core.Events.isRejection;
 import static java.util.Collections.emptyList;
 
 /**
@@ -84,25 +88,26 @@ public abstract class CommandHandlerTest<I,
     protected CommandHandlerExpected<S> expectThat(E entity) {
         S initialState = entity.getState();
         Message rejection = null;
-        List<? extends Message> events = dispatchTo(entity);
-        Optional<Message> rejectionMessage = rejectionFrom(events);
-        if (rejectionMessage.isPresent()) {
-            rejection = rejectionMessage.get();
-            events = emptyList();
+        List<? extends Message> events = emptyList();
+        try {
+            events = dispatchTo(entity);
+        } catch (RuntimeException e) {
+            rejection = rejection(e).getMessage();
         }
         return new CommandHandlerExpected<>(events, rejection, initialState,
                                             entity.getState(), interceptedCommands());
     }
 
-    private static Optional<Message> rejectionFrom(List<? extends Message> events) {
-        if (events.size() != 1) {
-            return Optional.empty();
-        }
-        Message singleEvent = events.get(0);
-        if (isRejection(singleEvent.getClass())) {
-            return Optional.of(singleEvent);
+    private RejectionEnvelope rejection(RuntimeException wrapped) {
+        Command command = createCommand(createMessage());
+        CommandEnvelope envelope = CommandEnvelope.of(command);
+        CaughtError error = CommandErrorHandler.with(NoOpSystemGateway.INSTANCE)
+                                               .handleError(envelope, wrapped);
+        Optional<RejectionEnvelope> rejectionEnvelope = error.asRejection();
+        if (rejectionEnvelope.isPresent()) {
+            return rejectionEnvelope.get();
         } else {
-            return Optional.empty();
+            throw wrapped;
         }
     }
 }
