@@ -55,6 +55,12 @@ public final class RejectionEnvelope
         extends AbstractMessageEnvelope<EventId, Event, EventContext>
         implements ActorMessageEnvelope<EventId, Event, EventContext> {
 
+    /**
+     * The default producer ID for rejection events.
+     *
+     * <p>Represented by a packed {@link com.google.protobuf.StringValue StringValue} of
+     * {@code "Unknown"}.
+     */
     private static final Any DEFAULT_EVENT_PRODUCER = Identifier.pack("Unknown");
 
     private final EventEnvelope event;
@@ -64,6 +70,14 @@ public final class RejectionEnvelope
         this.event = event;
     }
 
+    /**
+     * Creates a new {@code RejectionEnvelope} from the given event.
+     *
+     * <p>Throws an {@link IllegalArgumentException} if the given event is not a rejection.
+     *
+     * @param event the rejection event
+     * @return new
+     */
     public static RejectionEnvelope from(EventEnvelope event) {
         checkNotNull(event);
         checkArgument(event.isRejection(), "%s is not a rejection", event.getMessageClass());
@@ -73,6 +87,9 @@ public final class RejectionEnvelope
     /**
      * Creates an instance of {@code Rejection} from the rejected command and a {@link Throwable}
      * caused by the {@link ThrowableMessage}.
+     *
+     * <p>If the producer is not {@linkplain ThrowableMessage#initProducer(Any) set}, uses
+     * the {@link #DEFAULT_EVENT_PRODUCER} as the producer.
      *
      * @param origin    the rejected command
      * @param throwable the caught error
