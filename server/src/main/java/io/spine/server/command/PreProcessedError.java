@@ -21,7 +21,7 @@
 package io.spine.server.command;
 
 /**
- * A preprocessed {@link HandledError}.
+ * A pre-processed {@link HandledError}.
  *
  * <p>Performs no action on {@link #rethrowOnce()} and always returns
  * {@link java.util.Optional#empty() Optional.empty()} on {@link #asRejection()}.
