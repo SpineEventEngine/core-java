@@ -23,6 +23,7 @@ package io.spine.server.event;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.Identifier;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.AbstractMessageEnvelope;
 import io.spine.core.ActorContext;
@@ -44,7 +45,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
 import static io.spine.core.Events.rejectionContext;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * The holder of a rejection {@code Event} which provides convenient access to its properties.
@@ -54,6 +54,8 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 public final class RejectionEnvelope
         extends AbstractMessageEnvelope<EventId, Event, EventContext>
         implements ActorMessageEnvelope<EventId, Event, EventContext> {
+
+    private static final Any DEFAULT_EVENT_PRODUCER = Identifier.pack("Unknown");
 
     private final EventEnvelope event;
 
@@ -99,10 +101,7 @@ public final class RejectionEnvelope
 
     private static Event produceEvent(CommandEnvelope origin, ThrowableMessage throwableMessage) {
         Any producerId = throwableMessage.producerId()
-                                         .orElseThrow(() -> newIllegalArgumentException(
-                                                 "ThrowableMessage has no producer: %s",
-                                                 throwableMessage
-                                         ));
+                                         .orElse(DEFAULT_EVENT_PRODUCER);
         EventFactory factory = EventFactory.on(origin, producerId);
         Message thrownMessage = throwableMessage.getMessageThrown();
         RejectionEventContext context = rejectionContext(origin.getMessage(), throwableMessage);
