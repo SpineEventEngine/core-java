@@ -101,7 +101,8 @@ import static io.spine.testing.server.Assertions.assertCommandClasses;
 import static io.spine.testing.server.Assertions.assertEventClasses;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchRejection;
-import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
+import static io.spine.testing.server.blackbox.VerifyEvents.emitted;
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -110,7 +111,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static java.util.stream.Collectors.toList;
 
 /**
  * @author Alexander Litus

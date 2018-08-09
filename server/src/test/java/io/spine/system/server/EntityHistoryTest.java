@@ -49,6 +49,7 @@ import io.spine.system.server.given.EntityHistoryTestEnv.TestProcmanRepository;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestProjection;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestProjectionRepository;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.blackbox.CommandMemoizingTap;
 import io.spine.type.TypeUrl;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

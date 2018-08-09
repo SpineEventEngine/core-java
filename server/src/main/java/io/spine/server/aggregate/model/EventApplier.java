@@ -57,7 +57,7 @@ public final class EventApplier
 
     @Override
     public EventClass getMessageClass() {
-        return EventClass.of(rawMessageClass());
+        return EventClass.from(rawMessageClass());
     }
 
     @VisibleForTesting

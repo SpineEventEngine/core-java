@@ -37,7 +37,7 @@ import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.Count.twice;
-import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
+import static io.spine.testing.server.blackbox.VerifyEvents.emitted;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;

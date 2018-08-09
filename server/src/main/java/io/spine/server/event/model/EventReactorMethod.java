@@ -51,7 +51,7 @@ public final class EventReactorMethod
 
     @Override
     public EventClass getMessageClass() {
-        return EventClass.of(rawMessageClass());
+        return EventClass.from(rawMessageClass());
     }
 
     /**

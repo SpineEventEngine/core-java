@@ -23,7 +23,6 @@ package io.spine.server.procman.given.pm;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.core.React;
 import io.spine.server.command.Assign;
@@ -79,7 +78,7 @@ public class TestProcessManager
      ********************/
 
     @Assign
-    PmProjectCreated handle(PmCreateProject command, CommandContext ignored) {
+    PmProjectCreated handle(PmCreateProject command) {
         getBuilder().mergeFrom(pack(command));
         return ((PmProjectCreated.Builder) Sample.builderForType(PmProjectCreated.class))
                 .setProjectId(command.getProjectId())
@@ -87,7 +86,7 @@ public class TestProcessManager
     }
 
     @Assign
-    PmTaskAdded handle(PmAddTask command, CommandContext ignored) {
+    PmTaskAdded handle(PmAddTask command) {
         getBuilder().mergeFrom(pack(command));
         return ((PmTaskAdded.Builder) Sample.builderForType(PmTaskAdded.class))
                 .setProjectId(command.getProjectId())
@@ -95,7 +94,7 @@ public class TestProcessManager
     }
 
     @Command
-    PmAddTask transform(PmStartProject command, CommandContext context) {
+    PmAddTask transform(PmStartProject command) {
         getBuilder().mergeFrom(pack(command));
 
         PmAddTask addTask = ((PmAddTask.Builder)

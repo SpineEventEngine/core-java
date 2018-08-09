@@ -77,7 +77,7 @@ abstract class RejectionHandlerMethod<T, R extends MethodResult>
             @SuppressWarnings("unchecked") // RejectionFilterPredicate ensures that
             Class<? extends Message> rawCommandClass =
                     (Class<? extends Message>) getRawMethod().getParameterTypes()[1];
-            return HandlerKey.of(getMessageClass(), CommandClass.of(rawCommandClass));
+            return HandlerKey.of(getMessageClass(), CommandClass.from(rawCommandClass));
         } else {
             return super.key();
         }

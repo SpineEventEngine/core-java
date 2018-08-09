@@ -28,7 +28,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.DispatchedCommand;
 import io.spine.core.Event;
@@ -88,7 +87,7 @@ import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
 import static io.spine.testing.client.blackbox.Count.none;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
-import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
+import static io.spine.testing.server.blackbox.VerifyEvents.emitted;
 import static io.spine.testing.server.procman.PmDispatcher.dispatch;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -272,9 +271,9 @@ class ProcessManagerTest {
     class Commanding {
 
         /**
-         * Tests command routing.
+         * Tests transformation of a command into another command.
          *
-         * @see TestProcessManager#transform(PmStartProject, CommandContext)
+         * @see TestProcessManager#transform(PmStartProject)
          */
         @Test
         @DisplayName("route commands")

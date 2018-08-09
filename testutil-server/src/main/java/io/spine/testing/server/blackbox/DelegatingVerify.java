@@ -20,24 +20,25 @@
 
 package io.spine.testing.server.blackbox;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.core.Event;
-import io.spine.core.EventClass;
-
-import java.util.List;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 
 /**
- * Provides information on events emitted in the {@link BlackBoxBoundedContext Bounded Context}.
+ * A base class for type-specific verification classes.
  *
- * @author Mykhailo Drachuk
+ * @param <E> the type of emitted messages
+ * @author Alexander Yevsyukov
  */
-@VisibleForTesting
-public final class EmittedEvents extends EmittedMessages<EventClass, Event> {
+public abstract class DelegatingVerify<E extends EmittedMessages> implements Verify<E> {
 
-    EmittedEvents(List<Event> events) {
-        super(events,
-              new MessageTypeCounter<>(events, EventClass::of, EventClass::from),
-              Event.class
-        );
+    private final Verify<E> delegate;
+
+    protected DelegatingVerify(Verify<E> delegate) {
+        this.delegate = delegate;
+    }
+
+    @Override
+    @OverridingMethodsMustInvokeSuper
+    public void verify(E emittedMessages) {
+        delegate.verify(emittedMessages);
     }
 }

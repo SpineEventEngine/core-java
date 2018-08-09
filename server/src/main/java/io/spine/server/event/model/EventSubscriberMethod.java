@@ -52,7 +52,7 @@ public final class EventSubscriberMethod
 
     @Override
     public EventClass getMessageClass() {
-        return EventClass.of(rawMessageClass());
+        return EventClass.from(rawMessageClass());
     }
 
     /**

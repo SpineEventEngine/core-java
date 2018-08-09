@@ -21,23 +21,23 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
-import io.spine.core.Event;
-import io.spine.core.EventClass;
+import io.spine.core.Command;
+import io.spine.core.CommandClass;
 
 import java.util.List;
 
 /**
- * Provides information on events emitted in the {@link BlackBoxBoundedContext Bounded Context}.
+ * Provides information on commands emitted in the {@link BlackBoxBoundedContext Bounded Context}.
  *
- * @author Mykhailo Drachuk
+ * @author Alexander Yevsyukov
  */
 @VisibleForTesting
-public final class EmittedEvents extends EmittedMessages<EventClass, Event> {
+public final class EmittedCommands extends EmittedMessages<CommandClass, Command> {
 
-    EmittedEvents(List<Event> events) {
-        super(events,
-              new MessageTypeCounter<>(events, EventClass::of, EventClass::from),
-              Event.class
+    EmittedCommands(List<Command> commands) {
+        super(commands,
+              new MessageTypeCounter<>(commands, CommandClass::of, CommandClass::from),
+              Command.class
         );
     }
 }

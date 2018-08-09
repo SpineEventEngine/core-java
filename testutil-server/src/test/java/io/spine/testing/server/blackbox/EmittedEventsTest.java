@@ -89,13 +89,13 @@ class EmittedEventsTest {
                 event(taskAdded())
         );
         EmittedEvents emittedEvents = new EmittedEvents(events);
-        assertEquals(0, emittedEvents.count(EventClass.of(BbProjectStarted.class)));
-        assertEquals(1, emittedEvents.count(EventClass.of(BbProjectCreated.class)));
-        assertEquals(2, emittedEvents.count(EventClass.of(BbTaskAdded.class)));
+        assertEquals(0, emittedEvents.count(EventClass.from(BbProjectStarted.class)));
+        assertEquals(1, emittedEvents.count(EventClass.from(BbProjectCreated.class)));
+        assertEquals(2, emittedEvents.count(EventClass.from(BbTaskAdded.class)));
     }
 
     @Test
-    @DisplayName("return true if contains the provided class")
+    @DisplayName("return true if contains the provided message class")
     void containMessageClass() {
         List<Event> events = asList(
                 event(projectCreated()),
@@ -117,8 +117,8 @@ class EmittedEventsTest {
                 event(taskAdded())
         );
         EmittedEvents emittedEvents = new EmittedEvents(events);
-        assertFalse(emittedEvents.contain(EventClass.of(BbProjectStarted.class)));
-        assertTrue(emittedEvents.contain(EventClass.of(BbProjectCreated.class)));
-        assertTrue(emittedEvents.contain(EventClass.of(BbTaskAdded.class)));
+        assertFalse(emittedEvents.contain(EventClass.from(BbProjectStarted.class)));
+        assertTrue(emittedEvents.contain(EventClass.from(BbProjectCreated.class)));
+        assertTrue(emittedEvents.contain(EventClass.from(BbTaskAdded.class)));
     }
 }

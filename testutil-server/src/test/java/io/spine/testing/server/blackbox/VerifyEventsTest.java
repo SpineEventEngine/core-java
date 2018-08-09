@@ -32,7 +32,7 @@ import static io.spine.testing.client.blackbox.Count.none;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.Count.twice;
-import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
+import static io.spine.testing.server.blackbox.VerifyEvents.emitted;
 import static io.spine.testing.server.blackbox.given.EmittedEventsTestEnv.event;
 import static io.spine.testing.server.blackbox.given.EmittedEventsTestEnv.projectCreated;
 import static io.spine.testing.server.blackbox.given.EmittedEventsTestEnv.taskAdded;
@@ -43,7 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
  * @author Mykhailo Drachuk
  */
 @DisplayName("Emitted Events Verifier should")
-class EmittedEventsVerifierTest {
+class VerifyEventsTest {
 
     private EmittedEvents emittedEvents;
 
@@ -89,7 +89,7 @@ class EmittedEventsVerifierTest {
                      () -> verify(emitted(BbTaskAdded.class, thrice())));
     }
 
-    private void verify(EmittedEventsVerifier verifier) {
+    private void verify(VerifyEvents verifier) {
         verifier.verify(emittedEvents);
     }
 }

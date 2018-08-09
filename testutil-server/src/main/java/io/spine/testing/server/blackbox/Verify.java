@@ -20,24 +20,18 @@
 
 package io.spine.testing.server.blackbox;
 
-import com.google.common.annotations.VisibleForTesting;
-import io.spine.core.Event;
-import io.spine.core.EventClass;
-
-import java.util.List;
-
 /**
- * Provides information on events emitted in the {@link BlackBoxBoundedContext Bounded Context}.
+ * Common interface for classes that verify emitted messages.
  *
- * @author Mykhailo Drachuk
+ * @param <E> the type of emitted messages
+ * @author Alexander Yevsyukov
  */
-@VisibleForTesting
-public final class EmittedEvents extends EmittedMessages<EventClass, Event> {
+public interface Verify<E extends EmittedMessages> {
 
-    EmittedEvents(List<Event> events) {
-        super(events,
-              new MessageTypeCounter<>(events, EventClass::of, EventClass::from),
-              Event.class
-        );
-    }
+    /**
+     * Verifies passed messages by invoking appropriate assertions.
+     *
+     * @throws AssertionError if messages do not meet the verification criteria
+     */
+    void verify(E emittedMessages);
 }

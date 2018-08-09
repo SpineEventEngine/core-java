@@ -18,14 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server;
+package io.spine.testing.server.blackbox;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
+import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.server.bus.BusFilter;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -40,14 +44,15 @@ import static org.hamcrest.Matchers.instanceOf;
  *
  * @author Dmytro Dashenkov
  */
-final class CommandMemoizingTap implements BusFilter<CommandEnvelope> {
+public final class CommandMemoizingTap implements BusFilter<CommandEnvelope> {
 
     private final Map<CommandId, Message> commandMessages = newHashMap();
+    private final List<Command> commands = Lists.newArrayList();
 
     /**
      * Looks up the command message by the command ID.
      */
-    <M extends Message> Optional<M> find(CommandId commandId, Class<M> commandClass) {
+    public <M extends Message> Optional<M> find(CommandId commandId, Class<M> commandClass) {
         Message commandMessage = commandMessages.get(commandId);
         assertThat(commandMessage, instanceOf(commandClass));
         @SuppressWarnings("unchecked") // Checked with an assertion.
@@ -58,6 +63,14 @@ final class CommandMemoizingTap implements BusFilter<CommandEnvelope> {
     @Override
     public Optional<Ack> accept(CommandEnvelope envelope) {
         commandMessages.put(envelope.getId(), envelope.getMessage());
+        commands.add(envelope.getCommand());
         return Optional.empty();
+    }
+
+    /**
+     * Obtains immutable list with commands collected by the tap so far.
+     */
+    public List<Command> commands() {
+        return ImmutableList.copyOf(commands);
     }
 }

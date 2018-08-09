@@ -63,7 +63,7 @@ public final class HandlerKey {
      * @return a new instance
      */
     public static HandlerKey of(MessageClass handledMessage) {
-        return new HandlerKey(handledMessage, CommandClass.of(Empty.class));
+        return new HandlerKey(handledMessage, CommandClass.from(Empty.class));
     }
 
     /**

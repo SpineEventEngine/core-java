@@ -136,8 +136,8 @@ public class AggregateRepositoryTest {
         @DisplayName("event classes on which aggregate reacts")
         void aggregateEventClasses() {
             Set<EventClass> eventClasses = repository().getEventClasses();
-            assertTrue(eventClasses.contains(EventClass.of(AggProjectArchived.class)));
-            assertTrue(eventClasses.contains(EventClass.of(AggProjectDeleted.class)));
+            assertTrue(eventClasses.contains(EventClass.from(AggProjectArchived.class)));
+            assertTrue(eventClasses.contains(EventClass.from(AggProjectDeleted.class)));
         }
     }
 

@@ -57,11 +57,11 @@ import static java.util.Collections.singletonList;
  *
  * <p>Using its API commands and events are sent to a Bounded Context. Their effect is afterwards
  * verified in using various verifiers (e.g. {@link AcknowledgementsVerifier acknowledgement
- * verfier}, {@link EmittedEventsVerifier emitted events verifier}).
+ * verfier}, {@link VerifyEvents emitted events verifier}).
  *
  * @author Mykhailo Drachuk
  */
-@SuppressWarnings("ClassWithTooManyMethods")
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 @VisibleForTesting
 public class BlackBoxBoundedContext {
 
@@ -74,9 +74,19 @@ public class BlackBoxBoundedContext {
     private final EventBus eventBus;
     private final TenantId tenantId;
     private final MemoizingObserver<Ack> observer;
+    private final CommandMemoizingTap commandTap;
 
+    /**
+     * Creates a new multi-tenant instance.
+     */
     private BlackBoxBoundedContext() {
-        this.boundedContext = newBoundedContext();
+        this.commandTap = new CommandMemoizingTap();
+        this.boundedContext = BoundedContext
+                .newBuilder()
+                .setMultitenant(true)
+                .setCommandBus(CommandBus.newBuilder()
+                                         .appendFilter(commandTap))
+                .build();
         this.tenantId = newTenantId();
         this.requestFactory = requestFactory(tenantId);
         this.eventFactory = eventFactory(requestFactory);
@@ -121,15 +131,6 @@ public class BlackBoxBoundedContext {
         return TenantId.newBuilder()
                        .setValue(newUuid())
                        .build();
-    }
-
-    /**
-     * @return a new multitenant bounded context
-     */
-    private static BoundedContext newBoundedContext() {
-        return BoundedContext.newBuilder()
-                             .setMultitenant(true)
-                             .build();
     }
 
     /*
@@ -289,14 +290,13 @@ public class BlackBoxBoundedContext {
      ******************************************************************************/
 
     /**
-     * Executes the provided verifier, which throws an assertion error in case of
-     * unexpected results.
+     * Verifies emitted events by the passed verifier.
      *
      * @param verifier a verifier that checks the events emitted in this Bounded Context
      * @return current {@link BlackBoxBoundedContext black box} instance
      */
     @CanIgnoreReturnValue
-    public BlackBoxBoundedContext verifiesThat(EmittedEventsVerifier verifier) {
+    public BlackBoxBoundedContext verifiesThat(VerifyEvents verifier) {
         EmittedEvents events = emittedEvents();
         verifier.verify(events);
         return this;
@@ -319,6 +319,28 @@ public class BlackBoxBoundedContext {
         Acknowledgements acks = commandAcks();
         verifier.verify(acks);
         return this;
+    }
+
+    /**
+     * Verifies emitted commands by the passed verifier.
+     *
+     * @param verifier a verifier that checks the commands emitted in this Bounded Context
+     * @return current {@link BlackBoxBoundedContext black box} instance
+     */
+    @CanIgnoreReturnValue
+    public BlackBoxBoundedContext verifiesThat(VerifyCommands verifier) {
+        EmittedCommands commands = emittedCommands();
+        verifier.verify(commands);
+        return this;
+    }
+
+    private EmittedCommands emittedCommands() {
+        List<Command> commands = readAllCommands();
+        return new EmittedCommands(commands);
+    }
+
+    private List<Command> readAllCommands() {
+        return commandTap.commands();
     }
 
     private Acknowledgements commandAcks() {

@@ -249,7 +249,7 @@ public class EventBusTestEnv {
      */
     public static class TaskCreatedFilter implements BusFilter<EventEnvelope> {
 
-        private static final EventClass TASK_ADDED_CLASS = EventClass.of(EBTaskAdded.class);
+        private static final EventClass TASK_ADDED_CLASS = EventClass.from(EBTaskAdded.class);
 
         @Override
         public Optional<Ack> accept(EventEnvelope envelope) {
@@ -343,7 +343,7 @@ public class EventBusTestEnv {
 
         @Override
         public Set<EventClass> getMessageClasses() {
-            return ImmutableSet.of(EventClass.of(ProjectCreated.class));
+            return ImmutableSet.of(EventClass.from(ProjectCreated.class));
         }
 
         @Override

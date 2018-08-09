@@ -58,7 +58,7 @@ public final class CommandReactionMethod
 
     @Override
     public EventClass getMessageClass() {
-        return EventClass.of(rawMessageClass());
+        return EventClass.from(rawMessageClass());
     }
 
     /**

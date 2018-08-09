@@ -46,6 +46,6 @@ public abstract class CommandAcceptingMethod<T extends CommandReceiver, R extend
 
     @Override
     public CommandClass getMessageClass() {
-        return CommandClass.of(rawMessageClass());
+        return CommandClass.from(rawMessageClass());
     }
 }

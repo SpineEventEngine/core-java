@@ -199,7 +199,7 @@ public abstract class MessageHandlerTest<I,
         if (Message.class.isAssignableFrom(cls)) {
             @SuppressWarnings("unchecked")
             Class<? extends Message> messageType = (Class<? extends Message>) cls;
-            CommandClass commandClass = CommandClass.of(messageType);
+            CommandClass commandClass = CommandClass.from(messageType);
             return of(commandClass);
         } else {
             return empty();
