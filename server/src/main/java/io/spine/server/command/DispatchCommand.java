@@ -65,7 +65,7 @@ public final class DispatchCommand {
      * {@link EntityLifecycle#onCommandRejected EntityLifecycle.onCommandRejected(...)} callback
      * is triggered.
      *
-     * @return the produced events, may be a single rejection event
+     * @return the produced events including the rejections thrown by the command handler
      */
     public List<Event> perform() {
         Command cmd = command.getCommand();
