@@ -164,7 +164,7 @@ message MarkSplit {
 //
 // Posted when a commanding method creates one or more commands in response to an incoming event.
 //
-message MarkReacted {
+message MarkCausedByEvent {
 
     // The ID of the command.
     spine.core.CommandId id = 1;

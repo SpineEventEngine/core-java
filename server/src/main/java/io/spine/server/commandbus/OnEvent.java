@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.core.ActorContext;
 import io.spine.core.CommandId;
 import io.spine.core.EventId;
-import io.spine.system.server.MarkReacted;
+import io.spine.system.server.MarkCausedByEvent;
 import io.spine.system.server.SystemGateway;
 
 /**
@@ -44,7 +44,7 @@ OnEvent <R extends Message, B extends Message.Builder, S extends CommandSequence
     }
 
     void markReacted(SystemGateway gateway, CommandId commandId) {
-        MarkReacted systemCommand = MarkReacted
+        MarkCausedByEvent systemCommand = MarkCausedByEvent
                 .newBuilder()
                 .setId(commandId)
                 .setOrigin(origin())

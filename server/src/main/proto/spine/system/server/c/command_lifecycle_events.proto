@@ -165,7 +165,7 @@ message CommandSplit {
 }
 
 // An event emitted when a command was generated in response to an event.
-message CommandReacted {
+message CommandCausedByEvent {
 
     // The ID of the command.
     spine.core.CommandId id = 1;
