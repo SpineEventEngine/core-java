@@ -40,6 +40,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Utility class for working with {@link Event} objects.
@@ -117,6 +118,18 @@ public final class Events {
         checkNotNull(event);
         Any any = event.getMessage();
         Message result = unpack(any);
+        return result;
+    }
+
+    /**
+     * Extract event messages from the passed events.
+     */
+    public static List<? extends Message> toMessages(List<Event> events) {
+       checkNotNull(events);
+        List<Message> result =
+                events.stream()
+                      .map(Events::getMessage)
+                      .collect(toList());
         return result;
     }
 

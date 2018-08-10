@@ -30,6 +30,8 @@ import io.spine.system.server.SystemGateway;
 
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * A {@link CommandBus} filter which watches the commands as they appear in the bus.
  *
@@ -43,22 +45,18 @@ import java.util.Optional;
  */
 final class CommandReceivedTap implements BusFilter<CommandEnvelope> {
 
-    private final SystemGateway systemGateway;
+    private final GatewayFunction gateway;
 
-    CommandReceivedTap(SystemGateway gateway) {
-        systemGateway = gateway;
+    CommandReceivedTap(GatewayFunction gateway) {
+        this.gateway = checkNotNull(gateway);
     }
 
     @Override
     public Optional<Ack> accept(CommandEnvelope envelope) {
         MarkCommandAsReceived systemCommand = systemCommand(envelope.getCommand());
         TenantId tenantId = envelope.getTenantId();
-        SystemGateway tenantAwareGateway = TenantAwareSystemGateway
-                .create()
-                .withTenant(tenantId)
-                .atopOf(systemGateway)
-                .build();
-        tenantAwareGateway.postCommand(systemCommand);
+        SystemGateway gateway = this.gateway.get(tenantId);
+        gateway.postCommand(systemCommand);
         return Optional.empty();
     }
 

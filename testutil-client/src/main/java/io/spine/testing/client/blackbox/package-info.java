@@ -21,7 +21,7 @@
  * This package provides test utilities for implementing black box testing.
  * Black box testing is mostly done by the {@code testutils-server} module, and this package 
  * serves some of its {@code client}-oriented building blocks like {@link 
- * io.spine.testing.client.blackbox.AcknowledgementsVerifier ack verifiers} or {@link 
+ * io.spine.testing.client.blackbox.VerifyAcknowledgements ack verifiers} or {@link
  * io.spine.testing.client.blackbox.MessageCriterion message criteria}.
  */
 @CheckReturnValue

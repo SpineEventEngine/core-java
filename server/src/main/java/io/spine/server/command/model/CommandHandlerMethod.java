@@ -22,21 +22,22 @@ package io.spine.server.command.model;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandContext;
 import io.spine.core.Rejection;
 import io.spine.server.EventProducer;
 import io.spine.server.command.Assign;
-import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.command.CommandHandler;
 import io.spine.server.model.EventsResult;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.procman.ProcessManager;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -46,7 +47,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @author Alexander Yevsyukov
  */
 public final class CommandHandlerMethod
-        extends CommandAcceptingMethod<EventProducer, CommandHandlerMethod.Result> {
+        extends CommandAcceptingMethod<CommandHandler, CommandHandlerMethod.Result> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
@@ -61,7 +62,7 @@ public final class CommandHandlerMethod
         return new CommandHandlerMethod(method);
     }
 
-    public static AbstractHandlerMethod.Factory<CommandHandlerMethod> factory() {
+    public static MethodFactory<CommandHandlerMethod> factory() {
         return Factory.INSTANCE;
     }
 
@@ -69,7 +70,7 @@ public final class CommandHandlerMethod
      * Transforms the passed raw method output into a list of event messages.
      */
     @Override
-    protected Result toResult(EventProducer target, Object rawMethodOutput) {
+    protected Result toResult(CommandHandler target, Object rawMethodOutput) {
         Result result = new Result(target, rawMethodOutput);
         return result;
     }
@@ -77,18 +78,12 @@ public final class CommandHandlerMethod
     /**
      * The factory of {@link CommandHandlerMethod}s.
      */
-    private static class Factory extends AbstractHandlerMethod.Factory<CommandHandlerMethod> {
+    private static class Factory extends MethodFactory<CommandHandlerMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
-        @Override
-        public Class<CommandHandlerMethod> getMethodClass() {
-            return CommandHandlerMethod.class;
-        }
-
-        @Override
-        public Predicate<Method> getPredicate() {
-            return Filter.INSTANCE;
+        private Factory() {
+            super(CommandHandlerMethod.class, new Filter());
         }
 
         @Override
@@ -123,15 +118,13 @@ public final class CommandHandlerMethod
      */
     private static class Filter extends HandlerMethodPredicate<CommandContext> {
 
-        private static final Filter INSTANCE = new Filter();
-
         private Filter() {
             super(Assign.class, CommandContext.class);
         }
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            boolean result = returnsMessageOrIterable(method);
+            boolean result = returnsMessageOrIterable(method, EventMessage.class);
             return result;
         }
     }

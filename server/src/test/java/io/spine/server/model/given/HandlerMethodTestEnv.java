@@ -27,11 +27,11 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.function.Predicate;
 
 /**
  * @author Alexander Litus
@@ -129,7 +129,7 @@ public class HandlerMethodTestEnv {
 
         @Override
         public EventClass getMessageClass() {
-            return EventClass.of(rawMessageClass());
+            return EventClass.from(rawMessageClass());
         }
 
         @Override
@@ -161,25 +161,19 @@ public class HandlerMethodTestEnv {
 
         @Override
         public EventClass getMessageClass() {
-            return EventClass.of(rawMessageClass());
+            return EventClass.from(rawMessageClass());
         }
 
-        private static class Factory extends AbstractHandlerMethod.Factory<OneParamMethod> {
+        private static class Factory extends MethodFactory<OneParamMethod> {
 
             private static final Factory INSTANCE = new Factory();
 
+            private Factory() {
+                super(OneParamMethod.class, method -> true);
+            }
+
             private static Factory getInstance() {
                 return INSTANCE;
-            }
-
-            @Override
-            public Class<OneParamMethod> getMethodClass() {
-                return OneParamMethod.class;
-            }
-
-            @Override
-            public Predicate<Method> getPredicate() {
-                throw new IllegalStateException("The test factory cannot provide the predicate.");
             }
 
             @Override

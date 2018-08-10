@@ -35,7 +35,7 @@ import static java.lang.String.format;
  * <p>Optionally can contain an the criterion description, useful for display by test assertions.
  *
  * <p>These criteria are consumed by acks verifier
- * {@link AcknowledgementsVerifier#ackedWithErrors(ErrorCriterion) ackedWithError method}.
+ * {@link VerifyAcknowledgements#ackedWithErrors(ErrorCriterion) ackedWithError method}.
  *
  * @author Mykhailo Drachuk
  */

@@ -124,7 +124,7 @@ public final class CommandRouting<I> extends MessageRouting<CommandContext, Comm
 
     @Override
     CommandClass toMessageClass(Class<? extends Message> classOfMessages) {
-        return CommandClass.of(classOfMessages);
+        return CommandClass.from(classOfMessages);
     }
 
     @Override

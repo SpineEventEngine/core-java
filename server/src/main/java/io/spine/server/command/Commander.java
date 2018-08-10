@@ -20,20 +20,10 @@
 
 package io.spine.server.command;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
-import io.spine.server.command.model.CommandSubstituteMethod;
-import io.spine.server.command.model.CommanderClass;
-import io.spine.server.commandbus.CommandBus;
-import io.spine.server.event.EventBus;
-
-import java.util.Set;
-
-import static io.spine.server.command.model.CommanderClass.asCommanderClass;
+import io.spine.server.event.EventReceiver;
 
 /**
- * The abstract base for classes that post one or more command in response to an incoming message.
+ * An interface common for objects that post one or more command in response to an incoming message.
  *
  * <p>Example of use case scenarios:
  * <ul>
@@ -45,30 +35,7 @@ import static io.spine.server.command.model.CommanderClass.asCommanderClass;
  * </ul>
  *
  * @author Alexander Yevsyukov
+ * @see Command @Command
  */
-public abstract class Commander extends AbstractCommandDispatcher {
-
-    private final CommanderClass<?> thisClass = asCommanderClass(getClass());
-    private final CommandBus commandBus;
-
-    protected Commander(CommandBus commandBus, EventBus eventBus) {
-        super(eventBus);
-        this.commandBus = commandBus;
-    }
-
-    @Override
-    public Set<CommandClass> getMessageClasses() {
-        return thisClass.getCommands();
-    }
-
-    @CanIgnoreReturnValue
-    @Override
-    public String dispatch(CommandEnvelope envelope) {
-        CommandSubstituteMethod method = thisClass.getHandler(envelope.getMessageClass());
-        //TODO:2018-07-20:alexander.yevsyukov: Dispatch the envelope to the method.
-        // Post resulting events of command transformations to the EventBus.
-//        Dispatch<CommandEnvelope> dispatch = Dispatch.of(envelope)
-//                                                     .to(this, method);
-        return getId();
-    }
+public interface Commander extends CommandReceiver, EventReceiver {
 }

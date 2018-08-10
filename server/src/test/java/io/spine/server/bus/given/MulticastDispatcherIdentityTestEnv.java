@@ -47,7 +47,7 @@ public class MulticastDispatcherIdentityTestEnv {
 
         @Override
         public Set<String> dispatch(MessageEnvelope envelope) {
-            return Identity.of(this);
+            return identity();
         }
 
         @Override

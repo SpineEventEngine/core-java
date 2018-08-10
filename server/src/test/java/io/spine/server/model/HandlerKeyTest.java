@@ -38,8 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @DisplayName("HandlerKey should")
 class HandlerKeyTest {
 
-    private final CommandClass emptyClass = CommandClass.of(Empty.class);
-    private final CommandClass stringClass = CommandClass.of(StringValue.class);
+    private final CommandClass emptyClass = CommandClass.from(Empty.class);
+    private final CommandClass stringClass = CommandClass.from(StringValue.class);
 
     @Test
     @DisplayName("not accept nulls on construction")

@@ -30,7 +30,7 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
-import io.spine.server.model.MethodPredicate;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
 
 import java.lang.reflect.Method;
@@ -57,11 +57,7 @@ public final class EventApplier
 
     @Override
     public EventClass getMessageClass() {
-        return EventClass.of(rawMessageClass());
-    }
-
-    static EventApplier from(Method method) {
-        return new EventApplier(method);
+        return EventClass.from(rawMessageClass());
     }
 
     @VisibleForTesting
@@ -69,7 +65,7 @@ public final class EventApplier
         return factory().getPredicate();
     }
 
-    public static AbstractHandlerMethod.Factory<EventApplier> factory() {
+    static MethodFactory<EventApplier> factory() {
         return Factory.INSTANCE;
     }
 
@@ -94,18 +90,12 @@ public final class EventApplier
     }
 
     /** The factory for filtering methods that match {@code EventApplier} specification. */
-    private static class Factory extends AbstractHandlerMethod.Factory<EventApplier> {
+    private static class Factory extends MethodFactory<EventApplier> {
 
         private static final Factory INSTANCE = new Factory();
 
-        @Override
-        public Class<EventApplier> getMethodClass() {
-            return EventApplier.class;
-        }
-
-        @Override
-        public Predicate<Method> getPredicate() {
-            return Filter.INSTANCE;
+        private Factory() {
+            super(EventApplier.class, new Filter());
         }
 
         @Override
@@ -116,7 +106,7 @@ public final class EventApplier
 
         @Override
         protected EventApplier doCreate(Method method) {
-            return from(method);
+            return new EventApplier(method);
         }
     }
 
@@ -124,8 +114,6 @@ public final class EventApplier
      * The predicate for filtering event applier methods.
      */
     private static class Filter extends HandlerMethodPredicate<Empty> {
-
-        private static final MethodPredicate INSTANCE = new Filter();
 
         private static final int NUMBER_OF_PARAMS = 1;
         private static final int EVENT_PARAM_INDEX = 0;

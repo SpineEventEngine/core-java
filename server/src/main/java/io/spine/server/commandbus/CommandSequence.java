@@ -33,11 +33,12 @@ import io.spine.core.Ack;
 import io.spine.core.ActorContext;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
-import io.spine.core.DispatchedCommand;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Status;
-import io.spine.server.procman.CommandSplit;
-import io.spine.server.procman.CommandTransformed;
+import io.spine.core.TenantId;
+import io.spine.system.server.SystemGateway;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -46,12 +47,12 @@ import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.core.Commands.toDispatched;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * A sequence of commands to be posted to {@code CommandBus}.
  *
+ * @param <O> the type of origin ID which caused the sequence
  * @param <R> the type of the result generated when the command sequence is posted
  * @param <B> the type of the result builder
  * @param <S> the type of the sequence for the return type covariance
@@ -59,11 +60,15 @@ import static io.spine.protobuf.AnyPacker.unpack;
  */
 @SuppressWarnings("ClassReferencesSubclass")
 @Internal
-public abstract class CommandSequence<R extends Message, B extends Message.Builder,
-        S extends CommandSequence<R, B, S>> {
+public abstract
+class CommandSequence<O extends Message, R extends Message, B extends Message.Builder,
+        S extends CommandSequence<O, R, B, S>> {
 
-    /** The bus to post commands. */
-    private final CommandBus commandBus;
+    /** The ID of the message which caused the sequence. */
+    private final O origin;
+
+    /** The context in which the sequence is generated. */
+    private final ActorContext actorContext;
 
     /** The factory for producing commands. */
     private final CommandFactory commandFactory;
@@ -74,37 +79,44 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
     /** The handler for the posting errors. */
     private ErrorHandler errorHandler = new DefaultErrorHandler();
 
-    private CommandSequence(ActorContext actorContext, CommandBus bus) {
-        this.commandBus = checkNotNull(bus);
+    CommandSequence(O origin, ActorContext actorContext) {
+        this.origin = checkNotNull(origin);
         this.queue = Queues.newConcurrentLinkedQueue();
+        this.actorContext = actorContext;
         this.commandFactory = ActorRequestFactory.fromContext(actorContext)
                                                  .command();
     }
 
-    /**
-     * Creates a sequence for splitting the source command into several ones.
-     *
-     * @param commandMessage the message of the source command
-     * @param context the context of the source command
-     * @param bus the command bus to post commands
-     * @return new empty sequence
-     */
-    public static Split split(Message commandMessage, CommandContext context, CommandBus bus) {
-        return new Split(bus, commandMessage, context);
+    protected O origin() {
+        return origin;
     }
 
     /**
-     * Creates a sequence for transforming incoming command into another one.
-     *
-     * @param commandMessage the message of the source command
-     * @param context the context of the source command
-     * @param bus the command bus to post commands
-     * @return new empty sequence
+     * Creates an empty sequence for splitting the source command into several ones.
      */
-    public static Transform transform(Message commandMessage,
-                                      CommandContext context,
-                                      CommandBus bus) {
-        return new Transform(bus, commandMessage, context);
+    public static Split split(CommandEnvelope command) {
+        return new Split(command);
+    }
+
+    /**
+     * Creates an empty sequence for transforming incoming command into another one.
+     */
+    public static Transform transform(CommandEnvelope command) {
+        return new Transform(command);
+    }
+
+    /**
+     * Creates an empty sequence for creating a command in response to the passed event.
+     */
+    public static SingleCommand inResponseTo(EventEnvelope event) {
+        return new SingleCommand(event.getId(), event.getActorContext());
+    }
+
+    /**
+     * Creates an empty sequence for creating two or more commands in response to the passed event.
+     */
+    public static SeveralCommands respondMany(EventEnvelope event) {
+        return new SeveralCommands(event.getId(), event.getActorContext());
     }
 
     /**
@@ -115,7 +127,8 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
     /**
      * Adds the posted command to the result builder.
      */
-    protected abstract void addPosted(B builder, Message message, CommandContext context);
+    protected abstract void addPosted(B builder, Command command,
+                                      SystemGateway gateway);
 
     /**
      * Adds a command message to the sequence of commands to be posted.
@@ -171,23 +184,28 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
      *
      * <p>The {@linkplain #size() size} of the sequence after this method is zero <em>if</em>
      * all the commands were posted successfully.
-     *
-     * @return the result
      */
-    protected R postAll() {
+    protected R postAll(CommandBus bus) {
+        SystemGateway gateway = gateway(bus);
         B builder = newBuilder();
         while (hasNext()) {
             Message message = next();
-            Optional<Command> posted = post(message);
+            Optional<Command> posted = post(message, bus);
             if (posted.isPresent()) {
                 Command command = posted.get();
-                addPosted(builder, message, command.getContext());
+                addPosted(builder, command, gateway);
             }
         }
         @SuppressWarnings("unchecked") /* The type is ensured by correct couples of R,B types passed
             to in the classes derived from `CommandSequence` that are limited to this package. */
         R result = (R) builder.build();
+        gateway.postCommand(result);
         return result;
+    }
+
+    private SystemGateway gateway(CommandBus bus) {
+        TenantId tenantId = actorContext.getTenantId();
+        return bus.gatewayFor(tenantId);
     }
 
     /**
@@ -195,15 +213,13 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
      * to the {@code CommandBus}.
      *
      * <p>This method waits till the posting of the command is finished.
-     *
-     * @param message the command message for the new command
      * @return the created and posted {@code Command}
      */
-    private Optional<Command> post(Message message) {
+    private Optional<Command> post(Message message, CommandBus bus) {
         Command command = commandFactory.create(message);
         SettableFuture<Ack> finishFuture = SettableFuture.create();
         StreamObserver<Ack> observer = newAckObserver(finishFuture);
-        commandBus.post(command, observer);
+        bus.post(command, observer);
         Ack ack;
         // Wait till the call is completed.
         try {
@@ -217,7 +233,7 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
         return Optional.of(command);
     }
 
-    public static StreamObserver<Ack> newAckObserver(SettableFuture<Ack> finishFuture) {
+    private static StreamObserver<Ack> newAckObserver(SettableFuture<Ack> finishFuture) {
         return new StreamObserver<Ack>() {
             @Override
             public void onNext(Ack value) {
@@ -236,7 +252,7 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
         };
     }
 
-    public static void checkSent(Command command, Ack ack) {
+    private static void checkSent(Command command, Ack ack) {
         Status status = ack.getStatus();
         CommandId routedCommandId = unpack(ack.getMessageId());
         CommandId commandId = command.getId();
@@ -266,120 +282,6 @@ public abstract class CommandSequence<R extends Message, B extends Message.Build
         @Override
         public void onError(Message commandMessage, CommandContext context, Throwable throwable) {
             throw new CommandPostingException(commandMessage, context, throwable);
-        }
-    }
-
-    /**
-     * Abstract base for command sequences initiated from a source command.
-     */
-    private abstract static
-    class OnCommand<R extends Message,
-                    B extends Message.Builder,
-                    S extends CommandSequence<R, B, S>>
-            extends CommandSequence<R, B, S> {
-
-        private final Message sourceMessage;
-        private final CommandContext sourceContext;
-
-        protected OnCommand(Message message, CommandContext context, CommandBus bus) {
-            super(context.getActorContext(), bus);
-            this.sourceMessage = message;
-            this.sourceContext = context;
-        }
-
-        protected DispatchedCommand source() {
-            return toDispatched(this.sourceMessage, this.sourceContext);
-        }
-    }
-
-    /**
-     * A {@code CommandSequence} of two or more commands which is generated in response to
-     * a source command.
-     */
-    public static final class Split extends OnCommand<CommandSplit, CommandSplit.Builder, Split> {
-
-        private Split(CommandBus commandBus, Message sourceMessage, CommandContext sourceContext) {
-            super(sourceMessage, sourceContext, commandBus);
-        }
-
-        /** {@inheritDoc} */
-        @CanIgnoreReturnValue
-        @Override
-        public Split add(Message commandMessage) {
-            return super.add(commandMessage);
-        }
-
-        /** {@inheritDoc} */
-        @Override
-        public int size() {
-            return super.size();
-        }
-
-        @Override
-        protected CommandSplit.Builder newBuilder() {
-            CommandSplit.Builder result = CommandSplit
-                    .newBuilder()
-                    .setSource(source());
-            return result;
-        }
-
-        @SuppressWarnings("CheckReturnValue") // calling builder method
-        @Override
-        protected void addPosted(CommandSplit.Builder builder,
-                                 Message message,
-                                 CommandContext context) {
-            builder.addProduced(toDispatched(message, context));
-        }
-
-        @Override
-        public CommandSplit postAll() {
-            checkState(size() >= 2,
-                       "The split sequence must have at least two commands. " +
-                               "For converting a command to another please use " +
-                               "`CommandSequence.transform()`."
-            );
-            return super.postAll();
-        }
-    }
-
-    /**
-     * A command sequence containing only one element
-     */
-    public static final class Transform
-            extends OnCommand<CommandTransformed, CommandTransformed.Builder, Transform> {
-
-        private Transform(CommandBus commandBus, Message sourceMessage, CommandContext context) {
-            super(sourceMessage, context, commandBus);
-        }
-
-        /**
-         * Sets the message for the target command.
-         */
-        public Transform to(Message targetMessage) {
-            return add(targetMessage);
-        }
-
-        /**
-         * Posts the command to the bus and returns resulting event.
-         */
-        public CommandTransformed post() {
-            checkState(size() == 1, "The conversion sequence must have exactly one command.");
-            return postAll();
-        }
-
-        @Override
-        protected CommandTransformed.Builder newBuilder() {
-            CommandTransformed.Builder result = CommandTransformed
-                    .newBuilder()
-                    .setSource(source());
-            return result;
-        }
-
-        @SuppressWarnings("CheckReturnValue") // calling builder method
-        @Override
-        protected void addPosted(CommandTransformed.Builder builder, Message message,
-                                 CommandContext context) {
-            builder.setProduced(toDispatched(message, context));
         }
     }
 }

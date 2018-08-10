@@ -77,7 +77,7 @@ abstract class AbstractEventAccumulator implements EventDispatcher<String> {
     public final Set<EventClass> getMessageClasses() {
         Collection<Class<? extends Message>> messageClasses = getEventClasses();
         return messageClasses.stream()
-                             .map(EventClass::of)
+                             .map(EventClass::from)
                              .collect(toSet());
     }
 

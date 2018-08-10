@@ -23,21 +23,21 @@ package spine.testing.server.blackbox;
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.testing.server.blackbox";
+option java_package = "io.spine.testing.server.blackbox.rejection";
 option java_multiple_files = false;
 
-import "spine/testing/server/blackbox/project.proto";
+import "spine/testing/server/blackbox/entities.proto";
 
 message BbProjectAlreadyStarted {
-    ProjectId project_id = 1;
+    BbProjectId project_id = 1;
 }
 
 message BbTaskLimitReached {
-    ProjectId project_id = 1;
-    Task task = 2;
+    BbProjectId project_id = 1;
+    BbTask task = 2;
 }
 
 message BbTaskCreatedInCompletedProject {
-    ProjectId project_id = 1;
-    Task task = 2;
+    BbProjectId project_id = 1;
+    BbTask task = 2;
 }

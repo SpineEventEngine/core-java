@@ -44,10 +44,12 @@ public class ProcessManagerBuilder<P extends ProcessManager<I, S, B>,
                                    B extends ValidatingBuilder<S, ?>>
         extends EntityBuilder<P, I, S> {
 
-    /** Creates new instance. */
-    public ProcessManagerBuilder() {
-        super();
-        // Have the constructor for easier location of usages.
+    public static <P extends ProcessManager<I, S, B>,
+                   I,
+                   S extends Message,
+                   B extends ValidatingBuilder<S, ?>>
+    ProcessManagerBuilder<P, I, S, B> newInstance() {
+        return new ProcessManagerBuilder<>();
     }
 
     @CanIgnoreReturnValue

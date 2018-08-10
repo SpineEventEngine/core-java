@@ -51,6 +51,7 @@ public class MessageHandlerMap<M extends MessageClass,
     private static final long serialVersionUID = 0L;
 
     private final ImmutableMap<HandlerKey, H> map;
+    private final ImmutableSet<M> messageClasses;
 
     /**
      * Creates a map of methods found in the passed class.
@@ -58,15 +59,24 @@ public class MessageHandlerMap<M extends MessageClass,
      * @param cls     the class to inspect
      * @param factory the factory of methods
      */
-    public MessageHandlerMap(Class<?> cls, AbstractHandlerMethod.Factory<H> factory) {
+    public MessageHandlerMap(Class<?> cls, MethodFactory<H> factory) {
         this.map = scan(cls, factory);
+        this.messageClasses = messageClasses(map.values());
     }
 
     /**
      * Obtains classes of messages for which handlers are stored in this map.
      */
     public Set<M> getMessageClasses() {
-        return messageClasses(map.values());
+        return messageClasses;
+    }
+
+    /**
+     * Returns {@code true} if the handler map contains a method that handles the passed class
+     * of messages, {@code false} otherwise.
+     */
+    public boolean containsClass(M messageClass) {
+        return messageClasses.contains(messageClass);
     }
 
     /**
@@ -135,7 +145,7 @@ public class MessageHandlerMap<M extends MessageClass,
 
     private static <M extends MessageClass, H extends HandlerMethod<?, M, ?, ?>>
     ImmutableMap<HandlerKey, H> scan(Class<?> declaringClass,
-                                     AbstractHandlerMethod.Factory<H> factory) {
+                                     MethodFactory<H> factory) {
         Predicate<Method> filter = factory.getPredicate();
         Map<HandlerKey, H> tempMap = Maps.newHashMap();
         Method[] declaredMethods = declaringClass.getDeclaredMethods();

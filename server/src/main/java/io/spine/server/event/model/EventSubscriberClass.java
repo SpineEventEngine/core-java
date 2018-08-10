@@ -37,7 +37,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <S> the type of event subscribers
  * @author Alexander Yevsyukov
  */
-public final class EventSubscriberClass<S extends AbstractEventSubscriber> extends ModelClass<S> {
+public final class EventSubscriberClass<S extends AbstractEventSubscriber> extends ModelClass<S>
+    implements EventReceiverClass, SubscribingClass {
 
     private static final long serialVersionUID = 0L;
 
@@ -65,14 +66,17 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
         return result;
     }
 
-    public Set<EventClass> getEventSubscriptions() {
+    @Override
+    public Set<EventClass> getEventClasses() {
         return domesticSubscriptions;
     }
 
-    public Set<EventClass> getExternalEventSubscriptions() {
+    @Override
+    public Set<EventClass> getExternalEventClasses() {
         return externalSubscriptions;
     }
 
+    @Override
     public EventSubscriberMethod getSubscriber(EventClass eventClass) {
         return eventSubscriptions.getMethod(eventClass);
     }

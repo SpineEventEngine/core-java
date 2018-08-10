@@ -78,7 +78,7 @@ class ExecutorCommandSchedulerTest {
 
         // System BC integration is NOT tested in this suite.
         SystemGateway systemGateway = NoOpSystemGateway.INSTANCE;
-        CommandFlowWatcher flowWatcher = new CommandFlowWatcher(systemGateway);
+        CommandFlowWatcher flowWatcher = new CommandFlowWatcher((t) -> systemGateway);
         scheduler.setFlowWatcher(flowWatcher);
     }
 
