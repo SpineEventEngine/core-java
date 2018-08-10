@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("AbstractHandlerMethod should")
 class AbstractHandlerMethodTest {
 
-    private final AbstractHandlerMethod.Factory<OneParamMethod> factory = OneParamMethod.factory();
+    private final MethodFactory<OneParamMethod> factory = OneParamMethod.factory();
 
     private AbstractHandlerMethod<Object, EventClass, EventContext, MethodResult<Empty>> twoParamMethod;
     private AbstractHandlerMethod<Object, EventClass, Empty, MethodResult<Empty>> oneParamMethod;

@@ -21,17 +21,17 @@
 package io.spine.server.event.model;
 
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.React;
 import io.spine.server.event.EventReactor;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
-import io.spine.server.model.MethodPredicate;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.model.ReactorMethodResult;
 
 import java.lang.reflect.Method;
-import java.util.function.Predicate;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -51,7 +51,7 @@ public final class EventReactorMethod
 
     @Override
     public EventClass getMessageClass() {
-        return EventClass.of(rawMessageClass());
+        return EventClass.from(rawMessageClass());
     }
 
     /**
@@ -71,29 +71,19 @@ public final class EventReactorMethod
         return new ReactorMethodResult(target, rawMethodOutput);
     }
 
-    static EventReactorMethod from(Method method) {
-        return new EventReactorMethod(method);
-    }
-
-    public static AbstractHandlerMethod.Factory<EventReactorMethod> factory() {
+    static MethodFactory<EventReactorMethod> factory() {
         return Factory.INSTANCE;
     }
 
     /**
      * The factory for creating {@link EventReactorMethod event reactor} methods.
      */
-    private static class Factory extends AbstractHandlerMethod.Factory<EventReactorMethod> {
+    private static class Factory extends MethodFactory<EventReactorMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
-        @Override
-        public Class<EventReactorMethod> getMethodClass() {
-            return EventReactorMethod.class;
-        }
-
-        @Override
-        public Predicate<Method> getPredicate() {
-            return Filter.INSTANCE;
+        private Factory() {
+            super(EventReactorMethod.class, new Filter());
         }
 
         @Override
@@ -104,7 +94,7 @@ public final class EventReactorMethod
 
         @Override
         protected EventReactorMethod doCreate(Method method) {
-            return from(method);
+            return new EventReactorMethod(method);
         }
     }
 
@@ -113,15 +103,13 @@ public final class EventReactorMethod
      */
     private static class Filter extends EventMethodPredicate {
 
-        private static final MethodPredicate INSTANCE = new Filter();
-
         private Filter() {
             super(React.class);
         }
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            boolean returnsMessageOrIterable = returnsMessageOrIterable(method);
+            boolean returnsMessageOrIterable = returnsMessageOrIterable(method, EventMessage.class);
             if (returnsMessageOrIterable) {
                 checkOutputMessageType(method);
                 return true;
@@ -141,7 +129,7 @@ public final class EventReactorMethod
         private static void checkOutputMessageType(Method method) {
             Class<?> returnType = method.getReturnType();
 
-            // The method returns List. We're OK.
+            // The method returns Iterable. We're OK.
             if (Iterable.class.isAssignableFrom(returnType)) {
                 return;
             }

@@ -24,9 +24,9 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
+import io.spine.server.event.EventReceiver;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.model.ModelClass;
 import io.spine.server.rejection.model.RejectionReactorMethod;
 
 import java.util.Set;
@@ -38,54 +38,39 @@ import java.util.Set;
  * @author Alex Tymchenko
  * @author Alexander Yevsyukov
  */
-public final class ReactorClassDelegate<T> extends ModelClass<T> implements ReactorClass {
+public final class ReactorClassDelegate<T extends EventReceiver>
+        extends EventReceivingClassDelegate<T, EventReactorMethod>
+        implements ReactingClass {
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactions;
     private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactions;
 
-    private final ImmutableSet<EventClass> domesticEventReactions;
-    private final ImmutableSet<EventClass> externalEventReactions;
-    private final ImmutableSet<RejectionClass> domesticRejectionReactions;
-    private final ImmutableSet<RejectionClass> externalRejectionReactions;
+    private final ImmutableSet<RejectionClass> domesticRejections;
+    private final ImmutableSet<RejectionClass> externalRejections;
 
     public ReactorClassDelegate(Class<T> cls) {
-        super(cls);
-        this.eventReactions = new MessageHandlerMap<>(cls, EventReactorMethod.factory());
-        this.domesticEventReactions = eventReactions.getMessageClasses(HandlerMethod::isDomestic);
-        this.externalEventReactions = eventReactions.getMessageClasses(HandlerMethod::isExternal);
-
+        super(cls, EventReactorMethod.factory());
         this.rejectionReactions = new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
-        this.domesticRejectionReactions =
+        this.domesticRejections =
                 rejectionReactions.getMessageClasses(HandlerMethod::isDomestic);
-        this.externalRejectionReactions =
+        this.externalRejections =
                 rejectionReactions.getMessageClasses(HandlerMethod::isExternal);
     }
 
     @Override
-    public Set<EventClass> getEventReactions() {
-        return domesticEventReactions;
+    public Set<RejectionClass> getRejectionClasses() {
+        return domesticRejections;
     }
 
     @Override
-    public Set<EventClass> getExternalEventReactions() {
-        return externalEventReactions;
-    }
-
-    @Override
-    public Set<RejectionClass> getRejectionReactions() {
-        return domesticRejectionReactions;
-    }
-
-    @Override
-    public Set<RejectionClass> getExternalRejectionReactions() {
-        return externalRejectionReactions;
+    public Set<RejectionClass> getExternalRejectionClasses() {
+        return externalRejections;
     }
 
     @Override
     public EventReactorMethod getReactor(EventClass eventClass) {
-        return eventReactions.getMethod(eventClass);
+        return getMethod(eventClass);
     }
 
     @Override

@@ -21,7 +21,6 @@
 package io.spine.core;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -83,52 +82,7 @@ public final class Commands {
      */
     public static Message getMessage(Command command) {
         checkNotNull(command);
-        return getMessage(command.getMessage());
-    }
-
-    /**
-     * Extracts the message from the passed {@code Command} instance.
-     *
-     * @param command a command to extract a message from
-     * @return an unpacked message
-     */
-    public static Message getMessage(DispatchedCommand command) {
-        checkNotNull(command);
-        return getMessage(command.getMessage());
-    }
-
-    private static Message getMessage(Any message) {
-        Message result = AnyPacker.unpack(message);
-        return result;
-    }
-
-    /**
-     * Creates a {@code DispatchedCommand} using the message and context
-     * from the passed {@code Command}.
-     */
-    public static DispatchedCommand toDispatched(Command command) {
-        checkNotNull(command);
-        return toDispatched(command.getMessage(), command.getContext());
-    }
-
-    /**
-     * Creates a {@code DispatchedCommand} with the passed command message and context.
-     *
-     * @param commandMessage the message of the command, can be already packed into {@code Any}
-     * @param context the context of the message
-     * @return new instance of {@code DispatchedCommand}
-     */
-    public static DispatchedCommand toDispatched(Message commandMessage, CommandContext context) {
-        checkNotNull(commandMessage);
-        checkNotNull(context);
-        Any packed = commandMessage instanceof Any
-                ? (Any) commandMessage
-                : AnyPacker.pack(commandMessage);
-        DispatchedCommand.Builder result = DispatchedCommand
-                .newBuilder()
-                .setMessage(packed)
-                .setContext(context);
-        return result.build();
+        return AnyPacker.unpack(command.getMessage());
     }
 
     /**

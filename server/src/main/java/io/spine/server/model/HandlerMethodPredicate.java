@@ -85,8 +85,16 @@ public abstract class HandlerMethodPredicate<C extends Message> extends MethodPr
     /**
      * Returns {@code true} if a method returns an instance of the class assignable from
      * {@link Message}, or {@link Iterable}.
+     *
+     * @param method       the method to check
+     * @param messageClass the class of messages expected in the method result
      */
-    protected static boolean returnsMessageOrIterable(Method method) {
+    protected static boolean returnsMessageOrIterable(
+            Method method,
+            @SuppressWarnings("unused") // will be used after message marker interfaces
+                                        // are implemented
+            Class<? extends Message> messageClass
+    ) {
         Class<?> returnType = method.getReturnType();
         boolean isMessage = Message.class.isAssignableFrom(returnType);
         if (isMessage) {

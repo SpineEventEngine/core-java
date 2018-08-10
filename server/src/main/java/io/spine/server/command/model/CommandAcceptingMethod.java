@@ -23,6 +23,7 @@ package io.spine.server.command.model;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
+import io.spine.server.command.CommandReceiver;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodResult;
 
@@ -31,11 +32,12 @@ import java.lang.reflect.Method;
 /**
  * An abstract base for methods that accept a command message and optionally its context.
  *
+ * @param <T> the type of the target object
  * @param <R> the type of the result object returned by the method
  * @author Alexander Yevsyukov
  */
 @Immutable
-public abstract class CommandAcceptingMethod<T, R extends MethodResult>
+public abstract class CommandAcceptingMethod<T extends CommandReceiver, R extends MethodResult>
         extends AbstractHandlerMethod<T, CommandClass, CommandContext, R> {
 
     CommandAcceptingMethod(Method method) {
@@ -44,6 +46,6 @@ public abstract class CommandAcceptingMethod<T, R extends MethodResult>
 
     @Override
     public CommandClass getMessageClass() {
-        return CommandClass.of(rawMessageClass());
+        return CommandClass.from(rawMessageClass());
     }
 }

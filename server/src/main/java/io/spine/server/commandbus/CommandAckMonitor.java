@@ -54,11 +54,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
 
     private CommandAckMonitor(Builder builder) {
         this.delegate = builder.delegate;
-        this.gateway = TenantAwareSystemGateway
-                .create()
-                .atopOf(builder.systemGateway)
-                .withTenant(builder.tenantId)
-                .build();
+        this.gateway = TenantAwareSystemGateway.forTenant(builder.tenantId, builder.systemGateway);
     }
 
     /**

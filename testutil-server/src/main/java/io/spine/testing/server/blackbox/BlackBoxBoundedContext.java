@@ -37,7 +37,7 @@ import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.client.blackbox.Acknowledgements;
-import io.spine.testing.client.blackbox.AcknowledgementsVerifier;
+import io.spine.testing.client.blackbox.VerifyAcknowledgements;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.util.Exceptions;
 
@@ -56,12 +56,12 @@ import static java.util.Collections.singletonList;
  * Black Box Bounded Context is aimed at facilitating writing literate integration tests.
  *
  * <p>Using its API commands and events are sent to a Bounded Context. Their effect is afterwards
- * verified in using various verifiers (e.g. {@link AcknowledgementsVerifier acknowledgement verfier},
- * {@link EmittedEventsVerifier emitted events verifier}).
+ * verified in using various verifiers (e.g. {@link VerifyAcknowledgements acknowledgement
+ * verfier}, {@link VerifyEvents emitted events verifier}).
  *
  * @author Mykhailo Drachuk
  */
-@SuppressWarnings("ClassWithTooManyMethods")
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 @VisibleForTesting
 public class BlackBoxBoundedContext {
 
@@ -74,9 +74,19 @@ public class BlackBoxBoundedContext {
     private final EventBus eventBus;
     private final TenantId tenantId;
     private final MemoizingObserver<Ack> observer;
+    private final CommandMemoizingTap commandTap;
 
+    /**
+     * Creates a new multi-tenant instance.
+     */
     private BlackBoxBoundedContext() {
-        this.boundedContext = newBoundedContext();
+        this.commandTap = new CommandMemoizingTap();
+        this.boundedContext = BoundedContext
+                .newBuilder()
+                .setMultitenant(true)
+                .setCommandBus(CommandBus.newBuilder()
+                                         .appendFilter(commandTap))
+                .build();
         this.tenantId = newTenantId();
         this.requestFactory = requestFactory(tenantId);
         this.eventFactory = eventFactory(requestFactory);
@@ -102,7 +112,8 @@ public class BlackBoxBoundedContext {
 
     /**
      * Creates a new {@link io.spine.server.event.EventFactory event factory} for tests which uses
-     * the actor and the origin from the provided {@link io.spine.client.ActorRequestFactory request factory}.
+     * the actor and the origin from the provided {@link io.spine.client.ActorRequestFactory
+     * request factory}.
      *
      * @param requestFactory a request factory bearing the actor and able to provide an origin for
      *                       factory generated events
@@ -120,15 +131,6 @@ public class BlackBoxBoundedContext {
         return TenantId.newBuilder()
                        .setValue(newUuid())
                        .build();
-    }
-
-    /**
-     * @return a new multitenant bounded context
-     */
-    private static BoundedContext newBoundedContext() {
-        return BoundedContext.newBuilder()
-                             .setMultitenant(true)
-                             .build();
     }
 
     /*
@@ -288,13 +290,13 @@ public class BlackBoxBoundedContext {
      ******************************************************************************/
 
     /**
-     * Executes the provided verifier, which throws an assertion error in case of unexpected results.
+     * Verifies emitted events by the passed verifier.
      *
      * @param verifier a verifier that checks the events emitted in this Bounded Context
      * @return current {@link BlackBoxBoundedContext black box} instance
      */
     @CanIgnoreReturnValue
-    public BlackBoxBoundedContext verifiesThat(EmittedEventsVerifier verifier) {
+    public BlackBoxBoundedContext assertThat(VerifyEvents verifier) {
         EmittedEvents events = emittedEvents();
         verifier.verify(events);
         return this;
@@ -306,16 +308,39 @@ public class BlackBoxBoundedContext {
     }
 
     /**
-     * Executes the provided verifier, which throws an assertion error in case of unexpected results.
+     * Executes the provided verifier, which throws an assertion error in case of
+     * unexpected results.
      *
      * @param verifier a verifier that checks the acknowledgements in this Bounded Context
      * @return current {@link BlackBoxBoundedContext black box} instance
      */
     @CanIgnoreReturnValue
-    public BlackBoxBoundedContext verifiesThat(AcknowledgementsVerifier verifier) {
+    public BlackBoxBoundedContext assertThat(VerifyAcknowledgements verifier) {
         Acknowledgements acks = commandAcks();
         verifier.verify(acks);
         return this;
+    }
+
+    /**
+     * Verifies emitted commands by the passed verifier.
+     *
+     * @param verifier a verifier that checks the commands emitted in this Bounded Context
+     * @return current {@link BlackBoxBoundedContext black box} instance
+     */
+    @CanIgnoreReturnValue
+    public BlackBoxBoundedContext assertThat(VerifyCommands verifier) {
+        EmittedCommands commands = emittedCommands();
+        verifier.verify(commands);
+        return this;
+    }
+
+    private EmittedCommands emittedCommands() {
+        List<Command> commands = readAllCommands();
+        return new EmittedCommands(commands);
+    }
+
+    private List<Command> readAllCommands() {
+        return commandTap.commands();
     }
 
     private Acknowledgements commandAcks() {

@@ -338,13 +338,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public Set<EventClass> getEventClasses() {
-        return aggregateClass().getEventReactions();
+        return aggregateClass().getEventClasses();
     }
 
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<EventClass> getExternalEventClasses() {
-        return aggregateClass().getExternalEventReactions();
+        return aggregateClass().getExternalEventClasses();
     }
 
     /**
@@ -368,13 +368,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public Set<RejectionClass> getRejectionClasses() {
-        return aggregateClass().getRejectionReactions();
+        return aggregateClass().getRejectionClasses();
     }
 
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<RejectionClass> getExternalRejectionClasses() {
-        return aggregateClass().getExternalRejectionReactions();
+        return aggregateClass().getExternalRejectionClasses();
     }
 
     @Override

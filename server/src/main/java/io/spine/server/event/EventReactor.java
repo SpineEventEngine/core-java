@@ -31,5 +31,5 @@ import io.spine.server.EventProducer;
  * @author Alexander Yevsyukov
  * @see io.spine.core.React @React
  */
-public interface EventReactor extends EventProducer {
+public interface EventReactor extends EventReceiver, EventProducer {
 }

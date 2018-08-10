@@ -158,7 +158,7 @@ public class EventBusTest {
             eventBus.register(subscriberOne);
             eventBus.register(subscriberTwo);
 
-            EventClass eventClass = EventClass.of(ProjectCreated.class);
+            EventClass eventClass = EventClass.from(ProjectCreated.class);
             assertTrue(eventBus.hasDispatchers(eventClass));
 
             Collection<? extends EventDispatcher<?>> dispatchers =
@@ -174,7 +174,7 @@ public class EventBusTest {
 
             eventBus.register(dispatcher);
 
-            assertTrue(eventBus.getDispatchers(EventClass.of(ProjectCreated.class))
+            assertTrue(eventBus.getDispatchers(EventClass.from(ProjectCreated.class))
                                .contains(dispatcher));
         }
     }
@@ -190,7 +190,7 @@ public class EventBusTest {
             AbstractEventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
             eventBus.register(subscriberOne);
             eventBus.register(subscriberTwo);
-            EventClass eventClass = EventClass.of(ProjectCreated.class);
+            EventClass eventClass = EventClass.from(ProjectCreated.class);
 
             eventBus.unregister(subscriberOne);
 
@@ -213,7 +213,7 @@ public class EventBusTest {
         void eventDispatcher() {
             EventDispatcher dispatcherOne = new BareDispatcher();
             EventDispatcher dispatcherTwo = new BareDispatcher();
-            EventClass eventClass = EventClass.of(ProjectCreated.class);
+            EventClass eventClass = EventClass.from(ProjectCreated.class);
             eventBus.register(dispatcherOne);
             eventBus.register(dispatcherTwo);
 
@@ -271,7 +271,7 @@ public class EventBusTest {
                 .build();
         eventBus.register(new BareDispatcher());
         eventBus.register(new ProjectCreatedSubscriber());
-        EventClass eventClass = EventClass.of(ProjectCreated.class);
+        EventClass eventClass = EventClass.from(ProjectCreated.class);
 
         eventBus.close();
 

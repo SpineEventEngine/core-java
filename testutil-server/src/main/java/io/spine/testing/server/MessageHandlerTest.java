@@ -21,7 +21,7 @@
 package io.spine.testing.server;
 
 import com.google.common.collect.ImmutableList;
-import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.core.Ack;
 import io.spine.core.CommandClass;
@@ -41,7 +41,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -75,18 +74,20 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * @see CommandHandlerTest
  * @see EventReactionTest
  */
-@CheckReturnValue
 public abstract class MessageHandlerTest<I,
                                          M extends Message,
                                          S extends Message,
                                          E extends Entity<I, S>,
                                          X extends AbstractExpected<S, X>> {
 
+    @SuppressWarnings("unused")
     protected static final String BE_REJECTED_TEST_NAME = "be rejected";
+    @SuppressWarnings("unused")
     protected static final String CHANGE_STATE_TEST_NAME = "change a state of the entity";
 
-    private I id;
-    private @Nullable M message;
+    private final I entityId;
+    private final M message;
+
     private @Nullable Repository<I, E> entityRepository;
 
     /**
@@ -100,31 +101,28 @@ public abstract class MessageHandlerTest<I,
      */
     private BoundedContext boundedContext;
 
-    /**
-     * Creates and stores the reference to the command message being tested.
-     */
-    @BeforeEach
-    @OverridingMethodsMustInvokeSuper
-    protected void setUp() {
-        id = newId();
-        storeMessage(createMessage());
+    protected MessageHandlerTest(I entityId, M message) {
+        this.entityId = entityId;
+        this.message = message;
     }
 
     /**
-     * Creates a new ID of the tested entity.
+     * Obtains the ID of the tested entity.
      *
      * @return new ID
      */
-    protected abstract I newId();
+    protected final I entityId() {
+        return entityId;
+    }
 
     /**
-     * Creates a new message to test.
+     * Obtains the message dispatched to the entity.
      *
-     * <p>This message is then dispatched to the entity.
-     *
-     * @return a new message to test
+     * @return the message to handle
      */
-    protected abstract M createMessage();
+    protected final M message() {
+        return message;
+    }
 
     /**
      * Dispatches the {@linkplain #message() message} to the given entity.
@@ -143,34 +141,6 @@ public abstract class MessageHandlerTest<I,
     protected abstract Repository<I, E> createEntityRepository();
 
     /**
-     * Retrieves the ID of the tested entity.
-     */
-    protected final I id() {
-        return id;
-    }
-
-    /**
-     * Retrieves the message dispatched to the entity.
-     *
-     * <p>By default, this message is created by {@link #createMessage()}. Call
-     * {@link #storeMessage(Message)} to override.
-     *
-     * @return the message to handle
-     */
-    protected final M message() {
-        return message;
-    }
-
-    /**
-     * Overrides the handled message with the given one.
-     *
-     * @param message the new message to handle
-     */
-    protected void storeMessage(M message) {
-        this.message = message;
-    }
-
-    /**
      * Returns instance of {@link BoundedContext} which is being used in this test suite.
      *
      * @return {@link BoundedContext} instance
@@ -180,17 +150,40 @@ public abstract class MessageHandlerTest<I,
         return boundedContext;
     }
 
+    /**
+     * Creates new test instance of a Bounded Context and configures it for intercepting
+     * all commands that will be generated during the next test.
+     */
     @BeforeEach
-    protected final void configureBoundedContext() {
+    @OverridingMethodsMustInvokeSuper
+    public void setUp() {
         boundedContext = TestBoundedContext.create(new MemoizingBusFilter());
         entityRepository = createEntityRepository();
         assertNotNull(entityRepository);
 
         Set<CommandClass> commandClasses = getAllCommandClasses();
         CommandBus commandBus = boundedContext().getCommandBus();
-        commandBus.register(new VoidCommandDispatcher<>(commandClasses));
+        commandBus.register(new VoidCommandDispatcher(commandClasses));
     }
 
+    /**
+     * Resets the state of the test case, so test methods can't share it.
+     */
+    @AfterEach
+    @OverridingMethodsMustInvokeSuper
+    public void tearDown() {
+        entityRepository = null;
+        interceptedCommands.clear();
+        if (boundedContext != null) {
+            try {
+                boundedContext.close();
+            } catch (Exception e) {
+                throw illegalStateWithCauseOf(e);
+            }
+        }
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // checked when filtering
     private static Set<CommandClass> getAllCommandClasses() {
         return KnownTypes
                 .instance()
@@ -206,31 +199,14 @@ public abstract class MessageHandlerTest<I,
         if (Message.class.isAssignableFrom(cls)) {
             @SuppressWarnings("unchecked")
             Class<? extends Message> messageType = (Class<? extends Message>) cls;
-            CommandClass commandClass = CommandClass.of(messageType);
+            CommandClass commandClass = CommandClass.from(messageType);
             return of(commandClass);
         } else {
             return empty();
         }
     }
 
-    /**
-     * Resets the state of the test case, so test methods can't share it.
-     */
-    @AfterEach
-    protected void resetTestCase() {
-        message = null;
-        entityRepository = null;
-        interceptedCommands.clear();
-        if (boundedContext != null) {
-            try {
-                boundedContext.close();
-            } catch (Exception e) {
-                throw illegalStateWithCauseOf(e);
-            }
-        }
-    }
-
-    ImmutableList<Message> interceptedCommands() {
+    protected final ImmutableList<Message> interceptedCommands() {
         return copyOf(interceptedCommands);
     }
 
@@ -244,11 +220,11 @@ public abstract class MessageHandlerTest<I,
     protected abstract X expectThat(E entity);
 
     /**
-     * A command dispatcher to dispatch commands into nothing.
+     * Dispatches all expected commands into nowhere.
      *
-     * @param <I> the type of entity ID.
+     * <p>This class is needed to accept commands and pass it further to filtering.
      */
-    private static class VoidCommandDispatcher<I> implements CommandDispatcher<I> {
+    private static class VoidCommandDispatcher implements CommandDispatcher<String> {
 
         private final Set<CommandClass> expectedCommands;
 
@@ -261,14 +237,19 @@ public abstract class MessageHandlerTest<I,
             return newHashSet(expectedCommands);
         }
 
+        /**
+         * Does nothing.
+         *
+         * @return fully qualified class name
+         */
         @Override
-        public I dispatch(CommandEnvelope envelope) {
-            return null;
+        public String dispatch(CommandEnvelope envelope) {
+            return getClass().getName();
         }
 
         @Override
         public void onError(CommandEnvelope envelope, RuntimeException exception) {
-            log().info("Error while dispatching a command during the unit test");
+            log().error("Error while dispatching a command during the unit test");
         }
     }
 
@@ -292,6 +273,7 @@ public abstract class MessageHandlerTest<I,
         private final Logger value = LoggerFactory.getLogger(MessageHandlerTest.class);
     }
 
+    @SuppressWarnings("MethodOnlyUsedFromInnerClass")
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }

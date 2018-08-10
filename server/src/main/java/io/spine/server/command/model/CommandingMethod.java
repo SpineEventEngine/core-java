@@ -22,24 +22,42 @@ package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.EventEnvelope;
 import io.spine.server.command.Command;
+import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.SeveralCommands;
+import io.spine.server.commandbus.SingleCommand;
+import io.spine.server.commandbus.Split;
+import io.spine.server.commandbus.Transform;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodResult;
 import io.spine.type.MessageClass;
 
+import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.commandbus.CommandSequence.inResponseTo;
+import static io.spine.server.commandbus.CommandSequence.respondMany;
+import static io.spine.server.commandbus.CommandSequence.split;
+import static io.spine.server.commandbus.CommandSequence.transform;
+
 /**
  * Base interface for methods that generate one or more command messages in response to
  * an incoming message.
  *
+ * @param <T> the type of the target object
  * @param <M> the type of the message class
  * @param <C> the type of the message context
+ * @param <R> the type of the method result
  *
  * @author Alexander Yevsyukov
  */
 @Immutable
-public interface CommandingMethod<M extends MessageClass, C extends Message, R extends MethodResult>
-        extends HandlerMethod<Object, M, C, R> {
+public
+interface CommandingMethod<T, M extends MessageClass, C extends Message, R extends MethodResult>
+        extends HandlerMethod<T, M, C, R> {
 
     /**
      * Abstract base for commanding method predicates.
@@ -48,6 +66,79 @@ public interface CommandingMethod<M extends MessageClass, C extends Message, R e
 
         AbstractPredicate(Class<C> contextClass) {
             super(Command.class, contextClass);
+        }
+    }
+
+    /**
+     * A commanding method returns one or more command messages.
+     */
+    final class Result extends MethodResult<Message> {
+
+        private final boolean optional;
+
+        /**
+         * Creates new instance of method result.
+         *
+         * @param rawMethodOutput
+         *        output of the raw method call
+         * @param optional
+         *        {@code true} if this kind of methods may not return a value,
+         *        {@code false} otherwise
+         */
+        Result(Object rawMethodOutput, boolean optional) {
+            super(rawMethodOutput);
+            this.optional = optional;
+            List<Message> messages = toMessages(rawMethodOutput);
+            checkMessages(messages);
+            setMessages(messages);
+        }
+
+        private void checkMessages(List<Message> messages) {
+            if (messages.isEmpty() && !optional) {
+                throw new IllegalStateException(
+                        "Commanding method did not produce command messages"
+                );
+            }
+        }
+
+        /**
+         * Transforms the passed command into one or more, and posts new command(s) to the passed
+         * {@code CommandBus}.
+         *
+         * @implNote The number of commands generated is the same as the number of
+         *           {@linkplain #asMessages()} command messages} produced by the method.
+         */
+        public void transformOrSplitAndPost(CommandEnvelope cmd, CommandBus bus) {
+            checkNotNull(cmd);
+            checkNotNull(bus);
+            List<? extends Message> messages = asMessages();
+            if (messages.size() == 1) {
+                Transform transform = transform(cmd).to(messages.get(0));
+                transform.post(bus);
+            } else {
+                Split split = split(cmd).addAll(messages);
+                split.postAll(bus);
+            }
+        }
+
+        /**
+         * Creates one or more commands in response to the event and posts the to the passed
+         * {@code CommandBus}.
+         *
+         * @implNote The number of commands generated is the same as the number of
+         *           {@linkplain #asMessages()} command messages} produced by the method.
+         */
+        public void produceAndPost(EventEnvelope event, CommandBus bus) {
+            checkNotNull(event);
+            checkNotNull(bus);
+            List<? extends Message> messages = asMessages();
+            if (messages.size() == 1) {
+                SingleCommand seq = inResponseTo(event).produce(messages.get(0));
+                seq.post(bus);
+            } else {
+                SeveralCommands seq = respondMany(event);
+                seq.addAll(messages);
+            }
         }
     }
 }
