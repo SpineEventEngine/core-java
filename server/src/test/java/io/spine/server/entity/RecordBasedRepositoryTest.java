@@ -249,10 +249,10 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
 
             // Find some of the entities (half of them in this case).
             int idsToObtain = count / 2;
-            List<EntityId> ids = someNumberOfEntityIds(entities, idsToObtain);
+            List<EntityId> ids = obtainSomeNumberOfEntityIds(entities, idsToObtain);
 
-            EntityFilters filters = entityFiltersById(ids);
-            FieldMask firstFieldOnly = firstFieldOnlyMask(entities);
+            EntityFilters filters = createEntityIdFilters(ids);
+            FieldMask firstFieldOnly = createFirstFieldOnlyMask(entities);
             Iterator<E> readEntities = find(filters, firstFieldOnly);
             Collection<E> foundList = newArrayList(readEntities);
 
@@ -270,10 +270,10 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
 
             // Find some of the records (half of them in this case).
             int idsToObtain = count / 2;
-            List<EntityId> ids = someNumberOfEntityIds(entities, idsToObtain);
+            List<EntityId> ids = obtainSomeNumberOfEntityIds(entities, idsToObtain);
 
-            EntityFilters filters = entityFiltersById(ids);
-            FieldMask firstFieldOnly = firstFieldOnlyMask(entities);
+            EntityFilters filters = createEntityIdFilters(ids);
+            FieldMask firstFieldOnly = createFirstFieldOnlyMask(entities);
             Iterator<EntityRecord> readEntities = repository.findRecords(filters, firstFieldOnly);
             Collection<EntityRecord> foundList = newArrayList(readEntities);
 
@@ -303,7 +303,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             assertSize(0, found);
         }
 
-        private List<EntityId> someNumberOfEntityIds(List<E> entities, int count) {
+        private List<EntityId> obtainSomeNumberOfEntityIds(List<E> entities, int count) {
             List<EntityId> ids = Lists.newLinkedList();
             for (int i = 0; i < count; i++) {
                 Message entityId = (Message) entities.get(i)
@@ -316,7 +316,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             return ids;
         }
 
-        private EntityFilters entityFiltersById(List<EntityId> ids) {
+        private EntityFilters createEntityIdFilters(List<EntityId> ids) {
             EntityIdFilter filter = EntityIdFilter
                     .newBuilder()
                     .addAllIds(ids)
@@ -328,7 +328,7 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             return filters;
         }
 
-        private FieldMask firstFieldOnlyMask(List<E> entities) {
+        private FieldMask createFirstFieldOnlyMask(List<E> entities) {
             Descriptor entityDescriptor =
                     entities.get(0)
                             .getState()
