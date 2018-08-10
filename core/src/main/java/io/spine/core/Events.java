@@ -216,20 +216,6 @@ public final class Events {
     }
 
     /**
-     * Tells whether the passed message class represents a rejection message.
-     */
-    public static boolean isRejection(Class<? extends Message> messageClass) {
-        checkNotNull(messageClass);
-        Class<?> enclosingClass = messageClass.getEnclosingClass();
-        if (enclosingClass == null) {
-            return false; // Rejection messages are generated as inner static classes.
-        }
-        boolean hasCorrectSuffix = enclosingClass.getName()
-                                                 .endsWith(REJECTION_CLASS_SUFFIX);
-        return hasCorrectSuffix;
-    }
-
-    /**
      * Constructs a new {@link RejectionEventContext} from the given command message and
      * {@link ThrowableMessage}.
      *
