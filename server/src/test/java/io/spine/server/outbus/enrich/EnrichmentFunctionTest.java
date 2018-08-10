@@ -23,9 +23,9 @@ package io.spine.server.outbus.enrich;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Empty;
-import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.core.EventContext;
 import io.spine.server.outbus.enrich.given.EnrichmentFunctionTestEnv.GivenEventMessage;
 import io.spine.test.event.ProjectCreated;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -50,8 +50,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("EnrichmentFunction should")
 class EnrichmentFunctionTest {
 
-    private BiFunction<ProjectCreated, Int32Value, ProjectCreated.Enrichment> function;
-    private FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, Int32Value> fieldEnrichment;
+    private BiFunction<ProjectCreated, EventContext, ProjectCreated.Enrichment> function;
+    private FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, EventContext> fieldEnrichment;
 
     @BeforeEach
     void setUp() {
@@ -83,11 +83,11 @@ class EnrichmentFunctionTest {
     @Test
     @DisplayName("not accept same source and target class")
     void rejectSameSourceAndTarget() {
-        BiFunction<StringValue, Int32Value, StringValue> func =
-                new BiFunction<StringValue, Int32Value, StringValue>() {
+        BiFunction<StringValue, EventContext, StringValue> func =
+                new BiFunction<StringValue, EventContext, StringValue>() {
                     @Override
                     public @Nullable StringValue apply(@Nullable StringValue input,
-                                                       Int32Value context) {
+                                                       EventContext context) {
                         return null;
                     }
                 };
@@ -122,7 +122,7 @@ class EnrichmentFunctionTest {
         ProjectCreated event = GivenEventMessage.projectCreated();
 
         ProjectCreated.Enrichment enriched =
-                fieldEnrichment.apply(event, Int32Value.getDefaultInstance());
+                fieldEnrichment.apply(event, EventContext.getDefaultInstance());
 
         assertNotNull(enriched);
         assertEquals(event.getProjectId()
@@ -146,7 +146,7 @@ class EnrichmentFunctionTest {
     @Test
     @DisplayName("support equality")
     void haveSmartEquals() {
-        FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, Int32Value> anotherEnricher =
+        FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, EventContext> anotherEnricher =
                 FieldEnrichment.of(ProjectCreated.class,
                                    ProjectCreated.Enrichment.class,
                                    function);

@@ -22,7 +22,7 @@ package io.spine.server.outbus.enrich.given;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.google.protobuf.Int32Value;
+import io.spine.core.EventContext;
 import io.spine.people.PersonName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -42,13 +42,13 @@ import static com.google.common.collect.Lists.newArrayList;
  *
  * @author Alexander Yevsyukov
  */
-public class StringToPersonName implements BiFunction<String, Int32Value, PersonName> {
+public class StringToPersonName implements BiFunction<String, EventContext, PersonName> {
 
     private static final Splitter SPLITTER = Splitter.on(' ');
     private static final Joiner JOINER = Joiner.on(' ');
 
     @Override
-    public @Nullable PersonName apply(@Nullable String input, Int32Value context) {
+    public @Nullable PersonName apply(@Nullable String input, EventContext context) {
         if (input == null) {
             return PersonName.getDefaultInstance();
         }

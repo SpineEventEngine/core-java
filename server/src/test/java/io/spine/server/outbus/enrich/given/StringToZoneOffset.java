@@ -20,7 +20,7 @@
 
 package io.spine.server.outbus.enrich.given;
 
-import com.google.protobuf.Int32Value;
+import io.spine.core.EventContext;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -34,9 +34,9 @@ import java.util.function.BiFunction;
  *
  * @author Alexander Yevsyukov
  */
-public class StringToZoneOffset implements BiFunction<String, Int32Value, ZoneOffset> {
+public class StringToZoneOffset implements BiFunction<String, EventContext, ZoneOffset> {
     @Override
-    public @Nullable ZoneOffset apply(@Nullable String input, Int32Value context) {
+    public @Nullable ZoneOffset apply(@Nullable String input, EventContext context) {
         return input == null
                ? ZoneOffset.getDefaultInstance()
                : ZoneOffsets.parse(input);

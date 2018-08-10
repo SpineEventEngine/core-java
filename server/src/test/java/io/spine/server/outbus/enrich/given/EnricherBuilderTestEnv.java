@@ -21,9 +21,9 @@
 package io.spine.server.outbus.enrich.given;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Int32Value;
 import com.google.protobuf.Timestamp;
 import io.spine.core.CommandContext;
+import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.people.PersonName;
@@ -68,9 +68,9 @@ public class EnricherBuilderTestEnv {
             return builder.build();
         }
 
-        public static class GetProjectName implements BiFunction<ProjectId, Int32Value, String> {
+        public static class GetProjectName implements BiFunction<ProjectId, EventContext, String> {
             @Override
-            public @Nullable String apply(@Nullable ProjectId id, Int32Value context) {
+            public @Nullable String apply(@Nullable ProjectId id, EventContext context) {
                 if (id == null) {
                     return null;
                 }
@@ -79,9 +79,9 @@ public class EnricherBuilderTestEnv {
             }
         }
 
-        public static class GetProjectOwnerId implements BiFunction<ProjectId, Int32Value, UserId> {
+        public static class GetProjectOwnerId implements BiFunction<ProjectId, EventContext, UserId> {
             @Override
-            public @Nullable UserId apply(@Nullable ProjectId id, Int32Value context) {
+            public @Nullable UserId apply(@Nullable ProjectId id, EventContext context) {
                 if (id == null) {
                     return null;
                 }
@@ -89,33 +89,33 @@ public class EnricherBuilderTestEnv {
             }
         }
 
-        private static final BiFunction<EventId, Int32Value, String> EVENT_ID_TO_STRING =
-                new BiFunction<EventId, Int32Value, String>() {
+        private static final BiFunction<EventId, EventContext, String> EVENT_ID_TO_STRING =
+                new BiFunction<EventId, EventContext, String>() {
                     @Override
-                    public @Nullable String apply(@Nullable EventId input, Int32Value context) {
+                    public @Nullable String apply(@Nullable EventId input, EventContext context) {
                         return input == null ? "" : input.getValue();
                     }
                 };
 
-        private static final BiFunction<Timestamp, Int32Value, String>
+        private static final BiFunction<Timestamp, EventContext, String>
                 TIMESTAMP_TO_STRING = (input, context) -> input == null ? "" : input.toString();
 
-        private static final BiFunction<CommandContext, Int32Value, String>
+        private static final BiFunction<CommandContext, EventContext, String>
                 CMD_CONTEXT_TO_STRING = (input, context) -> input == null ? "" : input.toString();
 
-        private static final BiFunction<Any, Int32Value, String>
+        private static final BiFunction<Any, EventContext, String>
                 ANY_TO_STRING = (input, context) -> input == null ? "" : input.toString();
 
-        private static final BiFunction<Integer, Int32Value, String>
+        private static final BiFunction<Integer, EventContext, String>
                 VERSION_TO_STRING = (input, context) -> input == null ? "" : input.toString();
 
-        private static final BiFunction<String, Int32Value, ZoneOffset>
+        private static final BiFunction<String, EventContext, ZoneOffset>
                 STRING_TO_ZONE_OFFSET = new StringToZoneOffset();
 
-        private static final BiFunction<String, Int32Value, PersonName>
+        private static final BiFunction<String, EventContext, PersonName>
                 STRING_TO_PERSON_NAME = new StringToPersonName();
 
-        private static final BiFunction<String, Int32Value, Integer> STRING_TO_INT =
+        private static final BiFunction<String, EventContext, Integer> STRING_TO_INT =
                 (input, context) -> Integer.valueOf(input);
 
     }

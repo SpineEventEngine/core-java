@@ -5,7 +5,7 @@
  * modification, must retain the above copyright notice and the following
  * disclaimer.
  *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * THIInt32S SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
  * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
@@ -31,6 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @param <S> the type of the field in the source event message
  * @param <T> the type of the field in the target enrichment message
+ * @param <C> the type of the event context
  *
  * @author Alexander Yevsyukov
  */

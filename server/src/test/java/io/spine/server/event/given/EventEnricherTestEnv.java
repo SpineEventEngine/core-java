@@ -21,7 +21,6 @@
 package io.spine.server.event.given;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.CommandContext;
@@ -263,10 +262,10 @@ public class EventEnricherTestEnv {
         private static final BiFunction<Integer, EventContext, String>
                 VERSION_TO_STRING = (input, context) -> checkNotNull(input).toString();
 
-        private static final BiFunction<String, Int32Value, ZoneOffset>
+        private static final BiFunction<String, EventContext, ZoneOffset>
                 STRING_TO_ZONE_OFFSET = new StringToZoneOffset();
 
-        private static final BiFunction<String, Int32Value, PersonName>
+        private static final BiFunction<String, EventContext, PersonName>
                 STRING_TO_PERSON_NAME = new StringToPersonName();
 
         private static final BiFunction<String, EventContext, Integer>
