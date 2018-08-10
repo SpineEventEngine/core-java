@@ -20,15 +20,11 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.core.Event;
 
 import java.util.List;
-
-import static com.google.common.collect.ImmutableList.copyOf;
 
 /**
  * The list of uncommitted events of an {@link Aggregate}.
@@ -90,30 +86,5 @@ final class UncommittedEvents {
                 .addAll(newEvents)
                 .build();
         return new UncommittedEvents(newList);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        UncommittedEvents events1 = (UncommittedEvents) o;
-        return Objects.equal(events, events1.events);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(events);
-    }
-
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Common terms used all over the core.
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                          .add("events", events)
-                          .toString();
     }
 }
