@@ -21,6 +21,7 @@
 package io.spine.server.outbus.enrich.given;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.Int32Value;
 import com.google.protobuf.Timestamp;
 import io.spine.core.CommandContext;
 import io.spine.core.EventId;
@@ -33,7 +34,7 @@ import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneOffset;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * @author Alexander Yevsyukov
@@ -46,21 +47,22 @@ public class EventMessageEnricherTestEnv {
 
     public static class Enrichment {
 
-        private static final Function<EventId, String> EVENT_ID_TO_STRING =
-                input -> input == null ? "" : input.getValue();
-        private static final Function<Timestamp, String> TIMESTAMP_TO_STRING =
-                input -> input == null ? "" : input.toString();
-        private static final Function<CommandContext, String> CMD_CONTEXT_TO_STRING =
-                input -> input == null ? "" : input.toString();
-        private static final Function<Any, String> ANY_TO_STRING =
-                input -> input == null ? "" : input.toString();
-        private static final Function<Integer, String> VERSION_TO_STRING =
-                input -> input == null ? "" : input.toString();
-        private static final Function<String, ZoneOffset> STRING_TO_ZONE_OFFSET =
+        private static final BiFunction<EventId, Int32Value, String> EVENT_ID_TO_STRING =
+                (input, context) -> input == null ? "" : input.getValue();
+        private static final BiFunction<Timestamp, Int32Value, String> TIMESTAMP_TO_STRING =
+                (input, context) -> input == null ? "" : input.toString();
+        private static final BiFunction<CommandContext, Int32Value, String> CMD_CONTEXT_TO_STRING =
+                (input, context) -> input == null ? "" : input.toString();
+        private static final BiFunction<Any, Int32Value, String> ANY_TO_STRING =
+                (input, context) -> input == null ? "" : input.toString();
+        private static final BiFunction<Integer, Int32Value, String> VERSION_TO_STRING =
+                (input, context) -> input == null ? "" : input.toString();
+        private static final BiFunction<String, Int32Value, ZoneOffset> STRING_TO_ZONE_OFFSET =
                 new StringToZoneOffset();
-        private static final Function<String, PersonName> STRING_TO_PERSON_NAME =
+        private static final BiFunction<String, Int32Value, PersonName> STRING_TO_PERSON_NAME =
                 new StringToPersonName();
-        private static final Function<String, Integer> STRING_TO_INT = Integer::valueOf;
+        private static final BiFunction<String, Int32Value, Integer> STRING_TO_INT =
+                (input, context) ->  Integer.valueOf(input);
 
         private Enrichment() {
         }
@@ -82,9 +84,9 @@ public class EventMessageEnricherTestEnv {
             return builder.build();
         }
 
-        public static class GetProjectName implements Function<ProjectId, String> {
+        public static class GetProjectName implements BiFunction<ProjectId, Int32Value, String> {
             @Override
-            public @Nullable String apply(@Nullable ProjectId id) {
+            public @Nullable String apply(@Nullable ProjectId id, Int32Value context) {
                 if (id == null) {
                     return null;
                 }
@@ -93,9 +95,9 @@ public class EventMessageEnricherTestEnv {
             }
         }
 
-        public static class GetProjectOwnerId implements Function<ProjectId, UserId> {
+        public static class GetProjectOwnerId implements BiFunction<ProjectId, Int32Value, UserId> {
             @Override
-            public @Nullable UserId apply(@Nullable ProjectId id) {
+            public @Nullable UserId apply(@Nullable ProjectId id, Int32Value context) {
                 if (id == null) {
                     return null;
                 }

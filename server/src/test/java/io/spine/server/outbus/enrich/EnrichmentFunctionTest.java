@@ -23,9 +23,9 @@ package io.spine.server.outbus.enrich;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Empty;
+import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.core.EventContext;
 import io.spine.server.outbus.enrich.given.EnrichmentFunctionTestEnv.GivenEventMessage;
 import io.spine.test.event.ProjectCreated;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -33,7 +33,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,12 +50,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("EnrichmentFunction should")
 class EnrichmentFunctionTest {
 
-    private Function<ProjectCreated, ProjectCreated.Enrichment> function;
-    private FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, EventContext> fieldEnrichment;
+    private BiFunction<ProjectCreated, Int32Value, ProjectCreated.Enrichment> function;
+    private FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, Int32Value> fieldEnrichment;
 
     @BeforeEach
     void setUp() {
-        this.function = input -> {
+        this.function = (input, context) -> {
             if (input == null) {
                 return null;
             }
@@ -76,19 +76,21 @@ class EnrichmentFunctionTest {
         new NullPointerTester()
                 .setDefault(Message.class, Empty.getDefaultInstance())
                 .setDefault(Class.class, Empty.class)
-                .setDefault(Function.class, function)
+                .setDefault(BiFunction.class, function)
                 .testAllPublicStaticMethods(FieldEnrichment.class);
     }
 
     @Test
     @DisplayName("not accept same source and target class")
     void rejectSameSourceAndTarget() {
-        Function<StringValue, StringValue> func = new Function<StringValue, StringValue>() {
-            @Override
-            public @Nullable StringValue apply(@Nullable StringValue input) {
-                return null;
-            }
-        };
+        BiFunction<StringValue, Int32Value, StringValue> func =
+                new BiFunction<StringValue, Int32Value, StringValue>() {
+                    @Override
+                    public @Nullable StringValue apply(@Nullable StringValue input,
+                                                       Int32Value context) {
+                        return null;
+                    }
+                };
 
         assertThrows(IllegalArgumentException.class,
                      () -> FieldEnrichment.of(StringValue.class, StringValue.class, func));
@@ -120,7 +122,7 @@ class EnrichmentFunctionTest {
         ProjectCreated event = GivenEventMessage.projectCreated();
 
         ProjectCreated.Enrichment enriched =
-                fieldEnrichment.apply(event, EventContext.getDefaultInstance());
+                fieldEnrichment.apply(event, Int32Value.getDefaultInstance());
 
         assertNotNull(enriched);
         assertEquals(event.getProjectId()
@@ -144,7 +146,7 @@ class EnrichmentFunctionTest {
     @Test
     @DisplayName("support equality")
     void haveSmartEquals() {
-        FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, EventContext> anotherEnricher =
+        FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, Int32Value> anotherEnricher =
                 FieldEnrichment.of(ProjectCreated.class,
                                    ProjectCreated.Enrichment.class,
                                    function);

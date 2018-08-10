@@ -20,6 +20,7 @@
 
 package io.spine.server.outbus.enrich;
 
+import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
@@ -34,7 +35,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -51,15 +52,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EnricherBuilderTest {
 
     private Enricher.AbstractBuilder builder;
-    private Function<Timestamp, StringValue> function;
+    private BiFunction<Timestamp, Int32Value, StringValue> function;
     private FieldEnrichment<Timestamp, StringValue, ?> fieldEnrichment;
 
     @BeforeEach
     void setUp() {
         this.builder = EventEnricher.newBuilder();
-        this.function = new Function<Timestamp, StringValue>() {
+        this.function = new BiFunction<Timestamp, Int32Value, StringValue>() {
             @Override
-            public @Nullable StringValue apply(@Nullable Timestamp input) {
+            public @Nullable StringValue apply(@Nullable Timestamp input, Int32Value context) {
                 if (input == null) {
                     return null;
                 }
@@ -149,7 +150,7 @@ class EnricherBuilderTest {
             assertThrows(NullPointerException.class,
                          () -> builder.add(Timestamp.class,
                                            StringValue.class,
-                                           Tests.<Function<Timestamp, StringValue>>nullRef()));
+                                           Tests.<BiFunction<Timestamp, Int32Value, StringValue>>nullRef()));
         }
 
         @Test

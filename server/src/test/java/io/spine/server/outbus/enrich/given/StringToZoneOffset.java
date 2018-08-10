@@ -20,11 +20,12 @@
 
 package io.spine.server.outbus.enrich.given;
 
+import com.google.protobuf.Int32Value;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * Naïve implementation of string to ZoneOffset conversion for the enrichment tests purposes.
@@ -33,9 +34,9 @@ import java.util.function.Function;
  *
  * @author Alexander Yevsyukov
  */
-public class StringToZoneOffset implements Function<String, ZoneOffset> {
+public class StringToZoneOffset implements BiFunction<String, Int32Value, ZoneOffset> {
     @Override
-    public @Nullable ZoneOffset apply(@Nullable String input) {
+    public @Nullable ZoneOffset apply(@Nullable String input, Int32Value context) {
         return input == null
                ? ZoneOffset.getDefaultInstance()
                : ZoneOffsets.parse(input);

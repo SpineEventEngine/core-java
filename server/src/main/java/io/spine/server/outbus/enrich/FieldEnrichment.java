@@ -22,7 +22,7 @@ package io.spine.server.outbus.enrich;
 
 import com.google.protobuf.Message;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -37,9 +37,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 final class FieldEnrichment<S, T, C extends Message> extends EnrichmentFunction<S, T, C> {
 
     /** A function, which performs the translation. */
-    private final Function<S, T> function;
+    private final BiFunction<S, C, T> function;
 
-    private FieldEnrichment(Class<S> eventClass, Class<T> enrichmentClass, Function<S, T> func) {
+    private FieldEnrichment(Class<S> eventClass, Class<T> enrichmentClass,
+                            BiFunction<S, C, T> func) {
         super(eventClass, enrichmentClass);
         this.function = checkNotNull(func);
     }
@@ -58,7 +59,7 @@ final class FieldEnrichment<S, T, C extends Message> extends EnrichmentFunction<
     static <S, T, C extends Message>
     FieldEnrichment<S, T, C> of(Class<S> messageFieldClass,
                                 Class<T> enrichmentFieldClass,
-                                Function<S, T> func) {
+                                BiFunction<S, C, T> func) {
         FieldEnrichment<S, T, C> result =
                 new FieldEnrichment<>(messageFieldClass, enrichmentFieldClass, func);
         return result;
@@ -84,7 +85,7 @@ final class FieldEnrichment<S, T, C extends Message> extends EnrichmentFunction<
     @Override
     public T apply(S message, C context) {
         ensureActive();
-        T result = function.apply(message);
+        T result = function.apply(message, context);
         return result;
     }
 }

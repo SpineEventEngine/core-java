@@ -35,7 +35,7 @@ import io.spine.type.TypeName;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -208,9 +208,9 @@ public abstract class Enricher<M extends EnrichableMessageEnvelope<?, ?, C>, C e
          *         a function which converts fields
          * @return the builder instance
          */
-        public <S, T> B add(Class<S> sourceFieldClass,
-                            Class<T> enrichmentFieldClass,
-                            Function<S, T> func) {
+        public <S, T, C extends Message> B add(Class<S> sourceFieldClass,
+                                               Class<T> enrichmentFieldClass,
+                                               BiFunction<S, C, T> func) {
             checkNotNull(sourceFieldClass);
             checkNotNull(enrichmentFieldClass);
             checkNotNull(func);
