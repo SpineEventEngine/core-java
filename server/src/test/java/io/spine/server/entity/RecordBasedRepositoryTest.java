@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -52,6 +53,7 @@ import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.TestTransaction.archive;
 import static io.spine.server.entity.TestTransaction.delete;
 import static io.spine.server.storage.LifecycleFlagField.archived;
@@ -87,6 +89,12 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     void assertMatches(E entity, FieldMask fieldMask) {
         Message state = entity.getState();
         Tests.assertMatchesMask(state, fieldMask);
+    }
+
+    private static void assertMatches(EntityRecord record, FieldMask fieldMask) {
+        Any state = record.getState();
+        Message unpackedState = unpack(state);
+        Tests.assertMatchesMask(unpackedState, fieldMask);
     }
 
     protected abstract RecordBasedRepository<I, E, S> createRepository();
@@ -233,44 +241,45 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             assertNotContains(entity2, found);
         }
 
-        @SuppressWarnings("MethodWithMultipleLoops")
         @Test
         @DisplayName("entities by query and field mask")
         void entitiesByQueryAndFields() {
             int count = 10;
             List<E> entities = createAndStoreEntities(repository, count);
-            List<EntityId> ids = Lists.newLinkedList();
 
-            // Find some of the records (half of them in this case)
-            for (int i = 0; i < count / 2; i++) {
-                Message entityId = (Message) entities.get(i)
-                                                     .getId();
-                EntityId id = EntityId.newBuilder()
-                                      .setId(pack(entityId))
-                                      .build();
-                ids.add(id);
-            }
+            // Find some of the entities (half of them in this case).
+            int idsToObtain = count / 2;
+            List<EntityId> ids = someNumberOfEntityIds(entities, idsToObtain);
 
-            EntityIdFilter filter = EntityIdFilter
-                    .newBuilder()
-                    .addAllIds(ids)
-                    .build();
-            EntityFilters filters = EntityFilters
-                    .newBuilder()
-                    .setIdFilter(filter)
-                    .build();
-            Descriptor entityDescriptor =
-                    entities.get(0)
-                            .getState()
-                            .getDescriptorForType();
-            FieldMask firstFieldOnly = FieldMasks.maskOf(entityDescriptor, 1);
+            EntityFilters filters = entityFiltersById(ids);
+            FieldMask firstFieldOnly = firstFieldOnlyMask(entities);
             Iterator<E> readEntities = find(filters, firstFieldOnly);
             Collection<E> foundList = newArrayList(readEntities);
 
             assertSize(ids.size(), foundList);
-
             for (E entity : foundList) {
                 assertMatches(entity, firstFieldOnly);
+            }
+        }
+
+        @Test
+        @DisplayName("entity records by query and field mask")
+        void recordsByQueryAndFields() {
+            int count = 10;
+            List<E> entities = createAndStoreEntities(repository, count);
+
+            // Find some of the records (half of them in this case).
+            int idsToObtain = count / 2;
+            List<EntityId> ids = someNumberOfEntityIds(entities, idsToObtain);
+
+            EntityFilters filters = entityFiltersById(ids);
+            FieldMask firstFieldOnly = firstFieldOnlyMask(entities);
+            Iterator<EntityRecord> readEntities = repository.findRecords(filters, firstFieldOnly);
+            Collection<EntityRecord> foundList = newArrayList(readEntities);
+
+            assertSize(ids.size(), foundList);
+            for (EntityRecord record : foundList) {
+                assertMatches(record, firstFieldOnly);
             }
         }
 
@@ -292,6 +301,38 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         void noEntitiesIfEmpty() {
             Collection<E> found = newArrayList(loadAll());
             assertSize(0, found);
+        }
+
+        private List<EntityId> someNumberOfEntityIds(List<E> entities, int count) {
+            List<EntityId> ids = Lists.newLinkedList();
+            for (int i = 0; i < count; i++) {
+                Message entityId = (Message) entities.get(i)
+                                                     .getId();
+                EntityId id = EntityId.newBuilder()
+                                      .setId(pack(entityId))
+                                      .build();
+                ids.add(id);
+            }
+            return ids;
+        }
+
+        private EntityFilters entityFiltersById(List<EntityId> ids) {
+            EntityIdFilter filter = EntityIdFilter
+                    .newBuilder()
+                    .addAllIds(ids)
+                    .build();
+            return EntityFilters
+                    .newBuilder()
+                    .setIdFilter(filter)
+                    .build();
+        }
+
+        private FieldMask firstFieldOnlyMask(List<E> entities) {
+            Descriptor entityDescriptor =
+                    entities.get(0)
+                            .getState()
+                            .getDescriptorForType();
+            return FieldMasks.maskOf(entityDescriptor, 1);
         }
     }
 
