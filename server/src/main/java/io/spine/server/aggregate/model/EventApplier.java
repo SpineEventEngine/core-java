@@ -21,6 +21,7 @@
 package io.spine.server.aggregate.model;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
@@ -28,15 +29,16 @@ import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.HandlerMethodPredicate;
+import io.spine.server.model.MessageAcceptor;
 import io.spine.server.model.MethodAccessChecker;
-import io.spine.server.model.MethodPredicate;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.function.Predicate;
+import java.util.Optional;
 
+import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
@@ -50,10 +52,12 @@ public final class EventApplier
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param method subscriber method
+     * @param method   subscriber method
+     * @param acceptor
      */
-    private EventApplier(Method method) {
-        super(method);
+    private EventApplier(Method method,
+                         MessageAcceptor<EventEnvelope> acceptor) {
+        super(method, acceptor);
     }
 
     @Override
@@ -61,16 +65,12 @@ public final class EventApplier
         return EventClass.of(rawMessageClass());
     }
 
-    static EventApplier from(Method method) {
-        return new EventApplier(method);
+    static EventApplier from(Method method,
+                             MessageAcceptor<EventEnvelope> acceptor) {
+        return new EventApplier(method, acceptor);
     }
 
-    @VisibleForTesting
-    static Predicate<Method> predicate() {
-        return factory().getPredicate();
-    }
-
-    public static AbstractHandlerMethod.Factory<EventApplier> factory() {
+    public static MethodFactory<EventApplier, ?> factory() {
         return Factory.INSTANCE;
     }
 
@@ -80,18 +80,17 @@ public final class EventApplier
     }
 
     /** The factory for filtering methods that match {@code EventApplier} specification. */
-    private static class Factory extends AbstractHandlerMethod.Factory<EventApplier> {
+    private static class Factory extends MethodFactory<EventApplier, MessageAcceptor<EventEnvelope>> {
 
         private static final Factory INSTANCE = new Factory();
+
+        private Factory() {
+            super(Apply.class, of(void.class));
+        }
 
         @Override
         public Class<EventApplier> getMethodClass() {
             return EventApplier.class;
-        }
-
-        @Override
-        public Predicate<Method> getPredicate() {
-            return Filter.INSTANCE;
         }
 
         @Override
@@ -101,42 +100,34 @@ public final class EventApplier
         }
 
         @Override
-        protected EventApplier doCreate(Method method) {
-            return from(method);
+        protected EventApplier doCreate(Method method, MessageAcceptor<EventEnvelope> acceptor) {
+            return from(method, acceptor);
+        }
+
+        @Override
+        protected Optional<MessageAcceptor<EventEnvelope>>
+        findAcceptorForParameters(Class<?>[] parameterTypes) {
+            int count = parameterTypes.length;
+            if (count != 1) {
+                return Optional.empty();
+            } else if (Message.class.isAssignableFrom(parameterTypes[0])) {
+                return Optional.of(Accessor.INSTANCE);
+            } else {
+                return Optional.empty();
+            }
         }
     }
 
-    /**
-     * The predicate for filtering event applier methods.
-     */
-    private static class Filter extends HandlerMethodPredicate<Empty> {
+    @VisibleForTesting
+    @Immutable
+    enum Accessor implements MessageAcceptor<EventEnvelope> {
 
-        private static final MethodPredicate INSTANCE = new Filter();
-
-        private static final int NUMBER_OF_PARAMS = 1;
-        private static final int EVENT_PARAM_INDEX = 0;
-
-        private Filter() {
-            super(Apply.class, Empty.class);
-        }
-
-        @SuppressWarnings("MethodDoesntCallSuperMethod") // because we override the checking.
-        @Override
-        protected boolean verifyParams(Method method) {
-            Class<?>[] parameterTypes = method.getParameterTypes();
-            boolean paramCountIsValid = parameterTypes.length == NUMBER_OF_PARAMS;
-            if (!paramCountIsValid) {
-                return false;
-            }
-            Class<?> paramType = parameterTypes[EVENT_PARAM_INDEX];
-            boolean paramIsMessage = Message.class.isAssignableFrom(paramType);
-            return paramIsMessage;
-        }
+        INSTANCE;
 
         @Override
-        protected boolean verifyReturnType(Method method) {
-            boolean isVoid = Void.TYPE.equals(method.getReturnType());
-            return isVoid;
+        public Object invoke(Object receiver, Method method, EventEnvelope envelope)
+                throws InvocationTargetException, IllegalAccessException {
+            return method.invoke(receiver, envelope.getMessage());
         }
     }
 }

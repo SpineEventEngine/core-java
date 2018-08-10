@@ -20,22 +20,20 @@
 
 package io.spine.server.event.model;
 
+import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.React;
-import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
-import io.spine.server.model.MethodPredicate;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.model.ReactorMethodResult;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
-import java.util.Optional;
-import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A wrapper for a method which {@linkplain React reacts} on events.
@@ -46,8 +44,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public final class EventReactorMethod
         extends EventHandlerMethod<EventReactor, ReactorMethodResult> {
 
-    private EventReactorMethod(Method method) {
-        super(method);
+    private EventReactorMethod(Method method, EventAcceptor acceptor) {
+        super(method, acceptor);
     }
 
     @Override
@@ -61,29 +59,29 @@ public final class EventReactorMethod
         return new ReactorMethodResult(target, rawMethodOutput);
     }
 
-    static EventReactorMethod from(Method method) {
-        return new EventReactorMethod(method);
+    static EventReactorMethod from(Method method,
+                                   EventAcceptor acceptor) {
+        return new EventReactorMethod(method, acceptor);
     }
 
-    public static AbstractHandlerMethod.Factory<EventReactorMethod> factory() {
+    public static MethodFactory<EventReactorMethod, ?> factory() {
         return Factory.INSTANCE;
     }
 
     /**
      * The factory for creating {@link EventReactorMethod event reactor} methods.
      */
-    private static class Factory extends AbstractHandlerMethod.Factory<EventReactorMethod> {
+    private static class Factory extends EventHandlerMethod.Factory<EventReactorMethod> {
 
         private static final Factory INSTANCE = new Factory();
+
+        private Factory() {
+            super(React.class, of(Message.class, Iterable.class));
+        }
 
         @Override
         public Class<EventReactorMethod> getMethodClass() {
             return EventReactorMethod.class;
-        }
-
-        @Override
-        public Predicate<Method> getPredicate() {
-            return Filter.INSTANCE;
         }
 
         @Override
@@ -93,69 +91,9 @@ public final class EventReactorMethod
         }
 
         @Override
-        protected EventReactorMethod doCreate(Method method) {
-            return from(method);
+        protected EventReactorMethod doCreate(Method method, EventAcceptor acceptor) {
+            return from(method, acceptor);
         }
     }
 
-    /**
-     * The predicate that filters event reactor methods.
-     */
-    private static class Filter extends EventMethodPredicate {
-
-        private static final MethodPredicate INSTANCE = new Filter();
-
-        private Filter() {
-            super(React.class);
-        }
-
-        @Override
-        protected boolean verifyReturnType(Method method) {
-            boolean returnsMessageOrIterable = returnsMessageOrIterable(method);
-            if (returnsMessageOrIterable) {
-                checkOutputMessageType(method);
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        protected boolean verifyParams(Method method) {
-            Optional<EventAcceptor> acceptor = EventAcceptor.findFor(method);
-            return acceptor.isPresent();
-        }
-
-        /**
-         * Ensures that the method does not return the same class of message as one that passed
-         * as the first method parameter.
-         *
-         * <p>This protection is needed to prevent repeated events passed to Event Store.
-         *
-         * @throws IllegalStateException if the type of the first parameter is the same as
-         *                               the return value
-         */
-        private static void checkOutputMessageType(Method method) {
-            Class<?> returnType = method.getReturnType();
-
-            // The method returns List. We're OK.
-            if (Iterable.class.isAssignableFrom(returnType)) {
-                return;
-            }
-
-            // The returned value must not be of the same type as the passed message param.
-            Class<?>[] paramTypes = method.getParameterTypes();
-            if (paramTypes.length < 1) {
-                /* The number of parameters is checked by `verifyParams()`.
-                   We check the number of parameters here to avoid accidental exception in case
-                   this method is called before `verifyParams()`. */
-                return;
-            }
-            Class<?> firstParamType = paramTypes[0];
-            if (firstParamType.equals(returnType)) {
-                throw newIllegalStateException(
-                        "React method cannot return the same event message {}",
-                        firstParamType.getName());
-            }
-        }
-    }
 }

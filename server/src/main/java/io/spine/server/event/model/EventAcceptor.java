@@ -21,6 +21,7 @@
 package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableList;
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
@@ -30,6 +31,7 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.model.HandlerKey;
+import io.spine.server.model.MessageAcceptor;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.InvocationTargetException;
@@ -38,7 +40,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.ImmutableList.of;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -51,7 +52,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  *
  * @author Dmytro Dashenkov
  */
-enum EventAcceptor {
+@Immutable
+enum EventAcceptor implements MessageAcceptor<EventEnvelope> {
 
     /**
      * Method accepting only the event message.
@@ -122,22 +124,22 @@ enum EventAcceptor {
     private final ImmutableList<Class<?>> expectedParameters;
     private final boolean awareOfCommandType;
 
-    EventAcceptor(ImmutableList<Class<?>> types, boolean type) {
+    EventAcceptor(ImmutableList<Class<?>> types, boolean awareOfCommandType) {
         this.expectedParameters = types;
-        awareOfCommandType = type;
+        this.awareOfCommandType = awareOfCommandType;
     }
 
     /**
      * Obtains an instance of {@code EventAcceptor} for the given method.
      *
-     * @param method the event accepting method
+     * @param parameters the event accepting method parameter types
      * @return instance of {@code EventAcceptor} or {@link Optional#empty()} if the given method is
      * not an event accepting method.
      */
-    static Optional<EventAcceptor> findFor(Method method) {
-        List<Class<?>> parameters = copyOf(method.getParameterTypes());
+    static Optional<EventAcceptor> findFor(Class<?>[] parameters) {
+        List<Class<?>> params = ImmutableList.copyOf(parameters);
         Optional<EventAcceptor> result = Stream.of(values())
-                                               .filter(acceptor -> acceptor.matches(parameters))
+                                               .filter(acceptor -> acceptor.matches(params))
                                                .findFirst();
         return result;
     }
@@ -150,7 +152,7 @@ enum EventAcceptor {
      * @return instance of {@code EventAcceptor}
      */
     static EventAcceptor from(Method method) {
-        EventAcceptor acceptor = findFor(method)
+        EventAcceptor acceptor = findFor(method.getParameterTypes())
                 .orElseThrow(() -> newIllegalStateException(
                         "Method %s is not a valid event acceptor.", method.toString())
                 );
@@ -180,7 +182,8 @@ enum EventAcceptor {
      * @return the method invocation result
      * @throws InvocationTargetException if the method throws
      */
-    @Nullable Object invoke(Object receiver, Method acceptorMethod, EventEnvelope event)
+    @Override
+    public @Nullable Object invoke(Object receiver, Method acceptorMethod, EventEnvelope event)
             throws InvocationTargetException {
         Object[] arguments = arguments(event).toArray();
         try {

@@ -26,6 +26,8 @@ import io.spine.core.Event;
 
 import java.util.List;
 
+import static com.google.common.collect.ImmutableList.copyOf;
+
 /**
  * The list of uncommitted events of an {@link Aggregate}.
  *

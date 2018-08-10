@@ -20,6 +20,7 @@
 
 package io.spine.server.model.given;
 
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
@@ -28,11 +29,17 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
+import io.spine.server.model.MessageAcceptor;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.function.Predicate;
+import java.util.Optional;
+
+import static com.google.common.collect.ImmutableSet.of;
 
 /**
  * @author Alexander Litus
@@ -125,7 +132,7 @@ public class HandlerMethodTestEnv {
         extends AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> {
 
         public TwoParamMethod(Method method) {
-            super(method);
+            super(method, TwoParamAcceptor.INSTANCE);
         }
 
         @Override
@@ -148,7 +155,7 @@ public class HandlerMethodTestEnv {
             extends AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> {
 
         public OneParamMethod(Method method) {
-            super(method);
+            super(method, OneParamAcceptor.INSTANCE);
         }
 
         @Override
@@ -165,9 +172,14 @@ public class HandlerMethodTestEnv {
             return EventClass.of(rawMessageClass());
         }
 
-        private static class Factory extends AbstractHandlerMethod.Factory<OneParamMethod> {
+        private static class Factory
+                extends MethodFactory<OneParamMethod, MessageAcceptor<EventEnvelope>> {
 
             private static final Factory INSTANCE = new Factory();
+
+            private Factory() {
+                super(Annotation.class, of(Object.class));
+            }
 
             private static Factory getInstance() {
                 return INSTANCE;
@@ -179,24 +191,50 @@ public class HandlerMethodTestEnv {
             }
 
             @Override
-            public Predicate<Method> getPredicate() {
-                throw new IllegalStateException("The test factory cannot provide the predicate.");
-            }
-
-            @Override
             public void checkAccessModifier(Method method) {
                 // Any access modifier is accepted for the test method.
             }
 
             @Override
-            protected OneParamMethod doCreate(Method method) {
+            protected OneParamMethod doCreate(Method method,
+                                              MessageAcceptor<EventEnvelope> acceptor) {
                 return new OneParamMethod(method);
+            }
+
+            @Override
+            protected Optional<MessageAcceptor<EventEnvelope>>
+            findAcceptorForParameters(Class<?>[] parameterTypes) {
+                return Optional.empty();
             }
         }
 
         @Override
         public HandlerKey key() {
             throw new IllegalStateException("The method is not a target of the test.");
+        }
+    }
+
+    @Immutable
+    private enum OneParamAcceptor implements MessageAcceptor<EventEnvelope> {
+
+        INSTANCE;
+
+        @Override
+        public Object invoke(Object receiver, Method method, EventEnvelope envelope)
+                throws InvocationTargetException, IllegalAccessException {
+            return method.invoke(receiver, envelope.getMessage());
+        }
+    }
+
+    @Immutable
+    private enum TwoParamAcceptor implements MessageAcceptor<EventEnvelope> {
+
+        INSTANCE;
+
+        @Override
+        public Object invoke(Object receiver, Method method, EventEnvelope envelope)
+                throws InvocationTargetException, IllegalAccessException {
+            return method.invoke(receiver, envelope.getMessage(), envelope.getEventContext());
         }
     }
 }

@@ -32,10 +32,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.model.MethodExceptionChecker.forMethod;
 import static java.lang.String.format;
 
 /**
@@ -65,9 +63,6 @@ public abstract class AbstractHandlerMethod<T,
     /** The class of the first parameter. */
     private final Class<? extends Message> messageClass;
 
-    /** The number of parameters the method has. */
-    private final int paramCount;
-
     /**
      * The set of the metadata attributes set via method annotations.
      *
@@ -78,16 +73,18 @@ public abstract class AbstractHandlerMethod<T,
     @SuppressWarnings("Immutable")
     private final ImmutableSet<MethodAttribute<?>> attributes;
 
+    private final MessageAcceptor<E> acceptor;
+
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    protected AbstractHandlerMethod(Method method) {
+    protected AbstractHandlerMethod(Method method, MessageAcceptor<E> acceptor) {
         this.method = checkNotNull(method);
         this.messageClass = getFirstParamType(method);
-        this.paramCount = method.getParameterTypes().length;
         this.attributes = discoverAttributes(method);
+        this.acceptor = checkNotNull(acceptor);
         method.setAccessible(true);
     }
 
@@ -141,11 +138,6 @@ public abstract class AbstractHandlerMethod<T,
         return result;
     }
 
-    /** Returns the count of the method parameters. */
-    protected int getParamCount() {
-        return paramCount;
-    }
-
     /** Returns the set of method attributes configured for this method. */
     @Override
     public Set<MethodAttribute<?>> getAttributes() {
@@ -160,20 +152,17 @@ public abstract class AbstractHandlerMethod<T,
 
     @CanIgnoreReturnValue
     @Override
-    public R invoke(T target, E envelope) {
+    public final R invoke(T target, E envelope) {
         checkNotNull(target);
         checkNotNull(envelope);
         Message message = envelope.getMessage();
         Message context = envelope.getMessageContext();
         try {
-            int paramCount = getParamCount();
-            Object rawOutput = (paramCount == 1)
-                            ? method.invoke(target, message)
-                            : method.invoke(target, message, context);
+            Object rawOutput = acceptor.invoke(target, method, envelope);
             R result = toResult(target, rawOutput);
             return result;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw whyFailed(target, message, context, e);
+            throw new HandlerMethodFailedException(target, message, context, e);
         }
     }
 
@@ -181,20 +170,6 @@ public abstract class AbstractHandlerMethod<T,
      * Converts the output of the raw method call to the result object.
      */
     protected abstract R toResult(T target, Object rawMethodOutput);
-
-    /**
-     * Creates an exception containing information on the failure of the handler method invocation.
-     *
-     * @param target  the object which method was invoked
-     * @param message the message dispatched to the object
-     * @param context the context of the message
-     * @param cause   exception instance thrown by the invoked method
-     * @return the exception thrown during the invocation
-     */
-    protected HandlerMethodFailedException
-    whyFailed(Object target, Message message, Message context, Exception cause) {
-        return new HandlerMethodFailedException(target, message, context, cause);
-    }
 
     /**
      * Returns a full name of the handler method.
@@ -241,61 +216,4 @@ public abstract class AbstractHandlerMethod<T,
         return getFullName();
     }
 
-    /**
-     * The base class for factory objects that can filter {@link Method} objects
-     * that represent handler methods and create corresponding {@code HandlerMethod} instances
-     * that wrap those methods.
-     *
-     * @param <H> the type of the handler method objects to create
-     */
-    public abstract static class Factory<H extends HandlerMethod> {
-
-        /** Returns the class of the method wrapper. */
-        public abstract Class<H> getMethodClass();
-
-        /** Returns a predicate for filtering methods. */
-        public abstract Predicate<Method> getPredicate();
-
-        /**
-         * Checks an access modifier of the method and logs a warning if it is invalid.
-         *
-         * @param method the method to check
-         * @see MethodAccessChecker
-         */
-        public abstract void checkAccessModifier(Method method);
-
-        /**
-         * Creates a {@linkplain HandlerMethod handler method} from a raw method.
-         *
-         * <p>Performs various checks before wrapper creation, e.g. method access modifier or
-         * whether method throws any prohibited exceptions.
-         *
-         * @param method the method to create wrapper from
-         * @return a wrapper object created from the method
-         * @throws IllegalStateException in case some of the method checks fail
-         */
-        public H create(Method method) {
-            checkAccessModifier(method);
-            checkThrownExceptions(method);
-            return doCreate(method);
-        }
-
-        /** Creates a wrapper object from a method. */
-        protected abstract H doCreate(Method method);
-
-        /**
-         * Ensures method does not throw any prohibited exception types.
-         *
-         * <p>In case it does, the {@link IllegalStateException} containing diagnostics info is
-         * thrown.
-         *
-         * @param method the method to check
-         * @throws IllegalStateException if the method throws any prohibited exception types
-         * @see MethodExceptionChecker
-         */
-        protected void checkThrownExceptions(Method method) {
-            MethodExceptionChecker checker = forMethod(method);
-            checker.checkDeclaresNoExceptionsThrown();
-        }
-    }
 }

@@ -44,10 +44,12 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -62,10 +64,13 @@ class EventSubscriberMethodTest {
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
+    void passNullToleranceCheck() throws NoSuchMethodException {
+        Method defaultMethod =
+                ValidOneParam.class.getDeclaredMethod("handle", RefProjectCreated.class);
         new NullPointerTester()
                 .setDefault(Any.class, Any.getDefaultInstance())
                 .setDefault(EventContext.class, EventContext.getDefaultInstance())
+                .setDefault(Method.class, defaultMethod)
                 .testAllPublicStaticMethods(EventSubscriberMethod.class);
     }
 
@@ -74,7 +79,10 @@ class EventSubscriberMethodTest {
     void invokeSubscriberMethod() {
         ValidTwoParams subscriberObject;
         subscriberObject = spy(new ValidTwoParams());
-        EventSubscriberMethod subscriber = EventSubscriberMethod.from(subscriberObject.getMethod());
+        Optional<EventSubscriberMethod> createdMethod =
+                EventSubscriberMethod.factory().create(subscriberObject.getMethod());
+        assertTrue(createdMethod.isPresent());
+        EventSubscriberMethod subscriber = createdMethod.get();
         RefProjectCreated msg = Given.EventMessage.projectCreated();
 
         Event event = Event
@@ -189,7 +197,7 @@ class EventSubscriberMethodTest {
 
     private static void assertIsEventSubscriber(Method subscriber, boolean isSubscriber) {
         assertEquals(isSubscriber, EventSubscriberMethod.factory()
-                                                        .getPredicate()
-                                                        .test(subscriber));
+                                                        .create(subscriber)
+                                                        .isPresent());
     }
 }

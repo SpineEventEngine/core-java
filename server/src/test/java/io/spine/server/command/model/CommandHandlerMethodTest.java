@@ -64,11 +64,11 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.testing.Helpers.assertEmpty;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.command.model.CommandHandlerMethod.from;
 import static io.spine.server.model.given.Given.CommandMessage.createProject;
 import static io.spine.server.model.given.Given.CommandMessage.startProject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -118,7 +118,11 @@ class CommandHandlerMethodTest {
         @DisplayName("one Message")
         void returningMessage() {
             ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
-            CommandHandlerMethod handler = from(handlerObject.getHandler());
+
+            Optional<CommandHandlerMethod> createdMethod =
+                    CommandHandlerMethod.factory().create(handlerObject.getHandler());
+            assertTrue(createdMethod.isPresent());
+            CommandHandlerMethod handler = createdMethod.get();
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
 
@@ -137,7 +141,10 @@ class CommandHandlerMethodTest {
         void returningMessageList() {
             ValidHandlerOneParamReturnsList handlerObject =
                     spy(new ValidHandlerOneParamReturnsList());
-            CommandHandlerMethod handler = from(handlerObject.getHandler());
+            Optional<CommandHandlerMethod> method =
+                    CommandHandlerMethod.factory().create(handlerObject.getHandler());
+            assertTrue(method.isPresent());
+            CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
 
@@ -159,7 +166,10 @@ class CommandHandlerMethodTest {
         @DisplayName("no events")
         void noEvents() {
             HandlerReturnsEmptyList handlerObject = new HandlerReturnsEmptyList();
-            CommandHandlerMethod handler = from(handlerObject.getHandler());
+            Optional<CommandHandlerMethod> method =
+                    CommandHandlerMethod.factory().create(handlerObject.getHandler());
+            assertTrue(method.isPresent());
+            CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
 
@@ -171,7 +181,10 @@ class CommandHandlerMethodTest {
         @DisplayName("`Empty` event")
         void emptyEvent() {
             HandlerReturnsEmpty handlerObject = new HandlerReturnsEmpty();
-            CommandHandlerMethod handler = from(handlerObject.getHandler());
+            Optional<CommandHandlerMethod> method =
+                    CommandHandlerMethod.factory().create(handlerObject.getHandler());
+            assertTrue(method.isPresent());
+            CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
 
@@ -354,8 +367,8 @@ class CommandHandlerMethodTest {
     private static void assertIsCommandHandler(Method handler, boolean isHandler) {
         assertEquals(isHandler,
                      CommandHandlerMethod.factory()
-                                         .getPredicate()
-                                         .test(handler));
+                                         .create(handler)
+                                         .isPresent());
     }
 
     private static CommandEnvelope envelope(Message commandMessage) {

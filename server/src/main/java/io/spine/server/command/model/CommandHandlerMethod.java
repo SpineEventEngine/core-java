@@ -23,19 +23,18 @@ package io.spine.server.command.model;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.ThrowableMessage;
-import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.EventProducer;
 import io.spine.server.command.Assign;
-import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.EventsResult;
-import io.spine.server.model.HandlerMethodPredicate;
+import io.spine.server.model.MessageAcceptor;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.procman.ProcessManager;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -51,16 +50,19 @@ public final class CommandHandlerMethod
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
+     * @param acceptor
      */
-    private CommandHandlerMethod(Method method) {
-        super(method);
+    private CommandHandlerMethod(Method method,
+                                 MessageAcceptor<CommandEnvelope> acceptor) {
+        super(method, acceptor);
     }
 
-    static CommandHandlerMethod from(Method method) {
-        return new CommandHandlerMethod(method);
+    static CommandHandlerMethod from(Method method,
+                                     MessageAcceptor<CommandEnvelope> acceptor) {
+        return new CommandHandlerMethod(method, acceptor);
     }
 
-    public static AbstractHandlerMethod.Factory<CommandHandlerMethod> factory() {
+    public static MethodFactory<CommandHandlerMethod, ?> factory() {
         return Factory.INSTANCE;
     }
 
@@ -75,18 +77,17 @@ public final class CommandHandlerMethod
     /**
      * The factory of {@link CommandHandlerMethod}s.
      */
-    private static class Factory extends AbstractHandlerMethod.Factory<CommandHandlerMethod> {
+    private static class Factory extends CommandAcceptingMethod.Factory<CommandHandlerMethod> {
 
         private static final Factory INSTANCE = new Factory();
+
+        private Factory() {
+            super(Assign.class);
+        }
 
         @Override
         public Class<CommandHandlerMethod> getMethodClass() {
             return CommandHandlerMethod.class;
-        }
-
-        @Override
-        public Predicate<Method> getPredicate() {
-            return Filter.INSTANCE;
         }
 
         @Override
@@ -109,28 +110,9 @@ public final class CommandHandlerMethod
         }
 
         @Override
-        protected CommandHandlerMethod doCreate(Method method) {
-            return from(method);
-        }
-    }
-
-    /**
-     * The predicate that filters command handling methods.
-     *
-     * <p>See {@link Assign} annotation for more info about such methods.
-     */
-    private static class Filter extends HandlerMethodPredicate<CommandContext> {
-
-        private static final Filter INSTANCE = new Filter();
-
-        private Filter() {
-            super(Assign.class, CommandContext.class);
-        }
-
-        @Override
-        protected boolean verifyReturnType(Method method) {
-            boolean result = returnsMessageOrIterable(method);
-            return result;
+        protected CommandHandlerMethod doCreate(Method method,
+                                                MessageAcceptor<CommandEnvelope> acceptor) {
+            return from(method, acceptor);
         }
     }
 

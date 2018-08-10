@@ -28,7 +28,8 @@ import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.aggregate.model.EventApplier.Accessor;
+import io.spine.server.model.MethodFactory;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testdata.Sample;
 import io.spine.validate.StringValueVBuilder;
@@ -37,6 +38,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -51,7 +53,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("EventApplierMethod should")
 class EventApplierTest {
 
-    private final AbstractHandlerMethod.Factory<EventApplier> factory = EventApplier.factory();
+    private final MethodFactory<EventApplier, ?> factory = EventApplier.factory();
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
@@ -77,12 +79,6 @@ class EventApplierTest {
         void methodClass() {
             assertEquals(EventApplier.class, factory.getMethodClass());
         }
-
-        @Test
-        @DisplayName("method predicate")
-        void methodPredicate() {
-            assertEquals(EventApplier.predicate(), factory.getPredicate());
-        }
     }
 
     @Test
@@ -90,16 +86,20 @@ class EventApplierTest {
     void beCreatedFromFactory() {
         Method method = new ValidApplier().getMethod();
 
-        EventApplier actual = factory.create(method);
+        Optional<EventApplier> actual = factory.create(method);
+        assertTrue(actual.isPresent());
 
-        assertEquals(EventApplier.from(method), actual);
+        assertEquals(EventApplier.from(method, Accessor.INSTANCE), actual.get());
     }
 
     @Test
     @DisplayName("allow invocation")
     void invokeApplierMethod() {
         ValidApplier applierObject = new ValidApplier();
-        EventApplier applier = EventApplier.from(applierObject.getMethod());
+        Optional<EventApplier> method = EventApplier.factory()
+                                                    .create(applierObject.getMethod());
+        assertTrue(method.isPresent());
+        EventApplier applier = method.get();
         RefProjectCreated eventMessage = Sample.messageOfType(RefProjectCreated.class);
         Event event = Event
                 .newBuilder()
@@ -140,8 +140,9 @@ class EventApplierTest {
         }
 
         private void assertIsEventApplier(Method applier) {
-            assertTrue(EventApplier.predicate()
-                                   .test(applier));
+            assertTrue(EventApplier.factory()
+                                   .create(applier)
+                                   .isPresent());
         }
     }
 
@@ -190,8 +191,9 @@ class EventApplierTest {
         }
 
         private void assertIsNotEventApplier(Method applier) {
-            assertFalse(EventApplier.predicate()
-                                    .test(applier));
+            assertFalse(EventApplier.factory()
+                                    .create(applier)
+                                    .isPresent());
         }
     }
 

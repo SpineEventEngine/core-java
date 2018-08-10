@@ -23,16 +23,17 @@ package io.spine.server.command.model;
 import com.google.protobuf.Message;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
-import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
+import io.spine.server.command.Command;
 import io.spine.server.command.model.CommandSubstituteMethod.Result;
-import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.MessageAcceptor;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
 
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * A method that produces one or more command messages in response to an incoming command.
@@ -43,8 +44,9 @@ public final class CommandSubstituteMethod
         extends CommandAcceptingMethod<Object, Result>
         implements CommandingMethod<CommandClass, Result> {
 
-    private CommandSubstituteMethod(Method method) {
-        super(method);
+    private CommandSubstituteMethod(Method method,
+                                    MessageAcceptor<CommandEnvelope> acceptor) {
+        super(method, acceptor);
     }
 
     @Override
@@ -53,27 +55,27 @@ public final class CommandSubstituteMethod
         return result;
     }
 
-    static CommandSubstituteMethod from(Method method) {
-        return new CommandSubstituteMethod(method);
+    static CommandSubstituteMethod from(Method method,
+                                        MessageAcceptor<CommandEnvelope> acceptor) {
+        return new CommandSubstituteMethod(method, acceptor);
     }
 
-    static AbstractHandlerMethod.Factory<CommandSubstituteMethod> factory() {
+    static MethodFactory<CommandSubstituteMethod, ?> factory() {
         return Factory.INSTANCE;
     }
 
     private static class Factory
-            extends AbstractHandlerMethod.Factory<CommandSubstituteMethod> {
+            extends CommandAcceptingMethod.Factory<CommandSubstituteMethod> {
 
         private static final Factory INSTANCE = new Factory();
+
+        private Factory() {
+            super(Command.class);
+        }
 
         @Override
         public Class<CommandSubstituteMethod> getMethodClass() {
             return CommandSubstituteMethod.class;
-        }
-
-        @Override
-        public Predicate<Method> getPredicate() {
-            return Filter.INSTANCE;
         }
 
         @Override
@@ -91,26 +93,9 @@ public final class CommandSubstituteMethod
         }
 
         @Override
-        protected CommandSubstituteMethod doCreate(Method method) {
-            return from(method);
-        }
-    }
-
-    /**
-     * Filters command substitution methods.
-     */
-    private static final class Filter extends AbstractPredicate<CommandContext> {
-
-        private static final Filter INSTANCE = new Filter();
-
-        private Filter() {
-            super(CommandContext.class);
-        }
-
-        @Override
-        protected boolean verifyReturnType(Method method) {
-            boolean result = returnsMessageOrIterable(method);
-            return result;
+        protected CommandSubstituteMethod doCreate(Method method,
+                                                   MessageAcceptor<CommandEnvelope> acceptor) {
+            return from(method, acceptor);
         }
     }
 

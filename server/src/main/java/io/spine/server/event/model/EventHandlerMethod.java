@@ -20,17 +20,18 @@
 
 package io.spine.server.event.model;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.EventClass;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.lang.reflect.InvocationTargetException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * An abstract base for methods handling events.
@@ -47,9 +48,9 @@ abstract class EventHandlerMethod<T, R extends MethodResult>
      *
      * @param method subscriber method
      */
-    protected EventHandlerMethod(Method method) {
-        super(method);
-        this.acceptor = EventAcceptor.from(method);
+    protected EventHandlerMethod(Method method, EventAcceptor acceptor) {
+        super(method, acceptor);
+        this.acceptor = acceptor;
     }
 
     @Override
@@ -61,30 +62,23 @@ abstract class EventHandlerMethod<T, R extends MethodResult>
     /**
      * {@inheritDoc}
      *
-     * @return the list of event messages (or an empty list if the reactor method returns nothing)
-     */
-    @CanIgnoreReturnValue
-    @Override
-    public R invoke(T target, EventEnvelope event) {
-        EventContext context = event.getEventContext();
-        ensureExternalMatch(context.getExternal());
-
-        Object rawResult;
-        try {
-            rawResult = acceptor.invoke(target, getRawMethod(), event);
-        } catch (InvocationTargetException e) {
-            throw whyFailed(target, event.getMessage(), context, e);
-        }
-        R result = toResult(target, rawResult);
-        return result;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @apiNote
      * Overridden to mark {@code rawMethodOutput} argument as nullable.
      */
     @Override
     protected abstract R toResult(T target, @Nullable Object rawMethodOutput);
+
+    protected abstract static class Factory<H extends EventHandlerMethod>
+            extends MethodFactory<H, EventAcceptor> {
+
+        protected Factory(Class<? extends Annotation> annotation,
+                          Set<Class<?>> types) {
+            super(annotation, types);
+        }
+
+        @Override
+        protected Optional<EventAcceptor> findAcceptorForParameters(Class<?>[] parameterTypes) {
+            return EventAcceptor.findFor(parameterTypes);
+        }
+    }
 }

@@ -30,6 +30,7 @@ import io.spine.type.MessageClass;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -59,7 +60,7 @@ public class MessageHandlerMap<M extends MessageClass,
      * @param cls     the class to inspect
      * @param factory the factory of methods
      */
-    public MessageHandlerMap(Class<?> cls, AbstractHandlerMethod.Factory<H> factory) {
+    public MessageHandlerMap(Class<?> cls, MethodFactory<H, ?> factory) {
         this.map = scan(cls, factory);
     }
 
@@ -135,13 +136,13 @@ public class MessageHandlerMap<M extends MessageClass,
 
     private static <M extends MessageClass, H extends HandlerMethod<?, M, ?, ?>>
     ImmutableMap<HandlerKey, H> scan(Class<?> declaringClass,
-                                     AbstractHandlerMethod.Factory<H> factory) {
-        Predicate<Method> filter = factory.getPredicate();
+                                     MethodFactory<H, ?> factory) {
         Map<HandlerKey, H> tempMap = Maps.newHashMap();
         Method[] declaredMethods = declaringClass.getDeclaredMethods();
         for (Method method : declaredMethods) {
-            if (filter.test(method)) {
-                H handler = factory.create(method);
+            Optional<H> handlerMethod = factory.create(method);
+            if (handlerMethod.isPresent()) {
+                H handler = handlerMethod.get();
                 HandlerKey handlerKey = handler.key();
                 if (tempMap.containsKey(handlerKey)) {
                     Method alreadyPresent = tempMap.get(handlerKey)

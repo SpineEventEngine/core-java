@@ -21,12 +21,21 @@
 package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
+import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.MessageAcceptor;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Optional;
+
+import static com.google.common.collect.ImmutableSet.of;
 
 /**
  * An abstract base for methods that accept a command message and optionally its context.
@@ -38,12 +47,70 @@ import java.lang.reflect.Method;
 public abstract class CommandAcceptingMethod<T, R extends MethodResult>
         extends AbstractHandlerMethod<T, CommandClass, CommandEnvelope, R> {
 
-    CommandAcceptingMethod(Method method) {
-        super(method);
+    CommandAcceptingMethod(Method method, MessageAcceptor<CommandEnvelope> acceptor) {
+        super(method, acceptor);
     }
 
     @Override
     public CommandClass getMessageClass() {
         return CommandClass.of(rawMessageClass());
+    }
+
+    protected abstract static class Factory<H extends CommandAcceptingMethod>
+            extends MethodFactory<H, MessageAcceptor<CommandEnvelope>> {
+
+        protected Factory(Class<? extends Annotation> annotation) {
+            super(annotation, of(Message.class, Iterable.class));
+        }
+
+        @Override
+        protected Optional<MessageAcceptor<CommandEnvelope>>
+        findAcceptorForParameters(Class<?>[] parameterTypes) {
+            int count = parameterTypes.length;
+            switch (count) {
+                case 1:
+                    return CommandAcceptor.MESSAGE.matches(parameterTypes)
+                           ? Optional.of(CommandAcceptor.MESSAGE)
+                           : Optional.empty();
+                case 2:
+                    return CommandAcceptor.MESSAGE_AND_CONTEXT.matches(parameterTypes)
+                           ? Optional.of(CommandAcceptor.MESSAGE_AND_CONTEXT)
+                           : Optional.empty();
+                default:
+                    return Optional.empty();
+            }
+        }
+    }
+
+    @Immutable
+    private enum CommandAcceptor implements MessageAcceptor<CommandEnvelope> {
+
+        MESSAGE {
+            @Override
+            public Object invoke(Object receiver, Method method, CommandEnvelope envelope)
+                    throws InvocationTargetException, IllegalAccessException {
+                return method.invoke(receiver, envelope.getMessage());
+            }
+
+            @Override
+            boolean matches(Class<?>[] parameterTypes) {
+                return Message.class.isAssignableFrom(parameterTypes[0]);
+            }
+        },
+        MESSAGE_AND_CONTEXT {
+            @Override
+            public Object invoke(Object receiver, Method method, CommandEnvelope envelope)
+                    throws InvocationTargetException, IllegalAccessException {
+                return method.invoke(receiver, envelope.getMessage(), envelope.getCommandContext());
+            }
+
+            @Override
+            boolean matches(Class<?>[] parameterTypes) {
+                return Message.class.isAssignableFrom(parameterTypes[0])
+                        && CommandContext.class.isAssignableFrom(parameterTypes[1]);
+            }
+        };
+
+        abstract boolean matches(Class<?>[] parameterTypes);
     }
 }

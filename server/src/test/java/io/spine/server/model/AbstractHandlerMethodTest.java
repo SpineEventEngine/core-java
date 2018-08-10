@@ -35,10 +35,15 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.model.AbstractHandlerMethod.getFirstParamType;
+import static io.spine.server.model.given.HandlerMethodTestEnv.StubHandler.getMethodWithCheckedException;
+import static io.spine.server.model.given.HandlerMethodTestEnv.StubHandler.getMethodWithRuntimeException;
 import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -51,7 +56,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("AbstractHandlerMethod should")
 class AbstractHandlerMethodTest {
 
-    private final AbstractHandlerMethod.Factory<OneParamMethod> factory = OneParamMethod.factory();
+    private final MethodFactory<OneParamMethod, ?> factory = OneParamMethod.factory();
 
     private
     AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> twoParamMethod;
@@ -186,15 +191,15 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("checked exception")
         void checkedException() {
-            assertThrows(IllegalStateException.class,
-                         () -> factory.create(StubHandler.getMethodWithCheckedException()));
+            Optional<OneParamMethod> method = factory.create(getMethodWithCheckedException());
+            assertFalse(method.isPresent());
         }
 
         @Test
         @DisplayName("runtime exception")
         void runtimeException() {
-            assertThrows(IllegalStateException.class,
-                         () -> factory.create(StubHandler.getMethodWithRuntimeException()));
+            Optional<OneParamMethod> method = factory.create(getMethodWithRuntimeException());
+            assertFalse(method.isPresent());
         }
     }
 }
