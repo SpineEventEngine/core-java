@@ -23,6 +23,7 @@ package io.spine.server.event.model;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.core.EventClass;
+import io.spine.server.event.EventReceiver;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.MethodFactory;
@@ -34,10 +35,13 @@ import java.util.Set;
  * Helper object for storing information about methods and events of an
  * {@linkplain EventReceiverClass event receiving class}.
  *
+ * @param <T> the type of target objects that handle messages
+ * @param <M> the type of handler method objects
  * @author Alexander Yevsyukov
  */
 @Immutable(containerOf = "M")
-public class EventReceivingClassDelegate<T, M extends HandlerMethod<?, EventClass, ?, ?>>
+public class EventReceivingClassDelegate<T extends EventReceiver,
+                                         M extends HandlerMethod<?, EventClass, ?, ?>>
         extends ModelClass<T> {
 
     private static final long serialVersionUID = 0L;
