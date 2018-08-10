@@ -317,6 +317,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @param fieldMask the mask to apply for returned records
      * @return an iterator over the matching records
      */
+    @SuppressWarnings("WeakerAccess") // Used in the code outside of the repository.
     @Internal
     public Iterator<EntityRecord> findRecords(EntityFilters filters, FieldMask fieldMask) {
         checkNotNull(filters);
