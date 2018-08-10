@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.RejectionClass;
+import io.spine.server.event.EventReceiver;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.rejection.model.RejectionReactorMethod;
@@ -37,7 +38,7 @@ import java.util.Set;
  * @author Alex Tymchenko
  * @author Alexander Yevsyukov
  */
-public final class ReactorClassDelegate<T>
+public final class ReactorClassDelegate<T extends EventReceiver>
         extends EventReceivingClassDelegate<T, EventReactorMethod>
         implements ReactingClass {
 
