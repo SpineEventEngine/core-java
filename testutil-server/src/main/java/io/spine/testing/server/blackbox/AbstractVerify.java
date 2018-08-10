@@ -93,6 +93,7 @@ abstract class AbstractVerify<E extends EmittedMessages> implements Verify<E> {
         private final Count expected;
 
         MessageCount(Count expected) {
+            super();
             this.expected = expected;
         }
 
@@ -123,6 +124,7 @@ abstract class AbstractVerify<E extends EmittedMessages> implements Verify<E> {
         private final List<Class<? extends Message>> messageClasses;
 
         private MessageClasses(List<Class<? extends Message>> classes) {
+            super();
             checkNotNull(classes);
             checkArgument(
                     classes.size() > 0,
