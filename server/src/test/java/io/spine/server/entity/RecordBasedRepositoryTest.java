@@ -22,7 +22,6 @@ package io.spine.server.entity;
 
 import com.google.common.collect.Lists;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -53,7 +52,6 @@ import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.TestTransaction.archive;
 import static io.spine.server.entity.TestTransaction.delete;
 import static io.spine.server.storage.LifecycleFlagField.archived;
@@ -89,12 +87,6 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
     void assertMatches(E entity, FieldMask fieldMask) {
         Message state = entity.getState();
         Tests.assertMatchesMask(state, fieldMask);
-    }
-
-    private static void assertMatches(EntityRecord record, FieldMask fieldMask) {
-        Any state = record.getState();
-        Message unpackedState = unpack(state);
-        Tests.assertMatchesMask(unpackedState, fieldMask);
     }
 
     protected abstract RecordBasedRepository<I, E, S> createRepository();
@@ -259,27 +251,6 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             assertSize(ids.size(), foundList);
             for (E entity : foundList) {
                 assertMatches(entity, firstFieldOnly);
-            }
-        }
-
-        @Test
-        @DisplayName("entity records by query and field mask")
-        void recordsByQueryAndFields() {
-            int count = 10;
-            List<E> entities = createAndStoreEntities(repository, count);
-
-            // Find some of the records (half of them in this case).
-            int idsToObtain = count / 2;
-            List<EntityId> ids = obtainSomeNumberOfEntityIds(entities, idsToObtain);
-
-            EntityFilters filters = createEntityIdFilters(ids);
-            FieldMask firstFieldOnly = createFirstFieldOnlyMask(entities);
-            Iterator<EntityRecord> readEntities = repository.findRecords(filters, firstFieldOnly);
-            Collection<EntityRecord> foundList = newArrayList(readEntities);
-
-            assertSize(ids.size(), foundList);
-            for (EntityRecord record : foundList) {
-                assertMatches(record, firstFieldOnly);
             }
         }
 
