@@ -27,10 +27,7 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
-import io.spine.core.Command;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.DispatchedCommand;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Events;
@@ -47,9 +44,8 @@ import io.spine.server.procman.given.QuizProcmanRepository;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.NoOpSystemGateway;
-import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmAddTask;
-import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.command.PmReviewBacklog;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
@@ -60,12 +56,12 @@ import io.spine.test.procman.quiz.command.PmAnswerQuestion;
 import io.spine.test.procman.quiz.command.PmStartQuiz;
 import io.spine.test.procman.quiz.event.PmQuestionAnswered;
 import io.spine.test.procman.quiz.event.PmQuizStarted;
-import io.spine.testdata.Sample;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.model.ModelTests;
+import io.spine.testing.server.procman.InjectCommandBus;
 import io.spine.testing.server.tenant.TenantAwareTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -75,29 +71,30 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.core.Commands.getMessage;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.server.commandbus.Given.ACommand;
-import static io.spine.server.procman.given.ProcessManagerTestEnv.answerQuestion;
-import static io.spine.server.procman.given.ProcessManagerTestEnv.newAnswer;
-import static io.spine.server.procman.given.ProcessManagerTestEnv.newQuizId;
-import static io.spine.server.procman.given.ProcessManagerTestEnv.startQuiz;
-import static io.spine.testing.Verify.assertSize;
-import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
+import static io.spine.server.procman.given.pm.GivenMessages.addTask;
+import static io.spine.server.procman.given.pm.GivenMessages.createProject;
+import static io.spine.server.procman.given.pm.GivenMessages.entityAlreadyArchived;
+import static io.spine.server.procman.given.pm.GivenMessages.ownerChanged;
+import static io.spine.server.procman.given.pm.GivenMessages.startProject;
+import static io.spine.server.procman.given.pm.QuizGiven.answerQuestion;
+import static io.spine.server.procman.given.pm.QuizGiven.newAnswer;
+import static io.spine.server.procman.given.pm.QuizGiven.newQuizId;
+import static io.spine.server.procman.given.pm.QuizGiven.startQuiz;
+import static io.spine.testdata.Sample.messageOfType;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.client.blackbox.Count.none;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
-import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
-import static io.spine.testing.server.procman.ProcessManagerDispatcher.dispatch;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
+import static io.spine.testing.server.blackbox.VerifyCommands.emittedCommand;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
+import static io.spine.testing.server.procman.PmDispatcher.dispatch;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 /**
@@ -111,10 +108,8 @@ import static org.mockito.Mockito.spy;
 @DisplayName("ProcessManager should")
 class ProcessManagerTest {
 
-    private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
-
     private final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(Identifier.pack(ID), getClass());
+            TestEventFactory.newInstance(Identifier.pack(TestProcessManager.ID), getClass());
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
 
@@ -122,39 +117,13 @@ class ProcessManagerTest {
     private TestProcessManager processManager;
     private EventBus eventBus;
 
-    private static PmCreateProject createProject() {
-        return ((PmCreateProject.Builder) Sample.builderForType(PmCreateProject.class))
-                .setProjectId(ID)
-                .build();
-    }
-
-    private static PmStartProject startProject() {
-        return ((PmStartProject.Builder) Sample.builderForType(PmStartProject.class))
-                .setProjectId(ID)
-                .build();
-    }
-
-    private static PmAddTask addTask() {
-        return ((PmAddTask.Builder) Sample.builderForType(PmAddTask.class))
-                .setProjectId(ID)
-                .build();
-    }
-
-    private static RejectionEnvelope entityAlreadyArchived(Class<? extends Message> commandMessageCls) {
-        Any id = Identifier.pack(ProcessManagerTest.class.getName());
-        EntityAlreadyArchived throwable = new EntityAlreadyArchived(id);
-        throwable.initProducer(id);
-        Command command = ACommand.withMessage(Sample.messageOfType(commandMessageCls));
-        CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
-        return RejectionEnvelope.from(commandEnvelope, throwable);
-    }
-
     @BeforeEach
     void setUp() {
         ModelTests.dropAllModels();
-        BoundedContext bc = BoundedContext.newBuilder()
-                                          .setMultitenant(true)
-                                          .build();
+        BoundedContext bc = BoundedContext
+                .newBuilder()
+                .setMultitenant(true)
+                .build();
         StorageFactory storageFactory = bc.getStorageFactory();
         TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false, storageFactory);
 
@@ -167,7 +136,7 @@ class ProcessManagerTest {
                                    .injectEventBus(eventBus)
                                    .build());
         processManager = Given.processManagerOfClass(TestProcessManager.class)
-                              .withId(ID)
+                              .withId(TestProcessManager.ID)
                               .withVersion(2)
                               .withState(Any.getDefaultInstance())
                               .build();
@@ -204,7 +173,7 @@ class ProcessManagerTest {
         @DisplayName("event")
         void event() {
             List<? extends Message> eventMessages =
-                    testDispatchEvent(Sample.messageOfType(PmProjectStarted.class));
+                    testDispatchEvent(messageOfType(PmProjectStarted.class));
 
             assertEquals(1, eventMessages.size());
             assertTrue(eventMessages.get(0) instanceof Event);
@@ -220,7 +189,7 @@ class ProcessManagerTest {
         Event event = events.get(0);
         assertNotNull(event);
         PmProjectCreated message = unpack(event.getMessage());
-        assertEquals(ID, message.getProjectId());
+        assertEquals(TestProcessManager.ID, message.getProjectId());
     }
 
     @Nested
@@ -254,7 +223,8 @@ class ProcessManagerTest {
         @DisplayName("commands")
         void commands() {
             commandBus.register(new AddTaskDispatcher());
-            processManager.injectCommandBus(commandBus);
+            InjectCommandBus.of(commandBus)
+                            .to(processManager);
 
             testDispatchCommand(createProject());
             testDispatchCommand(addTask());
@@ -264,53 +234,40 @@ class ProcessManagerTest {
         @Test
         @DisplayName("events")
         void events() {
-            testDispatchEvent(Sample.messageOfType(PmProjectCreated.class));
-            testDispatchEvent(Sample.messageOfType(PmTaskAdded.class));
-            testDispatchEvent(Sample.messageOfType(PmProjectStarted.class));
+            testDispatchEvent(messageOfType(PmProjectCreated.class));
+            testDispatchEvent(messageOfType(PmTaskAdded.class));
+            testDispatchEvent(messageOfType(PmProjectStarted.class));
         }
     }
 
-    /**
-     * Tests command routing.
-     *
-     * @see TestProcessManager#handle(PmStartProject, CommandContext)
-     */
-    @Test
-    @DisplayName("route commands")
-    void routeCommands() {
-        // Add dispatcher for the routed command. Otherwise the command would reject the command.
-        AddTaskDispatcher dispatcher = new AddTaskDispatcher();
-        commandBus.register(dispatcher);
-        processManager.injectCommandBus(commandBus);
+    @Nested
+    @DisplayName("Create command")
+    class Commanding {
 
-        List<Event> events = testDispatchCommand(startProject());
+        private BlackBoxBoundedContext boundedContext;
 
-        // There's only one event generated.
-        assertEquals(1, events.size());
+        @BeforeEach
+        void setUp() {
+            boundedContext = BlackBoxBoundedContext.with(new TestProcessManagerRepo());
+        }
 
-        Event event = events.get(0);
+        /**
+         * Tests transformation of a command into another command.
+         * @see TestProcessManager#transform(PmStartProject)
+         */
+        @Test
+        @DisplayName("by transform incoming command")
+        void transformCommand() {
+            boundedContext.receivesCommand(startProject())
+                          .assertThat(emittedCommand(PmAddTask.class, once()));
+        }
 
-        // The producer of the event is our Process Manager.
-        assertEquals(processManager.getId(), Events.getProducer(event.getContext()));
-
-        Message message = unpack(event.getMessage());
-
-        // The event type is CommandRouted.
-        assertThat(message, instanceOf(CommandTransformed.class));
-
-        CommandTransformed commandRouted = (CommandTransformed) message;
-
-        // The source of the command is StartProject.
-        assertThat(getMessage(commandRouted.getSource()), instanceOf(PmStartProject.class));
-        List<CommandEnvelope> dispatchedCommands = dispatcher.getCommands();
-        assertSize(1, dispatchedCommands);
-        CommandEnvelope dispatchedCommand = dispatcher.getCommands()
-                                                      .get(0);
-        DispatchedCommand generated = commandRouted.getProduced();
-        assertEquals(generated.getMessage(), dispatchedCommand.getCommand()
-                                                              .getMessage());
-        assertEquals(generated.getContext(), dispatchedCommand.getCommand()
-                                                              .getContext());
+        @Test
+        @DisplayName("on incoming event")
+        void commandOnEvent() {
+            boundedContext.receivesEvent(ownerChanged())
+                          .assertThat(emittedCommand(PmReviewBacklog.class));
+        }
     }
 
     @Nested
@@ -341,32 +298,6 @@ class ProcessManagerTest {
     }
 
     @Nested
-    @DisplayName("create")
-    class Create {
-
-        @Test
-        @DisplayName("split sequence")
-        void commandRouter() {
-            StringValue commandMessage = toMessage("create_router");
-            CommandContext commandContext = requestFactory.createCommandContext();
-
-            processManager.injectCommandBus(mock(CommandBus.class));
-
-            CommandSequence.Split sequence = processManager.split(commandMessage, commandContext);
-            assertNotNull(sequence);
-            assertEquals(0, sequence.size());
-        }
-    }
-
-    @Test
-    @DisplayName("require CommandBus when creating router")
-    void requireCommandBusForRouter() {
-        assertThrows(NullPointerException.class,
-                     () -> processManager.split(StringValue.getDefaultInstance(),
-                                                CommandContext.getDefaultInstance()));
-    }
-
-    @Nested
     @DisplayName("not create an empty event")
     class NoEmpty {
 
@@ -389,7 +320,7 @@ class ProcessManagerTest {
          * containing {@link com.google.protobuf.Empty Empty}. This is done because the answered
          * question is not part of a quiz.
          *
-         * @see io.spine.server.procman.given.QuizProcman
+         * @see io.spine.server.procman.given.pm.QuizProcman
          */
         @Test
         @DisplayName("for an either of three event reaction")
@@ -402,11 +333,11 @@ class ProcessManagerTest {
             BlackBoxBoundedContext
                     .with(new QuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
-                    .verifiesThat(acked(twice()).withoutErrorsOrRejections())
-                    .verifiesThat(emitted(twice()))
-                    .verifiesThat(emitted(PmQuizStarted.class))
-                    .verifiesThat(emitted(PmQuestionAnswered.class))
-                    .verifiesThat(emitted(Empty.class, none()))
+                    .assertThat(acked(twice()).withoutErrorsOrRejections())
+                    .assertThat(emittedEvent(twice()))
+                    .assertThat(emittedEvents(PmQuizStarted.class))
+                    .assertThat(emittedEvents(PmQuestionAnswered.class))
+                    .assertThat(emittedEvent(Empty.class, none()))
                     .close();
         }
 
@@ -427,7 +358,7 @@ class ProcessManagerTest {
          * {@link io.spine.server.tuple.EitherOfThree Either Of Three}
          * containing {@link com.google.protobuf.Empty Empty}.
          *
-         * @see io.spine.server.procman.given.DirectQuizProcman
+         * @see io.spine.server.procman.given.pm.DirectQuizProcman
          */
         @Test
         @DisplayName("for an either of three emitted upon handling a command")
@@ -440,10 +371,10 @@ class ProcessManagerTest {
             BlackBoxBoundedContext
                     .with(new DirectQuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
-                    .verifiesThat(acked(twice()).withoutErrorsOrRejections())
-                    .verifiesThat(emitted(once()))
-                    .verifiesThat(emitted(PmQuizStarted.class))
-                    .verifiesThat(emitted(Empty.class, none()))
+                    .assertThat(acked(twice()).withoutErrorsOrRejections())
+                    .assertThat(emittedEvent(once()))
+                    .assertThat(emittedEvents(PmQuizStarted.class))
+                    .assertThat(emittedEvent(Empty.class, none()))
                     .close();
         }
     }

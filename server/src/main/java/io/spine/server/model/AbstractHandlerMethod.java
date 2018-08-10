@@ -43,9 +43,9 @@ import static java.lang.String.format;
  * same object (not class).
  *
  * @param <T> the type of the target object
- * @param <M> the type of the incoming message class
- * @param <E> the type of the {@link MessageEnvelope} wrapping the method arguments
- * @param <R> the type of the method result object
+ * @param <M> the type of the message class
+ * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
+ *            a context parameter is never used
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
@@ -189,6 +189,12 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     @Override
+    public HandlerKey key() {
+        HandlerKey result = HandlerKey.of(getMessageClass());
+        return result;
+    }
+
+    @Override
     public int hashCode() {
         int prime = 31;
         return (prime + method.hashCode());
@@ -215,5 +221,4 @@ public abstract class AbstractHandlerMethod<T,
     public String toString() {
         return getFullName();
     }
-
 }

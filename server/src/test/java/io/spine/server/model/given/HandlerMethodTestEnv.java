@@ -137,7 +137,7 @@ public class HandlerMethodTestEnv {
 
         @Override
         public EventClass getMessageClass() {
-            return EventClass.of(rawMessageClass());
+            return EventClass.from(rawMessageClass());
         }
 
         @Override
@@ -169,7 +169,7 @@ public class HandlerMethodTestEnv {
 
         @Override
         public EventClass getMessageClass() {
-            return EventClass.of(rawMessageClass());
+            return EventClass.from(rawMessageClass());
         }
 
         private static class Factory

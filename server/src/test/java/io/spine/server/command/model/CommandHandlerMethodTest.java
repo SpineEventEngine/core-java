@@ -56,7 +56,7 @@ import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 import io.spine.testing.server.model.ModelTests;
-import io.spine.testing.server.procman.ProcessManagerDispatcher;
+import io.spine.testing.server.procman.PmDispatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -200,7 +200,7 @@ class CommandHandlerMethodTest {
         ProcessManager<ProjectId, ?, ?> entity =
                 new ProcessManagerDoingNothing(commandMessage.getProjectId());
         CommandEnvelope cmd = requestFactory.createEnvelope(commandMessage);
-        List<Event> events = ProcessManagerDispatcher.dispatch(entity, cmd);
+        List<Event> events = PmDispatcher.dispatch(entity, cmd);
         assertEmpty(events);
     }
 

@@ -52,6 +52,10 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
         return commands.getMessageClasses();
     }
 
+    public boolean handlesCommand(CommandClass commandClass) {
+        return commands.containsClass(commandClass);
+    }
+
     @Override
     public CommandHandlerMethod getHandler(CommandClass commandClass) {
         return commands.getMethod(commandClass);

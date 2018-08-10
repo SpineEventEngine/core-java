@@ -58,4 +58,8 @@ public abstract class AbstractCommandHandlingClass<C, H extends CommandAccepting
     public H getHandler(CommandClass commandClass) {
         return commands.getMethod(commandClass);
     }
+
+    boolean contains(CommandClass commandClass) {
+        return commands.containsClass(commandClass);
+    }
 }

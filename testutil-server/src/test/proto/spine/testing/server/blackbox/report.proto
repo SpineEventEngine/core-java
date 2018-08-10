@@ -28,14 +28,14 @@ option java_package = "io.spine.testing.server.blackbox";
 option java_outer_classname = "BbReportProto";
 option java_multiple_files = true;
 
-import "spine/testing/server/blackbox/project.proto";
+import "spine/testing/server/blackbox/entities.proto";
 
-message ReportId {
+message BbReportId {
     string id = 1;
 }
 
-message Report {
-    ReportId id = 1;
-    repeated ProjectId project_ids = 2;
-    repeated Task tasks = 3;
+message BbReport {
+    BbReportId id = 1;
+    repeated BbProjectId project_ids = 2;
+    repeated BbTask tasks = 3;
 }

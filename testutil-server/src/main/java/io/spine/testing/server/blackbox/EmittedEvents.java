@@ -21,8 +21,6 @@
 package io.spine.testing.server.blackbox;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.ImmutableMap;
-import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.Version;
@@ -37,85 +35,18 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
- * Contains the data on the events emitted in the {@link BlackBoxBoundedContext Bounded Context}.
- * It can be queried for event presence, count and structure.
+ * Provides information on events emitted in the {@link BlackBoxBoundedContext Bounded Context}.
  *
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
-public class EmittedEvents {
-
-    private final List<Event> events;
-    private final Map<EventClass, Integer> countOfTypes;
+public final class EmittedEvents extends EmittedMessages<EventClass, Event> {
 
     EmittedEvents(List<Event> events) {
-        this.events = copyOf(events);
-        this.countOfTypes = countEventTypes(events);
-    }
-
-    /**
-     * Counts the number of times the domain event types are included in the provided list.
-     *
-     * @param events a list of {@link Event}
-     * @return a mapping of Event classes to its count
-     */
-    private static Map<EventClass, Integer> countEventTypes(List<Event> events) {
-        Map<EventClass, Integer> countForType = new HashMap<>();
-        for (Event event : events) {
-            Message message = unpack(event.getMessage());
-            EventClass type = EventClass.of(message);
-            int currentCount = countForType.getOrDefault(type, 0);
-            countForType.put(type, currentCount + 1);
-        }
-        return ImmutableMap.copyOf(countForType);
-    }
-
-    /**
-     * @return total number of executed events
-     */
-    public int count() {
-        return events.size();
-    }
-
-    /**
-     * Counts the number of times the events of the provided type were executed.
-     *
-     * @param eventType a class of the fired domain event
-     * @return number of times the provided event was executed
-     */
-    public int count(Class<? extends Message> eventType) {
-        return count(EventClass.of(eventType));
-    }
-
-    /**
-     * Counts the number of times the events of the provided {@link EventClass} were executed.
-     *
-     * @param eventClass an event class wrapping the event
-     * @return number of times the provided event was executed
-     */
-    public int count(EventClass eventClass) {
-        if (!contain(eventClass)) {
-            return 0;
-        }
-        return countOfTypes.get(eventClass);
-    }
-
-    /**
-     * @param eventType a class representing a domain event
-     * @return {@code true} if the event of provided type was emitted in the Bounded Context,
-     * {@code false} otherwise
-     */
-    public boolean contain(Class<? extends Message> eventType) {
-        return contain(EventClass.of(eventType));
-    }
-
-    /**
-     * @param eventClass an {@link EventClass EventClass} instance for a domain event
-     * @return {@code true} if the event of provided type was emitted in the Bounded Context,
-     * {@code false} otherwise
-     */
-    public boolean contain(EventClass eventClass) {
-        return countOfTypes.containsKey(eventClass);
+        super(events,
+              new MessageTypeCounter<>(events, EventClass::of, EventClass::from),
+              Event.class
+        );
     }
 
     /**

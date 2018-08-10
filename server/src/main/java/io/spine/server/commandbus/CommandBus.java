@@ -148,7 +148,7 @@ public class CommandBus extends Bus<Command,
 
     @Override
     protected Collection<BusFilter<CommandEnvelope>> filterChainHead() {
-        BusFilter<CommandEnvelope> tap = new CommandReceivedTap(systemGateway);
+        BusFilter<CommandEnvelope> tap = new CommandReceivedTap(this::gatewayFor);
         Deque<BusFilter<CommandEnvelope>> result = newLinkedList();
         result.push(tap);
         return result;
@@ -185,6 +185,17 @@ public class CommandBus extends Bus<Command,
                       .map(Commands::getTenantId)
                       .findAny()
                       .orElse(TenantId.getDefaultInstance());
+    }
+
+    SystemGateway gatewayFor(TenantId tenantId) {
+        checkNotNull(tenantId);
+        return gatewayFor(tenantId, systemGateway);
+    }
+
+    @VisibleForTesting
+    static SystemGateway gatewayFor(TenantId tenantId, SystemGateway systemGateway) {
+        SystemGateway result = TenantAwareSystemGateway.forTenant(tenantId, systemGateway);
+        return result;
     }
 
     @Override

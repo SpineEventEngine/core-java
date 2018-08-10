@@ -27,5 +27,5 @@ package io.spine.server.event;
  * @author Alexander Yevsyukov
  * @see io.spine.core.Subscribe @Subscribe
  */
-public interface EventSubscriber {
+public interface EventSubscriber extends EventReceiver {
 }

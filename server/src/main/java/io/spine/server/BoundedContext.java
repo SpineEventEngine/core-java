@@ -49,8 +49,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -141,7 +141,7 @@ public abstract class BoundedContext
                                                       EventBus eventBus,
                                                       BoundedContextName name) {
         Optional<IntegrationBus.Builder> busBuilder = builder.getIntegrationBus();
-        checkState(busBuilder.isPresent());
+        checkArgument(busBuilder.isPresent());
         IntegrationBus result =
                 busBuilder.get()
                           .setBoundedContextName(name)

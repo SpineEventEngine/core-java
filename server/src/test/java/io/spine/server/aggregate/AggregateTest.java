@@ -94,13 +94,15 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.event;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.newTenantId;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.reassignTask;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
-import static io.spine.testing.client.blackbox.AcknowledgementsVerifier.acked;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.server.Assertions.assertCommandClasses;
 import static io.spine.testing.server.Assertions.assertEventClasses;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
-import static io.spine.testing.server.blackbox.EmittedEventsVerifier.emitted;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
+import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -748,8 +750,8 @@ public class AggregateTest {
             BlackBoxBoundedContext
                     .with(new TaskAggregateRepository())
                     .receivesCommand(createTask())
-                    .verifiesThat(acked(once()).withoutErrorsOrRejections())
-                    .verifiesThat(emitted(once()))
+                    .assertThat(acked(once()).withoutErrorsOrRejections())
+                    .assertThat(emittedEvent(once()))
                     .close();
         }
 
@@ -768,10 +770,10 @@ public class AggregateTest {
             BlackBoxBoundedContext
                     .with(new TaskAggregateRepository())
                     .receivesCommand(assignTask())
-                    .verifiesThat(acked(once()).withoutErrorsOrRejections())
-                    .verifiesThat(emitted(twice()))
-                    .verifiesThat(emitted(AggTaskAssigned.class))
-                    .verifiesThat(emitted(AggUserNotified.class))
+                    .assertThat(acked(once()).withoutErrorsOrRejections())
+                    .assertThat(emittedEvent(twice()))
+                    .assertThat(emittedEvents(AggTaskAssigned.class))
+                    .assertThat(emittedEvents(AggUserNotified.class))
                     .close();
         }
 
@@ -790,10 +792,10 @@ public class AggregateTest {
             BlackBoxBoundedContext
                     .with(new TaskAggregateRepository())
                     .receivesCommand(reassignTask())
-                    .verifiesThat(acked(once()).withoutErrorsOrRejections())
-                    .verifiesThat(emitted(twice()))
-                    .verifiesThat(emitted(Rejections.AggCannotReassignUnassignedTask.class))
-                    .verifiesThat(emitted(AggUserNotified.class))
+                    .assertThat(acked(once()).withoutErrorsOrRejections())
+                    .assertThat(emittedEvent(twice()))
+                    .assertThat(emitted(Rejections.AggCannotReassignUnassignedTask.class))
+                    .assertThat(emittedEvents(AggUserNotified.class))
                     .close();
         }
     }

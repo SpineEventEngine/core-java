@@ -44,6 +44,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static io.spine.validate.Validate.isDefault;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Utility class for working with {@link Event} objects.
@@ -124,6 +125,18 @@ public final class Events {
         checkNotNull(event);
         Any any = event.getMessage();
         Message result = unpack(any);
+        return result;
+    }
+
+    /**
+     * Extract event messages from the passed events.
+     */
+    public static List<? extends Message> toMessages(List<Event> events) {
+       checkNotNull(events);
+        List<Message> result =
+                events.stream()
+                      .map(Events::getMessage)
+                      .collect(toList());
         return result;
     }
 
@@ -384,8 +397,8 @@ public final class Events {
                                           .setVersion(newVersion)
                                           .build();
         Event result = event.toBuilder()
-                               .setContext(newContext)
-                               .build();
+                            .setContext(newContext)
+                            .build();
         return result;
     }
 

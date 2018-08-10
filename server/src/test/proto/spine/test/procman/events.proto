@@ -47,3 +47,7 @@ message PmNotificationSent {
 message PmProjectStarted {
     ProjectId project_id = 1;
 }
+
+message PmOwnerChanged {
+    ProjectId project_id = 1;
+}

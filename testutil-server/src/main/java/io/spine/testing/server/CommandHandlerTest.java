@@ -64,7 +64,10 @@ public abstract class CommandHandlerTest<I,
     private final ActorRequestFactory requestFactory;
 
     /**
-     * Creates a new instance with {@link TestActorRequestFactory}.
+     * Creates a new instance of the test suite.
+     *
+     * @param entityId       the ID of an aggregate under the tests
+     * @param commandMessage the command message to be dispatched to the aggregate
      */
     @SuppressWarnings("TestOnlyProblems") // OK for a test-util.
     protected CommandHandlerTest() {
@@ -78,10 +81,19 @@ public abstract class CommandHandlerTest<I,
      * @param commandMessage command message
      * @return {@link Command} ready to be dispatched
      */
-    protected final Command createCommand(C commandMessage) {
+    private Command createCommand(C commandMessage) {
         Command command = requestFactory.command()
                                         .create(commandMessage);
         return command;
+    }
+
+    /**
+     * Creates new command for the command message associated with this test.
+     */
+    protected final CommandEnvelope createCommand() {
+        C message = message();
+        checkNotNull(message);
+        return CommandEnvelope.of(createCommand(message));
     }
 
     @Override

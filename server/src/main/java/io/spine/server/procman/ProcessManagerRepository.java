@@ -189,8 +189,8 @@ public abstract class ProcessManagerRepository<I,
      *         {@code false} otherwise
      */
     @SuppressWarnings("unchecked")  // To avoid a long "train" of generic parameter definitions.
-    private static <D extends MessageDispatcher<?, ?, ?>> boolean register(Bus<?, ?, ?, D> bus,
-                                                                           D dispatcher) {
+    private static <D extends MessageDispatcher<?, ?, ?>>
+    boolean register(Bus<?, ?, ?, D> bus, D dispatcher) {
         boolean hasHandlerMethods = !dispatcher.getMessageClasses()
                                                .isEmpty();
         if (hasHandlerMethods) {
@@ -218,7 +218,7 @@ public abstract class ProcessManagerRepository<I,
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
     public Set<EventClass> getMessageClasses() {
-        return processManagerClass().getEventReactions();
+        return processManagerClass().getEventClasses();
     }
 
     /**
@@ -415,7 +415,7 @@ public abstract class ProcessManagerRepository<I,
         @Override
         public Set<ExternalMessageClass> getMessageClasses() {
             ProcessManagerClass<?> pmClass = asProcessManagerClass(getEntityClass());
-            Set<EventClass> eventClasses = pmClass.getExternalEventReactions();
+            Set<EventClass> eventClasses = pmClass.getExternalEventClasses();
             return ExternalMessageClass.fromEventClasses(eventClasses);
         }
 

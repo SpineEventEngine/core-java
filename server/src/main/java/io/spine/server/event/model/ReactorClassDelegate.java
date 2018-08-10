@@ -22,9 +22,9 @@ package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.EventClass;
+import io.spine.server.event.EventReceiver;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.model.ModelClass;
 import io.spine.type.MessageClass;
 
 import java.util.Set;
@@ -38,7 +38,9 @@ import static com.google.common.collect.ImmutableSet.copyOf;
  * @author Alex Tymchenko
  * @author Alexander Yevsyukov
  */
-public final class ReactorClassDelegate<T> extends ModelClass<T> implements ReactorClass {
+public final class ReactorClassDelegate<T extends EventReceiver>
+        extends EventReceivingClassDelegate<T, EventReactorMethod>
+        implements ReactingClass {
 
     private static final long serialVersionUID = 0L;
 

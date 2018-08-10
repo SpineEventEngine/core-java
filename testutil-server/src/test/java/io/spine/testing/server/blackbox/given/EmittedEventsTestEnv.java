@@ -25,10 +25,10 @@ import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.blackbox.BbProjectCreated;
-import io.spine.testing.server.blackbox.BbTaskAdded;
+import io.spine.testing.server.blackbox.BbProjectId;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.ProjectId;
+import io.spine.testing.server.blackbox.event.BbProjectCreated;
+import io.spine.testing.server.blackbox.event.BbTaskAdded;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -73,8 +73,8 @@ public class EmittedEventsTestEnv {
         return TestActorRequestFactory.newInstance(BlackBoxBoundedContext.class, tenantId);
     }
 
-    private static ProjectId newProjectId() {
-        return ProjectId.newBuilder()
+    private static BbProjectId newProjectId() {
+        return BbProjectId.newBuilder()
                         .setId(newUuid())
                         .build();
     }

@@ -68,9 +68,15 @@ public final class EventApplier
     static EventApplier from(Method method,
                              MessageAcceptor<EventEnvelope> acceptor) {
         return new EventApplier(method, acceptor);
+        return EventClass.from(rawMessageClass());
     }
 
-    public static MethodFactory<EventApplier, ?> factory() {
+    @VisibleForTesting
+    static Predicate<Method> predicate() {
+        return factory().getPredicate();
+    }
+
+    static MethodFactory<EventApplier, ?> factory() {
         return Factory.INSTANCE;
     }
 

@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
+import io.spine.server.command.CommandReceiver;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MessageAcceptor;
@@ -40,6 +41,7 @@ import static com.google.common.collect.ImmutableSet.of;
 /**
  * An abstract base for methods that accept a command message and optionally its context.
  *
+ * @param <T> the type of the target object
  * @param <R> the type of the result object returned by the method
  * @author Alexander Yevsyukov
  */
@@ -53,7 +55,7 @@ public abstract class CommandAcceptingMethod<T, R extends MethodResult>
 
     @Override
     public CommandClass getMessageClass() {
-        return CommandClass.of(rawMessageClass());
+        return CommandClass.from(rawMessageClass());
     }
 
     protected abstract static class Factory<H extends CommandAcceptingMethod>

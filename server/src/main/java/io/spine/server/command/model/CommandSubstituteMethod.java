@@ -20,17 +20,20 @@
 
 package io.spine.server.command.model;
 
-import com.google.protobuf.Message;
+import io.spine.base.CommandMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.command.Command;
 import io.spine.server.command.model.CommandSubstituteMethod.Result;
 import io.spine.server.model.MessageAcceptor;
+import io.spine.core.CommandContext;
+import io.spine.server.command.CommandReceiver;
+import io.spine.server.command.model.CommandingMethod.Result;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
 import io.spine.server.model.MethodFactory;
-import io.spine.server.model.MethodResult;
+import io.spine.server.model.MethodFactory;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -41,8 +44,8 @@ import java.util.List;
  * @author Alexander Yevsyukov
  */
 public final class CommandSubstituteMethod
-        extends CommandAcceptingMethod<Object, Result>
-        implements CommandingMethod<CommandClass, Result> {
+        extends CommandAcceptingMethod<CommandReceiver, Result>
+        implements CommandingMethod<CommandReceiver, CommandClass, Result> {
 
     private CommandSubstituteMethod(Method method,
                                     MessageAcceptor<CommandEnvelope> acceptor) {
@@ -50,17 +53,16 @@ public final class CommandSubstituteMethod
     }
 
     @Override
-    protected Result toResult(Object target, Object rawMethodOutput) {
-        Result result = new Result(rawMethodOutput);
+    protected Result toResult(CommandReceiver target, Object rawMethodOutput) {
+        Result result = new Result(rawMethodOutput, false);
         return result;
     }
 
-    static CommandSubstituteMethod from(Method method,
-                                        MessageAcceptor<CommandEnvelope> acceptor) {
-        return new CommandSubstituteMethod(method, acceptor);
+    static CommandSubstituteMethod from(Method method) {
+        return new CommandSubstituteMethod(method);
     }
 
-    static MethodFactory<CommandSubstituteMethod, ?> factory() {
+    static AbstractHandlerMethod.Factory<CommandSubstituteMethod> factory() {
         return Factory.INSTANCE;
     }
 
@@ -96,18 +98,6 @@ public final class CommandSubstituteMethod
         protected CommandSubstituteMethod doCreate(Method method,
                                                    MessageAcceptor<CommandEnvelope> acceptor) {
             return from(method, acceptor);
-        }
-    }
-
-    /**
-     * A command substitution method returns a one or more command messages.
-     */
-    public static final class Result extends MethodResult<Message> {
-
-        private Result(Object rawMethodOutput) {
-            super(rawMethodOutput);
-            List<Message> messages = toMessages(rawMethodOutput);
-            setMessages(messages);
         }
     }
 }

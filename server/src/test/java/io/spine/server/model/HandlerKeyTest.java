@@ -39,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class HandlerKeyTest {
 
     private final MessageClass emptyClass = EmptyClass.instance();
-    private final CommandClass stringClass = CommandClass.of(StringValue.class);
+    private final CommandClass stringClass = CommandClass.from(StringValue.class);
 
     @Test
     @DisplayName("not accept nulls on construction")

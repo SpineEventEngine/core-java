@@ -20,17 +20,18 @@
 
 package io.spine.testing.server.aggregate;
 
-import io.spine.testing.server.TUProjectId;
-import io.spine.testing.server.aggregate.given.AggregatePartCommandTestShouldEnv.CommentsAggregatePart;
-import io.spine.testing.server.aggregate.given.AggregatePartCommandTestShouldEnv.TimeCounterTest;
+import io.spine.testing.server.aggregate.given.SamplePartCommandTest;
+import io.spine.testing.server.aggregate.given.agg.TuAggregatePart;
+import io.spine.testing.server.aggregate.given.agg.TuAggregateRoot;
+import io.spine.testing.server.given.entity.TuTaskId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.server.aggregate.given.AggregatePartCommandTestShouldEnv.ID;
-import static io.spine.testing.server.aggregate.given.AggregatePartCommandTestShouldEnv.TimeCounterTest.TEST_COMMAND;
-import static io.spine.testing.server.aggregate.given.AggregatePartCommandTestShouldEnv.aggregatePart;
-import static io.spine.testing.server.aggregate.given.AggregatePartCommandTestShouldEnv.aggregateRoot;
+import static io.spine.base.Identifier.newUuid;
+import static io.spine.testing.server.aggregate.given.SamplePartCommandTest.TEST_COMMAND;
+import static io.spine.testing.server.aggregate.given.agg.TuAggregatePart.ID;
+import static io.spine.testing.server.aggregate.given.agg.TuAggregatePart.newInstance;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -43,11 +44,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("AggregatePartCommandTest should")
 class AggregatePartCommandTestShould {
 
-    private TimeCounterTest aggregatePartCommandTest;
+    private SamplePartCommandTest aggregatePartCommandTest;
 
     @BeforeEach
     void setUp() {
-        aggregatePartCommandTest = new TimeCounterTest();
+        aggregatePartCommandTest = new SamplePartCommandTest();
     }
 
     @Test
@@ -61,7 +62,8 @@ class AggregatePartCommandTestShould {
     @DisplayName("dispatch tested command")
     void shouldDispatchCommand() {
         aggregatePartCommandTest.setUp();
-        CommentsAggregatePart testPart = aggregatePart(aggregateRoot(ID));
+        TuAggregatePart testPart = newInstance(
+                TuAggregateRoot.newInstance(ID));
         aggregatePartCommandTest.expectThat(testPart)
                                 .hasState(state -> {
                                     assertTrue(isNotDefault(state.getTimestamp()));
@@ -71,11 +73,11 @@ class AggregatePartCommandTestShould {
     @Test
     @DisplayName("create new part")
     void shouldCreatePart() {
-        TUProjectId id = TUProjectId.newBuilder()
-                                    .setValue("tested ID")
-                                    .build();
+        TuTaskId id = TuTaskId.newBuilder()
+                              .setValue(newUuid())
+                              .build();
         aggregatePartCommandTest.setUp();
-        CommentsAggregatePart part = aggregatePartCommandTest.createPart(id);
+        TuAggregatePart part = aggregatePartCommandTest.createPart(id);
         assertNotNull(part);
         assertEquals(id, part.getId());
     }

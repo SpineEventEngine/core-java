@@ -24,7 +24,7 @@ import io.spine.core.EventClass;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.model.CommandHandlingEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
-import io.spine.server.event.model.ReactorClass;
+import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.type.MessageClass;
@@ -41,7 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class AggregateClass<A extends Aggregate>
         extends CommandHandlingEntityClass<A>
-        implements ReactorClass {
+        implements ReactingClass {
 
     private static final long serialVersionUID = 0L;
 
@@ -66,13 +66,13 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public Set<EventClass> getEventReactions() {
-        return delegate.getEventReactions();
+    public Set<EventClass> getEventClasses() {
+        return delegate.getEventClasses();
     }
 
     @Override
-    public Set<EventClass> getExternalEventReactions() {
-        return delegate.getExternalEventReactions();
+    public Set<EventClass> getExternalEventClasses() {
+        return delegate.getExternalEventClasses();
     }
 
     @Override

@@ -56,9 +56,11 @@ public final class EventSubscriberMethod
         return new EventSubscriberMethod(method, acceptor);
     }
 
-    /** Returns the factory for filtering and creating event subscriber methods. */
+    /**
+     * Returns the factory for filtering and creating event subscriber methods.
+     */
     public static MethodFactory<EventSubscriberMethod, ?> factory() {
-        return Factory.getInstance();
+        return Factory.INSTANCE;
     }
 
     @Override

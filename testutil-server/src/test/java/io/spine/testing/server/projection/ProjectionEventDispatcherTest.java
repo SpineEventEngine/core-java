@@ -21,12 +21,12 @@
 package io.spine.testing.server.projection;
 
 import io.spine.core.EventEnvelope;
-import io.spine.testing.server.TUEventLoggingProjection;
-import io.spine.testing.server.TUProjectAssigned;
-import io.spine.testing.server.TUProjectCreated;
-import io.spine.testing.server.TUProjectId;
 import io.spine.testing.server.TestEventFactory;
-import io.spine.testing.server.projection.given.ProjectionEventDispatcherTestEnv.EventLoggingView;
+import io.spine.testing.server.given.entity.TuEventLog;
+import io.spine.testing.server.given.entity.TuProjectId;
+import io.spine.testing.server.given.entity.event.TuProjectAssigned;
+import io.spine.testing.server.given.entity.event.TuProjectCreated;
+import io.spine.testing.server.projection.given.prj.TuEventLoggingView;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,29 +35,28 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@SuppressWarnings("DuplicateStringLiteralInspection")
 @DisplayName("ProjectionEventDispatcher should")
 class ProjectionEventDispatcherTest {
 
-    private static final TUProjectId ID = TUProjectId.newBuilder()
+    private static final TuProjectId ID = TuProjectId.newBuilder()
                                                      .setValue("projection id")
                                                      .build();
 
-    private EventLoggingView projection;
+    private TuEventLoggingView projection;
 
     @BeforeEach
     void setUp() {
-        projection = new EventLoggingView(ID);
+        projection = new TuEventLoggingView(ID);
     }
 
     @Test
     @DisplayName("dispatch event")
     void dispatchEvent() {
         TestEventFactory factory = TestEventFactory.newInstance(getClass());
-        TUProjectCreated firstEvent = TUProjectCreated.newBuilder()
+        TuProjectCreated firstEvent = TuProjectCreated.newBuilder()
                                                       .setId(ID)
                                                       .build();
-        TUProjectAssigned secondEvent = TUProjectAssigned.newBuilder()
+        TuProjectAssigned secondEvent = TuProjectAssigned.newBuilder()
                                                          .setId(ID)
                                                          .build();
 
@@ -68,9 +67,9 @@ class ProjectionEventDispatcherTest {
         ProjectionEventDispatcher.dispatch(projection, secondEnvelope.getMessage(),
                                            secondEnvelope.getEventContext());
 
-        TUEventLoggingProjection state = projection.getState();
+        TuEventLog state = projection.getState();
         assertEquals(2, state.getEventCount());
-        assertTrue(TUProjectCreated.class.isInstance(unpack(state.getEvent(0))));
-        assertTrue(TUProjectAssigned.class.isInstance(unpack(state.getEvent(1))));
+        assertTrue(unpack(state.getEvent(0)) instanceof TuProjectCreated);
+        assertTrue(unpack(state.getEvent(1)) instanceof TuProjectAssigned);
     }
 }
