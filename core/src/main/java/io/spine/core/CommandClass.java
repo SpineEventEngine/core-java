@@ -49,7 +49,7 @@ public final class CommandClass extends MessageClass {
      * @param value class reference
      * @return new instance
      */
-    public static CommandClass of(Class<? extends Message> value) {
+    public static CommandClass from(Class<? extends Message> value) {
         return new CommandClass(checkNotNull(value));
     }
 
@@ -67,14 +67,14 @@ public final class CommandClass extends MessageClass {
      */
     public static CommandClass of(Message commandOrMessage) {
         Message commandMessage = Commands.ensureMessage(commandOrMessage);
-        return of(commandMessage.getClass());
+        return from(commandMessage.getClass());
     }
 
     /** Creates immutable set of {@code CommandClass} from the passed set. */
     public static Set<CommandClass> setOf(Iterable<Class<? extends Message>> classes) {
         ImmutableSet.Builder<CommandClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
-            builder.add(of(cls));
+            builder.add(from(cls));
         }
         return builder.build();
     }

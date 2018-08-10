@@ -36,16 +36,14 @@ import static com.google.common.base.Preconditions.checkArgument;
  * @param <M> the type of the incoming message class
  * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
  *            a context parameter is never used
- * @param <R> the type of the method result object
+ * @param <R> the type of the method result
  *            
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
 @Immutable
-public interface HandlerMethod<T,
-                               M extends MessageClass,
-                               C extends Message,
-                               R extends MethodResult> {
+public
+interface HandlerMethod<T, M extends MessageClass, C extends Message, R extends MethodResult> {
 
     M getMessageClass();
 

@@ -82,7 +82,7 @@ class CommandDispatcherRegistryTest {
         Set<CommandClass> supportedClasses = registry.getRegisteredMessageClasses();
 
         for (Class<? extends Message> clazz : cmdClasses) {
-            CommandClass cmdClass = CommandClass.of(clazz);
+            CommandClass cmdClass = CommandClass.from(clazz);
             assertTrue(supportedClasses.contains(cmdClass));
         }
     }
@@ -92,7 +92,7 @@ class CommandDispatcherRegistryTest {
         Set<CommandClass> supportedClasses = registry.getRegisteredMessageClasses();
 
         for (Class<? extends Message> clazz : cmdClasses) {
-            CommandClass cmdClass = CommandClass.of(clazz);
+            CommandClass cmdClass = CommandClass.from(clazz);
             assertFalse(supportedClasses.contains(cmdClass));
         }
     }

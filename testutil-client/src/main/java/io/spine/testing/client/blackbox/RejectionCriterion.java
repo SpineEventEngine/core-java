@@ -29,7 +29,7 @@ import com.google.protobuf.Message;
  * <p>Optionally can contain an the criterion description, useful for display by test assertions.
  *
  * <p>These criteria are consumed by acks verifier
- * {@link AcknowledgementsVerifier#ackedWithErrors(ErrorCriterion) ackedWithError method}.
+ * {@link VerifyAcknowledgements#ackedWithErrors(ErrorCriterion) ackedWithError method}.
  *
  * @param <T> a domain rejection type
  * @author Mykhailo Drachuk

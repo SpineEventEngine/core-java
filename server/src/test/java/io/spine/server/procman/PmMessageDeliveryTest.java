@@ -27,9 +27,9 @@ import io.spine.server.BoundedContext;
 import io.spine.server.delivery.AbstractMessageDeliveryTest;
 import io.spine.server.delivery.given.ParallelDispatcher;
 import io.spine.server.delivery.given.ThreadStats;
-import io.spine.server.procman.given.PmMessageDeliveryTestEnv.DeliveryPm;
-import io.spine.server.procman.given.PmMessageDeliveryTestEnv.QuadrupleShardPmRepository;
-import io.spine.server.procman.given.PmMessageDeliveryTestEnv.SingleShardPmRepository;
+import io.spine.server.procman.given.delivery.DeliveryPm;
+import io.spine.server.procman.given.delivery.QuadrupleShardPmRepository;
+import io.spine.server.procman.given.delivery.SingleShardPmRepository;
 import io.spine.test.procman.ProjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,9 +37,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
-import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.cannotStartProject;
-import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.createProject;
-import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.projectStarted;
+import static io.spine.server.procman.given.delivery.GivenMessage.cannotStartProject;
+import static io.spine.server.procman.given.delivery.GivenMessage.createProject;
+import static io.spine.server.procman.given.delivery.GivenMessage.projectStarted;
 
 /**
  * @author Alex Tymchenko

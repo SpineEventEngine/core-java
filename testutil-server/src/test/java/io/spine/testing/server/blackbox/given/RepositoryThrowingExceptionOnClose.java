@@ -21,13 +21,13 @@
 package io.spine.testing.server.blackbox.given;
 
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.testing.server.blackbox.ProjectId;
+import io.spine.testing.server.blackbox.BbProjectId;
 
 /**
  * @author Mykhailo Drachuk
  */
 public abstract class RepositoryThrowingExceptionOnClose
-        extends AggregateRepository<ProjectId, BbProjectAggregate> {
+        extends AggregateRepository<BbProjectId, BbProjectAggregate> {
 
     @Override
     public void close() {

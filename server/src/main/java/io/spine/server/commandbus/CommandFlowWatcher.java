@@ -37,10 +37,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class CommandFlowWatcher {
 
-    private final SystemGateway systemGateway;
+    private final GatewayFunction gateway;
 
-    CommandFlowWatcher(SystemGateway gateway) {
-        this.systemGateway = checkNotNull(gateway);
+    CommandFlowWatcher(GatewayFunction gateway) {
+        this.gateway = checkNotNull(gateway);
     }
 
     /**
@@ -73,11 +73,7 @@ final class CommandFlowWatcher {
     }
 
     private void postSystem(Message systemCommand, TenantId tenantId) {
-        SystemGateway tenantAwareGateway = TenantAwareSystemGateway
-                .create()
-                .atopOf(systemGateway)
-                .withTenant(tenantId)
-                .build();
-        tenantAwareGateway.postCommand(systemCommand);
+        SystemGateway gateway = this.gateway.get(tenantId);
+        gateway.postCommand(systemCommand);
     }
 }

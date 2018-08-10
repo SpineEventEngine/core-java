@@ -50,7 +50,7 @@ public class Assertions {
     @SafeVarargs
     public static void assertCommandClasses(Collection<CommandClass> expected,
                                             Class<? extends Message>... commandClass) {
-        assertContains(expected, CommandClass::of, commandClass);
+        assertContains(expected, CommandClass::from, commandClass);
     }
 
     /**
@@ -59,7 +59,7 @@ public class Assertions {
     @SafeVarargs
     public static void assertEventClasses(Collection<EventClass> expected,
                                           Class<? extends Message>... eventClass) {
-        assertContains(expected, EventClass::of, eventClass);
+        assertContains(expected, EventClass::from, eventClass);
     }
 
     /**

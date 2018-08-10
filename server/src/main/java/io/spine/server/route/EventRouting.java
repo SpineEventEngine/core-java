@@ -140,7 +140,7 @@ public final class EventRouting<I> extends MessageRouting<EventContext, EventCla
      */
     @Override
     EventClass toMessageClass(Class<? extends Message> classOfEvents) {
-        return EventClass.of(classOfEvents);
+        return EventClass.from(classOfEvents);
     }
 
     /**

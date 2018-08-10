@@ -79,7 +79,7 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
             onError(envelope, e);
             return ImmutableSet.of();
         }
-        return Identity.of(this);
+        return identity();
     }
 
     private void handle(RejectionEnvelope rejection) {

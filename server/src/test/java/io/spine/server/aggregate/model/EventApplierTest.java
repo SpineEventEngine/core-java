@@ -26,7 +26,7 @@ import com.google.protobuf.StringValue;
 import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.MethodFactory;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testdata.Sample;
 import io.spine.validate.StringValueVBuilder;
@@ -48,7 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("EventApplierMethod should")
 class EventApplierTest {
 
-    private final AbstractHandlerMethod.Factory<EventApplier> factory = EventApplier.factory();
+    private final MethodFactory<EventApplier> factory = EventApplier.factory();
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
@@ -83,20 +83,11 @@ class EventApplierTest {
     }
 
     @Test
-    @DisplayName("be properly created from factory")
-    void beCreatedFromFactory() {
-        Method method = new ValidApplier().getMethod();
-
-        EventApplier actual = factory.create(method);
-
-        assertEquals(EventApplier.from(method), actual);
-    }
-
-    @Test
     @DisplayName("allow invocation")
     void invokeApplierMethod() {
         ValidApplier applierObject = new ValidApplier();
-        EventApplier applier = EventApplier.from(applierObject.getMethod());
+        EventApplier applier = EventApplier.factory()
+                                           .create(applierObject.getMethod());
         RefProjectCreated event = Sample.messageOfType(RefProjectCreated.class);
 
         applier.invoke(applierObject, event);

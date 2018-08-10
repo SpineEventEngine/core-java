@@ -51,7 +51,6 @@ public abstract class AbstractExpected<S extends Message, E extends AbstractExpe
      *
      * @param validator a {@link Consumer} that performs all required assertions for the state
      */
-    @SuppressWarnings("UnusedReturnValue")
     @CanIgnoreReturnValue
     public E hasState(Consumer<S> validator) {
         validator.accept(state);
@@ -61,9 +60,8 @@ public abstract class AbstractExpected<S extends Message, E extends AbstractExpe
     /**
      * Asserts that the message was ignored by the entity.
      */
-    @SuppressWarnings("UnusedReturnValue")
     @CanIgnoreReturnValue
-    public E ignoresMessage() {
+    protected E ignoresMessage() {
         assertEquals(initialState, state);
         return self();
     }

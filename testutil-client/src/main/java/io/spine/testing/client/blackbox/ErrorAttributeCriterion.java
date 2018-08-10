@@ -36,7 +36,7 @@ import static java.lang.String.format;
  * @author Mykhailo Drachuk
  */
 @VisibleForTesting
-public class ErrorAttributeCriterion implements ErrorCriterion {
+public final class ErrorAttributeCriterion implements ErrorCriterion {
 
     private final String name;
 

@@ -42,12 +42,12 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.command.Assign;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventBusTest;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.event.EBProjectArchived;
 import io.spine.test.event.EBProjectCreated;
@@ -249,7 +249,7 @@ public class EventBusTestEnv {
      */
     public static class TaskCreatedFilter implements BusFilter<EventEnvelope> {
 
-        private static final EventClass TASK_ADDED_CLASS = EventClass.of(EBTaskAdded.class);
+        private static final EventClass TASK_ADDED_CLASS = EventClass.from(EBTaskAdded.class);
 
         @Override
         public Optional<Ack> accept(EventEnvelope envelope) {
@@ -343,13 +343,13 @@ public class EventBusTestEnv {
 
         @Override
         public Set<EventClass> getMessageClasses() {
-            return ImmutableSet.of(EventClass.of(ProjectCreated.class));
+            return ImmutableSet.of(EventClass.from(ProjectCreated.class));
         }
 
         @Override
         public Set<String> dispatch(EventEnvelope event) {
             dispatchCalled = true;
-            return Identity.of(this);
+            return identity();
         }
 
         @Override

@@ -21,16 +21,16 @@ package io.spine.server.rejection.model;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import io.spine.base.EventMessage;
 import io.spine.core.React;
 import io.spine.core.RejectionContext;
-import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.model.ReactorMethodResult;
 import io.spine.server.rejection.RejectionReactor;
 
 import java.lang.reflect.Method;
-import java.util.function.Predicate;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 
@@ -86,25 +86,19 @@ public class RejectionReactorMethod
     }
 
     /** Returns the factory for filtering and creating rejection reactor methods. */
-    public static AbstractHandlerMethod.Factory<RejectionReactorMethod> factory() {
+    public static MethodFactory<RejectionReactorMethod> factory() {
         return Factory.INSTANCE;
     }
 
     /**
      * The factory for filtering methods that match {@code RejectionReactorMethod} specification.
      */
-    private static class Factory extends AbstractHandlerMethod.Factory<RejectionReactorMethod> {
+    private static class Factory extends MethodFactory<RejectionReactorMethod> {
 
         private static final Factory INSTANCE = new Factory();
 
-        @Override
-        public Class<RejectionReactorMethod> getMethodClass() {
-            return RejectionReactorMethod.class;
-        }
-
-        @Override
-        public Predicate<Method> getPredicate() {
-            return Filter.INSTANCE;
+        private Factory() {
+            super(RejectionReactorMethod.class, new Filter());
         }
 
         @Override
@@ -127,15 +121,13 @@ public class RejectionReactorMethod
      */
     private static class Filter extends AbstractPredicate {
 
-        private static final Filter INSTANCE = new Filter();
-
         private Filter() {
             super(React.class);
         }
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            boolean result = returnsMessageOrIterable(method);
+            boolean result = returnsMessageOrIterable(method, EventMessage.class);
             return result;
         }
     }

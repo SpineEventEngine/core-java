@@ -22,7 +22,7 @@ package io.spine.testing.server.expected;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
-import io.spine.testing.server.Rejections.TUFailedToAssignProject;
+import io.spine.testing.server.given.entity.rejection.Rejections.TuFailedToAssignProject;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
@@ -49,7 +49,7 @@ class CommandHandlerExpectedTest {
     void trackRejection() {
         CommandHandlerExpected<UInt64Value> expected =
                 commandExpectedWithRejection(rejectionMessage());
-        expected.throwsRejection(TUFailedToAssignProject.class);
+        expected.throwsRejection(TuFailedToAssignProject.class);
     }
 
     @Test
@@ -79,7 +79,10 @@ class CommandHandlerExpectedTest {
     void notTrackEventsIfRejected() {
         CommandHandlerExpected<UInt64Value> expected =
                 commandExpectedWithRejection(rejectionMessage());
-        assertThrows(AssertionFailedError.class, () -> expected.producesEvents(StringValue.class));
+        assertThrows(
+                AssertionFailedError.class,
+                () -> expected.producesEvents(StringValue.class)
+        );
     }
 
     @Test
@@ -92,32 +95,39 @@ class CommandHandlerExpectedTest {
     @Test
     @DisplayName("validate the single produced events")
     void trackSingleEvent() {
-        StringValue expectedEvent = StringValue.newBuilder()
-                                               .setValue("single produced event")
-                                               .build();
+        StringValue expectedEvent = StringValue
+                .newBuilder()
+                .setValue("single produced event")
+                .build();
         CommandHandlerExpected<UInt64Value> expected = commandExpectedWithEvent(expectedEvent);
-        expected.producesEvent(StringValue.class, event -> {
-            assertEquals(expectedEvent, event);
-        });
+        expected.producesEvent(
+                StringValue.class,
+                event -> assertEquals(expectedEvent, event)
+        );
     }
 
     @Test
     @DisplayName("track routed commands")
     void trackCommands() {
         CommandHandlerExpected<UInt64Value> expected = commandExpected();
-        expected.routesCommands(StringValue.class, StringValue.class);
-        assertThrows(AssertionFailedError.class, () -> expected.routesCommands(StringValue.class));
+        expected.producesCommands(StringValue.class, StringValue.class);
+        assertThrows(
+                AssertionFailedError.class,
+                () -> expected.producesCommands(StringValue.class)
+        );
     }
 
     @Test
     @DisplayName("validate the single routed command")
     void trackSingleCommand() {
-        StringValue expectedCommand = StringValue.newBuilder()
-                                                 .setValue("single routed command")
-                                                 .build();
+        StringValue expectedCommand = StringValue
+                .newBuilder()
+                .setValue("single routed command")
+                .build();
         CommandHandlerExpected<UInt64Value> expected = commandExpectedWithCommand(expectedCommand);
-        expected.routesCommand(StringValue.class, command -> {
-            assertEquals(expectedCommand, command);
-        });
+        expected.producesCommand(
+                StringValue.class,
+                command -> assertEquals(expectedCommand, command)
+        );
     }
 }

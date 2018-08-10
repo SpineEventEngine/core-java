@@ -41,6 +41,10 @@ public abstract class AggregatePartCommandTest<I,
                                                R extends AggregateRoot<I>>
         extends AggregateCommandTest<I, C, S, P> {
 
+    protected AggregatePartCommandTest(I aggregateId, C commandMessage) {
+        super(aggregateId, commandMessage);
+    }
+
     /**
      * Instantiates a new aggregate root with the given ID.
      *

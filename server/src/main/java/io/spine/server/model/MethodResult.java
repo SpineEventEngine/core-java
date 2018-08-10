@@ -52,8 +52,8 @@ public abstract class MethodResult<V extends Message> {
     /**
      * Assigns messages to a method result object.
      *
-     * <p>This method is meant to be called from withing a constructor of derived classes, and
-     * called only once.
+     * @apiNote This method is meant to be called from withing a constructor of derived classes,
+     *          and called only once.
      *
      * @throws IllegalStateException if messages are already assigned
      */

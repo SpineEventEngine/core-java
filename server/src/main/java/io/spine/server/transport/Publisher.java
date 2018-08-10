@@ -42,6 +42,5 @@ public interface Publisher extends MessageChannel {
      * @see Ack
      */
     @CanIgnoreReturnValue
-    @SuppressWarnings("UnusedReturnValue")      // Return value is planned for future use.
     Ack publish(Any id, ExternalMessage message);
 }

@@ -44,11 +44,11 @@ import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
-import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv;
-import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.RememberingSubscriber;
-import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.SensoryDeprivedPmRepository;
-import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManager;
-import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManagerRepository;
+import io.spine.server.procman.given.repo.GivenCommandMessage;
+import io.spine.server.procman.given.repo.RememberingSubscriber;
+import io.spine.server.procman.given.repo.SensoryDeprivedPmRepository;
+import io.spine.server.procman.given.repo.TestProcessManager;
+import io.spine.server.procman.given.repo.TestProcessManagerRepository;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.Task;
@@ -73,16 +73,16 @@ import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Rejections.createRejection;
-import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.ID;
-import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.addTask;
-import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.archiveProcess;
-import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.createProject;
-import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.deleteProcess;
-import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.doNothing;
-import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.projectCreated;
-import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.projectStarted;
-import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.startProject;
-import static io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.GivenCommandMessage.taskAdded;
+import static io.spine.server.procman.given.repo.GivenCommandMessage.ID;
+import static io.spine.server.procman.given.repo.GivenCommandMessage.addTask;
+import static io.spine.server.procman.given.repo.GivenCommandMessage.archiveProcess;
+import static io.spine.server.procman.given.repo.GivenCommandMessage.createProject;
+import static io.spine.server.procman.given.repo.GivenCommandMessage.deleteProcess;
+import static io.spine.server.procman.given.repo.GivenCommandMessage.doNothing;
+import static io.spine.server.procman.given.repo.GivenCommandMessage.projectCreated;
+import static io.spine.server.procman.given.repo.GivenCommandMessage.projectStarted;
+import static io.spine.server.procman.given.repo.GivenCommandMessage.startProject;
+import static io.spine.server.procman.given.repo.GivenCommandMessage.taskAdded;
 import static io.spine.testing.server.Assertions.assertCommandClasses;
 import static io.spine.testing.server.Assertions.assertEventClasses;
 import static io.spine.testing.server.Assertions.assertRejectionClasses;
@@ -227,7 +227,7 @@ class ProcessManagerRepositoryTest
                                          .build();
             Rejection rejection = createRejection(rejectionMessage,
                                                   ce.getCommand());
-            ProjectId id = ProcessManagerRepositoryTestEnv.GivenCommandMessage.ID;
+            ProjectId id = GivenCommandMessage.ID;
             Rejection.Builder builder =
                     rejection.toBuilder()
                              .setContext(rejection.getContext()

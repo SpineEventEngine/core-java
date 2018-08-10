@@ -24,7 +24,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
-import io.spine.testing.server.expected.EventHandlerExpected;
+import io.spine.testing.server.expected.EventReactorExpected;
 
 import java.util.List;
 
@@ -63,48 +63,48 @@ public class EventHandlerExpectedTestEnv {
         return asList(firstCommand, secondCommand);
     }
 
-    public static EventHandlerExpected<UInt64Value> expected() {
-        EventHandlerExpected<UInt64Value> expected =
-                new EventHandlerExpected<>(events(),
-                                               oldState(),
-                                               newState(),
-                                               interceptedCommands());
+    public static EventReactorExpected<UInt64Value> expected() {
+        EventReactorExpected<UInt64Value> expected =
+                new EventReactorExpected<>(events(),
+                                           oldState(),
+                                           newState(),
+                                           interceptedCommands());
         return expected;
     }
 
-    public static EventHandlerExpected<UInt64Value> expectedWithEvent(Message event) {
-        EventHandlerExpected<UInt64Value> expected =
-                new EventHandlerExpected<>(singletonList(event),
-                                               oldState(),
-                                               newState(),
-                                               interceptedCommands());
+    public static EventReactorExpected<UInt64Value> expectedWithEvent(Message event) {
+        EventReactorExpected<UInt64Value> expected =
+                new EventReactorExpected<>(singletonList(event),
+                                           oldState(),
+                                           newState(),
+                                           interceptedCommands());
         return expected;
     }
 
-    public static EventHandlerExpected<UInt64Value> expectedWithCommand(Message command) {
-        EventHandlerExpected<UInt64Value> expected =
-                new EventHandlerExpected<>(events(),
-                                               oldState(),
-                                               newState(),
-                                               singletonList(command));
+    public static EventReactorExpected<UInt64Value> expectedWithCommand(Message command) {
+        EventReactorExpected<UInt64Value> expected =
+                new EventReactorExpected<>(events(),
+                                           oldState(),
+                                           newState(),
+                                           singletonList(command));
         return expected;
     }
 
-    public static EventHandlerExpected<UInt64Value> blankExpected() {
-        EventHandlerExpected<UInt64Value> expected =
-                new EventHandlerExpected<>(emptyList(),
-                                               oldState(),
-                                               oldState(),
-                                               emptyList());
+    public static EventReactorExpected<UInt64Value> blankExpected() {
+        EventReactorExpected<UInt64Value> expected =
+                new EventReactorExpected<>(emptyList(),
+                                           oldState(),
+                                           oldState(),
+                                           emptyList());
         return expected;
     }
 
-    public static EventHandlerExpected<UInt64Value> emptyExpected() {
-        EventHandlerExpected<UInt64Value> expected =
-                new EventHandlerExpected<>(singletonList(Empty.getDefaultInstance()),
-                                               oldState(),
-                                               oldState(),
-                                               emptyList());
+    public static EventReactorExpected<UInt64Value> emptyExpected() {
+        EventReactorExpected<UInt64Value> expected =
+                new EventReactorExpected<>(singletonList(Empty.getDefaultInstance()),
+                                           oldState(),
+                                           oldState(),
+                                           emptyList());
         return expected;
     }
 

@@ -45,7 +45,7 @@ public class BareDispatcher implements RejectionDispatcher<String> {
     @Override
     public Set<String> dispatch(RejectionEnvelope rejection) {
         dispatchCalled = true;
-        return Identity.of(this);
+        return identity();
     }
 
     @Override
