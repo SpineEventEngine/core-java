@@ -20,23 +20,17 @@
 
 package io.spine.server.command.model;
 
-import io.spine.base.CommandMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.command.Command;
-import io.spine.server.command.model.CommandSubstituteMethod.Result;
-import io.spine.server.model.MessageAcceptor;
-import io.spine.core.CommandContext;
 import io.spine.server.command.CommandReceiver;
 import io.spine.server.command.model.CommandingMethod.Result;
+import io.spine.server.model.MessageAcceptor;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
-import io.spine.server.model.MethodFactory;
-import io.spine.server.model.MethodFactory;
 
 import java.lang.reflect.Method;
-import java.util.List;
 
 /**
  * A method that produces one or more command messages in response to an incoming command.

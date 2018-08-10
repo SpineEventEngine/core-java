@@ -36,9 +36,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.server.delivery.given.MessageDeliveryTestEnv.dispatchWaitTime;
-import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.createProject;
-import static io.spine.server.procman.given.PmMessageDeliveryTestEnv.projectStarted;
-import static io.spine.server.procman.given.delivery.GivenMessage.cannotStartProject;
 import static io.spine.server.procman.given.delivery.GivenMessage.createProject;
 import static io.spine.server.procman.given.delivery.GivenMessage.projectStarted;
 

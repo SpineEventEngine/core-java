@@ -21,7 +21,6 @@
 package io.spine.server.event.model;
 
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.React;

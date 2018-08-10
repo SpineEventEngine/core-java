@@ -24,7 +24,6 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
-import io.spine.server.command.CommandReceiver;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MessageAcceptor;

@@ -22,7 +22,6 @@ package io.spine.server.command.model;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.base.EventMessage;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.EventProducer;
