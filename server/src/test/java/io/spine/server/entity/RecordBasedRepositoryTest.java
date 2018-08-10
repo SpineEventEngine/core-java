@@ -329,10 +329,9 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         }
 
         private FieldMask createFirstFieldOnlyMask(List<E> entities) {
-            Descriptor entityDescriptor =
-                    entities.get(0)
-                            .getState()
-                            .getDescriptorForType();
+            Descriptor entityDescriptor = entities.get(0)
+                                                  .getState()
+                                                  .getDescriptorForType();
             FieldMask fieldMask = FieldMasks.maskOf(entityDescriptor, 1);
             return fieldMask;
         }
