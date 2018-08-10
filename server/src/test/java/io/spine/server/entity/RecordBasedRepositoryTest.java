@@ -321,10 +321,11 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
                     .newBuilder()
                     .addAllIds(ids)
                     .build();
-            return EntityFilters
+            EntityFilters filters = EntityFilters
                     .newBuilder()
                     .setIdFilter(filter)
                     .build();
+            return filters;
         }
 
         private FieldMask firstFieldOnlyMask(List<E> entities) {
@@ -332,7 +333,8 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
                     entities.get(0)
                             .getState()
                             .getDescriptorForType();
-            return FieldMasks.maskOf(entityDescriptor, 1);
+            FieldMask fieldMask = FieldMasks.maskOf(entityDescriptor, 1);
+            return fieldMask;
         }
     }
 
