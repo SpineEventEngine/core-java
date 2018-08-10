@@ -108,8 +108,8 @@ class CommandSequence<O extends Message, R extends Message, B extends Message.Bu
     /**
      * Creates an empty sequence for creating a command in response to the passed event.
      */
-    public static OneCommand inResponseTo(EventEnvelope event) {
-        return new OneCommand(event.getId(), event.getActorContext());
+    public static SingleCommand inResponseTo(EventEnvelope event) {
+        return new SingleCommand(event.getId(), event.getActorContext());
     }
 
     /**

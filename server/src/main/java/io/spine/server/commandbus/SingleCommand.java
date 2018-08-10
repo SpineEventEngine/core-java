@@ -40,13 +40,14 @@ import static com.google.common.base.Preconditions.checkState;
  * @author Alexander Yevsyukov
  */
 @Internal
-public class OneCommand extends OnEvent<MarkCausedCommand, MarkCausedCommand.Builder, OneCommand> {
+public class SingleCommand
+        extends OnEvent<MarkCausedCommand, MarkCausedCommand.Builder, SingleCommand> {
 
-    OneCommand(EventId origin, ActorContext actorContext) {
+    SingleCommand(EventId origin, ActorContext actorContext) {
         super(origin, actorContext);
     }
 
-    public OneCommand produce(Message commandMessage) {
+    public SingleCommand produce(Message commandMessage) {
         add(commandMessage);
         return this;
     }

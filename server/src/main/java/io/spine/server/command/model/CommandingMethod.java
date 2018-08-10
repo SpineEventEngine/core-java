@@ -26,8 +26,8 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.server.command.Command;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandbus.OneCommand;
 import io.spine.server.commandbus.SeveralCommands;
+import io.spine.server.commandbus.SingleCommand;
 import io.spine.server.commandbus.Split;
 import io.spine.server.commandbus.Transform;
 import io.spine.server.model.HandlerMethod;
@@ -133,7 +133,7 @@ interface CommandingMethod<T, M extends MessageClass, C extends Message, R exten
             checkNotNull(bus);
             List<? extends Message> messages = asMessages();
             if (messages.size() == 1) {
-                OneCommand seq = inResponseTo(event).produce(messages.get(0));
+                SingleCommand seq = inResponseTo(event).produce(messages.get(0));
                 seq.post(bus);
             } else {
                 SeveralCommands seq = respondMany(event);
