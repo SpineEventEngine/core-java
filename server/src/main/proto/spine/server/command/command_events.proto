@@ -40,6 +40,7 @@ import "spine/core/event.proto";
 // in response to one command which carries data for those parts.
 //
 message CommandSplit {
+    option deprecated = true; // See spine.system.server.CommandSplit.
 
     // The command in response of which we post other commands.
     core.DispatchedCommand source = 1 [(required) = true];
@@ -58,6 +59,7 @@ message CommandSplit {
 // command API.
 //
 message CommandTransformed {
+    option deprecated = true; // See spine.system.server.CommandTransformed.
 
     // The command in response of which we post other commands.
     core.DispatchedCommand source = 1 [(required) = true];
