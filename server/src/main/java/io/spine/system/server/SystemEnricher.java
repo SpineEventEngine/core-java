@@ -55,7 +55,7 @@ public final class SystemEnricher {
         checkNotNull(commandRepository);
         Enricher enricher = Enricher.newBuilder()
                                     .add(CommandId.class, Command.class,
-                                                   commandLookup(commandRepository))
+                                         commandLookup(commandRepository))
                                     .build();
         return enricher;
     }

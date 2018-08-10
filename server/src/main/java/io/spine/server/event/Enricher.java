@@ -212,8 +212,8 @@ public class Enricher {
          * @return the builder instance
          */
         public <S, T> Builder add(Class<S> sourceFieldClass,
-                            Class<T> enrichmentFieldClass,
-                            Function<S, T> func) {
+                                  Class<T> enrichmentFieldClass,
+                                  Function<S, T> func) {
             checkNotNull(sourceFieldClass);
             checkNotNull(enrichmentFieldClass);
             checkNotNull(func);
