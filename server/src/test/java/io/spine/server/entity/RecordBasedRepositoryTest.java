@@ -233,42 +233,22 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
             assertNotContains(entity2, found);
         }
 
-        @SuppressWarnings("MethodWithMultipleLoops")
         @Test
         @DisplayName("entities by query and field mask")
         void entitiesByQueryAndFields() {
             int count = 10;
             List<E> entities = createAndStoreEntities(repository, count);
-            List<EntityId> ids = Lists.newLinkedList();
 
-            // Find some of the records (half of them in this case)
-            for (int i = 0; i < count / 2; i++) {
-                Message entityId = (Message) entities.get(i)
-                                                     .getId();
-                EntityId id = EntityId.newBuilder()
-                                      .setId(pack(entityId))
-                                      .build();
-                ids.add(id);
-            }
+            // Find some of the entities (half of them in this case).
+            int idsToObtain = count / 2;
+            List<EntityId> ids = obtainSomeNumberOfEntityIds(entities, idsToObtain);
 
-            EntityIdFilter filter = EntityIdFilter
-                    .newBuilder()
-                    .addAllIds(ids)
-                    .build();
-            EntityFilters filters = EntityFilters
-                    .newBuilder()
-                    .setIdFilter(filter)
-                    .build();
-            Descriptor entityDescriptor =
-                    entities.get(0)
-                            .getState()
-                            .getDescriptorForType();
-            FieldMask firstFieldOnly = FieldMasks.maskOf(entityDescriptor, 1);
+            EntityFilters filters = createEntityIdFilters(ids);
+            FieldMask firstFieldOnly = createFirstFieldOnlyMask(entities);
             Iterator<E> readEntities = find(filters, firstFieldOnly);
             Collection<E> foundList = newArrayList(readEntities);
 
             assertSize(ids.size(), foundList);
-
             for (E entity : foundList) {
                 assertMatches(entity, firstFieldOnly);
             }
@@ -292,6 +272,39 @@ public abstract class RecordBasedRepositoryTest<E extends AbstractVersionableEnt
         void noEntitiesIfEmpty() {
             Collection<E> found = newArrayList(loadAll());
             assertSize(0, found);
+        }
+
+        private List<EntityId> obtainSomeNumberOfEntityIds(List<E> entities, int count) {
+            List<EntityId> ids = Lists.newLinkedList();
+            for (int i = 0; i < count; i++) {
+                Message entityId = (Message) entities.get(i)
+                                                     .getId();
+                EntityId id = EntityId.newBuilder()
+                                      .setId(pack(entityId))
+                                      .build();
+                ids.add(id);
+            }
+            return ids;
+        }
+
+        private EntityFilters createEntityIdFilters(List<EntityId> ids) {
+            EntityIdFilter filter = EntityIdFilter
+                    .newBuilder()
+                    .addAllIds(ids)
+                    .build();
+            EntityFilters filters = EntityFilters
+                    .newBuilder()
+                    .setIdFilter(filter)
+                    .build();
+            return filters;
+        }
+
+        private FieldMask createFirstFieldOnlyMask(List<E> entities) {
+            Descriptor entityDescriptor = entities.get(0)
+                                                  .getState()
+                                                  .getDescriptorForType();
+            FieldMask fieldMask = FieldMasks.maskOf(entityDescriptor, 1);
+            return fieldMask;
         }
     }
 
