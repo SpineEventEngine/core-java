@@ -55,8 +55,6 @@ import static java.util.stream.Collectors.toList;
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this utility class.
 public final class Events {
 
-    private static final String REJECTION_CLASS_SUFFIX = "Rejections";
-
     /** Compares two events by their timestamps. */
     private static final Comparator<Event> eventComparator = (o1, o2) -> {
         Timestamp timestamp1 = getTimestamp(o1);
