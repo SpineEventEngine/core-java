@@ -50,12 +50,10 @@ class PmDispatcherTest extends UtilityClassTest<PmDispatcher> {
     @Override
     protected void setDefaults(NullPointerTester tester) {
         Command command = requestFactory.generateCommand();
-        new NullPointerTester()
-                .setDefault(CommandEnvelope.class,
-                            CommandEnvelope.of(command))
-                .setDefault(EventEnvelope.class,
-                            EventEnvelope.of(eventFactory.createEvent(newUuidValue())))
-                .setDefault(ProcessManager.class, mock(ProcessManager.class))
-                .testAllPublicStaticMethods(PmDispatcher.class);
+        tester.setDefault(CommandEnvelope.class,
+                          CommandEnvelope.of(command))
+              .setDefault(EventEnvelope.class,
+                          EventEnvelope.of(eventFactory.createEvent(newUuidValue())))
+              .setDefault(ProcessManager.class, mock(ProcessManager.class));
     }
 }
