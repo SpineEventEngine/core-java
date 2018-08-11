@@ -123,6 +123,14 @@ class EventSubscriberMethodTest {
 
             assertIsEventSubscriber(method, true);
         }
+
+        @Test
+        @DisplayName("rejection event type")
+        void rejectionClassType() {
+            Method rejectionSubscriber = new ARejectionSubscriber().getMethod();
+
+            assertIsEventSubscriber(rejectionSubscriber, true);
+        }
     }
 
     @Nested
@@ -183,14 +191,6 @@ class EventSubscriberMethodTest {
             Method subscriber = new InvalidNotVoid().getMethod();
 
             assertIsEventSubscriber(subscriber, false);
-        }
-
-        @Test
-        @DisplayName("rejection event type")
-        void rejectionClassType() {
-            Method rejectionSubscriber = new ARejectionSubscriber().getMethod();
-
-            assertIsEventSubscriber(rejectionSubscriber, true);
         }
     }
 
