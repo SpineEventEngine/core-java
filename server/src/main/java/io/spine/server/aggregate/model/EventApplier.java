@@ -62,18 +62,12 @@ public final class EventApplier
 
     @Override
     public EventClass getMessageClass() {
-        return EventClass.of(rawMessageClass());
+        return EventClass.from(rawMessageClass());
     }
 
     static EventApplier from(Method method,
                              MessageAcceptor<EventEnvelope> acceptor) {
         return new EventApplier(method, acceptor);
-        return EventClass.from(rawMessageClass());
-    }
-
-    @VisibleForTesting
-    static Predicate<Method> predicate() {
-        return factory().getPredicate();
     }
 
     static MethodFactory<EventApplier, ?> factory() {

@@ -149,8 +149,7 @@ public abstract class ProcessManager<I,
 
         if (thisClass.substitutesCommand(commandClass)) {
             CommandSubstituteMethod method = thisClass.getCommander(commandClass);
-            CommandSubstituteMethod.Result result =
-                    method.invoke(this, command.getMessage(), command.getCommandContext());
+            CommandSubstituteMethod.Result result = method.invoke(this, command);
             result.transformOrSplitAndPost(command, commandBus);
             return noEvents();
         }
@@ -180,17 +179,15 @@ public abstract class ProcessManager<I,
         ProcessManagerClass<?> thisClass = thisClass();
         EventClass eventClass = event.getMessageClass();
         if (thisClass.reactsOnEvent(eventClass)) {
-            EventReactorMethod method = thisClass.getReactor(eventClass);
-            ReactorMethodResult methodResult =
-                    method.invoke(this, event.getMessage(), event.getEventContext());
+            EventReactorMethod method = thisClass.getReactor(eventClass, event.getOriginClass());
+            ReactorMethodResult methodResult = method.invoke(this, event);
             List<Event> result = methodResult.produceEvents(event);
             return result;
         }
 
         if (thisClass.producesCommandsOn(eventClass)) {
             CommandReactionMethod method = thisClass.getCommander(eventClass);
-            CommandReactionMethod.Result result =
-                    method.invoke(this, event.getMessage(), event.getEventContext());
+            CommandReactionMethod.Result result = method.invoke(this, event);
             result.produceAndPost(event, commandBus);
             return noEvents();
         }
@@ -206,23 +203,6 @@ public abstract class ProcessManager<I,
 
     private static ImmutableList<Event> noEvents() {
         return ImmutableList.of();
-    }
-
-    /**
-     * Dispatches a rejection to the reacting method of the process manager.
-     *
-     * @param  rejection the envelope with the rejection
-     * @return a list of produced events or an empty list if the process manager does not
-     *         produce new events because of the passed event
-     */
-    List<Event> dispatchRejection(RejectionEnvelope rejection) {
-        CommandClass commandClass = CommandClass.of(rejection.getCommandMessage());
-        RejectionReactorMethod method =
-                thisClass().getReactor(rejection.getMessageClass(), commandClass);
-        ReactorMethodResult methodResult =
-                method.invoke(this, rejection.getMessage(), rejection.getRejectionContext());
-        List<Event> result = methodResult.produceEvents(rejection);
-        return result;
     }
 
     @Override

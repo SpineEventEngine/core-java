@@ -20,16 +20,21 @@
 
 package io.spine.server.command.model;
 
-import io.spine.base.CommandMessage;
+import com.google.errorprone.annotations.Immutable;
+import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
+import io.spine.server.command.Commander;
 import io.spine.server.command.model.CommandingMethod.Result;
-import io.spine.server.event.EventReceiver;
 import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.MessageAcceptor;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodFactory;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 
@@ -39,20 +44,20 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  * @author Alexander Yevsyukov
  */
 public final class CommandReactionMethod
-        extends AbstractHandlerMethod<EventReceiver, EventClass, EventContext, Result>
-        implements CommandingMethod<EventReceiver, EventClass, EventContext, Result> {
+        extends AbstractHandlerMethod<Commander, EventClass, EventEnvelope, Result>
+        implements CommandingMethod<EventClass, EventEnvelope, Result> {
 
-    private CommandReactionMethod(Method method) {
-        super(method);
+    private CommandReactionMethod(Method method, MessageAcceptor<EventEnvelope> acceptor) {
+        super(method, acceptor);
     }
 
     @Override
-    protected Result toResult(EventReceiver target, Object rawMethodOutput) {
+    protected Result toResult(Commander target, Object rawMethodOutput) {
         Result result = new Result(rawMethodOutput, true);
         return result;
     }
 
-    static MethodFactory<CommandReactionMethod> factory() {
+    static MethodFactory<CommandReactionMethod, ?> factory() {
         return Factory.INSTANCE;
     }
 
@@ -64,40 +69,70 @@ public final class CommandReactionMethod
     /**
      * Obtains {@code CommandReactionMethod}s from a class.
      */
-    private static final class Factory extends MethodFactory<CommandReactionMethod> {
+    private static final class Factory
+            extends CommandingMethod.Factory<CommandReactionMethod, Accessor> {
 
         private static final Factory INSTANCE = new Factory();
 
         private Factory() {
-            super(CommandReactionMethod.class, new Filter());
+            super();
+        }
+
+        @Override
+        public Class<CommandReactionMethod> getMethodClass() {
+            return CommandReactionMethod.class;
         }
 
         @Override
         public void checkAccessModifier(Method method) {
             MethodAccessChecker checker = forMethod(method);
-            checker.checkPublic("Commanding event reaction `{}` must be declared `public`");
+            checker.checkPackagePrivate(
+                    "Commanding event reaction `{}` must be declared package-private`"
+            );
         }
 
         @Override
-        protected CommandReactionMethod doCreate(Method method) {
-            CommandReactionMethod result = new CommandReactionMethod(method);
-            return result;
+        protected CommandReactionMethod doCreate(Method method, Accessor acceptor) {
+            return new CommandReactionMethod(method, acceptor);
+        }
+
+        @Override
+        protected Optional<? extends Accessor>
+        findAcceptorForParameters(Class<?>[] parameterTypes) {
+            int count = parameterTypes.length;
+            if (count < 1 || count > 2) {
+                return Optional.empty();
+            }
+            Class<?> firstParam = parameterTypes[0];
+            if (!Message.class.isAssignableFrom(firstParam)) {
+                return Optional.empty();
+            }
+            if (count == 1) {
+                return Optional.of(Accessor.MESSAGE);
+            }
+            Class<?> secondParam = parameterTypes[1];
+            return EventContext.class.isAssignableFrom(secondParam)
+                   ? Optional.of(Accessor.MESSAGE_AND_CONTEXT)
+                   : Optional.empty();
         }
     }
 
-    /**
-     * Recognizes methods that accept events and generate command messages.
-     */
-    private static final class Filter extends AbstractPredicate<EventContext> {
+    @Immutable
+    private enum Accessor implements MessageAcceptor<EventEnvelope> {
 
-        private Filter() {
-            super(EventContext.class);
-        }
-
-        @Override
-        protected boolean verifyReturnType(Method method) {
-            boolean result = returnsMessageOrIterable(method, CommandMessage.class);
-            return result;
+        MESSAGE {
+            @Override
+            public Object invoke(Object receiver, Method method, EventEnvelope envelope)
+                    throws InvocationTargetException, IllegalAccessException {
+                return method.invoke(receiver, envelope.getMessage());
+            }
+        },
+        MESSAGE_AND_CONTEXT {
+            @Override
+            public Object invoke(Object receiver, Method method, EventEnvelope envelope)
+                    throws InvocationTargetException, IllegalAccessException {
+                return method.invoke(receiver, envelope.getMessage(), envelope.getEventContext());
+            }
         }
     }
 }

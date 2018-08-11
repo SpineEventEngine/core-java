@@ -18,22 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.procman.given.delivery;
+package io.spine.testing.server.blackbox;
 
-import com.google.protobuf.StringValue;
-import io.spine.server.delivery.ShardingStrategy;
-import io.spine.server.delivery.UniformAcrossTargets;
-import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.test.procman.ProjectId;
+import static java.util.Arrays.copyOf;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class QuadrupleShardPmRepository
-        extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
+/**
+ * An event verifier which checks that the emitted events have the given version numbers.
+ */
+public final class EventVersionsVerifier implements Verify<EmittedEvents> {
 
-    public QuadrupleShardPmRepository() {
+    private final int[] versions;
+
+    public EventVersionsVerifier(int[] versions) {
+        this.versions = copyOf(versions, versions.length);
     }
 
     @Override
-    public ShardingStrategy getShardingStrategy() {
-        return UniformAcrossTargets.forNumber(4);
+    public void verify(EmittedEvents events) {
+        assertTrue(events.haveVersions(versions));
     }
 }

@@ -49,7 +49,7 @@ public final class EventSubscriberMethod
 
     @Override
     public EventClass getMessageClass() {
-        return EventClass.of(rawMessageClass());
+        return EventClass.from(rawMessageClass());
     }
 
     public static EventSubscriberMethod from(Method method, EventAcceptor acceptor) {
@@ -77,10 +77,6 @@ public final class EventSubscriberMethod
 
         private Factory() {
             super(Subscribe.class, of(void.class));
-        }
-
-        private static Factory getInstance() {
-            return INSTANCE;
         }
 
         @Override

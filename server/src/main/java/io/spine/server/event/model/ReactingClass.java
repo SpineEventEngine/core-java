@@ -23,34 +23,12 @@ package io.spine.server.event.model;
 import io.spine.core.EventClass;
 import io.spine.type.MessageClass;
 
-import java.util.Set;
-
 /**
  * Provides message handling information on a class that reacts on messages.
  *
  * @author Alexander Yevsyukov
  */
 public interface ReactingClass extends EventReceiverClass {
-
-    /**
-     * Obtains a set of event classes to which this class reacts.
-     *
-     * <p>The returned set contains only event classes of the {@code BoundedContext}
-     * to which the class belongs.
-     *
-     * <p>For reactions on external events, please see {@link #getExternalEventReactions()}.
-     */
-    Set<EventClass> getEventReactions();
-
-    /**
-     * Obtains a set of external events to which this class reacts.
-     *
-     * <p>External events are those that are delivered to the {@code BoundedContext}
-     * to which this class belongs from outside.
-     *
-     * <p>For reactions on domestic events, please see {@link #getEventReactions()}.
-     */
-    Set<EventClass> getExternalEventReactions();
 
     /**
      * Obtains the method that reacts on the passed projection class.

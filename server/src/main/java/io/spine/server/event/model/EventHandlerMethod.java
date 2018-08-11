@@ -38,7 +38,7 @@ import java.util.Set;
  *
  * @author Dmytro Dashenkov
  */
-abstract class EventHandlerMethod<T, R extends MethodResult>
+public abstract class EventHandlerMethod<T, R extends MethodResult>
         extends AbstractHandlerMethod<T, EventClass, EventEnvelope, R> {
 
     private final EventAcceptor acceptor;
@@ -77,7 +77,11 @@ abstract class EventHandlerMethod<T, R extends MethodResult>
         }
 
         @Override
-        protected Optional<EventAcceptor> findAcceptorForParameters(Class<?>[] parameterTypes) {
+        protected Optional<? extends EventAcceptor>
+        findAcceptorForParameters(Class<?>[] parameterTypes) {
+            // Satisfy Java compiler.
+            // When returning `EventAcceptor.findFor(parameterTypes)` directly, it complains because
+            // of an unchecked cast.
             return EventAcceptor.findFor(parameterTypes);
         }
     }

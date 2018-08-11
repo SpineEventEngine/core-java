@@ -20,7 +20,13 @@
 
 package io.spine.server.procman.model;
 
+import com.google.common.collect.Sets.SetView;
+import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
+import io.spine.server.command.model.CommandReactionMethod;
+import io.spine.server.command.model.CommandSubstituteMethod;
+import io.spine.server.command.model.CommanderClass;
+import io.spine.server.command.model.CommandingClass;
 import io.spine.server.entity.model.CommandHandlingEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactingClass;
@@ -89,6 +95,26 @@ public final class ProcessManagerClass<P extends ProcessManager>
 
     @Override
     public EventReactorMethod getReactor(EventClass eventClass, MessageClass originClass) {
-        return delegate.getReactor(eventClass, originClass);
+        return reactorDelegate.getReactor(eventClass, originClass);
+    }
+
+    public CommandSubstituteMethod getCommander(CommandClass commandClass) {
+        return commanderDelegate.getHandler(commandClass);
+    }
+
+    public CommandReactionMethod getCommander(EventClass eventClass) {
+        return commanderDelegate.getCommander(eventClass);
+    }
+
+    public boolean substitutesCommand(CommandClass commandClass) {
+        return commanderDelegate.substitutesCommand(commandClass);
+    }
+
+    public boolean reactsOnEvent(EventClass eventClass) {
+        return reactorDelegate.contains(eventClass);
+    }
+
+    public boolean producesCommandsOn(EventClass eventClass) {
+        return commanderDelegate.producesCommandsOn(eventClass);
     }
 }

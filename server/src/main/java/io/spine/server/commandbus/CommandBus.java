@@ -412,7 +412,7 @@ public class CommandBus extends Bus<Command,
             if (commandScheduler == null) {
                 commandScheduler = new ExecutorCommandScheduler();
             }
-            flowWatcher = new CommandFlowWatcher(systemGateway);
+            flowWatcher = new CommandFlowWatcher((tenantId) -> gatewayFor(tenantId, systemGateway));
             commandScheduler.setFlowWatcher(flowWatcher);
 
             CommandBus commandBus = createCommandBus();

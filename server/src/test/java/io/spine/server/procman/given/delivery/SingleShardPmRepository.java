@@ -28,6 +28,5 @@ public class SingleShardPmRepository
         extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
 
     public SingleShardPmRepository() {
-        getRejectionRouting().replaceDefault(GivenMessage.routeByProjectId());
     }
 }

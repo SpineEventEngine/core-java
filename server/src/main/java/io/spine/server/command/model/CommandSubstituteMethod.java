@@ -24,11 +24,12 @@ import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.command.Command;
-import io.spine.server.command.CommandReceiver;
+import io.spine.server.command.Commander;
 import io.spine.server.command.model.CommandingMethod.Result;
 import io.spine.server.model.MessageAcceptor;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
+import io.spine.server.model.MethodFactory;
 
 import java.lang.reflect.Method;
 
@@ -38,8 +39,8 @@ import java.lang.reflect.Method;
  * @author Alexander Yevsyukov
  */
 public final class CommandSubstituteMethod
-        extends CommandAcceptingMethod<CommandReceiver, Result>
-        implements CommandingMethod<CommandReceiver, CommandClass, Result> {
+        extends CommandAcceptingMethod<Commander, Result>
+        implements CommandingMethod<CommandClass, CommandEnvelope, Result> {
 
     private CommandSubstituteMethod(Method method,
                                     MessageAcceptor<CommandEnvelope> acceptor) {
@@ -47,16 +48,12 @@ public final class CommandSubstituteMethod
     }
 
     @Override
-    protected Result toResult(CommandReceiver target, Object rawMethodOutput) {
+    protected Result toResult(Commander target, Object rawMethodOutput) {
         Result result = new Result(rawMethodOutput, false);
         return result;
     }
 
-    static CommandSubstituteMethod from(Method method) {
-        return new CommandSubstituteMethod(method);
-    }
-
-    static AbstractHandlerMethod.Factory<CommandSubstituteMethod> factory() {
+    static MethodFactory<CommandSubstituteMethod, ?> factory() {
         return Factory.INSTANCE;
     }
 
@@ -91,7 +88,7 @@ public final class CommandSubstituteMethod
         @Override
         protected CommandSubstituteMethod doCreate(Method method,
                                                    MessageAcceptor<CommandEnvelope> acceptor) {
-            return from(method, acceptor);
+            return new CommandSubstituteMethod(method, acceptor);
         }
     }
 }

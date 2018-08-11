@@ -204,13 +204,13 @@ enum EventAcceptor implements MessageAcceptor<EventEnvelope> {
         Class<?>[] types = method.getParameterTypes();
         @SuppressWarnings("unchecked")
         Class<? extends Message> eventMessageClass = (Class<? extends Message>) types[0];
-        EventClass eventClass = EventClass.of(eventMessageClass);
+        EventClass eventClass = EventClass.from(eventMessageClass);
         if (!awareOfCommandType) {
             return HandlerKey.of(eventClass);
         } else {
             @SuppressWarnings("unchecked")
             Class<? extends Message> commandMessageClass = (Class<? extends Message>) types[1];
-            CommandClass commandClass = CommandClass.of(commandMessageClass);
+            CommandClass commandClass = CommandClass.from(commandMessageClass);
             return HandlerKey.of(eventClass, commandClass);
         }
     }

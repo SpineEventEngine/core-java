@@ -20,6 +20,7 @@
 package io.spine.server.procman.given.delivery;
 
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.Event;
@@ -37,6 +38,7 @@ import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.rejection.Rejections.PmCannotStartArchivedProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
+import io.spine.validate.StringValueVBuilder;
 
 import java.util.List;
 

@@ -74,7 +74,7 @@ public abstract class MethodFactory<H extends HandlerMethod, A extends MessageAc
         if (validMethod) {
             checkAccessModifier(method);
             checkThrownExceptions(method);
-            Optional<A> acceptor = findAcceptorFor(method);
+            Optional<? extends A> acceptor = findAcceptorFor(method);
             Optional<H> result = acceptor.map(
                     messageAcceptor -> doCreate(method, messageAcceptor)
             );
@@ -112,11 +112,11 @@ public abstract class MethodFactory<H extends HandlerMethod, A extends MessageAc
                                .anyMatch(type -> type.isAssignableFrom(returnType));
     }
 
-    private Optional<A> findAcceptorFor(Method method) {
+    private Optional<? extends A> findAcceptorFor(Method method) {
         Class<?>[] parameters = method.getParameterTypes();
         return findAcceptorForParameters(parameters);
     }
 
     protected abstract
-    Optional<A> findAcceptorForParameters(Class<?>[] parameterTypes);
+    Optional<? extends A> findAcceptorForParameters(Class<?>[] parameterTypes);
 }

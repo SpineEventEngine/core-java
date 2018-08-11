@@ -21,6 +21,7 @@
 package io.spine.server.command.model;
 
 import io.spine.core.CommandClass;
+import io.spine.core.EmptyClass;
 import io.spine.core.EventClass;
 import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Commander;
@@ -77,7 +78,7 @@ public final class CommanderClass<C extends Commander>
      * Obtains the method which reacts on the passed event class.
      */
     public CommandReactionMethod getCommander(EventClass eventClass) {
-        return delegate.getMethod(eventClass);
+        return delegate.getMethod(eventClass, EmptyClass.instance());
     }
 
     public boolean substitutesCommand(CommandClass commandClass) {

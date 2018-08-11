@@ -60,7 +60,7 @@ import io.spine.test.aggregate.event.AggProjectStarted;
 import io.spine.test.aggregate.event.AggTaskAdded;
 import io.spine.test.aggregate.event.AggTaskAssigned;
 import io.spine.test.aggregate.event.AggUserNotified;
-import io.spine.test.aggregate.rejection.Rejections;
+import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedTask;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.time.testing.TimeTests;
@@ -782,7 +782,7 @@ public class AggregateTest {
          *
          * <p>The rejection is fired by the {@link TaskAggregate#handle(AggReassignTask)
          * TaskAggregate.handle(AggReassignTask)}
-         * and handled by the {@link TaskAggregate#on(Rejections.AggCannotReassignUnassignedTask)
+         * and handled by the {@link TaskAggregate#on(AggCannotReassignUnassignedTask)
          * TaskAggregate.on(AggCannotReassignUnassignedTask)}.
          */
         @Test
@@ -793,7 +793,7 @@ public class AggregateTest {
                     .receivesCommand(reassignTask())
                     .assertThat(acked(once()).withoutErrorsOrRejections())
                     .assertThat(emittedEvent(twice()))
-                    .assertThat(emitted(Rejections.AggCannotReassignUnassignedTask.class))
+                    .assertThat(emittedEvent(AggCannotReassignUnassignedTask.class, once()))
                     .assertThat(emittedEvents(AggUserNotified.class))
                     .close();
         }

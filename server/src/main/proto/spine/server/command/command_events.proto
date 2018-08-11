@@ -28,10 +28,7 @@ option java_package = "io.spine.server.procman";
 option java_multiple_files = true;
 option java_outer_classname = "CommandEventsProto";
 
-import "google/protobuf/any.proto";
-
 import "spine/core/command.proto";
-import "spine/core/event.proto";
 
 // This event is generated when instead of processing of the `source` command, two or
 // more commands were produced.

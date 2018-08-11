@@ -40,10 +40,10 @@ import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
-import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.RememberingSubscriber;
-import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.SensoryDeprivedPmRepository;
-import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManager;
-import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManagerRepository;
+import io.spine.server.procman.given.repo.RememberingSubscriber;
+import io.spine.server.procman.given.repo.SensoryDeprivedPmRepository;
+import io.spine.server.procman.given.repo.TestProcessManager;
+import io.spine.server.procman.given.repo.TestProcessManagerRepository;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.Task;
@@ -86,6 +86,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Litus

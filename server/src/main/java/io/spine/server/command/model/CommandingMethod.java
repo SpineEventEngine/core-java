@@ -23,20 +23,25 @@ package io.spine.server.command.model;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.EventEnvelope;
+import io.spine.core.MessageEnvelope;
 import io.spine.server.command.Command;
+import io.spine.server.command.Commander;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.SeveralCommands;
 import io.spine.server.commandbus.SingleCommand;
 import io.spine.server.commandbus.Split;
 import io.spine.server.commandbus.Transform;
 import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.HandlerMethodPredicate;
+import io.spine.server.model.MessageAcceptor;
+import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
 import io.spine.type.MessageClass;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.commandbus.CommandSequence.inResponseTo;
 import static io.spine.server.commandbus.CommandSequence.respondMany;
 import static io.spine.server.commandbus.CommandSequence.split;
@@ -46,23 +51,22 @@ import static io.spine.server.commandbus.CommandSequence.transform;
  * Base interface for methods that generate one or more command messages in response to
  * an incoming message.
  *
- * @param <T> the type of the target object
  * @param <M> the type of the message class
  * @param <R> the type of the method result
  *
  * @author Alexander Yevsyukov
  */
 @Immutable
-public interface CommandingMethod<M extends MessageClass, R extends MethodResult>
-        extends HandlerMethod<Object, M, CommandEnvelope, R> {
+public interface CommandingMethod<M extends MessageClass,
+                                  E extends MessageEnvelope<?, ?, ?>,
+                                  R extends MethodResult>
+        extends HandlerMethod<Commander, M, E, R> {
 
-    /**
-     * Abstract base for commanding method predicates.
-     */
-    abstract class AbstractPredicate<C extends Message> extends HandlerMethodPredicate<C> {
+    abstract class Factory<H extends CommandingMethod,
+                           A extends MessageAcceptor> extends MethodFactory<H, A> {
 
-        AbstractPredicate(Class<C> contextClass) {
-            super(Command.class, contextClass);
+        protected Factory() {
+            super(Command.class, of(Message.class, Iterable.class));
         }
     }
 

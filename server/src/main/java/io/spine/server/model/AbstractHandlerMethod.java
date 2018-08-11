@@ -44,8 +44,6 @@ import static java.lang.String.format;
  *
  * @param <T> the type of the target object
  * @param <M> the type of the message class
- * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
- *            a context parameter is never used
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
@@ -115,11 +113,6 @@ public abstract class AbstractHandlerMethod<T,
     @Override
     public Method getRawMethod() {
         return method;
-    }
-
-    @Override
-    public HandlerKey key() {
-        return HandlerKey.of(getMessageClass());
     }
 
     private int getModifiers() {

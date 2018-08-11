@@ -78,7 +78,7 @@ public final class CommandHandlerMethod
     /**
      * The factory of {@link CommandHandlerMethod}s.
      */
-    private static class Factory extends CommandAcceptingMethod.Factory<CommandHandlerMethod> {
+    private static final class Factory extends CommandAcceptingMethod.Factory<CommandHandlerMethod> {
 
         private static final Factory INSTANCE = new Factory();
 

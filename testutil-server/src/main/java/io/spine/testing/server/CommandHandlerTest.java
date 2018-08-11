@@ -36,6 +36,7 @@ import io.spine.testing.server.expected.CommandHandlerExpected;
 import java.util.List;
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyList;
 
 /**
@@ -70,8 +71,8 @@ public abstract class CommandHandlerTest<I,
      * @param commandMessage the command message to be dispatched to the aggregate
      */
     @SuppressWarnings("TestOnlyProblems") // OK for a test-util.
-    protected CommandHandlerTest() {
-        super();
+    protected CommandHandlerTest(I entityId, C commandMessage) {
+        super(entityId, commandMessage);
         this.requestFactory = TestActorRequestFactory.newInstance(getClass());
     }
 
@@ -111,7 +112,7 @@ public abstract class CommandHandlerTest<I,
     }
 
     private RejectionEnvelope rejection(RuntimeException wrapped) {
-        Command command = createCommand(createMessage());
+        Command command = createCommand(message());
         CommandEnvelope envelope = CommandEnvelope.of(command);
         CaughtError error = CommandErrorHandler.with(NoOpSystemGateway.INSTANCE)
                                                .handleError(envelope, wrapped);

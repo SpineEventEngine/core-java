@@ -20,7 +20,6 @@
 package io.spine.testing.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.common.collect.ImmutableMap;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
@@ -28,7 +27,6 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
-import io.spine.core.RejectionEnvelope;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.procman.PmCommandEndpoint;
 import io.spine.server.procman.PmEventEndpoint;
@@ -62,8 +60,6 @@ public class PmDispatcher {
                          (p, m) -> TestPmCommandEndpoint.dispatch(p, (CommandEnvelope) m))
                     .put(EventEnvelope.class,
                          (p, m) -> TestPmEventEndpoint.dispatch(p, (EventEnvelope) m))
-                    .put(RejectionEnvelope.class,
-                         (p, m) -> TestPmRejectionEndpoint.dispatch(p, (RejectionEnvelope) m))
                     .build();
 
     /** Prevents this utility class from instantiation. */

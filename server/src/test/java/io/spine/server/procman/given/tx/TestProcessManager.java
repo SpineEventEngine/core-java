@@ -23,7 +23,7 @@ package io.spine.server.procman.given.tx;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.core.React;
+import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
