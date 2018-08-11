@@ -129,6 +129,12 @@ public class EventSubscriberMethodTestEnv {
         }
     }
 
+    public static class ExternalSubscriber extends TestEventSubscriber {
+        @Subscribe(external = true)
+        public void handle(RefProjectCreated externalEvent) {
+        }
+    }
+
     /**
      * The abstract base for test subscriber classes.
      *

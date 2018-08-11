@@ -59,6 +59,13 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
         return key;
     }
 
+    @Override
+    protected void checkAttributesMatch(EventEnvelope envelope) {
+        boolean external = envelope.getEventContext()
+                                   .getExternal();
+        ensureExternalMatch(external);
+    }
+
     /**
      * {@inheritDoc}
      *

@@ -26,6 +26,7 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.ARejectionSubscriber;
+import io.spine.server.event.given.EventSubscriberMethodTestEnv.ExternalSubscriber;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidNoAnnotation;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidNoParams;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidNotVoid;
@@ -33,6 +34,7 @@ import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidOneNotMsg
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidTooManyParams;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidTwoParamsFirstInvalid;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.InvalidTwoParamsSecondInvalid;
+import io.spine.server.event.given.EventSubscriberMethodTestEnv.TestEventSubscriber;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.ValidButPrivate;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.ValidOneParam;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.ValidTwoParams;
@@ -48,6 +50,7 @@ import java.util.Optional;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -191,6 +194,45 @@ class EventSubscriberMethodTest {
             Method subscriber = new InvalidNotVoid().getMethod();
 
             assertIsEventSubscriber(subscriber, false);
+        }
+    }
+
+    @Nested
+    @DisplayName("reject event if")
+    class ExternalMatch {
+
+        @Test
+        @DisplayName("it is external")
+        void external() {
+            TestEventSubscriber subscriber = new ValidOneParam();
+            check(subscriber, true);
+        }
+
+        @Test
+        @DisplayName("it is not external")
+        void notExternal() {
+            TestEventSubscriber subscriber = new ExternalSubscriber();
+            check(subscriber, false);
+        }
+
+        private void check(TestEventSubscriber subscriber, boolean external) {
+            Method method = subscriber.getMethod();
+            Optional<EventSubscriberMethod> created = EventSubscriberMethod.factory()
+                                                                           .create(method);
+            assertTrue(created.isPresent());
+            EventSubscriberMethod modelMethod = created.get();
+            EventContext context = EventContext
+                    .newBuilder()
+                    .setExternal(external)
+                    .build();
+            Event event = Event
+                    .newBuilder()
+                    .setMessage(pack(RefProjectCreated.getDefaultInstance()))
+                    .setContext(context)
+                    .build();
+            EventEnvelope envelope = EventEnvelope.of(event);
+            assertThrows(IllegalArgumentException.class,
+                         () -> modelMethod.invoke(subscriber, envelope));
         }
     }
 

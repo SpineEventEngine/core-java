@@ -148,6 +148,7 @@ public abstract class AbstractHandlerMethod<T,
     public final R invoke(T target, E envelope) {
         checkNotNull(target);
         checkNotNull(envelope);
+        checkAttributesMatch(envelope);
         Message message = envelope.getMessage();
         Message context = envelope.getMessageContext();
         try {
@@ -157,6 +158,10 @@ public abstract class AbstractHandlerMethod<T,
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
             throw new HandlerMethodFailedException(target, message, context, e);
         }
+    }
+
+    protected void checkAttributesMatch(E envelope) {
+        // Do nothing by default.
     }
 
     /**
