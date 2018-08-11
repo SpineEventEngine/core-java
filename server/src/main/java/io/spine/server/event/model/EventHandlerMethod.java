@@ -68,6 +68,11 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
     @Override
     protected abstract R toResult(T target, @Nullable Object rawMethodOutput);
 
+    /**
+     * The implementation base for a {@link EventHandlerMethod} factory.
+     *
+     * @param <H> the type of built methods
+     */
     protected abstract static class Factory<H extends EventHandlerMethod>
             extends MethodFactory<H, EventAcceptor> {
 
@@ -77,7 +82,7 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
         }
 
         @Override
-        protected Optional<? extends EventAcceptor>
+        protected final Optional<? extends EventAcceptor>
         findAcceptorForParameters(Class<?>[] parameterTypes) {
             return EventAcceptor.findFor(parameterTypes);
         }

@@ -50,8 +50,8 @@ public final class CommandHandlerMethod
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param method subscriber method
-     * @param acceptor
+     * @param method   subscriber method
+     * @param acceptor the {@link MessageAcceptor} to invoke the method
      */
     private CommandHandlerMethod(Method method,
                                  MessageAcceptor<CommandEnvelope> acceptor) {

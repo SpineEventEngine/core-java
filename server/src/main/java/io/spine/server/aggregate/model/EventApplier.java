@@ -53,7 +53,7 @@ public final class EventApplier
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method   subscriber method
-     * @param acceptor
+     * @param acceptor {@link MessageAcceptor} to use to invoke the method
      */
     private EventApplier(Method method,
                          MessageAcceptor<EventEnvelope> acceptor) {

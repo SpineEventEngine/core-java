@@ -62,6 +62,12 @@ public interface CommandingMethod<M extends MessageClass,
                                   R extends MethodResult>
         extends HandlerMethod<Commander, M, E, R> {
 
+    /**
+     * The implementation base for {@link CommandingMethod} factories.
+     *
+     * @param <H> the type of created methods
+     * @param <A> the type of {@link MessageAcceptor}
+     */
     abstract class Factory<H extends CommandingMethod,
                            A extends MessageAcceptor> extends MethodFactory<H, A> {
 

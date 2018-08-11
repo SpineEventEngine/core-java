@@ -59,11 +59,6 @@ public final class EventReactorMethod
         return new ReactorMethodResult(target, rawMethodOutput);
     }
 
-    static EventReactorMethod from(Method method,
-                                   EventAcceptor acceptor) {
-        return new EventReactorMethod(method, acceptor);
-    }
-
     public static MethodFactory<EventReactorMethod, ?> factory() {
         return Factory.INSTANCE;
     }
@@ -92,7 +87,7 @@ public final class EventReactorMethod
 
         @Override
         protected EventReactorMethod doCreate(Method method, EventAcceptor acceptor) {
-            return from(method, acceptor);
+            return new EventReactorMethod(method, acceptor);
         }
     }
 

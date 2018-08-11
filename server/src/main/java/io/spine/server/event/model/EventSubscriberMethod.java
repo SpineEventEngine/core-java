@@ -52,10 +52,6 @@ public final class EventSubscriberMethod
         return EventClass.from(rawMessageClass());
     }
 
-    public static EventSubscriberMethod from(Method method, EventAcceptor acceptor) {
-        return new EventSubscriberMethod(method, acceptor);
-    }
-
     /**
      * Returns the factory for filtering and creating event subscriber methods.
      */
@@ -92,7 +88,7 @@ public final class EventSubscriberMethod
 
         @Override
         protected EventSubscriberMethod doCreate(Method method, EventAcceptor acceptor) {
-            return from(method, acceptor);
+            return new EventSubscriberMethod(method, acceptor);
         }
     }
 }
