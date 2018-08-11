@@ -79,9 +79,6 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
         @Override
         protected Optional<? extends EventAcceptor>
         findAcceptorForParameters(Class<?>[] parameterTypes) {
-            // Satisfy Java compiler.
-            // When returning `EventAcceptor.findFor(parameterTypes)` directly, it complains because
-            // of an unchecked cast.
             return EventAcceptor.findFor(parameterTypes);
         }
     }
