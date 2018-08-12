@@ -43,7 +43,7 @@ import java.util.Optional;
 public interface CaughtError {
 
     /**
-     * Rethrows the handled exception if it was <b>not</b> caused by a rejection or
+     * Rethrows the caught exception if it was <b>not</b> caused by a rejection or
      * rethrown earlier.
      *
      * <p>Otherwise, preforms no action.
@@ -53,9 +53,9 @@ public interface CaughtError {
     }
 
     /**
-     * Converts the handled error into a {@linkplain RejectionEnvelope rejection}.
+     * Converts the caught error into a {@linkplain RejectionEnvelope rejection}.
      *
-     * @return the handled rejection event or {@link Optional#empty()} if the handled error is
+     * @return the caught rejection event or {@link Optional#empty()} if the caught error is
      * not a command rejection
      */
     default Optional<RejectionEnvelope> asRejection() {
@@ -72,7 +72,7 @@ public interface CaughtError {
     /**
      * Obtains a {@link CaughtError} for the given {@link RuntimeException}.
      *
-     * @param exception the handled error
+     * @param exception the caught error
      * @return wrapped error
      */
     static CaughtError ofRuntime(RuntimeException exception) {
