@@ -28,7 +28,6 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
@@ -49,13 +48,10 @@ import io.spine.validate.ValidatingBuilder;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.core.Events.getMessage;
-import static io.spine.core.Events.substituteVersion;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.validate.Validate.isNotDefault;
@@ -302,7 +298,7 @@ public abstract class Aggregate<I,
      * @param origin         the origin of those events
      * @return events ready to be applied to this aggregate
      * @see #apply(List, MessageEnvelope)
-     * @see #prepareEvent(Event, MessageEnvelope, Version)
+     * @see AggregateEvents#prepareEvent(Event, MessageEnvelope, Version)
      */
     private ImmutableList<Event> prepareEvents(Collection<Event> originalEvents,
                                                MessageEnvelope origin) {
@@ -313,65 +309,9 @@ public abstract class Aggregate<I,
                                          .limit(originalEvents.size());
         Stream<Event> events = originalEvents.stream();
         ImmutableList<Event> eventsToApply = Streams.zip(events, versions,
-                                                         prepareEventFunction(origin))
+                                                         AggregateEvents.prepareEventForApplyFn(origin))
                                                     .collect(toImmutableList());
         return eventsToApply;
-    }
-
-    private static BiFunction<Event, Version, Event> prepareEventFunction(MessageEnvelope origin) {
-
-        return (event, version) -> prepareEvent(event, origin, version);
-    }
-
-    /**
-     * Prepares the given event to be applied to an aggregate.
-     *
-     * <p>Updates the event version with the given {@code projectedVersion}.
-     *
-     * <p>If the given event is an imported event, un-boxes the event message.
-     *
-     * @param event            the event to prepare
-     * @param origin           the event origin
-     * @param projectedVersion the version to set to the event
-     * @return the event ready to be applied to this aggregate
-     */
-    private static Event prepareEvent(Event event,
-                                      MessageEnvelope origin,
-                                      Version projectedVersion) {
-        Message eventMessage = getMessage(event);
-
-        Event eventToApply;
-        if (eventMessage instanceof Event) {
-            Event importEvent = (Event) eventMessage;
-            CommandEnvelope command = (CommandEnvelope) origin;
-            eventToApply = importedEvent(importEvent, command, projectedVersion);
-        } else {
-            eventToApply = substituteVersion(event, projectedVersion);
-        }
-        return eventToApply;
-    }
-
-    /**
-     * Creates an event based on the event received in an import command.
-     *
-     * @param event   the event to import
-     * @param command the import command
-     * @param version the version of the aggregate to use for the event
-     * @return an event with updated command context and entity version
-     */
-    private static Event importedEvent(Event event, CommandEnvelope command, Version version) {
-        EventContext eventContext =
-                event.getContext()
-                     .toBuilder()
-                     .setCommandContext(command.getCommandContext())
-                     .setTimestamp(getCurrentTime())
-                     .setVersion(version)
-                     .build();
-        Event result =
-                event.toBuilder()
-                     .setContext(eventContext)
-                     .build();
-        return result;
     }
 
     /**
