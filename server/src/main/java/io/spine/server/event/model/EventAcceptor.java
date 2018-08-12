@@ -45,7 +45,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * The strategy of event accepting method invocation.
+ * The strategy of event-accepting method invocation.
  *
  * <p>An event accepting method is an event {@linkplain io.spine.core.Subscribe subscriber} or
  * an event {@link io.spine.server.event.React reactor}.
@@ -176,18 +176,18 @@ enum EventAcceptor implements MessageAcceptor<EventEnvelope> {
     /**
      * Invokes the given event accepting method with the given event as an argument.
      *
-     * @param receiver       the object which owns the method
+     * @param target       the object which owns the method
      * @param acceptorMethod the event accepting method
      * @param event          the event argument
      * @return the method invocation result
      * @throws InvocationTargetException if the method throws
      */
     @Override
-    public @Nullable Object invoke(Object receiver, Method acceptorMethod, EventEnvelope event)
+    public @Nullable Object invoke(Object target, Method acceptorMethod, EventEnvelope event)
             throws InvocationTargetException {
         Object[] arguments = arguments(event).toArray();
         try {
-            return acceptorMethod.invoke(receiver, arguments);
+            return acceptorMethod.invoke(target, arguments);
         } catch (IllegalAccessException e) {
             throw newIllegalStateException(e, "Method %s is inaccessible.", acceptorMethod);
         }

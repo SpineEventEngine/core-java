@@ -27,11 +27,30 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
+ * An abstract base for those strategies, which define whether a particular method is eligible
+ * to be invoked with the given message envelope as an argument.
+ *
  * @author Dmytro Dashenkov
  */
 @Immutable
 public interface MessageAcceptor<E extends MessageEnvelope<?, ?, ?>> {
 
-    Object invoke(Object receiver, Method method, E envelope)
+    /**
+     * Invokes the method of an accepting party, using the provided {@code MessageEnvelope}
+     * as a source or method argument values.
+     *
+     * @param target
+     *         the object, which method is to be invoked
+     * @param method
+     *         the method to invoke
+     * @param envelope
+     *         the envelope to use
+     * @return the result of the method call
+     * @throws InvocationTargetException
+     *         if the called method throws an exception
+     * @throws IllegalAccessException
+     *         if the method to call is in fact inaccessible due to some reason, such as visibility
+     */
+    Object invoke(Object target, Method method, E envelope)
             throws InvocationTargetException, IllegalAccessException;
 }

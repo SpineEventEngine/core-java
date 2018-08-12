@@ -122,16 +122,16 @@ public final class CommandReactionMethod
 
         MESSAGE {
             @Override
-            public Object invoke(Object receiver, Method method, EventEnvelope envelope)
+            public Object invoke(Object target, Method method, EventEnvelope envelope)
                     throws InvocationTargetException, IllegalAccessException {
-                return method.invoke(receiver, envelope.getMessage());
+                return method.invoke(target, envelope.getMessage());
             }
         },
         MESSAGE_AND_CONTEXT {
             @Override
-            public Object invoke(Object receiver, Method method, EventEnvelope envelope)
+            public Object invoke(Object target, Method method, EventEnvelope envelope)
                     throws InvocationTargetException, IllegalAccessException {
-                return method.invoke(receiver, envelope.getMessage(), envelope.getEventContext());
+                return method.invoke(target, envelope.getMessage(), envelope.getEventContext());
             }
         }
     }

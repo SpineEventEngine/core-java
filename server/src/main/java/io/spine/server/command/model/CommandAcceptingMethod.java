@@ -88,9 +88,9 @@ public abstract class CommandAcceptingMethod<T, R extends MethodResult>
 
         MESSAGE {
             @Override
-            public Object invoke(Object receiver, Method method, CommandEnvelope envelope)
+            public Object invoke(Object target, Method method, CommandEnvelope envelope)
                     throws InvocationTargetException, IllegalAccessException {
-                return method.invoke(receiver, envelope.getMessage());
+                return method.invoke(target, envelope.getMessage());
             }
 
             @Override
@@ -100,9 +100,9 @@ public abstract class CommandAcceptingMethod<T, R extends MethodResult>
         },
         MESSAGE_AND_CONTEXT {
             @Override
-            public Object invoke(Object receiver, Method method, CommandEnvelope envelope)
+            public Object invoke(Object target, Method method, CommandEnvelope envelope)
                     throws InvocationTargetException, IllegalAccessException {
-                return method.invoke(receiver, envelope.getMessage(), envelope.getCommandContext());
+                return method.invoke(target, envelope.getMessage(), envelope.getCommandContext());
             }
 
             @Override
