@@ -23,6 +23,7 @@ package io.spine.server.outbus.enrich.given;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import io.spine.core.CommandContext;
+import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.people.PersonName;
@@ -33,7 +34,7 @@ import io.spine.testing.core.given.GivenUserId;
 import io.spine.time.ZoneOffset;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 /**
  * @author Alexander Yevsyukov
@@ -67,9 +68,9 @@ public class EnricherBuilderTestEnv {
             return builder.build();
         }
 
-        public static class GetProjectName implements Function<ProjectId, String> {
+        public static class GetProjectName implements BiFunction<ProjectId, EventContext, String> {
             @Override
-            public @Nullable String apply(@Nullable ProjectId id) {
+            public @Nullable String apply(@Nullable ProjectId id, EventContext context) {
                 if (id == null) {
                     return null;
                 }
@@ -78,9 +79,9 @@ public class EnricherBuilderTestEnv {
             }
         }
 
-        public static class GetProjectOwnerId implements Function<ProjectId, UserId> {
+        public static class GetProjectOwnerId implements BiFunction<ProjectId, EventContext, UserId> {
             @Override
-            public @Nullable UserId apply(@Nullable ProjectId id) {
+            public @Nullable UserId apply(@Nullable ProjectId id, EventContext context) {
                 if (id == null) {
                     return null;
                 }
@@ -88,33 +89,34 @@ public class EnricherBuilderTestEnv {
             }
         }
 
-        private static final Function<EventId, String> EVENT_ID_TO_STRING =
-                new Function<EventId, String>() {
+        private static final BiFunction<EventId, EventContext, String> EVENT_ID_TO_STRING =
+                new BiFunction<EventId, EventContext, String>() {
                     @Override
-                    public @Nullable String apply(@Nullable EventId input) {
+                    public @Nullable String apply(@Nullable EventId input, EventContext context) {
                         return input == null ? "" : input.getValue();
                     }
                 };
 
-        private static final Function<Timestamp, String> TIMESTAMP_TO_STRING =
-                input -> input == null ? "" : input.toString();
+        private static final BiFunction<Timestamp, EventContext, String>
+                TIMESTAMP_TO_STRING = (input, context) -> input == null ? "" : input.toString();
 
-        private static final Function<CommandContext, String> CMD_CONTEXT_TO_STRING =
-                input -> input == null ? "" : input.toString();
+        private static final BiFunction<CommandContext, EventContext, String>
+                CMD_CONTEXT_TO_STRING = (input, context) -> input == null ? "" : input.toString();
 
-        private static final Function<Any, String> ANY_TO_STRING =
-                input -> input == null ? "" : input.toString();
+        private static final BiFunction<Any, EventContext, String>
+                ANY_TO_STRING = (input, context) -> input == null ? "" : input.toString();
 
-        private static final Function<Integer, String> VERSION_TO_STRING =
-                input -> input == null ? "" : input.toString();
+        private static final BiFunction<Integer, EventContext, String>
+                VERSION_TO_STRING = (input, context) -> input == null ? "" : input.toString();
 
-        private static final Function<String, ZoneOffset> STRING_TO_ZONE_OFFSET =
-                new StringToZoneOffset();
+        private static final BiFunction<String, EventContext, ZoneOffset>
+                STRING_TO_ZONE_OFFSET = new StringToZoneOffset();
 
-        private static final Function<String, PersonName> STRING_TO_PERSON_NAME =
-                new StringToPersonName();
+        private static final BiFunction<String, EventContext, PersonName>
+                STRING_TO_PERSON_NAME = new StringToPersonName();
 
-        private static final Function<String, Integer> STRING_TO_INT = Integer::valueOf;
+        private static final BiFunction<String, EventContext, Integer> STRING_TO_INT =
+                (input, context) -> Integer.valueOf(input);
 
     }
 }

@@ -43,7 +43,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.core.Enrichments.getEnrichment;
@@ -66,8 +66,8 @@ public class EventEnricherTest {
     private EventBus eventBus;
     private TestEventSubscriber subscriber;
     private EventEnricher enricher;
-    private final Function<ProjectId, String> getProjectName = new GetProjectName();
-    private final Function<ProjectId, UserId> getProjectOwnerId = new GetProjectOwnerId();
+    private final BiFunction<ProjectId, EventContext, String> getProjectName = new GetProjectName();
+    private final BiFunction<ProjectId, EventContext, UserId> getProjectOwnerId = new GetProjectOwnerId();
 
     @BeforeEach
     void setUp() {
@@ -102,7 +102,7 @@ public class EventEnricherTest {
 
             eventBus.post(event);
 
-            assertEquals(getProjectName.apply(msg.getProjectId()),
+            assertEquals(getProjectName.apply(msg.getProjectId(), event.getContext()),
                          subscriber.projectStartedEnrichment.getProjectName());
         }
 
@@ -111,9 +111,10 @@ public class EventEnricherTest {
         void fromSamePackage() {
             ProjectCreated msg = GivenEventMessage.projectCreated();
 
-            eventBus.post(createEvent(msg));
+            Event event = createEvent(msg);
+            eventBus.post(event);
 
-            assertEquals(getProjectName.apply(msg.getProjectId()),
+            assertEquals(getProjectName.apply(msg.getProjectId(), event.getContext()),
                          subscriber.projectCreatedSeparateEnrichment.getProjectName());
         }
 
@@ -122,9 +123,10 @@ public class EventEnricherTest {
         void fromAnotherPackage() {
             ProjectCreated msg = GivenEventMessage.projectCreated();
 
-            eventBus.post(createEvent(msg));
+            Event event = createEvent(msg);
+            eventBus.post(event);
 
-            assertEquals(getProjectName.apply(msg.getProjectId()),
+            assertEquals(getProjectName.apply(msg.getProjectId(), event.getContext()),
                          subscriber.projectCreatedAnotherPackEnrichment.getProjectName());
         }
     }
@@ -135,11 +137,12 @@ public class EventEnricherTest {
         ProjectCreated msg = GivenEventMessage.projectCreated();
         ProjectId projectId = msg.getProjectId();
 
-        eventBus.post(createEvent(msg));
+        Event event = createEvent(msg);
+        eventBus.post(event);
 
-        assertEquals(getProjectName.apply(projectId),
+        assertEquals(getProjectName.apply(projectId, event.getContext()),
                      subscriber.projectCreatedEnrichment.getProjectName());
-        assertEquals(getProjectOwnerId.apply(projectId),
+        assertEquals(getProjectOwnerId.apply(projectId, event.getContext()),
                      subscriber.projectCreatedEnrichment.getOwnerId());
     }
 
@@ -155,12 +158,14 @@ public class EventEnricherTest {
             ProjectId completedProjectId = completed.getProjectId();
             ProjectId starredProjectId = starred.getProjectId();
 
-            eventBus.post(createEvent(completed));
-            eventBus.post(createEvent(starred));
+            Event completedEvent = createEvent(completed);
+            eventBus.post(completedEvent);
+            Event starredEvent = createEvent(starred);
+            eventBus.post(starredEvent);
 
-            assertEquals(getProjectName.apply(completedProjectId),
+            assertEquals(getProjectName.apply(completedProjectId, completedEvent.getContext()),
                          subscriber.projectCompletedEnrichment.getProjectName());
-            assertEquals(getProjectName.apply(starredProjectId),
+            assertEquals(getProjectName.apply(starredProjectId, starredEvent.getContext()),
                          subscriber.projectStarredEnrichment.getProjectName());
         }
 
