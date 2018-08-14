@@ -37,7 +37,7 @@ import static io.spine.server.model.MethodExceptionChecker.forMethod;
  *
  * @param <H> the type of the handler method objects to create
  */
-public abstract class MethodFactory<H extends HandlerMethod, A extends MessageAcceptor> {
+public abstract class MethodFactory<H extends HandlerMethod, S extends MethodSignature<?>> {
 
     private final Class<? extends Annotation> annotation;
     private final ImmutableSet<Class<?>> validReturnTypes;
@@ -65,19 +65,20 @@ public abstract class MethodFactory<H extends HandlerMethod, A extends MessageAc
      * <p>Performs various checks before wrapper creation, e.g. method access modifier or
      * whether method throws any prohibited exceptions.
      *
-     * @param method the method to create wrapper from
+     * @param method
+     *         the method to create wrapper from
      * @return a wrapper object created from the method
-     * @throws IllegalStateException in case some of the method checks fail
+     * @throws IllegalStateException
+     *         in case some of the method checks fail
      */
     public Optional<H> create(Method method) {
         boolean validMethod = annotationMatches(method) && returnTypeMatches(method);
         if (validMethod) {
             checkAccessModifier(method);
             checkThrownExceptions(method);
-            Optional<? extends A> acceptor = findAcceptorFor(method);
-            Optional<H> result = acceptor.map(
-                    messageAcceptor -> doCreate(method, messageAcceptor)
-            );
+            //TODO:2018-08-14:alex.tymchenko: include annotation and return type to signature
+            Optional<S> signature = MethodSignatures.findMatching(method, getSignatureClass());
+            Optional<H> result = signature.map(s -> doCreate(method, s));
             return result;
         } else {
             return Optional.empty();
@@ -85,7 +86,7 @@ public abstract class MethodFactory<H extends HandlerMethod, A extends MessageAc
     }
 
     /** Creates a wrapper object from a method. */
-    protected abstract H doCreate(Method method, A acceptor);
+    protected abstract H doCreate(Method method, S signature);
 
     /**
      * Ensures method does not throw any prohibited exception types.
@@ -112,11 +113,7 @@ public abstract class MethodFactory<H extends HandlerMethod, A extends MessageAc
                                .anyMatch(type -> type.isAssignableFrom(returnType));
     }
 
-    private Optional<? extends A> findAcceptorFor(Method method) {
-        Class<?>[] parameters = method.getParameterTypes();
-        return findAcceptorForParameters(parameters);
-    }
 
-    protected abstract
-    Optional<? extends A> findAcceptorForParameters(Class<?>[] parameterTypes);
+    protected abstract Class<S> getSignatureClass();
+
 }

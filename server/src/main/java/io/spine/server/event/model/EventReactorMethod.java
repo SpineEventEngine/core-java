@@ -44,8 +44,8 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
 public final class EventReactorMethod
         extends EventHandlerMethod<EventReactor, ReactorMethodResult> {
 
-    private EventReactorMethod(Method method, EventAcceptor acceptor) {
-        super(method, acceptor);
+    private EventReactorMethod(Method method, EventAcceptingSignature signature) {
+        super(method, signature);
     }
 
     @Override
@@ -55,7 +55,9 @@ public final class EventReactorMethod
 
     @Override
     protected ReactorMethodResult toResult(EventReactor target, @Nullable Object rawMethodOutput) {
-        checkNotNull(rawMethodOutput, "Event reactor method %s returned null.", getRawMethod());
+        checkNotNull(rawMethodOutput,
+                     "Event reactor method %s returned null.",
+                     getRawMethod());
         return new ReactorMethodResult(target, rawMethodOutput);
     }
 
@@ -86,8 +88,8 @@ public final class EventReactorMethod
         }
 
         @Override
-        protected EventReactorMethod doCreate(Method method, EventAcceptor acceptor) {
-            return new EventReactorMethod(method, acceptor);
+        protected EventReactorMethod doCreate(Method method, EventAcceptingSignature signature) {
+            return new EventReactorMethod(method, signature);
         }
     }
 

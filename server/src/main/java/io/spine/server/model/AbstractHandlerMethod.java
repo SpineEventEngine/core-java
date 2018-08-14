@@ -71,18 +71,18 @@ public abstract class AbstractHandlerMethod<T,
     @SuppressWarnings("Immutable")
     private final ImmutableSet<MethodAttribute<?>> attributes;
 
-    private final MessageAcceptor<E> acceptor;
+    private final MethodSignature<E> signature;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    protected AbstractHandlerMethod(Method method, MessageAcceptor<E> acceptor) {
+    protected AbstractHandlerMethod(Method method, MethodSignature<E> signature) {
         this.method = checkNotNull(method);
         this.messageClass = getFirstParamType(method);
         this.attributes = discoverAttributes(method);
-        this.acceptor = checkNotNull(acceptor);
+        this.signature = checkNotNull(signature);
         method.setAccessible(true);
     }
 
@@ -154,7 +154,8 @@ public abstract class AbstractHandlerMethod<T,
         Message message = envelope.getMessage();
         Message context = envelope.getMessageContext();
         try {
-            Object rawOutput = acceptor.invoke(target, method, envelope);
+            Object[] arguments = signature.extractArguments(envelope);
+            Object rawOutput = method.invoke(target, arguments);
             R result = toResult(target, rawOutput);
             return result;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {

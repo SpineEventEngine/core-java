@@ -29,17 +29,16 @@ import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.MessageAcceptor;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
+import io.spine.server.model.MethodSignature;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Optional;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
+import static io.spine.server.model.MethodSignatures.consistsOfSingle;
 
 /**
  * A wrapper for event applier method.
@@ -52,12 +51,12 @@ public final class EventApplier
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param method   subscriber method
-     * @param acceptor {@link MessageAcceptor} to use to invoke the method
+     * @param method   the applier method
+     * @param signature {@link MethodSignature} which describes the method
      */
     private EventApplier(Method method,
-                         MessageAcceptor<EventEnvelope> acceptor) {
-        super(method, acceptor);
+                         MethodSignature<EventEnvelope> signature) {
+        super(method, signature);
     }
 
     @Override
@@ -66,8 +65,8 @@ public final class EventApplier
     }
 
     static EventApplier from(Method method,
-                             MessageAcceptor<EventEnvelope> acceptor) {
-        return new EventApplier(method, acceptor);
+                             MethodSignature<EventEnvelope> signature) {
+        return new EventApplier(method, signature);
     }
 
     static MethodFactory<EventApplier, ?> factory() {
@@ -80,7 +79,7 @@ public final class EventApplier
     }
 
     /** The factory for filtering methods that match {@code EventApplier} specification. */
-    private static class Factory extends MethodFactory<EventApplier, MessageAcceptor<EventEnvelope>> {
+    private static class Factory extends MethodFactory<EventApplier, EventApplierSignature> {
 
         private static final Factory INSTANCE = new Factory();
 
@@ -100,34 +99,30 @@ public final class EventApplier
         }
 
         @Override
-        protected EventApplier doCreate(Method method, MessageAcceptor<EventEnvelope> acceptor) {
+        protected EventApplier doCreate(Method method, EventApplierSignature acceptor) {
             return from(method, acceptor);
         }
 
         @Override
-        protected Optional<MessageAcceptor<EventEnvelope>>
-        findAcceptorForParameters(Class<?>[] parameterTypes) {
-            int count = parameterTypes.length;
-            if (count != 1) {
-                return Optional.empty();
-            } else if (Message.class.isAssignableFrom(parameterTypes[0])) {
-                return Optional.of(Accessor.INSTANCE);
-            } else {
-                return Optional.empty();
-            }
+        protected Class<EventApplierSignature> getSignatureClass() {
+            return EventApplierSignature.class;
         }
     }
 
     @VisibleForTesting
     @Immutable
-    enum Accessor implements MessageAcceptor<EventEnvelope> {
+    enum EventApplierSignature implements MethodSignature<EventEnvelope> {
 
-        INSTANCE;
+        MESSAGE {
+            @Override
+            public boolean matches(Class<?>[] methodParams) {
+                return consistsOfSingle(methodParams, Message.class);
+            }
 
-        @Override
-        public Object invoke(Object target, Method method, EventEnvelope envelope)
-                throws InvocationTargetException, IllegalAccessException {
-            return method.invoke(target, envelope.getMessage());
+            @Override
+            public Object[] extractArguments(EventEnvelope envelope) {
+                return new Object[] {envelope.getMessage()};
+            }
         }
     }
 }

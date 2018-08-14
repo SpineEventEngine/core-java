@@ -28,7 +28,6 @@ import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.aggregate.model.EventApplier.Accessor;
 import io.spine.server.model.MethodFactory;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testdata.Sample;
@@ -41,6 +40,9 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.aggregate.model.EventApplier.EventApplierSignature;
+import static io.spine.server.aggregate.model.EventApplier.factory;
+import static io.spine.server.aggregate.model.EventApplier.from;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -53,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("EventApplierMethod should")
 class EventApplierTest {
 
-    private final MethodFactory<EventApplier, ?> factory = EventApplier.factory();
+    private final MethodFactory<EventApplier, ?> factory = factory();
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
@@ -89,14 +91,14 @@ class EventApplierTest {
         Optional<EventApplier> actual = factory.create(method);
         assertTrue(actual.isPresent());
 
-        assertEquals(EventApplier.from(method, Accessor.INSTANCE), actual.get());
+        assertEquals(from(method, EventApplierSignature.MESSAGE), actual.get());
     }
 
     @Test
     @DisplayName("allow invocation")
     void invokeApplierMethod() {
         ValidApplier applierObject = new ValidApplier();
-        Optional<EventApplier> method = EventApplier.factory()
+        Optional<EventApplier> method = factory()
                                                     .create(applierObject.getMethod());
         assertTrue(method.isPresent());
         EventApplier applier = method.get();
@@ -140,7 +142,7 @@ class EventApplierTest {
         }
 
         private void assertIsEventApplier(Method applier) {
-            assertTrue(EventApplier.factory()
+            assertTrue(factory()
                                    .create(applier)
                                    .isPresent());
         }
@@ -191,7 +193,7 @@ class EventApplierTest {
         }
 
         private void assertIsNotEventApplier(Method applier) {
-            assertFalse(EventApplier.factory()
+            assertFalse(factory()
                                     .create(applier)
                                     .isPresent());
         }

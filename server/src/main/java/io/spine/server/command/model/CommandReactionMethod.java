@@ -20,7 +20,6 @@
 
 package io.spine.server.command.model;
 
-import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -28,15 +27,15 @@ import io.spine.core.EventEnvelope;
 import io.spine.server.command.Commander;
 import io.spine.server.command.model.CommandingMethod.Result;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.MessageAcceptor;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodFactory;
+import io.spine.server.model.MethodSignature;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Optional;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
+import static io.spine.server.model.MethodSignatures.consistsOfSingle;
+import static io.spine.server.model.MethodSignatures.consistsOfTwo;
 
 /**
  * A method which <em>may</em> generate one or more command messages in response to an event.
@@ -47,8 +46,8 @@ public final class CommandReactionMethod
         extends AbstractHandlerMethod<Commander, EventClass, EventEnvelope, Result>
         implements CommandingMethod<EventClass, EventEnvelope, Result> {
 
-    private CommandReactionMethod(Method method, MessageAcceptor<EventEnvelope> acceptor) {
-        super(method, acceptor);
+    private CommandReactionMethod(Method method, MethodSignature<EventEnvelope> signature) {
+        super(method, signature);
     }
 
     @Override
@@ -70,7 +69,7 @@ public final class CommandReactionMethod
      * Obtains {@code CommandReactionMethod}s from a class.
      */
     private static final class Factory
-            extends CommandingMethod.Factory<CommandReactionMethod, Accessor> {
+            extends CommandingMethod.Factory<CommandReactionMethod, CommandReactionSignature> {
 
         private static final Factory INSTANCE = new Factory();
 
@@ -92,46 +91,40 @@ public final class CommandReactionMethod
         }
 
         @Override
-        protected CommandReactionMethod doCreate(Method method, Accessor acceptor) {
-            return new CommandReactionMethod(method, acceptor);
+        protected CommandReactionMethod doCreate(Method method,
+                                                 CommandReactionSignature signature) {
+            return new CommandReactionMethod(method, signature);
         }
 
         @Override
-        protected Optional<? extends Accessor>
-        findAcceptorForParameters(Class<?>[] parameterTypes) {
-            int count = parameterTypes.length;
-            if (count < 1 || count > 2) {
-                return Optional.empty();
-            }
-            Class<?> firstParam = parameterTypes[0];
-            if (!Message.class.isAssignableFrom(firstParam)) {
-                return Optional.empty();
-            }
-            if (count == 1) {
-                return Optional.of(Accessor.MESSAGE);
-            }
-            Class<?> secondParam = parameterTypes[1];
-            return EventContext.class.isAssignableFrom(secondParam)
-                   ? Optional.of(Accessor.MESSAGE_AND_CONTEXT)
-                   : Optional.empty();
+        protected Class<CommandReactionSignature> getSignatureClass() {
+            return CommandReactionSignature.class;
         }
     }
 
-    @Immutable
-    private enum Accessor implements MessageAcceptor<EventEnvelope> {
+    private enum CommandReactionSignature implements MethodSignature<EventEnvelope> {
 
         MESSAGE {
             @Override
-            public Object invoke(Object target, Method method, EventEnvelope envelope)
-                    throws InvocationTargetException, IllegalAccessException {
-                return method.invoke(target, envelope.getMessage());
+            public boolean matches(Class<?>[] methodParams) {
+                return consistsOfSingle(methodParams, Message.class);
+            }
+
+            @Override
+            public Object[] extractArguments(EventEnvelope envelope) {
+                return new Object[]{envelope.getMessage()};
             }
         },
+
         MESSAGE_AND_CONTEXT {
             @Override
-            public Object invoke(Object target, Method method, EventEnvelope envelope)
-                    throws InvocationTargetException, IllegalAccessException {
-                return method.invoke(target, envelope.getMessage(), envelope.getEventContext());
+            public boolean matches(Class<?>[] methodParams) {
+                return consistsOfTwo(methodParams, Message.class, EventContext.class);
+            }
+
+            @Override
+            public Object[] extractArguments(EventEnvelope envelope) {
+                return new Object[]{envelope, envelope.getEventContext()};
             }
         }
     }

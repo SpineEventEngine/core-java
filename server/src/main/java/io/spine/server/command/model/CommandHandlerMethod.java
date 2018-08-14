@@ -28,10 +28,10 @@ import io.spine.server.EventProducer;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.model.EventsResult;
-import io.spine.server.model.MessageAcceptor;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
 import io.spine.server.model.MethodFactory;
+import io.spine.server.model.MethodSignature;
 import io.spine.server.procman.ProcessManager;
 
 import java.lang.reflect.Method;
@@ -50,17 +50,17 @@ public final class CommandHandlerMethod
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param method   subscriber method
-     * @param acceptor the {@link MessageAcceptor} to invoke the method
+     * @param method   command handler method
+     * @param signature the {@link MethodSignature} describing the method signature
      */
     private CommandHandlerMethod(Method method,
-                                 MessageAcceptor<CommandEnvelope> acceptor) {
-        super(method, acceptor);
+                                 MethodSignature<CommandEnvelope> signature) {
+        super(method, signature);
     }
 
     static CommandHandlerMethod from(Method method,
-                                     MessageAcceptor<CommandEnvelope> acceptor) {
-        return new CommandHandlerMethod(method, acceptor);
+                                     MethodSignature<CommandEnvelope> signature) {
+        return new CommandHandlerMethod(method, signature);
     }
 
     public static MethodFactory<CommandHandlerMethod, ?> factory() {
@@ -112,8 +112,8 @@ public final class CommandHandlerMethod
 
         @Override
         protected CommandHandlerMethod doCreate(Method method,
-                                                MessageAcceptor<CommandEnvelope> acceptor) {
-            return from(method, acceptor);
+                                                CommandAcceptingSignature signature) {
+            return from(method, signature);
         }
     }
 

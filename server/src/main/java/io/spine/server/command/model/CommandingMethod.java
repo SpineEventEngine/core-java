@@ -33,9 +33,9 @@ import io.spine.server.commandbus.SingleCommand;
 import io.spine.server.commandbus.Split;
 import io.spine.server.commandbus.Transform;
 import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.MessageAcceptor;
 import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
+import io.spine.server.model.MethodSignature;
 import io.spine.type.MessageClass;
 
 import java.util.List;
@@ -66,10 +66,10 @@ public interface CommandingMethod<M extends MessageClass,
      * The implementation base for {@link CommandingMethod} factories.
      *
      * @param <H> the type of created methods
-     * @param <A> the type of {@link MessageAcceptor}
+     * @param <S> the type of {@link MethodSignature}
      */
     abstract class Factory<H extends CommandingMethod,
-                           A extends MessageAcceptor> extends MethodFactory<H, A> {
+                           S extends MethodSignature<?>> extends MethodFactory<H, S> {
 
         protected Factory() {
             super(Command.class, of(Message.class, Iterable.class));

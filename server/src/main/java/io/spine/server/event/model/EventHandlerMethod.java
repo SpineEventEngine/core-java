@@ -20,6 +20,8 @@
 
 package io.spine.server.event.model;
 
+import com.google.protobuf.Message;
+import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
@@ -41,22 +43,32 @@ import java.util.Set;
 public abstract class EventHandlerMethod<T, R extends MethodResult>
         extends AbstractHandlerMethod<T, EventClass, EventEnvelope, R> {
 
-    private final EventAcceptor acceptor;
+    private final EventAcceptingSignature signature;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    protected EventHandlerMethod(Method method, EventAcceptor acceptor) {
-        super(method, acceptor);
-        this.acceptor = acceptor;
+    protected EventHandlerMethod(Method method, EventAcceptingSignature signature) {
+        super(method, signature);
+        this.signature = signature;
     }
 
     @Override
     public HandlerKey key() {
-        HandlerKey key = acceptor.createKey(getRawMethod());
-        return key;
+        Class<?>[] types = getRawMethod().getParameterTypes();
+        @SuppressWarnings("unchecked")
+        Class<? extends Message> eventMessageClass = (Class<? extends Message>) types[0];
+        EventClass eventClass = EventClass.from(eventMessageClass);
+        if (!signature.isAwareOfCommandType()) {
+            return HandlerKey.of(eventClass);
+        } else {
+            @SuppressWarnings("unchecked")
+            Class<? extends Message> commandMessageClass = (Class<? extends Message>) types[1];
+            CommandClass commandClass = CommandClass.from(commandMessageClass);
+            return HandlerKey.of(eventClass, commandClass);
+        }
     }
 
     @Override
@@ -81,7 +93,7 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
      * @param <H> the type of built methods
      */
     protected abstract static class Factory<H extends EventHandlerMethod>
-            extends MethodFactory<H, EventAcceptor> {
+            extends MethodFactory<H, EventAcceptingSignature> {
 
         protected Factory(Class<? extends Annotation> annotation,
                           Set<Class<?>> types) {
@@ -89,9 +101,8 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
         }
 
         @Override
-        protected final Optional<? extends EventAcceptor>
-        findAcceptorForParameters(Class<?>[] parameterTypes) {
-            return EventAcceptor.findFor(parameterTypes);
+        protected Class<EventAcceptingSignature> getSignatureClass() {
+            return EventAcceptingSignature.class;
         }
     }
 }

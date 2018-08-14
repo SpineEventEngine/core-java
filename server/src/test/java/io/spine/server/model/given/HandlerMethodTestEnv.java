@@ -23,23 +23,24 @@ package io.spine.server.model.given;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
-import io.spine.server.model.MessageAcceptor;
 import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
+import io.spine.server.model.MethodSignature;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Optional;
 
 import static com.google.common.collect.ImmutableSet.of;
+import static io.spine.server.model.MethodSignatures.consistsOfSingle;
+import static io.spine.server.model.MethodSignatures.consistsOfTwo;
 
 /**
  * @author Alexander Litus
@@ -132,7 +133,7 @@ public class HandlerMethodTestEnv {
         extends AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> {
 
         public TwoParamMethod(Method method) {
-            super(method, TwoParamAcceptor.INSTANCE);
+            super(method, TwoParamSignature.INSTANCE);
         }
 
         @Override
@@ -155,7 +156,7 @@ public class HandlerMethodTestEnv {
             extends AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> {
 
         public OneParamMethod(Method method) {
-            super(method, OneParamAcceptor.INSTANCE);
+            super(method, OneParamSignature.INSTANCE);
         }
 
         @Override
@@ -173,7 +174,7 @@ public class HandlerMethodTestEnv {
         }
 
         private static class Factory
-                extends MethodFactory<OneParamMethod, MessageAcceptor<EventEnvelope>> {
+                extends MethodFactory<OneParamMethod, OneParamSignature> {
 
             private static final Factory INSTANCE = new Factory();
 
@@ -197,14 +198,13 @@ public class HandlerMethodTestEnv {
 
             @Override
             protected OneParamMethod doCreate(Method method,
-                                              MessageAcceptor<EventEnvelope> acceptor) {
+                                              OneParamSignature signature) {
                 return new OneParamMethod(method);
             }
 
             @Override
-            protected Optional<MessageAcceptor<EventEnvelope>>
-            findAcceptorForParameters(Class<?>[] parameterTypes) {
-                return Optional.empty();
+            protected Class<OneParamSignature> getSignatureClass() {
+                return OneParamSignature.class;
             }
         }
 
@@ -215,26 +215,34 @@ public class HandlerMethodTestEnv {
     }
 
     @Immutable
-    private enum OneParamAcceptor implements MessageAcceptor<EventEnvelope> {
+    private enum OneParamSignature implements MethodSignature<EventEnvelope> {
 
         INSTANCE;
 
         @Override
-        public Object invoke(Object target, Method method, EventEnvelope envelope)
-                throws InvocationTargetException, IllegalAccessException {
-            return method.invoke(target, envelope.getMessage());
+        public boolean matches(Class<?>[] methodParams) {
+            return consistsOfSingle(methodParams, Message.class);
+        }
+
+        @Override
+        public Object[] extractArguments(EventEnvelope envelope) {
+            return new Object[]{envelope.getMessage()};
         }
     }
 
     @Immutable
-    private enum TwoParamAcceptor implements MessageAcceptor<EventEnvelope> {
+    private enum TwoParamSignature implements MethodSignature<EventEnvelope> {
 
         INSTANCE;
 
         @Override
-        public Object invoke(Object target, Method method, EventEnvelope envelope)
-                throws InvocationTargetException, IllegalAccessException {
-            return method.invoke(target, envelope.getMessage(), envelope.getEventContext());
+        public boolean matches(Class<?>[] methodParams) {
+            return consistsOfTwo(methodParams, Message.class, EventContext.class);
+        }
+
+        @Override
+        public Object[] extractArguments(EventEnvelope envelope) {
+            return new Object[]{envelope.getMessage(), envelope.getEventContext()};
         }
     }
 }

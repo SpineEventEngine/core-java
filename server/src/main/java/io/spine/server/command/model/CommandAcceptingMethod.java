@@ -29,13 +29,15 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MessageAcceptor;
 import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
+import io.spine.server.model.MethodSignature;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Optional;
 
 import static com.google.common.collect.ImmutableSet.of;
+import static io.spine.server.model.MethodSignatures.consistsOfSingle;
+import static io.spine.server.model.MethodSignatures.consistsOfTwo;
 
 /**
  * An abstract base for methods that accept a command message and optionally its context.
@@ -48,8 +50,8 @@ import static com.google.common.collect.ImmutableSet.of;
 public abstract class CommandAcceptingMethod<T, R extends MethodResult>
         extends AbstractHandlerMethod<T, CommandClass, CommandEnvelope, R> {
 
-    CommandAcceptingMethod(Method method, MessageAcceptor<CommandEnvelope> acceptor) {
-        super(method, acceptor);
+    CommandAcceptingMethod(Method method, MethodSignature<CommandEnvelope> signature) {
+        super(method, signature);
     }
 
     @Override
@@ -58,60 +60,42 @@ public abstract class CommandAcceptingMethod<T, R extends MethodResult>
     }
 
     protected abstract static class Factory<H extends CommandAcceptingMethod>
-            extends MethodFactory<H, MessageAcceptor<CommandEnvelope>> {
+            extends MethodFactory<H, CommandAcceptingSignature> {
 
         protected Factory(Class<? extends Annotation> annotation) {
             super(annotation, of(Message.class, Iterable.class));
         }
 
         @Override
-        protected Optional<MessageAcceptor<CommandEnvelope>>
-        findAcceptorForParameters(Class<?>[] parameterTypes) {
-            int count = parameterTypes.length;
-            switch (count) {
-                case 1:
-                    return CommandAcceptor.MESSAGE.matches(parameterTypes)
-                           ? Optional.of(CommandAcceptor.MESSAGE)
-                           : Optional.empty();
-                case 2:
-                    return CommandAcceptor.MESSAGE_AND_CONTEXT.matches(parameterTypes)
-                           ? Optional.of(CommandAcceptor.MESSAGE_AND_CONTEXT)
-                           : Optional.empty();
-                default:
-                    return Optional.empty();
-            }
+        protected Class<CommandAcceptingSignature> getSignatureClass() {
+            return CommandAcceptingSignature.class;
         }
     }
 
-    @Immutable
-    private enum CommandAcceptor implements MessageAcceptor<CommandEnvelope> {
+    enum CommandAcceptingSignature implements MethodSignature<CommandEnvelope> {
 
         MESSAGE {
             @Override
-            public Object invoke(Object target, Method method, CommandEnvelope envelope)
-                    throws InvocationTargetException, IllegalAccessException {
-                return method.invoke(target, envelope.getMessage());
+            public boolean matches(Class<?>[] methodParams) {
+                return consistsOfSingle(methodParams, Message.class);
             }
 
             @Override
-            boolean matches(Class<?>[] parameterTypes) {
-                return Message.class.isAssignableFrom(parameterTypes[0]);
+            public Object[] extractArguments(CommandEnvelope envelope) {
+                return new Object[] {envelope.getMessage()};
             }
         },
+
         MESSAGE_AND_CONTEXT {
             @Override
-            public Object invoke(Object target, Method method, CommandEnvelope envelope)
-                    throws InvocationTargetException, IllegalAccessException {
-                return method.invoke(target, envelope.getMessage(), envelope.getCommandContext());
+            public boolean matches(Class<?>[] methodParams) {
+                return consistsOfTwo(methodParams, Message.class, CommandContext.class);
             }
 
             @Override
-            boolean matches(Class<?>[] parameterTypes) {
-                return Message.class.isAssignableFrom(parameterTypes[0])
-                        && CommandContext.class.isAssignableFrom(parameterTypes[1]);
+            public Object[] extractArguments(CommandEnvelope envelope) {
+                return new Object[] {envelope.getMessage(), envelope.getCommandContext()};
             }
         };
-
-        abstract boolean matches(Class<?>[] parameterTypes);
     }
 }
