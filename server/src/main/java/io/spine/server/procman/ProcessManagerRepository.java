@@ -36,8 +36,6 @@ import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
-import io.spine.server.bus.Bus;
-import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
@@ -82,6 +80,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("OverlyCoupledClass")
 public abstract class ProcessManagerRepository<I,
                                                P extends ProcessManager<I, S, ?>,
                                                S extends Message>
@@ -98,22 +97,13 @@ public abstract class ProcessManagerRepository<I,
             RejectionRouting.withDefault(RejectionProducers.fromContext());
 
     private final Supplier<PmCommandDelivery<I, P>> commandDeliverySupplier =
-            memoize(() -> {
-                PmCommandDelivery<I, P> result = new PmCommandDelivery<>(this);
-                return result;
-            });
+            memoize(this::createCommandDelivery);
 
     private final Supplier<PmEventDelivery<I, P>> eventDeliverySupplier =
-            memoize(() -> {
-                PmEventDelivery<I, P> result = new PmEventDelivery<>(this);
-                return result;
-            });
+            memoize(this::createEventDelivery);
 
     private final Supplier<PmRejectionDelivery<I, P>> rejectionDeliverySupplier =
-            memoize(() -> {
-                PmRejectionDelivery<I, P> result = new PmRejectionDelivery<>(this);
-                return result;
-            });
+            memoize(this::crateRejectionDelivery);
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -185,7 +175,7 @@ public abstract class ProcessManagerRepository<I,
         if (reactsOnDomesticRejections || reactsOnExternalRejections) {
             boundedContext.registerRejectionDispatcher(this);
         }
-        
+
         boolean reactsOnDomesticEvents = !getMessageClasses().isEmpty();
         boolean reactsOnExternalEvents = !getExternalEventClasses().isEmpty();
 
@@ -212,27 +202,6 @@ public abstract class ProcessManagerRepository<I,
         ServerEnvironment.getInstance()
                          .getSharding()
                          .register(this);
-    }
-
-    /**
-     * Registers the given dispatcher in the bus if there is at least one message class declared
-     * for dispatching by the dispatcher.
-     *
-     * @param bus        the bus to register dispatchers in
-     * @param dispatcher the dispatcher to register
-     * @param <D>        the type of dispatcher
-     * @return {@code true} if there are message classes to dispatch by the given dispatchers,
-     *         {@code false} otherwise
-     */
-    @SuppressWarnings("unchecked")  // To avoid a long "train" of generic parameter definitions.
-    private static <D extends MessageDispatcher<?, ?, ?>>
-    boolean register(Bus<?, ?, ?, D> bus, D dispatcher) {
-        boolean hasHandlerMethods = !dispatcher.getMessageClasses()
-                                               .isEmpty();
-        if (hasHandlerMethods) {
-            bus.register(dispatcher);
-        }
-        return hasHandlerMethods;
     }
 
     /**
@@ -518,6 +487,18 @@ public abstract class ProcessManagerRepository<I,
         super.close();
     }
 
+    private PmCommandDelivery<I, P> createCommandDelivery() {
+        return new PmCommandDelivery<>(this);
+    }
+
+    private PmEventDelivery<I, P> createEventDelivery() {
+        return new PmEventDelivery<>(this);
+    }
+
+    private PmRejectionDelivery<I, P> crateRejectionDelivery() {
+        return new PmRejectionDelivery<>(this);
+    }
+
     /**
      * An implementation of an external message dispatcher feeding external events
      * to {@code ProcessManager} instances.
@@ -539,5 +520,6 @@ public abstract class ProcessManagerRepository<I,
                              " (class: %s, id: %s)",
                      envelope, exception);
         }
+
     }
 }
