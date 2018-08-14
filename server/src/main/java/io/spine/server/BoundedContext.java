@@ -27,6 +27,7 @@ import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
+import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Entity;
@@ -43,8 +44,6 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.SystemGateway;
 import io.spine.type.TypeName;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.Set;
@@ -82,7 +81,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public abstract class BoundedContext
         extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
-        implements AutoCloseable {
+        implements AutoCloseable, Logging {
 
     /**
      * The name of the bounded context, which is used to distinguish the context in an application
@@ -329,15 +328,5 @@ public abstract class BoundedContext
         if (tenantIndex != null) {
             tenantIndex.close();
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(BoundedContext.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }
