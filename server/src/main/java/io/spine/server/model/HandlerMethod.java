@@ -52,6 +52,8 @@ public interface HandlerMethod<T,
     M getMessageClass();
 
     /**
+     * Creates a new instance of {@link HandlerKey handler key} for this method.
+     *
      * @return the key of the handler method
      */
     HandlerKey key();
