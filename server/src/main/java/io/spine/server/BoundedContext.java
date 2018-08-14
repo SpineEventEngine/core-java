@@ -30,6 +30,9 @@ import io.spine.core.Event;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.commandbus.CommandDispatcherDelegate;
+import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VisibilityGuard;
@@ -171,6 +174,22 @@ public abstract class BoundedContext
         repository.setBoundedContext(this);
         guard.register(repository);
         repository.onRegistered();
+    }
+
+    /**
+     * Registers the passed command dispatcher at the Command Bus of this Bounded Context.
+     */
+    public void registerDispatcher(CommandDispatcher<?> dispatcher) {
+        checkNotNull(dispatcher);
+        getCommandBus().register(dispatcher);
+    }
+
+    /**
+     * Registers the passed command dispatcher at the Command Bus of this Bounded Context.
+     */
+    public void registerDispatcher(CommandDispatcherDelegate<?> dispatcher) {
+        checkNotNull(dispatcher);
+        registerDispatcher(DelegatingCommandDispatcher.of(dispatcher));
     }
 
     /**

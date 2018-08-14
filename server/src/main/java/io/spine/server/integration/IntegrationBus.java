@@ -29,8 +29,8 @@ import io.spine.server.bus.Bus;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
-import io.spine.server.event.EventBus;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.event.EventBus;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.server.transport.PublisherHub;
@@ -109,6 +109,7 @@ import static java.lang.String.format;
  *
  * @author Alex Tymchenko
  */
+@SuppressWarnings("OverlyCoupledClass")
 public class IntegrationBus extends MulticastBus<ExternalMessage,
                                                  ExternalMessageEnvelope,
                                                  ExternalMessageClass,
@@ -128,7 +129,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     private final PublisherHub publisherHub;
     private final ConfigurationChangeObserver configurationChangeObserver;
 
-    @SuppressWarnings("ConstantConditions")     // `TransportFactory` has already been initialized.
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+        // `TransportFactory` has already been initialized.
     private IntegrationBus(Builder builder) {
         super(builder);
         TransportFactory transportFactory = builder.getTransportFactory()
@@ -155,9 +157,9 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                 });
     }
 
-    private static ImmutableSet<BusAdapter<?, ?>> createAdapters(Builder builder,
-                                                                 PublisherHub publisherHub) {
-        return ImmutableSet.<BusAdapter<?, ?>>of(
+    private static
+    ImmutableSet<BusAdapter<?, ?>> createAdapters(Builder builder, PublisherHub publisherHub) {
+        return ImmutableSet.of(
                 EventBusAdapter.builderWith(builder.eventBus, builder.boundedContextName)
                                .setPublisherHub(publisherHub)
                                .build(),
@@ -360,7 +362,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
 
         configurationChangeObserver.close();
         // Declare that this instance has no needs.
-        notifyOfNeeds(ImmutableSet.<ChannelId>of());
+        notifyOfNeeds(ImmutableSet.of());
 
         subscriberHub.close();
         publisherHub.close();

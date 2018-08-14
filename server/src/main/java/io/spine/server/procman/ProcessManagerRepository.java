@@ -174,13 +174,17 @@ public abstract class ProcessManagerRepository<I,
         super.onRegistered();
 
         BoundedContext boundedContext = getBoundedContext();
+
+        boolean handlesCommands = !getCommandClasses().isEmpty();
+        if (handlesCommands) {
+            boundedContext.registerDispatcher(this);
+        }
+
         DelegatingRejectionDispatcher<I> rejDispatcher =
                 DelegatingRejectionDispatcher.of(this);
-
-        boolean handlesCommands = register(boundedContext.getCommandBus(),
-                                           DelegatingCommandDispatcher.of(this));
         RejectionBus rejectionBus = boundedContext.getRejectionBus();
         boolean handlesDomesticRejections = register(rejectionBus, rejDispatcher);
+
         boolean handlesExternalRejections = register(boundedContext.getIntegrationBus(),
                                                      rejDispatcher.getExternalDispatcher());
         boolean handlesDomesticEvents = !getMessageClasses().isEmpty();
