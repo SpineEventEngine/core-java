@@ -205,17 +205,6 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
-     * Registers itself as {@link io.spine.server.event.EventDispatcher EventDispatcher} if
-     * process managers of this repository are subscribed at least to one event.
-     */
-    @Override
-    protected void registerAsEventDispatcher() {
-        if (!getMessageClasses().isEmpty()) {
-            super.registerAsEventDispatcher();
-        }
-    }
-
-    /**
      * Obtains a set of event classes on which process managers of this repository react.
      *
      * @return a set of event classes or empty set if process managers do not react on
@@ -233,7 +222,8 @@ public abstract class ProcessManagerRepository<I,
      * @return a set of event classes or an empty set, if process managers do not react on
      *         external events
      */
-    private Set<EventClass> getExternalEventClasses() {
+    @Override
+    public Set<EventClass> getExternalEventClasses() {
         return processManagerClass().getExternalEventClasses();
     }
 
@@ -454,7 +444,7 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
+    public ExternalMessageDispatcher<I> createExternalDispatcher() {
         return new PmExternalEventDispatcher();
     }
 
@@ -517,7 +507,7 @@ public abstract class ProcessManagerRepository<I,
             checkNotNull(envelope);
             checkNotNull(exception);
             logError("Error dispatching external event to process manager" +
-                             " (class: %s, id: %s)",
+                             " (event class: %s, id: %s)",
                      envelope, exception);
         }
 

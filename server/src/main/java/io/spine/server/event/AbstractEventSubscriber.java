@@ -21,21 +21,27 @@
 package io.spine.server.event;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.core.MessageEnvelope;
 import io.spine.logging.Logging;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.event.model.EventSubscriberClass;
 import io.spine.server.event.model.EventSubscriberMethod;
+import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.ExternalMessageClass;
+import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.tenant.EventOperation;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
-import org.slf4j.Logger;
 
 import java.util.Set;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.event.model.EventSubscriberClass.asEventSubscriberClass;
 import static java.lang.String.format;
 
@@ -49,12 +55,11 @@ import static java.lang.String.format;
  * @author Alex Tymchenko
  * @see EventBus#register(MessageDispatcher)
  */
-public abstract class AbstractEventSubscriber implements EventDispatcher<String>, EventSubscriber {
+public abstract class AbstractEventSubscriber
+        implements EventDispatcher<String>, EventSubscriber, Logging {
 
     /** Model class for this subscriber. */
     private final EventSubscriberClass<?> thisClass = asEventSubscriberClass(getClass());
-    /** Lazily initialized logger. */
-    private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
 
     /**
      * {@inheritDoc}
@@ -98,21 +103,62 @@ public abstract class AbstractEventSubscriber implements EventDispatcher<String>
         log().error(errorMessage, exception);
     }
 
-    /**
-     * Obtains the instance of logger associated with the class of the subscriber.
-     */
-    protected Logger log() {
-        return loggerSupplier.get();
-    }
-
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
     public Set<EventClass> getMessageClasses() {
         return thisClass.getEventClasses();
     }
 
+    @Override
+    public Set<EventClass> getExternalEventClasses() {
+        return thisClass.getExternalEventClasses();
+    }
+
+    @Override
+    public ExternalMessageDispatcher<String> createExternalDispatcher() {
+        return new ExternalDispatcher();
+    }
+
     private void handle(EventEnvelope envelope) {
         EventSubscriberMethod method = thisClass.getSubscriber(envelope.getMessageClass());
         method.invoke(this, envelope.getMessage(), envelope.getEventContext());
+    }
+
+    /**
+     * Dispatches external events to this subscriber.
+     */
+    private final class ExternalDispatcher implements ExternalMessageDispatcher<String>, Logging {
+
+        @Override
+        public Set<ExternalMessageClass> getMessageClasses() {
+            return ExternalMessageClass.fromEventClasses(thisClass.getExternalEventClasses());
+        }
+
+        @CanIgnoreReturnValue
+        @Override
+        public Set<String> dispatch(ExternalMessageEnvelope envelope) {
+            ExternalMessage externalMessage = envelope.getOuterObject();
+            Event event = unpack(externalMessage.getOriginalMessage());
+            EventEnvelope eventEnvelope = EventEnvelope.of(event);
+            return AbstractEventSubscriber.this.dispatch(eventEnvelope);
+        }
+
+        @Override
+        public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
+            checkNotNull(envelope);
+            checkNotNull(exception);
+            logError("Error dispatching external event to event subscriber " +
+                             "(event class: %s, id: %s)",
+                     envelope, exception);
+        }
+
+        private void logError(String msgFormat,
+                              MessageEnvelope envelope,
+                              RuntimeException exception) {
+            MessageClass messageClass = envelope.getMessageClass();
+            String messageId = Stringifiers.toString(envelope.getId());
+            String errorMessage = format(msgFormat, messageClass, messageId);
+            _error(errorMessage, exception);
+        }
     }
 }

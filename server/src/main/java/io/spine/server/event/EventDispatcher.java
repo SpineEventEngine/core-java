@@ -23,6 +23,9 @@ package io.spine.server.event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.bus.MulticastDispatcher;
+import io.spine.server.integration.ExternalMessageDispatcher;
+
+import java.util.Set;
 
 /**
  * {@code EventDispatcher} delivers events to subscribers.
@@ -32,6 +35,14 @@ import io.spine.server.bus.MulticastDispatcher;
  */
 public interface EventDispatcher<I> extends MulticastDispatcher<EventClass, EventEnvelope, I> {
 
+    default Set<EventClass> getEventClasses() {
+        return getMessageClasses();
+    }
+
+    Set<EventClass> getExternalEventClasses();
+
+    ExternalMessageDispatcher<I> createExternalDispatcher();
+
     enum Error {
 
         DISPATCHING_EXTERNAL_EVENT("Error dispatching external event (class: %s, id: %s)");
@@ -40,10 +51,6 @@ public interface EventDispatcher<I> extends MulticastDispatcher<EventClass, Even
 
         Error(String messageFormat) {
             this.messageFormat = messageFormat;
-        }
-
-        public String getMessageFormat() {
-            return messageFormat;
         }
 
         public String format(Object... args) {

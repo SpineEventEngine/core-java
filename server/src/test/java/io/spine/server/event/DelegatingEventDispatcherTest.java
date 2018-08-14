@@ -81,7 +81,7 @@ class DelegatingEventDispatcherTest {
     @DisplayName("expose external dispatcher that delegates `onError`")
     void exposeExternalDispatcher() {
         ExternalMessageDispatcher<String> extMessageDispatcher =
-                delegatingDispatcher.getExternalDispatcher();
+                delegatingDispatcher.createExternalDispatcher();
 
         TestEventFactory factory = TestEventFactory.newInstance(getClass());
         StringValue eventMsg = newUuidValue();

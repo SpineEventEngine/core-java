@@ -160,7 +160,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         Set<EventClass> eventClasses = eventDispatcher.getMessageClasses();
 
         ExternalMessageDispatcher<I> extEventDispatcher;
-        extEventDispatcher = eventDispatcher.getExternalDispatcher();
+        extEventDispatcher = eventDispatcher.createExternalDispatcher();
         Set<ExternalMessageClass> extEventClasses = extEventDispatcher.getMessageClasses();
 
         DelegatingRejectionDispatcher<I> rejectionDispatcher;

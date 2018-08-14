@@ -37,7 +37,9 @@ import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VisibilityGuard;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventFactory;
+import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
@@ -195,6 +197,28 @@ public abstract class BoundedContext
     public void registerCommandDispatcher(CommandDispatcherDelegate<?> dispatcher) {
         checkNotNull(dispatcher);
         registerCommandDispatcher(DelegatingCommandDispatcher.of(dispatcher));
+    }
+
+    /**
+     * Registers the passed event dispatcher with the {@code EventBus} of
+     * this {@code BoundedContext}, if this dispatcher handles domestic events.
+     * If the dispatcher handles external events, registers it with {@code IntegrationBus}.
+     */
+    public void registerEventDispatcher(EventDispatcher<?> dispatcher) {
+        checkNotNull(dispatcher);
+        boolean handlesDomesticEvents = !dispatcher.getEventClasses()
+                                                   .isEmpty();
+        if (handlesDomesticEvents) {
+            getEventBus().register(dispatcher);
+        }
+
+        boolean handlesExternalEvents = !dispatcher.getExternalEventClasses()
+                                                   .isEmpty();
+        if (handlesExternalEvents) {
+            ExternalMessageDispatcher<?> externalDispatcher =
+                    dispatcher.createExternalDispatcher();
+            getIntegrationBus().register(externalDispatcher);
+        }
     }
 
     /**

@@ -73,6 +73,11 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
     }
 
     @Override
+    public Set<EventClass> getExternalEventClasses() {
+        return delegate.getExternalEventClasses();
+    }
+
+    @Override
     public Set<I> dispatch(EventEnvelope envelope) {
         return delegate.dispatchEvent(envelope);
     }
@@ -87,7 +92,8 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
      *
      * @return the external rejection dispatcher proxying calls to the underlying instance
      */
-    public ExternalMessageDispatcher<I> getExternalDispatcher() {
+    @Override
+    public ExternalMessageDispatcher<I> createExternalDispatcher() {
         return new ExternalMessageDispatcher<I>() {
             @Override
             public Set<ExternalMessageClass> getMessageClasses() {

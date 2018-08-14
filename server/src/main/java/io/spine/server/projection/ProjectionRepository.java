@@ -144,8 +144,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         boolean noEventSubscriptions = getMessageClasses().isEmpty();
         if (noEventSubscriptions) {
             boolean noExternalSubscriptions =
-                    getExternalEventDispatcher().getMessageClasses()
-                                                .isEmpty();
+                    createExternalDispatcher().getMessageClasses()
+                                              .isEmpty();
             if (noExternalSubscriptions) {
                 throw newIllegalStateException(
                         "Projections of the repository %s have neither domestic nor external " +
@@ -159,7 +159,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     }
 
     @Override
-    protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
+    public ExternalMessageDispatcher<I> createExternalDispatcher() {
         return new ProjectionExternalEventDispatcher();
     }
 
@@ -250,6 +250,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     public Set<EventClass> getMessageClasses() {
         return projectionClass().getEventClasses();
+    }
+
+    @Override
+    public Set<EventClass> getExternalEventClasses() {
+        return projectionClass().getExternalEventClasses();
     }
 
     @Override

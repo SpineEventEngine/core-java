@@ -20,24 +20,25 @@
 
 package io.spine.system.server.given;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventDispatcher;
+import io.spine.server.integration.ExternalMessageDispatcher;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.util.Exceptions.unsupported;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
-import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -75,16 +76,18 @@ abstract class AbstractEventAccumulator implements EventDispatcher<String> {
 
     @Override
     public final Set<EventClass> getMessageClasses() {
-        Collection<Class<? extends Message>> messageClasses = getEventClasses();
-        return messageClasses.stream()
-                             .map(EventClass::from)
-                             .collect(toSet());
+        return getEventClasses();
     }
 
-    /**
-     * Obtains the Java classes of the dispatched events.
-     */
-    protected abstract Collection<Class<? extends Message>> getEventClasses();
+    @Override
+    public Set<EventClass> getExternalEventClasses() {
+        return ImmutableSet.of();
+    }
+
+    @Override
+    public ExternalMessageDispatcher<String> createExternalDispatcher() {
+        throw unsupported();
+    }
 
     /**
      * {@linkplain org.junit.jupiter.api.Assertions#fail(Throwable) Fails} with the given exception.

@@ -20,9 +20,8 @@
 
 package io.spine.system.server.given;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
+import io.spine.core.EventClass;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
@@ -52,7 +51,7 @@ import io.spine.system.server.StartCompanyEstablishing;
 import io.spine.system.server.TargetAssignedToCommand;
 import io.spine.type.TypeUrl;
 
-import java.util.Collection;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
@@ -73,14 +72,14 @@ public final class CommandLifecycleTestEnv {
     public static class CommandLifecycleWatcher extends AbstractEventAccumulator {
 
         @Override
-        protected Collection<Class<? extends Message>> getEventClasses() {
-            return ImmutableSet.of(CommandReceived.class,
-                                   CommandAcknowledged.class,
-                                   CommandDispatched.class,
-                                   TargetAssignedToCommand.class,
-                                   CommandHandled.class,
-                                   CommandErrored.class,
-                                   CommandRejected.class);
+        public Set<EventClass> getEventClasses() {
+            return EventClass.setOf(CommandReceived.class,
+                                    CommandAcknowledged.class,
+                                    CommandDispatched.class,
+                                    TargetAssignedToCommand.class,
+                                    CommandHandled.class,
+                                    CommandErrored.class,
+                                    CommandRejected.class);
         }
     }
 
