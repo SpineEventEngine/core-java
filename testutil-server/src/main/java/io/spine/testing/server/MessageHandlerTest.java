@@ -161,7 +161,7 @@ public abstract class MessageHandlerTest<I,
         assertNotNull(entityRepository);
 
         Set<CommandClass> commandClasses = getAllCommandClasses();
-        boundedContext.registerDispatcher(new VoidCommandDispatcher(commandClasses));
+        boundedContext.registerCommandDispatcher(new VoidCommandDispatcher(commandClasses));
     }
 
     /**

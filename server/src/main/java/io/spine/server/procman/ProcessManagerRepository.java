@@ -55,8 +55,6 @@ import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
-import io.spine.server.rejection.DelegatingRejectionDispatcher;
-import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
@@ -168,7 +166,8 @@ public abstract class ProcessManagerRepository<I,
      *
      * <p>Throws an {@code IllegalStateException} otherwise.
      */
-    @SuppressWarnings("MethodWithMoreThanThreeNegations")   // It's fine, as reflects the logic.
+    @SuppressWarnings({"MethodWithMoreThanThreeNegations", "LocalVariableNamingConvention"})
+    // It's fine, as reflects the logic.
     @Override
     public void onRegistered() {
         super.onRegistered();
@@ -177,32 +176,37 @@ public abstract class ProcessManagerRepository<I,
 
         boolean handlesCommands = !getCommandClasses().isEmpty();
         if (handlesCommands) {
-            boundedContext.registerDispatcher(this);
+            boundedContext.registerCommandDispatcher(this);
         }
 
-        DelegatingRejectionDispatcher<I> rejDispatcher =
-                DelegatingRejectionDispatcher.of(this);
-        RejectionBus rejectionBus = boundedContext.getRejectionBus();
-        boolean handlesDomesticRejections = register(rejectionBus, rejDispatcher);
+        boolean reactsOnDomesticRejections = !getRejectionClasses().isEmpty();
+        boolean reactsOnExternalRejections = !getExternalRejectionClasses().isEmpty();
 
-        boolean handlesExternalRejections = register(boundedContext.getIntegrationBus(),
-                                                     rejDispatcher.getExternalDispatcher());
-        boolean handlesDomesticEvents = !getMessageClasses().isEmpty();
-        boolean handlesExternalEvents = !getExternalEventDispatcher().getMessageClasses()
-                                                                     .isEmpty();
+        if (reactsOnDomesticRejections || reactsOnExternalRejections) {
+            boundedContext.registerRejectionDispatcher(this);
+        }
+        
+        boolean reactsOnDomesticEvents = !getMessageClasses().isEmpty();
+        boolean reactsOnExternalEvents = !getExternalEventClasses().isEmpty();
 
-        boolean subscribesToEvents = handlesDomesticEvents || handlesExternalEvents;
-        boolean reactsUponRejections = handlesDomesticRejections || handlesExternalRejections;
+        boolean dispatchesEvents = reactsOnDomesticEvents || reactsOnExternalEvents;
+        boolean reactsOnRejections = reactsOnDomesticRejections || reactsOnExternalRejections;
 
-        if (!handlesCommands && !subscribesToEvents && !reactsUponRejections) {
+        if (!handlesCommands && !dispatchesEvents && !reactsOnRejections) {
             throw newIllegalStateException(
                     "Process managers of the repository %s have no command handlers, " +
                             "and do not react upon any rejections or events.", this);
         }
+
+        initErrorHandler();
+    }
+
+    private void initErrorHandler() {
+        BoundedContext boundedContext = getBoundedContext();
         SystemGateway systemGateway = boundedContext.getSystemGateway();
         this.commandErrorHandler = CommandErrorHandler
                 .newBuilder()
-                .setRejectionBus(rejectionBus)
+                .setRejectionBus(boundedContext.getRejectionBus())
                 .setSystemGateway(systemGateway)
                 .build();
         ServerEnvironment.getInstance()
@@ -243,14 +247,25 @@ public abstract class ProcessManagerRepository<I,
     }
 
     /**
-     * Obtains a set of event classes on which process managers of this repository are subscribed.
+     * Obtains a set of event classes on which process managers of this repository react.
      *
-     * @return a set of event classes or empty set if process managers do not subscribe to events
+     * @return a set of event classes or empty set if process managers do not react on
+     *         domestic events
      */
     @Override
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
     public Set<EventClass> getMessageClasses() {
         return processManagerClass().getEventClasses();
+    }
+
+    /**
+     * Obtains classes of external events on which process managers managed by this repository
+     * react.
+     *
+     * @return a set of event classes or an empty set, if process managers do not react on
+     *         external events
+     */
+    private Set<EventClass> getExternalEventClasses() {
+        return processManagerClass().getExternalEventClasses();
     }
 
     /**

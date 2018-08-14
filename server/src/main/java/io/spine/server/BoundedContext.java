@@ -41,7 +41,10 @@ import io.spine.server.event.EventFactory;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
+import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionBus;
+import io.spine.server.rejection.RejectionDispatcher;
+import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
@@ -177,19 +180,46 @@ public abstract class BoundedContext
     }
 
     /**
-     * Registers the passed command dispatcher at the Command Bus of this Bounded Context.
+     * Registers the passed command dispatcher with the {@code CommandBus} of
+     * this {@code BoundedContext}.
      */
-    public void registerDispatcher(CommandDispatcher<?> dispatcher) {
+    public void registerCommandDispatcher(CommandDispatcher<?> dispatcher) {
         checkNotNull(dispatcher);
         getCommandBus().register(dispatcher);
     }
 
     /**
-     * Registers the passed command dispatcher at the Command Bus of this Bounded Context.
+     * Registers the passed command dispatcher with the {@code CommandBus} of
+     * this {@code BoundedContext}.
      */
-    public void registerDispatcher(CommandDispatcherDelegate<?> dispatcher) {
+    public void registerCommandDispatcher(CommandDispatcherDelegate<?> dispatcher) {
         checkNotNull(dispatcher);
-        registerDispatcher(DelegatingCommandDispatcher.of(dispatcher));
+        registerCommandDispatcher(DelegatingCommandDispatcher.of(dispatcher));
+    }
+
+    /**
+     * Registers the passed rejection dispatcher with the {@code RejectionBus} of
+     * this {@code BoundedContext}.
+     */
+    public void registerRejectionDispatcher(RejectionDispatcher<?> dispatcher) {
+        checkNotNull(dispatcher);
+        getRejectionBus().register(dispatcher);
+    }
+
+    /**
+     * Registers the passed rejection dispatcher with the {@code RejectionBus} of
+     * this {@code BoundedContext}.
+     */
+    public void registerRejectionDispatcher(RejectionDispatcherDelegate<?> dispatcher) {
+        checkNotNull(dispatcher);
+        DelegatingRejectionDispatcher<?> delegatingDispatcher =
+                DelegatingRejectionDispatcher.of(dispatcher);
+        if (!dispatcher.getRejectionClasses().isEmpty()) {
+            registerRejectionDispatcher(delegatingDispatcher);
+        }
+        if (!dispatcher.getExternalRejectionClasses().isEmpty()) {
+            getIntegrationBus().register(delegatingDispatcher.getExternalDispatcher());
+        }
     }
 
     /**

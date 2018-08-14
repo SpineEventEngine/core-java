@@ -87,7 +87,7 @@ public abstract class EventDispatchingRepository<I,
         ExternalMessageDispatcher<I> thisAsExternal = getExternalEventDispatcher();
         if(!thisAsExternal.getMessageClasses().isEmpty()) {
             getBoundedContext().getIntegrationBus()
-                               .register(getExternalEventDispatcher());
+                               .register(thisAsExternal);
         }
     }
 
