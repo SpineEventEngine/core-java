@@ -28,7 +28,7 @@ import io.spine.server.integration.ExternalMessageDispatcher;
 import java.util.Set;
 
 /**
- * {@code EventDispatcher} delivers events to subscribers.
+ * {@code EventDispatcher} delivers events to {@linkplain EventReceiver receiving} objects.
  *
  * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
