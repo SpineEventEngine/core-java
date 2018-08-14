@@ -37,5 +37,5 @@ ext {
 
     spineTimeVersion = '0.10.45-SNAPSHOT'
 
-    gRpcVersion = '1.13.0'
+    gRpcVersion = '1.14.0'
 }
