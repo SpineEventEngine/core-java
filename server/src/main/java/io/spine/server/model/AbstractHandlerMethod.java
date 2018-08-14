@@ -108,7 +108,7 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     /**
-     * Returns the handling method.
+     * {@inheritDoc}
      */
     @Override
     public Method getRawMethod() {
@@ -131,7 +131,9 @@ public abstract class AbstractHandlerMethod<T,
         return result;
     }
 
-    /** Returns the set of method attributes configured for this method. */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Set<MethodAttribute<?>> getAttributes() {
         return attributes;
