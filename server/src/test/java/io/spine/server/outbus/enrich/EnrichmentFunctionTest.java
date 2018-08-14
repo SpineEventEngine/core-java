@@ -33,7 +33,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -50,12 +50,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("EnrichmentFunction should")
 class EnrichmentFunctionTest {
 
-    private Function<ProjectCreated, ProjectCreated.Enrichment> function;
+    private BiFunction<ProjectCreated, EventContext, ProjectCreated.Enrichment> function;
     private FieldEnrichment<ProjectCreated, ProjectCreated.Enrichment, EventContext> fieldEnrichment;
 
     @BeforeEach
     void setUp() {
-        this.function = input -> {
+        this.function = (input, context) -> {
             if (input == null) {
                 return null;
             }
@@ -76,19 +76,21 @@ class EnrichmentFunctionTest {
         new NullPointerTester()
                 .setDefault(Message.class, Empty.getDefaultInstance())
                 .setDefault(Class.class, Empty.class)
-                .setDefault(Function.class, function)
+                .setDefault(BiFunction.class, function)
                 .testAllPublicStaticMethods(FieldEnrichment.class);
     }
 
     @Test
     @DisplayName("not accept same source and target class")
     void rejectSameSourceAndTarget() {
-        Function<StringValue, StringValue> func = new Function<StringValue, StringValue>() {
-            @Override
-            public @Nullable StringValue apply(@Nullable StringValue input) {
-                return null;
-            }
-        };
+        BiFunction<StringValue, EventContext, StringValue> func =
+                new BiFunction<StringValue, EventContext, StringValue>() {
+                    @Override
+                    public @Nullable StringValue apply(@Nullable StringValue input,
+                                                       EventContext context) {
+                        return null;
+                    }
+                };
 
         assertThrows(IllegalArgumentException.class,
                      () -> FieldEnrichment.of(StringValue.class, StringValue.class, func));

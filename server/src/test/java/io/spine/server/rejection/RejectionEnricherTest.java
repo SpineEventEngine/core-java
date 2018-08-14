@@ -54,7 +54,7 @@ class RejectionEnricherTest {
                 .newBuilder()
                 .add(ProjectId.class,
                      String.class,
-                     input -> PROJECT_NAME_PREFIX + input.getId());
+                     (input, context) -> PROJECT_NAME_PREFIX + input.getId());
         RejectionEnricher enricher = builder.build();
 
         rejectionBus = RejectionBus.newBuilder()
