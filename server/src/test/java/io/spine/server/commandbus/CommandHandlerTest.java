@@ -22,6 +22,7 @@ package io.spine.server.commandbus;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Queues;
+import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.core.Command;
@@ -48,13 +49,9 @@ import org.slf4j.helpers.SubstituteLogger;
 import java.util.List;
 import java.util.Queue;
 
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * @author Alexander Litus
@@ -138,56 +135,11 @@ class CommandHandlerTest {
         }
     }
 
-    @Nested
-    @DisplayName("provide `hashCode` method such that")
-    class ProvideHashCode {
-
-        @Test
-        @DisplayName("for non-empty handler ID non-zero hashcode is generated")
-        void nonZeroForNonEmptyId() {
-            int hashCode = handler.hashCode();
-
-            assertTrue(hashCode != 0);
-        }
-
-        @Test
-        @DisplayName("for same handler instances same hashcode is generated")
-        void sameForSameInstances() {
-            assertEquals(handler.hashCode(), handler.hashCode());
-        }
-    }
-
-    @Nested
-    @DisplayName("provide `equals` method such that")
-    class ProvideEqualsSuchThat {
-
-        @Test
-        @DisplayName("same handlers are equal")
-        void equalsToSame() {
-            TestCommandHandler same = new TestCommandHandler(eventBus);
-
-            assertTrue(handler.equals(same));
-        }
-
-        @SuppressWarnings("EqualsWithItself") // is the goal of the test
-        @Test
-        @DisplayName("handler is equal to itself")
-        void equalsToSelf() {
-            assertTrue(handler.equals(handler));
-        }
-
-        @Test
-        @DisplayName("handler is not equal to null")
-        void notEqualsToNull() {
-            assertFalse(handler.equals(nullRef()));
-        }
-
-        @SuppressWarnings("EqualsBetweenInconvertibleTypes") // is the goal of the test
-        @Test
-        @DisplayName("handler is not equal to object of another class")
-        void notEqualsToOtherClass() {
-            assertFalse(handler.equals(newUuid()));
-        }
+    @Test
+    @DisplayName("handle equality")
+    void equality() {
+        new EqualsTester().addEqualityGroup(handler, new TestCommandHandler(eventBus))
+                          .testEquals();
     }
 
     @Test

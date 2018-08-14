@@ -87,7 +87,6 @@ class LoggingObserverTest {
         observer.onNext(value);
         loggingEvent = queue.poll();
         assertNotNull(loggingEvent);
-        assertLogLevel(loggingEvent, level);
         assertContains(loggingEvent, value);
         assertContains(loggingEvent, "onNext");
 

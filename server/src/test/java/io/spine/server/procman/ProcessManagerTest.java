@@ -81,10 +81,10 @@ import static io.spine.server.procman.given.pm.QuizGiven.newAnswer;
 import static io.spine.server.procman.given.pm.QuizGiven.newQuizId;
 import static io.spine.server.procman.given.pm.QuizGiven.startQuiz;
 import static io.spine.testdata.Sample.messageOfType;
-import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.client.blackbox.Count.none;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.server.blackbox.VerifyCommands.emittedCommand;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
@@ -240,7 +240,8 @@ class ProcessManagerTest {
 
         @BeforeEach
         void setUp() {
-            boundedContext = BlackBoxBoundedContext.with(new TestProcessManagerRepo());
+            boundedContext = BlackBoxBoundedContext.newInstance()
+                                                   .with(new TestProcessManagerRepo());
         }
 
         /**
@@ -323,6 +324,7 @@ class ProcessManagerTest {
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
             BlackBoxBoundedContext
+                    .newInstance()
                     .with(new QuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
                     .assertThat(acked(twice()).withoutErrorsOrRejections())
@@ -361,6 +363,7 @@ class ProcessManagerTest {
             PmAnswerQuestion answerQuestion = answerQuestion(quizId, newAnswer());
 
             BlackBoxBoundedContext
+                    .newInstance()
                     .with(new DirectQuizProcmanRepository())
                     .receivesCommands(startQuiz, answerQuestion)
                     .assertThat(acked(twice()).withoutErrorsOrRejections())

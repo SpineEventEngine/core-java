@@ -94,9 +94,9 @@ import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.event;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.newTenantId;
 import static io.spine.server.aggregate.given.aggregate.AggregateTestEnv.reassignTask;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
-import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.server.Assertions.assertCommandClasses;
 import static io.spine.testing.server.Assertions.assertEventClasses;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
@@ -774,6 +774,7 @@ public class AggregateTest {
         @DisplayName("when dispatching a command")
         void fromCommandDispatch() {
             BlackBoxBoundedContext
+                    .newInstance()
                     .with(new TaskAggregateRepository())
                     .receivesCommand(createTask())
                     .assertThat(acked(once()).withoutErrorsOrRejections())
@@ -794,6 +795,7 @@ public class AggregateTest {
         @DisplayName("when reacting on an event")
         void fromEventReact() {
             BlackBoxBoundedContext
+                    .newInstance()
                     .with(new TaskAggregateRepository())
                     .receivesCommand(assignTask())
                     .assertThat(acked(once()).withoutErrorsOrRejections())
@@ -816,6 +818,7 @@ public class AggregateTest {
         @DisplayName("when reacting on a rejection")
         void fromRejectionReact() {
             BlackBoxBoundedContext
+                    .newInstance()
                     .with(new TaskAggregateRepository())
                     .receivesCommand(reassignTask())
                     .assertThat(acked(once()).withoutErrorsOrRejections())
