@@ -68,7 +68,9 @@ public final class EventSubscriberMethod
 
     @CanIgnoreReturnValue // since event subscriber methods do not return values
     @Override
-    public MethodResult<Empty> invoke(EventSubscriber target, Message message, EventContext context) {
+    public MethodResult<Empty> invoke(EventSubscriber target,
+                                      Message message,
+                                      EventContext context) {
         ensureExternalMatch(context.getExternal());
         return super.invoke(target, message, context);
     }
