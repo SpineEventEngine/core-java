@@ -18,27 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model.given.handler;
-
-import io.spine.server.BoundedContext;
-import io.spine.server.command.AbstractCommandHandler;
-import io.spine.server.command.model.given.MethodHarness;
+package io.spine.server.command.model.given;
 
 import java.lang.reflect.Method;
 
-/**
- * Abstract base for test environment command handlers.
- */
-public abstract class TestCommandHandler extends AbstractCommandHandler {
+import static io.spine.util.Exceptions.newIllegalStateException;
 
-    protected TestCommandHandler() {
-        super(BoundedContext.newBuilder()
-                            .setMultitenant(true)
-                            .build()
-                            .getEventBus());
+/**
+ * Utilities for obtaining a method reference from a declaring class.
+ * Such a class must declare exactly one method called {@code handleTest}.
+ */
+public final class MethodHarness {
+
+    private static final String HANDLER_METHOD_NAME = "handleTest";
+
+    private MethodHarness() {
     }
 
-    public Method getHandler() {
-        return MethodHarness.getMethod(getClass());
+    public static Method getMethod(Class<?> cls) {
+        Method[] methods = cls.getDeclaredMethods();
+        for (Method method : methods) {
+            if (method.getName()
+                      .equals(HANDLER_METHOD_NAME)) {
+                return method;
+            }
+        }
+        throw newIllegalStateException("No command handler method found: %s",
+                                       HANDLER_METHOD_NAME);
     }
 }

@@ -20,7 +20,7 @@
 
 package io.spine.server.command.model;
 
-import io.spine.base.CommandMessage;
+import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.server.command.model.CommandingMethod.Result;
@@ -96,7 +96,7 @@ public final class CommandReactionMethod
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            boolean result = returnsMessageOrIterable(method, CommandMessage.class);
+            boolean result = returnsMessageIterableOrOptional(method, EventMessage.class);
             return result;
         }
     }

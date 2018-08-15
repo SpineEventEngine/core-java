@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 /**
  * The predicate for filtering message handling methods.
@@ -91,16 +92,42 @@ public abstract class HandlerMethodPredicate<C extends Message> extends MethodPr
      */
     protected static boolean returnsMessageOrIterable(
             Method method,
-            @SuppressWarnings("unused") // will be used after message marker interfaces
-                                        // are implemented
+            @SuppressWarnings("ParameterCanBeLocal") // See comment in the body.
             Class<? extends Message> messageClass
     ) {
         Class<?> returnType = method.getReturnType();
-        boolean isMessage = Message.class.isAssignableFrom(returnType);
+
+        //TODO:2018-08-15:alexander.yevsyukov: Use `messageClass` as passed
+        // here after marker interfaces are implemented.
+        // See: https://github.com/SpineEventEngine/core-java/issues/818
+        messageClass = Message.class;
+
+        boolean isMessage = messageClass.isAssignableFrom(returnType);
         if (isMessage) {
             return true;
         }
-        boolean isList = Iterable.class.isAssignableFrom(returnType);
-        return isList;
+
+        boolean isIterable = Iterable.class.isAssignableFrom(returnType);
+        return isIterable;
+    }
+
+    /**
+     * Returns {@code true} if a method returns an instance of the class assignable from
+     * {@link Message}, or {@link Iterable}, or {@link Optional}.
+     *
+     * @param method       the method to check
+     * @param messageClass the class of messages expected in the method result
+     */
+    protected static
+    boolean returnsMessageIterableOrOptional(Method method, Class<? extends Message> messageClass) {
+
+        boolean messageOrIterable = returnsMessageOrIterable(method, messageClass);
+        if (messageOrIterable) {
+            return true;
+        }
+
+        Class<?> returnType = method.getReturnType();
+        boolean isOptional = Optional.class.isAssignableFrom(returnType);
+        return isOptional;
     }
 }

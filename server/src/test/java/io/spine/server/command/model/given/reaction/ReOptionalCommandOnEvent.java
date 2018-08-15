@@ -27,10 +27,16 @@ import io.spine.test.command.event.CmdProjectCreated;
 
 import java.util.Optional;
 
-class ReOptionalCommandOnEvent implements EventReceiver {
+/**
+ * Optionally generates a command.
+ *
+ * <p>To make it generate a command pass the event {@link CmdProjectCreated} with
+ * {@link CmdProjectCreated#getInitialize() initialize} attribute set to {@code true}.
+ */
+public class ReOptionalCommandOnEvent implements EventReceiver {
 
     @Command
-    Optional<CmdAddTask> on(CmdProjectCreated event) {
+    Optional<CmdAddTask> handleTest(CmdProjectCreated event) {
         if (event.getInitialize()) {
             return Optional.of(CmdAddTask.newBuilder()
                                          .setProjectId(event.getProjectId())
