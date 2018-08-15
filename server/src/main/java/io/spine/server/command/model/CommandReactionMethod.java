@@ -20,6 +20,7 @@
 
 package io.spine.server.command.model;
 
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -102,6 +103,7 @@ public final class CommandReactionMethod
         }
     }
 
+    @Immutable
     private enum CommandReactionSignature implements MethodSignature<EventEnvelope> {
 
         MESSAGE {

@@ -70,6 +70,7 @@ public abstract class CommandAcceptingMethod<T, R extends MethodResult>
         }
     }
 
+    @Immutable
     enum CommandAcceptingSignature implements MethodSignature<CommandEnvelope> {
 
         MESSAGE {
