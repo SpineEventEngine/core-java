@@ -45,6 +45,10 @@ class EventReactorMethodTest {
 
     private static final Predicate<Method> predicate = EventReactorMethod.factory().getPredicate();
 
+    private static void assertValid(Method reactor, boolean isReactor) {
+        assertThat(predicate.test(reactor)).isEqualTo(isReactor);
+    }
+
     @Nested
     @DisplayName("consider reactor method valid with")
     class MethodArguments {
@@ -62,17 +66,28 @@ class EventReactorMethodTest {
             Method method = new RcTwoParams().getMethod();
             assertValid(method, true);
         }
+    }
 
+    @Nested
+    @DisplayName("allow return value of type")
+    class ReturnValues {
 
         @Test
-        @DisplayName("Iterable return value")
+        @DisplayName("Message")
+        void messageReturn() {
+            Method method = new RcOneParam().getMethod();
+            assertValid(method, true);
+        }
+
+        @Test
+        @DisplayName("Iterable")
         void iterableReturn() {
             Method method = new RcIterableReturn().getMethod();
             assertValid(method, true);
         }
 
         @Test
-        @DisplayName("Optional return value")
+        @DisplayName("Optional")
         void optionalReturn() {
             Method method = new RcReturnOptional().getMethod();
             assertValid(method, true);
@@ -103,9 +118,5 @@ class EventReactorMethodTest {
             Method method = new RcWrongNoParam().getMethod();
             assertValid(method, false);
         }
-    }
-
-    private static void assertValid(Method reactor, boolean isReactor) {
-        assertThat(predicate.test(reactor)).isEqualTo(isReactor);
     }
 }
