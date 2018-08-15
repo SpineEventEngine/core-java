@@ -32,13 +32,13 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
-import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.MethodAccessChecker.forMethod;
-import static io.spine.server.model.MethodParams.consistsOfSingle;
+import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 
 /**
  * A wrapper for event applier method.
@@ -99,12 +99,12 @@ public final class EventApplier
         }
 
         @Override
-        protected EventApplier doCreate(Method method, EventApplierParams acceptor) {
-            return from(method, acceptor);
+        protected EventApplier doCreate(Method method, EventApplierParams paramSpec) {
+            return from(method, paramSpec);
         }
 
         @Override
-        protected Class<EventApplierParams> getSignatureClass() {
+        protected Class<EventApplierParams> getParamSpec() {
             return EventApplierParams.class;
         }
     }

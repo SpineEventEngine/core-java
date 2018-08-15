@@ -31,7 +31,7 @@ import io.spine.server.model.EventsResult;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
 import io.spine.server.model.MethodFactory;
-import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.procman.ProcessManager;
 
 import java.lang.reflect.Method;
@@ -112,8 +112,8 @@ public final class CommandHandlerMethod
 
         @Override
         protected CommandHandlerMethod doCreate(Method method,
-                                                CommandAcceptingMethodParams signature) {
-            return from(method, signature);
+                                                CommandAcceptingMethodParams paramSpec) {
+            return from(method, paramSpec);
         }
     }
 

@@ -88,8 +88,8 @@ public final class EventReactorMethod
         }
 
         @Override
-        protected EventReactorMethod doCreate(Method method, EventAcceptingMethodParams signature) {
-            return new EventReactorMethod(method, signature);
+        protected EventReactorMethod doCreate(Method method, EventAcceptingMethodParams paramSpec) {
+            return new EventReactorMethod(method, paramSpec);
         }
     }
 

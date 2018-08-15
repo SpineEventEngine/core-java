@@ -30,13 +30,13 @@ import io.spine.server.command.model.CommandingMethod.Result;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodFactory;
-import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
-import static io.spine.server.model.MethodParams.consistsOfSingle;
-import static io.spine.server.model.MethodParams.consistsOfTwo;
+import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
+import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
 
 /**
  * A method which <em>may</em> generate one or more command messages in response to an event.
@@ -93,12 +93,12 @@ public final class CommandReactionMethod
 
         @Override
         protected CommandReactionMethod doCreate(Method method,
-                                                 CommandReactionParams signature) {
-            return new CommandReactionMethod(method, signature);
+                                                 CommandReactionParams paramSpec) {
+            return new CommandReactionMethod(method, paramSpec);
         }
 
         @Override
-        protected Class<CommandReactionParams> getSignatureClass() {
+        protected Class<CommandReactionParams> getParamSpec() {
             return CommandReactionParams.class;
         }
     }

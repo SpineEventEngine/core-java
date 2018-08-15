@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
+package io.spine.server.model.declare;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -81,7 +81,7 @@ public final class MethodParams {
         return true;
     }
 
-    static <S extends ParameterSpec<?>>
+    public static <S extends ParameterSpec<?>>
     Optional<S> findMatching(Method method, Class<S> paramSpecClass) {
 
         Class<?>[] parameterTypes = method.getParameterTypes();

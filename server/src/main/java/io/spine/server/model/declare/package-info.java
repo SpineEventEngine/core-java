@@ -18,23 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.model;
-
-import com.google.errorprone.annotations.Immutable;
-import io.spine.core.MessageEnvelope;
-
 /**
- * A signature of {@linkplain HandlerMethod methods}, that accept parameters, extracted from
- * a message envelope of a particular kind.
- *
- * @param <E>
- *         the type of message envelope
- * @author Alex Tymchenko
+ * This package defines of the declaration requirements of {@link io.spine.server.entity.Entity
+ * Entity} API methods, that are typically created by the framework end-user.
  */
-@Immutable
-public interface ParameterSpec<E extends MessageEnvelope<?, ?, ?>> {
+@Internal
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.model.declare;
 
-    boolean matches(Class<?>[] methodParams);
+import com.google.errorprone.annotations.CheckReturnValue;
+import io.spine.annotation.Internal;
 
-    Object[] extractArguments(E envelope);
-}
+import javax.annotation.ParametersAreNonnullByDefault;

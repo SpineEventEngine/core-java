@@ -100,7 +100,7 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
         }
 
         @Override
-        protected Class<EventAcceptingMethodParams> getSignatureClass() {
+        protected Class<EventAcceptingMethodParams> getParamSpec() {
             return EventAcceptingMethodParams.class;
         }
     }

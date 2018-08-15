@@ -21,6 +21,8 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
+import io.spine.server.model.declare.MethodParams;
+import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -77,8 +79,8 @@ public abstract class MethodFactory<H extends HandlerMethod, S extends Parameter
             checkAccessModifier(method);
             checkThrownExceptions(method);
             //TODO:2018-08-14:alex.tymchenko: include annotation and return type to signature
-            Optional<S> signature = MethodParams.findMatching(method, getSignatureClass());
-            Optional<H> result = signature.map(s -> doCreate(method, s));
+            Optional<S> paramSpec = MethodParams.findMatching(method, getParamSpec());
+            Optional<H> result = paramSpec.map(s -> doCreate(method, s));
             return result;
         } else {
             return Optional.empty();
@@ -86,7 +88,7 @@ public abstract class MethodFactory<H extends HandlerMethod, S extends Parameter
     }
 
     /** Creates a wrapper object from a method. */
-    protected abstract H doCreate(Method method, S signature);
+    protected abstract H doCreate(Method method, S paramSpec);
 
     /**
      * Ensures method does not throw any prohibited exception types.
@@ -114,6 +116,6 @@ public abstract class MethodFactory<H extends HandlerMethod, S extends Parameter
     }
 
 
-    protected abstract Class<S> getSignatureClass();
+    protected abstract Class<S> getParamSpec();
 
 }

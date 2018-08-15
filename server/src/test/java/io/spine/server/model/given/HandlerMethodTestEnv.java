@@ -32,15 +32,15 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
 import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
-import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.declare.ParameterSpec;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import static com.google.common.collect.ImmutableSet.of;
-import static io.spine.server.model.MethodParams.consistsOfSingle;
-import static io.spine.server.model.MethodParams.consistsOfTwo;
+import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
+import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
 
 /**
  * @author Alexander Litus
@@ -198,12 +198,12 @@ public class HandlerMethodTestEnv {
 
             @Override
             protected OneParamMethod doCreate(Method method,
-                                              OneParamSpec signature) {
+                                              OneParamSpec paramSpec) {
                 return new OneParamMethod(method);
             }
 
             @Override
-            protected Class<OneParamSpec> getSignatureClass() {
+            protected Class<OneParamSpec> getParamSpec() {
                 return OneParamSpec.class;
             }
         }

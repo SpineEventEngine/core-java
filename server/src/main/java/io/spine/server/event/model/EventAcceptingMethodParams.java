@@ -28,11 +28,11 @@ import io.spine.core.DispatchedCommand;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.RejectionEnvelope;
-import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.declare.ParameterSpec;
 
 import static com.google.common.collect.ImmutableList.of;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.model.MethodParams.consistsOfTypes;
+import static io.spine.server.model.declare.MethodParams.consistsOfTypes;
 
 /**
  * @author Alex Tymchenko

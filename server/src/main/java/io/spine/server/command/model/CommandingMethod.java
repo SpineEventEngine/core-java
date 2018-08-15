@@ -35,7 +35,7 @@ import io.spine.server.commandbus.Transform;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
-import io.spine.server.model.ParameterSpec;
+import io.spine.server.model.declare.ParameterSpec;
 import io.spine.type.MessageClass;
 
 import java.util.List;

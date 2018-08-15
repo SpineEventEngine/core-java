@@ -87,8 +87,8 @@ public final class EventSubscriberMethod
         }
 
         @Override
-        protected EventSubscriberMethod doCreate(Method method, EventAcceptingMethodParams signature) {
-            return new EventSubscriberMethod(method, signature);
+        protected EventSubscriberMethod doCreate(Method method, EventAcceptingMethodParams paramSpec) {
+            return new EventSubscriberMethod(method, paramSpec);
         }
     }
 }
