@@ -20,9 +20,92 @@
 
 package io.spine.server.event.model;
 
+import io.spine.server.event.model.given.reactor.RcIterableReturn;
+import io.spine.server.event.model.given.reactor.RcOneParam;
+import io.spine.server.event.model.given.reactor.RcReturnOptional;
+import io.spine.server.event.model.given.reactor.RcTwoParams;
+import io.spine.server.event.model.given.reactor.RcWrongAnnotation;
+import io.spine.server.event.model.given.reactor.RcWrongNoAnnotation;
+import io.spine.server.event.model.given.reactor.RcWrongNoParam;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Method;
+import java.util.function.Predicate;
+
+import static com.google.common.truth.Truth.assertThat;
+
 /**
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("InnerClassMayBeStatic")
+@DisplayName("EventReactorMethod should")
 class EventReactorMethodTest {
 
+    private static final Predicate<Method> predicate = EventReactorMethod.factory().getPredicate();
+
+    @Nested
+    @DisplayName("consider reactor method valid with")
+    class MethodArguments {
+
+        @Test
+        @DisplayName("one event message parameter")
+        void oneParam() {
+            Method method = new RcOneParam().getMethod();
+            assertValid(method, true);
+        }
+
+        @Test
+        @DisplayName("event message and context")
+        void twoParams() {
+            Method method = new RcTwoParams().getMethod();
+            assertValid(method, true);
+        }
+
+
+        @Test
+        @DisplayName("Iterable return value")
+        void iterableReturn() {
+            Method method = new RcIterableReturn().getMethod();
+            assertValid(method, true);
+        }
+
+        @Test
+        @DisplayName("Optional return value")
+        void optionalReturn() {
+            Method method = new RcReturnOptional().getMethod();
+            assertValid(method, true);
+        }
+    }
+
+    @Nested
+    @DisplayName("consider a method invalid if")
+    class NotReactor {
+
+        @Test
+        @DisplayName("no annotation is provided")
+        void noAnnotation() {
+            Method method = new RcWrongNoAnnotation().getMethod();
+            assertValid(method, false);
+        }
+
+        @Test
+        @DisplayName("wrong annotations provided")
+        void wrongAnnotations() {
+            Method method = new RcWrongAnnotation().getMethod();
+            assertValid(method, false);
+        }
+
+        @Test
+        @DisplayName("it has no parameters")
+        void noParameters() {
+            Method method = new RcWrongNoParam().getMethod();
+            assertValid(method, false);
+        }
+    }
+
+    private static void assertValid(Method reactor, boolean isReactor) {
+        assertThat(predicate.test(reactor)).isEqualTo(isReactor);
+    }
 }

@@ -791,6 +791,7 @@
       <option name="ignorableAnnotations">
         <value>
           <item value="com.google.common.annotations.VisibleForTesting" />
+          <item value="org.junit.jupiter.api.DisplayName" />
         </value>
       </option>
       <option name="ignoreClassesWithOnlyMain" value="false" />
