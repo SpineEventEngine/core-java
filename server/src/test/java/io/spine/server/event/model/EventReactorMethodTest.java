@@ -59,8 +59,8 @@ class EventReactorMethodTest {
     private static final MethodFactory<EventReactorMethod> factory = EventReactorMethod.factory();
     private static final Predicate<Method> predicate = factory.getPredicate();
 
-    private static void assertValid(Method reactor, boolean isReactor) {
-        assertThat(predicate.test(reactor)).isEqualTo(isReactor);
+    private static void assertValid(Method rawMethod, boolean isReactor) {
+        assertThat(predicate.test(rawMethod)).isEqualTo(isReactor);
     }
 
     @Nested
@@ -92,7 +92,6 @@ class EventReactorMethodTest {
             Method method = new RcOneParam().getMethod();
             assertValid(method, true);
         }
-
     }
 
     @Nested

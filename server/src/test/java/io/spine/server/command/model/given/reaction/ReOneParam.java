@@ -21,27 +21,18 @@
 package io.spine.server.command.model.given.reaction;
 
 import io.spine.server.command.Command;
-import io.spine.server.event.EventReceiver;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.event.CmdProjectCreated;
 
-import java.util.Optional;
-
 /**
- * Optionally generates a command.
- *
- * <p>To make it generate a command pass the event {@link CmdProjectCreated} with
- * {@link CmdProjectCreated#getInitialize() initialize} attribute set to {@code true}.
+ * Provides method accepting event message.
  */
-public class ReOptionalCommandOnEvent implements EventReceiver {
+public class ReOneParam extends TestCommandReactor {
 
     @Command
-    Optional<CmdAddTask> handleTest(CmdProjectCreated event) {
-        if (event.getInitialize()) {
-            return Optional.of(CmdAddTask.newBuilder()
-                                         .setProjectId(event.getProjectId())
-                                         .build());
-        }
-        return Optional.empty();
+    CmdAddTask commandOn(CmdProjectCreated event) {
+        return CmdAddTask.newBuilder()
+                         .setProjectId(event.getProjectId())
+                         .build();
     }
 }
