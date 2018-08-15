@@ -35,8 +35,8 @@ import io.spine.server.model.ParameterSpec;
 import java.lang.reflect.Method;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
-import static io.spine.server.model.MethodSignatures.consistsOfSingle;
-import static io.spine.server.model.MethodSignatures.consistsOfTwo;
+import static io.spine.server.model.MethodParams.consistsOfSingle;
+import static io.spine.server.model.MethodParams.consistsOfTwo;
 
 /**
  * A method which <em>may</em> generate one or more command messages in response to an event.

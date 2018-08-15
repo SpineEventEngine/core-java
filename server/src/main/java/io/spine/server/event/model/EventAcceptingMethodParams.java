@@ -32,7 +32,7 @@ import io.spine.server.model.ParameterSpec;
 
 import static com.google.common.collect.ImmutableList.of;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.model.MethodSignatures.consistsOfTypes;
+import static io.spine.server.model.MethodParams.consistsOfTypes;
 
 /**
  * @author Alex Tymchenko

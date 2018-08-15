@@ -39,8 +39,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 
 import static com.google.common.collect.ImmutableSet.of;
-import static io.spine.server.model.MethodSignatures.consistsOfSingle;
-import static io.spine.server.model.MethodSignatures.consistsOfTwo;
+import static io.spine.server.model.MethodParams.consistsOfSingle;
+import static io.spine.server.model.MethodParams.consistsOfTwo;
 
 /**
  * @author Alexander Litus

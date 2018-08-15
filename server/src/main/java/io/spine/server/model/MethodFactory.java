@@ -77,7 +77,7 @@ public abstract class MethodFactory<H extends HandlerMethod, S extends Parameter
             checkAccessModifier(method);
             checkThrownExceptions(method);
             //TODO:2018-08-14:alex.tymchenko: include annotation and return type to signature
-            Optional<S> signature = MethodSignatures.findMatching(method, getSignatureClass());
+            Optional<S> signature = MethodParams.findMatching(method, getSignatureClass());
             Optional<H> result = signature.map(s -> doCreate(method, s));
             return result;
         } else {

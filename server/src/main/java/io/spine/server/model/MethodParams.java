@@ -31,12 +31,12 @@ import static java.util.Arrays.stream;
 /**
  * @author Alex Tymchenko
  */
-public final class MethodSignatures {
+public final class MethodParams {
 
     /**
      * Prevents this utility class from instantiation.
      */
-    private MethodSignatures() {
+    private MethodParams() {
     }
 
     public static boolean consistsOfSingle(Class<?>[] methodParams, Class<?> type) {
@@ -82,16 +82,16 @@ public final class MethodSignatures {
     }
 
     static <S extends ParameterSpec<?>>
-    Optional<S> findMatching(Method method, Class<S> signatureClass) {
+    Optional<S> findMatching(Method method, Class<S> paramSpecClass) {
 
         Class<?>[] parameterTypes = method.getParameterTypes();
-        S[] signatures = signatureClass.getEnumConstants();
-        verify(signatures != null,
+        S[] specs = paramSpecClass.getEnumConstants();
+        verify(specs != null,
                "`ParameterSpec` implementations are expected " +
                        "to be enumerations, but that's not true for %s",
-               signatureClass);
+               paramSpecClass);
 
-        Optional<S> result = stream(signatures)
+        Optional<S> result = stream(specs)
                 .filter(s -> s.matches(parameterTypes))
                 .findFirst();
         return result;
