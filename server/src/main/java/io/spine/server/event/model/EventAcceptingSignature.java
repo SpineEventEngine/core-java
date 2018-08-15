@@ -34,7 +34,6 @@ import io.spine.server.model.HandlerKey;
 import io.spine.server.model.MethodSignature;
 
 import java.lang.reflect.Method;
-import java.util.List;
 
 import static com.google.common.collect.ImmutableList.of;
 import static io.spine.protobuf.AnyPacker.unpack;

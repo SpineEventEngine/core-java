@@ -26,13 +26,11 @@ import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.MessageAcceptor;
 import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.MethodSignature;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static com.google.common.collect.ImmutableSet.of;

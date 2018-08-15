@@ -32,7 +32,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Optional;
 import java.util.Set;
 
 /**
