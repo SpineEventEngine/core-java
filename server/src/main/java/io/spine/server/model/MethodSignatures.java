@@ -43,7 +43,7 @@ public final class MethodSignatures {
         checkNotNull(parameters);
         checkNotNull(type);
 
-        if (!(parameters.length == 1)) {
+        if (!(1 == parameters.length)) {
             return false;
         }
         Class<?> firstParam = parameters[0];
@@ -57,7 +57,7 @@ public final class MethodSignatures {
         checkNotNull(firstType);
         checkNotNull(secondType);
 
-        if (!(parameters.length == 2)) {
+        if (!(2 == parameters.length)) {
             return false;
         }
         Class<?> firstParam = parameters[0];
