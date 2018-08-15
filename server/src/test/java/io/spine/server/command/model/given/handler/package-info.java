@@ -18,13 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+/**
+ * This package provides test environment classes for
+ * {@link io.spine.server.command.model.CommandHandlerMethodTest}.
+ */
 
-class CommandReactionMethodTest {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.command.model.given.handler;
 
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    /*
-     * Test environment.
-     */
-
-}
+import javax.annotation.ParametersAreNonnullByDefault;

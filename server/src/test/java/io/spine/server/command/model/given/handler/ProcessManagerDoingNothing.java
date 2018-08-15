@@ -18,13 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+package io.spine.server.command.model.given.handler;
 
-class CommandReactionMethodTest {
+import com.google.protobuf.Empty;
+import io.spine.server.command.Assign;
+import io.spine.server.procman.ProcessManager;
+import io.spine.test.reflect.ProjectId;
+import io.spine.test.reflect.command.RefCreateProject;
+import io.spine.validate.EmptyVBuilder;
 
+public class ProcessManagerDoingNothing
+        extends ProcessManager<ProjectId, Empty, EmptyVBuilder> {
 
-    /*
-     * Test environment.
-     */
+    public ProcessManagerDoingNothing(ProjectId id) {
+        super(id);
+    }
 
+    @Assign
+    Empty handle(RefCreateProject cmd) {
+        return Empty.getDefaultInstance();
+    }
 }

@@ -18,13 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+package io.spine.server.command.model.given.handler;
 
-class CommandReactionMethodTest {
+import io.spine.base.Identifier;
+import io.spine.server.command.Assign;
+import io.spine.server.entity.rejection.EntityAlreadyArchived;
+import io.spine.test.reflect.command.RefCreateProject;
+import io.spine.test.reflect.event.RefProjectCreated;
 
-
-    /*
-     * Test environment.
-     */
-
+/**
+ * A command handler which always rejects the passed command.
+ */
+public class RejectingHandler extends TestCommandHandler {
+    @Assign
+    RefProjectCreated handleTest(RefCreateProject cmd) throws EntityAlreadyArchived {
+        throw new EntityAlreadyArchived(Identifier.pack(cmd.getProjectId()));
+    }
 }

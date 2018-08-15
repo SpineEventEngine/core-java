@@ -18,13 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+package io.spine.server.command.model.given.handler;
 
-class CommandReactionMethodTest {
+import io.spine.core.CommandContext;
+import io.spine.server.command.Assign;
+import io.spine.test.reflect.event.RefProjectCreated;
 
-
-    /*
-     * Test environment.
-     */
-
+public class InvalidHandlerTwoParamsFirstInvalid extends TestCommandHandler {
+    @Assign
+    RefProjectCreated handleTest(Exception invalid, CommandContext context) {
+        return RefProjectCreated.getDefaultInstance();
+    }
 }

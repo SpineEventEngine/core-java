@@ -18,13 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+package io.spine.server.command.model.given.reaction;
 
-class CommandReactionMethodTest {
+import io.spine.server.command.Command;
+import io.spine.server.event.EventReceiver;
+import io.spine.test.command.CmdAddTask;
+import io.spine.test.command.event.CmdProjectCreated;
 
+import java.util.Optional;
 
-    /*
-     * Test environment.
-     */
+class ReOptionalCommandOnEvent implements EventReceiver {
 
+    @Command
+    Optional<CmdAddTask> on(CmdProjectCreated event) {
+        if (event.getInitialize()) {
+            return Optional.of(CmdAddTask.newBuilder()
+                                         .setProjectId(event.getProjectId())
+                                         .build());
+        }
+        return Optional.empty();
+    }
 }

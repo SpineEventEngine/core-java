@@ -18,13 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+package io.spine.server.command.model.given.handler;
 
-class CommandReactionMethodTest {
+import io.spine.core.CommandContext;
+import io.spine.server.command.Assign;
+import io.spine.test.reflect.command.RefCreateProject;
+import io.spine.test.reflect.event.RefProjectCreated;
 
+import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 
-    /*
-     * Test environment.
-     */
-
+public class InvalidHandlerTooManyParams extends TestCommandHandler {
+    @Assign
+    RefProjectCreated handleTest(RefCreateProject cmd,
+                                 CommandContext context,
+                                 Object redundant) {
+        return projectCreated(cmd.getProjectId());
+    }
 }

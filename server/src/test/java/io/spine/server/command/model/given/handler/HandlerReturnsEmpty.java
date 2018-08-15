@@ -18,13 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+package io.spine.server.command.model.given.handler;
 
-class CommandReactionMethodTest {
+import com.google.protobuf.Empty;
+import io.spine.server.command.Assign;
+import io.spine.test.reflect.command.RefCreateProject;
 
-
-    /*
-     * Test environment.
-     */
-
+public class HandlerReturnsEmpty extends TestCommandHandler {
+    @Assign
+    Empty handleTest(RefCreateProject cmd) {
+        return Empty.getDefaultInstance();
+    }
 }

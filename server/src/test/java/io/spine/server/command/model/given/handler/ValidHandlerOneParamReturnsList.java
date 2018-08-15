@@ -18,13 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+package io.spine.server.command.model.given.handler;
 
-class CommandReactionMethodTest {
+import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Message;
+import io.spine.server.command.Assign;
+import io.spine.test.reflect.command.RefCreateProject;
 
+import java.util.List;
 
-    /*
-     * Test environment.
-     */
+import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 
+public class ValidHandlerOneParamReturnsList extends TestCommandHandler {
+
+    @Assign
+    @VisibleForTesting
+    public List<Message> handleTest(RefCreateProject cmd) {
+        List<Message> result = newLinkedList();
+        result.add(projectCreated(cmd.getProjectId()));
+        return result;
+    }
 }
