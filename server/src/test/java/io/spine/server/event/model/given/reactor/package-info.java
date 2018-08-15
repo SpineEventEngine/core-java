@@ -18,33 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model.given.subscriber;
-
-import io.spine.server.event.EventSubscriber;
-
-import java.lang.reflect.Method;
-
-import static io.spine.util.Exceptions.newIllegalStateException;
-
 /**
- * The abstract base for test subscriber classes.
- *
- * <p>The purpose of this class is to obtain a reference to a
- * {@linkplain #HANDLER_METHOD_NAME single subscriber method}.
- * This reference will be later used for assertions.
+ * This package provides test environment classes for
+ * {@link io.spine.server.event.model.EventReactorMethodTest}.
  */
-public abstract class TestEventSubscriber implements EventSubscriber {
+@CheckReturnValue
+@ParametersAreNonnullByDefault
+package io.spine.server.event.model.given.reactor;
 
-    @SuppressWarnings("DuplicateStringLiteralInspection")
-    private static final String HANDLER_METHOD_NAME = "handle";
+import com.google.errorprone.annotations.CheckReturnValue;
 
-    public Method getMethod() {
-        Method[] methods = getClass().getDeclaredMethods();
-        for (Method method : methods) {
-            if (HANDLER_METHOD_NAME.equals(method.getName())) {
-                return method;
-            }
-        }
-        throw newIllegalStateException("No subscriber method found: %s", HANDLER_METHOD_NAME);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;
