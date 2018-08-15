@@ -29,7 +29,7 @@ import io.spine.server.command.model.CommandingMethod.Result;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
 import io.spine.server.model.MethodFactory;
-import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ParameterSpec;
 
 import java.lang.reflect.Method;
 
@@ -43,7 +43,7 @@ public final class CommandSubstituteMethod
         implements CommandingMethod<CommandClass, CommandEnvelope, Result> {
 
     private CommandSubstituteMethod(Method method,
-                                    MethodSignature<CommandEnvelope> signature) {
+                                    ParameterSpec<CommandEnvelope> signature) {
         super(method, signature);
     }
 
@@ -87,7 +87,7 @@ public final class CommandSubstituteMethod
 
         @Override
         protected CommandSubstituteMethod doCreate(Method method,
-                                                   CommandAcceptingSignature signature) {
+                                                   CommandAcceptingMethodParams signature) {
             return new CommandSubstituteMethod(method, signature);
         }
     }

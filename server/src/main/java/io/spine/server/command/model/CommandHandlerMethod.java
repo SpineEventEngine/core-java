@@ -31,7 +31,7 @@ import io.spine.server.model.EventsResult;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodExceptionChecker;
 import io.spine.server.model.MethodFactory;
-import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ParameterSpec;
 import io.spine.server.procman.ProcessManager;
 
 import java.lang.reflect.Method;
@@ -51,15 +51,15 @@ public final class CommandHandlerMethod
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method   command handler method
-     * @param signature the {@link MethodSignature} describing the method signature
+     * @param signature the {@link ParameterSpec} describing the method signature
      */
     private CommandHandlerMethod(Method method,
-                                 MethodSignature<CommandEnvelope> signature) {
+                                 ParameterSpec<CommandEnvelope> signature) {
         super(method, signature);
     }
 
     static CommandHandlerMethod from(Method method,
-                                     MethodSignature<CommandEnvelope> signature) {
+                                     ParameterSpec<CommandEnvelope> signature) {
         return new CommandHandlerMethod(method, signature);
     }
 
@@ -112,7 +112,7 @@ public final class CommandHandlerMethod
 
         @Override
         protected CommandHandlerMethod doCreate(Method method,
-                                                CommandAcceptingSignature signature) {
+                                                CommandAcceptingMethodParams signature) {
             return from(method, signature);
         }
     }

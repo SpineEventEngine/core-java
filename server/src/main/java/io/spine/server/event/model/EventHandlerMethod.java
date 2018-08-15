@@ -42,14 +42,14 @@ import java.util.Set;
 public abstract class EventHandlerMethod<T, R extends MethodResult>
         extends AbstractHandlerMethod<T, EventClass, EventEnvelope, R> {
 
-    private final EventAcceptingSignature signature;
+    private final EventAcceptingMethodParams signature;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    protected EventHandlerMethod(Method method, EventAcceptingSignature signature) {
+    protected EventHandlerMethod(Method method, EventAcceptingMethodParams signature) {
         super(method, signature);
         this.signature = signature;
     }
@@ -92,7 +92,7 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
      * @param <H> the type of built methods
      */
     protected abstract static class Factory<H extends EventHandlerMethod>
-            extends MethodFactory<H, EventAcceptingSignature> {
+            extends MethodFactory<H, EventAcceptingMethodParams> {
 
         protected Factory(Class<? extends Annotation> annotation,
                           Set<Class<?>> types) {
@@ -100,8 +100,8 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
         }
 
         @Override
-        protected Class<EventAcceptingSignature> getSignatureClass() {
-            return EventAcceptingSignature.class;
+        protected Class<EventAcceptingMethodParams> getSignatureClass() {
+            return EventAcceptingMethodParams.class;
         }
     }
 }

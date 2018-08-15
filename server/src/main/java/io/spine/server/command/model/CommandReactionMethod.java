@@ -30,7 +30,7 @@ import io.spine.server.command.model.CommandingMethod.Result;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodFactory;
-import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ParameterSpec;
 
 import java.lang.reflect.Method;
 
@@ -47,7 +47,7 @@ public final class CommandReactionMethod
         extends AbstractHandlerMethod<Commander, EventClass, EventEnvelope, Result>
         implements CommandingMethod<EventClass, EventEnvelope, Result> {
 
-    private CommandReactionMethod(Method method, MethodSignature<EventEnvelope> signature) {
+    private CommandReactionMethod(Method method, ParameterSpec<EventEnvelope> signature) {
         super(method, signature);
     }
 
@@ -70,7 +70,7 @@ public final class CommandReactionMethod
      * Obtains {@code CommandReactionMethod}s from a class.
      */
     private static final class Factory
-            extends CommandingMethod.Factory<CommandReactionMethod, CommandReactionSignature> {
+            extends CommandingMethod.Factory<CommandReactionMethod, CommandReactionParams> {
 
         private static final Factory INSTANCE = new Factory();
 
@@ -93,18 +93,18 @@ public final class CommandReactionMethod
 
         @Override
         protected CommandReactionMethod doCreate(Method method,
-                                                 CommandReactionSignature signature) {
+                                                 CommandReactionParams signature) {
             return new CommandReactionMethod(method, signature);
         }
 
         @Override
-        protected Class<CommandReactionSignature> getSignatureClass() {
-            return CommandReactionSignature.class;
+        protected Class<CommandReactionParams> getSignatureClass() {
+            return CommandReactionParams.class;
         }
     }
 
     @Immutable
-    private enum CommandReactionSignature implements MethodSignature<EventEnvelope> {
+    private enum CommandReactionParams implements ParameterSpec<EventEnvelope> {
 
         MESSAGE {
             @Override

@@ -32,7 +32,7 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
-import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ParameterSpec;
 
 import java.lang.reflect.Method;
 
@@ -52,10 +52,10 @@ public final class EventApplier
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method   the applier method
-     * @param signature {@link MethodSignature} which describes the method
+     * @param signature {@link ParameterSpec} which describes the method
      */
     private EventApplier(Method method,
-                         MethodSignature<EventEnvelope> signature) {
+                         ParameterSpec<EventEnvelope> signature) {
         super(method, signature);
     }
 
@@ -65,7 +65,7 @@ public final class EventApplier
     }
 
     static EventApplier from(Method method,
-                             MethodSignature<EventEnvelope> signature) {
+                             ParameterSpec<EventEnvelope> signature) {
         return new EventApplier(method, signature);
     }
 
@@ -79,7 +79,7 @@ public final class EventApplier
     }
 
     /** The factory for filtering methods that match {@code EventApplier} specification. */
-    private static class Factory extends MethodFactory<EventApplier, EventApplierSignature> {
+    private static class Factory extends MethodFactory<EventApplier, EventApplierParams> {
 
         private static final Factory INSTANCE = new Factory();
 
@@ -99,19 +99,19 @@ public final class EventApplier
         }
 
         @Override
-        protected EventApplier doCreate(Method method, EventApplierSignature acceptor) {
+        protected EventApplier doCreate(Method method, EventApplierParams acceptor) {
             return from(method, acceptor);
         }
 
         @Override
-        protected Class<EventApplierSignature> getSignatureClass() {
-            return EventApplierSignature.class;
+        protected Class<EventApplierParams> getSignatureClass() {
+            return EventApplierParams.class;
         }
     }
 
     @VisibleForTesting
     @Immutable
-    enum EventApplierSignature implements MethodSignature<EventEnvelope> {
+    enum EventApplierParams implements ParameterSpec<EventEnvelope> {
 
         MESSAGE {
             @Override

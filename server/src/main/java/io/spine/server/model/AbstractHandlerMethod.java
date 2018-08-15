@@ -71,14 +71,14 @@ public abstract class AbstractHandlerMethod<T,
     @SuppressWarnings("Immutable")
     private final ImmutableSet<MethodAttribute<?>> attributes;
 
-    private final MethodSignature<E> signature;
+    private final ParameterSpec<E> signature;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    protected AbstractHandlerMethod(Method method, MethodSignature<E> signature) {
+    protected AbstractHandlerMethod(Method method, ParameterSpec<E> signature) {
         this.method = checkNotNull(method);
         this.messageClass = getFirstParamType(method);
         this.attributes = discoverAttributes(method);

@@ -44,7 +44,7 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
 public final class EventReactorMethod
         extends EventHandlerMethod<EventReactor, ReactorMethodResult> {
 
-    private EventReactorMethod(Method method, EventAcceptingSignature signature) {
+    private EventReactorMethod(Method method, EventAcceptingMethodParams signature) {
         super(method, signature);
     }
 
@@ -88,7 +88,7 @@ public final class EventReactorMethod
         }
 
         @Override
-        protected EventReactorMethod doCreate(Method method, EventAcceptingSignature signature) {
+        protected EventReactorMethod doCreate(Method method, EventAcceptingMethodParams signature) {
             return new EventReactorMethod(method, signature);
         }
     }

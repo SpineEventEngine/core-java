@@ -43,7 +43,7 @@ public final class EventSubscriberMethod
         extends EventHandlerMethod<Object, MethodResult<Empty>> {
 
     /** Creates a new instance. */
-    private EventSubscriberMethod(Method method, EventAcceptingSignature signature) {
+    private EventSubscriberMethod(Method method, EventAcceptingMethodParams signature) {
         super(method, signature);
     }
 
@@ -87,7 +87,7 @@ public final class EventSubscriberMethod
         }
 
         @Override
-        protected EventSubscriberMethod doCreate(Method method, EventAcceptingSignature signature) {
+        protected EventSubscriberMethod doCreate(Method method, EventAcceptingMethodParams signature) {
             return new EventSubscriberMethod(method, signature);
         }
     }

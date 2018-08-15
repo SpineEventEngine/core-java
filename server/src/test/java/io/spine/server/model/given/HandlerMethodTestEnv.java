@@ -32,7 +32,7 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
 import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
-import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ParameterSpec;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -133,7 +133,7 @@ public class HandlerMethodTestEnv {
         extends AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> {
 
         public TwoParamMethod(Method method) {
-            super(method, TwoParamSignature.INSTANCE);
+            super(method, TwoParamSpec.INSTANCE);
         }
 
         @Override
@@ -156,7 +156,7 @@ public class HandlerMethodTestEnv {
             extends AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> {
 
         public OneParamMethod(Method method) {
-            super(method, OneParamSignature.INSTANCE);
+            super(method, OneParamSpec.INSTANCE);
         }
 
         @Override
@@ -174,7 +174,7 @@ public class HandlerMethodTestEnv {
         }
 
         private static class Factory
-                extends MethodFactory<OneParamMethod, OneParamSignature> {
+                extends MethodFactory<OneParamMethod, OneParamSpec> {
 
             private static final Factory INSTANCE = new Factory();
 
@@ -198,13 +198,13 @@ public class HandlerMethodTestEnv {
 
             @Override
             protected OneParamMethod doCreate(Method method,
-                                              OneParamSignature signature) {
+                                              OneParamSpec signature) {
                 return new OneParamMethod(method);
             }
 
             @Override
-            protected Class<OneParamSignature> getSignatureClass() {
-                return OneParamSignature.class;
+            protected Class<OneParamSpec> getSignatureClass() {
+                return OneParamSpec.class;
             }
         }
 
@@ -215,7 +215,7 @@ public class HandlerMethodTestEnv {
     }
 
     @Immutable
-    private enum OneParamSignature implements MethodSignature<EventEnvelope> {
+    private enum OneParamSpec implements ParameterSpec<EventEnvelope> {
 
         INSTANCE;
 
@@ -231,7 +231,7 @@ public class HandlerMethodTestEnv {
     }
 
     @Immutable
-    private enum TwoParamSignature implements MethodSignature<EventEnvelope> {
+    private enum TwoParamSpec implements ParameterSpec<EventEnvelope> {
 
         INSTANCE;
 

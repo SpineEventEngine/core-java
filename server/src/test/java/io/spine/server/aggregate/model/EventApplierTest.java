@@ -40,7 +40,7 @@ import java.lang.reflect.Method;
 import java.util.Optional;
 
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.aggregate.model.EventApplier.EventApplierSignature;
+import static io.spine.server.aggregate.model.EventApplier.EventApplierParams;
 import static io.spine.server.aggregate.model.EventApplier.factory;
 import static io.spine.server.aggregate.model.EventApplier.from;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -91,7 +91,7 @@ class EventApplierTest {
         Optional<EventApplier> actual = factory.create(method);
         assertTrue(actual.isPresent());
 
-        assertEquals(from(method, EventApplierSignature.MESSAGE), actual.get());
+        assertEquals(from(method, EventApplierParams.MESSAGE), actual.get());
     }
 
     @Test

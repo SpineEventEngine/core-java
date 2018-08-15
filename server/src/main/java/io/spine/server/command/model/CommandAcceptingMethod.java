@@ -28,7 +28,7 @@ import io.spine.core.CommandEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
-import io.spine.server.model.MethodSignature;
+import io.spine.server.model.ParameterSpec;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -48,7 +48,7 @@ import static io.spine.server.model.MethodSignatures.consistsOfTwo;
 public abstract class CommandAcceptingMethod<T, R extends MethodResult>
         extends AbstractHandlerMethod<T, CommandClass, CommandEnvelope, R> {
 
-    CommandAcceptingMethod(Method method, MethodSignature<CommandEnvelope> signature) {
+    CommandAcceptingMethod(Method method, ParameterSpec<CommandEnvelope> signature) {
         super(method, signature);
     }
 
@@ -58,20 +58,20 @@ public abstract class CommandAcceptingMethod<T, R extends MethodResult>
     }
 
     protected abstract static class Factory<H extends CommandAcceptingMethod>
-            extends MethodFactory<H, CommandAcceptingSignature> {
+            extends MethodFactory<H, CommandAcceptingMethodParams> {
 
         protected Factory(Class<? extends Annotation> annotation) {
             super(annotation, of(Message.class, Iterable.class));
         }
 
         @Override
-        protected Class<CommandAcceptingSignature> getSignatureClass() {
-            return CommandAcceptingSignature.class;
+        protected Class<CommandAcceptingMethodParams> getSignatureClass() {
+            return CommandAcceptingMethodParams.class;
         }
     }
 
     @Immutable
-    enum CommandAcceptingSignature implements MethodSignature<CommandEnvelope> {
+    enum CommandAcceptingMethodParams implements ParameterSpec<CommandEnvelope> {
 
         MESSAGE {
             @Override

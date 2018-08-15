@@ -37,7 +37,7 @@ import static io.spine.server.model.MethodExceptionChecker.forMethod;
  *
  * @param <H> the type of the handler method objects to create
  */
-public abstract class MethodFactory<H extends HandlerMethod, S extends MethodSignature<?>> {
+public abstract class MethodFactory<H extends HandlerMethod, S extends ParameterSpec<?>> {
 
     private final Class<? extends Annotation> annotation;
     private final ImmutableSet<Class<?>> validReturnTypes;

@@ -81,13 +81,13 @@ public final class MethodSignatures {
         return true;
     }
 
-    static <S extends MethodSignature<?>>
+    static <S extends ParameterSpec<?>>
     Optional<S> findMatching(Method method, Class<S> signatureClass) {
 
         Class<?>[] parameterTypes = method.getParameterTypes();
         S[] signatures = signatureClass.getEnumConstants();
         verify(signatures != null,
-               "`MethodSignature` implementations are expected " +
+               "`ParameterSpec` implementations are expected " +
                        "to be enumerations, but that's not true for %s",
                signatureClass);
 
