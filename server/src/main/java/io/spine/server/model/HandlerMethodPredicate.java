@@ -85,48 +85,46 @@ public abstract class HandlerMethodPredicate<C extends Message> extends MethodPr
 
     /**
      * Returns {@code true} if a method returns an instance of the class assignable from
-     * {@link Message}, or {@link Iterable}.
+     * the passed message class.
      *
      * @param method       the method to check
      * @param messageClass the class of messages expected in the method result
      */
-    protected static boolean returnsMessageOrIterable(
+    protected static boolean returnsMessage(
             Method method,
             @SuppressWarnings("ParameterCanBeLocal") // See comment in the body.
-            Class<? extends Message> messageClass
-    ) {
-        Class<?> returnType = method.getReturnType();
+                    Class<? extends Message> messageClass) {
 
         //TODO:2018-08-15:alexander.yevsyukov: Use `messageClass` as passed
         // here after marker interfaces are implemented.
         // See: https://github.com/SpineEventEngine/core-java/issues/818
+
         messageClass = Message.class;
-
+        Class<?> returnType = method.getReturnType();
         boolean isMessage = messageClass.isAssignableFrom(returnType);
-        if (isMessage) {
-            return true;
-        }
+        return isMessage;
+    }
 
-        boolean isIterable = Iterable.class.isAssignableFrom(returnType);
-        return isIterable;
+    /**
+     * Returns {@code true} if the passed method returns {@link Iterable}.
+     */
+    protected static boolean returnsIterable(Method method) {
+        Class<?> returnType = method.getReturnType();
+        boolean result = Iterable.class.isAssignableFrom(returnType);
+        return result;
     }
 
     /**
      * Returns {@code true} if a method returns an instance of the class assignable from
-     * {@link Message}, or {@link Iterable}, or {@link Optional}.
-     *
-     * @param method       the method to check
-     * @param messageClass the class of messages expected in the method result
+     * {@link Iterable}, or {@link Optional}.
      */
-    protected static
-    boolean returnsMessageIterableOrOptional(Method method, Class<? extends Message> messageClass) {
+    protected static boolean returnsIterableOrOptional(Method method) {
+        Class<?> returnType = method.getReturnType();
 
-        boolean messageOrIterable = returnsMessageOrIterable(method, messageClass);
-        if (messageOrIterable) {
+        if (Iterable.class.isAssignableFrom(returnType)) {
             return true;
         }
 
-        Class<?> returnType = method.getReturnType();
         boolean isOptional = Optional.class.isAssignableFrom(returnType);
         return isOptional;
     }

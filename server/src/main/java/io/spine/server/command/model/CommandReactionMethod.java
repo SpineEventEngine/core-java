@@ -96,8 +96,9 @@ public final class CommandReactionMethod
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            boolean result = returnsMessageIterableOrOptional(method, EventMessage.class);
-            return result;
+            boolean returnsMessage = returnsMessage(method, EventMessage.class);
+            boolean returnsIterableOrOptional = returnsIterableOrOptional(method);
+            return returnsMessage || returnsIterableOrOptional;
         }
     }
 }

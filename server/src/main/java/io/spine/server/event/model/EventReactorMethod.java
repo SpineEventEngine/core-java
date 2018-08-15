@@ -32,6 +32,7 @@ import io.spine.server.model.MethodFactory;
 import io.spine.server.model.ReactorMethodResult;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -109,12 +110,13 @@ public final class EventReactorMethod
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            boolean returnsMessageOrIterable = returnsMessageOrIterable(method, EventMessage.class);
-            if (returnsMessageOrIterable) {
+            if (returnsMessage(method, EventMessage.class)) {
                 checkOutputMessageType(method);
                 return true;
             }
-            return false;
+
+            boolean iterableOrOptional = returnsIterableOrOptional(method);
+            return iterableOrOptional;
         }
 
         /**
@@ -129,8 +131,9 @@ public final class EventReactorMethod
         private static void checkOutputMessageType(Method method) {
             Class<?> returnType = method.getReturnType();
 
-            // The method returns Iterable. We're OK.
-            if (Iterable.class.isAssignableFrom(returnType)) {
+            // The method returns Iterable or Optional. We're OK.
+            if (Iterable.class.isAssignableFrom(returnType) ||
+                Optional.class.isAssignableFrom(returnType)) {
                 return;
             }
 
