@@ -39,29 +39,29 @@ public final class MethodSignatures {
     private MethodSignatures() {
     }
 
-    public static boolean consistsOfSingle(Class<?>[] parameters, Class<?> type) {
-        checkNotNull(parameters);
+    public static boolean consistsOfSingle(Class<?>[] methodParams, Class<?> type) {
+        checkNotNull(methodParams);
         checkNotNull(type);
 
-        if (!(1 == parameters.length)) {
+        if (!(1 == methodParams.length)) {
             return false;
         }
-        Class<?> firstParam = parameters[0];
+        Class<?> firstParam = methodParams[0];
         return type.isAssignableFrom(firstParam);
     }
 
-    public static boolean consistsOfTwo(Class<?>[] parameters,
+    public static boolean consistsOfTwo(Class<?>[] methodParams,
                                         Class<?> firstType,
                                         Class<?> secondType) {
-        checkNotNull(parameters);
+        checkNotNull(methodParams);
         checkNotNull(firstType);
         checkNotNull(secondType);
 
-        if (!(2 == parameters.length)) {
+        if (!(2 == methodParams.length)) {
             return false;
         }
-        Class<?> firstParam = parameters[0];
-        Class<?> secondParam = parameters[1];
+        Class<?> firstParam = methodParams[0];
+        Class<?> secondParam = methodParams[1];
         return firstType.isAssignableFrom(firstParam) &&
                 secondType.isAssignableFrom(secondParam);
     }
