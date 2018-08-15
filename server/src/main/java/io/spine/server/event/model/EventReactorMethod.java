@@ -32,7 +32,6 @@ import io.spine.server.model.MethodFactory;
 import io.spine.server.model.ReactorMethodResult;
 
 import java.lang.reflect.Method;
-import java.util.Optional;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -111,7 +110,7 @@ public final class EventReactorMethod
         @Override
         protected boolean verifyReturnType(Method method) {
             if (returnsMessage(method, EventMessage.class)) {
-                checkOutputMessageType(method);
+                checkMessageClass(method);
                 return true;
             }
 
@@ -128,14 +127,8 @@ public final class EventReactorMethod
          * @throws IllegalStateException if the type of the first parameter is the same as
          *                               the return value
          */
-        private static void checkOutputMessageType(Method method) {
+        private static void checkMessageClass(Method method) {
             Class<?> returnType = method.getReturnType();
-
-            // The method returns Iterable or Optional. We're OK.
-            if (Iterable.class.isAssignableFrom(returnType) ||
-                Optional.class.isAssignableFrom(returnType)) {
-                return;
-            }
 
             // The returned value must not be of the same type as the passed message param.
             Class<?>[] paramTypes = method.getParameterTypes();
