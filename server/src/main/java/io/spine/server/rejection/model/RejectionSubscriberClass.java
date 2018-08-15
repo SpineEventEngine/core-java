@@ -67,12 +67,12 @@ public final class RejectionSubscriberClass<S extends RejectionSubscriber> exten
         return result;
     }
 
-    public Set<RejectionClass> getRejectionSubscriptions() {
+    public Set<RejectionClass> getRejectionClasses() {
         return domesticSubscriptions;
     }
 
     @SuppressWarnings("InstanceMethodNamingConvention")     // it's long to reflect the aim.
-    public Set<RejectionClass> getExternalRejectionSubscriptions() {
+    public Set<RejectionClass> getExternalRejectionClasses() {
         return externalSubscriptions;
     }
 

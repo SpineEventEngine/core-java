@@ -64,4 +64,18 @@ public interface RejectionDispatcherDelegate<I> {
      * @param exception the error
      */
     void onError(RejectionEnvelope envelope, RuntimeException exception);
+
+    /**
+     * Verifies if this instance dispatches at least one domestic rejection.
+     */
+    default boolean dispatchesRejections() {
+        return !getRejectionClasses().isEmpty();
+    }
+
+    /**
+     * Verifies if this instance dispatches at least one external rejection.
+     */
+    default boolean dispatchesExternalRejections() {
+        return !getExternalRejectionClasses().isEmpty();
+    }
 }

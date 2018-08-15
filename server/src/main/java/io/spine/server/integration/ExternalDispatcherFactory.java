@@ -18,25 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandbus;
+package io.spine.server.integration;
 
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
-import io.spine.server.bus.UnicastDispatcher;
+import java.util.Optional;
 
 /**
- * Delivers commands to their handlers.
- *
- * <p>A dispatcher can deliver more than one class of commands.
+ * Creates external message dispatcher.
  *
  * @author Alexander Yevsyukov
  */
-public interface CommandDispatcher<I> extends UnicastDispatcher<CommandClass, CommandEnvelope, I> {
+public interface ExternalDispatcherFactory<I> {
 
     /**
-     * Verifies if this instance dispatches at least one command.
+     * Creates and returns new {@link ExternalMessageDispatcher} if implementing object
+     * dispatches at least one external message. Returns {@code Optional.empty()} otherwise.
      */
-    default boolean dispatchesCommands() {
-        return !getMessageClasses().isEmpty();
-    }
+    Optional<ExternalMessageDispatcher<I>> createExternalDispatcher();
 }

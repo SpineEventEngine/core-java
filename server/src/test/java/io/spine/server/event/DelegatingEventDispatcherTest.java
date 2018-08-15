@@ -25,7 +25,7 @@ import com.google.protobuf.StringValue;
 import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.server.event.given.DelegatingEventDispatcherTestEnv.EmptyEventDispatcherDelegate;
+import io.spine.server.event.given.DelegatingEventDispatcherTestEnv.DummyEventDispatcherDelegate;
 import io.spine.server.integration.ExternalMessage;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
@@ -37,6 +37,7 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static io.spine.testing.TestValues.newUuidValue;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -46,12 +47,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("DelegatingEventDispatcher should")
 class DelegatingEventDispatcherTest {
 
-    private EmptyEventDispatcherDelegate delegate;
+    private DummyEventDispatcherDelegate delegate;
     private DelegatingEventDispatcher<String> delegatingDispatcher;
 
     @BeforeEach
     void setUp() {
-        delegate = new EmptyEventDispatcherDelegate();
+        delegate = new DummyEventDispatcherDelegate();
         delegatingDispatcher = DelegatingEventDispatcher.of(delegate);
     }
 
@@ -59,7 +60,7 @@ class DelegatingEventDispatcherTest {
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() {
         new NullPointerTester()
-                .setDefault(EventDispatcherDelegate.class, new EmptyEventDispatcherDelegate())
+                .setDefault(EventDispatcherDelegate.class, new DummyEventDispatcherDelegate())
                 .testAllPublicStaticMethods(DelegatingEventDispatcher.class);
     }
 
@@ -81,7 +82,10 @@ class DelegatingEventDispatcherTest {
     @DisplayName("expose external dispatcher that delegates `onError`")
     void exposeExternalDispatcher() {
         ExternalMessageDispatcher<String> extMessageDispatcher =
-                delegatingDispatcher.createExternalDispatcher();
+                delegatingDispatcher
+                        .createExternalDispatcher()
+                        .orElseThrow(() -> newIllegalStateException("No external events in %s",
+                                                                    delegatingDispatcher));
 
         TestEventFactory factory = TestEventFactory.newInstance(getClass());
         StringValue eventMsg = newUuidValue();

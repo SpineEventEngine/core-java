@@ -35,7 +35,6 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.BoundedContext;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
@@ -59,8 +58,9 @@ import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.RejectionProducers;
 import io.spine.server.route.RejectionRouting;
-import io.spine.system.server.SystemGateway;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -111,7 +111,7 @@ public abstract class ProcessManagerRepository<I,
      * <p>This field is not {@code final} only because it is initialized in {@link #onRegistered()}
      * method.
      */
-    private CommandErrorHandler commandErrorHandler;
+    private @MonotonicNonNull CommandErrorHandler commandErrorHandler;
 
     /**
      * Creates a new instance with the event routing by the first message field.
@@ -163,45 +163,20 @@ public abstract class ProcessManagerRepository<I,
         super.onRegistered();
 
         BoundedContext boundedContext = getBoundedContext();
+        boundedContext.registerCommandDispatcher(this);
+        boundedContext.registerRejectionDispatcher(this);
 
-        boolean handlesCommands = !getCommandClasses().isEmpty();
-        if (handlesCommands) {
-            boundedContext.registerCommandDispatcher(this);
-        }
+        boolean dispatchesEvents = dispatchesEvents() || dispatchesExternalEvents();
+        boolean dispatchesRejections = dispatchesRejections() || dispatchesExternalRejections();
 
-        boolean reactsOnDomesticRejections = !getRejectionClasses().isEmpty();
-        boolean reactsOnExternalRejections = !getExternalRejectionClasses().isEmpty();
-
-        if (reactsOnDomesticRejections || reactsOnExternalRejections) {
-            boundedContext.registerRejectionDispatcher(this);
-        }
-
-        boolean reactsOnDomesticEvents = !getMessageClasses().isEmpty();
-        boolean reactsOnExternalEvents = !getExternalEventClasses().isEmpty();
-
-        boolean dispatchesEvents = reactsOnDomesticEvents || reactsOnExternalEvents;
-        boolean reactsOnRejections = reactsOnDomesticRejections || reactsOnExternalRejections;
-
-        if (!handlesCommands && !dispatchesEvents && !reactsOnRejections) {
+        if (!dispatchesCommands() && !dispatchesEvents && !dispatchesRejections) {
             throw newIllegalStateException(
                     "Process managers of the repository %s have no command handlers, " +
                             "and do not react upon any rejections or events.", this);
         }
 
-        initErrorHandler();
-    }
-
-    private void initErrorHandler() {
-        BoundedContext boundedContext = getBoundedContext();
-        SystemGateway systemGateway = boundedContext.getSystemGateway();
-        this.commandErrorHandler = CommandErrorHandler
-                .newBuilder()
-                .setRejectionBus(boundedContext.getRejectionBus())
-                .setSystemGateway(systemGateway)
-                .build();
-        ServerEnvironment.getInstance()
-                         .getSharding()
-                         .register(this);
+        this.commandErrorHandler = boundedContext.createCommandErrorHandler();
+        registerWithSharding();
     }
 
     /**
@@ -444,8 +419,11 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    public ExternalMessageDispatcher<I> createExternalDispatcher() {
-        return new PmExternalEventDispatcher();
+    public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
+        if (!dispatchesExternalEvents()) {
+            return Optional.empty();
+        }
+        return Optional.of(new PmExternalEventDispatcher());
     }
 
     @Override
@@ -471,9 +449,7 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     public void close() {
-        ServerEnvironment.getInstance()
-                         .getSharding()
-                         .unregister(this);
+        unregisterWithSharding();
         super.close();
     }
 

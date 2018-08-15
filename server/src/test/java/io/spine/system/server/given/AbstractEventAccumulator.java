@@ -31,11 +31,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.util.Exceptions.unsupported;
 import static java.lang.String.format;
 import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.joining;
@@ -85,8 +85,8 @@ abstract class AbstractEventAccumulator implements EventDispatcher<String> {
     }
 
     @Override
-    public ExternalMessageDispatcher<String> createExternalDispatcher() {
-        throw unsupported();
+    public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
+        return Optional.empty();
     }
 
     /**

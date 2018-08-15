@@ -354,7 +354,7 @@ public class EventBusTestEnv {
         }
 
         @Override
-        public ExternalMessageDispatcher<String> createExternalDispatcher() {
+        public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
             throw unsupported();
         }
 

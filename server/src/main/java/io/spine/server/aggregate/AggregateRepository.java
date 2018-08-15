@@ -33,7 +33,6 @@ import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandErrorHandler;
@@ -43,13 +42,8 @@ import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
-import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
-import io.spine.server.integration.ExternalMessageClass;
-import io.spine.server.integration.ExternalMessageDispatcher;
-import io.spine.server.rejection.DelegatingRejectionDispatcher;
-import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
@@ -59,7 +53,6 @@ import io.spine.server.route.RejectionRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.system.server.SystemGateway;
 
 import java.util.List;
 import java.util.Optional;
@@ -95,6 +88,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
         implements CommandDispatcher<I>,
@@ -117,13 +111,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             RejectionRouting.withDefault(RejectionProducers.fromContext());
 
     private final Supplier<AggregateCommandDelivery<I, A>> commandDeliverySupplier =
-            memoize(() -> new AggregateCommandDelivery<>(this));
+            memoize(this::createCommandDelivery);
 
     private final Supplier<AggregateEventDelivery<I, A>> eventDeliverySupplier =
-            memoize(() -> new AggregateEventDelivery<>(this));
+            memoize(this::createEventDelivery);
 
     private final Supplier<AggregateRejectionDelivery<I, A>> rejectionDeliverySupplier =
-            memoize(() -> new AggregateRejectionDelivery<>(this));
+            memoize(this::createRejectionDelivery);
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -152,83 +146,28 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public void onRegistered() {
         super.onRegistered();
         BoundedContext boundedContext = getBoundedContext();
+        boundedContext.registerCommandDispatcher(this);
+        boundedContext.registerEventDispatcher(this);
+        boundedContext.registerRejectionDispatcher(this);
 
-        Set<CommandClass> commandClasses = getMessageClasses();
+        checkNotVoid();
 
-        DelegatingEventDispatcher<I> eventDispatcher;
-        eventDispatcher = DelegatingEventDispatcher.of(this);
-        Set<EventClass> eventClasses = eventDispatcher.getMessageClasses();
+        this.commandErrorHandler = boundedContext.createCommandErrorHandler();
+        registerWithSharding();
+    }
 
-        ExternalMessageDispatcher<I> extEventDispatcher;
-        extEventDispatcher = eventDispatcher.createExternalDispatcher();
-        Set<ExternalMessageClass> extEventClasses = extEventDispatcher.getMessageClasses();
+    /**
+     * Ensures that this repository dispatches at least one kind of messages.
+     */
+    private void checkNotVoid() {
+        boolean handlesCommands = dispatchesCommands();
+        boolean reactsOnEvents = dispatchesEvents() || dispatchesExternalEvents();
+        boolean reactsOnRejections = dispatchesRejections() || dispatchesExternalRejections();
 
-        DelegatingRejectionDispatcher<I> rejectionDispatcher;
-        rejectionDispatcher = DelegatingRejectionDispatcher.of(this);
-        Set<RejectionClass> rejectionClasses = rejectionDispatcher.getMessageClasses();
-
-        ExternalMessageDispatcher<I> extRejectionDispatcher;
-        extRejectionDispatcher = rejectionDispatcher.getExternalDispatcher();
-        Set<ExternalMessageClass> extRejectionClasses =
-                extRejectionDispatcher.getMessageClasses();
-
-        if (commandClasses.isEmpty() && eventClasses.isEmpty() && rejectionClasses.isEmpty()
-                && extEventClasses.isEmpty() && extRejectionClasses.isEmpty()) {
+        if (!handlesCommands && !reactsOnEvents && !reactsOnRejections) {
             throw newIllegalStateException(
                     "Aggregates of the repository %s neither handle commands" +
                             " nor react on events or rejections.", this);
-        }
-
-        registerInCommandBus(boundedContext, commandClasses);
-        registerInEventBus(boundedContext, eventDispatcher, eventClasses);
-        registerInRejectionBus(boundedContext, rejectionDispatcher, rejectionClasses);
-
-        registerExtMessageDispatcher(boundedContext, extEventDispatcher, extEventClasses);
-        registerExtMessageDispatcher(boundedContext, extRejectionDispatcher, extRejectionClasses);
-
-        RejectionBus rejectionBus = boundedContext.getRejectionBus();
-        SystemGateway systemGateway = boundedContext.getSystemGateway();
-        this.commandErrorHandler = CommandErrorHandler.newBuilder()
-                                                      .setRejectionBus(rejectionBus)
-                                                      .setSystemGateway(systemGateway)
-                                                      .build();
-        ServerEnvironment.getInstance()
-                         .getSharding()
-                         .register(this);
-    }
-
-    private void registerExtMessageDispatcher(BoundedContext boundedContext,
-                                              ExternalMessageDispatcher<I> extEventDispatcher,
-                                              Set<ExternalMessageClass> extEventClasses) {
-        if (!extEventClasses.isEmpty()) {
-            boundedContext.getIntegrationBus()
-                          .register(extEventDispatcher);
-        }
-    }
-
-    private void registerInRejectionBus(BoundedContext boundedContext,
-                                        DelegatingRejectionDispatcher<I> rejectionDispatcher,
-                                        Set<RejectionClass> rejectionClasses) {
-        if (!rejectionClasses.isEmpty()) {
-            boundedContext.getRejectionBus()
-                          .register(rejectionDispatcher);
-        }
-    }
-
-    private void registerInEventBus(BoundedContext boundedContext,
-                                    DelegatingEventDispatcher<I> eventDispatcher,
-                                    Set<EventClass> eventClasses) {
-        if (!eventClasses.isEmpty()) {
-            boundedContext.getEventBus()
-                          .register(eventDispatcher);
-        }
-    }
-
-    private void registerInCommandBus(BoundedContext boundedContext,
-                                      Set<CommandClass> commandClasses) {
-        if (!commandClasses.isEmpty()) {
-            boundedContext.getCommandBus()
-                          .register(this);
         }
     }
 
@@ -638,6 +577,18 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         lifecycleOf(id).onTargetAssignedToCommand(commandId);
     }
 
+    private AggregateEventDelivery<I, A> createEventDelivery() {
+        return new AggregateEventDelivery<>(this);
+    }
+
+    private AggregateCommandDelivery<I, A> createCommandDelivery() {
+        return new AggregateCommandDelivery<>(this);
+    }
+
+    private AggregateRejectionDelivery<I, A> createRejectionDelivery() {
+        return new AggregateRejectionDelivery<>(this);
+    }
+
     @Override
     public ShardingStrategy getShardingStrategy() {
         return UniformAcrossTargets.singleShard();
@@ -662,9 +613,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public void close() {
-        ServerEnvironment.getInstance()
-                         .getSharding()
-                         .unregister(this);
+        unregisterWithSharding();
         super.close();
     }
 }

@@ -23,7 +23,7 @@ package io.spine.server.event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.bus.MulticastDispatcher;
-import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.integration.ExternalDispatcherFactory;
 
 import java.util.Set;
 
@@ -33,15 +33,34 @@ import java.util.Set;
  * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
  */
-public interface EventDispatcher<I> extends MulticastDispatcher<EventClass, EventEnvelope, I> {
+public interface EventDispatcher<I>
+        extends MulticastDispatcher<EventClass, EventEnvelope, I>, ExternalDispatcherFactory<I> {
 
+    /**
+     * Obtains classes of domestic events processed by this dispatcher.
+     */
     default Set<EventClass> getEventClasses() {
         return getMessageClasses();
     }
 
+    /**
+     * Obtains classes of external events processed by this dispatcher.
+     */
     Set<EventClass> getExternalEventClasses();
 
-    ExternalMessageDispatcher<I> createExternalDispatcher();
+    /**
+     * Verifies if this instance dispatches at least one domestic events.
+     */
+    default boolean dispatchesEvents() {
+        return !getEventClasses().isEmpty();
+    }
+
+    /**
+     * Verifies if this instance dispatches at least one external events.
+     */
+    default boolean dispatchesExternalEvents() {
+        return !getExternalEventClasses().isEmpty();
+    }
 
     enum Error {
 

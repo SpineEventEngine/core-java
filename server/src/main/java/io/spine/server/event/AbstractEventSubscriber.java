@@ -38,6 +38,7 @@ import io.spine.server.tenant.EventOperation;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -115,8 +116,8 @@ public abstract class AbstractEventSubscriber
     }
 
     @Override
-    public ExternalMessageDispatcher<String> createExternalDispatcher() {
-        return new ExternalDispatcher();
+    public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
+        return Optional.of(new ExternalDispatcher());
     }
 
     private void handle(EventEnvelope envelope) {

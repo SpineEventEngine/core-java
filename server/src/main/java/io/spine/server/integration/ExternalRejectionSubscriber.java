@@ -65,7 +65,7 @@ final class ExternalRejectionSubscriber implements ExternalMessageDispatcher<Str
     @Override
     public Set<ExternalMessageClass> getMessageClasses() {
         RejectionSubscriberClass<?> subscriberClass = asRejectionSubscriber(delegate.getClass());
-        Set<RejectionClass> extSubscriptions = subscriberClass.getExternalRejectionSubscriptions();
+        Set<RejectionClass> extSubscriptions = subscriberClass.getExternalRejectionClasses();
         return ExternalMessageClass.fromRejectionClasses(extSubscriptions);
     }
 

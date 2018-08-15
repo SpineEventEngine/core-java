@@ -46,6 +46,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newLinkedList;
@@ -76,7 +77,7 @@ public class CommandHandlerTestEnv {
         }
 
         @Override
-        public ExternalMessageDispatcher<String> createExternalDispatcher() {
+        public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
             throw unsupported();
         }
 
