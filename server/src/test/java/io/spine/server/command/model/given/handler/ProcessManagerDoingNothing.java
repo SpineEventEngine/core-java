@@ -27,6 +27,13 @@ import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.validate.EmptyVBuilder;
 
+/**
+ * A simple process manager that accepts a command and always returns {@link Empty}.
+ *
+ * <p>The process manager does not modify its state when “handling” the passed command.
+ *
+ * @author Alexander Yevsykov
+ */
 public class ProcessManagerDoingNothing
         extends ProcessManager<ProjectId, Empty, EmptyVBuilder> {
 

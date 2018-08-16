@@ -20,17 +20,21 @@
 
 package io.spine.server.command.model.given.handler;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.spine.server.command.Assign;
 import io.spine.test.reflect.command.RefCreateProject;
 import io.spine.test.reflect.event.RefProjectCreated;
 
 import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 
+/**
+ * Provides a
+ */
 public class ValidHandlerButPrivate extends TestCommandHandler {
+
+    @SuppressWarnings("MethodMayBeStatic") // Handler methods are instance methods, even if they
+    // do not modify the state of the instance.
     @Assign
-    @VisibleForTesting
-    public RefProjectCreated handleTest(RefCreateProject cmd) {
+    private RefProjectCreated handleTest(RefCreateProject cmd) {
         return projectCreated(cmd.getProjectId());
     }
 }

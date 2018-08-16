@@ -26,6 +26,11 @@ import io.spine.test.reflect.event.RefProjectCreated;
 
 import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 
+/**
+ * Provides a method with two parameters with the second parameter of incorrect type.
+ *
+ * @author Alexander Yevsyukov
+ */
 public class InvalidHandlerTwoParamsSecondInvalid extends TestCommandHandler {
     @Assign
     RefProjectCreated handleTest(RefCreateProject cmd, Exception invalid) {

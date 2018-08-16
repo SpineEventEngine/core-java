@@ -24,6 +24,11 @@ import com.google.protobuf.Empty;
 import io.spine.server.command.Assign;
 import io.spine.test.reflect.command.RefCreateProject;
 
+/**
+ * Provides a handler method that returns {@link Empty}.
+ *
+ * @author Alexander Yevsyukov
+ */
 public class HandlerReturnsEmpty extends TestCommandHandler {
     @Assign
     Empty handleTest(RefCreateProject cmd) {

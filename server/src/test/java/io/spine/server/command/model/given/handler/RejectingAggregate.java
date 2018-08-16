@@ -33,6 +33,8 @@ import io.spine.validate.EmptyVBuilder;
 
 /**
  * An aggregate which always rejects the passed command.
+ *
+ * @author Alexander Yevsyukov
  */
 public class RejectingAggregate extends Aggregate<ProjectId, Empty, EmptyVBuilder> {
     public RejectingAggregate(ProjectId id) {

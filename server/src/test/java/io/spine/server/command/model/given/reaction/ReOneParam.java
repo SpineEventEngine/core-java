@@ -26,6 +26,8 @@ import io.spine.test.command.event.CmdProjectCreated;
 
 /**
  * Provides method accepting event message.
+ *
+ * @author Alexander Yevsyukov
  */
 public class ReOneParam extends TestCommandReactor {
 

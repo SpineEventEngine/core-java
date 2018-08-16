@@ -23,6 +23,11 @@ package io.spine.server.command.model.given.handler;
 import io.spine.server.command.Assign;
 import io.spine.test.reflect.event.RefProjectCreated;
 
+/**
+ * Provides a method with incorrect type of the parameter.
+ * 
+ * @author Alexander Yevsyukov
+ */
 public class InvalidHandlerOneNotMsgParam extends TestCommandHandler {
     @Assign
     RefProjectCreated handleTest(Exception invalid) {

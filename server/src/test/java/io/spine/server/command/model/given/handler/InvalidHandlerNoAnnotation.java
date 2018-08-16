@@ -26,9 +26,19 @@ import io.spine.test.reflect.event.RefProjectCreated;
 
 import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 
-@SuppressWarnings("unused")
-// because the method is not annotated, which is the purpose of this test class.
+/**
+ * Provides a method which is not annotated.
+ *
+ * @implNote The "unused" warning is suppressed because the following. There are no calls to this
+ * method since all handler methods are called indirectly. Regular handler methods have annotations
+ * and IDEA is configured to ignore unused methods with those annotations.
+ * Since the method does not have the annotation (which is the purpose of this test dummy class),
+ * it is deemed unused. We suppress the annotation to avoid accidental removal of the method.
+ * @author Alexander Yevsyukov
+ */
+@SuppressWarnings("unused") // See Javadoc
 public class InvalidHandlerNoAnnotation extends TestCommandHandler {
+
     public RefProjectCreated handleTest(RefCreateProject cmd, CommandContext context) {
         return projectCreated(cmd.getProjectId());
     }

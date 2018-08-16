@@ -24,6 +24,11 @@ import io.spine.core.CommandContext;
 import io.spine.server.command.Assign;
 import io.spine.test.reflect.event.RefProjectCreated;
 
+/**
+ * Provides a method with two parameters, with the first parameter of incorrect type.
+ *
+ * @author Alexander Yevsyukov
+ */
 public class InvalidHandlerTwoParamsFirstInvalid extends TestCommandHandler {
     @Assign
     RefProjectCreated handleTest(Exception invalid, CommandContext context) {

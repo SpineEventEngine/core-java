@@ -23,6 +23,11 @@ package io.spine.server.command.model.given.handler;
 import io.spine.server.command.Assign;
 import io.spine.test.reflect.event.RefProjectCreated;
 
+/**
+ * Provides a method which is annotated, but does not accept parameters.
+ *
+ * @author Alexander Yevsyukov
+ */
 public class InvalidHandlerNoParams extends TestCommandHandler {
     @Assign
     RefProjectCreated handleTest() {

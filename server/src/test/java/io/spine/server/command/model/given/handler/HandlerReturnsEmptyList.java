@@ -28,6 +28,11 @@ import java.util.List;
 
 import static java.util.Collections.emptyList;
 
+/**
+ * Provides a handler method that returns an empty list.
+ *
+ * @author Alexander Yevsyukov
+ */
 public class HandlerReturnsEmptyList extends TestCommandHandler {
     @Assign
     List<Message> handleTest(RefCreateProject cmd) {

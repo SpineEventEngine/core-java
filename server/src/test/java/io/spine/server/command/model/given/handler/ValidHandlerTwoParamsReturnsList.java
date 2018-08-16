@@ -31,6 +31,11 @@ import java.util.List;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 
+/**
+ * Provides a method with two parameters which returns a list of event messages.
+ *
+ * @author Alexander Yevsyukov
+ */
 public class ValidHandlerTwoParamsReturnsList extends TestCommandHandler {
     @Assign
     @VisibleForTesting

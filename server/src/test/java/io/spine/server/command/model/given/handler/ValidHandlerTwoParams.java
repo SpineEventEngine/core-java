@@ -28,6 +28,11 @@ import io.spine.test.reflect.event.RefProjectCreated;
 
 import static io.spine.server.model.given.Given.EventMessage.projectCreated;
 
+/**
+ * Provides a method with two params which returns an event message.
+ *
+ * @author Alexander Yevsyukov
+ */
 public class ValidHandlerTwoParams extends TestCommandHandler {
     @Assign
     @VisibleForTesting

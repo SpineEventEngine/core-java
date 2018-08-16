@@ -31,6 +31,8 @@ import java.util.Optional;
  *
  * <p>To make it generate a command pass the event {@link CmdProjectCreated} with
  * {@link CmdProjectCreated#getInitialize() initialize} attribute set to {@code true}.
+ *
+ * @author Alexander Yevsyukov
  */
 public class ReOptionalResult extends TestCommandReactor {
 

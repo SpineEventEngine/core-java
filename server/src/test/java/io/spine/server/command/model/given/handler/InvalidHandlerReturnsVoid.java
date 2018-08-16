@@ -24,6 +24,11 @@ import io.spine.core.CommandContext;
 import io.spine.server.command.Assign;
 import io.spine.test.reflect.command.RefCreateProject;
 
+/**
+ * Provides a method which does not return a value.
+ *
+ * @author Alexander Yevsyukov
+ */
 public class InvalidHandlerReturnsVoid extends TestCommandHandler {
     @Assign
     void handleTest(RefCreateProject cmd, CommandContext context) {

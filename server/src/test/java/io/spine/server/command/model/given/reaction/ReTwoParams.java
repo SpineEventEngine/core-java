@@ -27,6 +27,8 @@ import io.spine.test.command.event.CmdProjectCreated;
 
 /**
  * Provides method accepting event message and context.
+ *
+ * @author Alexander Yevsyukov
  */
 public class ReTwoParams extends TestCommandReactor {
 
