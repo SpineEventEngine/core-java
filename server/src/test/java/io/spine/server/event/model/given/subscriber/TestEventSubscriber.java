@@ -21,10 +21,9 @@
 package io.spine.server.event.model.given.subscriber;
 
 import io.spine.server.event.EventSubscriber;
+import io.spine.testing.server.model.ModelTests;
 
 import java.lang.reflect.Method;
-
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * The abstract base for test subscriber classes.
@@ -35,16 +34,9 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public abstract class TestEventSubscriber implements EventSubscriber {
 
-    @SuppressWarnings("DuplicateStringLiteralInspection")
     private static final String HANDLER_METHOD_NAME = "handle";
 
     public Method getMethod() {
-        Method[] methods = getClass().getDeclaredMethods();
-        for (Method method : methods) {
-            if (HANDLER_METHOD_NAME.equals(method.getName())) {
-                return method;
-            }
-        }
-        throw newIllegalStateException("No subscriber method found: %s", HANDLER_METHOD_NAME);
+        return ModelTests.getMethod(getClass(), HANDLER_METHOD_NAME);
     }
 }

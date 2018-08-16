@@ -21,10 +21,9 @@
 package io.spine.server.command.model.given.reaction;
 
 import io.spine.server.event.EventReceiver;
+import io.spine.testing.server.model.ModelTests;
 
 import java.lang.reflect.Method;
-
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * @author Alexander Yevsyukov
@@ -34,12 +33,6 @@ public class TestCommandReactor implements EventReceiver {
     private static final String METHOD_NAME = "commandOn";
 
     public Method getMethod() {
-        Method[] methods = getClass().getDeclaredMethods();
-        for (Method method : methods) {
-            if (METHOD_NAME.equals(method.getName())) {
-                return method;
-            }
-        }
-        throw newIllegalStateException("No commanding method found: %s", METHOD_NAME);
+        return ModelTests.getMethod(getClass(), METHOD_NAME);
     }
 }

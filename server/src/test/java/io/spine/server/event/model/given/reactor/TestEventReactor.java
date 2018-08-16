@@ -24,10 +24,9 @@ import com.google.protobuf.Any;
 import io.spine.base.Identifier;
 import io.spine.core.Version;
 import io.spine.server.event.EventReactor;
+import io.spine.testing.server.model.ModelTests;
 
 import java.lang.reflect.Method;
-
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Abstract base for test environment classes that allows to obtain a method reference.
@@ -55,12 +54,6 @@ public class TestEventReactor implements EventReactor {
 
 
     public Method getMethod() {
-        Method[] methods = getClass().getDeclaredMethods();
-        for (Method method : methods) {
-            if (REACTOR_METHOD_NAME.equals(method.getName())) {
-                return method;
-            }
-        }
-        throw newIllegalStateException("No reactor method found: %s", REACTOR_METHOD_NAME);
+        return ModelTests.getMethod(getClass(), REACTOR_METHOD_NAME);
     }
 }

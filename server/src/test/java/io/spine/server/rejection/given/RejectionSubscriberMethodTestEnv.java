@@ -24,6 +24,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.Subscribe;
 import io.spine.test.reflect.ReflectRejections.InvalidProjectName;
 import io.spine.test.rejection.command.RjUpdateProjectName;
+import io.spine.testing.server.model.ModelTests;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
@@ -50,15 +51,7 @@ public class RejectionSubscriberMethodTestEnv {
         private static final String HANDLER_METHOD_NAME = "handle";
 
         public Method getMethod() {
-            Method[] methods = getClass().getDeclaredMethods();
-            for (Method method : methods) {
-                if (method.getName()
-                          .equals(HANDLER_METHOD_NAME)) {
-                    return method;
-                }
-            }
-            throw new RuntimeException("No rejection subscriber method found " +
-                                               HANDLER_METHOD_NAME);
+            return ModelTests.getMethod(getClass(), HANDLER_METHOD_NAME);
         }
     }
 

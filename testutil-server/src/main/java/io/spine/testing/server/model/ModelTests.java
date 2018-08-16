@@ -22,6 +22,11 @@ package io.spine.testing.server.model;
 
 import io.spine.server.model.Model;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+
+import static io.spine.util.Exceptions.newIllegalStateException;
+
 /**
  * Utilities for tests that deal with {@link Model}.
  *
@@ -44,5 +49,27 @@ public class ModelTests {
      */
     public static void dropAllModels() {
         Model.dropAllModels();
+    }
+
+    /**
+     * Obtains a method declared in the passed class with the given name.
+     * @throws IllegalStateException if the class does not have such a method.
+     */
+    public static Method getMethod(Class<?> cls, String methodName) {
+        Method[] methods = cls.getDeclaredMethods();
+
+        Method result =
+                Arrays.stream(methods)
+                      .filter(method -> methodName.equals(method.getName()))
+                      .findFirst()
+                      .orElseThrow(
+                              () -> newIllegalStateException(
+                                      "No method named `%s` found in class `%s`",
+                                      methodName,
+                                      cls.getName()
+                              )
+                      );
+
+        return result;
     }
 }

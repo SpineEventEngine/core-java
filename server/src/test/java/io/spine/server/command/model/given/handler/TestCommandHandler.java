@@ -22,7 +22,7 @@ package io.spine.server.command.model.given.handler;
 
 import io.spine.server.BoundedContext;
 import io.spine.server.command.AbstractCommandHandler;
-import io.spine.server.command.model.given.MethodHarness;
+import io.spine.testing.server.model.ModelTests;
 
 import java.lang.reflect.Method;
 
@@ -30,6 +30,8 @@ import java.lang.reflect.Method;
  * Abstract base for test environment command handlers.
  */
 public abstract class TestCommandHandler extends AbstractCommandHandler {
+
+    public static final String HANDLER_METHOD_NAME = "handleTest";
 
     protected TestCommandHandler() {
         super(BoundedContext.newBuilder()
@@ -39,6 +41,6 @@ public abstract class TestCommandHandler extends AbstractCommandHandler {
     }
 
     public Method getHandler() {
-        return MethodHarness.getMethod(getClass());
+        return ModelTests.getMethod(getClass(), HANDLER_METHOD_NAME);
     }
 }
