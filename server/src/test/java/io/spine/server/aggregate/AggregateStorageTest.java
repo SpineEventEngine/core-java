@@ -30,7 +30,7 @@ import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.RejectionContext;
 import io.spine.core.Version;
-import io.spine.server.aggregate.given.StorageRecord;
+import io.spine.server.aggregate.given.StorageRecords;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.storage.AbstractStorageTest;
 import io.spine.test.aggregate.Project;
@@ -259,7 +259,7 @@ public abstract class AggregateStorageTest
     @Test
     @DisplayName("write and read one record")
     void writeAndReadRecord() {
-        AggregateEventRecord expected = StorageRecord.create(getCurrentTime());
+        AggregateEventRecord expected = StorageRecords.create(getCurrentTime());
 
         storage.writeRecord(id, expected);
 
@@ -317,7 +317,7 @@ public abstract class AggregateStorageTest
             LifecycleFlags archivedRecordFlags = LifecycleFlags.newBuilder()
                                                                .setArchived(true)
                                                                .build();
-            storage.writeRecord(id, StorageRecord.create(getCurrentTime()));
+            storage.writeRecord(id, StorageRecords.create(getCurrentTime()));
             storage.writeLifecycleFlags(id, archivedRecordFlags);
             assertTrue(storage.index()
                               .hasNext());
@@ -329,7 +329,7 @@ public abstract class AggregateStorageTest
             LifecycleFlags deletedRecordFlags = LifecycleFlags.newBuilder()
                                                               .setDeleted(true)
                                                               .build();
-            storage.writeRecord(id, StorageRecord.create(getCurrentTime()));
+            storage.writeRecord(id, StorageRecords.create(getCurrentTime()));
             storage.writeLifecycleFlags(id, deletedRecordFlags);
             assertTrue(storage.index()
                               .hasNext());
@@ -403,7 +403,7 @@ public abstract class AggregateStorageTest
             for (int i = 0; i < eventsNumber; i++) {
                 Project state = Project.getDefaultInstance();
                 Event event = eventFactory.createEvent(state, currentVersion, timestamp);
-                AggregateEventRecord record = StorageRecord.create(timestamp, event);
+                AggregateEventRecord record = StorageRecords.create(timestamp, event);
                 records.add(record);
                 currentVersion = increment(currentVersion);
             }
@@ -470,7 +470,7 @@ public abstract class AggregateStorageTest
             Timestamp time2 = add(time1, delta);
             Timestamp time3 = add(time2, delta);
 
-            storage.writeRecord(id, StorageRecord.create(time1));
+            storage.writeRecord(id, StorageRecords.create(time1));
             storage.writeSnapshot(id, newSnapshot(time2));
 
             testWriteRecordsAndLoadHistory(time3);
