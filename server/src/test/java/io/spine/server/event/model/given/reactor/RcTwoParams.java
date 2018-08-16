@@ -27,6 +27,8 @@ import io.spine.test.reflect.event.RefProjectStarted;
 
 /**
  * Provides reactor method with two parameters.
+ *
+ * @author Alexander Yevsyukov
  */
 public class RcTwoParams extends TestEventReactor {
 

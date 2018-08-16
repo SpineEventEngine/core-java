@@ -28,6 +28,8 @@ import io.spine.test.reflect.event.RefTaskAdded;
 
 /**
  * Provides a method that returns {@link Iterable}.
+ *
+ * @author Alexander Yevsyukov
  */
 public class RcIterableReturn extends TestEventReactor {
 

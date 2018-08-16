@@ -25,6 +25,8 @@ import io.spine.test.reflect.event.RefProjectStarted;
 
 /**
  * Provides a method with correct annotation and return value, but without parameters.
+ *
+ * @author Alexander Yevsyukov
  */
 public class RcWrongNoParam extends TestEventReactor {
 
