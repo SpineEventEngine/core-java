@@ -95,8 +95,9 @@ public final class CommandSubstituteMethod
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            boolean result = returnsMessageOrIterable(method, CommandMessage.class);
-            return result;
+            boolean returnsMessage = returnsMessage(method, CommandMessage.class);
+            boolean returnsIterable = returnsIterable(method);
+            return returnsMessage || returnsIterable;
         }
     }
 }

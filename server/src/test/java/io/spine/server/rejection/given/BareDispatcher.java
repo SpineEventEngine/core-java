@@ -20,11 +20,14 @@
 
 package io.spine.server.rejection.given;
 
+import com.google.common.collect.ImmutableSet;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
+import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.rejection.RejectionDispatcher;
 import io.spine.test.rejection.ProjectRejections.InvalidProjectName;
 
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -55,5 +58,15 @@ public class BareDispatcher implements RejectionDispatcher<String> {
 
     public boolean isDispatchCalled() {
         return dispatchCalled;
+    }
+
+    @Override
+    public Set<RejectionClass> getExternalRejectionClasses() {
+        return ImmutableSet.of();
+    }
+
+    @Override
+    public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
+        return Optional.empty();
     }
 }

@@ -109,12 +109,13 @@ public final class EventReactorMethod
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            boolean returnsMessageOrIterable = returnsMessageOrIterable(method, EventMessage.class);
-            if (returnsMessageOrIterable) {
-                checkOutputMessageType(method);
+            if (returnsMessage(method, EventMessage.class)) {
+                checkMessageClass(method);
                 return true;
             }
-            return false;
+
+            boolean iterableOrOptional = returnsIterableOrOptional(method);
+            return iterableOrOptional;
         }
 
         /**
@@ -126,13 +127,8 @@ public final class EventReactorMethod
          * @throws IllegalStateException if the type of the first parameter is the same as
          *                               the return value
          */
-        private static void checkOutputMessageType(Method method) {
+        private static void checkMessageClass(Method method) {
             Class<?> returnType = method.getReturnType();
-
-            // The method returns Iterable. We're OK.
-            if (Iterable.class.isAssignableFrom(returnType)) {
-                return;
-            }
 
             // The returned value must not be of the same type as the passed message param.
             Class<?>[] paramTypes = method.getParameterTypes();

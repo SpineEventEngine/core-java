@@ -22,6 +22,9 @@ package io.spine.server.rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.bus.MulticastDispatcher;
+import io.spine.server.integration.ExternalDispatcherFactory;
+
+import java.util.Set;
 
 /**
  * Delivers rejections to corresponding subscribers.
@@ -30,5 +33,26 @@ import io.spine.server.bus.MulticastDispatcher;
  * @author Alex Tymchenko
  */
 public interface RejectionDispatcher<I>
-        extends MulticastDispatcher<RejectionClass, RejectionEnvelope, I> {
+        extends MulticastDispatcher<RejectionClass, RejectionEnvelope, I>,
+                ExternalDispatcherFactory<I> {
+
+    default Set<RejectionClass> getRejectionClasses() {
+        return getMessageClasses();
+    }
+
+    Set<RejectionClass> getExternalRejectionClasses();
+
+    /**
+     * Verifies if this instance dispatches at least one domestic rejection.
+     */
+    default boolean dispatchesRejections() {
+        return !getRejectionClasses().isEmpty();
+    }
+
+    /**
+     * Verifies if this instance dispatches at least one external rejection.
+     */
+    default boolean dispatchesExternalRejections() {
+        return !getExternalRejectionClasses().isEmpty();
+    }
 }

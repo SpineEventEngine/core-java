@@ -27,24 +27,35 @@ import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
+import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.commandbus.CommandDispatcherDelegate;
+import io.spine.server.commandbus.CommandErrorHandler;
+import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VisibilityGuard;
+import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventDispatcher;
+import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.event.EventFactory;
+import io.spine.server.integration.ExternalDispatcherFactory;
+import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
+import io.spine.server.rejection.DelegatingRejectionDispatcher;
 import io.spine.server.rejection.RejectionBus;
+import io.spine.server.rejection.RejectionDispatcher;
+import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.SystemGateway;
 import io.spine.type.TypeName;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.Set;
@@ -82,7 +93,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public abstract class BoundedContext
         extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
-        implements AutoCloseable {
+        implements AutoCloseable, Logging {
 
     /**
      * The name of the bounded context, which is used to distinguish the context in an application
@@ -174,6 +185,125 @@ public abstract class BoundedContext
         repository.onRegistered();
     }
 
+    /**
+     * Registers the passed command dispatcher with the {@code CommandBus} of
+     * this {@code BoundedContext}.
+     */
+    public void registerCommandDispatcher(CommandDispatcher<?> dispatcher) {
+        checkNotNull(dispatcher);
+        if (dispatcher.dispatchesCommands()) {
+            getCommandBus().register(dispatcher);
+        }
+    }
+
+    /**
+     * Registers the passed command dispatcher with the {@code CommandBus} of
+     * this {@code BoundedContext}.
+     */
+    public void registerCommandDispatcher(CommandDispatcherDelegate<?> dispatcher) {
+        checkNotNull(dispatcher);
+        if (dispatcher.dispatchesCommands()) {
+            registerCommandDispatcher(DelegatingCommandDispatcher.of(dispatcher));
+        }
+    }
+
+    private void registerWithIntegrationBus(ExternalDispatcherFactory<?> dispatcher) {
+        ExternalMessageDispatcher<?> externalDispatcher =
+                dispatcher.createExternalDispatcher()
+                          .orElseThrow(notExternalDispatcherFrom(dispatcher));
+
+        getIntegrationBus().register(externalDispatcher);
+    }
+
+    /**
+     * Registers the passed event dispatcher with the {@code EventBus} of
+     * this {@code BoundedContext}, if it dispatches domestic events.
+     * If the passed instance dispatches external events, registers it with
+     * the {@code IntegrationBus}.
+     */
+    public void registerEventDispatcher(EventDispatcher<?> dispatcher) {
+        checkNotNull(dispatcher);
+        if (dispatcher.dispatchesEvents()) {
+            getEventBus().register(dispatcher);
+        }
+
+        if (dispatcher.dispatchesExternalEvents()) {
+            registerWithIntegrationBus(dispatcher);
+        }
+    }
+
+    /**
+     * Registers the passed rejection dispatcher with the {@code RejectionBus} of
+     * this {@code BoundedContext}.
+     */
+    public void registerRejectionDispatcher(RejectionDispatcher<?> dispatcher) {
+        checkNotNull(dispatcher);
+        if (dispatcher.dispatchesRejections()) {
+            getRejectionBus().register(dispatcher);
+        }
+
+        if (dispatcher.dispatchesExternalRejections()) {
+            registerWithIntegrationBus(dispatcher);
+        }
+    }
+
+    /**
+     * Registers the passed event dispatcher with the {@code EventBus} of
+     * this {@code BoundedContext}, if it dispatchers domestic events.
+     * If the passed instance dispatches external events, registers it with
+     * the {@code IntegrationBus}.
+     */
+    public void registerEventDispatcher(EventDispatcherDelegate<?> dispatcher) {
+        checkNotNull(dispatcher);
+        DelegatingEventDispatcher<?> delegatingDispatcher =
+                DelegatingEventDispatcher.of(dispatcher);
+
+        if (dispatcher.dispatchesEvents()) {
+            getEventBus().register(delegatingDispatcher);
+        }
+
+        if (dispatcher.dispatchesExternalEvents()) {
+            registerWithIntegrationBus(delegatingDispatcher);
+        }
+    }
+
+    /**
+     * Supplies {@code IllegalStateException} for the cases when dispatchers or dispatcher
+     * delegates do not provide an external message dispatcher.
+     */
+    private static
+    Supplier<IllegalStateException> notExternalDispatcherFrom(Object dispatcher) {
+        return () -> newIllegalStateException("No external dispatcher provided by %s", dispatcher);
+    }
+
+    /**
+     * Registers the passed rejection dispatcher with the {@code RejectionBus} of
+     * this {@code BoundedContext}.
+     */
+    public void registerRejectionDispatcher(RejectionDispatcherDelegate<?> dispatcher) {
+        checkNotNull(dispatcher);
+        DelegatingRejectionDispatcher<?> delegatingDispatcher =
+                DelegatingRejectionDispatcher.of(dispatcher);
+        if (dispatcher.dispatchesRejections()) {
+            registerRejectionDispatcher(delegatingDispatcher);
+        }
+        if (dispatcher.dispatchesExternalRejections()) {
+            registerWithIntegrationBus(delegatingDispatcher);
+        }
+    }
+
+    /**
+     * Creates a {@code CommandErrorHandler} for objects that handle commands.
+     */
+    public CommandErrorHandler createCommandErrorHandler() {
+        SystemGateway systemGateway = getSystemGateway();
+        CommandErrorHandler result = CommandErrorHandler
+                .newBuilder()
+                .setRejectionBus(getRejectionBus())
+                .setSystemGateway(systemGateway)
+                .build();
+        return result;
+    }
     /**
      * Sends an integration event to this {@code BoundedContext}.
      */
@@ -329,15 +459,5 @@ public abstract class BoundedContext
         if (tenantIndex != null) {
             tenantIndex.close();
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(BoundedContext.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

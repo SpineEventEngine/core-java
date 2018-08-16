@@ -32,10 +32,9 @@ import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
-import org.slf4j.Logger;
 
+import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -51,13 +50,10 @@ import static java.lang.String.format;
  * @see RejectionDispatcherDelegate
  */
 @Internal
-public final class DelegatingRejectionDispatcher<I> implements RejectionDispatcher<I> {
+public final class DelegatingRejectionDispatcher<I> implements RejectionDispatcher<I>, Logging {
 
     /** A target delegate. */
     private final RejectionDispatcherDelegate<I> delegate;
-
-    /** Lazily initialized logger. */
-    private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
 
     private DelegatingRejectionDispatcher(RejectionDispatcherDelegate<I> delegate) {
         this.delegate = delegate;
@@ -99,13 +95,22 @@ public final class DelegatingRejectionDispatcher<I> implements RejectionDispatch
                           .toString();
     }
 
+    @Override
+    public Set<RejectionClass> getExternalRejectionClasses() {
+        return delegate.getExternalRejectionClasses();
+    }
+
     /**
      * Wraps this dispatcher to an external rejection dispatcher.
      *
      * @return the external rejection dispatcher proxying calls to the underlying instance
      */
-    public ExternalMessageDispatcher<I> getExternalDispatcher() {
-        return new ExternalMessageDispatcher<I>() {
+    @Override
+    public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
+        if (!dispatchesExternalRejections()) {
+            return Optional.empty();
+        }
+        return Optional.of(new ExternalMessageDispatcher<I>() {
             @Override
             public Set<ExternalMessageClass> getMessageClasses() {
                 Set<RejectionClass> rejectionClasses = delegate.getExternalRejectionClasses();
@@ -129,10 +134,6 @@ public final class DelegatingRejectionDispatcher<I> implements RejectionDispatch
                                messageClass, messageId);
                 log().error(errorMessage, exception);
             }
-        };
-    }
-
-    private Logger log() {
-        return loggerSupplier.get();
+        });
     }
 }

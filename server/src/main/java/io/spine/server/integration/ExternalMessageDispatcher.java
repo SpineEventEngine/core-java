@@ -25,6 +25,7 @@ import io.spine.server.bus.MulticastDispatcher;
  * Delivers messages produced outside of the current {@code BoundedContext} to dispatchers,
  * that are {@linkplain io.spine.core.Subscribe#external() configured} to receive external events.
  *
+ * @param <I> the type of IDs of entities to which messages are dispatched
  * @author Alex Tymchenko
  */
 public interface ExternalMessageDispatcher<I>

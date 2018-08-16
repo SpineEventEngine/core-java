@@ -29,6 +29,7 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.model.MethodFactory;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testdata.Sample;
+import io.spine.testing.server.model.ModelTests;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -237,21 +238,14 @@ class EventApplierTest {
     private abstract static class TestEventApplier
             extends Aggregate<Long, StringValue, StringValueVBuilder> {
 
-        protected TestEventApplier() {
+        TestEventApplier() {
             super(0L);
         }
 
         private static final String APPLIER_METHOD_NAME = "apply";
 
         public Method getMethod() {
-            Method[] methods = getClass().getDeclaredMethods();
-            for (Method method : methods) {
-                if (method.getName().equals(APPLIER_METHOD_NAME)) {
-                    method.setAccessible(true);
-                    return method;
-                }
-            }
-            throw new RuntimeException("No applier method found: " + APPLIER_METHOD_NAME);
+            return ModelTests.getMethod(getClass(), APPLIER_METHOD_NAME);
         }
     }
 }

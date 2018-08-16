@@ -35,9 +35,6 @@ import io.spine.core.EventEnvelope;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.server.BoundedContext;
-import io.spine.server.ServerEnvironment;
-import io.spine.server.bus.Bus;
-import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
@@ -55,16 +52,15 @@ import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
-import io.spine.server.rejection.DelegatingRejectionDispatcher;
-import io.spine.server.rejection.RejectionBus;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.RejectionProducers;
 import io.spine.server.route.RejectionRouting;
-import io.spine.system.server.SystemGateway;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -84,6 +80,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("OverlyCoupledClass")
 public abstract class ProcessManagerRepository<I,
                                                P extends ProcessManager<I, S, ?>,
                                                S extends Message>
@@ -100,22 +97,13 @@ public abstract class ProcessManagerRepository<I,
             RejectionRouting.withDefault(RejectionProducers.fromContext());
 
     private final Supplier<PmCommandDelivery<I, P>> commandDeliverySupplier =
-            memoize(() -> {
-                PmCommandDelivery<I, P> result = new PmCommandDelivery<>(this);
-                return result;
-            });
+            memoize(this::createCommandDelivery);
 
     private final Supplier<PmEventDelivery<I, P>> eventDeliverySupplier =
-            memoize(() -> {
-                PmEventDelivery<I, P> result = new PmEventDelivery<>(this);
-                return result;
-            });
+            memoize(this::createEventDelivery);
 
     private final Supplier<PmRejectionDelivery<I, P>> rejectionDeliverySupplier =
-            memoize(() -> {
-                PmRejectionDelivery<I, P> result = new PmRejectionDelivery<>(this);
-                return result;
-            });
+            memoize(this::crateRejectionDelivery);
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -123,7 +111,7 @@ public abstract class ProcessManagerRepository<I,
      * <p>This field is not {@code final} only because it is initialized in {@link #onRegistered()}
      * method.
      */
-    private CommandErrorHandler commandErrorHandler;
+    private @MonotonicNonNull CommandErrorHandler commandErrorHandler;
 
     /**
      * Creates a new instance with the event routing by the first message field.
@@ -168,85 +156,50 @@ public abstract class ProcessManagerRepository<I,
      *
      * <p>Throws an {@code IllegalStateException} otherwise.
      */
-    @SuppressWarnings("MethodWithMoreThanThreeNegations")   // It's fine, as reflects the logic.
+    @SuppressWarnings({"MethodWithMoreThanThreeNegations", "LocalVariableNamingConvention"})
+    // It's fine, as reflects the logic.
     @Override
     public void onRegistered() {
         super.onRegistered();
 
         BoundedContext boundedContext = getBoundedContext();
-        DelegatingRejectionDispatcher<I> rejDispatcher =
-                DelegatingRejectionDispatcher.of(this);
+        boundedContext.registerCommandDispatcher(this);
+        boundedContext.registerRejectionDispatcher(this);
 
-        boolean handlesCommands = register(boundedContext.getCommandBus(),
-                                           DelegatingCommandDispatcher.of(this));
-        RejectionBus rejectionBus = boundedContext.getRejectionBus();
-        boolean handlesDomesticRejections = register(rejectionBus, rejDispatcher);
-        boolean handlesExternalRejections = register(boundedContext.getIntegrationBus(),
-                                                     rejDispatcher.getExternalDispatcher());
-        boolean handlesDomesticEvents = !getMessageClasses().isEmpty();
-        boolean handlesExternalEvents = !getExternalEventDispatcher().getMessageClasses()
-                                                                     .isEmpty();
+        boolean dispatchesEvents = dispatchesEvents() || dispatchesExternalEvents();
+        boolean dispatchesRejections = dispatchesRejections() || dispatchesExternalRejections();
 
-        boolean subscribesToEvents = handlesDomesticEvents || handlesExternalEvents;
-        boolean reactsUponRejections = handlesDomesticRejections || handlesExternalRejections;
-
-        if (!handlesCommands && !subscribesToEvents && !reactsUponRejections) {
+        if (!dispatchesCommands() && !dispatchesEvents && !dispatchesRejections) {
             throw newIllegalStateException(
                     "Process managers of the repository %s have no command handlers, " +
                             "and do not react upon any rejections or events.", this);
         }
-        SystemGateway systemGateway = boundedContext.getSystemGateway();
-        this.commandErrorHandler = CommandErrorHandler
-                .newBuilder()
-                .setRejectionBus(rejectionBus)
-                .setSystemGateway(systemGateway)
-                .build();
-        ServerEnvironment.getInstance()
-                         .getSharding()
-                         .register(this);
+
+        this.commandErrorHandler = boundedContext.createCommandErrorHandler();
+        registerWithSharding();
     }
 
     /**
-     * Registers the given dispatcher in the bus if there is at least one message class declared
-     * for dispatching by the dispatcher.
+     * Obtains a set of event classes on which process managers of this repository react.
      *
-     * @param bus        the bus to register dispatchers in
-     * @param dispatcher the dispatcher to register
-     * @param <D>        the type of dispatcher
-     * @return {@code true} if there are message classes to dispatch by the given dispatchers,
-     *         {@code false} otherwise
-     */
-    @SuppressWarnings("unchecked")  // To avoid a long "train" of generic parameter definitions.
-    private static <D extends MessageDispatcher<?, ?, ?>>
-    boolean register(Bus<?, ?, ?, D> bus, D dispatcher) {
-        boolean hasHandlerMethods = !dispatcher.getMessageClasses()
-                                               .isEmpty();
-        if (hasHandlerMethods) {
-            bus.register(dispatcher);
-        }
-        return hasHandlerMethods;
-    }
-
-    /**
-     * Registers itself as {@link io.spine.server.event.EventDispatcher EventDispatcher} if
-     * process managers of this repository are subscribed at least to one event.
+     * @return a set of event classes or empty set if process managers do not react on
+     *         domestic events
      */
     @Override
-    protected void registerAsEventDispatcher() {
-        if (!getMessageClasses().isEmpty()) {
-            super.registerAsEventDispatcher();
-        }
-    }
-
-    /**
-     * Obtains a set of event classes on which process managers of this repository are subscribed.
-     *
-     * @return a set of event classes or empty set if process managers do not subscribe to events
-     */
-    @Override
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
     public Set<EventClass> getMessageClasses() {
         return processManagerClass().getEventClasses();
+    }
+
+    /**
+     * Obtains classes of external events on which process managers managed by this repository
+     * react.
+     *
+     * @return a set of event classes or an empty set, if process managers do not react on
+     *         external events
+     */
+    @Override
+    public Set<EventClass> getExternalEventClasses() {
+        return processManagerClass().getExternalEventClasses();
     }
 
     /**
@@ -466,8 +419,11 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
-        return new PmExternalEventDispatcher();
+    public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
+        if (!dispatchesExternalEvents()) {
+            return Optional.empty();
+        }
+        return Optional.of(new PmExternalEventDispatcher());
     }
 
     @Override
@@ -493,10 +449,20 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     public void close() {
-        ServerEnvironment.getInstance()
-                         .getSharding()
-                         .unregister(this);
+        unregisterWithSharding();
         super.close();
+    }
+
+    private PmCommandDelivery<I, P> createCommandDelivery() {
+        return new PmCommandDelivery<>(this);
+    }
+
+    private PmEventDelivery<I, P> createEventDelivery() {
+        return new PmEventDelivery<>(this);
+    }
+
+    private PmRejectionDelivery<I, P> crateRejectionDelivery() {
+        return new PmRejectionDelivery<>(this);
     }
 
     /**
@@ -517,8 +483,9 @@ public abstract class ProcessManagerRepository<I,
             checkNotNull(envelope);
             checkNotNull(exception);
             logError("Error dispatching external event to process manager" +
-                             " (class: %s, id: %s)",
+                             " (event class: %s, id: %s)",
                      envelope, exception);
         }
+
     }
 }

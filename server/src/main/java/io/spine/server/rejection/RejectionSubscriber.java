@@ -20,22 +20,29 @@
 package io.spine.server.rejection;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
+import io.spine.core.MessageEnvelope;
+import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.logging.Logging;
+import io.spine.server.integration.ExternalMessage;
+import io.spine.server.integration.ExternalMessageClass;
+import io.spine.server.integration.ExternalMessageDispatcher;
+import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.rejection.model.RejectionSubscriberClass;
 import io.spine.server.rejection.model.RejectionSubscriberMethod;
 import io.spine.server.tenant.CommandOperation;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
-import org.slf4j.Logger;
 
+import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.rejection.model.RejectionSubscriberClass.asRejectionSubscriber;
 import static java.lang.String.format;
 
@@ -47,12 +54,9 @@ import static java.lang.String.format;
  * @see RejectionBus#register(io.spine.server.bus.MessageDispatcher)
  * @see io.spine.core.Subscribe
  */
-public class RejectionSubscriber implements RejectionDispatcher<String> {
+public class RejectionSubscriber implements RejectionDispatcher<String>, Logging {
 
     private final RejectionSubscriberClass<?> thisClass = asRejectionSubscriber(getClass());
-
-    /** Lazily initialized logger. */
-    private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
 
     /**
      * {@inheritDoc}
@@ -107,16 +111,64 @@ public class RejectionSubscriber implements RejectionDispatcher<String> {
         log().error(errorMessage, exception);
     }
 
-    /**
-     * Obtains the instance of logger associated with the class of the subscriber.
-     */
-    protected Logger log() {
-        return loggerSupplier.get();
-    }
-
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // as we return an immutable collection.
     public Set<RejectionClass> getMessageClasses() {
-        return thisClass.getRejectionSubscriptions();
+        return thisClass.getRejectionClasses();
+    }
+
+    @Override
+    public Set<RejectionClass> getExternalRejectionClasses() {
+        return thisClass.getExternalRejectionClasses();
+    }
+
+    @Override
+    public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
+        if (!dispatchesExternalRejections()) {
+            return Optional.empty();
+        }
+        return Optional.of(new ExternalDispatcher());
+    }
+
+    /**
+     * Dispatches external events to this subscriber.
+     */
+    private final class ExternalDispatcher implements ExternalMessageDispatcher<String>, Logging {
+
+        @Override
+        public Set<ExternalMessageClass> getMessageClasses() {
+            Set<ExternalMessageClass> result =
+                    ExternalMessageClass.fromRejectionClasses(
+                            thisClass.getExternalRejectionClasses()
+                    );
+            return result;
+        }
+
+        @CanIgnoreReturnValue
+        @Override
+        public Set<String> dispatch(ExternalMessageEnvelope envelope) {
+            ExternalMessage externalMessage = envelope.getOuterObject();
+            Rejection rejection = unpack(externalMessage.getOriginalMessage());
+            RejectionEnvelope re = RejectionEnvelope.of(rejection);
+            return RejectionSubscriber.this.dispatch(re);
+        }
+
+        @Override
+        public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
+            checkNotNull(envelope);
+            checkNotNull(exception);
+            logError("Error dispatching external rejection to subscriber " +
+                             "(rejection class: %s, id: %s)",
+                     envelope, exception);
+        }
+
+        private void logError(String msgFormat,
+                              MessageEnvelope envelope,
+                              RuntimeException exception) {
+            MessageClass messageClass = envelope.getMessageClass();
+            String messageId = Stringifiers.toString(envelope.getId());
+            String errorMessage = format(msgFormat, messageClass, messageId);
+            _error(errorMessage, exception);
+        }
     }
 }

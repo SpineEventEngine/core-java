@@ -71,4 +71,11 @@ public interface CommandDispatcherDelegate<I> {
      * @param exception the error
      */
     void onError(CommandEnvelope envelope, RuntimeException exception);
+
+    /**
+     * Verifies if this instance dispatches at least one command.
+     */
+    default boolean dispatchesCommands() {
+        return !getCommandClasses().isEmpty();
+    }
 }

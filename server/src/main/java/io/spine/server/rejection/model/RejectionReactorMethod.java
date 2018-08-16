@@ -127,8 +127,9 @@ public class RejectionReactorMethod
 
         @Override
         protected boolean verifyReturnType(Method method) {
-            boolean result = returnsMessageOrIterable(method, EventMessage.class);
-            return result;
+            boolean returnsMessage = returnsMessage(method, EventMessage.class);
+            boolean returnsIterable = returnsIterable(method);
+            return returnsMessage || returnsIterable;
         }
     }
 }

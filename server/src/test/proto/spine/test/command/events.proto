@@ -32,6 +32,10 @@ import "spine/test/command/project.proto";
 
 message CmdProjectCreated {
     ProjectId project_id = 1;
+
+    // If true a command for adding a first task will be created.
+    // See `CommandReactionMethodTest.java`
+    bool initialize = 2;
 }
 
 message CmdTaskAdded {

@@ -20,6 +20,7 @@
 package io.spine.server.delivery;
 
 import io.spine.core.BoundedContextName;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.entity.model.EntityClass;
 
 /**
@@ -78,4 +79,22 @@ public interface Shardable {
      * in this {@code Shardable}
      */
     EntityClass getShardedModelClass();
+
+    /**
+     * Registers this instance with {@link Sharding} obtained from the {@link ServerEnvironment}.
+     */
+    default void registerWithSharding() {
+        ServerEnvironment.getInstance()
+                         .getSharding()
+                         .register(this);
+    }
+
+    /**
+     * Unregisters this instance {@link Sharding} obtained from the {@link ServerEnvironment}.
+     */
+    default void unregisterWithSharding() {
+        ServerEnvironment.getInstance()
+                         .getSharding()
+                         .unregister(this);
+    }
 }
