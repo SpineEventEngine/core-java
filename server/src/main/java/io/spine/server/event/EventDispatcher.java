@@ -49,14 +49,14 @@ public interface EventDispatcher<I>
     Set<EventClass> getExternalEventClasses();
 
     /**
-     * Verifies if this instance dispatches at least one domestic events.
+     * Verifies if this instance dispatches at least one domestic event.
      */
     default boolean dispatchesEvents() {
         return !getEventClasses().isEmpty();
     }
 
     /**
-     * Verifies if this instance dispatches at least one external events.
+     * Verifies if this instance dispatches at least one external event.
      */
     default boolean dispatchesExternalEvents() {
         return !getExternalEventClasses().isEmpty();
