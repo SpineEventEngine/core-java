@@ -41,5 +41,5 @@ message Moved {
 
     // A position of the object after the move.
     // This field is optional to allow objects disclosing at their will.
-    Position current_position = 3;
+    Point current_position = 3;
 }

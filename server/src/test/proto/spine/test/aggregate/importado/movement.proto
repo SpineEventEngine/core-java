@@ -41,14 +41,6 @@ message Point {
     int32 y = 2;
 }
 
-// A position of a moving object.
-//
-// We aggregate `Point` instad of just using it for a position, to allow validation.
-//
-message Position {
-    Point point = 1 [(required) = true];
-}
-
 // Describes a movenent in terms of cardinal directions.
 //
 // See: https://en.wikipedia.org/wiki/Cardinal_direction
@@ -63,5 +55,5 @@ enum Direction {
 
 // An identifier of a moving object.
 message ObjectId {
-    string uuid = 1;
+    string value = 1;
 }
