@@ -25,6 +25,8 @@ import io.spine.core.Subscribe;
 
 /**
  * The subscriber with a method with first invalid parameter.
+ *
+ * @author Alexander Yevsyukov
  */
 public class InvalidTwoParamsFirstInvalid extends TestEventSubscriber {
     @Subscribe

@@ -31,6 +31,8 @@ import java.lang.reflect.Method;
  * <p>The purpose of this class is to obtain a reference to a
  * {@linkplain #HANDLER_METHOD_NAME single subscriber method}.
  * This reference will be later used for assertions.
+ *
+ * @author Alexander Yevsyukov
  */
 public abstract class TestEventSubscriber implements EventSubscriber {
 

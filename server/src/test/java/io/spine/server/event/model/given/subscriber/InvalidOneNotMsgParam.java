@@ -24,6 +24,8 @@ import io.spine.core.Subscribe;
 
 /**
  * The subscriber which has invalid single argument.
+ *
+ * @author Alexander Yevsyukov
  */
 public class InvalidOneNotMsgParam extends TestEventSubscriber {
     @Subscribe

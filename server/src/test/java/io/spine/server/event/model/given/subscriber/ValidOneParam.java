@@ -25,6 +25,8 @@ import io.spine.test.reflect.event.RefProjectCreated;
 
 /**
  * A class with a subscriber method that accepts only event message.
+ *
+ * @author Alexander Yevsyukov
  */
 public class ValidOneParam extends TestEventSubscriber {
 

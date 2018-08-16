@@ -25,6 +25,8 @@ import io.spine.test.reflect.event.RefProjectCreated;
 
 /**
  * The subscriber which has invalid second parameter.
+ *
+ * @author Alexander Yevsyukov
  */
 public class InvalidTwoParamsSecondInvalid extends TestEventSubscriber {
     @Subscribe
