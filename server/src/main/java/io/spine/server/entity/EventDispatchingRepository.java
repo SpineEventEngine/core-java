@@ -92,22 +92,6 @@ public abstract class EventDispatchingRepository<I,
     }
 
     /**
-     * Obtains an external event dispatcher for this repository.
-     *
-     * <p>This method should be overridden by the repositories, which are eligible
-     * to handle external events. In this case the implementation would typically delegate
-     * the dispatching of external events to the repository itself.
-     *
-     * <p>Such a delegate-based approach is chosen, since it's not possible to make
-     * {@code EventDispatchingRepository} extend another
-     * {@link io.spine.server.bus.MessageDispatcher MessageDispatcher} interface due to clashes
-     * in the class hierarchy.
-     *
-     * @return the external event dispatcher
-     */
-    //protected abstract ExternalMessageDispatcher<I> createExternalEventDispatcher();
-
-    /**
      * An abstract base for the external message dispatchers, enabling
      * the {@code EventDispatchingRepository} instances to handle external events.
      */
