@@ -25,6 +25,7 @@ import java.util.Optional;
 /**
  * Creates external message dispatcher.
  *
+ * @param <I> the type of IDs of entities to which messages are dispatched
  * @author Alexander Yevsyukov
  */
 public interface ExternalDispatcherFactory<I> {
