@@ -22,12 +22,14 @@ package io.spine.server.bus;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Rejection;
 import io.spine.type.MessageClass;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
@@ -54,24 +56,21 @@ import static java.util.stream.Collectors.toList;
  * @author Alexander Yevsyukov
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class Bus<T extends Message,
                           E extends MessageEnvelope<?, T, ?>,
                           C extends MessageClass,
                           D extends MessageDispatcher<C, E, ?>> implements AutoCloseable {
 
-    // A queue of envelopes to post.
+    /** A queue of envelopes to post. */
     private @Nullable DispatchingQueue<E> queue;
 
+    /** Dispatchers of messages by their class. */
     private @Nullable DispatcherRegistry<C, D> registry;
 
-    /**
-     * The chain of filters for this bus.
-     *
-     * <p>This field is effectively final, but is initialized lazily.
-     *
-     * @see #filterChain() for the non-null filter chain value
-     */
-    private @Nullable FilterChain<E> filterChain;
+    /** The chain of filters for this bus, {@linkplain #filterChain() lazily initialized}. */
+    @LazyInit
+    private @MonotonicNonNull FilterChain<E> filterChain;
 
     private final ChainBuilder<E> chainBuilder;
 
