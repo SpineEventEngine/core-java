@@ -47,7 +47,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <I> the type of entity IDs
  * @param <E> the type of entities
  * @param <M> the type of message envelopes
- * @param <T> the type of the dispatch result, which is {@code <I>} for unicast dispatching, and
+ * @param <R> the type of the dispatch result, which is {@code <I>} for unicast dispatching, and
  *            {@code Set<I>} for multicast
  * @author Alexander Yevsyukov
  */
@@ -55,7 +55,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public abstract class EntityMessageEndpoint<I,
                                             E extends Entity<I, ?>,
                                             M extends ActorMessageEnvelope<?, ?, ?>,
-                                            T> {
+                                            R> {
 
     /** The repository which created this endpoint. */
     private final @Nullable Repository<I, E> repository;
@@ -73,10 +73,10 @@ public abstract class EntityMessageEndpoint<I,
      *
      * @return the result of the message processing
      */
-    public final T handle() {
+    public final R handle() {
         TenantId tenantId = envelope().getTenantId();
-        TenantAwareFunction0<T> operation = new Operation(tenantId);
-        T result = operation.execute();
+        TenantAwareFunction0<R> operation = new Operation(tenantId);
+        R result = operation.execute();
         return result;
     }
 
@@ -84,15 +84,15 @@ public abstract class EntityMessageEndpoint<I,
      * {@linkplain #getTargets() Selects} one or more message targets and
      * {@linkplain #dispatchToOne(I) dispatches} the message to them.
      */
-    @SuppressWarnings("unchecked")
-    private T dispatch() {
-        T targets = getTargets();
+    @SuppressWarnings({"unchecked", "MethodOnlyUsedFromInnerClass"})
+    private R dispatch() {
+        R targets = getTargets();
         if (targets instanceof Set) {
             Set<I> handlingEntities = (Set<I>) targets;
-            return (T)(dispatchToMany(handlingEntities));
+            return (R) (dispatchToMany(handlingEntities));
         }
         try {
-            dispatchToOne((I)targets);
+            dispatchToOne((I) targets);
         } catch (RuntimeException exception) {
             onError(envelope(), exception);
         }
@@ -114,7 +114,7 @@ public abstract class EntityMessageEndpoint<I,
     /**
      * Obtains IDs of aggregates to which the endpoint delivers the message.
      */
-    protected abstract T getTargets();
+    protected abstract R getTargets();
 
     /**
      * Dispatches the message to the entity with the passed ID, providing transactional work
@@ -232,14 +232,14 @@ public abstract class EntityMessageEndpoint<I,
     /**
      * The operation executed under the tenant context in which the message was created.
      */
-    private class Operation extends TenantAwareFunction0<T> {
+    private class Operation extends TenantAwareFunction0<R> {
 
         private Operation(TenantId tenantId) {
             super(tenantId);
         }
 
         @Override
-        public T apply() {
+        public R apply() {
             return dispatch();
         }
     }
