@@ -37,6 +37,7 @@ import io.spine.system.server.SystemGateway;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Iterator;
@@ -281,13 +282,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @return passed value if it's not not null
      * @throws IllegalStateException if the passed instance is null
      */
-    protected static <S extends AutoCloseable> S checkStorage(@Nullable S storage) {
+    protected static <S extends AutoCloseable> @NonNull S checkStorage(@Nullable S storage) {
         checkState(storage != null, ERR_MSG_STORAGE_NOT_ASSIGNED);
-        return storage;
-    }
-
-    private Storage<I, ?, ?> ensureStorage() {
-        checkState(storage != null, "No storage assigned in repository %s", this);
         return storage;
     }
 
@@ -392,7 +388,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
         private EntityIterator(Repository<I, E> repository) {
             this.repository = repository;
-            this.index = repository.ensureStorage()
+            this.index = repository.getStorage()
                                    .index();
         }
 
