@@ -183,7 +183,7 @@ public abstract class Bus<T extends Message,
      * for the altered behavior specification.
      *
      * @param messages the messages to create an observer for
-     * @param source   the source {@link StreamObserver} to be transforme
+     * @param source   the source {@link StreamObserver} to be transformed
      * @return a transformed observer of {@link Ack} streams
      */
     protected StreamObserver<Ack> prepareObserver(Iterable<T> messages,
