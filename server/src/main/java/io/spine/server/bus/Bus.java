@@ -34,16 +34,15 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Deque;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterables.isEmpty;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.validate.Validate.isNotDefault;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Abstract base for buses.
@@ -150,12 +149,10 @@ public abstract class Bus<T extends Message,
     }
 
     private void filterAndPost(Iterable<T> messages, StreamObserver<Ack> observer) {
-        Collection<T> filteredMessages = filter(messages, observer);
-        if (!isEmpty(filteredMessages)) {
-            store(filteredMessages);
-            Iterable<E> envelopes = filteredMessages.stream()
-                                                    .map(this::toEnvelope)
-                                                    .collect(toList());
+        Map<T, E> filteredMessages = filter(messages, observer);
+        if (!filteredMessages.isEmpty()) {
+            store(filteredMessages.keySet());
+            Iterable<E> envelopes = filteredMessages.values();
             doPost(envelopes, observer);
         }
         observer.onCompleted();
@@ -317,18 +314,22 @@ public abstract class Bus<T extends Message,
      *
      * @param messages the message to filter
      * @param observer the observer to receive the negative outcome of the operation
-     * @return a {@code Collection} of messages, which passed all the filters
+     * @return a map of filtered messages where keys are messages, and values are envelopes with
+     *         these messages
+     * @implNote This method returns a map to avoid repeated creation of envelopes when dispatching.
+     * Messages in the returned map come in the same order as in the incoming sequence.
      */
-    private Collection<T> filter(Iterable<T> messages, StreamObserver<Ack> observer) {
+    private Map<T, E> filter(Iterable<T> messages, StreamObserver<Ack> observer) {
         checkNotNull(messages);
         checkNotNull(observer);
-        Collection<T> result = newLinkedList();
+        Map<T, E> result = new LinkedHashMap<>();
         for (T message : messages) {
-            Optional<Ack> response = filter(toEnvelope(message));
+            E envelope = toEnvelope(message);
+            Optional<Ack> response = filter(envelope);
             if (response.isPresent()) {
                 observer.onNext(response.get());
             } else {
-                result.add(message);
+                result.put(message, envelope);
             }
         }
         return result;
