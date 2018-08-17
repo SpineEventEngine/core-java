@@ -112,7 +112,7 @@ public abstract class EntityMessageEndpoint<I,
     }
 
     /**
-     * Obtains IDs of aggregates to which the endpoint delivers the message.
+     * Obtains IDs of entities to which the endpoint delivers the message.
      */
     protected abstract R getTargets();
 
@@ -165,7 +165,7 @@ public abstract class EntityMessageEndpoint<I,
 
     /**
      * Allows derived classes to handle empty list of uncommitted events returned by
-     * the aggregate in response to the message.
+     * the entity in response to the message.
      */
     protected abstract void onEmptyResult(E entity, M envelope);
 
@@ -175,10 +175,10 @@ public abstract class EntityMessageEndpoint<I,
     protected abstract void onError(M envelope, RuntimeException exception);
 
     /**
-     * Dispatches the message to multiple aggregates.
+     * Dispatches the message to multiple entities.
      *
-     * @param targets the set of aggregate IDs to which dispatch the message
-     * @return the set of aggregate IDs to which the message was successfully dispatched
+     * @param targets the set of entity IDs to which dispatch the message
+     * @return the set of entity IDs to which the message was successfully dispatched
      */
     private Set<I> dispatchToMany(Set<I> targets) {
         ImmutableSet.Builder<I> result = ImmutableSet.builder();
