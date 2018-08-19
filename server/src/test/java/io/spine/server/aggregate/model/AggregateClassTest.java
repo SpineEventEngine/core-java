@@ -21,9 +21,17 @@
 package io.spine.server.aggregate.model;
 
 import io.spine.core.CommandClass;
+import io.spine.core.EventClass;
+import io.spine.core.RejectionClass;
 import io.spine.server.aggregate.given.klasse.EngineAggregate;
+import io.spine.server.aggregate.given.klasse.command.EmissionTestStarted;
+import io.spine.server.aggregate.given.klasse.command.EmissionTestStopped;
 import io.spine.server.aggregate.given.klasse.command.StartEngine;
 import io.spine.server.aggregate.given.klasse.command.StopEngine;
+import io.spine.server.aggregate.given.klasse.command.TankEmpty;
+import io.spine.server.aggregate.given.klasse.rejection.Rejections.CannotStartEmissionTest;
+import io.spine.server.aggregate.given.klasse.rejection.Rejections.EngineAlreadyStarted;
+import io.spine.server.aggregate.given.klasse.rejection.Rejections.EngineAlreadyStopped;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -42,8 +50,46 @@ class AggregateClassTest {
     @DisplayName("provide handled command classes")
     void commandClasses() {
         assertThat(aggregateClass.getCommands())
-            .containsExactlyElementsIn(CommandClass.setOf(StartEngine.class, StopEngine.class));
+                .containsExactlyElementsIn(CommandClass.setOf(
+                        StartEngine.class, StopEngine.class
+                ));
     }
 
+    @Test
+    @DisplayName("provide event classes on which the aggregate reacts")
+    void eventClasses() {
+        assertThat(aggregateClass.getEventClasses())
+                .containsExactlyElementsIn(EventClass.setOf(
+                        TankEmpty.class
+                ));
+    }
 
+    @Test
+    @DisplayName("provide classes of external events on which the aggregate reacts")
+    void externalEventClasses() {
+        assertThat(aggregateClass.getExternalEventClasses())
+                .containsExactlyElementsIn(EventClass.setOf(
+                        EmissionTestStarted.class,
+                        EmissionTestStopped.class
+                ));
+    }
+
+    @Test
+    @DisplayName("provide rejection classes on which the aggregate reacts")
+    void rejectionClasses() {
+        assertThat(aggregateClass.getRejectionClasses())
+                .containsExactlyElementsIn(RejectionClass.setOf(
+                        EngineAlreadyStarted.class,
+                        EngineAlreadyStopped.class
+                ));
+    }
+
+    @Test
+    @DisplayName("provide external rejection classes on which the aggregate reacts")
+    void externalRejectionClasses() {
+        assertThat(aggregateClass.getExternalRejectionClasses())
+                .containsExactlyElementsIn(RejectionClass.setOf(
+                        CannotStartEmissionTest.class
+                ));
+    }
 }

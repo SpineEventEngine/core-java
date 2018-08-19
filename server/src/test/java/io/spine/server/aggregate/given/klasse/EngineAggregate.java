@@ -20,15 +20,24 @@
 
 package io.spine.server.aggregate.given.klasse;
 
+import com.google.protobuf.Empty;
+import io.spine.core.React;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
+import io.spine.server.aggregate.given.klasse.command.EmissionTestStarted;
+import io.spine.server.aggregate.given.klasse.command.EmissionTestStopped;
 import io.spine.server.aggregate.given.klasse.command.EngineStarted;
 import io.spine.server.aggregate.given.klasse.command.EngineStopped;
 import io.spine.server.aggregate.given.klasse.command.StartEngine;
 import io.spine.server.aggregate.given.klasse.command.StopEngine;
+import io.spine.server.aggregate.given.klasse.command.TankEmpty;
 import io.spine.server.aggregate.given.klasse.rejection.EngineAlreadyStarted;
 import io.spine.server.aggregate.given.klasse.rejection.EngineAlreadyStopped;
+import io.spine.server.aggregate.given.klasse.rejection.Rejections;
 import io.spine.server.command.Assign;
+
+import static io.spine.server.aggregate.given.klasse.Engine.Status.STARTED;
+import static io.spine.server.aggregate.given.klasse.Engine.Status.STOPPED;
 
 /**
  * A engine which handles commands and reacts on domestic and external events.
@@ -43,27 +52,108 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
 
     @Assign
     EngineStarted handle(StartEngine command) throws EngineAlreadyStarted {
-        //TODO:2018-08-19:alexander.yevsyukov: Throw EngineAlreadyStarted if so
-        return EngineStarted.newBuilder()
-                            .setId(command.getId())
-                            .build();
+        EngineId id = command.getId();
+        if (getState().getStatus() == STARTED) {
+            throw new EngineAlreadyStarted(id);
+        }
+        return start(id);
     }
 
     @Apply
     void on(EngineStarted event) {
-        //TODO:2018-08-19:alexander.yevsyukov: Do start.
+        setStarted();
     }
 
     @Assign
     EngineStopped handle(StopEngine command) throws EngineAlreadyStopped {
-        //TODO:2018-08-19:alexander.yevsyukov: Thow EngineAlreadyStopped if so.
-        return EngineStopped.newBuilder()
-                            .setId(command.getId())
-                            .build();
+        EngineId id = command.getId();
+        if (getState().getStatus() == STOPPED) {
+            throw new EngineAlreadyStopped(id);
+        }
+        return stop(id);
     }
 
     @Apply
     void on(EngineStopped event) {
-        //TODO:2018-08-19:alexander.yevsyukov: Do stop.
+        setStopped();
+    }
+
+    /*
+     * Domestic event reactions
+     ****************************/
+
+    @React
+    EngineStopped on(TankEmpty event) {
+        return stop(event.getId());
+    }
+
+    /*
+     * External event reactions
+     ****************************/
+
+    @React(external = true)
+    Empty on(EmissionTestStarted event) {
+        return empty();
+    }
+
+    @React(external = true)
+    Empty on(EmissionTestStopped event) {
+        return empty();
+    }
+
+    /*
+     * Domestic rejection reactions
+     *
+     * Since this class reacts on own rejections (which are derived from
+     * ThrowableMessage and have the same names as corresponding rejection
+     * message classes), we cannot import the outer class in which they
+     * are declared.
+     *********************************************************************/
+
+    @React
+    Empty on(Rejections.EngineAlreadyStarted rejection) {
+        return empty();
+    }
+
+    @React
+    Empty on(Rejections.EngineAlreadyStopped rejection) {
+        return empty();
+    }
+
+    /*
+     * External rejection reactions
+     *************************************/
+
+    @React(external = true)
+    Empty on(Rejections.CannotStartEmissionTest rejection) {
+        return empty();
+    }
+
+    /*
+     * Utility methods for creating messages and updating state
+     ************************************************************/
+
+    private static EngineStarted start(EngineId id) {
+        return EngineStarted.newBuilder()
+                            .setId(id)
+                            .build();
+    }
+
+    private static EngineStopped stop(EngineId id) {
+        return EngineStopped.newBuilder()
+                            .setId(id)
+                            .build();
+    }
+
+    private static Empty empty() {
+        return Empty.getDefaultInstance();
+    }
+
+    private void setStarted() {
+        getBuilder().setStatus(STARTED);
+    }
+
+    private void setStopped() {
+        getBuilder().setStatus(STOPPED);
     }
 }
