@@ -20,9 +20,30 @@
 
 package io.spine.server.aggregate.model;
 
+import io.spine.core.CommandClass;
+import io.spine.server.aggregate.given.klasse.EngineAggregate;
+import io.spine.server.aggregate.given.klasse.command.StartEngine;
+import io.spine.server.aggregate.given.klasse.command.StopEngine;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+
 /**
  * @author Alexander Yevsyukov
  */
+@DisplayName("AggregateClass should")
 class AggregateClassTest {
+
+    private final AggregateClass<?> aggregateClass = asAggregateClass(EngineAggregate.class);
+
+    @Test
+    @DisplayName("provide handled command classes")
+    void commandClasses() {
+        assertThat(aggregateClass.getCommands())
+            .containsExactlyElementsIn(CommandClass.setOf(StartEngine.class, StopEngine.class));
+    }
+
 
 }

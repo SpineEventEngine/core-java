@@ -37,9 +37,11 @@ message EngineId {
 message Engine {
     EngineId id = 1 [(required) = true];
 
-    enum State {
+    enum Status {
         ENGINE_STATE_UNDEFINED = 0;
         STOPPED = 1;
         STARTED = 2;
     }
+
+    Status status = 2 [(required) = true];
 }
