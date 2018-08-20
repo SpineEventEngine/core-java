@@ -138,6 +138,7 @@ interface CommandingMethod<T, M extends MessageClass, C extends Message, R exten
             } else {
                 SeveralCommands seq = respondMany(event);
                 seq.addAll(messages);
+                seq.postAll(bus);
             }
         }
     }

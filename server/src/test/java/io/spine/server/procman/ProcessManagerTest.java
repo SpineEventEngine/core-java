@@ -43,8 +43,12 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.NoOpSystemGateway;
 import io.spine.test.procman.command.PmAddTask;
+import io.spine.test.procman.command.PmCencelIteration;
+import io.spine.test.procman.command.PmPlanIteration;
 import io.spine.test.procman.command.PmReviewBacklog;
+import io.spine.test.procman.command.PmScheduleRetrospective;
 import io.spine.test.procman.command.PmStartProject;
+import io.spine.test.procman.event.PmOwnerChanged;
 import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.event.PmTaskAdded;
@@ -61,6 +65,7 @@ import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.model.ModelTests;
 import io.spine.testing.server.procman.InjectCommandBus;
 import io.spine.testing.server.tenant.TenantAwareTest;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -72,6 +77,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.procman.given.pm.GivenMessages.addTask;
+import static io.spine.server.procman.given.pm.GivenMessages.cancelIteration;
 import static io.spine.server.procman.given.pm.GivenMessages.createProject;
 import static io.spine.server.procman.given.pm.GivenMessages.entityAlreadyArchived;
 import static io.spine.server.procman.given.pm.GivenMessages.ownerChanged;
@@ -86,6 +92,7 @@ import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.server.blackbox.VerifyCommands.emittedCommand;
+import static io.spine.testing.server.blackbox.VerifyCommands.emittedCommands;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvents;
 import static io.spine.testing.server.procman.PmDispatcher.dispatch;
@@ -233,8 +240,8 @@ class ProcessManagerTest {
     }
 
     @Nested
-    @DisplayName("Create command")
-    class Commanding {
+    @DisplayName("create command(s)")
+    class CommandCreation {
 
         private BlackBoxBoundedContext boundedContext;
 
@@ -244,22 +251,54 @@ class ProcessManagerTest {
                                                    .with(new TestProcessManagerRepo());
         }
 
-        /**
-         * Tests transformation of a command into another command.
-         * @see TestProcessManager#transform(PmStartProject)
-         */
-        @Test
-        @DisplayName("by transform incoming command")
-        void transformCommand() {
-            boundedContext.receivesCommand(startProject())
-                          .assertThat(emittedCommand(PmAddTask.class, once()));
+        @AfterEach
+        void tearDown() {
+            boundedContext.close();
         }
 
-        @Test
-        @DisplayName("on incoming event")
-        void commandOnEvent() {
-            boundedContext.receivesEvent(ownerChanged())
-                          .assertThat(emittedCommand(PmReviewBacklog.class));
+        @Nested
+        @DisplayName("single command")
+        class SingleCommand {
+
+            /**
+             * Tests transformation of a command into another command.
+             * @see TestProcessManager#transform(PmStartProject)
+             */
+            @Test
+            @DisplayName("by transform incoming command")
+            void transformCommand() {
+                boundedContext.receivesCommand(startProject())
+                              .assertThat(emittedCommand(PmAddTask.class, once()));
+            }
+
+            /**
+             * Tests generation of a command in response to incoming event.
+             * @see TestProcessManager#on(PmOwnerChanged)
+             */
+            @Test
+            @DisplayName("on incoming event")
+            void commandOnEvent() {
+                boundedContext.receivesEvent(ownerChanged())
+                              .assertThat(emittedCommand(PmReviewBacklog.class));
+            }
+        }
+
+        @Nested
+        @DisplayName("several commands")
+        class SeveralCommands {
+
+            /**
+             * Tests splitting incoming command into two.
+             * @see TestProcessManager#split(PmCencelIteration)
+             */
+            @Test
+            @DisplayName("when splitting incoming command")
+            void splitCommand() {
+                boundedContext.receivesCommand(cancelIteration())
+                              .assertThat(emittedCommands(PmScheduleRetrospective.class,
+                                                          PmPlanIteration.class));
+            }
+
         }
     }
 
