@@ -50,6 +50,7 @@ import java.util.Optional;
 
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
@@ -142,7 +143,8 @@ class EventSubscriberMethodTest {
         @Test
         @DisplayName("no annotation")
         void noAnnotation() {
-            assertThrows(SignatureMismatchException.class, InvalidNoAnnotation::new);
+            Method method = new InvalidNoAnnotation().getMethod();
+            assertFalse(new EventSubscriberSignature().matches(method));
         }
 
         @Test

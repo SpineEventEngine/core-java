@@ -23,6 +23,7 @@ package io.spine.server.event.given;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
+import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.test.reflect.event.RefProjectCreated;
 
 import java.lang.reflect.Method;
@@ -142,7 +143,7 @@ public class EventSubscriberMethodTestEnv {
      * {@linkplain #HANDLER_METHOD_NAME single subscriber method}.
      * This reference will be later used for assertions.
      */
-    public abstract static class TestEventSubscriber {
+    public abstract static class TestEventSubscriber extends AbstractEventSubscriber {
 
         @SuppressWarnings("DuplicateStringLiteralInspection")
         private static final String HANDLER_METHOD_NAME = "handle";
