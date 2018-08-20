@@ -18,41 +18,34 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
+package io.spine.server.model.declare;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
-import io.spine.core.EventEnvelope;
-import io.spine.server.event.React;
-import io.spine.server.model.declare.AccessModifier;
-import io.spine.server.model.declare.ParameterSpec;
-
-import java.lang.reflect.Method;
-import java.util.Optional;
-
-import static com.google.common.collect.ImmutableSet.of;
+import com.google.common.base.Joiner;
 
 /**
+ * Thrown for {@linkplain io.spine.server.model.HandlerMethod handler method} in case
+ * the raw {@link java.lang.reflect.Method} does not match {@linkplain MethodSignature
+ * method signature}, set for the handler.
+ *
  * @author Alex Tymchenko
  */
-class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> {
+public class SignatureMismatchException extends RuntimeException {
 
-    EventReactorSignature() {
-        super(React.class);
+    private static final long serialVersionUID = 1L;
+
+    private final String message;
+
+    public SignatureMismatchException(Iterable<SignatureMismatch> mismatches) {
+        this.message =  formatMsg(mismatches);
     }
 
     @Override
-    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return of(AccessModifier.PACKAGE_PRIVATE);
+    public String getMessage() {
+        return message;
     }
 
-    @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return of(Message.class, Iterable.class, Optional.class);
-    }
-
-    @Override
-    public EventReactorMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
-        return new EventReactorMethod(method, parameterSpec);
+    private static String formatMsg(Iterable<SignatureMismatch> mismatches) {
+        return "Error declaring a method. Mismatches: " +Joiner.on(", ")
+                                                               .join(mismatches);
     }
 }

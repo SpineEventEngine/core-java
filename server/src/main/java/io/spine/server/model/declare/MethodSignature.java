@@ -20,7 +20,6 @@
 
 package io.spine.server.model.declare;
 
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.model.HandlerMethod;
@@ -34,14 +33,13 @@ import java.util.Optional;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.model.declare.MethodParams.findMatching;
 import static io.spine.server.model.declare.SignatureMismatch.Severity.ERROR;
-import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.stream.Collectors.toList;
 
 /**
  * @author Alex Tymchenko
  */
 public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
-                                      E extends MessageEnvelope<?, ?, ?>> {
+        E extends MessageEnvelope<?, ?, ?>> {
 
     private final Class<? extends Annotation> annotation;
 
@@ -55,16 +53,32 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
 
     protected abstract ImmutableSet<Class<?>> getValidReturnTypes();
 
-    public boolean matches(Method method) {
+    /**
+     * Checks whether the passed {@code method} matches the constraints set by this
+     * {@code MethodSignature} instance.
+     *
+     * @implNote This method never returns {@code false} (rather throwing an exception), since
+     * in future the extended diagnostic, based upon {@linkplain SignatureMismatch signature
+     * mismatches} found is going to be implemented.
+     *
+     * @param method
+     *         the method to check
+     * @return true if there was no {@link SignatureMismatch.Severity#ERROR ERROR}-level mismatches
+     * @throws SignatureMismatchException
+     *         in case of any {@link SignatureMismatch.Severity#ERROR ERROR}-level mismatches
+     */
+    public boolean matches(Method method) throws SignatureMismatchException {
+        if (!method.isAnnotationPresent(annotation)) {
+            return false;
+        }
+
         Collection<SignatureMismatch> mismatches = match(method);
         boolean hasErrors = mismatches.stream()
                                       .anyMatch(mismatch -> ERROR == mismatch.getSeverity());
         if (hasErrors) {
-            throw newIllegalStateException("Error declaring a method. Mismatches: %s",
-                                           Joiner.on(", ")
-                                                 .join(mismatches));
+            throw new SignatureMismatchException(mismatches);
         }
-        return !hasErrors;
+        return true;
     }
 
     public abstract H doCreate(Method method, ParameterSpec<E> parameterSpec);
@@ -90,15 +104,12 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      *         in case some of the method checks fail
      */
     public Optional<H> create(Method method) {
-        if(!method.isAnnotationPresent(annotation)) {
-            return Optional.empty();
-        }
-
         boolean matches = matches(method);
-        if(!matches) {
+        if (!matches) {
             return Optional.empty();
         }
-        Optional<? extends ParameterSpec<E>> matchingSpec = findMatching(method, getParamSpecClass());
+        Optional<? extends ParameterSpec<E>> matchingSpec = findMatching(method,
+                                                                         getParamSpecClass());
         return matchingSpec.map(spec -> doCreate(method, spec));
 
     }

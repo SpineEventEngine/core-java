@@ -38,6 +38,7 @@ import io.spine.server.event.given.EventSubscriberMethodTestEnv.TestEventSubscri
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.ValidButPrivate;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.ValidOneParam;
 import io.spine.server.event.given.EventSubscriberMethodTestEnv.ValidTwoParams;
+import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.server.model.given.Given;
 import io.spine.test.reflect.event.RefProjectCreated;
 import org.junit.jupiter.api.DisplayName;
@@ -49,7 +50,6 @@ import java.util.Optional;
 
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
@@ -108,15 +108,14 @@ class EventSubscriberMethodTest {
         void oneMessageParam() {
             Method subscriber = new ValidOneParam().getMethod();
 
-            assertIsEventSubscriber(subscriber, true);
+            assertIsEventSubscriber(subscriber);
         }
 
         @Test
         @DisplayName("Message and Context parameters")
         void messageAndContextParams() {
             Method subscriber = new ValidTwoParams().getMethod();
-
-            assertIsEventSubscriber(subscriber, true);
+            assertIsEventSubscriber(subscriber);
         }
 
         @Test
@@ -124,7 +123,7 @@ class EventSubscriberMethodTest {
         void nonPublicAccess() {
             Method method = new ValidButPrivate().getMethod();
 
-            assertIsEventSubscriber(method, true);
+            assertIsEventSubscriber(method);
         }
 
         @Test
@@ -132,7 +131,7 @@ class EventSubscriberMethodTest {
         void rejectionClassType() {
             Method rejectionSubscriber = new ARejectionSubscriber().getMethod();
 
-            assertIsEventSubscriber(rejectionSubscriber, true);
+            assertIsEventSubscriber(rejectionSubscriber);
         }
     }
 
@@ -143,57 +142,43 @@ class EventSubscriberMethodTest {
         @Test
         @DisplayName("no annotation")
         void noAnnotation() {
-            Method subscriber = new InvalidNoAnnotation().getMethod();
-
-            assertIsEventSubscriber(subscriber, false);
+            assertThrows(SignatureMismatchException.class, InvalidNoAnnotation::new);
         }
 
         @Test
         @DisplayName("no params")
         void noParams() {
-            Method subscriber = new InvalidNoParams().getMethod();
-
-            assertIsEventSubscriber(subscriber, false);
+            assertThrows(SignatureMismatchException.class, InvalidNoParams::new);
         }
 
         @Test
         @DisplayName("too many params")
         void tooManyParams() {
-            Method subscriber = new InvalidTooManyParams().getMethod();
-
-            assertIsEventSubscriber(subscriber, false);
+            assertThrows(SignatureMismatchException.class, InvalidTooManyParams::new);
         }
 
         @Test
         @DisplayName("one invalid param")
         void oneInvalidParam() {
-            Method subscriber = new InvalidOneNotMsgParam().getMethod();
-
-            assertIsEventSubscriber(subscriber, false);
+            assertThrows(SignatureMismatchException.class, InvalidOneNotMsgParam::new);
         }
 
         @Test
         @DisplayName("first non-Message param")
         void firstNonMessageParam() {
-            Method subscriber = new InvalidTwoParamsFirstInvalid().getMethod();
-
-            assertIsEventSubscriber(subscriber, false);
+            assertThrows(SignatureMismatchException.class, InvalidTwoParamsFirstInvalid::new);
         }
 
         @Test
         @DisplayName("second non-Context param")
         void secondNonContextParam() {
-            Method subscriber = new InvalidTwoParamsSecondInvalid().getMethod();
-
-            assertIsEventSubscriber(subscriber, false);
+            assertThrows(SignatureMismatchException.class, InvalidTwoParamsSecondInvalid::new);
         }
 
         @Test
         @DisplayName("non-void return type")
         void nonVoidReturnType() {
-            Method subscriber = new InvalidNotVoid().getMethod();
-
-            assertIsEventSubscriber(subscriber, false);
+            assertThrows(SignatureMismatchException.class, InvalidNotVoid::new);
         }
     }
 
@@ -235,8 +220,7 @@ class EventSubscriberMethodTest {
         }
     }
 
-    private static void assertIsEventSubscriber(Method subscriber, boolean isSubscriber) {
-        assertEquals(isSubscriber, new EventSubscriberSignature().match(subscriber)
-                                                                 .isEmpty());
+    private static void assertIsEventSubscriber(Method subscriber) {
+        assertTrue(new EventSubscriberSignature().matches(subscriber));
     }
 }

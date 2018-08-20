@@ -122,7 +122,7 @@ class EventApplierTest {
         }
 
         @Test
-        @DisplayName("it's not private")
+        @DisplayName("it's not package-private")
         void isNotPrivate() {
             Method method = new ValidApplierButNotPackagePrivate().getMethod();
 

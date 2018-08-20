@@ -42,7 +42,7 @@ import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectCancelled;
 import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggProjectStarted;
-import io.spine.test.aggregate.rejection.AggCannotReassignUnassignedTask;
+import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedTask;
 import io.spine.validate.StringValueVBuilder;
 
 import java.util.Optional;

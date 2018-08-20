@@ -23,6 +23,7 @@ package io.spine.server.command.model;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
+import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.command.Command;
@@ -82,10 +83,22 @@ public class CommandReactionSignature
             }
         },
 
-        MESSAGE_AND_CONTEXT {
+        MESSAGE_AND_EVENT_CONTEXT {
             @Override
             public boolean matches(Class<?>[] methodParams) {
                 return consistsOfTwo(methodParams, Message.class, EventContext.class);
+            }
+
+            @Override
+            public Object[] extractArguments(EventEnvelope envelope) {
+                return new Object[]{envelope, envelope.getEventContext()};
+            }
+        },
+
+        MESSAGE_AND_COMMAND_CONTEXT {
+            @Override
+            public boolean matches(Class<?>[] methodParams) {
+                return consistsOfTwo(methodParams, Message.class, CommandContext.class);
             }
 
             @Override

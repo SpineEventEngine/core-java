@@ -32,6 +32,8 @@ import java.util.Optional;
 import static com.google.common.base.Joiner.on;
 import static io.spine.server.model.MethodExceptionChecker.forMethod;
 import static io.spine.server.model.declare.SignatureMismatch.Severity.ERROR;
+import static io.spine.server.model.declare.SignatureMismatch.Severity.WARN;
+import static io.spine.server.model.declare.SignatureMismatch.create;
 import static java.lang.String.format;
 
 /**
@@ -50,18 +52,18 @@ public enum MatchCriterion {
                                         .anyMatch(type -> type.isAssignableFrom(returnType));
             if (!conforms) {
                 SignatureMismatch mismatch =
-                        SignatureMismatch.create(this,
-                                                 methodAsString(method),
-                                                 signature.getAnnotation()
-                                                          .getSimpleName());
+                        create(this,
+                               methodAsString(method),
+                               signature.getAnnotation()
+                                        .getSimpleName());
                 return Optional.of(mismatch);
             }
             return Optional.empty();
         }
     },
 
-    ACCESS_MODIFIER(/*WARN*/ERROR,
-                            "The access modifier of `%s` method must be `%s`, but it is `%s`.") {
+    ACCESS_MODIFIER(WARN,
+                    "The access modifier of `%s` method must be `%s`, but it is `%s`.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
 
@@ -71,10 +73,10 @@ public enum MatchCriterion {
                     .anyMatch(m -> m.test(method));
             if (!hasMatch) {
                 SignatureMismatch mismatch =
-                        SignatureMismatch.create(this,
-                                                 methodAsString(method),
-                                                 AccessModifier.asString(allowedModifiers),
-                                                 Modifier.toString(method.getModifiers()));
+                        create(this,
+                               methodAsString(method),
+                               AccessModifier.asString(allowedModifiers),
+                               Modifier.toString(method.getModifiers()));
                 return Optional.of(mismatch);
 
             }
@@ -92,8 +94,8 @@ public enum MatchCriterion {
                 checker.checkThrowsNoExceptionsBut(allowed);
                 return Optional.empty();
             } catch (IllegalStateException e) {
-                SignatureMismatch mismatch = SignatureMismatch.create(this,
-                                                                      e.getMessage());
+                SignatureMismatch mismatch = create(this,
+                                                    e.getMessage());
                 return Optional.of(mismatch);
             }
         }
@@ -107,10 +109,12 @@ public enum MatchCriterion {
             Optional<? extends ParameterSpec<?>> matching =
                     MethodParams.findMatching(method, signature.getParamSpecClass());
             if (!matching.isPresent()) {
-                SignatureMismatch.create(this,
-                                         methodAsString(method),
-                                         signature.getAnnotation()
-                                                  .getSimpleName());
+                SignatureMismatch mismatch =
+                        create(this,
+                               methodAsString(method),
+                               signature.getAnnotation()
+                                        .getSimpleName());
+                return Optional.of(mismatch);
             }
             return Optional.empty();
         }
