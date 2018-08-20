@@ -26,6 +26,7 @@ import io.spine.core.RejectionClass;
 import io.spine.server.aggregate.given.klasse.EngineAggregate;
 import io.spine.server.aggregate.given.klasse.command.EmissionTestStarted;
 import io.spine.server.aggregate.given.klasse.command.EmissionTestStopped;
+import io.spine.server.aggregate.given.klasse.command.EngineStopped;
 import io.spine.server.aggregate.given.klasse.command.StartEngine;
 import io.spine.server.aggregate.given.klasse.command.StopEngine;
 import io.spine.server.aggregate.given.klasse.command.TankEmpty;
@@ -91,5 +92,12 @@ class AggregateClassTest {
                 .containsExactlyElementsIn(RejectionClass.setOf(
                         CannotStartEmissionTest.class
                 ));
+    }
+
+    @Test
+    @DisplayName("provide classes of events that are imported by the aggregate")
+    void importedEvents() {
+        assertThat(aggregateClass.getImportEvents())
+                .containsExactly(EventClass.from(EngineStopped.class));
     }
 }

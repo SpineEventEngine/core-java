@@ -73,7 +73,7 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
         return stop(id);
     }
 
-    @Apply
+    @Apply(allowImport = true)
     void on(EngineStopped event) {
         setStopped();
     }
