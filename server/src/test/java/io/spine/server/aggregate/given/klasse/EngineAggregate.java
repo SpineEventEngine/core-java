@@ -24,13 +24,14 @@ import com.google.protobuf.Empty;
 import io.spine.core.React;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.aggregate.given.klasse.command.EmissionTestStarted;
-import io.spine.server.aggregate.given.klasse.command.EmissionTestStopped;
-import io.spine.server.aggregate.given.klasse.command.EngineStarted;
-import io.spine.server.aggregate.given.klasse.command.EngineStopped;
 import io.spine.server.aggregate.given.klasse.command.StartEngine;
 import io.spine.server.aggregate.given.klasse.command.StopEngine;
-import io.spine.server.aggregate.given.klasse.command.TankEmpty;
+import io.spine.server.aggregate.given.klasse.event.EmissionTestStarted;
+import io.spine.server.aggregate.given.klasse.event.EmissionTestStopped;
+import io.spine.server.aggregate.given.klasse.event.EngineStarted;
+import io.spine.server.aggregate.given.klasse.event.EngineStopped;
+import io.spine.server.aggregate.given.klasse.event.SettingsAdjusted;
+import io.spine.server.aggregate.given.klasse.event.TankEmpty;
 import io.spine.server.aggregate.given.klasse.rejection.EngineAlreadyStarted;
 import io.spine.server.aggregate.given.klasse.rejection.EngineAlreadyStopped;
 import io.spine.server.aggregate.given.klasse.rejection.Rejections;
@@ -76,6 +77,14 @@ public class EngineAggregate extends Aggregate<EngineId, Engine, EngineVBuilder>
     @Apply(allowImport = true)
     void on(EngineStopped event) {
         setStopped();
+    }
+
+    /**
+     * This is an example of import-only method.
+     */
+    @Apply(allowImport = true)
+    void on(SettingsAdjusted event) {
+        // Do nothing for now.
     }
 
     /*
