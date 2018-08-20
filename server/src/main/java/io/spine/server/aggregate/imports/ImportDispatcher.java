@@ -23,13 +23,11 @@ package io.spine.server.aggregate.imports;
 import io.spine.core.EventClass;
 import io.spine.server.bus.MessageDispatcher;
 
-import java.util.Set;
-
 /**
  * Dispatches imported events to aggregates.
  *
  * @param <I> the type of aggregate IDs
  * @author Alexander Yevsyukov
  */
-interface ImportDispatcher<I> extends MessageDispatcher<EventClass, ImportEnvelope, Set<I>> {
+interface ImportDispatcher<I> extends MessageDispatcher<EventClass, ImportEnvelope, I> {
 }
