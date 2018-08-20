@@ -270,14 +270,14 @@ public class EventRootCommandIdTestEnv {
         }
 
         @Apply
-        private void event(ProjectCreated event) {
+        void event(ProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Project.Status.CREATED);
         }
 
         @Apply
-        private void event(TaskAdded event) {
+        void event(TaskAdded event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .addTask(event.getTask());
@@ -297,7 +297,7 @@ public class EventRootCommandIdTestEnv {
         }
 
         @Apply
-        private void event(EvTeamProjectAdded event) {
+        void event(EvTeamProjectAdded event) {
             getBuilder()
                     .setId(event.getTeamId())
                     .addProjectId(event.getProjectId());

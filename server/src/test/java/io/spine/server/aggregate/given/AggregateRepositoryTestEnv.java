@@ -258,7 +258,7 @@ public class AggregateRepositoryTestEnv {
          * Otherwise returns empty iterable.
          */
         @React
-        private Iterable<AggProjectArchived> on(AggProjectArchived event) {
+        Iterable<AggProjectArchived> on(AggProjectArchived event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
                 return ImmutableList.of(AggProjectArchived.newBuilder()
@@ -278,7 +278,7 @@ public class AggregateRepositoryTestEnv {
          * Otherwise returns empty iterable.
          */
         @React
-        private Iterable<AggProjectDeleted> on(AggProjectDeleted event) {
+        Iterable<AggProjectDeleted> on(AggProjectDeleted event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
                 return ImmutableList.of(AggProjectDeleted.newBuilder()
@@ -542,7 +542,7 @@ public class AggregateRepositoryTestEnv {
          * Otherwise returns empty iterable.
          */
         @React
-        private Iterable<AggProjectArchived> on(AggProjectArchived event) {
+        Iterable<AggProjectArchived> on(AggProjectArchived event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
                 return ImmutableList.of(AggProjectArchived.newBuilder()
@@ -557,7 +557,7 @@ public class AggregateRepositoryTestEnv {
          * Otherwise returns empty iterable.
          */
         @React
-        private Iterable<AggProjectDeleted> on(AggProjectDeleted event) {
+        Iterable<AggProjectDeleted> on(AggProjectDeleted event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
                 return ImmutableList.of(AggProjectDeleted.newBuilder()
@@ -654,7 +654,7 @@ public class AggregateRepositoryTestEnv {
         }
 
         @React
-        private Iterable<AggProjectArchived> on(
+        Iterable<AggProjectArchived> on(
                 Rejections.AggCannotStartArchivedProject rejection) {
             List<ProjectId> childIdList = rejection.getChildProjectIdList();
             if (childIdList.contains(getId())) {

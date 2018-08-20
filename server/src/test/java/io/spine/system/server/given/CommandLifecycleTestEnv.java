@@ -106,7 +106,7 @@ public final class CommandLifecycleTestEnv {
         }
 
         @Apply
-        private void on(CompanyEstablished event) {
+        void on(CompanyEstablished event) {
             getBuilder().setId(event.getId())
                         .setName(event.getName());
         }

@@ -72,12 +72,12 @@ public class ProjectionRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(PrjProjectCreated event) {
+        void on(PrjProjectCreated event) {
             // do nothing.
         }
 
         @Subscribe
-        public void on(PrjTaskAdded event) {
+        void on(PrjTaskAdded event) {
             // do nothing
         }
     }
@@ -90,7 +90,7 @@ public class ProjectionRepositoryTestEnv {
         private @Nullable RuntimeException lastException;
 
         @Subscribe
-        public void apply(PrjProjectCreated event, EventContext eventContext) {
+        void apply(PrjProjectCreated event, EventContext eventContext) {
             // NOP
         }
 
@@ -163,7 +163,7 @@ public class ProjectionRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(PrjProjectCreated event) {
+        void on(PrjProjectCreated event) {
             // Keep the event message for further inspection in tests.
             keep(event);
 
@@ -175,7 +175,7 @@ public class ProjectionRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(PrjTaskAdded event) {
+        void on(PrjTaskAdded event) {
             keep(event);
             Project newState = getState().toBuilder()
                                          .addTask(event.getTask())
@@ -191,7 +191,7 @@ public class ProjectionRepositoryTestEnv {
          *                can have two parameters
          */
         @Subscribe
-        public void on(PrjProjectStarted event,
+        void on(PrjProjectStarted event,
                        @SuppressWarnings("UnusedParameters") EventContext ignored) {
             keep(event);
             Project newState = getState().toBuilder()
@@ -201,13 +201,13 @@ public class ProjectionRepositoryTestEnv {
         }
 
         @Subscribe
-        public void on(PrjProjectArchived event) {
+        void on(PrjProjectArchived event) {
             keep(event);
             setArchived(true);
         }
 
         @Subscribe
-        public void on(PrjProjectDeleted event) {
+        void on(PrjProjectDeleted event) {
             keep(event);
             setDeleted(true);
         }

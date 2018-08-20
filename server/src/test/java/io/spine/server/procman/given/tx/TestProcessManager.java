@@ -63,7 +63,7 @@ public class TestProcessManager
     }
 
     @React
-    public Empty event(PmProjectCreated event) {
+    Empty event(PmProjectCreated event) {
         receivedEvents.add(event);
         Project newState = Project.newBuilder(getState())
                                   .setId(event.getProjectId())
@@ -73,7 +73,7 @@ public class TestProcessManager
     }
 
     @React
-    public Empty event(PmTaskAdded event) {
+    Empty event(PmTaskAdded event) {
         throw new RuntimeException("that tests the tx behaviour for process manager");
     }
 

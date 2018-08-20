@@ -31,7 +31,6 @@ import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
@@ -58,8 +57,7 @@ class EventApplierSignature
 
     @Override
     protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        AccessModifier modifier = new AccessModifier(Modifier::isPrivate);
-        return of(modifier);
+        return of(AccessModifier.PACKAGE_PRIVATE);
     }
 
     @Override

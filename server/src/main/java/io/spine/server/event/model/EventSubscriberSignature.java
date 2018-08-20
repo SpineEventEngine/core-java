@@ -27,7 +27,6 @@ import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 import static com.google.common.collect.ImmutableSet.of;
 
@@ -44,8 +43,12 @@ public class EventSubscriberSignature extends EventAcceptingSignature<EventSubsc
 
     @Override
     protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        AccessModifier modifier = new AccessModifier(Modifier::isPublic);
-        return of(modifier);
+        return of(AccessModifier.PACKAGE_PRIVATE);
+    }
+
+    @Override
+    protected ImmutableSet<Class<?>> getValidReturnTypes() {
+        return of(void.class);
     }
 
     @Override

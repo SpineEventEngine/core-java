@@ -20,17 +20,18 @@
 
 package io.spine.server.model.declare;
 
-import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableSet;
 import io.spine.server.model.MethodExceptionChecker;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
 
+import static com.google.common.base.Joiner.on;
 import static io.spine.server.model.MethodExceptionChecker.forMethod;
 import static io.spine.server.model.declare.SignatureMismatch.Severity.ERROR;
-import static io.spine.server.model.declare.SignatureMismatch.Severity.WARN;
 import static java.lang.String.format;
 
 /**
@@ -44,31 +45,36 @@ public enum MatchCriterion {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             Class<?> returnType = method.getReturnType();
-            boolean violates = signature.getValidReturnTypes()
+            boolean conforms = signature.getValidReturnTypes()
                                         .stream()
                                         .anyMatch(type -> type.isAssignableFrom(returnType));
-            if (violates) {
-                SignatureMismatch mismatch = SignatureMismatch.create(this,
-                                                                      methodAsString(method),
-                                                                      signature.getAnnotation());
+            if (!conforms) {
+                SignatureMismatch mismatch =
+                        SignatureMismatch.create(this,
+                                                 methodAsString(method),
+                                                 signature.getAnnotation()
+                                                          .getSimpleName());
                 return Optional.of(mismatch);
             }
             return Optional.empty();
         }
     },
 
-    ACCESS_MODIFIER(WARN, "The access modifier of `%s` method must be `%s`, but it is `%s`.") {
+    ACCESS_MODIFIER(/*WARN*/ERROR,
+                            "The access modifier of `%s` method must be `%s`, but it is `%s`.") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
 
-            boolean hasMatch = signature.getAllowedModifiers()
-                                        .stream()
-                                        .anyMatch(m -> m.test(method));
+            ImmutableSet<AccessModifier> allowedModifiers = signature.getAllowedModifiers();
+            boolean hasMatch = allowedModifiers
+                    .stream()
+                    .anyMatch(m -> m.test(method));
             if (!hasMatch) {
-                //TODO:2018-08-15:alex.tymchenko: find how `toString()` modifiers.
-                SignatureMismatch mismatch = SignatureMismatch.create(this,
-                                                                      methodAsString(method),
-                                                                      "", "");
+                SignatureMismatch mismatch =
+                        SignatureMismatch.create(this,
+                                                 methodAsString(method),
+                                                 AccessModifier.asString(allowedModifiers),
+                                                 Modifier.toString(method.getModifiers()));
                 return Optional.of(mismatch);
 
             }
@@ -103,7 +109,8 @@ public enum MatchCriterion {
             if (!matching.isPresent()) {
                 SignatureMismatch.create(this,
                                          methodAsString(method),
-                                         signature.getAnnotation());
+                                         signature.getAnnotation()
+                                                  .getSimpleName());
             }
             return Optional.empty();
         }
@@ -129,10 +136,13 @@ public enum MatchCriterion {
     abstract Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature);
 
     private static String methodAsString(Method method) {
-        String result = Joiner.on(".")
-                              .join(method.getDeclaringClass()
-                                          .getCanonicalName(),
-                                    method.getName());
+        String result =
+                on(".").join(method.getDeclaringClass()
+                                   .getCanonicalName(),
+                             method.getName()) + '(' +
+                        on(", ")
+                                .join(method.getParameterTypes()) +
+                        ')';
         return result;
     }
 }

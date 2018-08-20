@@ -40,7 +40,7 @@ public class EventSubscriberMethodTestEnv {
 
     public static class ValidOneParam extends TestEventSubscriber {
         @Subscribe
-        public void handle(RefProjectCreated event) {
+        void handle(RefProjectCreated event) {
         }
     }
 
@@ -52,7 +52,7 @@ public class EventSubscriberMethodTestEnv {
 
     public static class ValidButPrivate extends TestEventSubscriber {
         @Subscribe
-        private void handle(RefProjectCreated event) {
+        void handle(RefProjectCreated event) {
         }
     }
 
@@ -61,7 +61,7 @@ public class EventSubscriberMethodTestEnv {
      */
     public static class InvalidNoAnnotation extends TestEventSubscriber {
         @SuppressWarnings("unused")
-        public void handle(RefProjectCreated event, EventContext context) {
+        void handle(RefProjectCreated event, EventContext context) {
         }
     }
 
@@ -70,7 +70,7 @@ public class EventSubscriberMethodTestEnv {
      */
     public static class InvalidNoParams extends TestEventSubscriber {
         @Subscribe
-        public void handle() {
+        void handle() {
         }
     }
 
@@ -79,7 +79,7 @@ public class EventSubscriberMethodTestEnv {
      */
     public static class InvalidTooManyParams extends TestEventSubscriber {
         @Subscribe
-        public void handle(RefProjectCreated event, EventContext context, Object redundant) {
+        void handle(RefProjectCreated event, EventContext context, Object redundant) {
         }
     }
 
@@ -88,7 +88,7 @@ public class EventSubscriberMethodTestEnv {
      */
     public static class InvalidOneNotMsgParam extends TestEventSubscriber {
         @Subscribe
-        public void handle(Exception invalid) {
+        void handle(Exception invalid) {
         }
     }
 
@@ -97,7 +97,7 @@ public class EventSubscriberMethodTestEnv {
      */
     public static class InvalidTwoParamsFirstInvalid extends TestEventSubscriber {
         @Subscribe
-        public void handle(Exception invalid, EventContext context) {
+        void handle(Exception invalid, EventContext context) {
         }
     }
 
@@ -106,7 +106,7 @@ public class EventSubscriberMethodTestEnv {
      */
     public static class InvalidTwoParamsSecondInvalid extends TestEventSubscriber {
         @Subscribe
-        public void handle(RefProjectCreated event, Exception invalid) {
+        void handle(RefProjectCreated event, Exception invalid) {
         }
     }
 
@@ -115,7 +115,7 @@ public class EventSubscriberMethodTestEnv {
      */
     public static class InvalidNotVoid extends TestEventSubscriber {
         @Subscribe
-        public Object handle(RefProjectCreated event) {
+        Object handle(RefProjectCreated event) {
             return event;
         }
     }
@@ -125,13 +125,13 @@ public class EventSubscriberMethodTestEnv {
      */
     public static class ARejectionSubscriber extends TestEventSubscriber {
         @Subscribe
-        public void handle(EntityAlreadyArchived rejection) {
+        void handle(EntityAlreadyArchived rejection) {
         }
     }
 
     public static class ExternalSubscriber extends TestEventSubscriber {
         @Subscribe(external = true)
-        public void handle(RefProjectCreated externalEvent) {
+        void handle(RefProjectCreated externalEvent) {
         }
     }
 

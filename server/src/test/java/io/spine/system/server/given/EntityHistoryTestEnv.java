@@ -138,23 +138,23 @@ public final class EntityHistoryTestEnv {
         }
 
         @Apply
-        private void on(PersonCreated event) {
+        void on(PersonCreated event) {
             getBuilder().setId(event.getId())
                         .setName(event.getName());
         }
 
         @Apply
-        private void on(PersonHidden event) {
+        void on(PersonHidden event) {
             setArchived(true);
         }
 
         @Apply
-        private void on(PersonExposed event) {
+        void on(PersonExposed event) {
             setArchived(false);
         }
 
         @Apply
-        private void on(PersonRenamed event) {
+        void on(PersonRenamed event) {
             PersonName newName = getBuilder().getName()
                                              .toBuilder()
                                              .setGivenName(event.getNewFirstName())
@@ -173,18 +173,18 @@ public final class EntityHistoryTestEnv {
         }
 
         @Subscribe
-        public void on(PersonCreated event) {
+        void on(PersonCreated event) {
             getBuilder().setId(event.getId())
                         .setName(event.getName());
         }
 
         @Subscribe
-        public void on(PersonHidden event) {
+        void on(PersonHidden event) {
             setDeleted(true);
         }
 
         @Subscribe
-        public void on(PersonExposed event) {
+        void on(PersonExposed event) {
             setDeleted(false);
         }
     }
@@ -251,7 +251,7 @@ public final class EntityHistoryTestEnv {
         }
 
         @Apply
-        private void on(PersonNameCreated event) {
+        void on(PersonNameCreated event) {
             getBuilder().setId(event.getId())
                         .setFirstName(event.getFirstName());
         }

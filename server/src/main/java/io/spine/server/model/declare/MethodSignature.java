@@ -64,7 +64,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
                                            Joiner.on(", ")
                                                  .join(mismatches));
         }
-        return mismatches.isEmpty();
+        return !hasErrors;
     }
 
     public abstract H doCreate(Method method, ParameterSpec<E> parameterSpec);
@@ -90,7 +90,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      *         in case some of the method checks fail
      */
     public Optional<H> create(Method method) {
-        if(method.isAnnotationPresent(getAnnotation())) {
+        if(!method.isAnnotationPresent(annotation)) {
             return Optional.empty();
         }
 
@@ -104,6 +104,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     }
 
     public Collection<SignatureMismatch> match(Method method) {
+
         Collection<SignatureMismatch> result =
                 Arrays.stream(MatchCriterion.values())
                       .map(criterion -> criterion.test(method, this))

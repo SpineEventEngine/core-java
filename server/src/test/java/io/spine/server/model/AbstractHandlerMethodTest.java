@@ -94,13 +94,13 @@ class AbstractHandlerMethodTest {
     class CheckAccess {
 
         @Test
-        @DisplayName("public")
+        @DisplayName(" public")
         void isPublic() {
             assertTrue(twoParamMethod.isPublic());
         }
 
         @Test
-        @DisplayName("private")
+        @DisplayName(" private")
         void isPrivate() {
             assertTrue(oneParamMethod.isPrivate());
         }

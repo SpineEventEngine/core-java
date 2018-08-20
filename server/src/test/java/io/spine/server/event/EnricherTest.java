@@ -235,7 +235,7 @@ public class EnricherTest {
         private ProjectCreatedEnrichmentAnotherPackage projectCreatedAnotherPackEnrichment;
 
         @Subscribe
-        public void on(ProjectCreated event, EventContext context) {
+        void on(ProjectCreated event, EventContext context) {
             this.projectCreatedEnrichment =
                     getEnrichment(ProjectCreated.Enrichment.class, context).get();
             this.projectCreatedSeparateEnrichment =
@@ -245,19 +245,19 @@ public class EnricherTest {
         }
 
         @Subscribe
-        public void on(ProjectStarted event, EventContext context) {
+        void on(ProjectStarted event, EventContext context) {
             this.projectStartedEnrichment =
                     getEnrichment(ProjectStarted.Enrichment.class, context).get();
         }
 
         @Subscribe
-        public void on(ProjectCompleted event, EventContext context) {
+        void on(ProjectCompleted event, EventContext context) {
             this.projectCompletedEnrichment =
                     getEnrichment(SeparateEnrichmentForMultipleProjectEvents.class, context).get();
         }
 
         @Subscribe
-        public void on(ProjectStarred event, EventContext context) {
+        void on(ProjectStarred event, EventContext context) {
             this.projectStarredEnrichment =
                     getEnrichment(SeparateEnrichmentForMultipleProjectEvents.class, context).get();
         }

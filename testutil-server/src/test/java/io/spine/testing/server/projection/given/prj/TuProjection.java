@@ -48,7 +48,7 @@ public final class TuProjection
     }
 
     @Subscribe
-    public void on(StringValue command) {
+    void on(StringValue command) {
         getBuilder().setValue(command.getValue());
     }
 }

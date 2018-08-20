@@ -114,19 +114,19 @@ public class TestProcessManager
      ************************/
 
     @React
-    public Empty on(PmProjectCreated event) {
+    Empty on(PmProjectCreated event) {
         remember(event);
         return Empty.getDefaultInstance();
     }
 
     @React
-    public Empty on(PmTaskAdded event) {
+    Empty on(PmTaskAdded event) {
         remember(event);
         return Empty.getDefaultInstance();
     }
 
     @React
-    public PmNotificationSent on(PmProjectStarted event) {
+    PmNotificationSent on(PmProjectStarted event) {
         remember(event);
         return messageOfType(PmNotificationSent.class);
     }

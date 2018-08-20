@@ -21,6 +21,7 @@
 package io.spine.server.event.model;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Message;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.React;
 import io.spine.server.model.declare.AccessModifier;
@@ -41,7 +42,12 @@ class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> 
 
     @Override
     protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return of(AccessModifier.PACKAGE_PRIVATE_MODIFIER);
+        return of(AccessModifier.PACKAGE_PRIVATE);
+    }
+
+    @Override
+    protected ImmutableSet<Class<?>> getValidReturnTypes() {
+        return of(Message.class, Iterable.class);
     }
 
     @Override

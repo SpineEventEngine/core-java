@@ -366,9 +366,8 @@ class CommandHandlerMethodTest {
 
     private static void assertIsCommandHandler(Method handler, boolean isHandler) {
         assertEquals(isHandler,
-                     new CommandHandlerSignature()
-                             .create(handler)
-                             .isPresent());
+                     new CommandHandlerSignature().match(handler)
+                                                  .isEmpty());
     }
 
     private static CommandEnvelope envelope(Message commandMessage) {

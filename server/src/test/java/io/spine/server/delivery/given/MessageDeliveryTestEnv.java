@@ -103,17 +103,17 @@ public class MessageDeliveryTestEnv {
         }
 
         @Apply
-        private void on(AggProjectStarted event) {
+        void on(AggProjectStarted event) {
             //Do nothing for this test.
         }
 
         @React
-        public Optional<AggProjectCancelled> on(AggProjectCancelled event) {
+        Optional<AggProjectCancelled> on(AggProjectCancelled event) {
             return Optional.empty();
         }
 
         @React
-        public Optional<AggProjectPaused> on(AggCannotReassignUnassignedTask rejection) {
+        Optional<AggProjectPaused> on(AggCannotReassignUnassignedTask rejection) {
             return Optional.empty();
         }
     }

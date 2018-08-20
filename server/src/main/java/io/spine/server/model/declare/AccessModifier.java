@@ -20,7 +20,10 @@
 
 package io.spine.server.model.declare;
 
+import com.google.common.base.Joiner;
+
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.function.Predicate;
 
 import static java.lang.reflect.Modifier.isPrivate;
@@ -32,20 +35,44 @@ import static java.lang.reflect.Modifier.isPublic;
  */
 public class AccessModifier implements Predicate<Method> {
 
-    public static final AccessModifier PACKAGE_PRIVATE_MODIFIER =
+    public static final AccessModifier PUBLIC =
+            new AccessModifier(Modifier::isPublic, "public");
+
+    public static final AccessModifier PROTECTED =
+            new AccessModifier(Modifier::isProtected, "protected");
+
+
+    public static final AccessModifier PACKAGE_PRIVATE =
             new AccessModifier(
                     methodModifier -> !(isPublic(methodModifier)
                             || isProtected(methodModifier)
-                            || isPrivate(methodModifier)));
+                            || isPrivate(methodModifier)), "package-private");
+
+    public static final AccessModifier PRIVATE =
+            new AccessModifier(Modifier::isProtected, "private");
+
 
     private final Predicate<Integer> checkingMethod;
 
-    public AccessModifier(Predicate<Integer> checkingMethod) {
+    private final String name;
+
+    public AccessModifier(Predicate<Integer> checkingMethod, String name) {
         this.checkingMethod = checkingMethod;
+        this.name = name;
+    }
+
+    static Object asString(Iterable<AccessModifier> modifiers) {
+        return Joiner.on(", ")
+                     .join(modifiers);
     }
 
     @Override
     public boolean test(Method method) {
         return checkingMethod.test(method.getModifiers());
+    }
+
+    @Override
+    public String toString() {
+        return name;
     }
 }

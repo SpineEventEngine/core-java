@@ -172,12 +172,12 @@ public class IntegrationBusTestEnv {
         }
 
         @Subscribe(external = true)
-        public void on(ItgProjectCreated event) {
+        void on(ItgProjectCreated event) {
             externalEvent = event;
         }
 
         @Subscribe
-        public void on(ItgProjectStarted event) {
+        void on(ItgProjectStarted event) {
             domesticEvent = event;
         }
 
@@ -316,7 +316,7 @@ public class IntegrationBusTestEnv {
         }
 
         @Subscribe(external = true)
-        public void on(ItgProjectCreated event, EventContext eventContext) {
+        void on(ItgProjectCreated event, EventContext eventContext) {
             externalEvents.add(event);
             externalContexts.add(eventContext);
         }
@@ -352,12 +352,12 @@ public class IntegrationBusTestEnv {
         private static ItgProjectStarted domesticEvent = null;
 
         @Subscribe(external = true)
-        public void on(ItgProjectCreated msg) {
+        void on(ItgProjectCreated msg) {
             externalEvent = msg;
         }
 
         @Subscribe
-        public void on(ItgProjectStarted msg) {
+        void on(ItgProjectStarted msg) {
             domesticEvent = msg;
         }
 
@@ -389,7 +389,7 @@ public class IntegrationBusTestEnv {
         private static ItgProjectStarted externalEvent = null;
 
         @Subscribe(external = true)
-        public void on(ItgProjectStarted msg) {
+        void on(ItgProjectStarted msg) {
             externalEvent = msg;
         }
 
@@ -417,12 +417,12 @@ public class IntegrationBusTestEnv {
     public static final class ExternalMismatchSubscriber extends AbstractEventSubscriber {
 
         @Subscribe(external = true)
-        public void on(ItgCannotStartArchivedProject rejection, ItgStartProject command) {
+        void on(ItgCannotStartArchivedProject rejection, ItgStartProject command) {
             // do nothing.
         }
 
         @Subscribe
-        public void on(ItgCannotStartArchivedProject rejection) {
+        void on(ItgCannotStartArchivedProject rejection) {
             // do nothing.
         }
 

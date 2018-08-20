@@ -53,7 +53,7 @@ public class CommandReactionSignature
 
     @Override
     protected ImmutableSet<AccessModifier> getAllowedModifiers() {
-        return of(AccessModifier.PACKAGE_PRIVATE_MODIFIER);
+        return of(AccessModifier.PACKAGE_PRIVATE);
     }
 
     @Override

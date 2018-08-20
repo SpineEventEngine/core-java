@@ -54,11 +54,6 @@ public final class EventApplier
         return EventClass.from(rawMessageClass());
     }
 
-    static EventApplier from(Method method,
-                             ParameterSpec<EventEnvelope> signature) {
-        return new EventApplier(method, signature);
-    }
-
     @Override
     protected MethodResult<Empty> toResult(Aggregate target, Object rawMethodOutput) {
         return MethodResult.empty();

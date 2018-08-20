@@ -43,7 +43,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.aggregate.model.EventApplier.from;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -72,10 +71,11 @@ class EventApplierTest {
     void beCreatedFromFactory() {
         Method method = new ValidApplier().getMethod();
 
+
         Optional<EventApplier> actual = signature.create(method);
         assertTrue(actual.isPresent());
 
-        assertEquals(from(method, EventApplierParams.MESSAGE), actual.get());
+        assertEquals(new EventApplier(method, EventApplierParams.MESSAGE), actual.get());
     }
 
     @Test
@@ -130,8 +130,7 @@ class EventApplierTest {
         }
 
         private void assertIsEventApplier(Method applier) {
-            assertTrue(signature.create(applier)
-                                .isPresent());
+            assertTrue(signature.matches(applier));
         }
     }
 
@@ -180,8 +179,7 @@ class EventApplierTest {
         }
 
         private void assertIsNotEventApplier(Method applier) {
-            assertFalse(signature.create(applier)
-                                 .isPresent());
+            assertFalse(signature.match(applier).isEmpty());
         }
     }
 

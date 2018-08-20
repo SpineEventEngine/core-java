@@ -28,20 +28,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class SignatureMismatch {
 
     private final MatchCriterion unmetCriterion;
-
-    private final Object[] values;
+    private final String message;
+    private final Severity severity;
 
     private SignatureMismatch(MatchCriterion criterion, Object[] values) {
         unmetCriterion = criterion;
-        this.values = values;
+        severity = criterion.getSeverity();
+        message = criterion.formatMsg(values);
     }
 
     public String getMessage() {
-        return unmetCriterion.formatMsg(values);
+        return message;
     }
-
-    public Severity getSeverity() {
-        return unmetCriterion.getSeverity();
+    Severity getSeverity() {
+        return severity;
     }
 
     public MatchCriterion getUnmetCriterion() {
@@ -59,5 +59,13 @@ public final class SignatureMismatch {
     enum Severity {
         ERROR,
         WARN
+    }
+
+    @Override
+    public String toString() {
+        return "SignatureMismatch{" +
+                "message=" + getMessage() +
+                ", unmetCriterion=" + unmetCriterion +
+                '}';
     }
 }

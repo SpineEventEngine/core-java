@@ -217,13 +217,13 @@ public class EventBusTestEnv {
         }
 
         @Apply
-        private void event(EBProjectCreated event) {
+        void event(EBProjectCreated event) {
             getBuilder().setId(event.getProjectId())
                         .setStatus(Project.Status.CREATED);
         }
 
         @Apply
-        private void event(EBTaskAdded event) {
+        void event(EBTaskAdded event) {
             getBuilder().setId(event.getProjectId())
                         .addTask(event.getTask());
         }
@@ -240,7 +240,6 @@ public class EventBusTestEnv {
                               .setTask(task)
                               .build();
         }
-
     }
 
     /**
@@ -290,7 +289,7 @@ public class EventBusTestEnv {
     public static class EBProjectCreatedNoOpSubscriber extends AbstractEventSubscriber {
 
         @Subscribe
-        public void on(EBProjectCreated message, EventContext context) {
+        void on(EBProjectCreated message, EventContext context) {
             // Do nothing.
         }
     }
@@ -300,7 +299,7 @@ public class EventBusTestEnv {
         private Message eventMessage;
 
         @Subscribe
-        public void on(EBProjectArchived message, EventContext ignored) {
+        void on(EBProjectArchived message, EventContext ignored) {
             this.eventMessage = message;
         }
 
@@ -315,7 +314,7 @@ public class EventBusTestEnv {
         private EventContext eventContext;
 
         @Subscribe
-        public void on(ProjectCreated eventMsg, EventContext context) {
+        void on(ProjectCreated eventMsg, EventContext context) {
             this.eventMessage = eventMsg;
             this.eventContext = context;
         }
@@ -336,7 +335,7 @@ public class EventBusTestEnv {
     public static class EBTaskAddedNoOpSubscriber extends AbstractEventSubscriber {
 
         @Subscribe
-        public void on(EBTaskAdded message, EventContext context) {
+        void on(EBTaskAdded message, EventContext context) {
             // Do nothing.
         }
     }
@@ -344,7 +343,7 @@ public class EventBusTestEnv {
     public static class EBExternalTaskAddedSubscriber extends AbstractEventSubscriber {
 
         @Subscribe(external = true)
-        public void on(EBTaskAdded message, EventContext context) {
+        void on(EBTaskAdded message, EventContext context) {
             if (!context.getExternal()) {
                 fail(format(
                         "Domestic event %s was delivered to an external subscriber.",
@@ -361,7 +360,7 @@ public class EventBusTestEnv {
          * @param event ignored
          */
         @Subscribe
-        public void on(ProjectCreated event) {
+        void on(ProjectCreated event) {
             fail("Unexpected event " + Json.toJson(event));
         }
     }

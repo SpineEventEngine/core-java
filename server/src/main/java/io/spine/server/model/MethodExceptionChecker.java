@@ -95,6 +95,8 @@ public class MethodExceptionChecker {
      *                               types specified in {@code whiteList} and their descendants
      */
     public void checkThrowsNoExceptionsBut(Collection<Class<? extends Throwable>> whiteList) {
+        checkNotNull(whiteList);
+
         Collection<Class<? extends Throwable>> exceptions =
                 obtainProhibitedExceptionsThrown(whiteList);
         if (!exceptions.isEmpty()) {

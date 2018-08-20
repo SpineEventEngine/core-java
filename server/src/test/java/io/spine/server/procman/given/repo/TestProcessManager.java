@@ -186,7 +186,7 @@ public class TestProcessManager
     }
 
     @React
-    public Empty on(PmTaskAdded event) {
+    Empty on(PmTaskAdded event) {
         keep(event);
 
         Task task = event.getTask();
@@ -195,7 +195,7 @@ public class TestProcessManager
     }
 
     @React
-    public Empty on(PmProjectStarted event) {
+    Empty on(PmProjectStarted event) {
         keep(event);
 
         handleProjectStarted();
@@ -203,7 +203,7 @@ public class TestProcessManager
     }
 
     @React
-    public Empty on(PmProjectCreated event, EventContext ignored) {
+    Empty on(PmProjectCreated event, EventContext ignored) {
         keep(event);
 
         handleProjectCreated(event.getProjectId());

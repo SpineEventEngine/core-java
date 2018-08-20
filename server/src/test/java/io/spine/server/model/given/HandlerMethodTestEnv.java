@@ -39,9 +39,12 @@ import io.spine.server.model.declare.ParameterSpec;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 
 import static com.google.common.collect.ImmutableSet.of;
+import static io.spine.server.model.declare.AccessModifier.PACKAGE_PRIVATE;
+import static io.spine.server.model.declare.AccessModifier.PRIVATE;
+import static io.spine.server.model.declare.AccessModifier.PROTECTED;
+import static io.spine.server.model.declare.AccessModifier.PUBLIC;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
 
@@ -133,10 +136,10 @@ public class HandlerMethodTestEnv {
     }
 
     public static class TwoParamMethod
-        extends AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> {
+            extends AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> {
 
         public TwoParamMethod(Method method,
-                                 ParameterSpec<EventEnvelope> parameterSpec) {
+                              ParameterSpec<EventEnvelope> parameterSpec) {
             super(method, parameterSpec);
         }
 
@@ -266,9 +269,7 @@ public class HandlerMethodTestEnv {
     }
 
     private static ImmutableSet<AccessModifier> allModifiers() {
-        return of(new AccessModifier(Modifier::isPublic),
-                  new AccessModifier(Modifier::isPrivate),
-                  new AccessModifier(Modifier::isProtected));
+        return of(PUBLIC, PROTECTED, PACKAGE_PRIVATE, PRIVATE);
     }
 
 }

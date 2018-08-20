@@ -236,7 +236,7 @@ class EventSubscriberMethodTest {
     }
 
     private static void assertIsEventSubscriber(Method subscriber, boolean isSubscriber) {
-        assertEquals(isSubscriber, new EventSubscriberSignature().create(subscriber)
-                                                                 .isPresent());
+        assertEquals(isSubscriber, new EventSubscriberSignature().match(subscriber)
+                                                                 .isEmpty());
     }
 }

@@ -20,18 +20,11 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.declare.MethodParams;
 import io.spine.server.model.declare.MethodSignature;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Optional;
-
-import static com.google.common.collect.ImmutableSet.of;
 
 /**
  * An abstract base of signatures for methods that accept {@code Event}s.
@@ -46,20 +39,7 @@ abstract class EventAcceptingSignature<H extends HandlerMethod<?, ?, EventEnvelo
     }
 
     @Override
-    protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return of(Message.class, Iterable.class);
-    }
-
-    @Override
     public Class<EventAcceptingMethodParams> getParamSpecClass() {
         return EventAcceptingMethodParams.class;
-    }
-
-    public boolean isAwareOfCommandType(Method method) {
-        Optional<EventAcceptingMethodParams> matching =
-                MethodParams.findMatching(method, getParamSpecClass());
-
-        return matching.map(EventAcceptingMethodParams::isAwareOfCommandType)
-                       .orElse(false);
     }
 }
