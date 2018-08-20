@@ -26,10 +26,11 @@ import io.spine.core.AbstractMessageEnvelope;
 import io.spine.core.ActorContext;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.aggregate.ImportEvent;
 import io.spine.type.MessageClass;
 
-import java.util.Objects;
-
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.newUuid;
 
 /**
@@ -38,22 +39,48 @@ import static io.spine.base.Identifier.newUuid;
  *
  * @author Alexander Yevsyukov
  */
-final class ImportEnvelope extends AbstractMessageEnvelope<StringValue, Message, ActorContext> {
+final class ImportEnvelope extends AbstractMessageEnvelope<StringValue, ImportEvent, ActorContext> {
 
-    private final StringValue id;
+    private final Message eventMessage;
     private final ActorContext actorContext;
     private final EventClass eventClass;
 
     ImportEnvelope(Message eventMessage, ActorContext context) {
-        super(eventMessage);
-        this.id = StringValue.of(newUuid());
+        this(wrap(eventMessage, context),
+             eventMessage,
+             context);
+    }
+
+    ImportEnvelope(ImportEvent importEvent) {
+        this(importEvent,
+             AnyPacker.unpack(importEvent.getMessage()),
+             importEvent.getContext());
+    }
+
+    private ImportEnvelope(ImportEvent importEvent, Message eventMessage, ActorContext context) {
+        super(importEvent);
+        this.eventMessage = eventMessage;
         this.eventClass = EventClass.of(eventMessage);
         this.actorContext = context;
     }
 
+    private static StringValue generateId() {
+        return StringValue.of(newUuid());
+    }
+
+    private static ImportEvent wrap(Message eventMessage, ActorContext actorContext) {
+        checkNotNull(eventMessage);
+        checkNotNull(actorContext);
+        return ImportEvent.newBuilder()
+                          .setId(generateId())
+                          .setMessage(AnyPacker.pack(eventMessage))
+                          .setContext(actorContext)
+                          .build();
+    }
+
     @Override
     public StringValue getId() {
-        return id;
+        return getOuterObject().getId();
     }
 
     @Override
@@ -71,33 +98,11 @@ final class ImportEnvelope extends AbstractMessageEnvelope<StringValue, Message,
 
     @Override
     public Message getMessage() {
-        return getOuterObject();
+        return eventMessage;
     }
 
     @Override
     public ActorContext getMessageContext() {
         return actorContext;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof ImportEnvelope)) {
-            return false;
-        }
-        if (!super.equals(o)) {
-            return false;
-        }
-        ImportEnvelope envelope = (ImportEnvelope) o;
-        return Objects.equals(id, envelope.id) &&
-                Objects.equals(actorContext, envelope.actorContext) &&
-                Objects.equals(eventClass, envelope.eventClass);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), id, actorContext, eventClass);
     }
 }
