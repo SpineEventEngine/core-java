@@ -71,4 +71,15 @@ public class SeveralCommands
         builder.addProduced(commandId);
         markReacted(gateway, commandId);
     }
+
+    /**
+     * {@inheritDoc}
+     *
+     * @apiNote Overrides to open the method for outside use.
+     */
+    @Override
+    @CanIgnoreReturnValue
+    public MarkCausedCommands postAll(CommandBus bus) {
+        return super.postAll(bus);
+    }
 }
