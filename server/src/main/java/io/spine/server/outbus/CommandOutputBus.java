@@ -29,7 +29,6 @@ import io.spine.server.bus.MulticastBus;
 import io.spine.type.MessageClass;
 
 import static com.google.common.base.Preconditions.checkState;
-import static java.lang.String.format;
 
 /**
  * A base bus responsible for delivering the {@link io.spine.core.Command command} output.
@@ -79,7 +78,8 @@ public abstract class CommandOutputBus<M extends Message,
         E enrichedEnvelope = enrich(envelope);
         int dispatchersCalled = callDispatchers(enrichedEnvelope);
         checkState(dispatchersCalled != 0,
-                   format("Message %s has no dispatchers.", envelope.getMessage()));
+                   "Message `%s` has no dispatchers.",
+                   envelope.getMessage());
     }
 
     /**

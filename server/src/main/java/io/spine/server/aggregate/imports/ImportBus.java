@@ -25,12 +25,21 @@ import io.spine.server.aggregate.ImportEvent;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.DispatcherRegistry;
 import io.spine.server.bus.EnvelopeValidator;
+import io.spine.server.bus.MessageUnhandled;
 import io.spine.server.bus.MulticastBus;
 
+import static com.google.common.base.Preconditions.checkState;
+
+/**
+ * Dispatches import events to aggregates that import these events.
+ *
+ * @author Alexander Yevsyukov
+ */
 public class ImportBus
         extends MulticastBus<ImportEvent, ImportEnvelope, EventClass, ImportDispatcher<?>> {
 
     private final ImportValidator validator = new ImportValidator();
+    private final DeadImportEventHandler deadImportEventHandler = new DeadImportEventHandler();
 
     protected ImportBus(AbstractBuilder<ImportEnvelope, ImportEvent, ?> builder) {
         super(builder);
@@ -38,8 +47,7 @@ public class ImportBus
 
     @Override
     protected DeadMessageHandler<ImportEnvelope> getDeadMessageHandler() {
-        //TODO:2018-08-20:alexander.yevsyukov: Implement
-        return null;
+        return deadImportEventHandler;
     }
 
     @Override
@@ -49,8 +57,7 @@ public class ImportBus
 
     @Override
     protected DispatcherRegistry<EventClass, ImportDispatcher<?>> createRegistry() {
-        //TODO:2018-08-20:alexander.yevsyukov: Implement
-        return null;
+        return new Registry();
     }
 
     @Override
@@ -60,7 +67,10 @@ public class ImportBus
 
     @Override
     protected void dispatch(ImportEnvelope envelope) {
-        //TODO:2018-08-20:alexander.yevsyukov: Implement
+        int dispatchersCalled = callDispatchers(envelope);
+        checkState(dispatchersCalled != 0,
+                   "The event with class: `%s` has no import dispatchers.",
+                   envelope.getMessageClass());
     }
 
     /**
@@ -68,5 +78,17 @@ public class ImportBus
      */
     @Override
     protected void store(Iterable<ImportEvent> messages) {
+    }
+
+    /**
+     * Creates {@link UnsupportedImportEventException} in response to an event message
+     * of unsupported type.
+     */
+    private static class DeadImportEventHandler implements DeadMessageHandler<ImportEnvelope> {
+
+        @Override
+        public MessageUnhandled handle(ImportEnvelope envelope) {
+            return new UnsupportedImportEventException(envelope);
+        }
     }
 }

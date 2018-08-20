@@ -17,55 +17,65 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.server.event;
+
+package io.spine.server.aggregate.imports;
 
 import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.EventClass;
-import io.spine.core.EventValidationError;
 import io.spine.server.bus.MessageUnhandled;
 import io.spine.type.TypeName;
 
+import static io.spine.server.event.EventException.eventTypeAttribute;
 import static java.lang.String.format;
 
 /**
- * Exception that is thrown when unsupported event is obtained
- * or in case there is no class for given Protobuf event message.
+ * Thrown when there are no aggregates that accept an event message for
+ * {@linkplain io.spine.server.aggregate.Apply#allowImport() import}.
  *
- * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
-public class UnsupportedEventException extends EventException implements MessageUnhandled {
+public final class UnsupportedImportEventException
+        extends RuntimeException
+        implements MessageUnhandled {
 
     private static final long serialVersionUID = 0L;
+    private final Error error;
 
-    public UnsupportedEventException(Message eventMsg) {
-        super(messageFormat(eventMsg), eventMsg, unsupportedEventError(eventMsg));
+    UnsupportedImportEventException(ImportEnvelope envelope) {
+        super(messageFormat(envelope));
+        this.error = unsupportedImportEvent(envelope.getMessage(), getMessage());
     }
 
-    private static String messageFormat(Message eventMsg) {
-        EventClass eventClass = EventClass.of(eventMsg);
+    private static String messageFormat(ImportEnvelope envelope) {
+        EventClass eventClass = envelope.getMessageClass();
         TypeName typeName = eventClass.getTypeName();
         String result = format(
-                "There is no registered handler or dispatcher for the event of the class: `%s` " +
-                " (proto type: `%s`).",
-                eventClass,
-                typeName);
+            "None of the aggregates declare importing appliers for " +
+                    "the event of the class: `%s` (proto type: `%s`).",
+            eventClass, typeName
+        );
         return result;
     }
 
-    /** Creates an instance of unsupported event error. */
-    private static Error unsupportedEventError(Message eventMessage) {
-        String type = eventMessage.getDescriptorForType()
-                                  .getFullName();
-        String errMsg = format("Events of the type `%s` are not supported.", type);
-        Error error = Error
-                .newBuilder()
-                .setType(EventValidationError.getDescriptor()
-                                             .getFullName())
-                .setCode(EventValidationError.UNSUPPORTED_EVENT.getNumber())
-                .putAllAttributes(eventTypeAttribute(eventMessage))
-                .setMessage(errMsg)
-                .build();
+    @Override
+    public Error asError() {
         return error;
+    }
+
+    @Override
+    public Throwable asThrowable() {
+        return this;
+    }
+
+    private static Error unsupportedImportEvent(Message eventMessage, String errorMessage) {
+        Error result = Error
+                .newBuilder()
+                .setType(UnsupportedImportEventException.class.getName())
+                .setCode(-1)
+                .setMessage(errorMessage)
+                .putAllAttributes(eventTypeAttribute(eventMessage))
+                .build();
+        return result;
     }
 }

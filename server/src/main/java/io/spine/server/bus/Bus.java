@@ -247,8 +247,7 @@ public abstract class Bus<T extends Message,
         Collection<BusFilter<E>> tail = filterChainTail();
         tail.forEach(chainBuilder::append);
 
-        BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(),
-                                                             registry());
+        BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(), registry());
         BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
 
         chainBuilder.prepend(deadMsgFilter);

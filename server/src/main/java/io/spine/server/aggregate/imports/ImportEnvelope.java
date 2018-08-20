@@ -28,7 +28,6 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.ImportEvent;
-import io.spine.type.MessageClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.newUuid;
@@ -84,7 +83,7 @@ final class ImportEnvelope extends AbstractMessageEnvelope<StringValue, ImportEv
     }
 
     @Override
-    public MessageClass getMessageClass() {
+    public EventClass getMessageClass() {
         return eventClass;
     }
 
