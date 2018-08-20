@@ -30,7 +30,6 @@ import io.spine.core.TenantId;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.string.Stringifiers;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -58,12 +57,12 @@ public abstract class EntityMessageEndpoint<I,
                                             R> {
 
     /** The repository which created this endpoint. */
-    private final @Nullable Repository<I, E> repository;
+    private final Repository<I, E> repository;
 
     /** The message which needs to handled. */
     private final M envelope;
 
-    protected EntityMessageEndpoint(@Nullable Repository<I, E> repository, M envelope) {
+    protected EntityMessageEndpoint(Repository<I, E> repository, M envelope) {
         this.repository = repository;
         this.envelope = envelope;
     }

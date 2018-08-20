@@ -60,7 +60,7 @@ public class AggregateTransaction<I,
      * does not operate with {@linkplain EventContext event context}, this parameter is ignored.
      */
     @Override
-    protected void dispatch(Aggregate aggregate, EventEnvelope event) {
+    protected final void dispatch(Aggregate aggregate, EventEnvelope event) {
         aggregate.invokeApplier(event.getMessage());
     }
 
