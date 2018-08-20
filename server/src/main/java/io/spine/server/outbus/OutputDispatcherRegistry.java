@@ -50,6 +50,7 @@ public class OutputDispatcherRegistry<C extends MessageClass,
      * <p>Overrides in order to expose itself to
      * {@link CommandOutputBus#post(Message, StreamObserver) CommandOutputBus}.
      */
+    @SuppressWarnings("RedundantMethodOverride")
     @Override
     protected Set<D> getDispatchers(C messageClass) {
         return super.getDispatchers(messageClass);

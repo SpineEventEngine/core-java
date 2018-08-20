@@ -30,6 +30,8 @@ import io.spine.server.bus.MulticastBus;
 public class ImportBus
         extends MulticastBus<ImportEvent, ImportEnvelope, EventClass, ImportDispatcher<?>> {
 
+    private final ImportValidator validator = new ImportValidator();
+
     protected ImportBus(AbstractBuilder<ImportEnvelope, ImportEvent, ?> builder) {
         super(builder);
     }
@@ -42,7 +44,7 @@ public class ImportBus
 
     @Override
     protected EnvelopeValidator<ImportEnvelope> getValidator() {
-        return null;
+        return validator;
     }
 
     @Override
@@ -61,8 +63,10 @@ public class ImportBus
         //TODO:2018-08-20:alexander.yevsyukov: Implement
     }
 
+    /**
+     * Does nothing because instances of {@link ImportEvent} are transient.
+     */
     @Override
     protected void store(Iterable<ImportEvent> messages) {
-
     }
 }

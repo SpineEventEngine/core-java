@@ -18,11 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.aggregate.imports;
 
 import com.google.protobuf.Message;
-import io.spine.core.Event;
-import io.spine.core.EventEnvelope;
 import io.spine.core.MessageInvalid;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.validate.ConstraintViolation;
@@ -36,28 +34,23 @@ import static io.spine.server.event.InvalidEventException.onConstraintViolations
 import static java.util.Optional.ofNullable;
 
 /**
- * Checks if the message of the passed event is {@linkplain MessageValidator#validate(Message)
- * valid}.
+ * Checks if a message of the event to import is
+ * {@linkplain MessageValidator#validate(Message) valid}
  *
- * @author Dmytro Dashenkov
+ * @author Alexander Yevsyukov
  */
-final class EventValidator implements EnvelopeValidator<EventEnvelope> {
+final class ImportValidator implements EnvelopeValidator<ImportEnvelope> {
 
-    private final MessageValidator messageValidator;
-
-    EventValidator(MessageValidator messageValidator) {
-        this.messageValidator = messageValidator;
-    }
+    private final MessageValidator messageValidator = MessageValidator.newInstance();
 
     @Override
-    public Optional<MessageInvalid> validate(EventEnvelope envelope) {
+    public Optional<MessageInvalid> validate(ImportEnvelope envelope) {
         checkNotNull(envelope);
-
-        Event event = envelope.getOuterObject();
         MessageInvalid result = null;
-        List<ConstraintViolation> violations = messageValidator.validate(event);
+        Message eventMessage = envelope.getMessage();
+        List<ConstraintViolation> violations = messageValidator.validate(eventMessage);
         if (!violations.isEmpty()) {
-            result = onConstraintViolations(event, violations);
+            result = onConstraintViolations(eventMessage, violations);
         }
         return ofNullable(result);
     }
