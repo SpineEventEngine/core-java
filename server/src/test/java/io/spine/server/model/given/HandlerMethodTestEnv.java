@@ -20,6 +20,7 @@
 
 package io.spine.server.model.given;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
@@ -30,13 +31,15 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
-import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
+import io.spine.server.model.declare.AccessModifier;
+import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
@@ -132,8 +135,9 @@ public class HandlerMethodTestEnv {
     public static class TwoParamMethod
         extends AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> {
 
-        public TwoParamMethod(Method method) {
-            super(method, TwoParamSpec.INSTANCE);
+        public TwoParamMethod(Method method,
+                                 ParameterSpec<EventEnvelope> parameterSpec) {
+            super(method, parameterSpec);
         }
 
         @Override
@@ -155,8 +159,8 @@ public class HandlerMethodTestEnv {
     public static class OneParamMethod
             extends AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> {
 
-        public OneParamMethod(Method method) {
-            super(method, OneParamSpec.INSTANCE);
+        public OneParamMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+            super(method, parameterSpec);
         }
 
         @Override
@@ -164,48 +168,9 @@ public class HandlerMethodTestEnv {
             return MethodResult.empty();
         }
 
-        public static Factory factory() {
-            return Factory.getInstance();
-        }
-
         @Override
         public EventClass getMessageClass() {
             return EventClass.from(rawMessageClass());
-        }
-
-        private static class Factory
-                extends MethodFactory<OneParamMethod, OneParamSpec> {
-
-            private static final Factory INSTANCE = new Factory();
-
-            private Factory() {
-                super(Annotation.class, of(Object.class));
-            }
-
-            private static Factory getInstance() {
-                return INSTANCE;
-            }
-
-            @Override
-            public Class<OneParamMethod> getMethodClass() {
-                return OneParamMethod.class;
-            }
-
-            @Override
-            public void checkAccessModifier(Method method) {
-                // Any access modifier is accepted for the test method.
-            }
-
-            @Override
-            protected OneParamMethod doCreate(Method method,
-                                              OneParamSpec paramSpec) {
-                return new OneParamMethod(method);
-            }
-
-            @Override
-            protected Class<OneParamSpec> getParamSpec() {
-                return OneParamSpec.class;
-            }
         }
 
         @Override
@@ -215,7 +180,7 @@ public class HandlerMethodTestEnv {
     }
 
     @Immutable
-    private enum OneParamSpec implements ParameterSpec<EventEnvelope> {
+    public enum OneParamSpec implements ParameterSpec<EventEnvelope> {
 
         INSTANCE;
 
@@ -230,8 +195,35 @@ public class HandlerMethodTestEnv {
         }
     }
 
+    public static class OneParamSignature extends MethodSignature<OneParamMethod, EventEnvelope> {
+
+        public OneParamSignature() {
+            super(Annotation.class);
+        }
+
+        @Override
+        public Class<? extends ParameterSpec<EventEnvelope>> getParamSpecClass() {
+            return OneParamSpec.class;
+        }
+
+        @Override
+        protected ImmutableSet<AccessModifier> getAllowedModifiers() {
+            return allModifiers();
+        }
+
+        @Override
+        protected ImmutableSet<Class<?>> getValidReturnTypes() {
+            return of(Object.class);
+        }
+
+        @Override
+        public OneParamMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+            return new OneParamMethod(method, parameterSpec);
+        }
+    }
+
     @Immutable
-    private enum TwoParamSpec implements ParameterSpec<EventEnvelope> {
+    public enum TwoParamSpec implements ParameterSpec<EventEnvelope> {
 
         INSTANCE;
 
@@ -245,4 +237,38 @@ public class HandlerMethodTestEnv {
             return new Object[]{envelope.getMessage(), envelope.getEventContext()};
         }
     }
+
+    private static class TwoParamSignature extends MethodSignature<TwoParamMethod, EventEnvelope> {
+
+        protected TwoParamSignature() {
+            super(Annotation.class);
+        }
+
+        @Override
+        public Class<? extends ParameterSpec<EventEnvelope>> getParamSpecClass() {
+            return TwoParamSpec.class;
+        }
+
+        @Override
+        protected ImmutableSet<AccessModifier> getAllowedModifiers() {
+            return allModifiers();
+        }
+
+        @Override
+        protected ImmutableSet<Class<?>> getValidReturnTypes() {
+            return of(Object.class);
+        }
+
+        @Override
+        public TwoParamMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+            return new TwoParamMethod(method, parameterSpec);
+        }
+    }
+
+    private static ImmutableSet<AccessModifier> allModifiers() {
+        return of(new AccessModifier(Modifier::isPublic),
+                  new AccessModifier(Modifier::isPrivate),
+                  new AccessModifier(Modifier::isProtected));
+    }
+
 }

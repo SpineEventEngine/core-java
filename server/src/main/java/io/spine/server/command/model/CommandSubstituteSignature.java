@@ -18,22 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model;
+package io.spine.server.command.model;
 
-import io.spine.core.EventContext;
-import io.spine.server.model.HandlerMethodPredicate;
+import io.spine.core.CommandEnvelope;
+import io.spine.server.command.Command;
+import io.spine.server.model.declare.ParameterSpec;
 
-import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
 /**
- * Abstract base for methods that accept an event message as the first parameter, and
- * {@link EventContext} as the second optional parameter.
+ * A signature of {@link io.spine.server.command.model.CommandSubstituteMethod
+ * CommandSubstituteMethod}.
  *
- * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-abstract class EventMethodPredicate extends HandlerMethodPredicate<EventContext> {
+public class CommandSubstituteSignature
+        extends CommandAcceptingMethodSignature<CommandSubstituteMethod>  {
 
-    EventMethodPredicate(Class<? extends Annotation> annotationClass) {
-        super(annotationClass, EventContext.class);
+    CommandSubstituteSignature() {
+        super(Command.class);
+    }
+
+    @Override
+    public CommandSubstituteMethod doCreate(Method method,
+                                            ParameterSpec<CommandEnvelope> parameterSpec) {
+        return new CommandSubstituteMethod(method, parameterSpec);
     }
 }

@@ -21,21 +21,13 @@
 package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
-import com.google.protobuf.Message;
 import io.spine.core.CommandClass;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-
-import static com.google.common.collect.ImmutableSet.of;
-import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
-import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
 
 /**
  * An abstract base for methods that accept a command message and optionally its context.
@@ -48,53 +40,12 @@ import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
 public abstract class CommandAcceptingMethod<T, R extends MethodResult>
         extends AbstractHandlerMethod<T, CommandClass, CommandEnvelope, R> {
 
-    CommandAcceptingMethod(Method method, ParameterSpec<CommandEnvelope> signature) {
-        super(method, signature);
+    CommandAcceptingMethod(Method method, ParameterSpec<CommandEnvelope> params) {
+        super(method, params);
     }
 
     @Override
     public CommandClass getMessageClass() {
         return CommandClass.from(rawMessageClass());
-    }
-
-    protected abstract static class Factory<H extends CommandAcceptingMethod>
-            extends MethodFactory<H, CommandAcceptingMethodParams> {
-
-        protected Factory(Class<? extends Annotation> annotation) {
-            super(annotation, of(Message.class, Iterable.class));
-        }
-
-        @Override
-        protected Class<CommandAcceptingMethodParams> getParamSpec() {
-            return CommandAcceptingMethodParams.class;
-        }
-    }
-
-    @Immutable
-    enum CommandAcceptingMethodParams implements ParameterSpec<CommandEnvelope> {
-
-        MESSAGE {
-            @Override
-            public boolean matches(Class<?>[] methodParams) {
-                return consistsOfSingle(methodParams, Message.class);
-            }
-
-            @Override
-            public Object[] extractArguments(CommandEnvelope envelope) {
-                return new Object[] {envelope.getMessage()};
-            }
-        },
-
-        MESSAGE_AND_CONTEXT {
-            @Override
-            public boolean matches(Class<?>[] methodParams) {
-                return consistsOfTwo(methodParams, Message.class, CommandContext.class);
-            }
-
-            @Override
-            public Object[] extractArguments(CommandEnvelope envelope) {
-                return new Object[] {envelope.getMessage(), envelope.getCommandContext()};
-            }
-        };
     }
 }

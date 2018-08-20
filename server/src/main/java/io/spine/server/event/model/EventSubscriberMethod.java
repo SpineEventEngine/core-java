@@ -22,16 +22,13 @@ package io.spine.server.event.model;
 
 import com.google.protobuf.Empty;
 import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
-import io.spine.server.model.MethodAccessChecker;
-import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
+import io.spine.server.model.declare.ParameterSpec;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
-
-import static com.google.common.collect.ImmutableSet.of;
-import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
  * A wrapper for an event subscriber method.
@@ -43,8 +40,8 @@ public final class EventSubscriberMethod
         extends EventHandlerMethod<Object, MethodResult<Empty>> {
 
     /** Creates a new instance. */
-    private EventSubscriberMethod(Method method, EventAcceptingMethodParams signature) {
-        super(method, signature);
+    EventSubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+        super(method, parameterSpec);
     }
 
     @Override
@@ -52,43 +49,8 @@ public final class EventSubscriberMethod
         return EventClass.from(rawMessageClass());
     }
 
-    /**
-     * Returns the factory for filtering and creating event subscriber methods.
-     */
-    public static MethodFactory<EventSubscriberMethod, ?> factory() {
-        return Factory.INSTANCE;
-    }
-
     @Override
     protected MethodResult<Empty> toResult(Object target, @Nullable Object rawMethodOutput) {
         return MethodResult.empty();
-    }
-
-    /**
-     * The factory for creating {@linkplain EventSubscriberMethod event subscriber} methods.
-     */
-    private static class Factory extends EventHandlerMethod.Factory<EventSubscriberMethod> {
-
-        private static final Factory INSTANCE = new Factory();
-
-        private Factory() {
-            super(Subscribe.class, of(void.class));
-        }
-
-        @Override
-        public Class<EventSubscriberMethod> getMethodClass() {
-            return EventSubscriberMethod.class;
-        }
-
-        @Override
-        public void checkAccessModifier(Method method) {
-            MethodAccessChecker checker = forMethod(method);
-            checker.checkPublic("Event subscriber `{}` must be declared `public`");
-        }
-
-        @Override
-        protected EventSubscriberMethod doCreate(Method method, EventAcceptingMethodParams paramSpec) {
-            return new EventSubscriberMethod(method, paramSpec);
-        }
     }
 }

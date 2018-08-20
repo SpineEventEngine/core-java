@@ -51,7 +51,7 @@ public class AggregateClass<A extends Aggregate>
     /** Creates new instance. */
     protected AggregateClass(Class<A> cls) {
         super(checkNotNull(cls));
-        this.stateEvents = new MessageHandlerMap<>(cls, EventApplier.factory());
+        this.stateEvents = new MessageHandlerMap<>(cls, new EventApplierSignature());
         this.delegate = new ReactorClassDelegate<>(cls);
     }
 

@@ -18,33 +18,40 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.command.model;
+package io.spine.server.event.model;
 
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
-import io.spine.server.command.Commander;
-import io.spine.server.command.model.CommandingMethod.Result;
+import com.google.common.collect.ImmutableSet;
+import io.spine.core.EventEnvelope;
+import io.spine.core.Subscribe;
+import io.spine.server.model.declare.AccessModifier;
 import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+
+import static com.google.common.collect.ImmutableSet.of;
 
 /**
- * A method that produces one or more command messages in response to an incoming command.
+ * A signature of {@code Event} subscriber methods.
  *
- * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-public final class CommandSubstituteMethod
-        extends CommandAcceptingMethod<Commander, Result>
-        implements CommandingMethod<CommandClass, CommandEnvelope, Result> {
+public class EventSubscriberSignature extends EventAcceptingSignature<EventSubscriberMethod> {
 
-    CommandSubstituteMethod(Method method,
-                            ParameterSpec<CommandEnvelope> paramSpec) {
-        super(method, paramSpec);
+    public EventSubscriberSignature() {
+        super(Subscribe.class);
     }
 
     @Override
-    protected Result toResult(Commander target, Object rawMethodOutput) {
-        Result result = new Result(rawMethodOutput, false);
-        return result;
+    protected ImmutableSet<AccessModifier> getAllowedModifiers() {
+        AccessModifier modifier = new AccessModifier(Modifier::isPublic);
+        return of(modifier);
     }
+
+    @Override
+    public EventSubscriberMethod doCreate(Method method,
+                                          ParameterSpec<EventEnvelope> parameterSpec) {
+        return new EventSubscriberMethod(method, parameterSpec);
+    }
+
 }

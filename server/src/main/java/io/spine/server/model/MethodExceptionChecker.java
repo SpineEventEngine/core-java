@@ -67,7 +67,7 @@ public class MethodExceptionChecker {
      *
      * @throws IllegalStateException if the check fails
      */
-    public void checkDeclaresNoExceptionsThrown() {
+    void checkDeclaresNoExceptionsThrown() {
         checkThrowsNoExceptionsBut();
     }
 
@@ -79,13 +79,26 @@ public class MethodExceptionChecker {
      * @throws IllegalStateException if the method throws any exception types apart from the
      *                               types specified in {@code whiteList} and their descendants
      */
-    public void checkThrowsNoExceptionsBut(Class<?>... whiteList) {
+    void checkThrowsNoExceptionsBut(Class<? extends Throwable>... whiteList) {
         checkNotNull(whiteList);
 
-        Collection<Class<?>> allowedExceptions = Arrays.asList(whiteList);
-        Collection<Class<?>> exceptions = obtainProhibitedExceptionsThrown(allowedExceptions);
+        Collection<Class<? extends Throwable>> allowedExceptions = Arrays.asList(whiteList);
+        checkThrowsNoExceptionsBut(allowedExceptions);
+    }
+
+    /**
+     * Checks that contained {@link Method} declares no thrown exception types except the ones
+     * specified as the {@code whiteList} and their descendants.
+     *
+     * @param whiteList the allowed exception types
+     * @throws IllegalStateException if the method throws any exception types apart from the
+     *                               types specified in {@code whiteList} and their descendants
+     */
+    public void checkThrowsNoExceptionsBut(Collection<Class<? extends Throwable>> whiteList) {
+        Collection<Class<? extends Throwable>> exceptions =
+                obtainProhibitedExceptionsThrown(whiteList);
         if (!exceptions.isEmpty()) {
-            throwCheckFailedException(exceptions, allowedExceptions);
+            throwCheckFailedException(exceptions, whiteList);
         }
     }
 
@@ -100,13 +113,16 @@ public class MethodExceptionChecker {
      *                          prohibited exceptions
      * @return a {@code Collection} of prohibited exceptions thrown
      */
-    private Collection<Class<?>>
-    obtainProhibitedExceptionsThrown(Iterable<Class<?>> allowedExceptions) {
+    private Collection<Class<? extends Throwable>>
+    obtainProhibitedExceptionsThrown(Iterable<Class<? extends Throwable>> allowedExceptions) {
         Class<?>[] thrownExceptions = method.getExceptionTypes();
-        Collection<Class<?>> result = newLinkedList();
+        Collection<Class<? extends Throwable>> result = newLinkedList();
         for (Class<?> exceptionType : thrownExceptions) {
             if (!isMemberOrDescendant(exceptionType, allowedExceptions)) {
-                result.add(exceptionType);
+                @SuppressWarnings("unchecked")  // As all exceptions extend `Throwable`.
+                Class<? extends Throwable> asThrowableCls =
+                        (Class<? extends Throwable>) exceptionType;
+                result.add(asThrowableCls);
             }
         }
         return result;
@@ -123,8 +139,8 @@ public class MethodExceptionChecker {
      * @param exceptionsThrown  the list of prohibited exceptions thrown
      * @param allowedExceptions the list of allowed exceptions for the contained {@link Method}
      */
-    private void throwCheckFailedException(Iterable<Class<?>> exceptionsThrown,
-                                           Iterable<Class<?>> allowedExceptions) {
+    private void throwCheckFailedException(Iterable<Class<? extends Throwable>> exceptionsThrown,
+                                           Iterable<Class<? extends Throwable>> allowedExceptions) {
         throw newIllegalStateException(
                 "Method %s.%s throws prohibited exception types: %s. " +
                         "The allowed exception types for this method are: %s",
@@ -146,7 +162,8 @@ public class MethodExceptionChecker {
      *         specified types, {@code false} otherwise.
      */
     private static boolean
-    isMemberOrDescendant(Class<?> exceptionType, Iterable<Class<?>> exceptionTypes) {
+    isMemberOrDescendant(Class<?> exceptionType,
+                         Iterable<Class<? extends Throwable>> exceptionTypes) {
         for (Class<?> type : exceptionTypes) {
             if (isEqualOrSubclass(exceptionType, type)) {
                 return true;
@@ -174,7 +191,7 @@ public class MethodExceptionChecker {
      * @param iterable the {@code Iterable} to print
      * @return the {@code String} containing all {@code Iterable}'s elements separated by comma
      */
-    private static String iterableToString(Iterable<Class<?>> iterable) {
+    private static String iterableToString(Iterable<Class<? extends Throwable>> iterable) {
         return Joiner.on(",").join(iterable);
     }
 }

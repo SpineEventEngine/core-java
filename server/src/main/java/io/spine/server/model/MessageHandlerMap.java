@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.errorprone.annotations.Immutable;
 import io.spine.core.EmptyClass;
+import io.spine.server.model.declare.MethodSignature;
 import io.spine.type.MessageClass;
 
 import java.io.Serializable;
@@ -60,12 +61,13 @@ public class MessageHandlerMap<M extends MessageClass,
      * Creates a map of methods found in the passed class.
      *
      * @param cls     the class to inspect
-     * @param factory the factory of methods
+     * @param signature the signature of methods
      */
-    public MessageHandlerMap(Class<?> cls, MethodFactory<H, ?> factory) {
-        this.map = scan(cls, factory);
+    public MessageHandlerMap(Class<?> cls, MethodSignature<H, ?> signature) {
+        this.map = scan(cls, signature);
         this.messageClasses = messageClasses(map.values());
     }
+
 
     /**
      * Obtains classes of messages for which handlers are stored in this map.
@@ -147,11 +149,11 @@ public class MessageHandlerMap<M extends MessageClass,
 
     private static <M extends MessageClass, H extends HandlerMethod<?, M, ?, ?>>
     ImmutableMap<HandlerKey, H> scan(Class<?> declaringClass,
-                                     MethodFactory<H, ?> factory) {
+                                     MethodSignature<H, ?> signature) {
         Map<HandlerKey, H> tempMap = newHashMap();
         Method[] declaredMethods = declaringClass.getDeclaredMethods();
         for (Method method : declaredMethods) {
-            Optional<H> handlerMethod = factory.create(method);
+            Optional<H> handlerMethod = signature.create(method);
             if (handlerMethod.isPresent()) {
                 H handler = handlerMethod.get();
                 HandlerKey handlerKey = handler.key();

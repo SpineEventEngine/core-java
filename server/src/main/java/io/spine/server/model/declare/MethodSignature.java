@@ -23,6 +23,7 @@ package io.spine.server.model.declare;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.MessageEnvelope;
+import io.spine.server.model.HandlerMethod;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -31,6 +32,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.model.declare.MethodParams.findMatching;
 import static io.spine.server.model.declare.SignatureMismatch.Severity.ERROR;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static java.util.stream.Collectors.toList;
@@ -38,38 +40,70 @@ import static java.util.stream.Collectors.toList;
 /**
  * @author Alex Tymchenko
  */
-public abstract class MethodSignature<E extends MessageEnvelope<?, ?, ?>> {
+public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
+                                      E extends MessageEnvelope<?, ?, ?>> {
 
     private final Class<? extends Annotation> annotation;
 
-    public MethodSignature(Class<? extends Annotation> annotation) {
+    protected MethodSignature(Class<? extends Annotation> annotation) {
         this.annotation = checkNotNull(annotation);
     }
 
-    boolean matches(Method method) {
+    public abstract Class<? extends ParameterSpec<E>> getParamSpecClass();
+
+    protected abstract ImmutableSet<AccessModifier> getAllowedModifiers();
+
+    protected abstract ImmutableSet<Class<?>> getValidReturnTypes();
+
+    public boolean matches(Method method) {
         Collection<SignatureMismatch> mismatches = match(method);
         boolean hasErrors = mismatches.stream()
-                              .anyMatch(mismatch -> ERROR == mismatch.getSeverity());
-        if(hasErrors) {
+                                      .anyMatch(mismatch -> ERROR == mismatch.getSeverity());
+        if (hasErrors) {
             throw newIllegalStateException("Error declaring a method. Mismatches: %s",
-                                                      Joiner.on(", ").join(mismatches));
+                                           Joiner.on(", ")
+                                                 .join(mismatches));
         }
         return mismatches.isEmpty();
     }
 
-    Class<? extends Annotation> getAnnotation() {
+    public abstract H doCreate(Method method, ParameterSpec<E> parameterSpec);
+
+    public Class<? extends Annotation> getAnnotation() {
         return annotation;
     }
 
-    protected abstract ImmutableSet<AccessModifier> getAllowedModifiers();
+    protected ImmutableSet<Class<? extends Throwable>> getAllowedExceptions() {
+        return ImmutableSet.of();
+    }
 
-    protected abstract ImmutableSet<Class<? extends Throwable>> getAllowedExceptions();
+    /**
+     * Creates a {@linkplain HandlerMethod handler method} from a raw method.
+     *
+     * <p>Performs various checks before wrapper creation, e.g. method access modifier or
+     * whether method throws any prohibited exceptions.
+     *
+     * @param method
+     *         the method to create wrapper from
+     * @return a wrapper object created from the method
+     * @throws IllegalStateException
+     *         in case some of the method checks fail
+     */
+    public Optional<H> create(Method method) {
+        if(method.isAnnotationPresent(getAnnotation())) {
+            return Optional.empty();
+        }
 
-    protected abstract ImmutableSet<Class<?>> getValidReturnTypes();
+        boolean matches = matches(method);
+        if(!matches) {
+            return Optional.empty();
+        }
+        Optional<? extends ParameterSpec<E>> matchingSpec = findMatching(method, getParamSpecClass());
+        return matchingSpec.map(spec -> doCreate(method, spec));
 
-    protected abstract Class<? extends ParameterSpec<E>> getParamSpecClass();
+    }
 
-    Collection<SignatureMismatch> match(Method method) {
+    public Collection<SignatureMismatch> match(Method method) {
         Collection<SignatureMismatch> result =
                 Arrays.stream(MatchCriterion.values())
                       .map(criterion -> criterion.test(method, this))

@@ -25,7 +25,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * @author Alex Tymchenko
  */
-final class SignatureMismatch {
+public final class SignatureMismatch {
 
     private final MatchCriterion unmetCriterion;
 
@@ -42,6 +42,10 @@ final class SignatureMismatch {
 
     public Severity getSeverity() {
         return unmetCriterion.getSeverity();
+    }
+
+    public MatchCriterion getUnmetCriterion() {
+        return unmetCriterion;
     }
 
     static SignatureMismatch create(MatchCriterion criterion, Object ...values) {

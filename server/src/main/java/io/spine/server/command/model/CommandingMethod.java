@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
-import io.spine.server.command.Command;
 import io.spine.server.command.Commander;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.SeveralCommands;
@@ -33,15 +32,12 @@ import io.spine.server.commandbus.SingleCommand;
 import io.spine.server.commandbus.Split;
 import io.spine.server.commandbus.Transform;
 import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
-import io.spine.server.model.declare.ParameterSpec;
 import io.spine.type.MessageClass;
 
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.commandbus.CommandSequence.inResponseTo;
 import static io.spine.server.commandbus.CommandSequence.respondMany;
 import static io.spine.server.commandbus.CommandSequence.split;
@@ -61,20 +57,6 @@ public interface CommandingMethod<M extends MessageClass,
                                   E extends MessageEnvelope<?, ?, ?>,
                                   R extends MethodResult>
         extends HandlerMethod<Commander, M, E, R> {
-
-    /**
-     * The implementation base for {@link CommandingMethod} factories.
-     *
-     * @param <H> the type of created methods
-     * @param <S> the type of {@link ParameterSpec}
-     */
-    abstract class Factory<H extends CommandingMethod,
-                           S extends ParameterSpec<?>> extends MethodFactory<H, S> {
-
-        protected Factory() {
-            super(Command.class, of(Message.class, Iterable.class));
-        }
-    }
 
     /**
      * A commanding method returns one or more command messages.

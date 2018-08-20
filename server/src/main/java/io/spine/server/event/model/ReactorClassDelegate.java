@@ -24,8 +24,6 @@ import io.spine.core.EventClass;
 import io.spine.server.event.EventReceiver;
 import io.spine.type.MessageClass;
 
-import static io.spine.server.event.model.EventReactorMethod.factory;
-
 /**
  * The helper class for holding messaging information on behalf of another model class.
  *
@@ -40,7 +38,7 @@ public final class ReactorClassDelegate<T extends EventReceiver>
     private static final long serialVersionUID = 0L;
 
     public ReactorClassDelegate(Class<T> cls) {
-        super(cls, factory());
+        super(cls, new EventReactorSignature());
     }
 
     @Override

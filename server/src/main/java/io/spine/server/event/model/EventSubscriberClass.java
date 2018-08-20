@@ -49,7 +49,7 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
 
     private EventSubscriberClass(Class<? extends S> cls) {
         super(cls);
-        this.eventSubscriptions = new MessageHandlerMap<>(cls, EventSubscriberMethod.factory());
+        this.eventSubscriptions = new MessageHandlerMap<>(cls, new EventSubscriberSignature());
         this.domesticSubscriptions =
                     eventSubscriptions.getMessageClasses(HandlerMethod::isDomestic);
         this.externalSubscriptions =

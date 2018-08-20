@@ -20,6 +20,8 @@
 
 package io.spine.server.model.declare;
 
+import io.spine.core.MessageEnvelope;
+
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Optional;
@@ -81,7 +83,7 @@ public final class MethodParams {
         return true;
     }
 
-    public static <S extends ParameterSpec<?>>
+    public static <E extends MessageEnvelope<?, ?, ?>, S extends ParameterSpec<E>>
     Optional<S> findMatching(Method method, Class<S> paramSpecClass) {
 
         Class<?>[] parameterTypes = method.getParameterTypes();

@@ -20,20 +20,17 @@
 
 package io.spine.server.event.model;
 
-import com.google.protobuf.Message;
 import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.React;
-import io.spine.server.model.MethodAccessChecker;
-import io.spine.server.model.MethodFactory;
 import io.spine.server.model.ReactorMethodResult;
+import io.spine.server.model.declare.ParameterSpec;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableSet.of;
-import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
  * A wrapper for a method which {@linkplain React reacts} on events.
@@ -44,8 +41,8 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
 public final class EventReactorMethod
         extends EventHandlerMethod<EventReactor, ReactorMethodResult> {
 
-    private EventReactorMethod(Method method, EventAcceptingMethodParams signature) {
-        super(method, signature);
+    EventReactorMethod(Method method, ParameterSpec<EventEnvelope> params) {
+        super(method, params);
     }
 
     @Override
@@ -60,37 +57,4 @@ public final class EventReactorMethod
                      getRawMethod());
         return new ReactorMethodResult(target, rawMethodOutput);
     }
-
-    public static MethodFactory<EventReactorMethod, ?> factory() {
-        return Factory.INSTANCE;
-    }
-
-    /**
-     * The factory for creating {@link EventReactorMethod event reactor} methods.
-     */
-    private static class Factory extends EventHandlerMethod.Factory<EventReactorMethod> {
-
-        private static final Factory INSTANCE = new Factory();
-
-        private Factory() {
-            super(React.class, of(Message.class, Iterable.class));
-        }
-
-        @Override
-        public Class<EventReactorMethod> getMethodClass() {
-            return EventReactorMethod.class;
-        }
-
-        @Override
-        public void checkAccessModifier(Method method) {
-            MethodAccessChecker checker = forMethod(method);
-            checker.checkPackagePrivate("Reactive handler method {} should be package-private.");
-        }
-
-        @Override
-        protected EventReactorMethod doCreate(Method method, EventAcceptingMethodParams paramSpec) {
-            return new EventReactorMethod(method, paramSpec);
-        }
-    }
-
 }

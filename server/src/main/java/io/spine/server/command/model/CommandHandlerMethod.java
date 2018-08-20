@@ -22,15 +22,10 @@ package io.spine.server.command.model;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.EventProducer;
-import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.model.EventsResult;
-import io.spine.server.model.MethodAccessChecker;
-import io.spine.server.model.MethodExceptionChecker;
-import io.spine.server.model.MethodFactory;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.server.procman.ProcessManager;
 
@@ -51,20 +46,9 @@ public final class CommandHandlerMethod
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method   command handler method
-     * @param signature the {@link ParameterSpec} describing the method signature
      */
-    private CommandHandlerMethod(Method method,
-                                 ParameterSpec<CommandEnvelope> signature) {
-        super(method, signature);
-    }
-
-    static CommandHandlerMethod from(Method method,
-                                     ParameterSpec<CommandEnvelope> signature) {
-        return new CommandHandlerMethod(method, signature);
-    }
-
-    public static MethodFactory<CommandHandlerMethod, ?> factory() {
-        return Factory.INSTANCE;
+    CommandHandlerMethod(Method method, ParameterSpec<CommandEnvelope> params) {
+        super(method, params);
     }
 
     /**
@@ -73,48 +57,6 @@ public final class CommandHandlerMethod
     @Override
     protected Result toResult(CommandHandler target, Object rawMethodOutput) {
         return new Result(target, rawMethodOutput);
-    }
-
-    /**
-     * The factory of {@link CommandHandlerMethod}s.
-     */
-    private static final class Factory extends CommandAcceptingMethod.Factory<CommandHandlerMethod> {
-
-        private static final Factory INSTANCE = new Factory();
-
-        private Factory() {
-            super(Assign.class);
-        }
-
-        @Override
-        public Class<CommandHandlerMethod> getMethodClass() {
-            return CommandHandlerMethod.class;
-        }
-
-        @Override
-        public void checkAccessModifier(Method method) {
-            MethodAccessChecker checker = MethodAccessChecker.forMethod(method);
-            checker.checkPackagePrivate("Command handler method {} should be package-private.");
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * <p>For the {@link CommandHandlerMethod}, the {@link ThrowableMessage} checked exception
-         * type is allowed, because the mechanism of {@linkplain ThrowableMessage
-         * command rejections} is based on this type.
-         */
-        @Override
-        protected void checkThrownExceptions(Method method) {
-            MethodExceptionChecker checker = MethodExceptionChecker.forMethod(method);
-            checker.checkThrowsNoExceptionsBut(ThrowableMessage.class);
-        }
-
-        @Override
-        protected CommandHandlerMethod doCreate(Method method,
-                                                CommandAcceptingMethodParams paramSpec) {
-            return from(method, paramSpec);
-        }
     }
 
     /**

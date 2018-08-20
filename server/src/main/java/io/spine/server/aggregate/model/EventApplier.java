@@ -20,25 +20,15 @@
 
 package io.spine.server.aggregate.model;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.Apply;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.MethodAccessChecker;
-import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
-
-import static com.google.common.collect.ImmutableSet.of;
-import static io.spine.server.model.MethodAccessChecker.forMethod;
-import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 
 /**
  * A wrapper for event applier method.
@@ -54,7 +44,7 @@ public final class EventApplier
      * @param method   the applier method
      * @param signature {@link ParameterSpec} which describes the method
      */
-    private EventApplier(Method method,
+    EventApplier(Method method,
                          ParameterSpec<EventEnvelope> signature) {
         super(method, signature);
     }
@@ -69,60 +59,8 @@ public final class EventApplier
         return new EventApplier(method, signature);
     }
 
-    static MethodFactory<EventApplier, ?> factory() {
-        return Factory.INSTANCE;
-    }
-
     @Override
     protected MethodResult<Empty> toResult(Aggregate target, Object rawMethodOutput) {
         return MethodResult.empty();
-    }
-
-    /** The factory for filtering methods that match {@code EventApplier} specification. */
-    private static class Factory extends MethodFactory<EventApplier, EventApplierParams> {
-
-        private static final Factory INSTANCE = new Factory();
-
-        private Factory() {
-            super(Apply.class, of(void.class));
-        }
-
-        @Override
-        public Class<EventApplier> getMethodClass() {
-            return EventApplier.class;
-        }
-
-        @Override
-        public void checkAccessModifier(Method method) {
-            MethodAccessChecker checker = forMethod(method);
-            checker.checkPrivate("Event applier method `{}` must be declared `private`.");
-        }
-
-        @Override
-        protected EventApplier doCreate(Method method, EventApplierParams paramSpec) {
-            return from(method, paramSpec);
-        }
-
-        @Override
-        protected Class<EventApplierParams> getParamSpec() {
-            return EventApplierParams.class;
-        }
-    }
-
-    @VisibleForTesting
-    @Immutable
-    enum EventApplierParams implements ParameterSpec<EventEnvelope> {
-
-        MESSAGE {
-            @Override
-            public boolean matches(Class<?>[] methodParams) {
-                return consistsOfSingle(methodParams, Message.class);
-            }
-
-            @Override
-            public Object[] extractArguments(EventEnvelope envelope) {
-                return new Object[] {envelope.getMessage()};
-            }
-        }
     }
 }

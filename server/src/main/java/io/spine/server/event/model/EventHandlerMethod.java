@@ -26,13 +26,11 @@ import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
-import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
+import io.spine.server.model.declare.ParameterSpec;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Set;
 
 /**
  * An abstract base for methods handling events.
@@ -42,16 +40,18 @@ import java.util.Set;
 public abstract class EventHandlerMethod<T, R extends MethodResult>
         extends AbstractHandlerMethod<T, EventClass, EventEnvelope, R> {
 
-    private final EventAcceptingMethodParams signature;
-
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    protected EventHandlerMethod(Method method, EventAcceptingMethodParams signature) {
-        super(method, signature);
-        this.signature = signature;
+    EventHandlerMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+        super(method, parameterSpec);
+    }
+
+    @Override
+    protected EventAcceptingMethodParams getParameterSpec() {
+        return (EventAcceptingMethodParams) super.getParameterSpec();
     }
 
     @Override
@@ -60,7 +60,7 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
         @SuppressWarnings("unchecked")
         Class<? extends Message> eventMessageClass = (Class<? extends Message>) types[0];
         EventClass eventClass = EventClass.from(eventMessageClass);
-        if (!signature.isAwareOfCommandType()) {
+        if (!getParameterSpec().isAwareOfCommandType()) {
             return HandlerKey.of(eventClass);
         } else {
             @SuppressWarnings("unchecked")
@@ -85,23 +85,4 @@ public abstract class EventHandlerMethod<T, R extends MethodResult>
      */
     @Override
     protected abstract R toResult(T target, @Nullable Object rawMethodOutput);
-
-    /**
-     * The implementation base for a {@link EventHandlerMethod} factory.
-     *
-     * @param <H> the type of built methods
-     */
-    protected abstract static class Factory<H extends EventHandlerMethod>
-            extends MethodFactory<H, EventAcceptingMethodParams> {
-
-        protected Factory(Class<? extends Annotation> annotation,
-                          Set<Class<?>> types) {
-            super(annotation, types);
-        }
-
-        @Override
-        protected Class<EventAcceptingMethodParams> getParamSpec() {
-            return EventAcceptingMethodParams.class;
-        }
-    }
 }

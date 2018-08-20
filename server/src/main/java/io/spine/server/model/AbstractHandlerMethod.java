@@ -45,6 +45,7 @@ import static java.lang.String.format;
  *
  * @param <T> the type of the target object
  * @param <M> the type of the message class
+ * @param <E> the type of message envelopes, in which the messages to handle are wrapped
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
@@ -72,18 +73,29 @@ public abstract class AbstractHandlerMethod<T,
     @SuppressWarnings("Immutable")
     private final ImmutableSet<MethodAttribute<?>> attributes;
 
-    private final ParameterSpec<E> signature;
+    /**
+     * The specification of parameters for this method.
+     *
+     * @implNote It serves to extract the argument values from the {@linkplain E envelope} used
+     * as a source for the method call.
+     */
+    private final ParameterSpec<E> parameterSpec;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param method subscriber method
+     * @param method
+     *         subscriber method
+     * @param parameterSpec
+     *         the specification of method parameters
      */
-    protected AbstractHandlerMethod(Method method, ParameterSpec<E> signature) {
+    protected AbstractHandlerMethod(Method method,
+                                    ParameterSpec<E> parameterSpec) {
         this.method = checkNotNull(method);
         this.messageClass = getFirstParamType(method);
         this.attributes = discoverAttributes(method);
-        this.signature = checkNotNull(signature);
+        this.parameterSpec = parameterSpec;
+
         method.setAccessible(true);
     }
 
@@ -120,6 +132,10 @@ public abstract class AbstractHandlerMethod<T,
         return method.getModifiers();
     }
 
+    protected ParameterSpec<E> getParameterSpec() {
+        return parameterSpec;
+    }
+
     /** Returns {@code true} if the method is declared {@code public}, {@code false} otherwise. */
     protected boolean isPublic() {
         boolean result = Modifier.isPublic(getModifiers());
@@ -135,6 +151,7 @@ public abstract class AbstractHandlerMethod<T,
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("AssignmentOrReturnOfFieldWithMutableType")   // Returning immutable impl.
     @Override
     public Set<MethodAttribute<?>> getAttributes() {
         return attributes;
@@ -155,7 +172,7 @@ public abstract class AbstractHandlerMethod<T,
         Message message = envelope.getMessage();
         Message context = envelope.getMessageContext();
         try {
-            Object[] arguments = signature.extractArguments(envelope);
+            Object[] arguments = parameterSpec.extractArguments(envelope);
             Object rawOutput = method.invoke(target, arguments);
             R result = toResult(target, rawOutput);
             return result;

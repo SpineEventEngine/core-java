@@ -46,8 +46,8 @@ public final class CommanderClass<C extends Commander>
     private final EventReceivingClassDelegate<C, CommandReactionMethod> delegate;
 
     private CommanderClass(Class<C> cls) {
-        super(cls, CommandSubstituteMethod.factory());
-        this.delegate = new EventReceivingClassDelegate<>(cls, CommandReactionMethod.factory());
+        super(cls, new CommandSubstituteSignature());
+        this.delegate = new EventReceivingClassDelegate<>(cls, new CommandReactionSignature());
     }
 
     public static <C extends Commander> CommanderClass<C> delegateFor(Class<C> cls) {

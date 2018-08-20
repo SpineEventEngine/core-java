@@ -23,10 +23,20 @@ package io.spine.server.model.declare;
 import java.lang.reflect.Method;
 import java.util.function.Predicate;
 
+import static java.lang.reflect.Modifier.isPrivate;
+import static java.lang.reflect.Modifier.isProtected;
+import static java.lang.reflect.Modifier.isPublic;
+
 /**
  * @author Alex Tymchenko
  */
 public class AccessModifier implements Predicate<Method> {
+
+    public static final AccessModifier PACKAGE_PRIVATE_MODIFIER =
+            new AccessModifier(
+                    methodModifier -> !(isPublic(methodModifier)
+                            || isProtected(methodModifier)
+                            || isPrivate(methodModifier)));
 
     private final Predicate<Integer> checkingMethod;
 

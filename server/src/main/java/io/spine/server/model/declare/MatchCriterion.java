@@ -24,6 +24,7 @@ import com.google.common.base.Joiner;
 import io.spine.server.model.MethodExceptionChecker;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Optional;
 
@@ -35,13 +36,13 @@ import static java.lang.String.format;
 /**
  * @author Alex Tymchenko
  */
-enum MatchCriterion {
+public enum MatchCriterion {
 
     RETURN_TYPE(ERROR,
                 "The return type of `%s` method does not match the constraints " +
                         "set for `%s`-annotated method.") {
         @Override
-        Optional<SignatureMismatch> test(Method method, MethodSignature<?> signature) {
+        Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             Class<?> returnType = method.getReturnType();
             boolean violates = signature.getValidReturnTypes()
                                         .stream()
@@ -58,7 +59,7 @@ enum MatchCriterion {
 
     ACCESS_MODIFIER(WARN, "The access modifier of `%s` method must be `%s`, but it is `%s`.") {
         @Override
-        Optional<SignatureMismatch> test(Method method, MethodSignature<?> signature) {
+        Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
 
             boolean hasMatch = signature.getAllowedModifiers()
                                         .stream()
@@ -68,6 +69,7 @@ enum MatchCriterion {
                 SignatureMismatch mismatch = SignatureMismatch.create(this,
                                                                       methodAsString(method),
                                                                       "", "");
+                return Optional.of(mismatch);
 
             }
             return Optional.empty();
@@ -76,11 +78,12 @@ enum MatchCriterion {
 
     PROHIBITED_EXCEPTION(ERROR, "%s") {
         @Override
-        Optional<SignatureMismatch> test(Method method, MethodSignature<?> signature) {
+        Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             //TODO:2018-08-15:alex.tymchenko: add non-throwing behavior to `MethodExceptionChecker`.
             try {
                 MethodExceptionChecker checker = forMethod(method);
-                checker.checkDeclaresNoExceptionsThrown();
+                Collection<Class<? extends Throwable>> allowed = signature.getAllowedExceptions();
+                checker.checkThrowsNoExceptionsBut(allowed);
                 return Optional.empty();
             } catch (IllegalStateException e) {
                 SignatureMismatch mismatch = SignatureMismatch.create(this,
@@ -94,7 +97,7 @@ enum MatchCriterion {
                    "`%s` method has an invalid parameter list. " +
                            "Please refer to `%s` annotation docs for allowed parameters.") {
         @Override
-        Optional<SignatureMismatch> test(Method method, MethodSignature<?> signature) {
+        Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
             Optional<? extends ParameterSpec<?>> matching =
                     MethodParams.findMatching(method, signature.getParamSpecClass());
             if (!matching.isPresent()) {
@@ -123,7 +126,7 @@ enum MatchCriterion {
         return message;
     }
 
-    abstract Optional<SignatureMismatch> test(Method method, MethodSignature<?> signature);
+    abstract Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature);
 
     private static String methodAsString(Method method) {
         String result = Joiner.on(".")
