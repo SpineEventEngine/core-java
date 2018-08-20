@@ -28,11 +28,17 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.procman.ProcessManager;
+import io.spine.server.tuple.Pair;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmAddTask;
+import io.spine.test.procman.command.PmCencelIteration;
 import io.spine.test.procman.command.PmCreateProject;
+import io.spine.test.procman.command.PmPlanIteration;
 import io.spine.test.procman.command.PmReviewBacklog;
+import io.spine.test.procman.command.PmScheduleRetrospective;
 import io.spine.test.procman.command.PmStartProject;
+import io.spine.test.procman.event.PmIterationCompleted;
+import io.spine.test.procman.event.PmIterationPlanned;
 import io.spine.test.procman.event.PmNotificationSent;
 import io.spine.test.procman.event.PmOwnerChanged;
 import io.spine.test.procman.event.PmProjectCreated;
@@ -68,7 +74,8 @@ public class TestProcessManager
     @Assign
     PmProjectCreated handle(PmCreateProject command) {
         remember(command);
-        return ((PmProjectCreated.Builder) builderForType(PmProjectCreated.class))
+        return PmProjectCreated
+                .newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
     }
@@ -76,7 +83,8 @@ public class TestProcessManager
     @Assign
     PmTaskAdded handle(PmAddTask command) {
         remember(command);
-        return ((PmTaskAdded.Builder) builderForType(PmTaskAdded.class))
+        return PmTaskAdded
+                .newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
     }
@@ -84,7 +92,26 @@ public class TestProcessManager
     @Assign
     PmNotificationSent handle(PmReviewBacklog command) {
         remember(command);
-        return ((PmNotificationSent.Builder) builderForType(PmNotificationSent.class))
+        return PmNotificationSent
+                .newBuilder()
+                .setProjectId(command.getProjectId())
+                .build();
+    }
+
+    @Assign
+    PmNotificationSent handle(PmScheduleRetrospective command) {
+        remember(command);
+        return PmNotificationSent
+                .newBuilder()
+                .setProjectId(command.getProjectId())
+                .build();
+    }
+
+    @Assign
+    PmIterationPlanned handle(PmPlanIteration command) {
+        remember(command);
+        return PmIterationPlanned
+                .newBuilder()
                 .setProjectId(command.getProjectId())
                 .build();
     }
@@ -107,6 +134,36 @@ public class TestProcessManager
     PmReviewBacklog on(PmOwnerChanged event) {
         remember(event);
         return messageOfType(PmReviewBacklog.class);
+    }
+
+    /*
+     * Generation of more than one command
+     **************************************/
+
+    @Command
+    Pair<PmScheduleRetrospective, PmPlanIteration> split(PmCencelIteration command) {
+        ProjectId pid = command.getProjectId();
+        return Pair.of(PmScheduleRetrospective
+                               .newBuilder()
+                               .setProjectId(pid)
+                               .build(),
+                       PmPlanIteration
+                               .newBuilder()
+                               .setProjectId(pid)
+                               .build());
+    }
+
+    @Command
+    Pair<PmScheduleRetrospective, PmPlanIteration> on(PmIterationCompleted event) {
+        ProjectId pid = event.getProjectId();
+        return Pair.of(PmScheduleRetrospective
+                               .newBuilder()
+                               .setProjectId(pid)
+                               .build(),
+                       PmPlanIteration
+                               .newBuilder()
+                               .setProjectId(pid)
+                               .build());
     }
 
     /*
