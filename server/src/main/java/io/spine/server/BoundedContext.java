@@ -109,7 +109,7 @@ public abstract class BoundedContext
     private final IntegrationBus integrationBus;
     private final Stand stand;
 
-    /** Controls access to entities of all repositories registered with this bounded context. */
+    /** Controls access to entities of all registered repositories. */
     private final VisibilityGuard guard = VisibilityGuard.newInstance();
 
     /** Memoized version of the {@code StorageFactory} supplier passed to the constructor. */
