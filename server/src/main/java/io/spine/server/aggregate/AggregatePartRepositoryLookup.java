@@ -37,7 +37,7 @@ import static java.lang.String.format;
  * @param <S> the type of the state of aggregate parts of managed by the target repository
  * @author Alexander Yevsyukov
  */
-class AggregatePartRepositoryLookup<I, S extends Message> {
+final class AggregatePartRepositoryLookup<I, S extends Message> {
 
     private final BoundedContext boundedContext;
     private final Class<I> idClass;

@@ -18,11 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.storage;
+package io.spine.server.aggregate;
 
 import io.spine.annotation.SPI;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.storage.StorageField;
 
 /**

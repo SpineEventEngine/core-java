@@ -36,7 +36,7 @@ import static io.spine.core.Events.getRootCommandId;
  *
  * @author Mykhailo Drachuk
  */
-class IdempotencyGuard {
+final class IdempotencyGuard {
 
     private final Aggregate<?, ?, ?> aggregate;
 
