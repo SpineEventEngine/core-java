@@ -120,7 +120,7 @@ class CommandHandlerMethodTest {
             ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
 
             Optional<CommandHandlerMethod> createdMethod =
-                    CommandHandlerMethod.factory().create(handlerObject.getHandler());
+                    new CommandHandlerSignature().create(handlerObject.getHandler());
             assertTrue(createdMethod.isPresent());
             CommandHandlerMethod handler = createdMethod.get();
             RefCreateProject cmd = createProject();
@@ -142,7 +142,7 @@ class CommandHandlerMethodTest {
             ValidHandlerOneParamReturnsList handlerObject =
                     spy(new ValidHandlerOneParamReturnsList());
             Optional<CommandHandlerMethod> method =
-                    CommandHandlerMethod.factory().create(handlerObject.getHandler());
+                    new CommandHandlerSignature().create(handlerObject.getHandler());
             assertTrue(method.isPresent());
             CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();
@@ -167,7 +167,7 @@ class CommandHandlerMethodTest {
         void noEvents() {
             HandlerReturnsEmptyList handlerObject = new HandlerReturnsEmptyList();
             Optional<CommandHandlerMethod> method =
-                    CommandHandlerMethod.factory().create(handlerObject.getHandler());
+                    new CommandHandlerSignature().create(handlerObject.getHandler());
             assertTrue(method.isPresent());
             CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();
@@ -182,7 +182,7 @@ class CommandHandlerMethodTest {
         void emptyEvent() {
             HandlerReturnsEmpty handlerObject = new HandlerReturnsEmpty();
             Optional<CommandHandlerMethod> method =
-                    CommandHandlerMethod.factory().create(handlerObject.getHandler());
+                    new CommandHandlerSignature().create(handlerObject.getHandler());
             assertTrue(method.isPresent());
             CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();
@@ -366,9 +366,9 @@ class CommandHandlerMethodTest {
 
     private static void assertIsCommandHandler(Method handler, boolean isHandler) {
         assertEquals(isHandler,
-                     CommandHandlerMethod.factory()
-                                         .create(handler)
-                                         .isPresent());
+                     new CommandHandlerSignature()
+                             .create(handler)
+                             .isPresent());
     }
 
     private static CommandEnvelope envelope(Message commandMessage) {

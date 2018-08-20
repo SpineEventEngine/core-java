@@ -82,7 +82,7 @@ class EventSubscriberMethodTest {
         ValidTwoParams subscriberObject;
         subscriberObject = spy(new ValidTwoParams());
         Optional<EventSubscriberMethod> createdMethod =
-                EventSubscriberMethod.factory().create(subscriberObject.getMethod());
+                new EventSubscriberSignature().create(subscriberObject.getMethod());
         assertTrue(createdMethod.isPresent());
         EventSubscriberMethod subscriber = createdMethod.get();
         RefProjectCreated msg = Given.EventMessage.projectCreated();
@@ -217,8 +217,7 @@ class EventSubscriberMethodTest {
 
         private void check(TestEventSubscriber subscriber, boolean external) {
             Method method = subscriber.getMethod();
-            Optional<EventSubscriberMethod> created = EventSubscriberMethod.factory()
-                                                                           .create(method);
+            Optional<EventSubscriberMethod> created = new EventSubscriberSignature().create(method);
             assertTrue(created.isPresent());
             EventSubscriberMethod modelMethod = created.get();
             EventContext context = EventContext
@@ -237,8 +236,7 @@ class EventSubscriberMethodTest {
     }
 
     private static void assertIsEventSubscriber(Method subscriber, boolean isSubscriber) {
-        assertEquals(isSubscriber, EventSubscriberMethod.factory()
-                                                        .create(subscriber)
-                                                        .isPresent());
+        assertEquals(isSubscriber, new EventSubscriberSignature().create(subscriber)
+                                                                 .isPresent());
     }
 }
