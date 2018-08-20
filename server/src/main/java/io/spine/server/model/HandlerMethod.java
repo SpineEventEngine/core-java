@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 
+import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.util.Set;
 
@@ -44,6 +45,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 @Immutable
 public
 interface HandlerMethod<T, M extends MessageClass, C extends Message, R extends MethodResult> {
+
+    @PostConstruct
+    void discoverAttributes();
 
     M getMessageClass();
 

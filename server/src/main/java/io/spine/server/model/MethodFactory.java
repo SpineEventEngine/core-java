@@ -79,7 +79,9 @@ public abstract class MethodFactory<H extends HandlerMethod> {
     public H create(Method method) {
         checkAccessModifier(method);
         checkThrownExceptions(method);
-        return doCreate(method);
+        H result = doCreate(method);
+        result.discoverAttributes();
+        return result;
     }
 
     /**

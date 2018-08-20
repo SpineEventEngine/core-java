@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -82,6 +83,12 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
         this.paramCount = method.getParameterTypes().length;
         this.attributes = discoverAttributes(method);
         method.setAccessible(true);
+    }
+
+    @Override
+    @PostConstruct
+    public void discoverAttributes() {
+        //TODO:2018-08-20:alexander.yevsyukov: Finish.
     }
 
     protected final Class<? extends Message> rawMessageClass() {
