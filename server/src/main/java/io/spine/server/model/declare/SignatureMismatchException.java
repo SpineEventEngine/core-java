@@ -35,7 +35,8 @@ public class SignatureMismatchException extends RuntimeException {
 
     private final String message;
 
-    public SignatureMismatchException(Iterable<SignatureMismatch> mismatches) {
+    SignatureMismatchException(Iterable<SignatureMismatch> mismatches) {
+        super();
         this.message =  formatMsg(mismatches);
     }
 
