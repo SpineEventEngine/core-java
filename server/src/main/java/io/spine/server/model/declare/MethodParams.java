@@ -45,7 +45,7 @@ public final class MethodParams {
         checkNotNull(methodParams);
         checkNotNull(type);
 
-        if (!(1 == methodParams.length)) {
+        if (1 != methodParams.length) {
             return false;
         }
         Class<?> firstParam = methodParams[0];
@@ -59,7 +59,7 @@ public final class MethodParams {
         checkNotNull(firstType);
         checkNotNull(secondType);
 
-        if (!(2 == methodParams.length)) {
+        if (2 != methodParams.length) {
             return false;
         }
         Class<?> firstParam = methodParams[0];
