@@ -57,18 +57,17 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      * Checks whether the passed {@code method} matches the constraints set by this
      * {@code MethodSignature} instance.
      *
-     * @implNote This method never returns {@code false} (rather throwing an exception), since
-     * in future the extended diagnostic, based upon {@linkplain SignatureMismatch signature
-     * mismatches} found is going to be implemented.
-     *
      * @param method
      *         the method to check
      * @return true if there was no {@link SignatureMismatch.Severity#ERROR ERROR}-level mismatches
      * @throws SignatureMismatchException
      *         in case of any {@link SignatureMismatch.Severity#ERROR ERROR}-level mismatches
+     * @implNote This method never returns {@code false} (rather throwing an exception),
+     *         sincein future the extended diagnostic, based upon {@linkplain SignatureMismatch
+     *         signature mismatches} found is going to be implemented.
      */
     public boolean matches(Method method) throws SignatureMismatchException {
-        if (!method.isAnnotationPresent(annotation)) {
+        if (!shouldInspect(method)) {
             return false;
         }
 
@@ -79,6 +78,22 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
             throw new SignatureMismatchException(mismatches);
         }
         return true;
+    }
+
+    /**
+     * Determines, if the given raw {@code method} is eligible to be inspected.
+     *
+     * <p>Such an approach allows to improve performance by skipping the methods, that a priori
+     * cannot be qualified as message handler methods, such as methods with no
+     * {@linkplain #getAnnotation() required annotation}.
+     *
+     * @param method
+     *         the method to determine if it should be inspected at all
+     * @return {@code true} if this method should be walked through further examination, {@code
+     *         false} otherwise
+     */
+    protected boolean shouldInspect(Method method) {
+        return method.isAnnotationPresent(annotation);
     }
 
     public abstract H doCreate(Method method, ParameterSpec<E> parameterSpec);

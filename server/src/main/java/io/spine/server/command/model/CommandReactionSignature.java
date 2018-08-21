@@ -28,10 +28,12 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.command.Command;
 import io.spine.server.model.declare.AccessModifier;
+import io.spine.server.model.declare.MethodParams;
 import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
@@ -48,7 +50,7 @@ public class CommandReactionSignature
     }
 
     @Override
-    public Class<? extends ParameterSpec<EventEnvelope>> getParamSpecClass() {
+    public Class<CommandReactionParams> getParamSpecClass() {
         return CommandReactionParams.class;
     }
 
@@ -66,6 +68,18 @@ public class CommandReactionSignature
     public CommandReactionMethod doCreate(Method method,
                                           ParameterSpec<EventEnvelope> parameterSpec) {
         return new CommandReactionMethod(method, parameterSpec);
+    }
+
+    @Override
+    protected boolean shouldInspect(Method method) {
+        boolean parentResult = super.shouldInspect(method);
+
+        if(parentResult) {
+            Optional<CommandReactionParams> paramMatch =
+                    MethodParams.findMatching(method, getParamSpecClass());
+            return paramMatch.isPresent();
+        }
+        return false;
     }
 
     @Immutable
@@ -91,7 +105,7 @@ public class CommandReactionSignature
 
             @Override
             public Object[] extractArguments(EventEnvelope envelope) {
-                return new Object[]{envelope, envelope.getEventContext()};
+                return new Object[]{envelope.getMessage(), envelope.getEventContext()};
             }
         },
 

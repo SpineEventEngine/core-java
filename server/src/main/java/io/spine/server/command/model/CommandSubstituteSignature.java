@@ -20,11 +20,17 @@
 
 package io.spine.server.command.model;
 
+import io.spine.base.CommandMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.command.Command;
+import io.spine.server.model.declare.MethodParams;
 import io.spine.server.model.declare.ParameterSpec;
+import io.spine.server.model.declare.SignatureMismatchException;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
+
+import static io.spine.server.command.model.CommandAcceptingMethodSignature.CommandAcceptingMethodParams.MESSAGE_AND_CONTEXT;
 
 /**
  * A signature of {@link io.spine.server.command.model.CommandSubstituteMethod
@@ -33,7 +39,7 @@ import java.lang.reflect.Method;
  * @author Alex Tymchenko
  */
 public class CommandSubstituteSignature
-        extends CommandAcceptingMethodSignature<CommandSubstituteMethod>  {
+        extends CommandAcceptingMethodSignature<CommandSubstituteMethod> {
 
     CommandSubstituteSignature() {
         super(Command.class);
@@ -43,5 +49,17 @@ public class CommandSubstituteSignature
     public CommandSubstituteMethod doCreate(Method method,
                                             ParameterSpec<CommandEnvelope> parameterSpec) {
         return new CommandSubstituteMethod(method, parameterSpec);
+    }
+
+    @Override
+    protected boolean shouldInspect(Method method) {
+        boolean parentResult = super.shouldInspect(method);
+
+        if(parentResult) {
+            Optional<CommandAcceptingMethodParams> paramMatch =
+                    MethodParams.findMatching(method,getParamSpecClass());
+            return paramMatch.isPresent();
+        }
+        return false;
     }
 }
