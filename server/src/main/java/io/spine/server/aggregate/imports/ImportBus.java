@@ -20,7 +20,9 @@
 
 package io.spine.server.aggregate.imports;
 
+import com.google.common.collect.Streams;
 import io.spine.core.EventClass;
+import io.spine.core.TenantId;
 import io.spine.server.aggregate.ImportEvent;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusBuilder;
@@ -89,7 +91,17 @@ public class ImportBus
      * Does nothing because instances of {@link ImportEvent} are transient.
      */
     @Override
-    protected void store(Iterable<ImportEvent> messages) {
+    protected void store(Iterable<ImportEvent> events) {
+        TenantId tenantId = tenantOf(events);
+        tenantIndex.keep(tenantId);
+    }
+
+    private static TenantId tenantOf(Iterable<ImportEvent> events) {
+        return Streams.stream(events)
+                      .map((e) -> e.getContext()
+                                   .getTenantId())
+                      .findAny()
+                      .orElse(TenantId.getDefaultInstance());
     }
 
     /**
@@ -113,6 +125,9 @@ public class ImportBus
             extends DispatcherRegistry<EventClass, ImportDispatcher<?>> {
     }
 
+    /**
+     * The builder for {@link ImportBus}.
+     */
     public static class Builder extends BusBuilder<ImportEnvelope, ImportEvent, Builder> {
 
         @Override
@@ -124,6 +139,5 @@ public class ImportBus
         protected Builder self() {
             return this;
         }
-
     }
 }
