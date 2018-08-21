@@ -26,9 +26,9 @@ import io.spine.server.model.HandlerMethod;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.model.declare.MethodParams.findMatching;
@@ -71,7 +71,6 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
         if (!method.isAnnotationPresent(annotation)) {
             return false;
         }
-
         Collection<SignatureMismatch> mismatches = match(method);
         boolean hasErrors = mismatches.stream()
                                       .anyMatch(mismatch -> ERROR == mismatch.getSeverity());
@@ -115,9 +114,8 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     }
 
     public Collection<SignatureMismatch> match(Method method) {
-
         Collection<SignatureMismatch> result =
-                Arrays.stream(MatchCriterion.values())
+                Stream.of(MatchCriterion.values())
                       .map(criterion -> criterion.test(method, this))
                       .filter(Optional::isPresent)
                       .map(Optional::get)

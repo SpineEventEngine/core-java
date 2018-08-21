@@ -101,6 +101,6 @@ abstract class CommandAcceptingMethodSignature<H extends HandlerMethod<?, Comman
             public Object[] extractArguments(CommandEnvelope envelope) {
                 return new Object[]{envelope.getMessage(), envelope.getCommandContext()};
             }
-        };
+        }
     }
 }
