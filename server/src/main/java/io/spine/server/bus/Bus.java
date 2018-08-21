@@ -65,7 +65,8 @@ public abstract class Bus<T extends Message,
     private @Nullable DispatchingQueue<E> queue;
 
     /** Dispatchers of messages by their class. */
-    private @Nullable DispatcherRegistry<C, D> registry;
+    @LazyInit
+    private @MonotonicNonNull DispatcherRegistry<C, D> registry;
 
     /** The chain of filters for this bus, {@linkplain #filterChain() lazily initialized}. */
     @LazyInit

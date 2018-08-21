@@ -38,22 +38,9 @@ import java.util.Set;
 public class AggregateRejectionEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateEndpoint<I, A, RejectionEnvelope, Set<I>> {
 
-    protected AggregateRejectionEndpoint(AggregateRepository<I, A> repository,
-                                         RejectionEnvelope envelope) {
+    protected
+    AggregateRejectionEndpoint(AggregateRepository<I, A> repository, RejectionEnvelope envelope) {
         super(repository, envelope);
-    }
-
-    static <I, A extends Aggregate<I, ?, ?>>
-    Set<I> handle(AggregateRepository<I, A> repository, RejectionEnvelope rejection) {
-        AggregateRejectionEndpoint<I, A> endpoint = of(repository, rejection);
-
-        return endpoint.handle();
-    }
-
-    static <I, A extends Aggregate<I, ?, ?>>
-    AggregateRejectionEndpoint<I, A>
-    of(AggregateRepository<I, A> repository, RejectionEnvelope rejection) {
-        return new AggregateRejectionEndpoint<>(repository, rejection);
     }
 
     @Override

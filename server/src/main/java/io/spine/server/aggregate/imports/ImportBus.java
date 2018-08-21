@@ -91,4 +91,13 @@ public class ImportBus
             return new UnsupportedImportEventException(envelope);
         }
     }
+
+    /**
+     * The registry of import dispatchers.
+     *
+     * @author Alexander Yevsyukov
+     */
+    private static final class Registry
+            extends DispatcherRegistry<EventClass, ImportDispatcher<?>> {
+    }
 }

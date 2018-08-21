@@ -62,7 +62,7 @@ public class AggregateCommandDelivery<I, A extends Aggregate<I, ?, ?>>
 
         @Override
         protected AggregateCommandEndpoint<I, A> getEndpoint(CommandEnvelope envelope) {
-            return AggregateCommandEndpoint.of(repository(), envelope);
+            return new AggregateCommandEndpoint<>(repository(), envelope);
         }
     }
 }

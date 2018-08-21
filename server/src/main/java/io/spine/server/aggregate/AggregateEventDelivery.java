@@ -62,7 +62,7 @@ public class AggregateEventDelivery<I, A extends Aggregate<I, ?, ?>>
 
         @Override
         protected AggregateEventEndpoint<I, A> getEndpoint(EventEnvelope envelope) {
-            return AggregateEventEndpoint.of(repository(), envelope);
+            return new AggregateEventEndpoint<>(repository(), envelope);
         }
     }
 }
