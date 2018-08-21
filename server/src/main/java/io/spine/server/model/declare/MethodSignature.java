@@ -63,7 +63,7 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      * @throws SignatureMismatchException
      *         in case of any {@link SignatureMismatch.Severity#ERROR ERROR}-level mismatches
      * @implNote This method never returns {@code false} (rather throwing an exception),
-     *         sincein future the extended diagnostic, based upon {@linkplain SignatureMismatch
+     *         since in future the extended diagnostic, based upon {@linkplain SignatureMismatch
      *         signature mismatches} found is going to be implemented.
      */
     public boolean matches(Method method) throws SignatureMismatchException {
