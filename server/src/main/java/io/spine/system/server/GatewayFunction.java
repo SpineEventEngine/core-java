@@ -18,10 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandbus;
+package io.spine.system.server;
 
 import io.spine.core.TenantId;
-import io.spine.system.server.SystemGateway;
 
 import java.util.function.Function;
 
@@ -31,10 +30,17 @@ import java.util.function.Function;
  * @author Alexander Yevsyukov
  */
 @FunctionalInterface
-interface GatewayFunction extends Function<TenantId, SystemGateway> {
+public interface GatewayFunction extends Function<TenantId, SystemGateway> {
 
     /** Obtains system gateway for the given tenant. */
     default SystemGateway get(TenantId tenantId) {
         return apply(tenantId);
+    }
+
+    static GatewayFunction delegatingTo(SystemGateway delegate) {
+        return (t) -> {
+            SystemGateway result = TenantAwareSystemGateway.forTenant(t, delegate);
+            return result;
+        };
     }
 }

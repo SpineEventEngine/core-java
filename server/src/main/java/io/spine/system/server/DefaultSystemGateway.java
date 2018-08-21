@@ -41,7 +41,7 @@ import static io.spine.grpc.StreamObservers.noOpObserver;
  *
  * @author Dmytro Dashenkov
  */
-public final class DefaultSystemGateway implements SystemGateway {
+final class DefaultSystemGateway implements SystemGateway {
 
     /**
      * The which posts the system events.

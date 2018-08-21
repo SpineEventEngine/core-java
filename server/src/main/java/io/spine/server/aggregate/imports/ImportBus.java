@@ -20,14 +20,18 @@
 
 package io.spine.server.aggregate.imports;
 
+import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
 import io.spine.server.aggregate.ImportEvent;
+import io.spine.server.bus.Bus;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.DispatcherRegistry;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MessageUnhandled;
 import io.spine.server.bus.MulticastBus;
+import io.spine.system.server.SystemGateway;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -40,9 +44,11 @@ public class ImportBus
 
     private final ImportValidator validator = new ImportValidator();
     private final DeadImportEventHandler deadImportEventHandler = new DeadImportEventHandler();
+    private final SystemGateway systemGateway;
 
-    protected ImportBus(AbstractBuilder<ImportEnvelope, ImportEvent, ?> builder) {
+    protected ImportBus(Builder builder) {
         super(builder);
+        this.systemGateway = checkNotNull(builder.systemGateway);
     }
 
     @Override
@@ -99,5 +105,33 @@ public class ImportBus
      */
     private static final class Registry
             extends DispatcherRegistry<EventClass, ImportDispatcher<?>> {
+    }
+
+    public static class Builder extends AbstractBuilder<ImportEnvelope, ImportEvent, Builder> {
+
+        private SystemGateway systemGateway;
+
+        @Override
+        public Bus<?, ImportEnvelope, ?, ?> build() {
+            return new ImportBus(this);
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
+        }
+
+        /**
+         * Inject the {@link SystemGateway} of the bounded context to which the built bus belongs.
+         *
+         * <p>This method is {@link Internal} to the framework. The name of the method starts with
+         * {@code inject} prefix so that this method does not appear in an autocomplete hint for
+         * {@code set} prefix.
+         */
+        @Internal
+        public Builder injectSystemGateway(SystemGateway gateway) {
+            this.systemGateway = checkNotNull(gateway);
+            return this;
+        }
     }
 }

@@ -41,6 +41,7 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.system.server.GatewayFunction;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -203,12 +204,8 @@ public class CommandBus extends Bus<Command,
 
     SystemGateway gatewayFor(TenantId tenantId) {
         checkNotNull(tenantId);
-        return gatewayFor(tenantId, systemGateway);
-    }
-
-    @VisibleForTesting
-    static SystemGateway gatewayFor(TenantId tenantId, SystemGateway systemGateway) {
-        SystemGateway result = TenantAwareSystemGateway.forTenant(tenantId, systemGateway);
+        SystemGateway result = GatewayFunction.delegatingTo(systemGateway)
+                                              .get(tenantId);
         return result;
     }
 
@@ -384,9 +381,9 @@ public class CommandBus extends Bus<Command,
         /**
          * Inject the {@link SystemGateway} of the bounded context to which the built bus belongs.
          *
-         * <p>This method is {@link Internal} to the framework. The name of the method starts with
-         * {@code inject} prefix so that this method does not appear in an autocomplete hint for
-         * {@code set} prefix.
+         * @apiNote This method is {@link Internal} to the framework. The name of the method starts
+         *          with the {@code inject} prefix so that this method does not appear in an
+         *          auto-complete hint for the {@code set} prefix.
          */
         @Internal
         public Builder injectSystemGateway(SystemGateway gateway) {
@@ -397,9 +394,9 @@ public class CommandBus extends Bus<Command,
         /**
          * Inject the {@link TenantIndex} of the bounded context to which the built bus belongs.
          *
-         * <p>This method is {@link Internal} to the framework. The name of the method starts with
-         * {@code inject} prefix so that this method does not appear in an autocomplete hint for
-         * {@code set} prefix.
+         * @apiNote This method is {@link Internal} to the framework. The name of the method starts
+         *          with the {@code inject} prefix so that this method does not appear in an
+         *          auto-complete hint for the {@code set} prefix.
          */
         @Internal
         public Builder injectTenantIndex(TenantIndex index) {
@@ -435,7 +432,11 @@ public class CommandBus extends Bus<Command,
                 rejectionBus = RejectionBus.newBuilder()
                                            .build();
             }
-            flowWatcher = new CommandFlowWatcher((tenantId) -> gatewayFor(tenantId, systemGateway));
+            flowWatcher = new CommandFlowWatcher((tenantId) -> {
+                SystemGateway result = GatewayFunction.delegatingTo(systemGateway)
+                                                      .get(tenantId);
+                return result;
+            });
             commandScheduler.setFlowWatcher(flowWatcher);
 
             CommandBus commandBus = createCommandBus();

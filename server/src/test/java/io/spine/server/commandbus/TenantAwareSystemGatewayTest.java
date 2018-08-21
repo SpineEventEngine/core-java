@@ -23,6 +23,7 @@ package io.spine.server.commandbus;
 import com.google.protobuf.Message;
 import io.spine.base.Time;
 import io.spine.core.TenantId;
+import io.spine.system.server.GatewayFunction;
 import io.spine.system.server.MemoizingGateway;
 import io.spine.system.server.SystemGateway;
 import org.junit.jupiter.api.DisplayName;
@@ -60,7 +61,8 @@ class TenantAwareSystemGatewayTest {
 
     private static void postAndCheck(MemoizingGateway delegate, TenantId tenantId) {
         Message command = Time.getCurrentTime();
-        SystemGateway gateway = TenantAwareSystemGateway.forTenant(tenantId, delegate);
+        SystemGateway gateway = GatewayFunction.delegatingTo(delegate)
+                                               .get(tenantId);
         gateway.postCommand(command);
 
         assertEquals(command, delegate.lastSeen().command());

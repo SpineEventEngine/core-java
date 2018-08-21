@@ -34,7 +34,6 @@ import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
-import io.spine.system.server.DefaultSystemGateway;
 import io.spine.system.server.NoOpSystemGateway;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -259,7 +258,7 @@ public final class BoundedContextBuilder {
     private BoundedContext buildDefault(SystemBoundedContext system) {
         BiFunction<BoundedContextBuilder, SystemGateway, DomainBoundedContext> instanceFactory =
                 DomainBoundedContext::newInstance;
-        SystemGateway systemGateway = new DefaultSystemGateway(system);
+        SystemGateway systemGateway = SystemGateway.newInstance(system);
         BoundedContext result = buildPartial(instanceFactory, systemGateway);
         return result;
     }
