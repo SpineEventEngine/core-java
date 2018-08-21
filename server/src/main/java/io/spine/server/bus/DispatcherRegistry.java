@@ -116,8 +116,9 @@ public abstract class DispatcherRegistry<C extends MessageClass,
     /**
      * Obtains a single dispatcher (if available) for the passed message class.
      *
+     * @throws IllegalStateException
+     *         if more than one dispatcher is found
      * @apiNote This method must be called only for serving {@link UnicastBus}es.
-     * @throws IllegalStateException if more than one dispatcher is found
      */
     protected Optional<? extends D> getDispatcher(C messageClass) {
         Set<D> dispatchers = getDispatchers(messageClass);
@@ -127,7 +128,7 @@ public abstract class DispatcherRegistry<C extends MessageClass,
 
         int size = dispatchers.size();
         checkState(size == 1,
-                   "More than one dispatcher found (%s) for the message class `%s`",
+                   "More than one (%s) dispatchers found for the message class `%s`.",
                    size, messageClass);
 
         // Since there can be only one dispatcher per message class, and the set is not empty,

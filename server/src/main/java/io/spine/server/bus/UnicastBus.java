@@ -42,18 +42,18 @@ public abstract class UnicastBus<T extends Message,
         super(builder);
     }
 
-    protected static IllegalStateException noDispatcherFound(MessageEnvelope envelope) {
-        String id = Identifier.toString(envelope.getId());
-        String msg = format("No dispatcher found for the command (class: %s id: %s).",
-                            envelope.getMessageClass(),
-                            id);
-        throw new IllegalStateException(msg);
-    }
-
     protected D getDispatcher(E envelope) {
         @SuppressWarnings("unchecked") // protected by overloaded return values of envelope classes
         C messageClass = (C) envelope.getMessageClass();
         return registry().getDispatcher(messageClass)
                          .orElseThrow(() -> noDispatcherFound(envelope));
+    }
+
+    private static IllegalStateException noDispatcherFound(MessageEnvelope envelope) {
+        String id = Identifier.toString(envelope.getId());
+        String msg = format("No dispatcher found for the command (class: %s id: %s).",
+                            envelope.getMessageClass(),
+                            id);
+        throw new IllegalStateException(msg);
     }
 }
