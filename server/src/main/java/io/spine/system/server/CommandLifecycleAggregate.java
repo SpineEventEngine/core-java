@@ -59,7 +59,7 @@ import static io.spine.base.Time.getCurrentTime;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // OK for an aggregate class.
-public final class CommandLifecycleAggregate
+final class CommandLifecycleAggregate
         extends Aggregate<CommandId, CommandLifecycle, CommandLifecycleVBuilder> {
 
     private CommandLifecycleAggregate(CommandId id) {

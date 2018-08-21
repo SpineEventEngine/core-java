@@ -28,6 +28,6 @@ import io.spine.server.aggregate.AggregateRepository;
  *
  * @author Dmytro Dashenkov
  */
-public final class CommandLifecycleRepository
+final class CommandLifecycleRepository
         extends AggregateRepository<CommandId, CommandLifecycleAggregate> {
 }

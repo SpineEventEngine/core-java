@@ -18,41 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.system.server;
 
+import io.spine.annotation.Internal;
+import io.spine.server.BoundedContext;
+import io.spine.server.BoundedContextBuilder;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventEnricher;
-import io.spine.system.server.CommandLifecycleRepository;
-import io.spine.system.server.EntityHistoryRepository;
-import io.spine.system.server.NoOpSystemGateway;
-import io.spine.system.server.ScheduledCommandRepository;
-import io.spine.system.server.SystemEnricher;
-import io.spine.system.server.SystemGateway;
 
 /**
  * An implementation of {@link BoundedContext} used for the System domain.
  *
- * <p>Orchestrates the system entities, such as
- * {@link io.spine.system.server.EntityHistoryAggregate EntityHistory} and
- * {@link io.spine.system.server.CommandLifecycleAggregate CommandLifecycle}.
+ * <p>Orchestrates the system entities that serve the goal of monitoring, auditing, and debugging
+ * the domain-specific entities.
  *
- * <p>Each {@link DomainBoundedContext} has an associated {@code SystemBoundedContext}.
+ * <p>Each {@link BoundedContext} has an associated {@code SystemBoundedContext}.
  * The system entities describe the meta information about the domain entities of the associated
- * {@link DomainBoundedContext}. A system bounded context does NOT have an associated bounded
+ * {@link BoundedContext}. A system bounded context does NOT have an associated bounded
  * context.
  *
- * <p>The system entities serve the goal of monitoring, auditing, and debugging the domain-specific
- * entities.
- *
- * <p>Users should not access a System bounded context directly. See {@link SystemGateway} for
+ * @apiNote The framework users should not access a System Bounded Context directly.
+ * Programmers extending the framework should see {@link SystemGateway} for
  * the front-facing API of the System bounded context.
  *
  * @author Dmytro Dashenkov
  * @see SystemGateway
  * @see BoundedContext
- * @see DomainBoundedContext
  */
-final class SystemBoundedContext extends BoundedContext {
+@Internal
+public final class SystemBoundedContext extends BoundedContext {
 
     private SystemBoundedContext(BoundedContextBuilder builder) {
         super(builder);
@@ -65,7 +59,7 @@ final class SystemBoundedContext extends BoundedContext {
      * @param builder the configuration of the instance to create
      * @return new {@code SystemBoundedContext}
      */
-    static SystemBoundedContext newInstance(BoundedContextBuilder builder) {
+    public static SystemBoundedContext newInstance(BoundedContextBuilder builder) {
         CommandLifecycleRepository repository = new CommandLifecycleRepository();
         BoundedContextBuilder preparedBuilder = prepareEnricher(builder, repository);
         SystemBoundedContext result = new SystemBoundedContext(preparedBuilder);

@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Dmytro Dashenkov
  */
 @Internal
-public final class SystemEnricher {
+final class SystemEnricher {
 
     /**
      * Prevents the utility class instantiation.

@@ -20,6 +20,8 @@
 
 package io.spine.server;
 
+import io.spine.server.entity.Repository;
+import io.spine.system.server.SystemBoundedContext;
 import io.spine.system.server.SystemGateway;
 
 /**
@@ -29,7 +31,7 @@ import io.spine.system.server.SystemGateway;
  * (i.e. built with a {@link BoundedContextBuilder}) are instances of this class.
  *
  * <p>All the user interactions with the system (such as
- * {@linkplain BoundedContext#register(io.spine.server.entity.Repository) repository registration},
+ * {@linkplain BoundedContext#register(Repository) repository registration},
  * {@linkplain BoundedContext#getCommandBus() command posting},
  * {@linkplain BoundedContext#findRepository(Class) query processing}, etc.) happen through
  * an instance of this class.
@@ -50,8 +52,7 @@ final class DomainBoundedContext extends BoundedContext {
         this.systemGateway = gateway;
     }
 
-    static DomainBoundedContext newInstance(BoundedContextBuilder builder,
-                                            SystemGateway gateway) {
+    static DomainBoundedContext newInstance(BoundedContextBuilder builder, SystemGateway gateway) {
         DomainBoundedContext result = new DomainBoundedContext(builder, gateway);
         result.init();
         return result;

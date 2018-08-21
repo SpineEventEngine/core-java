@@ -89,7 +89,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Dmitry Ganzha
  * @author Dmytro Dashenkov
  * @see <a href="https://martinfowler.com/bliki/BoundedContext.html">
- * Blog post on bounded contexts</a>
+ *     Martin Fowler on BoundedContext</a>
  */
 public abstract class BoundedContext
         extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
@@ -117,7 +117,7 @@ public abstract class BoundedContext
 
     private final TenantIndex tenantIndex;
 
-    BoundedContext(BoundedContextBuilder builder) {
+    protected BoundedContext(BoundedContextBuilder builder) {
         super();
         this.name = builder.getName();
         this.multitenant = builder.isMultitenant();

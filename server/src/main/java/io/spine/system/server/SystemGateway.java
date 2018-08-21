@@ -21,7 +21,6 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Message;
-import io.spine.server.BoundedContext;
 
 /**
  * A gateway for sending messages into a system bounded context.
@@ -44,7 +43,7 @@ public interface SystemGateway {
     /**
      * Creates new instance of the gateway which serves the passed System Bounded Context.
      */
-    static SystemGateway newInstance(BoundedContext system) {
+    static SystemGateway newInstance(SystemBoundedContext system) {
         return new DefaultSystemGateway(system);
     }
 }
