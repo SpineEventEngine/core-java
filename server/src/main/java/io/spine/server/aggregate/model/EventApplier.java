@@ -45,7 +45,7 @@ public final class EventApplier
      * @param signature {@link ParameterSpec} which describes the method
      */
     EventApplier(Method method,
-                         ParameterSpec<EventEnvelope> signature) {
+                 ParameterSpec<EventEnvelope> signature) {
         super(method, signature);
     }
 
