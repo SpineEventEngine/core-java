@@ -20,20 +20,40 @@
 
 package io.spine.server.model.declare;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import io.spine.annotation.Internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * The mismatch of a signature.
+ *
  * @author Alex Tymchenko
  */
 @Internal
 public final class SignatureMismatch {
 
+    /**
+     * The criterion, which requirements were not met.
+     */
     private final MatchCriterion unmetCriterion;
-    private final String message;
+
+    /**
+     * The severity of the mismatch.
+     *
+     * <p>Users of this class should consider building their handling logic depending
+     * on the value of this field. E.g. {@link Severity#ERROR ERROR} severity should probably
+     * be handled by raising an exception, such as {@link SignatureMismatchException}.
+     */
     private final Severity severity;
+
+    /**
+     * The message telling what the mismatch is.
+     *
+     * <p>This field exists to avoid formatting the message each time from the message template.
+     */
+    private final String message;
 
     private SignatureMismatch(MatchCriterion criterion, Object[] values) {
         unmetCriterion = criterion;
@@ -41,19 +61,31 @@ public final class SignatureMismatch {
         message = criterion.formatMsg(values);
     }
 
-    public String getMessage() {
-        return message;
-    }
-
+    /**
+     * Returns the severity of the mismatch.
+     */
     Severity getSeverity() {
         return severity;
     }
 
+    /**
+     * Returns the match criterion, which requirements were violated.
+     */
+    @VisibleForTesting
     public MatchCriterion getUnmetCriterion() {
         return unmetCriterion;
     }
 
-    static SignatureMismatch create(MatchCriterion criterion, Object ...values) {
+    /**
+     * Creates a new mismatch from the criterion and the values, which violated the criterion.
+     *
+     * @param criterion
+     *         the criterion
+     * @param values
+     *         the values, which did not met the criterion requirements
+     * @return a new {@code SignatureMismatch} instance
+     */
+    static SignatureMismatch create(MatchCriterion criterion, Object... values) {
         checkNotNull(criterion);
         checkNotNull(values);
 
@@ -61,8 +93,19 @@ public final class SignatureMismatch {
         return result;
     }
 
+    /**
+     * The severity level of the mismatch.
+     */
     enum Severity {
+        /**
+         * The mismatch of {@code ERROR} level means that the violation is a show-stopper.
+         */
         ERROR,
+
+        /**
+         * The mismatch of {@code WARN} level means that the recommended criterion was not met,
+         * however the application execution may proceed.
+         */
         WARN
     }
 
