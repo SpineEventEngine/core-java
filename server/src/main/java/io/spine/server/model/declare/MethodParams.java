@@ -89,6 +89,10 @@ public final class MethodParams {
     public static boolean consistsOfTwo(Class<?>[] methodParams,
                                         Class<?> firstType,
                                         Class<?> secondType) {
+        checkNotNull(methodParams);
+        checkNotNull(firstType);
+        checkNotNull(secondType);
+
         return consistsOfTypes(methodParams, asList(firstType, secondType));
     }
 
