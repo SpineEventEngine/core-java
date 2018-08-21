@@ -20,28 +20,40 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.testing.NullPointerTester;
-import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
+import com.google.common.collect.ImmutableList;
+import io.spine.core.TenantId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.core.BoundedContextNames.newName;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import java.util.List;
+
+import static com.google.common.truth.Truth.assertThat;
+import static io.spine.testing.TestValues.randomString;
 
 /**
  * @author Alexander Yevsyukov
  */
-@DisplayName("TenantIndex should")
-class TenantIndexTest {
+@DisplayName("SingleTenantIndex should")
+class SingleTenantIndexTest {
+
+    private final TenantIndex index = TenantIndex.singleTenant();
 
     @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        InMemoryStorageFactory storageFactory =
-                InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()), false);
-        new NullPointerTester()
-                .setDefault(StorageFactory.class, storageFactory)
-                .testAllPublicStaticMethods(TenantIndex.class);
+    @DisplayName("not add passed IDs")
+    void keep() {
+        List<TenantId> before = ImmutableList.copyOf(index.getAll());
+        index.keep(TenantId.newBuilder()
+                           .setValue(randomString())
+                           .build());
+        List<TenantId> after = ImmutableList.copyOf(index.getAll());
+        assertThat(after).isEqualTo(before);
+    }
+
+    @Test
+    @DisplayName("return set with one element")
+    void getAll() {
+        List<TenantId> items = ImmutableList.copyOf(index.getAll());
+
+        assertThat(items).containsExactly(SingleTenantIndex.tenantId());
     }
 }

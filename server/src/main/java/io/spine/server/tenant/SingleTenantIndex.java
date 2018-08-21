@@ -20,28 +20,47 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.testing.NullPointerTester;
-import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import com.google.common.collect.ImmutableSet;
+import io.spine.core.TenantId;
 
-import static io.spine.core.BoundedContextNames.newName;
-import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
+import java.util.Set;
 
 /**
+ * A null-object implementation of {@code TenantIndex} for being used in single-tenant
+ * execution context.
+ *
  * @author Alexander Yevsyukov
  */
-@DisplayName("TenantIndex should")
-class TenantIndexTest {
+enum SingleTenantIndex implements TenantIndex {
 
-    @Test
-    @DisplayName(NOT_ACCEPT_NULLS)
-    void passNullToleranceCheck() {
-        InMemoryStorageFactory storageFactory =
-                InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()), false);
-        new NullPointerTester()
-                .setDefault(StorageFactory.class, storageFactory)
-                .testAllPublicStaticMethods(TenantIndex.class);
+    INSTANCE;
+
+    /** A stub instance of {@code TenantId} to be used by the storage in single-tenant context. */
+    private static final TenantId singleTenant = TenantId.newBuilder()
+                                                         .setValue("SINGLE_TENANT")
+                                                         .build();
+
+    private static final ImmutableSet<TenantId> index = ImmutableSet.of(singleTenant);
+
+    /**
+     * Returns a constant for single-tenant applications.
+     */
+    static TenantId tenantId() {
+        return singleTenant;
+    }
+
+    @Override
+    public void keep(TenantId id) {
+        // Do nothing.
+    }
+
+    @Override
+    public Set<TenantId> getAll() {
+        return index;
+    }
+
+    @Override
+    public void close() {
+        // Do nothing.
     }
 }

@@ -174,7 +174,7 @@ public final class BoundedContextBuilder {
     TenantIndex buildTenantIndex() {
         TenantIndex result = isMultitenant()
             ? checkNotNull(tenantIndex)
-            : TenantIndex.Factory.singleTenant();
+            : TenantIndex.singleTenant();
         return result;
     }
 
@@ -326,8 +326,8 @@ public final class BoundedContextBuilder {
     private void initTenantIndex(StorageFactory factory) {
         if (tenantIndex == null) {
             tenantIndex = multitenant
-                          ? TenantIndex.Factory.createDefault(factory)
-                          : TenantIndex.Factory.singleTenant();
+                          ? TenantIndex.createDefault(factory)
+                          : TenantIndex.singleTenant();
         }
     }
 

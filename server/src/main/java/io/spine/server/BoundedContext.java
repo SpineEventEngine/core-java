@@ -392,7 +392,7 @@ public abstract class BoundedContext
      * Obtains a tenant index of this Bounded Context.
      *
      * <p>If the Bounded Context is single-tenant returns
-     * {@linkplain io.spine.server.tenant.TenantIndex.Factory#singleTenant() null-object}
+     * {@linkplain TenantIndex#singleTenant() null-object}
      * implementation.
      */
     @Internal
