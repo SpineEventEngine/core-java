@@ -28,6 +28,7 @@ import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.DefaultRecordBasedRepository;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.tenant.TenantRepository.Entity;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -40,7 +41,7 @@ import java.util.function.Function;
  * @param <T> the type of data associated with the tenant ID
  * @author Alexander Yevsyukov
  */
-public abstract class TenantRepository<T extends Message, E extends TenantRepository.Entity<T>>
+public abstract class TenantRepository<T extends Message, E extends Entity<T>>
         extends DefaultRecordBasedRepository<TenantId, E, T>
         implements TenantIndex {
 
@@ -101,12 +102,8 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
     @Override
     public Set<TenantId> getAll() {
         Storage<TenantId, ?, ?> storage = getStorage();
-        Iterator<TenantId> index = storage != null
-                                   ? storage.index()
-                                   : null;
-        Set<TenantId> result = index != null
-                               ? ImmutableSet.copyOf(index)
-                               : ImmutableSet.of();
+        Iterator<TenantId> index = storage.index();
+        Set<TenantId> result = ImmutableSet.copyOf(index);
         cache.addAll(result);
         return result;
     }
