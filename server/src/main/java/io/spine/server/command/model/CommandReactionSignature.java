@@ -33,13 +33,14 @@ import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
-import java.util.Optional;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
 
 /**
+ * A signature of {@link CommandReactionMethod}.
+ *
  * @author Alex Tymchenko
  */
 public class CommandReactionSignature
@@ -70,14 +71,18 @@ public class CommandReactionSignature
         return new CommandReactionMethod(method, parameterSpec);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @implNote This method distinguishes {@linkplain Command Commander} methods one from another,
+     * as they use the same annotation, but have different parameter list.
+     */
     @Override
     protected boolean shouldInspect(Method method) {
         boolean parentResult = super.shouldInspect(method);
 
         if(parentResult) {
-            Optional<CommandReactionParams> paramMatch =
-                    MethodParams.findMatching(method, getParamSpecClass());
-            return paramMatch.isPresent();
+            return !MethodParams.isFirstParamCommand(method);
         }
         return false;
     }

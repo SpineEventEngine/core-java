@@ -20,17 +20,12 @@
 
 package io.spine.server.command.model;
 
-import io.spine.base.CommandMessage;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.command.Command;
 import io.spine.server.model.declare.MethodParams;
 import io.spine.server.model.declare.ParameterSpec;
-import io.spine.server.model.declare.SignatureMismatchException;
 
 import java.lang.reflect.Method;
-import java.util.Optional;
-
-import static io.spine.server.command.model.CommandAcceptingMethodSignature.CommandAcceptingMethodParams.MESSAGE_AND_CONTEXT;
 
 /**
  * A signature of {@link io.spine.server.command.model.CommandSubstituteMethod
@@ -51,14 +46,18 @@ public class CommandSubstituteSignature
         return new CommandSubstituteMethod(method, parameterSpec);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @implNote This method distinguishes {@linkplain Command Commander} methods one from
+     *         another, as they use the same annotation, but have different parameter list.
+     */
     @Override
     protected boolean shouldInspect(Method method) {
         boolean parentResult = super.shouldInspect(method);
 
-        if(parentResult) {
-            Optional<CommandAcceptingMethodParams> paramMatch =
-                    MethodParams.findMatching(method,getParamSpecClass());
-            return paramMatch.isPresent();
+        if (parentResult) {
+            return MethodParams.isFirstParamCommand(method);
         }
         return false;
     }
