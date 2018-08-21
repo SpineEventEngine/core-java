@@ -28,12 +28,12 @@ import io.spine.core.Ack;
 import io.spine.core.CommandId;
 import io.spine.core.Status;
 import io.spine.core.TenantId;
-import io.spine.system.server.GatewayFunction;
 import io.spine.system.server.MarkCommandAsAcknowledged;
 import io.spine.system.server.MarkCommandAsErrored;
 import io.spine.system.server.SystemGateway;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.system.server.GatewayFunction.delegatingTo;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -55,8 +55,7 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
 
     private CommandAckMonitor(Builder builder) {
         this.delegate = builder.delegate;
-        this.gateway = GatewayFunction.delegatingTo(builder.systemGateway)
-                                      .get(builder.tenantId);
+        this.gateway = delegatingTo(builder.systemGateway).get(builder.tenantId);
     }
 
     /**
