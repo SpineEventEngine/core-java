@@ -39,7 +39,7 @@ import static java.util.stream.Collectors.toList;
  * @author Alex Tymchenko
  */
 public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
-        E extends MessageEnvelope<?, ?, ?>> {
+                                      E extends MessageEnvelope<?, ?, ?>> {
 
     private final Class<? extends Annotation> annotation;
 

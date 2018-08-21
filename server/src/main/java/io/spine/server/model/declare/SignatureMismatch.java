@@ -20,7 +20,6 @@
 
 package io.spine.server.model.declare;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import io.spine.annotation.Internal;
 
@@ -30,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alex Tymchenko
  */
 @Internal
-@VisibleForTesting // Otherwise would be package-private.
 public final class SignatureMismatch {
 
     private final MatchCriterion unmetCriterion;

@@ -20,7 +20,6 @@
 
 package io.spine.server.model.declare;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import io.spine.server.model.MethodExceptionChecker;
@@ -42,7 +41,6 @@ import static java.lang.String.format;
  * @author Alex Tymchenko
  */
 @Internal
-@VisibleForTesting // Otherwise would be package-private.
 public enum MatchCriterion {
 
     RETURN_TYPE(ERROR,
