@@ -20,11 +20,15 @@
 
 package io.spine.server.model.declare;
 
+import com.google.common.base.MoreObjects;
+import io.spine.annotation.Internal;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Alex Tymchenko
  */
+@Internal
 public final class SignatureMismatch {
 
     private final MatchCriterion unmetCriterion;
@@ -40,6 +44,7 @@ public final class SignatureMismatch {
     public String getMessage() {
         return message;
     }
+
     Severity getSeverity() {
         return severity;
     }
@@ -61,11 +66,12 @@ public final class SignatureMismatch {
         WARN
     }
 
+    @SuppressWarnings("DuplicateStringLiteralInspection") // `message` is a common term.
     @Override
     public String toString() {
-        return "SignatureMismatch{" +
-                "message=" + getMessage() +
-                ", unmetCriterion=" + unmetCriterion +
-                '}';
+        return MoreObjects.toStringHelper(this)
+                          .add("unmetCriterion", unmetCriterion)
+                          .add("message", message)
+                          .toString();
     }
 }

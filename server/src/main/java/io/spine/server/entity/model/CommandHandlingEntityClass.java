@@ -45,7 +45,7 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
 
     protected CommandHandlingEntityClass(Class<E> cls) {
         super(cls);
-        this.commands = new MessageHandlerMap<>(cls, new CommandHandlerSignature());
+        this.commands = MessageHandlerMap.create(cls, new CommandHandlerSignature());
     }
 
     @Override

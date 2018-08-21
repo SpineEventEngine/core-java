@@ -58,7 +58,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
     public EventReceivingClassDelegate(Class<? extends T> rawClass,
                                        MethodSignature<M, ?> signature) {
         super(rawClass);
-        this.events = new MessageHandlerMap<>(rawClass, signature);
+        this.events = MessageHandlerMap.create(rawClass, signature);
         this.domesticEvents = events.getMessageClasses(HandlerMethod::isDomestic);
         this.externalEvents = events.getMessageClasses(HandlerMethod::isExternal);
     }
