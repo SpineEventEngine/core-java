@@ -21,6 +21,7 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableMap;
+import io.spine.annotation.Internal;
 import io.spine.server.model.declare.MethodSignature;
 
 import java.lang.reflect.Method;
@@ -39,7 +40,8 @@ import static com.google.common.collect.Maps.newHashMap;
  *
  * @author Dmytro Dashenkov
  */
-final class ClassScanner {
+@Internal
+public final class ClassScanner {
 
     private final Class<?> declaringClass;
 
@@ -54,7 +56,7 @@ final class ClassScanner {
      *         the class to scan
      * @return new instance of {@code ClassScanner}
      */
-    static ClassScanner of(Class<?> cls) {
+    public static ClassScanner of(Class<?> cls) {
         checkNotNull(cls);
         ClassScanner scanner = new ClassScanner(cls);
         return scanner;

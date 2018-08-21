@@ -45,7 +45,7 @@ public abstract class AbstractCommandHandlingClass<C, H extends CommandAccepting
     AbstractCommandHandlingClass(Class<? extends C> cls,
                                  CommandAcceptingMethodSignature<H> signature) {
         super(cls);
-        this.commands = new MessageHandlerMap<>(cls, signature);
+        this.commands = MessageHandlerMap.create(cls, signature);
     }
 
     @Override

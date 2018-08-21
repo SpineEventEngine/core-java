@@ -37,7 +37,7 @@ class MessageHandlerMapTest {
     @DisplayName("not allow duplicating message classes in handlers")
     void rejectDuplicateHandlers() {
         assertThrows(DuplicateHandlerMethodError.class,
-                     () -> new MessageHandlerMap<>(HandlerWithDuplicatingMethods.class,
-                                                   new CommandHandlerSignature()));
+                     () -> MessageHandlerMap.create(HandlerWithDuplicatingMethods.class,
+                                                    new CommandHandlerSignature()));
     }
 }
