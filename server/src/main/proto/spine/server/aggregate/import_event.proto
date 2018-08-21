@@ -33,7 +33,7 @@ import "google/protobuf/wrappers.proto";
 
 import "spine/core/actor_context.proto";
 
-// A wrapping objects that holds an event message and `ActorContext` for the import operation.
+// A wrapping object that holds an event message and `ActorContext` for the import operation.
 message ImportEvent {
 
     // UUID-based ID of the import.
