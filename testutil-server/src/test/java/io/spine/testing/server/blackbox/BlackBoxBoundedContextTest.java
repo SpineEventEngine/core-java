@@ -32,11 +32,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.client.blackbox.Count.count;
 import static io.spine.testing.client.blackbox.Count.once;
 import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.Count.twice;
+import static io.spine.testing.client.blackbox.VerifyAcknowledgements.acked;
 import static io.spine.testing.server.blackbox.given.Given.addTask;
 import static io.spine.testing.server.blackbox.given.Given.createProject;
 import static io.spine.testing.server.blackbox.given.Given.createReport;
@@ -54,7 +54,8 @@ class BlackBoxBoundedContextTest {
 
     @BeforeEach
     void setUp() {
-        project = BlackBoxBoundedContext.with(new BbProjectRepository());
+        project = BlackBoxBoundedContext.newInstance()
+                                        .with(new BbProjectRepository());
     }
 
     @AfterEach
@@ -89,7 +90,7 @@ class BlackBoxBoundedContextTest {
     @DisplayName("receive and react on single event")
     void receivesEvent() {
         BbProjectId projectId = newProjectId();
-        project.andWith(new BbReportRepository())
+        project.with(new BbReportRepository())
                .receivesCommand(createReport(projectId))
                .receivesEvent(taskAdded(projectId))
                .assertThat(acked(twice()).withoutErrorsOrRejections())
@@ -103,7 +104,7 @@ class BlackBoxBoundedContextTest {
     @DisplayName("receive and react on multiple events")
     void receivesEvents() {
         BbProjectId projectId = newProjectId();
-        project.andWith(new BbReportRepository())
+        project.with(new BbReportRepository())
                .receivesCommand(createReport(projectId))
                .receivesEvents(taskAdded(projectId), taskAdded(projectId), taskAdded(projectId))
                .assertThat(acked(count(4)).withoutErrorsOrRejections())
@@ -117,6 +118,7 @@ class BlackBoxBoundedContextTest {
     void throwIllegalStateExceptionOnClose() {
         assertThrows(IllegalStateException.class, () ->
                 BlackBoxBoundedContext
+                        .newInstance()
                         .with(new RepositoryThrowingExceptionOnClose() {
                             @Override
                             protected void throwException() {

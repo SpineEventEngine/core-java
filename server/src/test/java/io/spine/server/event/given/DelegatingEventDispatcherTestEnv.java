@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.test.event.EvTeamCreated;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Set;
@@ -34,7 +35,7 @@ public class DelegatingEventDispatcherTestEnv {
     private DelegatingEventDispatcherTestEnv() {
     }
 
-    public static final class EmptyEventDispatcherDelegate
+    public static final class DummyEventDispatcherDelegate
             implements EventDispatcherDelegate<String> {
 
         private boolean onErrorCalled;
@@ -48,13 +49,14 @@ public class DelegatingEventDispatcherTestEnv {
 
         @Override
         public Set<EventClass> getExternalEventClasses() {
-            return ImmutableSet.of();
+            // Return at least one event class so that we can create external delegate.
+            return EventClass.setOf(EvTeamCreated.class);
         }
 
         @Override
         public Set<String> dispatchEvent(EventEnvelope envelope) {
             // Do nothing.
-            return ImmutableSet.of();
+            return ImmutableSet.of(getClass().getName());
         }
 
         @Override

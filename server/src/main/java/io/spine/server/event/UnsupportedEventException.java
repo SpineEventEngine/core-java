@@ -44,11 +44,10 @@ public class UnsupportedEventException extends EventException implements Message
 
     private static String messageFormat(Message eventMsg) {
         EventClass eventClass = EventClass.of(eventMsg);
-        String typeName = TypeName.of(eventMsg)
-                                  .value();
+        TypeName typeName = eventClass.getTypeName();
         String result = format(
-                "There is no registered handler or dispatcher for the event of class: `%s`." +
-                " Protobuf type: `%s`",
+                "There is no registered handler or dispatcher for the event of the class: `%s` " +
+                " (proto type: `%s`).",
                 eventClass,
                 typeName);
         return result;
@@ -59,12 +58,14 @@ public class UnsupportedEventException extends EventException implements Message
         String type = eventMessage.getDescriptorForType()
                                   .getFullName();
         String errMsg = format("Events of the type `%s` are not supported.", type);
-        Error.Builder error = Error.newBuilder()
-                                   .setType(EventValidationError.getDescriptor()
-                                                                .getFullName())
-                                   .setCode(EventValidationError.UNSUPPORTED_EVENT.getNumber())
-                                   .putAllAttributes(eventTypeAttribute(eventMessage))
-                                   .setMessage(errMsg);
-        return error.build();
+        Error error = Error
+                .newBuilder()
+                .setType(EventValidationError.getDescriptor()
+                                             .getFullName())
+                .setCode(EventValidationError.UNSUPPORTED_EVENT.getNumber())
+                .putAllAttributes(eventTypeAttribute(eventMessage))
+                .setMessage(errMsg)
+                .build();
+        return error;
     }
 }

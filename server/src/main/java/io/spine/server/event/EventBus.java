@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
@@ -38,6 +39,7 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
 import io.spine.server.storage.StorageFactory;
 import io.spine.validate.MessageValidator;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
@@ -110,8 +112,11 @@ public class EventBus
     /** The observer of post operations. */
     private final StreamObserver<Ack> streamObserver;
 
-    /** The validator for events posted to the bus. */
-    private @Nullable EventValidator eventValidator;
+    /**
+     * The validator for events posted to the bus, lazily {@linkplain #getValidator() initialized}.
+     */
+    @LazyInit
+    private @MonotonicNonNull EventValidator eventValidator;
 
     /** The enricher for posted events or {@code null} if the enrichment is not supported. */
     private final @Nullable Enricher enricher;

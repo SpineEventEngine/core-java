@@ -20,9 +20,10 @@
 
 package io.spine.system.server.given;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
+import io.spine.core.EventClass;
+import io.spine.core.React;
 import io.spine.core.Subscribe;
 import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
@@ -70,7 +71,7 @@ import io.spine.system.server.RenamePerson;
 import io.spine.system.server.StartPersonCreation;
 import io.spine.type.TypeUrl;
 
-import java.util.Collection;
+import java.util.Set;
 
 /**
  * @author Dmytro Dashenkov
@@ -86,16 +87,16 @@ public final class EntityHistoryTestEnv {
     public static class HistoryEventWatcher extends AbstractEventAccumulator {
 
         @Override
-        public Collection<Class<? extends Message>> getEventClasses() {
-            return ImmutableSet.of(EntityCreated.class,
-                                   EventDispatchedToSubscriber.class,
-                                   EventDispatchedToReactor.class,
-                                   CommandDispatchedToHandler.class,
-                                   EntityStateChanged.class,
-                                   EntityArchived.class,
-                                   EntityDeleted.class,
-                                   EntityExtractedFromArchive.class,
-                                   EntityRestored.class);
+        public Set<EventClass> getEventClasses() {
+            return EventClass.setOf(EntityCreated.class,
+                                    EventDispatchedToSubscriber.class,
+                                    EventDispatchedToReactor.class,
+                                    CommandDispatchedToHandler.class,
+                                    EntityStateChanged.class,
+                                    EntityArchived.class,
+                                    EntityDeleted.class,
+                                    EntityExtractedFromArchive.class,
+                                    EntityRestored.class);
         }
     }
 

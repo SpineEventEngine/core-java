@@ -77,7 +77,7 @@ import static java.lang.String.format;
  *
  * <p>Bounded context "Projects" has the external event handler method in the projection as follows:
  * <pre>
- * public class ProjectListView extends Projection {
+ * public class ProjectListView extends Projection ...  {
  *
  *      {@literal @}Subscribe(external = true)
  *      public void on(UserDeleted event) {
@@ -107,6 +107,7 @@ import static java.lang.String.format;
  *
  * @author Alex Tymchenko
  */
+@SuppressWarnings("OverlyCoupledClass")
 public class IntegrationBus extends MulticastBus<ExternalMessage,
                                                  ExternalMessageEnvelope,
                                                  ExternalMessageClass,
@@ -126,7 +127,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     private final PublisherHub publisherHub;
     private final ConfigurationChangeObserver configurationChangeObserver;
 
-    @SuppressWarnings("ConstantConditions")     // `TransportFactory` has already been initialized.
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+        // `TransportFactory` has already been initialized.
     private IntegrationBus(Builder builder) {
         super(builder);
         TransportFactory transportFactory = builder.getTransportFactory()
@@ -153,8 +155,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
                 });
     }
 
-    private static ImmutableSet<BusAdapter<?, ?>> createAdapters(Builder builder,
-                                                                 PublisherHub publisherHub) {
+    private static
+    ImmutableSet<BusAdapter<?, ?>> createAdapters(Builder builder, PublisherHub publisherHub) {
         return ImmutableSet.of(
                 EventBusAdapter.builderWith(builder.eventBus, builder.boundedContextName)
                                .setPublisherHub(publisherHub)

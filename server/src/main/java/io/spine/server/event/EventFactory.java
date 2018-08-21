@@ -159,10 +159,11 @@ public class EventFactory {
      * Creates an event based on the passed integration event.
      */
     public static Event toEvent(IntegrationEvent ie) {
-        Event event = IntegrationEventConverter.getInstance()
-                                               .convert(ie);
-        checkNotNull(event);
-        return event;
+        checkNotNull(ie);
+        Event result = IntegrationEventConverter.getInstance()
+                                                .convert(ie);
+        checkNotNull(result);
+        return result;
     }
 
     private EventContext createContext(@Nullable Version version) {

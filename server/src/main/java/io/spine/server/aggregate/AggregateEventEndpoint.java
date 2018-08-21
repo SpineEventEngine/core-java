@@ -45,18 +45,6 @@ public class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
         super(repo, event);
     }
 
-    static <I, A extends Aggregate<I, ?, ?>>
-    AggregateEventEndpoint<I, A> of(AggregateRepository<I, A> repository, EventEnvelope event) {
-        return new AggregateEventEndpoint<>(repository, event);
-    }
-
-    static <I, A extends Aggregate<I, ?, ?>>
-    Set<I> handle(AggregateRepository<I, A> repository, EventEnvelope event) {
-        AggregateEventEndpoint<I, A> endpoint = of(repository, event);
-
-        return endpoint.handle();
-    }
-
     @Override
     protected AggregateDelivery<I, A, EventEnvelope, ?, ?> getEndpointDelivery() {
         return repository().getEventEndpointDelivery();

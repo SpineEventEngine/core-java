@@ -30,7 +30,6 @@ import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.string.Stringifiers;
 import io.spine.type.MessageClass;
-import org.slf4j.Logger;
 
 import java.util.function.Supplier;
 
@@ -45,7 +44,7 @@ import static java.lang.String.format;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class AbstractCommandDispatcher implements CommandDispatcher<String> {
+public abstract class AbstractCommandDispatcher implements CommandDispatcher<String>, Logging {
 
     /** The {@code EventBut} to which the dispatcher posts events it produces. */
     private final EventBus eventBus;
@@ -55,7 +54,6 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
             memoize(() -> pack(TypeConverter.<String, StringValue>toMessage(getId())));
 
     /** Lazily initialized logger. */
-    private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
 
     protected AbstractCommandDispatcher(EventBus eventBus) {
         this.eventBus = eventBus;
@@ -77,13 +75,6 @@ public abstract class AbstractCommandDispatcher implements CommandDispatcher<Str
      */
     public Any getProducerId() {
         return producerId.get();
-    }
-
-    /**
-     * Obtains the instance of logger associated with the class of the handler.
-     */
-    protected Logger log() {
-        return loggerSupplier.get();
     }
 
     /**

@@ -20,20 +20,14 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.testing.NullPointerTester;
-import io.spine.core.TenantId;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-
 import static io.spine.core.BoundedContextNames.newName;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static io.spine.testing.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * @author Alexander Yevsyukov
@@ -48,23 +42,6 @@ class TenantIndexTest {
                 InMemoryStorageFactory.newInstance(newName(getClass().getSimpleName()), false);
         new NullPointerTester()
                 .setDefault(StorageFactory.class, storageFactory)
-                .testAllPublicStaticMethods(TenantIndex.Factory.class);
-    }
-
-    @Test
-    @DisplayName("provide utility factory")
-    void provideUtilityFactory() {
-        assertHasPrivateParameterlessCtor(TenantIndex.Factory.class);
-    }
-
-    @Test
-    @DisplayName("provide tenant index for single tenant context")
-    void getIndexForSingleTenantContext() {
-        TenantIndex index = TenantIndex.Factory.singleTenant();
-
-        List<TenantId> items = ImmutableList.copyOf(index.getAll());
-
-        assertEquals(1, items.size());
-        assertEquals(CurrentTenant.singleTenant(), items.get(0));
+                .testAllPublicStaticMethods(TenantIndex.class);
     }
 }

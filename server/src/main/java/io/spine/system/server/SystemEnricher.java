@@ -23,11 +23,12 @@ package io.spine.system.server;
 import io.spine.annotation.Internal;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
+import io.spine.core.EventContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.event.Enricher;
 
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -37,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Dmytro Dashenkov
  */
 @Internal
-public final class SystemEnricher {
+final class SystemEnricher {
 
     /**
      * Prevents the utility class instantiation.
@@ -60,9 +61,9 @@ public final class SystemEnricher {
         return enricher;
     }
 
-    private static Function<CommandId, Command>
+    private static BiFunction<CommandId, EventContext, Command>
     commandLookup(CommandLifecycleRepository repository) {
-        return commandId -> findCommand(repository, commandId);
+        return (commandId, context) -> findCommand(repository, commandId);
     }
 
     private static Command findCommand(CommandLifecycleRepository repository, CommandId id) {

@@ -22,17 +22,20 @@ package io.spine.server.model;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
+import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.model.declare.ParameterSpec;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import javax.annotation.PostConstruct;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
@@ -69,9 +72,12 @@ public abstract class AbstractHandlerMethod<T,
      * @implNote Even though that {@code MethodAttribute} is parameterized with {@code Object},
      * which is mutable, the {@code @Immutable} annotation of {@code MethodAttribute} class
      * ensures that we don't have mutable types passed as generic parameters.
+     *
+     * <p>This field is initialized in {@link #discoverAttributes()} to allow derived classes to
+     * {@linkplain #attributeSuppliers() customize} the set of supported method attributes.
      */
     @SuppressWarnings("Immutable")
-    private final ImmutableSet<MethodAttribute<?>> attributes;
+    private ImmutableSet<MethodAttribute<?>> attributes;
 
     /**
      * The specification of parameters for this method.
@@ -97,6 +103,40 @@ public abstract class AbstractHandlerMethod<T,
         this.parameterSpec = parameterSpec;
 
         method.setAccessible(true);
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Initializes attributes by obtaining values via functions provided by
+     * {@link #attributeSuppliers()}.
+     *
+     * @see #attributeSuppliers()
+     */
+    @Override
+    @PostConstruct
+    public final void discoverAttributes() {
+        ImmutableSet.Builder<MethodAttribute<?>> builder = ImmutableSet.builder();
+        for (Function<Method, MethodAttribute<?>> fn : attributeSuppliers()) {
+            MethodAttribute<?> attr = fn.apply(method);
+            builder.add(attr);
+        }
+        attributes = builder.build();
+    }
+
+    /**
+     * Obtains a set of functions for getting {@linkplain MethodAttribute method attributes}
+     * by a {@linkplain Method raw method} value.
+     *
+     * <p>Default implementation returns a one-element set for obtaining {@link ExternalAttribute}.
+     *
+     * <p>Overriding classes must return a set which is a
+     * {@linkplain com.google.common.collect.Sets#union(Set, Set) union} of the
+     * set provided by this method and the one needed by the overriding class.
+     */
+    @OverridingMethodsMustInvokeSuper
+    protected Set<Function<Method, MethodAttribute<?>>> attributeSuppliers() {
+        return ImmutableSet.of(ExternalAttribute::of);
     }
 
     protected final Class<? extends Message> rawMessageClass() {

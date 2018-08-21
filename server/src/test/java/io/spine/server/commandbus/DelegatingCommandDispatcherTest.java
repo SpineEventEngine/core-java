@@ -33,7 +33,7 @@ class DelegatingCommandDispatcherTest {
 
     @Test
     @DisplayName("delegate `onError`")
-    void delegateOnError() throws Exception {
+    void delegateOnError() {
         EmptyCommandDispatcherDelegate delegate = new EmptyCommandDispatcherDelegate();
 
         DelegatingCommandDispatcher<String> delegatingDispatcher =

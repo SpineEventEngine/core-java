@@ -21,9 +21,9 @@
 package io.spine.server.aggregate.model;
 
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.given.AggregatePartTestEnv.AnAggregatePart;
-import io.spine.server.aggregate.given.AggregatePartTestEnv.AnAggregateRoot;
-import io.spine.server.aggregate.given.AggregatePartTestEnv.WrongAggregatePart;
+import io.spine.server.aggregate.given.part.AnAggregatePart;
+import io.spine.server.aggregate.given.part.AnAggregateRoot;
+import io.spine.server.aggregate.given.part.WrongAggregatePart;
 import io.spine.server.model.ModelError;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.BeforeEach;

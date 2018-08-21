@@ -35,6 +35,7 @@ import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHistory;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcher;
+import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.CmdCreateProject;
 import io.spine.test.command.CmdStartProject;
@@ -45,9 +46,11 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.util.Exceptions.unsupported;
 
 /**
  * @author Alexander Yevsyukov
@@ -58,7 +61,7 @@ public class CommandHandlerTestEnv {
     private CommandHandlerTestEnv() {
     }
 
-    public static class EventCatcher implements EventDispatcher<String> {
+    public static final class EventCatcher implements EventDispatcher<String> {
 
         private final List<EventEnvelope> dispatched = newLinkedList();
 
@@ -66,6 +69,16 @@ public class CommandHandlerTestEnv {
         public Set<EventClass> getMessageClasses() {
             return ImmutableSet.of(EventClass.from(CmdProjectStarted.class),
                                    EventClass.from(StringValue.class));
+        }
+
+        @Override
+        public Set<EventClass> getExternalEventClasses() {
+            return ImmutableSet.of();
+        }
+
+        @Override
+        public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
+            throw unsupported();
         }
 
         @Override

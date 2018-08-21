@@ -127,6 +127,7 @@ public interface CommandingMethod<M extends MessageClass,
             } else {
                 SeveralCommands seq = respondMany(event);
                 seq.addAll(messages);
+                seq.postAll(bus);
             }
         }
     }

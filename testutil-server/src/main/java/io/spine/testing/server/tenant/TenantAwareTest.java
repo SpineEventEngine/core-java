@@ -47,8 +47,8 @@ public abstract class TenantAwareTest {
     public static TenantIndex createTenantIndex(boolean multitenant,
                                                 StorageFactory storageFactory) {
         return multitenant
-               ? TenantIndex.Factory.createDefault(storageFactory)
-               : TenantIndex.Factory.singleTenant();
+               ? TenantIndex.createDefault(storageFactory)
+               : TenantIndex.singleTenant();
     }
 
     /**
@@ -75,13 +75,13 @@ public abstract class TenantAwareTest {
     /**
      * Obtains current tenant ID.
      *
-     * @throws IllegalStateException if the current tenant ID was
-     *                               {@linkplain #setCurrentTenant(TenantId) not set} or already
-     *                               {@linkplain #clearCurrentTenant() cleared}
+     * @throws IllegalStateException
+     *         if the current tenant ID was {@linkplain #setCurrentTenant(TenantId) not set}, or
+     *         already {@linkplain #clearCurrentTenant() cleared}
      */
-    @SuppressWarnings("ConstantConditions") // see Javadoc
     protected TenantId tenantId() {
         Optional<TenantId> optional = CurrentTenant.get();
+        checkState(optional.isPresent());
         return optional.get();
     }
 

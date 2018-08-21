@@ -25,6 +25,7 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
+import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
 import java.util.Set;
 
@@ -50,6 +51,9 @@ public interface HandlerMethod<T,
      * @return the type of the incoming message class
      */
     M getMessageClass();
+
+    @PostConstruct
+    void discoverAttributes();
 
     /**
      * Creates a new instance of {@link HandlerKey handler key} for this method.
@@ -107,6 +111,7 @@ public interface HandlerMethod<T,
      * @throws IllegalArgumentException
      *         is thrown if the value does not meet the expectation.
      * @see ExternalAttribute
+     * @throws IllegalArgumentException is thrown if the value does not meet the expectation.
      */
     default void ensureExternalMatch(boolean expectedValue) {
         checkArgument(isExternal() == expectedValue,

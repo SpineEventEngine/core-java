@@ -28,7 +28,6 @@ import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusFilter;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
@@ -162,8 +161,7 @@ public abstract class MessageHandlerTest<I,
         assertNotNull(entityRepository);
 
         Set<CommandClass> commandClasses = getAllCommandClasses();
-        CommandBus commandBus = boundedContext().getCommandBus();
-        commandBus.register(new VoidCommandDispatcher(commandClasses));
+        boundedContext.registerCommandDispatcher(new VoidCommandDispatcher(commandClasses));
     }
 
     /**

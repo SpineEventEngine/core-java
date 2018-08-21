@@ -35,7 +35,7 @@ import io.spine.type.TypeName;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -50,8 +50,8 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * <pre>
  *     {@code
  *     Enricher enricher = Enricher.newBuilder()
- *         .add(ProjectId.class, String.class, new Function<ProjectId, String> { ... } )
- *         .add(ProjectId.class, UserId.class, new Function<ProjectId, UserId> { ... } )
+ *         .add(ProjectId.class, String.class, new BiFunction<ProjectId,  String> { ... } )
+ *         .add(ProjectId.class, UserId.class, new BiFunction<ProjectId, UserId> { ... } )
  *         ...
  *         .build();
  *     }
@@ -213,7 +213,7 @@ public class Enricher {
          */
         public <S, T> Builder add(Class<S> sourceFieldClass,
                                   Class<T> enrichmentFieldClass,
-                                  Function<S, T> func) {
+                                  BiFunction<S, C, T> func) {
             checkNotNull(sourceFieldClass);
             checkNotNull(enrichmentFieldClass);
             checkNotNull(func);

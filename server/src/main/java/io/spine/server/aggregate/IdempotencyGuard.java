@@ -32,11 +32,11 @@ import static io.spine.core.Events.getRootCommandId;
 
 /**
  * This guard ensures that the message was not yet dispatched to the {@link Aggregate aggregate}.
- * If it was the exception is thrown.
+ * If it was, the exception is thrown.
  *
  * @author Mykhailo Drachuk
  */
-class IdempotencyGuard {
+final class IdempotencyGuard {
 
     private final Aggregate<?, ?, ?> aggregate;
 

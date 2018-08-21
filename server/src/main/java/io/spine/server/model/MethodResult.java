@@ -27,6 +27,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -118,6 +119,17 @@ public abstract class MethodResult<V extends Message> {
         // command handlers are allowed to return `Empty` but not empty event `List`.
         if (output instanceof Empty) {
             return emptyList();
+        }
+
+        // Allow `Optional` for event reactions and command generation in response to events.
+        if (output instanceof Optional) {
+            Optional optional = (Optional) output;
+            if (optional.isPresent()) {
+                Message message = (Message) optional.get();
+                return ImmutableList.of(message);
+            } else {
+                return emptyList();
+            }
         }
 
         if (output instanceof List) {

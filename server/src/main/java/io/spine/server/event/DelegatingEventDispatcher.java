@@ -30,6 +30,7 @@ import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -73,6 +74,11 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
     }
 
     @Override
+    public Set<EventClass> getExternalEventClasses() {
+        return delegate.getExternalEventClasses();
+    }
+
+    @Override
     public Set<I> dispatch(EventEnvelope envelope) {
         return delegate.dispatchEvent(envelope);
     }
@@ -87,8 +93,13 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
      *
      * @return the external rejection dispatcher proxying calls to the underlying instance
      */
-    public ExternalMessageDispatcher<I> getExternalDispatcher() {
-        return new ExternalMessageDispatcher<I>() {
+    @Override
+    public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
+        if (!dispatchesExternalEvents()) {
+            return Optional.empty();
+        }
+
+        return Optional.of(new ExternalMessageDispatcher<I>() {
             @Override
             public Set<ExternalMessageClass> getMessageClasses() {
                 Set<EventClass> eventClasses = delegate.getExternalEventClasses();
@@ -107,7 +118,7 @@ public final class DelegatingEventDispatcher<I> implements EventDispatcher<I> {
                 EventEnvelope eventEnvelope = asEventEnvelope(envelope);
                 delegate.onError(eventEnvelope, exception);
             }
-        };
+        });
     }
 
     private static EventEnvelope asEventEnvelope(ExternalMessageEnvelope envelope) {

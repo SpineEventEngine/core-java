@@ -39,4 +39,11 @@ public interface SystemGateway {
      * @param systemCommand command message
      */
     void postCommand(Message systemCommand);
+
+    /**
+     * Creates new instance of the gateway which serves the passed System Bounded Context.
+     */
+    static SystemGateway newInstance(SystemBoundedContext system) {
+        return new DefaultSystemGateway(system);
+    }
 }

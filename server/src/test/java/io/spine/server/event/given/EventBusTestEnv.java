@@ -51,6 +51,7 @@ import io.spine.server.event.EventBus;
 import io.spine.server.event.EventBusTest;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.event.EBProjectArchived;
 import io.spine.test.event.EBProjectCreated;
@@ -80,6 +81,7 @@ import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.bus.Buses.reject;
 import static java.lang.String.format;
+import static io.spine.util.Exceptions.unsupported;
 import static java.util.Optional.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -376,6 +378,16 @@ public class EventBusTestEnv {
         @Override
         public Set<EventClass> getMessageClasses() {
             return ImmutableSet.of(EventClass.from(ProjectCreated.class));
+        }
+
+        @Override
+        public Set<EventClass> getExternalEventClasses() {
+            return ImmutableSet.of();
+        }
+
+        @Override
+        public Optional<ExternalMessageDispatcher<String>> createExternalDispatcher() {
+            throw unsupported();
         }
 
         @Override

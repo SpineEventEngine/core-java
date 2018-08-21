@@ -49,6 +49,14 @@ public final class EventApplier
         super(method, signature);
     }
 
+    /**
+     * Adds {@link AllowImportAttribute} to the set of method attributes.
+     */
+    @Override
+    protected Set<Function<Method, MethodAttribute<?>>> attributeSuppliers() {
+        return Sets.union(super.attributeSuppliers(), ImmutableSet.of(AllowImportAttribute::of));
+    }
+
     @Override
     public EventClass getMessageClass() {
         return EventClass.from(rawMessageClass());
@@ -57,5 +65,24 @@ public final class EventApplier
     @Override
     protected MethodResult<Empty> toResult(Aggregate target, Object rawMethodOutput) {
         return MethodResult.empty();
+    }
+
+    boolean allowsImport() {
+        return getAttributes().contains(AllowImportAttribute.ALLOW);
+    }
+
+    /**
+     * Invokes the applier method.
+     *
+     * <p>The method {@linkplain HandlerMethod#invoke(Object, Message, Message) delegates}
+     * the invocation passing {@linkplain Empty#getDefaultInstance() empty message}
+     * as the context parameter because event appliers do not have a context parameter.
+     *
+     * <p>Such redirection is correct because {@linkplain #getParamCount()} the number of parameters}
+     * is set to one during instance construction.
+     */
+    @SuppressWarnings("CheckReturnValue") // since method appliers do not return values
+    public void invoke(Aggregate aggregate, Message message) {
+        invoke(aggregate, message, Empty.getDefaultInstance());
     }
 }

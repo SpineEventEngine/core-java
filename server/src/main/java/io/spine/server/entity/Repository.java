@@ -37,13 +37,12 @@ import io.spine.system.server.SystemGateway;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
 
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -61,7 +60,7 @@ import static java.lang.String.format;
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.
 public abstract class Repository<I, E extends Entity<I, ?>>
-        implements RepositoryView<I, E>, AutoCloseable {
+        implements RepositoryView<I, E>, AutoCloseable, Logging {
 
     private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
@@ -87,9 +86,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * initialized} or the repository was {@linkplain #close() closed}.
      */
     private @Nullable Storage<I, ?, ?> storage;
-
-    /** Lazily initialized logger. */
-    private final Supplier<Logger> loggerSupplier = Logging.supplyFor(getClass());
 
     /**
      * Creates the repository.
@@ -286,13 +282,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @return passed value if it's not not null
      * @throws IllegalStateException if the passed instance is null
      */
-    protected static <S extends AutoCloseable> S checkStorage(@Nullable S storage) {
+    protected static <S extends AutoCloseable> @NonNull S checkStorage(@Nullable S storage) {
         checkState(storage != null, ERR_MSG_STORAGE_NOT_ASSIGNED);
-        return storage;
-    }
-
-    private Storage<I, ?, ?> ensureStorage() {
-        checkState(storage != null, "No storage assigned in repository %s", this);
         return storage;
     }
 
@@ -328,13 +319,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * Obtains the instance of logger associated with the class of the repository.
-     */
-    protected Logger log() {
-        return loggerSupplier.get();
-    }
-
-    /**
      * Logs error caused by a message processing into the {@linkplain #log() repository log}.
      *
      * <p>The formatted message has the following parameters:
@@ -353,7 +337,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         MessageClass messageClass = envelope.getMessageClass();
         String messageId = Stringifiers.toString(envelope.getId());
         String errorMessage = format(msgFormat, messageClass, messageId);
-        log().error(errorMessage, exception);
+        _error(errorMessage, exception);
     }
 
     /**
@@ -404,7 +388,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
         private EntityIterator(Repository<I, E> repository) {
             this.repository = repository;
-            this.index = repository.ensureStorage()
+            this.index = repository.getStorage()
                                    .index();
         }
 

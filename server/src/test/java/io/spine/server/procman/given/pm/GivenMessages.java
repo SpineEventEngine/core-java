@@ -29,12 +29,12 @@ import io.spine.server.commandbus.Given;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.test.procman.command.PmAddTask;
+import io.spine.test.procman.command.PmCencelIteration;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmOwnerChanged;
 
 import static io.spine.server.procman.given.pm.TestProcessManager.ID;
-import static io.spine.testdata.Sample.builderForType;
 import static io.spine.testdata.Sample.messageOfType;
 
 /**
@@ -46,19 +46,29 @@ public class GivenMessages {
     }
 
     public static PmCreateProject createProject() {
-        return ((PmCreateProject.Builder) builderForType(PmCreateProject.class))
+        return PmCreateProject
+                .newBuilder()
                 .setProjectId(ID)
                 .build();
     }
 
     public static PmStartProject startProject() {
-        return ((PmStartProject.Builder) builderForType(PmStartProject.class))
+        return PmStartProject
+                .newBuilder()
                 .setProjectId(ID)
                 .build();
     }
 
     public static PmAddTask addTask() {
-        return ((PmAddTask.Builder) builderForType(PmAddTask.class))
+        return PmAddTask
+                .newBuilder()
+                .setProjectId(ID)
+                .build();
+    }
+
+    public static PmCencelIteration cancelIteration() {
+        return PmCencelIteration
+                .newBuilder()
                 .setProjectId(ID)
                 .build();
     }
@@ -72,7 +82,8 @@ public class GivenMessages {
     }
 
     public static PmOwnerChanged ownerChanged() {
-        return ((PmOwnerChanged.Builder) builderForType(PmOwnerChanged.class))
+        return PmOwnerChanged
+                .newBuilder()
                 .setProjectId(ID)
                 .build();
     }

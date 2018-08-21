@@ -33,6 +33,7 @@ import io.spine.system.server.MarkCommandAsErrored;
 import io.spine.system.server.SystemGateway;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.system.server.GatewayFunction.delegatingTo;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -54,14 +55,14 @@ final class CommandAckMonitor implements StreamObserver<Ack> {
 
     private CommandAckMonitor(Builder builder) {
         this.delegate = builder.delegate;
-        this.gateway = TenantAwareSystemGateway.forTenant(builder.tenantId, builder.systemGateway);
+        this.gateway = delegatingTo(builder.systemGateway).get(builder.tenantId);
     }
 
     /**
      * {@inheritDoc}
      *
-     * <p>Posts either {@link MarkCommandAsAcknowledged} or {@link MarkCommandAsErrored} system command
-     * depending on the value of the given {@code Ack}.
+     * <p>Posts either {@link MarkCommandAsAcknowledged} or {@link MarkCommandAsErrored} system
+     * command depending on the value of the given {@code Ack}.
      *
      * @param value
      */

@@ -41,20 +41,8 @@ public class CurrentTenant {
 
     private static final ThreadLocal<TenantId> threadLocal = new ThreadLocal<>();
 
-    /** A stub instance of {@code TenantId} to be used by the storage in single-tenant context. */
-    private static final TenantId singleTenant = TenantId.newBuilder()
-                                                         .setValue("SINGLE_TENANT")
-                                                         .build();
-
+    /** Prevent instantiation of this utility class. */
     private CurrentTenant() {
-        // Prevent instantiation of this utility class.
-    }
-
-    /**
-     * Returns a constant for single-tenant applications.
-     */
-    static TenantId singleTenant() {
-        return singleTenant;
     }
 
     /**
