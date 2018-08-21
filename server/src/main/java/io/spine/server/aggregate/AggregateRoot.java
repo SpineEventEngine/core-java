@@ -135,6 +135,7 @@ public class AggregateRoot<I> {
 
     /**
      * The loader for the cache of aggregate part repositories.
+     *
      * @param <I> the type of root identifier
      * @see #createCache()
      * @see #newLoader()
