@@ -29,14 +29,11 @@ import io.spine.server.model.declare.MethodSignature;
 import io.spine.type.MessageClass;
 
 import java.io.Serializable;
-import java.lang.reflect.Method;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
 
 /**
@@ -67,7 +64,6 @@ public class MessageHandlerMap<M extends MessageClass,
         this.map = scan(cls, signature);
         this.messageClasses = messageClasses(map.values());
     }
-
 
     /**
      * Obtains classes of messages for which handlers are stored in this map.
@@ -147,30 +143,9 @@ public class MessageHandlerMap<M extends MessageClass,
         return ImmutableSet.copyOf(setToSwallowDuplicates);
     }
 
-    private static <M extends MessageClass, H extends HandlerMethod<?, M, ?, ?>>
-    ImmutableMap<HandlerKey, H> scan(Class<?> declaringClass,
-                                     MethodSignature<H, ?> signature) {
-        Map<HandlerKey, H> tempMap = newHashMap();
-        Method[] declaredMethods = declaringClass.getDeclaredMethods();
-        for (Method method : declaredMethods) {
-            Optional<H> handlerMethod = signature.create(method);
-            if (handlerMethod.isPresent()) {
-                H handler = handlerMethod.get();
-                HandlerKey handlerKey = handler.key();
-                if (tempMap.containsKey(handlerKey)) {
-                    Method alreadyPresent = tempMap.get(handlerKey)
-                                                   .getRawMethod();
-                    throw new DuplicateHandlerMethodError(
-                            declaringClass,
-                            handlerKey,
-                            alreadyPresent.getName(),
-                            method.getName()
-                    );
-                }
-                tempMap.put(handlerKey, handler);
-            }
-        }
-        ImmutableMap<HandlerKey, H> result = ImmutableMap.copyOf(tempMap);
-        return result;
+    private static <H extends HandlerMethod<?, ?, ?, ?>> ImmutableMap<HandlerKey, H>
+    scan(Class<?> declaringClass, MethodSignature<H, ?> signature) {
+        return ClassScanner.of(declaringClass)
+                           .findMethodsBy(signature);
     }
 }
