@@ -29,6 +29,7 @@ import java.lang.annotation.Annotation;
 /**
  * An abstract base of signatures for methods that accept {@code Event}s.
  *
+ * @param <H> the type of {@link HandlerMethod} which signature this is
  * @author Alex Tymchenko
  */
 abstract class EventAcceptingSignature<H extends HandlerMethod<?, ?, EventEnvelope, ?>>

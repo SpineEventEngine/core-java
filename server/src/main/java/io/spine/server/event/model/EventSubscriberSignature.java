@@ -31,7 +31,7 @@ import java.lang.reflect.Method;
 import static com.google.common.collect.ImmutableSet.of;
 
 /**
- * A signature of {@code Event} subscriber methods.
+ * A signature of {@link EventSubscriberMethod}.
  *
  * @author Alex Tymchenko
  */

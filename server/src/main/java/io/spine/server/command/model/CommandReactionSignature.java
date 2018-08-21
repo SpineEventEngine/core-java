@@ -89,6 +89,10 @@ public class CommandReactionSignature
         return true;
     }
 
+    /**
+     * Allowed combinations of parameters for {@linkplain CommandReactionMethod Command reaction}
+     * methods.
+     */
     @Immutable
     private enum CommandReactionParams implements ParameterSpec<EventEnvelope> {
 

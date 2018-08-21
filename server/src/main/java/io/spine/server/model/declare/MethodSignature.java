@@ -43,6 +43,8 @@ import static java.util.stream.Collectors.toList;
  *
  * <p>By extending this base class, descendants define the number of requirements:
  * <ul>
+ *     <li>{@linkplain #MethodSignature(Class) the method annotation},</li>
+ *
  *      <li>{@linkplain #getParamSpecClass() the specification of method parameters},</li>
  *
  *      <li>{@linkplain #getAllowedModifiers() the set of allowed access modifiers},</li>
@@ -51,8 +53,10 @@ import static java.util.stream.Collectors.toList;
  *
  *      <li>{@linkplain #getAllowedExceptions() the set of allowed exceptions}, that the method
  *      declares to throw (empty by default),</li>
- *
  * </ul>
+ *
+ * @param <H> the type of the handler method
+ * @param <E> the type of envelope, which is used to invoke the handler method
  *
  * @author Alex Tymchenko
  */
@@ -94,6 +98,10 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
     /**
      * Checks whether the passed {@code method} matches the constraints set by this
      * {@code MethodSignature} instance.
+     *
+     * <p>{@link SignatureMismatch.Severity#WARN WARN}-level mismatches are silently ignored
+     * by this method. To obtain a detailed information callees should use
+     * {@linkplain #match(Method) match(Method)}.
      *
      * @param method
      *         the method to check
