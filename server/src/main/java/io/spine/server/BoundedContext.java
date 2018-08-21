@@ -54,6 +54,7 @@ import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
+import io.spine.system.server.SystemBoundedContext;
 import io.spine.system.server.SystemGateway;
 import io.spine.type.TypeName;
 
@@ -63,6 +64,7 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Suppliers.memoize;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
@@ -91,6 +93,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @see <a href="https://martinfowler.com/bliki/BoundedContext.html">
  *     Martin Fowler on BoundedContext</a>
  */
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public abstract class BoundedContext
         extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
         implements AutoCloseable, Logging {
@@ -117,8 +120,19 @@ public abstract class BoundedContext
 
     private final TenantIndex tenantIndex;
 
+    /**
+     * Creates new instance.
+     *
+     * @throws IllegalStateException
+     *         if called from a derived class, which is not a part of the framework
+     * @apiNote This constructor is for internal use of the framework.
+     *          Application developers should not create classes derived from {@code BoundedContext}
+     */
+    @Internal
     protected BoundedContext(BoundedContextBuilder builder) {
         super();
+        checkInheritance();
+
         this.name = builder.getName();
         this.multitenant = builder.isMultitenant();
         this.storageFactory = memoize(() -> builder.buildStorageFactorySupplier()
@@ -129,6 +143,20 @@ public abstract class BoundedContext
         this.tenantIndex = builder.buildTenantIndex();
 
         this.integrationBus = buildIntegrationBus(builder, eventBus, commandBus, name);
+    }
+
+    /**
+     * Prevents 3rd party code from creating classes extending {@link BoundedContext}.
+     */
+    @SuppressWarnings("ClassReferencesSubclass")
+    private void checkInheritance() {
+        Class<? extends BoundedContext> thisClass = getClass();
+        checkState(
+                DomainBoundedContext.class.equals(thisClass) ||
+                        SystemBoundedContext.class.equals(thisClass),
+                "The class `BoundedContext` is not designed for " +
+                        "inheritance by the framework users"
+        );
     }
 
     /**
