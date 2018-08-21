@@ -149,6 +149,7 @@ public class AggregateRoot<I> {
         private final AggregateRoot<I> root;
 
         private PartRepositoryCacheLoader(AggregateRoot<I> root) {
+            super();
             this.root = root;
         }
 
