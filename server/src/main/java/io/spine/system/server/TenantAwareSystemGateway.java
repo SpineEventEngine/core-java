@@ -49,7 +49,7 @@ final class TenantAwareSystemGateway implements SystemGateway {
         this.delegate = checkNotNull(delegate);
     }
 
-    public static SystemGateway forTenant(TenantId tenantId, SystemGateway systemGateway) {
+    static SystemGateway forTenant(TenantId tenantId, SystemGateway systemGateway) {
         checkNotNull(tenantId);
         checkNotNull(systemGateway);
         SystemGateway result = new TenantAwareSystemGateway(tenantId, systemGateway);
