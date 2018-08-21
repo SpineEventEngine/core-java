@@ -32,6 +32,8 @@ import io.spine.server.model.HandlerMethod;
  * the specification also transfers knowledge on how to extract the designed argument values
  * from the given envelope for the method with this parameter spec.
  *
+ * <p>Implementing classes are required to be {@code enumeration}s.
+ *
  * @param <E>
  *         the type of message envelope
  * @author Alex Tymchenko

@@ -75,16 +75,18 @@ public class CommandReactionSignature
      * {@inheritDoc}
      *
      * @implNote This method distinguishes {@linkplain Command Commander} methods one from another,
-     * as they use the same annotation, but have different parameter list.
+     * as they use the same annotation, but have different parameter list. It skips the methods
+     * which first parameter {@linkplain MethodParams#isFirstParamCommand(Method) is }
+     * a {@code Command} message.
      */
     @Override
-    protected boolean shouldInspect(Method method) {
-        boolean parentResult = super.shouldInspect(method);
+    protected boolean skipMethod(Method method) {
+        boolean parentResult = !super.skipMethod(method);
 
         if(parentResult) {
-            return !MethodParams.isFirstParamCommand(method);
+            return MethodParams.isFirstParamCommand(method);
         }
-        return false;
+        return true;
     }
 
     @Immutable
