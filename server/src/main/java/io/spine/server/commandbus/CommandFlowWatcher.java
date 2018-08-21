@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
+import io.spine.system.server.GatewayFunction;
 import io.spine.system.server.MarkCommandAsDispatched;
 import io.spine.system.server.ScheduleCommand;
 import io.spine.system.server.SystemGateway;

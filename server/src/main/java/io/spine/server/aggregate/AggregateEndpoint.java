@@ -43,7 +43,8 @@ import java.util.List;
  */
 abstract class AggregateEndpoint<I,
                                  A extends Aggregate<I, ?, ?>,
-                                 M extends ActorMessageEnvelope<?, ?, ?>, R>
+                                 M extends ActorMessageEnvelope<?, ?, ?>,
+                                 R>
         extends EntityMessageEndpoint<I, A, M, R> {
 
     AggregateEndpoint(AggregateRepository<I, A> repository, M envelope) {
@@ -51,8 +52,8 @@ abstract class AggregateEndpoint<I,
     }
 
     @Override
-    protected void deliverNowTo(I aggregateId) {
-        A aggregate = instanceFor(aggregateId);
+    protected final void deliverNowTo(I aggregateId) {
+        A aggregate = loadOrCreate(aggregateId);
         LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
 
         dispatchInTx(aggregate);
@@ -66,21 +67,22 @@ abstract class AggregateEndpoint<I,
         store(aggregate);
     }
 
+    private A loadOrCreate(I aggregateId) {
+        return repository().loadOrCreate(aggregateId);
+    }
+
     @CanIgnoreReturnValue
-    protected List<? extends Message> dispatchInTx(A aggregate) {
-        List<? extends Message> eventMessages = doDispatch(aggregate, envelope());
+    protected final List<? extends Message> dispatchInTx(A aggregate) {
+        M envelope = envelope();
+        List<? extends Message> eventMessages = doDispatch(aggregate, envelope);
         AggregateTransaction tx = startTransaction(aggregate);
-        aggregate.apply(eventMessages, envelope());
+        aggregate.apply(eventMessages, envelope);
         tx.commit();
         return eventMessages;
     }
 
-    protected A instanceFor(I aggregateId) {
-        return repository().loadOrCreate(aggregateId);
-    }
-
     @SuppressWarnings("unchecked") // to avoid massive generic-related issues.
-    protected AggregateTransaction startTransaction(A aggregate) {
+    private AggregateTransaction startTransaction(A aggregate) {
         AggregateTransaction tx = AggregateTransaction.start(aggregate);
         TransactionListener listener = EntityLifecycleMonitor.newInstance(repository());
         tx.setListener(listener);
@@ -88,19 +90,19 @@ abstract class AggregateEndpoint<I,
     }
 
     @Override
-    protected void onModified(A entity) {
+    protected final void onModified(A entity) {
         repository().onModifiedAggregate(envelope().getTenantId(), entity);
     }
 
     @Override
-    protected boolean isModified(A aggregate) {
+    protected final boolean isModified(A aggregate) {
         List<Event> events = aggregate.getUncommittedEvents();
         return !events.isEmpty();
     }
 
     @Override
-    protected AggregateRepository<I, A> repository() {
-        return (AggregateRepository<I, A>)super.repository();
+    protected final AggregateRepository<I, A> repository() {
+        return (AggregateRepository<I, A>) super.repository();
     }
 
     private AggregateStorage<I> storage() {

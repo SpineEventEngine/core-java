@@ -19,12 +19,13 @@
  */
 
 /**
- * This package provides types related to storage of aggregates.
+ * This package provides test environment classes for
+ * {@link io.spine.server.aggregate.model.AggregateClassTest}.
  */
 
 @CheckReturnValue
 @ParametersAreNonnullByDefault
-package io.spine.server.aggregate.storage;
+package io.spine.server.aggregate.given.klasse;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 

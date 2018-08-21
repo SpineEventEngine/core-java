@@ -48,7 +48,7 @@ class TenantAwareOperationTest {
     @DisplayName("substitute single tenant for default value")
     void useSingleTenantId() {
         TenantAwareOperation op = createOperation(TenantId.getDefaultInstance());
-        assertEquals(CurrentTenant.singleTenant(), op.tenantId());
+        assertEquals(SingleTenantIndex.tenantId(), op.tenantId());
     }
 
     @Test

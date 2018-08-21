@@ -18,25 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.storage;
+package io.spine.server.aggregate.given.part;
 
-import io.spine.annotation.SPI;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateStorage;
-import io.spine.server.storage.StorageField;
+import com.google.protobuf.StringValue;
+import io.spine.server.aggregate.AggregatePart;
+import io.spine.validate.StringValueVBuilder;
 
 /**
- * A container for the storage fields specific for the {@link AggregateStorage}
- * and its implementations.
+ * A class which extends {@link AggregatePart} but does not provide suitable constructor.
  *
- * @author Dmytro Dashenkov
- * @see StorageField
+ * @author Alexander Yevsyukov
  */
-@SPI
-public enum AggregateField implements StorageField {
+public class WrongAggregatePart
+        extends AggregatePart<String,
+                              StringValue,
+                              StringValueVBuilder,
+                              AnAggregateRoot> {
 
-    /**
-     * A field representing an ID of an {@link Aggregate}.
-     */
-    aggregate_id
+    @SuppressWarnings("ConstantConditions")
+    // Supply a "wrong" parameters on purpose to cause the validation failure
+    protected WrongAggregatePart() {
+        super(null);
+    }
 }

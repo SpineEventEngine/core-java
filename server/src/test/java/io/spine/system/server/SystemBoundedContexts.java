@@ -30,7 +30,7 @@ import static org.hamcrest.Matchers.instanceOf;
  *
  * @author Dmytro Dashenkov
  */
-public final class SystemBoundedContexts {
+final class SystemBoundedContexts {
 
     /**
      * Prevents the utility class instantiation.
@@ -41,7 +41,7 @@ public final class SystemBoundedContexts {
     /**
      * Extracts the {@code System} bounded context from the given bounded context.
      */
-    public static BoundedContext systemOf(BoundedContext context) {
+    static BoundedContext systemOf(BoundedContext context) {
         SystemGateway systemGateway = context.getSystemGateway();
         assertThat(systemGateway, instanceOf(DefaultSystemGateway.class));
         DefaultSystemGateway gateway = (DefaultSystemGateway) systemGateway;

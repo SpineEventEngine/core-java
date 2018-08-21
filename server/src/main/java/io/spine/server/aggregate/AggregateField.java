@@ -18,23 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandbus;
+package io.spine.server.aggregate;
 
-import io.spine.core.TenantId;
-import io.spine.system.server.SystemGateway;
-
-import java.util.function.Function;
+import io.spine.annotation.SPI;
+import io.spine.server.storage.StorageField;
 
 /**
- * Obtains a gateway in a multi-tenant environment.
+ * A container for the storage fields specific for the {@link AggregateStorage}
+ * and its implementations.
  *
- * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
+ * @see StorageField
  */
-@FunctionalInterface
-interface GatewayFunction extends Function<TenantId, SystemGateway> {
+@SPI
+public enum AggregateField implements StorageField {
 
-    /** Obtains system gateway for the given tenant. */
-    default SystemGateway get(TenantId tenantId) {
-        return apply(tenantId);
-    }
+    /**
+     * A field representing an ID of an {@link Aggregate}.
+     */
+    aggregate_id
 }

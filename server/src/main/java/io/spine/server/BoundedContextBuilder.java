@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
+import io.spine.logging.Logging;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.IntegrationBus;
@@ -34,12 +35,10 @@ import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
-import io.spine.system.server.DefaultSystemGateway;
 import io.spine.system.server.NoOpSystemGateway;
+import io.spine.system.server.SystemBoundedContext;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -60,7 +59,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"}) // OK for this central piece.
 @CanIgnoreReturnValue
-public final class BoundedContextBuilder {
+public final class BoundedContextBuilder implements Logging {
 
     private BoundedContextName name = BoundedContextNames.assumingTests();
     private boolean multitenant;
@@ -174,7 +173,7 @@ public final class BoundedContextBuilder {
     TenantIndex buildTenantIndex() {
         TenantIndex result = isMultitenant()
             ? checkNotNull(tenantIndex)
-            : TenantIndex.Factory.singleTenant();
+            : TenantIndex.singleTenant();
         return result;
     }
 
@@ -257,9 +256,9 @@ public final class BoundedContextBuilder {
     }
 
     private BoundedContext buildDefault(SystemBoundedContext system) {
-        BiFunction<BoundedContextBuilder, SystemGateway, DomainBoundedContext> instanceFactory =
-                DomainBoundedContext::newInstance;
-        SystemGateway systemGateway = new DefaultSystemGateway(system);
+        BiFunction<BoundedContextBuilder, SystemGateway, DomainBoundedContext>
+                instanceFactory = DomainBoundedContext::newInstance;
+        SystemGateway systemGateway = SystemGateway.newInstance(system);
         BoundedContext result = buildPartial(instanceFactory, systemGateway);
         return result;
     }
@@ -326,8 +325,8 @@ public final class BoundedContextBuilder {
     private void initTenantIndex(StorageFactory factory) {
         if (tenantIndex == null) {
             tenantIndex = multitenant
-                          ? TenantIndex.Factory.createDefault(factory)
-                          : TenantIndex.Factory.singleTenant();
+                          ? TenantIndex.createDefault(factory)
+                          : TenantIndex.singleTenant();
         }
     }
 
@@ -408,18 +407,5 @@ public final class BoundedContextBuilder {
                                     .setMultitenant(multitenant)
                                     .setStorage(standStorage);
         return result;
-    }
-
-    /**
-     * Obtains the {@link Logger} to
-     */
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(BoundedContext.class);
     }
 }

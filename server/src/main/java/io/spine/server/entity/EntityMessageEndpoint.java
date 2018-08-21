@@ -30,7 +30,6 @@ import io.spine.core.TenantId;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.string.Stringifiers;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
 import java.util.Set;
@@ -47,7 +46,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @param <I> the type of entity IDs
  * @param <E> the type of entities
  * @param <M> the type of message envelopes
- * @param <T> the type of the dispatch result, which is {@code <I>} for unicast dispatching, and
+ * @param <R> the type of the dispatch result, which is {@code <I>} for unicast dispatching, and
  *            {@code Set<I>} for multicast
  * @author Alexander Yevsyukov
  */
@@ -55,15 +54,15 @@ import static io.spine.util.Exceptions.newIllegalStateException;
 public abstract class EntityMessageEndpoint<I,
                                             E extends Entity<I, ?>,
                                             M extends ActorMessageEnvelope<?, ?, ?>,
-                                            T> {
+                                            R> {
 
     /** The repository which created this endpoint. */
-    private final @Nullable Repository<I, E> repository;
+    private final Repository<I, E> repository;
 
     /** The message which needs to handled. */
     private final M envelope;
 
-    protected EntityMessageEndpoint(@Nullable Repository<I, E> repository, M envelope) {
+    protected EntityMessageEndpoint(Repository<I, E> repository, M envelope) {
         this.repository = repository;
         this.envelope = envelope;
     }
@@ -73,10 +72,10 @@ public abstract class EntityMessageEndpoint<I,
      *
      * @return the result of the message processing
      */
-    public final T handle() {
+    public final R handle() {
         TenantId tenantId = envelope().getTenantId();
-        TenantAwareFunction0<T> operation = new Operation(tenantId);
-        T result = operation.execute();
+        TenantAwareFunction0<R> operation = new Operation(tenantId);
+        R result = operation.execute();
         return result;
     }
 
@@ -84,15 +83,15 @@ public abstract class EntityMessageEndpoint<I,
      * {@linkplain #getTargets() Selects} one or more message targets and
      * {@linkplain #dispatchToOne(I) dispatches} the message to them.
      */
-    @SuppressWarnings("unchecked")
-    private T dispatch() {
-        T targets = getTargets();
+    @SuppressWarnings({"unchecked", "MethodOnlyUsedFromInnerClass"})
+    private R dispatch() {
+        R targets = getTargets();
         if (targets instanceof Set) {
             Set<I> handlingEntities = (Set<I>) targets;
-            return (T)(dispatchToMany(handlingEntities));
+            return (R) (dispatchToMany(handlingEntities));
         }
         try {
-            dispatchToOne((I)targets);
+            dispatchToOne((I) targets);
         } catch (RuntimeException exception) {
             onError(envelope(), exception);
         }
@@ -112,9 +111,9 @@ public abstract class EntityMessageEndpoint<I,
     }
 
     /**
-     * Obtains IDs of aggregates to which the endpoint delivers the message.
+     * Obtains IDs of entities to which the endpoint delivers the message.
      */
-    protected abstract T getTargets();
+    protected abstract R getTargets();
 
     /**
      * Dispatches the message to the entity with the passed ID, providing transactional work
@@ -165,7 +164,7 @@ public abstract class EntityMessageEndpoint<I,
 
     /**
      * Allows derived classes to handle empty list of uncommitted events returned by
-     * the aggregate in response to the message.
+     * the entity in response to the message.
      */
     protected abstract void onEmptyResult(E entity, M envelope);
 
@@ -175,10 +174,10 @@ public abstract class EntityMessageEndpoint<I,
     protected abstract void onError(M envelope, RuntimeException exception);
 
     /**
-     * Dispatches the message to multiple aggregates.
+     * Dispatches the message to multiple entities.
      *
-     * @param targets the set of aggregate IDs to which dispatch the message
-     * @return the set of aggregate IDs to which the message was successfully dispatched
+     * @param targets the set of entity IDs to which dispatch the message
+     * @return the set of entity IDs to which the message was successfully dispatched
      */
     private Set<I> dispatchToMany(Set<I> targets) {
         ImmutableSet.Builder<I> result = ImmutableSet.builder();
@@ -232,14 +231,14 @@ public abstract class EntityMessageEndpoint<I,
     /**
      * The operation executed under the tenant context in which the message was created.
      */
-    private class Operation extends TenantAwareFunction0<T> {
+    private class Operation extends TenantAwareFunction0<R> {
 
         private Operation(TenantId tenantId) {
             super(tenantId);
         }
 
         @Override
-        public T apply() {
+        public R apply() {
             return dispatch();
         }
     }

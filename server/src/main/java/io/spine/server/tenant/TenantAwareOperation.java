@@ -48,7 +48,7 @@ public abstract class TenantAwareOperation extends TenantAware implements Runnab
      * Creates an instance of an operation for the tenant specified by the passed ID.
      *
      * <p>If a default instance of {@link TenantId} is passed (because the application works in
-     * a single-tenant mode, {@linkplain CurrentTenant#singleTenant() singleTenant()} value will be
+     * a single-tenant mode, {@linkplain SingleTenantIndex#tenantId() singleTenant()} value will be
      * substituted.
      *
      * @param tenantId the tenant ID or {@linkplain TenantId#getDefaultInstance() default value}

@@ -19,6 +19,7 @@
  */
 package io.spine.server.aggregate;
 
+import io.spine.annotation.SPI;
 import io.spine.core.CommandEnvelope;
 import io.spine.server.delivery.CommandShardedStream;
 import io.spine.server.delivery.DeliveryTag;
@@ -30,6 +31,8 @@ import io.spine.server.delivery.DeliveryTag;
  * @param <A> the type of aggregate
  * @author Alex Tymchenko
  */
+@SPI
+@SuppressWarnings("WeakerAccess") // is public for customizable delivery mechanisms
 public class AggregateCommandDelivery<I, A extends Aggregate<I, ?, ?>>
         extends AggregateDelivery<I,
                                   A,
@@ -59,7 +62,7 @@ public class AggregateCommandDelivery<I, A extends Aggregate<I, ?, ?>>
 
         @Override
         protected AggregateCommandEndpoint<I, A> getEndpoint(CommandEnvelope envelope) {
-            return AggregateCommandEndpoint.of(repository(), envelope);
+            return new AggregateCommandEndpoint<>(repository(), envelope);
         }
     }
 }

@@ -20,7 +20,7 @@
 
 package io.spine.server.storage;
 
-import io.spine.server.aggregate.storage.AggregateField;
+import io.spine.server.aggregate.AggregateField;
 import io.spine.server.event.storage.EventContextField;
 import io.spine.server.event.storage.EventField;
 import org.junit.jupiter.api.DisplayName;

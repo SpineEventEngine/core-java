@@ -48,7 +48,7 @@ public class AggregateRejectionDelivery<I, A extends Aggregate<I, ?, ?>>
                                              RejectionShardedStream<I>,
                                              RejectionShardedStream.Builder<I>> {
 
-        protected AggregateRejectionConsumer(AggregateRepository<I, A> repository) {
+        private AggregateRejectionConsumer(AggregateRepository<I, A> repository) {
             super(DeliveryTag.forRejectionsOf(repository), repository);
         }
 
@@ -59,7 +59,7 @@ public class AggregateRejectionDelivery<I, A extends Aggregate<I, ?, ?>>
 
         @Override
         protected AggregateRejectionEndpoint<I, A> getEndpoint(RejectionEnvelope envelope) {
-            return AggregateRejectionEndpoint.of(repository(), envelope);
+            return new AggregateRejectionEndpoint<>(repository(), envelope);
         }
     }
 }

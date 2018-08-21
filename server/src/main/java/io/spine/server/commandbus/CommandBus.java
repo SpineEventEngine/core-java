@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
@@ -41,6 +42,7 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.SystemGateway;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
@@ -51,6 +53,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.system.server.GatewayFunction.delegatingTo;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
@@ -93,7 +96,8 @@ public class CommandBus extends Bus<Command,
      *
      * @see #getValidator() to getreive the non-null value of the validator
      */
-    private @Nullable CommandValidator commandValidator;
+    @LazyInit
+    private @MonotonicNonNull CommandValidator commandValidator;
 
     /**
      * Creates new instance according to the passed {@link Builder}.
@@ -200,12 +204,7 @@ public class CommandBus extends Bus<Command,
 
     SystemGateway gatewayFor(TenantId tenantId) {
         checkNotNull(tenantId);
-        return gatewayFor(tenantId, systemGateway);
-    }
-
-    @VisibleForTesting
-    static SystemGateway gatewayFor(TenantId tenantId, SystemGateway systemGateway) {
-        SystemGateway result = TenantAwareSystemGateway.forTenant(tenantId, systemGateway);
+        SystemGateway result = delegatingTo(systemGateway).get(tenantId);
         return result;
     }
 
@@ -381,9 +380,9 @@ public class CommandBus extends Bus<Command,
         /**
          * Inject the {@link SystemGateway} of the bounded context to which the built bus belongs.
          *
-         * <p>This method is {@link Internal} to the framework. The name of the method starts with
-         * {@code inject} prefix so that this method does not appear in an autocomplete hint for
-         * {@code set} prefix.
+         * @apiNote This method is {@link Internal} to the framework. The name of the method starts
+         *          with the {@code inject} prefix so that this method does not appear in an
+         *          auto-complete hint for the {@code set} prefix.
          */
         @Internal
         public Builder injectSystemGateway(SystemGateway gateway) {
@@ -394,9 +393,9 @@ public class CommandBus extends Bus<Command,
         /**
          * Inject the {@link TenantIndex} of the bounded context to which the built bus belongs.
          *
-         * <p>This method is {@link Internal} to the framework. The name of the method starts with
-         * {@code inject} prefix so that this method does not appear in an autocomplete hint for
-         * {@code set} prefix.
+         * @apiNote This method is {@link Internal} to the framework. The name of the method starts
+         *          with the {@code inject} prefix so that this method does not appear in an
+         *          auto-complete hint for the {@code set} prefix.
          */
         @Internal
         public Builder injectTenantIndex(TenantIndex index) {
@@ -432,7 +431,10 @@ public class CommandBus extends Bus<Command,
                 rejectionBus = RejectionBus.newBuilder()
                                            .build();
             }
-            flowWatcher = new CommandFlowWatcher((tenantId) -> gatewayFor(tenantId, systemGateway));
+            flowWatcher = new CommandFlowWatcher((tenantId) -> {
+                SystemGateway result = delegatingTo(systemGateway).get(tenantId);
+                return result;
+            });
             commandScheduler.setFlowWatcher(flowWatcher);
 
             CommandBus commandBus = createCommandBus();

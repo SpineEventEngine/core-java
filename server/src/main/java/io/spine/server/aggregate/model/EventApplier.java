@@ -21,6 +21,8 @@
 package io.spine.server.aggregate.model;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.EventClass;
@@ -30,10 +32,13 @@ import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodAccessChecker;
+import io.spine.server.model.MethodAttribute;
 import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
 
 import java.lang.reflect.Method;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 import static io.spine.server.model.MethodAccessChecker.forMethod;
@@ -55,9 +60,21 @@ public final class EventApplier
         super(method);
     }
 
+    /**
+     * Adds {@link AllowImportAttribute} to the set of method attributes.
+     */
+    @Override
+    protected Set<Function<Method, MethodAttribute<?>>> attributeSuppliers() {
+        return Sets.union(super.attributeSuppliers(), ImmutableSet.of(AllowImportAttribute::of));
+    }
+
     @Override
     public EventClass getMessageClass() {
         return EventClass.from(rawMessageClass());
+    }
+
+    boolean allowsImport() {
+        return getAttributes().contains(AllowImportAttribute.ALLOW);
     }
 
     @VisibleForTesting

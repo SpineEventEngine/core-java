@@ -257,7 +257,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public I dispatch(CommandEnvelope envelope) {
         checkNotNull(envelope);
-        return AggregateCommandEndpoint.handle(this, envelope);
+        AggregateCommandEndpoint<I, A> endpoint = new AggregateCommandEndpoint<>(this, envelope);
+        I result = endpoint.handle();
+        return result;
     }
 
     /**
@@ -295,7 +297,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Set<I> dispatchEvent(EventEnvelope envelope) {
         checkNotNull(envelope);
-        return AggregateEventEndpoint.handle(this, envelope);
+        AggregateEventEndpoint<I, A> endpoint = new AggregateEventEndpoint<>(this, envelope);
+        Set<I> result = endpoint.handle();
+        return result;
     }
 
     @Override
@@ -319,7 +323,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Set<I> dispatchRejection(RejectionEnvelope envelope) {
         checkNotNull(envelope);
-        return AggregateRejectionEndpoint.handle(this, envelope);
+        AggregateRejectionEndpoint<I, A> endpoint =
+                new AggregateRejectionEndpoint<>(this, envelope);
+        Set<I> result = endpoint.handle();
+        return result;
     }
 
     @Override

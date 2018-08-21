@@ -27,6 +27,6 @@ import io.spine.server.aggregate.AggregateRepository;
  *
  * @author Dmytro Dashenkov
  */
-public final class EntityHistoryRepository
+final class EntityHistoryRepository
         extends AggregateRepository<EntityHistoryId, EntityHistoryAggregate> {
 }

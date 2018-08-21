@@ -34,7 +34,7 @@ import static com.google.common.collect.ImmutableSet.of;
  *
  * @author Dmytro Dashenkov
  */
-public final class ScheduledCommandRepository
+final class ScheduledCommandRepository
         extends ProjectionRepository<CommandId, ScheduledCommand, ScheduledCommandRecord> {
 
     @Override

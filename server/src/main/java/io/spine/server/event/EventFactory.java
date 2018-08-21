@@ -134,8 +134,11 @@ public class EventFactory {
      * Creates an event based on the passed integration event.
      */
     public static Event toEvent(IntegrationEvent ie) {
-        return IntegrationEventConverter.getInstance()
-                                        .convert(ie);
+        checkNotNull(ie);
+        Event result = IntegrationEventConverter.getInstance()
+                                                .convert(ie);
+        checkNotNull(result);
+        return result;
     }
 
     @SuppressWarnings("CheckReturnValue") // calling builder
