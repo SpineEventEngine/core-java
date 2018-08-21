@@ -30,11 +30,9 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.DispatcherRegistry;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MessageUnhandled;
-import io.spine.server.bus.MulticastBus;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.SystemGateway;
 
-import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.bus.BusBuilder.FieldCheck.gatewayNotSet;
 import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
 
@@ -44,7 +42,7 @@ import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
  * @author Alexander Yevsyukov
  */
 public class ImportBus
-        extends MulticastBus<ImportEvent, ImportEnvelope, EventClass, ImportDispatcher<?>> {
+        extends Bus<ImportEvent, ImportEnvelope, EventClass, ImportDispatcher<?>> {
 
     private final ImportValidator validator = new ImportValidator();
     private final DeadImportEventHandler deadImportEventHandler = new DeadImportEventHandler();
@@ -81,10 +79,10 @@ public class ImportBus
 
     @Override
     protected void dispatch(ImportEnvelope envelope) {
-        int dispatchersCalled = callDispatchers(envelope);
-        checkState(dispatchersCalled != 0,
-                   "The event with class: `%s` has no import dispatchers.",
-                   envelope.getMessageClass());
+//        int dispatchersCalled = callDispatchers(envelope);
+//        checkState(dispatchersCalled != 0,
+//                   "The event with class: `%s` has no import dispatchers.",
+//                   envelope.getMessageClass());
     }
 
     /**

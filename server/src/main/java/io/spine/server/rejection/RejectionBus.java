@@ -35,7 +35,6 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
-import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +62,6 @@ public class RejectionBus extends CommandOutputBus<Rejection,
 
     /** The enricher for posted rejections or {@code null} if the enrichment is not supported. */
     private final @Nullable RejectionEnricher enricher;
-    private final SystemGateway systemGateway;
 
     /**
      * Creates a new instance according to the pre-configured {@code Builder}.
@@ -71,8 +69,6 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     private RejectionBus(Builder builder) {
         super(builder);
         this.enricher = builder.enricher;
-        this.systemGateway = builder.systemGateway()
-                                    .orElseThrow(BusBuilder.FieldCheck.gatewayNotSet());
     }
 
     /**

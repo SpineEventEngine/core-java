@@ -27,7 +27,6 @@ import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
-import io.spine.base.Identifier;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
@@ -35,11 +34,11 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
-import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
+import io.spine.server.bus.UnicastBus;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.SystemGateway;
@@ -56,7 +55,6 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.bus.BusBuilder.FieldCheck.gatewayNotSet;
 import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
 import static io.spine.system.server.GatewayFunction.delegatingTo;
-import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -68,10 +66,10 @@ import static java.util.Optional.ofNullable;
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
-public class CommandBus extends Bus<Command,
-                                    CommandEnvelope,
-                                    CommandClass,
-                                    CommandDispatcher<?>> {
+public class CommandBus extends UnicastBus<Command,
+                                           CommandEnvelope,
+                                           CommandClass,
+                                           CommandDispatcher<?>> {
 
     private final CommandScheduler scheduler;
     private final RejectionBus rejectionBus;
@@ -234,10 +232,6 @@ public class CommandBus extends Bus<Command,
         return registry().getRegisteredMessageClasses();
     }
 
-    private Optional<? extends CommandDispatcher<?>> getDispatcher(CommandClass commandClass) {
-        return registry().getDispatcher(commandClass);
-    }
-
     @Override
     protected DeadMessageHandler<CommandEnvelope> getDeadMessageHandler() {
         return deadCommandHandler;
@@ -259,28 +253,10 @@ public class CommandBus extends Bus<Command,
         dispatch(commandEnvelope);
     }
 
-    private static IllegalStateException noDispatcherFound(CommandEnvelope commandEnvelope) {
-        String idStr = Identifier.toString(commandEnvelope.getId());
-        String msg = format("No dispatcher found for the command (class: %s id: %s).",
-                            commandEnvelope.getMessageClass()
-                                           .toString(),
-                            idStr);
-        throw new IllegalStateException(msg);
-    }
-
     @Override
     protected void store(Iterable<Command> commands) {
         TenantId tenantId = tenantOf(commands);
         tenantIndex.keep(tenantId);
-    }
-
-    private CommandDispatcher<?> getDispatcher(CommandEnvelope commandEnvelope) {
-        Optional<? extends CommandDispatcher<?>> dispatcher =
-                getDispatcher(commandEnvelope.getMessageClass());
-        if (!dispatcher.isPresent()) {
-            throw noDispatcherFound(commandEnvelope);
-        }
-        return dispatcher.get();
     }
 
     /**
@@ -351,7 +327,6 @@ public class CommandBus extends Bus<Command,
         }
 
         @Internal
-        @CanIgnoreReturnValue
         public Builder setMultitenant(@Nullable Boolean multitenant) {
             this.multitenant = multitenant;
             return this;
@@ -365,14 +340,12 @@ public class CommandBus extends Bus<Command,
             return ofNullable(rejectionBus);
         }
 
-        @CanIgnoreReturnValue
         public Builder setCommandScheduler(CommandScheduler commandScheduler) {
             checkNotNull(commandScheduler);
             this.commandScheduler = commandScheduler;
             return this;
         }
 
-        @CanIgnoreReturnValue
         public Builder setRejectionBus(RejectionBus rejectionBus) {
             checkNotNull(rejectionBus);
             this.rejectionBus = rejectionBus;
@@ -414,10 +387,12 @@ public class CommandBus extends Bus<Command,
         }
 
         @Override
+        @CheckReturnValue
         protected Builder self() {
             return this;
         }
 
+        @CheckReturnValue
         @SuppressWarnings("CheckReturnValue")
             /* Calling registry() enforces creating the registry to make spying for CommandBus
                instances in tests work. */

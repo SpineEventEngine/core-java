@@ -26,10 +26,12 @@ import com.google.common.collect.Multimap;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Multimaps.synchronizedMultimap;
 
 /**
@@ -109,6 +111,31 @@ public abstract class DispatcherRegistry<C extends MessageClass,
         checkNotNull(messageClass);
         Collection<D> dispatchers = this.dispatchers.get(messageClass);
         return ImmutableSet.copyOf(dispatchers);
+    }
+
+    /**
+     * Obtains a single dispatcher (if available) for the passed message class.
+     *
+     * @apiNote This method must be called only for serving {@link UnicastBus}es.
+     * @throws IllegalStateException if more than one dispatcher is found
+     */
+    protected Optional<? extends D> getDispatcher(C messageClass) {
+        Set<D> dispatchers = getDispatchers(messageClass);
+        if (dispatchers.isEmpty()) {
+            return Optional.empty();
+        }
+
+        int size = dispatchers.size();
+        checkState(size == 1,
+                   "More than one dispatcher found (%s) for the message class `%s`",
+                   size, messageClass);
+
+        // Since there can be only one dispatcher per message class, and the set is not empty,
+        // we get the single element.
+        D result = dispatchers.stream()
+                              .findFirst()
+                              .get();
+        return Optional.of(result);
     }
 
     /**
