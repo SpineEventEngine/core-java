@@ -1,6 +1,5 @@
 io.spine.server
 io.spine.server.aggregate
-io.spine.server.aggregate.storage
 io.spine.server.annotation
 io.spine.server.bus
 io.spine.server.command
