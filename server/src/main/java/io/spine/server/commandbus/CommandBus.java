@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Streams;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
@@ -41,6 +42,7 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.SystemGateway;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
@@ -93,7 +95,8 @@ public class CommandBus extends Bus<Command,
      *
      * @see #getValidator() to getreive the non-null value of the validator
      */
-    private @Nullable CommandValidator commandValidator;
+    @LazyInit
+    private @MonotonicNonNull CommandValidator commandValidator;
 
     /**
      * Creates new instance according to the passed {@link Builder}.
