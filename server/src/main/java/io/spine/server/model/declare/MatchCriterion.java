@@ -38,11 +38,24 @@ import static io.spine.server.model.declare.SignatureMismatch.create;
 import static java.lang.String.format;
 
 /**
+ * The criteria of {@linkplain Method method} matching to a certain {@linkplain MethodSignature
+ * set of requirements}, applied to the model message handlers.
+ *
+ * <p>Each criterion defines the {@linkplain #getSeverity() severity} of its violation.
+ * Depending on it, the callees may refuse working with the tested methods.
+ *
+ * <p>Additionally, upon testing the criteria provide a number of {@linkplain SignatureMismatch
+ * signature mismatches}, that may later be used for diagnostic purposes.
+ *
  * @author Alex Tymchenko
  */
 @Internal
 public enum MatchCriterion {
 
+    /**
+     * The criterion, which checks that the method return type is among the
+     * {@linkplain MethodSignature#getValidReturnTypes() expected}.
+     */
     RETURN_TYPE(ERROR,
                 "The return type of `%s` method does not match the constraints " +
                         "set for `%s`-annotated method.") {
@@ -64,6 +77,10 @@ public enum MatchCriterion {
         }
     },
 
+    /**
+     * The criterion, which ensures that the method access modifier is among the
+     * {@linkplain MethodSignature#getAllowedModifiers() expected}.
+     */
     ACCESS_MODIFIER(WARN,
                     "The access modifier of `%s` method must be `%s`, but it is `%s`.") {
         @Override
@@ -86,6 +103,10 @@ public enum MatchCriterion {
         }
     },
 
+    /**
+     * The criterion checking that the tested method throws only
+     * {@linkplain MethodSignature#getAllowedExceptions() allowed exceptions}.
+     */
     PROHIBITED_EXCEPTION(ERROR, "%s") {
         @Override
         Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature) {
@@ -103,6 +124,12 @@ public enum MatchCriterion {
         }
     },
 
+    /**
+     * The criterion for the method parameter list to conform the
+     * {@linkplain MethodSignature#getParamSpecClass() requirements}.
+     *
+     * @see MethodParams#findMatching(Method, Class)
+     */
     PARAMETER_LIST(ERROR,
                    "`%s` method has an invalid parameter list. " +
                            "Please refer to `%s` annotation docs for allowed parameters.") {
@@ -125,6 +152,10 @@ public enum MatchCriterion {
     private final SignatureMismatch.Severity severity;
     private final String format;
 
+    /**
+     * Creates an instance with the given severity and the template of the signature
+     * mismatch message.
+     */
     MatchCriterion(SignatureMismatch.Severity severity, String format) {
         this.severity = severity;
         this.format = format;
@@ -139,6 +170,16 @@ public enum MatchCriterion {
         return message;
     }
 
+    /**
+     * Tests the method against the rules defined by the signature.
+     *
+     * @param method
+     *         the method to test
+     * @param signature
+     *         the signature to use in testing
+     * @return {@link Optional#empty() Optional.empty()} if there was no mismatch,
+     *         or the {@code Optional<SignatureMismatch>} of the mismatch detected.
+     */
     abstract Optional<SignatureMismatch> test(Method method, MethodSignature<?, ?> signature);
 
     private static String methodAsString(Method method) {
