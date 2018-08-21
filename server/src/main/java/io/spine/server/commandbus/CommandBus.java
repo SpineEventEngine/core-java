@@ -41,7 +41,6 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.GatewayFunction;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -54,6 +53,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.system.server.GatewayFunction.delegatingTo;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
 
@@ -204,8 +204,7 @@ public class CommandBus extends Bus<Command,
 
     SystemGateway gatewayFor(TenantId tenantId) {
         checkNotNull(tenantId);
-        SystemGateway result = GatewayFunction.delegatingTo(systemGateway)
-                                              .get(tenantId);
+        SystemGateway result = delegatingTo(systemGateway).get(tenantId);
         return result;
     }
 
@@ -433,8 +432,7 @@ public class CommandBus extends Bus<Command,
                                            .build();
             }
             flowWatcher = new CommandFlowWatcher((tenantId) -> {
-                SystemGateway result = GatewayFunction.delegatingTo(systemGateway)
-                                                      .get(tenantId);
+                SystemGateway result = delegatingTo(systemGateway).get(tenantId);
                 return result;
             });
             commandScheduler.setFlowWatcher(flowWatcher);
