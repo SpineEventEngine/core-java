@@ -20,19 +20,21 @@
 
 package io.spine.server.aggregate.imports;
 
-import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
 import io.spine.server.aggregate.ImportEvent;
 import io.spine.server.bus.Bus;
+import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.DispatcherRegistry;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MessageUnhandled;
 import io.spine.server.bus.MulticastBus;
+import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.SystemGateway;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.server.bus.BusBuilder.FieldCheck.gatewayNotSet;
+import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
 
 /**
  * Dispatches import events to aggregates that import these events.
@@ -45,10 +47,14 @@ public class ImportBus
     private final ImportValidator validator = new ImportValidator();
     private final DeadImportEventHandler deadImportEventHandler = new DeadImportEventHandler();
     private final SystemGateway systemGateway;
+    private final TenantIndex tenantIndex;
 
     protected ImportBus(Builder builder) {
         super(builder);
-        this.systemGateway = checkNotNull(builder.systemGateway);
+        this.systemGateway = builder.systemGateway()
+                                    .orElseThrow(gatewayNotSet());
+        this.tenantIndex = builder.tenantIndex()
+                                  .orElseThrow(tenantIndexNotSet());
     }
 
     @Override
@@ -107,9 +113,7 @@ public class ImportBus
             extends DispatcherRegistry<EventClass, ImportDispatcher<?>> {
     }
 
-    public static class Builder extends AbstractBuilder<ImportEnvelope, ImportEvent, Builder> {
-
-        private SystemGateway systemGateway;
+    public static class Builder extends BusBuilder<ImportEnvelope, ImportEvent, Builder> {
 
         @Override
         public Bus<?, ImportEnvelope, ?, ?> build() {
@@ -121,17 +125,5 @@ public class ImportBus
             return this;
         }
 
-        /**
-         * Inject the {@link SystemGateway} of the bounded context to which the built bus belongs.
-         *
-         * <p>This method is {@link Internal} to the framework. The name of the method starts with
-         * {@code inject} prefix so that this method does not appear in an autocomplete hint for
-         * {@code set} prefix.
-         */
-        @Internal
-        public Builder injectSystemGateway(SystemGateway gateway) {
-            this.systemGateway = checkNotNull(gateway);
-            return this;
-        }
     }
 }

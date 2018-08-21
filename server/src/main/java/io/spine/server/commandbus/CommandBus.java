@@ -36,6 +36,7 @@ import io.spine.core.Commands;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.bus.Bus;
+import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
@@ -51,8 +52,9 @@ import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.server.bus.BusBuilder.FieldCheck.gatewayNotSet;
+import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
 import static io.spine.system.server.GatewayFunction.delegatingTo;
 import static java.lang.String.format;
 import static java.util.Optional.ofNullable;
@@ -110,8 +112,10 @@ public class CommandBus extends Bus<Command,
                            : false;
         this.scheduler = builder.commandScheduler;
         this.rejectionBus = builder.rejectionBus;
-        this.systemGateway = builder.systemGateway;
-        this.tenantIndex = builder.tenantIndex;
+        this.systemGateway = builder.systemGateway()
+                                    .orElseThrow(gatewayNotSet());
+        this.tenantIndex = builder.tenantIndex()
+                                  .orElseThrow(tenantIndexNotSet());
         this.deadCommandHandler = new DeadCommandHandler();
         this.errorHandler = CommandErrorHandler.newBuilder()
                                                .setRejectionBus(rejectionBus)
@@ -311,7 +315,7 @@ public class CommandBus extends Bus<Command,
      * The {@code Builder} for {@code CommandBus}.
      */
     @CanIgnoreReturnValue
-    public static class Builder extends AbstractBuilder<CommandEnvelope, Command, Builder> {
+    public static class Builder extends BusBuilder<CommandEnvelope, Command, Builder> {
 
         /**
          * The multi-tenancy flag for the {@code CommandBus} to build.
@@ -332,8 +336,6 @@ public class CommandBus extends Bus<Command,
          */
         private CommandScheduler commandScheduler;
         private RejectionBus rejectionBus;
-        private SystemGateway systemGateway;
-        private TenantIndex tenantIndex;
         private CommandFlowWatcher flowWatcher;
 
         /**
@@ -378,40 +380,6 @@ public class CommandBus extends Bus<Command,
         }
 
         /**
-         * Inject the {@link SystemGateway} of the bounded context to which the built bus belongs.
-         *
-         * @apiNote This method is {@link Internal} to the framework. The name of the method starts
-         *          with the {@code inject} prefix so that this method does not appear in an
-         *          auto-complete hint for the {@code set} prefix.
-         */
-        @Internal
-        public Builder injectSystemGateway(SystemGateway gateway) {
-            this.systemGateway = checkNotNull(gateway);
-            return this;
-        }
-
-        /**
-         * Inject the {@link TenantIndex} of the bounded context to which the built bus belongs.
-         *
-         * @apiNote This method is {@link Internal} to the framework. The name of the method starts
-         *          with the {@code inject} prefix so that this method does not appear in an
-         *          auto-complete hint for the {@code set} prefix.
-         */
-        @Internal
-        public Builder injectTenantIndex(TenantIndex index) {
-            this.tenantIndex = checkNotNull(index);
-            return this;
-        }
-
-        Optional<SystemGateway> getSystemGateway() {
-            return ofNullable(systemGateway);
-        }
-
-        Optional<TenantIndex> getTenantIndex() {
-            return ofNullable(tenantIndex);
-        }
-
-        /**
          * Builds an instance of {@link CommandBus}.
          *
          * <p>This method is supposed to be called internally when building an enclosing
@@ -421,8 +389,7 @@ public class CommandBus extends Bus<Command,
         @Internal
         @CheckReturnValue
         public CommandBus build() {
-            checkSet(systemGateway, SystemGateway.class, "injectSystemGateway");
-            checkSet(tenantIndex, SystemGateway.class, "injectTenantIndex");
+            checkFieldsSet();
 
             if (commandScheduler == null) {
                 commandScheduler = new ExecutorCommandScheduler();
@@ -431,6 +398,9 @@ public class CommandBus extends Bus<Command,
                 rejectionBus = RejectionBus.newBuilder()
                                            .build();
             }
+            @SuppressWarnings("OptionalGetWithoutIsPresent") // ensured by `checkFieldsSet()`
+            SystemGateway systemGateway = systemGateway().get();
+
             flowWatcher = new CommandFlowWatcher((tenantId) -> {
                 SystemGateway result = delegatingTo(systemGateway).get(tenantId);
                 return result;
@@ -441,14 +411,6 @@ public class CommandBus extends Bus<Command,
             commandScheduler.setCommandBus(commandBus);
 
             return commandBus;
-        }
-
-        private static void checkSet(@Nullable Object field,
-                                     Class<?> fieldType,
-                                     String setterName) {
-            checkState(field != null,
-                       "%s must be set. Please call CommandBus.Builder.%s().",
-                       fieldType.getSimpleName(), setterName);
         }
 
         @Override

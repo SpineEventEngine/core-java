@@ -24,13 +24,13 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.annotation.Internal;
 import io.spine.core.MessageInvalid;
 import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.Rejections;
 import io.spine.grpc.StreamObservers;
+import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
@@ -71,7 +71,8 @@ public class RejectionBus extends CommandOutputBus<Rejection,
     private RejectionBus(Builder builder) {
         super(builder);
         this.enricher = builder.enricher;
-        this.systemGateway = builder.systemGateway;
+        this.systemGateway = builder.systemGateway()
+                                    .orElseThrow(BusBuilder.FieldCheck.gatewayNotSet());
     }
 
     /**
@@ -157,7 +158,7 @@ public class RejectionBus extends CommandOutputBus<Rejection,
 
     /** The {@code Builder} for {@code RejectionBus}. */
     @CanIgnoreReturnValue
-    public static class Builder extends AbstractBuilder<RejectionEnvelope, Rejection, Builder> {
+    public static class Builder extends BusBuilder<RejectionEnvelope, Rejection, Builder> {
 
 
         /**
@@ -167,8 +168,6 @@ public class RejectionBus extends CommandOutputBus<Rejection,
          * in the {@code RejectionBus} instance built.
          */
         private @Nullable RejectionEnricher enricher;
-
-        private @Nullable SystemGateway systemGateway;
 
         /** Prevents direct instantiation. */
         private Builder() {
@@ -187,12 +186,6 @@ public class RejectionBus extends CommandOutputBus<Rejection,
          */
         public Builder setEnricher(RejectionEnricher enricher) {
             this.enricher = enricher;
-            return this;
-        }
-
-        @Internal
-        public Builder injectSystemGateway(SystemGateway systemGateway) {
-            this.systemGateway = systemGateway;
             return this;
         }
 

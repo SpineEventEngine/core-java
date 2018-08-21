@@ -24,6 +24,7 @@ import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Rejection;
+import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.bus.MulticastBus;
 import io.spine.type.MessageClass;
@@ -52,7 +53,7 @@ public abstract class CommandOutputBus<M extends Message,
                                        D extends MessageDispatcher<C, E, ?>>
         extends MulticastBus<M, E, C, D> {
 
-    protected CommandOutputBus(AbstractBuilder<E, M, ?> builder) {
+    protected CommandOutputBus(BusBuilder<E, M, ?> builder) {
         super(builder);
     }
 

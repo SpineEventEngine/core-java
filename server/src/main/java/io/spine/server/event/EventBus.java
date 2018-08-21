@@ -34,6 +34,7 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
+import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
@@ -242,7 +243,7 @@ public class EventBus
 
     /** The {@code Builder} for {@code EventBus}. */
     @CanIgnoreReturnValue
-    public static class Builder extends AbstractBuilder<EventEnvelope, Event, Builder> {
+    public static class Builder extends BusBuilder<EventEnvelope, Event, Builder> {
 
         private static final String MSG_EVENT_STORE_CONFIGURED = "EventStore already configured.";
 

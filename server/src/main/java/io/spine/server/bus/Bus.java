@@ -20,8 +20,6 @@
 
 package io.spine.server.bus;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -33,7 +31,6 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
-import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -74,8 +71,9 @@ public abstract class Bus<T extends Message,
 
     private final ChainBuilder<E> chainBuilder;
 
-    protected Bus(AbstractBuilder<E, T, ?> builder) {
-        this.chainBuilder = builder.chainBuilder.copy();
+    protected Bus(BusBuilder<E, T, ?> builder) {
+        super();
+        this.chainBuilder = builder.chainBuilderCopy();
     }
 
     /**
@@ -228,7 +226,7 @@ public abstract class Bus<T extends Message,
      * a chain always has the following format:
      *
      * <pre>
-     *     Chain head -> {@link ValidatingFilter} -> {@link DeadMessageFilter} -> custom filters from {@linkplain AbstractBuilder Builder} -> chain tail.
+     *     Chain head -> {@link ValidatingFilter} -> {@link DeadMessageFilter} -> custom filters from {@linkplain BusBuilder Builder} -> chain tail.
      * </pre>
      *
      * <p>The head and the tail of the chain are created by the {@code Bus} itself. Those are
@@ -393,62 +391,4 @@ public abstract class Bus<T extends Message,
      */
     protected abstract void store(Iterable<T> messages);
 
-    /**
-     * The implementation base for the bus builders.
-     *
-     * @param <E> the type of {@link MessageEnvelope} posted by the bus
-     * @param <T> the type of {@link Message} posted by the bus
-     * @param <B> the own type of the builder
-     */
-    @CanIgnoreReturnValue
-    public abstract static class AbstractBuilder<E extends MessageEnvelope<?, T, ?>,
-                                                 T extends Message,
-                                                 B extends AbstractBuilder<E, T, B>> {
-
-        private final ChainBuilder<E> chainBuilder;
-
-        /**
-         * Creates a new instance of the bus builder.
-         */
-        protected AbstractBuilder() {
-            this.chainBuilder = FilterChain.newBuilder();
-        }
-
-        /**
-         * Adds the given {@linkplain BusFilter filter} to the builder.
-         *
-         * <p>The order of appending the filters to the builder is the order of the filters in
-         * the resulting bus.
-         *
-         * @param filter the filter to append
-         */
-        public final B appendFilter(BusFilter<E> filter) {
-            checkNotNull(filter);
-            chainBuilder.append(filter);
-            return self();
-        }
-
-        /**
-         * Obtains the {@linkplain BusFilter bus filters} of this builder.
-         *
-         * @see #appendFilter(BusFilter)
-         */
-        public final Deque<BusFilter<E>> getFilters() {
-            return chainBuilder.getFilters();
-        }
-
-        /**
-         * Creates new instance of {@code Bus} with the set parameters.
-         *
-         * <p>It is recommended to specify the exact resulting type of the bus in the return type
-         * when overriding this method.
-         */
-        @CheckReturnValue
-        public abstract Bus<?, E, ?, ?> build();
-
-        /**
-         * @return {@code this} reference to avoid redundant casts
-         */
-        protected abstract B self();
-    }
 }
