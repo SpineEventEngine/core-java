@@ -314,9 +314,7 @@ public class CommandBus extends UnicastBus<Command,
         private RejectionBus rejectionBus;
         private CommandFlowWatcher flowWatcher;
 
-        /**
-         * Prevents direct instantiation.
-         */
+        /** Prevents direct instantiation. */
         private Builder() {
             super();
         }

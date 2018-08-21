@@ -390,5 +390,4 @@ public abstract class Bus<T extends Message,
      * @param messages the messages to store
      */
     protected abstract void store(Iterable<T> messages);
-
 }

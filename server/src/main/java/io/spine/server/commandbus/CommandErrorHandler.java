@@ -28,6 +28,7 @@ import io.spine.base.Errors;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.Rejection;
+import io.spine.logging.Logging;
 import io.spine.server.rejection.RejectionBus;
 import io.spine.string.Stringifiers;
 import io.spine.system.server.MarkCommandAsErrored;
@@ -35,13 +36,10 @@ import io.spine.system.server.MarkCommandAsRejected;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Commands.rejectWithCause;
 import static io.spine.core.Rejections.causedByRejection;
-import static java.lang.String.format;
 
 /**
  * The handler of the errors thrown while command dispatching.
@@ -54,7 +52,7 @@ import static java.lang.String.format;
  * @see #handleError(CommandEnvelope, RuntimeException)
  */
 @Internal
-public final class CommandErrorHandler {
+public final class CommandErrorHandler implements Logging {
 
     private final RejectionBus rejectionBus;
     private final SystemGateway systemGateway;
@@ -78,11 +76,9 @@ public final class CommandErrorHandler {
     public HandledError handleError(CommandEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
-        if (causedByRejection(exception)) {
-            return handleRejection(envelope, exception);
-        } else {
-            return handleRuntime(envelope, exception);
-        }
+        return causedByRejection(exception)
+               ? handleRejection(envelope, exception)
+               : handleRuntime(envelope, exception);
     }
 
     private HandledError handleRejection(CommandEnvelope envelope, RuntimeException exception) {
@@ -106,10 +102,11 @@ public final class CommandErrorHandler {
         if (isPreProcessed(exception)) {
             return HandledError.forPreProcessed();
         } else {
-            log().error(format("Error dispatching command (class: %s id: %s).",
-                               envelope.getMessage().getClass(),
-                               Stringifiers.toString(envelope.getId())),
-                        exception);
+            String commandId = Stringifiers.toString(envelope.getId());
+            _error(exception,
+                   "Error dispatching command (class: `%s` id: `%s`).",
+                   envelope.getMessageClass(),
+                   commandId);
             Error error = Errors.causeOf(exception);
             markErrored(envelope, error);
             return HandledError.forRuntime(exception);
@@ -225,15 +222,5 @@ public final class CommandErrorHandler {
         public CommandErrorHandler build() {
             return new CommandErrorHandler(this);
         }
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(CommandErrorHandler.class);
     }
 }

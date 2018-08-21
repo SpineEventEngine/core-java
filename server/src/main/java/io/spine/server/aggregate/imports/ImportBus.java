@@ -24,14 +24,16 @@ import com.google.common.collect.Streams;
 import io.spine.core.EventClass;
 import io.spine.core.TenantId;
 import io.spine.server.aggregate.ImportEvent;
-import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.DispatcherRegistry;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MessageUnhandled;
+import io.spine.server.bus.UnicastBus;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.SystemGateway;
+
+import java.util.Optional;
 
 import static io.spine.server.bus.BusBuilder.FieldCheck.gatewayNotSet;
 import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
@@ -42,19 +44,23 @@ import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
  * @author Alexander Yevsyukov
  */
 public class ImportBus
-        extends Bus<ImportEvent, ImportEnvelope, EventClass, ImportDispatcher<?>> {
+        extends UnicastBus<ImportEvent, ImportEnvelope, EventClass, ImportDispatcher<?>> {
 
     private final ImportValidator validator = new ImportValidator();
     private final DeadImportEventHandler deadImportEventHandler = new DeadImportEventHandler();
     private final SystemGateway systemGateway;
     private final TenantIndex tenantIndex;
 
-    protected ImportBus(Builder builder) {
+    private ImportBus(Builder builder) {
         super(builder);
         this.systemGateway = builder.systemGateway()
                                     .orElseThrow(gatewayNotSet());
         this.tenantIndex = builder.tenantIndex()
                                   .orElseThrow(tenantIndexNotSet());
+    }
+
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
     @Override
@@ -68,7 +74,7 @@ public class ImportBus
     }
 
     @Override
-    protected DispatcherRegistry<EventClass, ImportDispatcher<?>> createRegistry() {
+    protected Registry createRegistry() {
         return new Registry();
     }
 
@@ -79,10 +85,13 @@ public class ImportBus
 
     @Override
     protected void dispatch(ImportEnvelope envelope) {
-//        int dispatchersCalled = callDispatchers(envelope);
-//        checkState(dispatchersCalled != 0,
-//                   "The event with class: `%s` has no import dispatchers.",
-//                   envelope.getMessageClass());
+        ImportDispatcher<?> dispatcher = getDispatcher(envelope);
+        dispatcher.dispatch(envelope);
+    }
+
+    @Override
+    protected Registry registry() {
+        return (Registry) super.registry();
     }
 
     /**
@@ -121,6 +130,12 @@ public class ImportBus
      */
     private static final class Registry
             extends DispatcherRegistry<EventClass, ImportDispatcher<?>> {
+
+        @SuppressWarnings("RedundantMethodOverride") // Overrides to open access to the method.
+        @Override
+        protected Optional<? extends ImportDispatcher<?>> getDispatcher(EventClass messageClass) {
+            return super.getDispatcher(messageClass);
+        }
     }
 
     /**
@@ -128,8 +143,13 @@ public class ImportBus
      */
     public static class Builder extends BusBuilder<ImportEnvelope, ImportEvent, Builder> {
 
+        /** Prevents direct instantiation. */
+        private Builder() {
+            super();
+        }
+
         @Override
-        public Bus<?, ImportEnvelope, ?, ?> build() {
+        public ImportBus build() {
             return new ImportBus(this);
         }
 
