@@ -31,6 +31,8 @@ import static java.lang.reflect.Modifier.isProtected;
 import static java.lang.reflect.Modifier.isPublic;
 
 /**
+ * The predicate for {@linkplain Modifier access modifiers} of {@linkplain Method methods}.
+ *
  * @author Alex Tymchenko
  */
 public class AccessModifier implements Predicate<Method> {
@@ -41,7 +43,6 @@ public class AccessModifier implements Predicate<Method> {
     public static final AccessModifier PROTECTED =
             new AccessModifier(Modifier::isProtected, "protected");
 
-
     public static final AccessModifier PACKAGE_PRIVATE =
             new AccessModifier(
                     methodModifier -> !(isPublic(methodModifier)
@@ -51,21 +52,44 @@ public class AccessModifier implements Predicate<Method> {
     public static final AccessModifier PRIVATE =
             new AccessModifier(Modifier::isProtected, "private");
 
-
+    /**
+     * The predicate which works with the {@linkplain Method#getModifiers() raw representation }
+     * of method's access modifiers.
+     */
     private final Predicate<Integer> checkingMethod;
 
+    /**
+     * The name of the access modifier.
+     *
+     * <p>Serves for pretty printing.
+     */
     private final String name;
 
-    public AccessModifier(Predicate<Integer> checkingMethod, String name) {
+    private AccessModifier(Predicate<Integer> checkingMethod, String name) {
         this.checkingMethod = checkingMethod;
         this.name = name;
     }
 
+    /**
+     * Composes a string representation of several access modifiers.
+     *
+     * @param modifiers
+     *         the modifiers to compose into a {@code String}
+     * @return the string with modifier-as-strings
+     */
     static Object asString(Iterable<AccessModifier> modifiers) {
         return Joiner.on(", ")
                      .join(modifiers);
     }
 
+    /**
+     * Checks whether the method is of the modifier determined by {@code this} instance.
+     *
+     * @param method
+     *         the method to check
+     * @return {@code true} if the method is declared with the expected modifier,
+     *         {@code false} otherwise.
+     */
     @Override
     public boolean test(Method method) {
         return checkingMethod.test(method.getModifiers());
