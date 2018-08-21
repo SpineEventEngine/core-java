@@ -53,7 +53,7 @@ final class DefaultSystemGateway implements SystemGateway {
 
     private final BoundedContext system;
 
-    public DefaultSystemGateway(BoundedContext system) {
+    DefaultSystemGateway(BoundedContext system) {
         this.system = system;
     }
 
