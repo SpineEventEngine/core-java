@@ -23,9 +23,9 @@ package io.spine.server.entity;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.Command;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.Repositories;
 import io.spine.server.aggregate.given.aggregate.IgTestAggregate;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
@@ -38,7 +38,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static io.spine.core.CommandEnvelope.of;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.entity.given.IdempotencyGuardTestEnv.command;
 import static io.spine.server.entity.given.IdempotencyGuardTestEnv.createProject;
@@ -90,26 +89,29 @@ class IdempotencyGuardTest {
 
             IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
             IdempotencyGuard guard = aggregate.idempotencyGuard();
-            assertThrows(DuplicateCommandException.class, () -> guard.check(of(createCommand)));
+            assertThrows(DuplicateCommandException.class,
+                         () -> guard.check(CommandEnvelope.of(createCommand)));
         }
 
         @Test
         @DisplayName("not throw exception when command was handled but snapshot was made")
         void notThrowForCommandHandledAfterSnapshot() {
-            Repositories.setSnapshotTrigger(repository, 1);
+            Repositories.setIdempotencyLimits(repository, 1, 1);
 
             TenantId tenantId = newTenantId();
             ProjectId projectId = newProjectId();
             Command createCommand = command(createProject(projectId), tenantId);
+            Command startCommand = command(startProject(projectId), tenantId);
 
             CommandBus commandBus = boundedContext.getCommandBus();
             StreamObserver<Ack> noOpObserver = noOpObserver();
             commandBus.post(createCommand, noOpObserver);
+            commandBus.post(startCommand, noOpObserver);
 
             IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
 
             IdempotencyGuard guard = aggregate.idempotencyGuard();
-            guard.check(of(createCommand));
+            guard.check(CommandEnvelope.of(createCommand));
         }
 
         @Test
@@ -121,7 +123,7 @@ class IdempotencyGuardTest {
             IgTestAggregate aggregate = new IgTestAggregate(projectId);
 
             IdempotencyGuard guard = aggregate.idempotencyGuard();
-            guard.check(of(createCommand));
+            guard.check(CommandEnvelope.of(createCommand));
         }
 
         @Test
@@ -139,9 +141,7 @@ class IdempotencyGuardTest {
             IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
 
             IdempotencyGuard guard = aggregate.idempotencyGuard();
-            guard.check(of(startCommand));
+            guard.check(CommandEnvelope.of(startCommand));
         }
     }
-
-
 }

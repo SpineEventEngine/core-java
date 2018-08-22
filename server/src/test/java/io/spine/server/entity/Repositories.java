@@ -18,10 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate;
+package io.spine.server.entity;
 
 /**
- * A utility for working with {@link AggregateRepository} instances in tests.
+ * A utility for working with {@link Repository} instances in tests.
  *
  * @author Dmytro Dashenkov
  */
@@ -33,11 +33,8 @@ public final class Repositories {
     private Repositories() {
     }
 
-    /**
-     * Calls {@link AggregateRepository#setSnapshotTrigger(int)} on the given repository with
-     * the given argument.
-     */
-    public static void setSnapshotTrigger(AggregateRepository<?, ?> repository, int trigger) {
-        repository.setSnapshotTrigger(trigger);
+    public static void setIdempotencyLimits(Repository<?, ?> repository,
+                                            int forCommands, int forEvents) {
+        repository.setIdempotencySpec(forCommands, forEvents);
     }
 }
