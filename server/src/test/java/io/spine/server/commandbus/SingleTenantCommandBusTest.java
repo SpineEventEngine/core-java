@@ -25,15 +25,12 @@ import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
-import io.spine.core.Rejection;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.CommandPostingHandler;
 import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.FaultyHandler;
-import io.spine.server.commandbus.given.SingleTenantCommandBusTestEnv.MemoizingRejectionSubscriber;
 import io.spine.test.command.FirstCmdCreateProject;
 import io.spine.test.command.SecondCmdStartProject;
-import io.spine.test.reflect.InvalidProjectName;
 import io.spine.testing.client.TestActorRequestFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -44,9 +41,7 @@ import java.util.List;
 
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.core.CommandValidationError.TENANT_INAPPLICABLE;
-import static io.spine.core.Rejections.toRejection;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
-import static io.spine.server.commandbus.Given.ACommand.addTask;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.commandbus.Given.ACommand.firstCreateProject;
 import static io.spine.server.commandbus.Given.ACommand.removeTask;
@@ -113,27 +108,6 @@ class SingleTenantCommandBusTest extends AbstractCommandBusTestSuite {
                               InvalidCommandException.class,
                               cmd);
         }
-    }
-
-    @Test
-    @DisplayName("propagate rejections to rejection bus")
-    void propagateRejections() {
-        FaultyHandler faultyHandler = new FaultyHandler(eventBus);
-        commandBus.register(faultyHandler);
-        MemoizingRejectionSubscriber rejectionSubscriber = new MemoizingRejectionSubscriber();
-        rejectionBus.register(rejectionSubscriber);
-
-        Command addTaskCommand = clearTenantId(addTask());
-        MemoizingObserver<Ack> observer = memoizingObserver();
-        commandBus.post(addTaskCommand, observer);
-
-        InvalidProjectName throwable = faultyHandler.getThrowable();
-        Rejection expectedRejection = toRejection(throwable, addTaskCommand);
-        rejectionSubscriber.verifyGot(expectedRejection);
-
-        Ack ack = observer.firstResponse();
-        assertTrue(ack.getStatus()
-                      .hasOk());
     }
 
     @Test

@@ -38,8 +38,6 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventContext;
 import io.spine.core.MessageEnvelope;
-import io.spine.core.React;
-import io.spine.core.RejectionContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
@@ -48,9 +46,9 @@ import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.rejection.CannotModifyArchivedEntity;
+import io.spine.server.event.React;
 import io.spine.server.route.CommandRoute;
 import io.spine.server.route.EventRoute;
-import io.spine.server.route.RejectionRoute;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectVBuilder;
@@ -80,6 +78,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.google.common.collect.ImmutableSet.copyOf;
 import static io.spine.core.Events.nothing;
 import static io.spine.testing.server.aggregate.AggregateMessageDispatcher.dispatchCommand;
 import static java.util.Collections.emptyList;
@@ -214,11 +213,6 @@ public class AggregateRepositoryTestEnv {
             super(id);
         }
 
-        @Override
-        public int uncommittedEventsCount() {
-            return super.uncommittedEventsCount();
-        }
-
         @Assign
         AggProjectCreated handle(AggCreateProject msg) {
             return AggProjectCreated.newBuilder()
@@ -264,7 +258,7 @@ public class AggregateRepositoryTestEnv {
          * Otherwise returns empty iterable.
          */
         @React
-        private Iterable<AggProjectArchived> on(AggProjectArchived event) {
+        Iterable<AggProjectArchived> on(AggProjectArchived event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
                 return ImmutableList.of(AggProjectArchived.newBuilder()
@@ -284,7 +278,7 @@ public class AggregateRepositoryTestEnv {
          * Otherwise returns empty iterable.
          */
         @React
-        private Iterable<AggProjectDeleted> on(AggProjectDeleted event) {
+        Iterable<AggProjectDeleted> on(AggProjectDeleted event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
                 return ImmutableList.of(AggProjectDeleted.newBuilder()
@@ -341,7 +335,7 @@ public class AggregateRepositoryTestEnv {
                                @Override
                                public Set<ProjectId> apply(AggProjectArchived msg,
                                                            EventContext ctx) {
-                                   return ImmutableSet.copyOf(msg.getChildProjectIdList());
+                                   return copyOf(msg.getChildProjectIdList());
                                }
                            })
                     .route(AggProjectDeleted.class,
@@ -351,7 +345,7 @@ public class AggregateRepositoryTestEnv {
                                @Override
                                public Set<ProjectId> apply(AggProjectDeleted msg,
                                                            EventContext ctx) {
-                                   return ImmutableSet.copyOf(msg.getChildProjectIdList());
+                                   return copyOf(msg.getChildProjectIdList());
                                }
                            });
         }
@@ -548,7 +542,7 @@ public class AggregateRepositoryTestEnv {
          * Otherwise returns empty iterable.
          */
         @React
-        private Iterable<AggProjectArchived> on(AggProjectArchived event) {
+        Iterable<AggProjectArchived> on(AggProjectArchived event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
                 return ImmutableList.of(AggProjectArchived.newBuilder()
@@ -563,7 +557,7 @@ public class AggregateRepositoryTestEnv {
          * Otherwise returns empty iterable.
          */
         @React
-        private Iterable<AggProjectDeleted> on(AggProjectDeleted event) {
+        Iterable<AggProjectDeleted> on(AggProjectDeleted event) {
             if (event.getChildProjectIdList()
                      .contains(getId())) {
                 return ImmutableList.of(AggProjectDeleted.newBuilder()
@@ -601,7 +595,7 @@ public class AggregateRepositoryTestEnv {
                                @Override
                                public Set<ProjectId> apply(AggProjectArchived message,
                                                            EventContext context) {
-                                   return ImmutableSet.copyOf(message.getChildProjectIdList());
+                                   return copyOf(message.getChildProjectIdList());
                                }
                            });
         }
@@ -660,7 +654,7 @@ public class AggregateRepositoryTestEnv {
         }
 
         @React
-        private Iterable<AggProjectArchived> on(
+        Iterable<AggProjectArchived> on(
                 Rejections.AggCannotStartArchivedProject rejection) {
             List<ProjectId> childIdList = rejection.getChildProjectIdList();
             if (childIdList.contains(getId())) {
@@ -683,17 +677,17 @@ public class AggregateRepositoryTestEnv {
 
         public RejectionReactingRepository() {
             super();
-            getRejectionRouting()
+            getEventRouting()
                     .route(Rejections.AggCannotStartArchivedProject.class,
-                           new RejectionRoute<ProjectId,
+                           new EventRoute<ProjectId,
                                    Rejections.AggCannotStartArchivedProject>() {
                                private static final long serialVersionUID = 0L;
 
                                @Override
                                public Set<ProjectId> apply(
                                        Rejections.AggCannotStartArchivedProject message,
-                                       RejectionContext context) {
-                                   return ImmutableSet.copyOf(message.getChildProjectIdList());
+                                       EventContext context) {
+                                   return copyOf(message.getChildProjectIdList());
                                }
                            });
         }

@@ -24,14 +24,13 @@ import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
-import io.spine.server.command.Command;
+import io.spine.core.MessageEnvelope;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.SeveralCommands;
 import io.spine.server.commandbus.SingleCommand;
 import io.spine.server.commandbus.Split;
 import io.spine.server.commandbus.Transform;
 import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.HandlerMethodPredicate;
 import io.spine.server.model.MethodResult;
 import io.spine.type.MessageClass;
 
@@ -49,25 +48,17 @@ import static io.spine.server.commandbus.CommandSequence.transform;
  *
  * @param <T> the type of the target object
  * @param <M> the type of the message class
- * @param <C> the type of the message context
+ * @param <E> the type of the message envelope, in which the incoming message is wrapped
  * @param <R> the type of the method result
  *
  * @author Alexander Yevsyukov
  */
 @Immutable
-public
-interface CommandingMethod<T, M extends MessageClass, C extends Message, R extends MethodResult>
-        extends HandlerMethod<T, M, C, R> {
-
-    /**
-     * Abstract base for commanding method predicates.
-     */
-    abstract class AbstractPredicate<C extends Message> extends HandlerMethodPredicate<C> {
-
-        AbstractPredicate(Class<C> contextClass) {
-            super(Command.class, contextClass);
-        }
-    }
+public interface CommandingMethod<T,
+                                  M extends MessageClass,
+                                  E extends MessageEnvelope<?, ?, ?>,
+                                  R extends MethodResult>
+        extends HandlerMethod<T, M, E, R> {
 
     /**
      * A commanding method returns one or more command messages.

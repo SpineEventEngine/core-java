@@ -17,6 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -33,13 +34,16 @@ import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
+import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
-import io.spine.server.rejection.RejectionBus;
+import io.spine.server.command.CommandErrorHandler;
+import io.spine.server.event.EventBus;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -72,7 +76,7 @@ public class CommandBus extends Bus<Command,
                                     CommandDispatcher<?>> {
 
     private final CommandScheduler scheduler;
-    private final RejectionBus rejectionBus;
+    private final EventBus eventBus;
     private final SystemGateway systemGateway;
     private final TenantIndex tenantIndex;
     private final CommandErrorHandler errorHandler;
@@ -109,14 +113,11 @@ public class CommandBus extends Bus<Command,
                            ? builder.multitenant
                            : false;
         this.scheduler = builder.commandScheduler;
-        this.rejectionBus = builder.rejectionBus;
+        this.eventBus = builder.eventBus;
         this.systemGateway = builder.systemGateway;
         this.tenantIndex = builder.tenantIndex;
         this.deadCommandHandler = new DeadCommandHandler();
-        this.errorHandler = CommandErrorHandler.newBuilder()
-                                               .setRejectionBus(rejectionBus)
-                                               .setSystemGateway(systemGateway)
-                                               .build();
+        this.errorHandler = CommandErrorHandler.with(systemGateway);
         this.flowWatcher = builder.flowWatcher;
     }
 
@@ -136,18 +137,6 @@ public class CommandBus extends Bus<Command,
     @VisibleForTesting
     CommandScheduler scheduler() {
         return scheduler;
-    }
-
-    /**
-     * Exposes the {@code RejectionBus} instance for this {@code CommandBus}.
-     *
-     * <p>This method is designed for internal use only. Client code should use
-     * {@link io.spine.server.BoundedContext#getRejectionBus() BoundedContext.getRejectionBus()}
-     * instead.
-     */
-    @Internal
-    public RejectionBus rejectionBus() {
-        return this.rejectionBus;
     }
 
     @Override
@@ -215,8 +204,15 @@ public class CommandBus extends Bus<Command,
         try {
             dispatcher.dispatch(envelope);
         } catch (RuntimeException exception) {
-            errorHandler.handleError(envelope, exception);
+            onError(envelope, exception);
         }
+    }
+
+    private void onError(CommandEnvelope envelope, RuntimeException exception) {
+        Optional<Event> rejection = errorHandler.handleError(envelope, exception)
+                                                .asRejection()
+                                                .map(RejectionEnvelope::getOuterObject);
+        rejection.ifPresent(eventBus::post);
     }
 
     /**
@@ -280,24 +276,6 @@ public class CommandBus extends Bus<Command,
     }
 
     /**
-     * Closes the instance, preventing any for further posting of commands.
-     *
-     * <p>The following operations are performed:
-     * <ol>
-     * <li>All command dispatchers are un-registered.
-     * <li>{@code CommandStore} is closed.
-     * <li>{@code CommandScheduler} is shut down.
-     * </ol>
-     *
-     * @throws Exception if closing the {@code CommandStore} cases an exception
-     */
-    @Override
-    public void close() throws Exception {
-        super.close();
-        rejectionBus.close();
-    }
-
-    /**
      * {@inheritDoc}
      *
      * <p>Overrides for return type covariance.
@@ -331,7 +309,7 @@ public class CommandBus extends Bus<Command,
          * <p>If unset, the default {@link ExecutorCommandScheduler} implementation is used.
          */
         private CommandScheduler commandScheduler;
-        private RejectionBus rejectionBus;
+        private EventBus eventBus;
         private SystemGateway systemGateway;
         private TenantIndex tenantIndex;
         private CommandFlowWatcher flowWatcher;
@@ -349,7 +327,6 @@ public class CommandBus extends Bus<Command,
         }
 
         @Internal
-        @CanIgnoreReturnValue
         public Builder setMultitenant(@Nullable Boolean multitenant) {
             this.multitenant = multitenant;
             return this;
@@ -359,21 +336,23 @@ public class CommandBus extends Bus<Command,
             return ofNullable(commandScheduler);
         }
 
-        public Optional<RejectionBus> getRejectionBus() {
-            return ofNullable(rejectionBus);
-        }
-
-        @CanIgnoreReturnValue
         public Builder setCommandScheduler(CommandScheduler commandScheduler) {
             checkNotNull(commandScheduler);
             this.commandScheduler = commandScheduler;
             return this;
         }
 
-        @CanIgnoreReturnValue
-        public Builder setRejectionBus(RejectionBus rejectionBus) {
-            checkNotNull(rejectionBus);
-            this.rejectionBus = rejectionBus;
+        /**
+         * Inject the {@link EventBus} of the bounded context to which the built bus belongs.
+         *
+         * <p>This method is {@link Internal} to the framework. The name of the method starts with
+         * {@code inject} prefix so that this method does not appear in an autocomplete hint for
+         * {@code set} prefix.
+         */
+        @Internal
+        public Builder injectEventBus(EventBus eventBus) {
+            checkNotNull(eventBus);
+            this.eventBus = eventBus;
             return this;
         }
 
@@ -411,6 +390,10 @@ public class CommandBus extends Bus<Command,
             return ofNullable(tenantIndex);
         }
 
+        Optional<EventBus> getEventBus() {
+            return ofNullable(eventBus);
+        }
+
         /**
          * Builds an instance of {@link CommandBus}.
          *
@@ -421,15 +404,12 @@ public class CommandBus extends Bus<Command,
         @Internal
         @CheckReturnValue
         public CommandBus build() {
+            checkSet(eventBus, EventBus.class, "injectEventBus");
             checkSet(systemGateway, SystemGateway.class, "injectSystemGateway");
-            checkSet(tenantIndex, SystemGateway.class, "injectTenantIndex");
+            checkSet(tenantIndex, TenantIndex.class, "injectTenantIndex");
 
             if (commandScheduler == null) {
                 commandScheduler = new ExecutorCommandScheduler();
-            }
-            if (rejectionBus == null) {
-                rejectionBus = RejectionBus.newBuilder()
-                                           .build();
             }
             flowWatcher = new CommandFlowWatcher((tenantId) -> {
                 SystemGateway result = delegatingTo(systemGateway).get(tenantId);
@@ -443,9 +423,9 @@ public class CommandBus extends Bus<Command,
             return commandBus;
         }
 
-        private static void checkSet(@Nullable Object field,
-                                     Class<?> fieldType,
-                                     String setterName) {
+        private static <F> void checkSet(@Nullable F field,
+                                         Class<F> fieldType,
+                                         String setterName) {
             checkState(field != null,
                        "%s must be set. Please call CommandBus.Builder.%s().",
                        fieldType.getSimpleName(), setterName);

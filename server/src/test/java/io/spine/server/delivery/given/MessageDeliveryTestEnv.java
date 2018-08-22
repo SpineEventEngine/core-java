@@ -22,7 +22,6 @@ package io.spine.server.delivery.given;
 import com.google.common.collect.Lists;
 import com.google.protobuf.StringValue;
 import io.spine.core.BoundedContextName;
-import io.spine.core.React;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
@@ -36,13 +35,14 @@ import io.spine.server.delivery.Sharding;
 import io.spine.server.delivery.ShardingStrategy;
 import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.model.EntityClass;
+import io.spine.server.event.React;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectCancelled;
 import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggProjectStarted;
-import io.spine.test.aggregate.rejection.AggCannotReassignUnassignedTask;
+import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedTask;
 import io.spine.validate.StringValueVBuilder;
 
 import java.util.Optional;
@@ -103,17 +103,17 @@ public class MessageDeliveryTestEnv {
         }
 
         @Apply
-        private void on(AggProjectStarted event) {
+        void on(AggProjectStarted event) {
             //Do nothing for this test.
         }
 
         @React
-        public Optional<AggProjectCancelled> on(AggProjectCancelled event) {
+        Optional<AggProjectCancelled> on(AggProjectCancelled event) {
             return Optional.empty();
         }
 
         @React
-        public Optional<AggProjectPaused> on(AggCannotReassignUnassignedTask rejection) {
+        Optional<AggProjectPaused> on(AggCannotReassignUnassignedTask rejection) {
             return Optional.empty();
         }
     }

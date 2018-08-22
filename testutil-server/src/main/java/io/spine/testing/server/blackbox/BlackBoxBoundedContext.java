@@ -51,6 +51,7 @@ import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Black Box Bounded Context is aimed at facilitating writing literate integration tests.
@@ -198,23 +199,11 @@ public class BlackBoxBoundedContext {
      * @return current {@link BlackBoxBoundedContext black box} instance
      */
     private BlackBoxBoundedContext receivesCommands(Collection<Message> domainCommands) {
-        List<Command> commands = newArrayListWithCapacity(domainCommands.size());
-        for (Message domainCommand : domainCommands) {
-            commands.add(command(domainCommand));
-        }
+        List<Command> commands = domainCommands.stream()
+                                               .map(requestFactory.command()::create)
+                                               .collect(toList());
         commandBus.post(commands, observer);
         return this;
-    }
-
-    /**
-     * Wraps the provided domain command message in a {@link Event Spine command}.
-     *
-     * @param commandMessage a domain command message
-     * @return a newly created command instance
-     */
-    private Command command(Message commandMessage) {
-        return requestFactory.command()
-                             .create(commandMessage);
     }
 
     /*

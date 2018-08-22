@@ -20,9 +20,9 @@
 
 package io.spine.testing.server.aggregate.given.agg;
 
-import io.spine.core.React;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
+import io.spine.server.event.React;
 import io.spine.testing.server.entity.given.Given;
 import io.spine.testing.server.given.entity.TuProject;
 import io.spine.testing.server.given.entity.TuProjectId;

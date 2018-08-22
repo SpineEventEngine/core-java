@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alex Tymchenko
  */
 abstract class BusAdapter<E extends MessageEnvelope<?, ?, ?>,
-        D extends MessageDispatcher<?, E, ?>> {
+                          D extends MessageDispatcher<?, E, ?>> {
 
     /**
      * The wrapped local bus.

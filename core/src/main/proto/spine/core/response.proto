@@ -32,7 +32,7 @@ import "google/protobuf/empty.proto";
 import "google/protobuf/any.proto";
 
 import "spine/base/error.proto";
-import "spine/core/rejection.proto";
+import "spine/core/event.proto";
 
 // The result of a call returned by a service.
 //
@@ -57,6 +57,6 @@ message Status {
         base.Error error = 2;
 
         // It is not possible to satisfy the request because of the business rejection.
-        Rejection rejection = 3;
+        core.Event rejection = 3;
     }
 }

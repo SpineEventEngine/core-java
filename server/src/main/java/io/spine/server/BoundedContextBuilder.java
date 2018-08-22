@@ -162,10 +162,6 @@ public final class BoundedContextBuilder implements Logging {
         return Optional.ofNullable(commandBus);
     }
 
-    CommandBus buildCommandBus() {
-        return commandBus.build();
-    }
-
     public Optional<? extends TenantIndex> getTenantIndex() {
         return Optional.ofNullable(tenantIndex);
     }
@@ -371,7 +367,7 @@ public final class BoundedContextBuilder implements Logging {
                 stand.setMultitenant(multitenant);
             } else {
                 checkSameValue("Stand must match multitenancy of BoundedContext. " +
-                                        "Status in BoundedContext.Builder: %s Stand: %s",
+                                       "Status in BoundedContext.Builder: %s Stand: %s",
                                standMultitenant);
             }
         }

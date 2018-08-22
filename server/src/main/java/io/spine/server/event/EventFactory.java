@@ -28,6 +28,7 @@ import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.Events;
 import io.spine.core.MessageEnvelope;
+import io.spine.core.RejectionEventContext;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.integration.IntegrationEvent;
@@ -86,11 +87,35 @@ public class EventFactory {
      */
     public Event createEvent(Message messageOrAny,
                              @Nullable Version version) throws ValidationException {
+        EventContext context = createContext(version);
+        return doCreateEvent(messageOrAny, context);
+    }
+
+    /**
+     * Creates a rejection event for the passed rejection message.
+     *
+     * @param messageOrAny     the rejection message
+     * @param version          the version of the event to create
+     * @param rejectionContext the rejection context
+     * @return new rejection event
+     * @throws ValidationException if the passed message does not satisfy the constraints
+     *                             set for it in its Protobuf definition
+     * @see #createEvent(Message, Version) createEvent(Message, Version) - for general rules of
+     *                                     the event construction
+     */
+    public Event createRejectionEvent(Message messageOrAny,
+                                      @Nullable Version version,
+                                      RejectionEventContext rejectionContext)
+            throws ValidationException {
+        EventContext context = createContext(version, rejectionContext);
+        return doCreateEvent(messageOrAny, context);
+    }
+
+    private static Event doCreateEvent(Message messageOrAny, EventContext context) {
         checkNotNull(messageOrAny);
         validate(messageOrAny);     // we must validate it now before emitting the next ID.
 
         EventId eventId = Events.generateId();
-        EventContext context = createContext(version);
         Event result = createEvent(eventId, messageOrAny, context);
         return result;
     }
@@ -141,8 +166,22 @@ public class EventFactory {
         return result;
     }
 
-    @SuppressWarnings("CheckReturnValue") // calling builder
     private EventContext createContext(@Nullable Version version) {
+        EventContext result = buildContext(version)
+                .build();
+        return result;
+    }
+
+    private EventContext createContext(@Nullable Version version,
+                                       RejectionEventContext rejectionContext) {
+        EventContext result = buildContext(version)
+                .setRejection(rejectionContext)
+                .build();
+        return result;
+    }
+
+    @SuppressWarnings("CheckReturnValue") // calling builder
+    private EventContext.Builder buildContext(@Nullable Version version) {
         Timestamp timestamp = getCurrentTime();
         EventContext.Builder builder = EventContext
                 .newBuilder()
@@ -152,6 +191,6 @@ public class EventFactory {
         if (version != null) {
             builder.setVersion(version);
         }
-        return builder.build();
+        return builder;
     }
 }

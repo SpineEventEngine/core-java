@@ -23,15 +23,15 @@ package io.spine.server.procman.given.pm;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.core.React;
 import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
+import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmAddTask;
-import io.spine.test.procman.command.PmCencelIteration;
+import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmPlanIteration;
 import io.spine.test.procman.command.PmReviewBacklog;
@@ -141,7 +141,7 @@ public class TestProcessManager
      **************************************/
 
     @Command
-    Pair<PmScheduleRetrospective, PmPlanIteration> split(PmCencelIteration command) {
+    Pair<PmScheduleRetrospective, PmPlanIteration> split(PmCancelIteration command) {
         ProjectId pid = command.getProjectId();
         return Pair.of(PmScheduleRetrospective
                                .newBuilder()
@@ -171,19 +171,19 @@ public class TestProcessManager
      ************************/
 
     @React
-    public Empty on(PmProjectCreated event) {
+    Empty on(PmProjectCreated event) {
         remember(event);
         return Empty.getDefaultInstance();
     }
 
     @React
-    public Empty on(PmTaskAdded event) {
+    Empty on(PmTaskAdded event) {
         remember(event);
         return Empty.getDefaultInstance();
     }
 
     @React
-    public PmNotificationSent on(PmProjectStarted event) {
+    PmNotificationSent on(PmProjectStarted event) {
         remember(event);
         return messageOfType(PmNotificationSent.class);
     }

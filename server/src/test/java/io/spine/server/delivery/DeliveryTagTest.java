@@ -54,12 +54,8 @@ class DeliveryTagTest {
         DeliveryTag commandTag = DeliveryTag.forCommandsOf(repository);
         DeliveryTag anotherCommandTag = DeliveryTag.forCommandsOf(repository);
 
-        DeliveryTag rejectionTag = DeliveryTag.forRejectionsOf(repository);
-        DeliveryTag anotherRejectionTag = DeliveryTag.forRejectionsOf(repository);
-
         new EqualsTester().addEqualityGroup(eventTag, secondEventTag)
                           .addEqualityGroup(commandTag, anotherCommandTag)
-                          .addEqualityGroup(rejectionTag, anotherRejectionTag)
                           .testEquals();
     }
 }

@@ -20,6 +20,7 @@
 
 package io.spine.testing.server.blackbox;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import io.spine.type.MessageClass;
 
@@ -38,7 +39,7 @@ import static com.google.common.collect.ImmutableList.copyOf;
  */
 public abstract class EmittedMessages<C extends MessageClass, W extends Message> {
 
-    private final List<W> messages;
+    private final ImmutableList<W> messages;
     private final MessageTypeCounter<C, W> countByType;
     private final Class<W> wrapperClass;
 
@@ -98,5 +99,9 @@ public abstract class EmittedMessages<C extends MessageClass, W extends Message>
      */
     public String plural() {
         return singular() + 's';
+    }
+
+    protected ImmutableList<W> messages() {
+        return messages;
     }
 }

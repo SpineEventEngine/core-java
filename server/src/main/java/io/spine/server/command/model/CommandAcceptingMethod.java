@@ -22,10 +22,10 @@ package io.spine.server.command.model;
 
 import com.google.errorprone.annotations.Immutable;
 import io.spine.core.CommandClass;
-import io.spine.core.CommandContext;
-import io.spine.server.command.CommandReceiver;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.MethodResult;
+import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
 
@@ -37,11 +37,11 @@ import java.lang.reflect.Method;
  * @author Alexander Yevsyukov
  */
 @Immutable
-public abstract class CommandAcceptingMethod<T extends CommandReceiver, R extends MethodResult>
-        extends AbstractHandlerMethod<T, CommandClass, CommandContext, R> {
+public abstract class CommandAcceptingMethod<T, R extends MethodResult>
+        extends AbstractHandlerMethod<T, CommandClass, CommandEnvelope, R> {
 
-    CommandAcceptingMethod(Method method) {
-        super(method);
+    CommandAcceptingMethod(Method method, ParameterSpec<CommandEnvelope> params) {
+        super(method, params);
     }
 
     @Override

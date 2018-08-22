@@ -270,7 +270,7 @@ public class ShardedStreamTestEnv {
         }
 
         @Apply
-        private void on(AggProjectStarted event) {
+        void on(AggProjectStarted event) {
             //Do nothing for this test.
         }
     }
@@ -297,7 +297,7 @@ public class ShardedStreamTestEnv {
         }
 
         @Apply
-        private void on(AggTaskAdded event) {
+        void on(AggTaskAdded event) {
             //Do nothing for this test.
         }
     }

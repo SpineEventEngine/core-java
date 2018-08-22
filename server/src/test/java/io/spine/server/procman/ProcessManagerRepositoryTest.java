@@ -23,7 +23,6 @@ package io.spine.server.procman;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
-import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
@@ -32,9 +31,6 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Rejection;
-import io.spine.core.RejectionClass;
-import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
 import io.spine.core.given.GivenEvent;
 import io.spine.protobuf.AnyPacker;
@@ -44,7 +40,6 @@ import io.spine.server.entity.RecordBasedRepositoryTest;
 import io.spine.server.entity.rejection.StandardRejections;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyDeleted;
-import io.spine.server.procman.given.repo.GivenCommandMessage;
 import io.spine.server.procman.given.repo.RememberingSubscriber;
 import io.spine.server.procman.given.repo.SensoryDeprivedPmRepository;
 import io.spine.server.procman.given.repo.TestProcessManager;
@@ -72,7 +67,6 @@ import java.util.List;
 import java.util.Set;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.core.Rejections.createRejection;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.ID;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.addTask;
 import static io.spine.server.procman.given.repo.GivenCommandMessage.archiveProcess;
@@ -85,7 +79,6 @@ import static io.spine.server.procman.given.repo.GivenCommandMessage.startProjec
 import static io.spine.server.procman.given.repo.GivenCommandMessage.taskAdded;
 import static io.spine.testing.server.Assertions.assertCommandClasses;
 import static io.spine.testing.server.Assertions.assertEventClasses;
-import static io.spine.testing.server.Assertions.assertRejectionClasses;
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
@@ -215,31 +208,6 @@ class ProcessManagerRepositoryTest
         @DisplayName("event")
         void event() {
             testDispatchEvent(projectCreated());
-        }
-
-        @Test
-        @DisplayName("rejection")
-        void rejection() {
-            CommandEnvelope ce = requestFactory.generateEnvelope();
-            EntityAlreadyArchived rejectionMessage =
-                    EntityAlreadyArchived.newBuilder()
-                                         .setEntityId(Identifier.pack(newUuid()))
-                                         .build();
-            Rejection rejection = createRejection(rejectionMessage,
-                                                  ce.getCommand());
-            ProjectId id = GivenCommandMessage.ID;
-            Rejection.Builder builder =
-                    rejection.toBuilder()
-                             .setContext(rejection.getContext()
-                                                  .toBuilder()
-                                                  .setProducerId(Identifier.pack(id)));
-            RejectionEnvelope re = RejectionEnvelope.of(builder.build());
-
-            Set<?> delivered = repository().dispatchRejection(re);
-
-            assertTrue(delivered.contains(id));
-
-            assertTrue(TestProcessManager.processed(rejectionMessage));
         }
     }
 
@@ -407,17 +375,7 @@ class ProcessManagerRepositoryTest
 
             assertEventClasses(
                     eventClasses,
-                    PmProjectCreated.class, PmTaskAdded.class, PmProjectStarted.class
-            );
-        }
-
-        @Test
-        @DisplayName("rejections")
-        void rejection() {
-            Set<RejectionClass> rejectionClasses = repository().getRejectionClasses();
-
-            assertRejectionClasses(
-                    rejectionClasses,
+                    PmProjectCreated.class, PmTaskAdded.class, PmProjectStarted.class,
                     EntityAlreadyArchived.class, EntityAlreadyDeleted.class
             );
         }

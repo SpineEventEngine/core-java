@@ -49,13 +49,13 @@ public class ProjectionTestEnv {
         }
 
         @Subscribe
-        public void on(StringValue event) {
+        void on(StringValue event) {
             StringValue newState = createNewState("stringState", event.getValue());
             getBuilder().mergeFrom(newState);
         }
 
         @Subscribe
-        public void on(Int32Value event) {
+        void on(Int32Value event) {
             StringValue newState = createNewState("integerState",
                                                   String.valueOf(event.getValue()));
             getBuilder().mergeFrom(newState);

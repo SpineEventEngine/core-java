@@ -20,9 +20,12 @@
 package io.spine.server.model;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Message;
+import io.spine.core.MessageEnvelope;
+import io.spine.server.model.declare.ParameterSpec;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -35,6 +38,7 @@ import java.util.Set;
 import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * An abstract base for wrappers over methods handling messages.
@@ -44,15 +48,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @param <T> the type of the target object
  * @param <M> the type of the message class
- * @param <C> the type of the message context or {@link com.google.protobuf.Empty Empty} if
- *            a context parameter is never used
+ * @param <E> the type of message envelopes, in which the messages to handle are wrapped
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
 @Immutable
-public abstract
-class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R extends MethodResult>
-        implements HandlerMethod<T, M, C, R> {
+public abstract class AbstractHandlerMethod<T,
+                                            M extends MessageClass,
+                                            E extends MessageEnvelope<?, ?, ?>,
+                                            R extends MethodResult>
+        implements HandlerMethod<T, M, E, R> {
 
     /** The method to be called. */
     @SuppressWarnings("Immutable")
@@ -60,9 +65,6 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
 
     /** The class of the first parameter. */
     private final Class<? extends Message> messageClass;
-
-    /** The number of parameters the method has. */
-    private final int paramCount;
 
     /**
      * The set of the metadata attributes set via method annotations.
@@ -78,15 +80,28 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
     private ImmutableSet<MethodAttribute<?>> attributes;
 
     /**
+     * The specification of parameters for this method.
+     *
+     * @implNote It serves to extract the argument values from the {@linkplain E envelope} used
+     * as a source for the method call.
+     */
+    private final ParameterSpec<E> parameterSpec;
+
+    /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param method subscriber method
+     * @param method
+     *         subscriber method
+     * @param parameterSpec
+     *         the specification of method parameters
      */
-    protected AbstractHandlerMethod(Method method) {
+    protected AbstractHandlerMethod(Method method,
+                                    ParameterSpec<E> parameterSpec) {
         this.method = checkNotNull(method);
         this.messageClass = getFirstParamType(method);
-        this.paramCount = method.getParameterTypes().length;
         this.attributes = discoverAttributes(method);
+        this.parameterSpec = parameterSpec;
+
         method.setAccessible(true);
     }
 
@@ -129,17 +144,6 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
     }
 
     /**
-     * Returns a full method name without parameters.
-     *
-     * @param method a method to get name for
-     * @return full method name
-     */
-    private static String getFullMethodName(Method method) {
-        return method.getDeclaringClass()
-                     .getName() + '.' + method.getName() + "()";
-    }
-
-    /**
      * Returns the class of the first parameter of the passed handler method object.
      *
      * <p>It is expected that the first parameter of the passed method is always of
@@ -157,7 +161,7 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
     }
 
     /**
-     * Returns the handling method.
+     * {@inheritDoc}
      */
     @Override
     public Method getRawMethod() {
@@ -166,6 +170,10 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
 
     private int getModifiers() {
         return method.getModifiers();
+    }
+
+    protected ParameterSpec<E> getParameterSpec() {
+        return parameterSpec;
     }
 
     /** Returns {@code true} if the method is declared {@code public}, {@code false} otherwise. */
@@ -180,12 +188,10 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
         return result;
     }
 
-    /** Returns the count of the method parameters. */
-    protected int getParamCount() {
-        return paramCount;
-    }
-
-    /** Returns the set of method attributes configured for this method. */
+    /**
+     * {@inheritDoc}
+     */
+    @SuppressWarnings("AssignmentOrReturnOfFieldWithMutableType")   // Returning immutable impl.
     @Override
     public Set<MethodAttribute<?>> getAttributes() {
         return attributes;
@@ -197,41 +203,32 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
         return ImmutableSet.of(externalAttribute);
     }
 
+    @CanIgnoreReturnValue
     @Override
-    public R invoke(T target, Message message, C context) {
+    public R invoke(T target, E envelope) {
         checkNotNull(target);
-        checkNotNull(message);
-        checkNotNull(context);
+        checkNotNull(envelope);
+        checkAttributesMatch(envelope);
+        Message message = envelope.getMessage();
+        Message context = envelope.getMessageContext();
         try {
-            int paramCount = getParamCount();
-            Object rawOutput = (paramCount == 1)
-                            ? method.invoke(target, message)
-                            : method.invoke(target, message, context);
+            Object[] arguments = parameterSpec.extractArguments(envelope);
+            Object rawOutput = method.invoke(target, arguments);
             R result = toResult(target, rawOutput);
             return result;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw whyFailed(target, message, context, e);
+            throw new HandlerMethodFailedException(target, message, context, e);
         }
+    }
+
+    protected void checkAttributesMatch(E envelope) {
+        // Do nothing by default.
     }
 
     /**
      * Converts the output of the raw method call to the result object.
      */
     protected abstract R toResult(T target, Object rawMethodOutput);
-
-    /**
-     * Creates an exception containing information on the failure of the handler method invocation.
-     *
-     * @param target  the object which method was invoked
-     * @param message the message dispatched to the object
-     * @param context the context of the message
-     * @param cause   exception instance thrown by the invoked method
-     * @return the exception thrown during the invocation
-     */
-    protected HandlerMethodFailedException
-    whyFailed(Object target, Message message, C context, Exception cause) {
-        return new HandlerMethodFailedException(target, message, context, cause);
-    }
 
     /**
      * Returns a full name of the handler method.
@@ -242,7 +239,18 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
      * @return full name of the subscriber
      */
     public String getFullName() {
-        return getFullMethodName(method);
+        String template = "%s.%s()";
+        String className = method.getDeclaringClass()
+                                 .getName();
+        String methodName = method.getName();
+        String result = format(template, className, methodName);
+        return result;
+    }
+
+    @Override
+    public HandlerKey key() {
+        HandlerKey result = HandlerKey.of(getMessageClass());
+        return result;
     }
 
     @Override
@@ -271,11 +279,5 @@ class AbstractHandlerMethod<T, M extends MessageClass, C extends Message, R exte
     @Override
     public String toString() {
         return getFullName();
-    }
-
-    @Override
-    public HandlerKey key() {
-        HandlerKey result = HandlerKey.of(getMessageClass());
-        return result;
     }
 }

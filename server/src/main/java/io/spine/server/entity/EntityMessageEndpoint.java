@@ -21,11 +21,11 @@
 package io.spine.server.entity;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.delivery.Delivery;
 import io.spine.server.tenant.TenantAwareFunction0;
@@ -136,7 +136,7 @@ public abstract class EntityMessageEndpoint<I,
     /**
      * Invokes entity-specific method for dispatching the message.
      */
-    protected abstract List<? extends Message> doDispatch(E entity, M envelope);
+    protected abstract List<Event> doDispatch(E entity, M envelope);
 
     /**
      * Stores the entity if it was modified during message dispatching.

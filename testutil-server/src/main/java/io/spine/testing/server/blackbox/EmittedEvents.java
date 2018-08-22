@@ -23,8 +23,13 @@ package io.spine.testing.server.blackbox;
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
+import io.spine.core.Version;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Provides information on events emitted in the {@link BlackBoxBoundedContext Bounded Context}.
@@ -39,5 +44,28 @@ public final class EmittedEvents extends EmittedMessages<EventClass, Event> {
               new MessageTypeCounter<>(events, EventClass::of, EventClass::from),
               Event.class
         );
+    }
+
+    /**
+     * Checks that the emitted events have given version numbers.
+     *
+     * <p>Fails if the number of emitted events is different then the number of given versions.
+     *
+     * @param versionNumbers the versions to check
+     * @return {@code true} if the events have given version numbers, {@code false} otherwise
+     */
+    public boolean haveVersions(int... versionNumbers) {
+        Collection<Event> messages = messages();
+        assertEquals(versionNumbers.length, messages.size());
+        Iterator<Event> events = this.messages().iterator();
+        for (int version : versionNumbers) {
+            Version actualVersion = events.next()
+                                          .getContext()
+                                          .getVersion();
+            if (version != actualVersion.getNumber()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

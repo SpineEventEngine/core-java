@@ -20,7 +20,6 @@
 package io.spine.server.integration;
 
 import com.google.protobuf.Message;
-import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.grpc.StreamObservers;
 
@@ -45,6 +44,6 @@ class ExternalMessageObserver extends AbstractChannelObserver {
 
     @Override
     protected void handle(ExternalMessage message) {
-        integrationBus.post(message, StreamObservers.<Ack>noOpObserver());
+        integrationBus.post(message, StreamObservers.noOpObserver());
     }
 }

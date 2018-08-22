@@ -19,27 +19,30 @@
  */
 package io.spine.server.procman.given.delivery;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.Rejection;
-import io.spine.core.RejectionContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.given.AggregateMessageDeliveryTestEnv;
-import io.spine.server.route.RejectionRoute;
+import io.spine.server.command.Assign;
+import io.spine.server.delivery.given.ThreadStats;
+import io.spine.server.event.React;
+import io.spine.server.procman.ProcessManager;
+import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmCreateProject;
-import io.spine.test.procman.command.PmStartProject;
+import io.spine.test.procman.event.PmProjectCreated;
 import io.spine.test.procman.event.PmProjectStarted;
 import io.spine.test.procman.rejection.Rejections.PmCannotStartArchivedProject;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
+import io.spine.validate.StringValueVBuilder;
 
-import java.util.Set;
+import java.util.List;
 
-import static io.spine.core.Rejections.toRejection;
+import static java.util.Collections.emptyList;
 
 /**
  * @author Alex Tymchenko
@@ -79,38 +82,62 @@ public class GivenMessage {
                         .build();
     }
 
-    public static Rejection cannotStartProject() {
-        ProjectId projectId = projectId();
-
-        PmStartProject cmdMessage = PmStartProject.newBuilder()
-                                                  .setProjectId(projectId)
-                                                  .build();
-        Command command = createCommand(cmdMessage);
-        Rejection result = toRejection(throwableWith(projectId), command);
-        return result;
-    }
-
-    private static io.spine.test.procman.rejection.PmCannotStartArchivedProject
-    throwableWith(ProjectId projectId) {
-        return new io.spine.test.procman.rejection.PmCannotStartArchivedProject(projectId);
-    }
-
     private static Command createCommand(Message cmdMessage) {
         Command result = TestActorRequestFactory.newInstance(AggregateMessageDeliveryTestEnv.class)
                                                 .createCommand(cmdMessage);
         return result;
     }
 
-    public static RejectionRoute<ProjectId, Message> routeByProjectId() {
-        return new RejectionRoute<ProjectId, Message>() {
+    /**
+     * A process manager class, which remembers the threads in which its handler methods
+     * were invoked.
+     *
+     * <p>Message handlers are invoked via reflection, so some of them are considered unused.
+     *
+     * <p>The handler method parameters are not used, as they aren't needed for tests.
+     * They are still present, as long as they are required according to the handler
+     * declaration rules.
+     */
+    @SuppressWarnings("unused")
+    public static class DeliveryPm
+            extends ProcessManager<ProjectId, StringValue, StringValueVBuilder> {
 
-            private static final long serialVersionUID = 1L;
+        private static final ThreadStats<ProjectId> stats = new ThreadStats<>();
 
-            @Override
-            public Set<ProjectId> apply(Message raw, RejectionContext context) {
-                PmCannotStartArchivedProject msg = (PmCannotStartArchivedProject) raw;
-                return ImmutableSet.of(msg.getProjectId());
-            }
-        };
+        protected DeliveryPm(ProjectId id) {
+            super(id);
+        }
+
+        @Assign
+        PmProjectCreated on(PmCreateProject command) {
+            stats.recordCallingThread(command.getProjectId());
+            return PmProjectCreated.newBuilder()
+                                   .setProjectId(command.getProjectId())
+                                   .build();
+        }
+
+        @React
+        List<Message> on(PmProjectStarted event) {
+            stats.recordCallingThread(getId());
+            return emptyList();
+        }
+
+        @React
+        List<Message> on(PmCannotStartArchivedProject rejection) {
+            stats.recordCallingThread(getId());
+            return emptyList();
+        }
+
+        public static ThreadStats<ProjectId> getStats() {
+            return stats;
+        }
+    }
+
+    public static class SingleShardPmRepository
+            extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
+    }
+
+    public static class QuadrupleShardPmRepository
+            extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
     }
 }

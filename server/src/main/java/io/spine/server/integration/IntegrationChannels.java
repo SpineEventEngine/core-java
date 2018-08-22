@@ -23,8 +23,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.Event;
-import io.spine.core.Rejection;
-import io.spine.core.Rejections;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.transport.MessageChannel;
 import io.spine.type.TypeUrl;
@@ -39,7 +37,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class IntegrationChannels {
 
-    private static final TypeUrl REJECTION_TYPE_URL = TypeUrl.of(Rejection.class);
     private static final TypeUrl EVENT_TYPE_URL = TypeUrl.of(Event.class);
 
     /**
@@ -100,12 +97,9 @@ class IntegrationChannels {
         StringValue rawValue = AnyPacker.unpack(channelId.getIdentifier());
         TypeUrl typeUrl = TypeUrl.parse(rawValue.getValue());
 
-        boolean isRejection = Rejections.isRejection(typeUrl.getMessageClass());
-        String wrapperTypeUrl = isRejection ? REJECTION_TYPE_URL.value()
-                                            : EVENT_TYPE_URL.value();
         ExternalMessageType result = ExternalMessageType.newBuilder()
                                                         .setMessageTypeUrl(typeUrl.value())
-                                                        .setWrapperTypeUrl(wrapperTypeUrl)
+                                                        .setWrapperTypeUrl(EVENT_TYPE_URL.value())
                                                         .build();
         return result;
     }

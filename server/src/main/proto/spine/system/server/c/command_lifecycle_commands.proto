@@ -34,8 +34,6 @@ option java_multiple_files = true;
 import "spine/base/error.proto";
 import "spine/core/command.proto";
 import "spine/core/event.proto";
-import "spine/core/rejection.proto";
-import "spine/client/entities.proto";
 import "spine/system/server/command_lifecycle.proto";
 
 // Marks a domain command as received.
@@ -125,8 +123,8 @@ message MarkCommandAsRejected {
     // The ID of the command.
     spine.core.CommandId id = 1;
 
-    // The command rejection.
-    spine.core.Rejection rejection = 2 [(valid) = true];
+    // The command rejection event.
+    spine.core.Event rejection_event = 2 [(valid) = true];
 }
 
 // Marks a command as one which was transformed into another command.

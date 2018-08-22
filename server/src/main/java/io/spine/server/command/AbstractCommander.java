@@ -67,8 +67,7 @@ public abstract class AbstractCommander
     @Override
     public String dispatch(CommandEnvelope command) {
         CommandSubstituteMethod method = thisClass.getHandler(command.getMessageClass());
-        CommandingMethod.Result result =
-                method.invoke(this, command.getMessage(), command.getCommandContext());
+        CommandingMethod.Result result = method.invoke(this, command);
         result.transformOrSplitAndPost(command, commandBus);
         return getId();
     }
@@ -86,8 +85,7 @@ public abstract class AbstractCommander
     @Override
     public Set<String> dispatchEvent(EventEnvelope event) {
         CommandReactionMethod method = thisClass.getCommander(event.getMessageClass());
-        CommandingMethod.Result result =
-                method.invoke(this, event.getMessage(), event.getEventContext());
+        CommandingMethod.Result result = method.invoke(this, event);
         result.produceAndPost(event, commandBus);
         return identity();
     }

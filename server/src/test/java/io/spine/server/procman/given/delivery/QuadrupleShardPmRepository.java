@@ -30,7 +30,6 @@ public class QuadrupleShardPmRepository
         extends ProcessManagerRepository<ProjectId, DeliveryPm, StringValue> {
 
     public QuadrupleShardPmRepository() {
-        getRejectionRouting().replaceDefault(GivenMessage.routeByProjectId());
     }
 
     @Override

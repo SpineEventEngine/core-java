@@ -23,17 +23,13 @@ package io.spine.testing.server.procman;
 import com.google.common.testing.NullPointerTester;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.core.Rejection;
-import io.spine.core.RejectionEnvelope;
 import io.spine.server.procman.ProcessManager;
 import io.spine.testing.UtilityClassTest;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
 import org.junit.jupiter.api.DisplayName;
 
-import static io.spine.core.Rejections.createRejection;
 import static io.spine.testing.TestValues.newUuidValue;
 import static org.mockito.Mockito.mock;
 
@@ -54,14 +50,10 @@ class PmDispatcherTest extends UtilityClassTest<PmDispatcher> {
     @Override
     protected void setDefaults(NullPointerTester tester) {
         Command command = requestFactory.generateCommand();
-        Event event = eventFactory.createEvent(newUuidValue());
-        Rejection rejection = createRejection(newUuidValue(), command);
         tester.setDefault(CommandEnvelope.class,
                           CommandEnvelope.of(command))
               .setDefault(EventEnvelope.class,
-                          EventEnvelope.of(event))
-              .setDefault(RejectionEnvelope.class,
-                          RejectionEnvelope.of(rejection))
+                          EventEnvelope.of(eventFactory.createEvent(newUuidValue())))
               .setDefault(ProcessManager.class, mock(ProcessManager.class));
     }
 }

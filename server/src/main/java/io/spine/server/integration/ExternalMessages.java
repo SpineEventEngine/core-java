@@ -27,7 +27,6 @@ import io.spine.base.Identifier;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.Event;
-import io.spine.core.Rejection;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.delivery.ShardedMessage;
 import io.spine.server.delivery.ShardedMessageId;
@@ -72,21 +71,6 @@ public final class ExternalMessages {
         checkNotNull(origin);
 
         ExternalMessage result = of(command.getId(), command, origin);
-        return result;
-    }
-
-    /**
-     * Wraps the instance of {@link Rejection} into an {@code ExternalMessage}.
-     *
-     * @param rejection the rejection to wrap
-     * @param origin    the name of bounded context in which the rejection was created
-     * @return the external message wrapping the given rejection
-     */
-    static ExternalMessage of(Rejection rejection, BoundedContextName origin) {
-        checkNotNull(rejection);
-        checkNotNull(origin);
-
-        ExternalMessage result = of(rejection.getId(), rejection, origin);
         return result;
     }
 

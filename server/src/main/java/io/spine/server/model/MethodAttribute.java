@@ -23,7 +23,7 @@ import com.google.errorprone.annotations.Immutable;
 import io.spine.annotation.Internal;
 
 /**
- * Meta-data set to a {@link AbstractHandlerMethod HandlerMethod}.
+ * Meta-data set to a {@link HandlerMethod#getAttributes()} HandlerMethod} attributes.
  *
  * <p>Typical way to add more semantics to a method is via a parameterized annotation,
  * such as {@link io.spine.core.Subscribe Subscribe}.

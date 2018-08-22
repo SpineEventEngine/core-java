@@ -21,14 +21,13 @@
 package io.spine.testing.client.blackbox;
 
 import com.google.protobuf.Message;
-import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Verifies that a command or an event was handled responding with a {@link Rejection rejection}
- * of the provided type.
+ * Verifies that a command was handled with a {@link io.spine.base.ThrowableMessage rejection} of
+ * the provided type.
  *
  * @author Mykhailo Drachuk
  */

@@ -106,9 +106,11 @@ final class CommandLifecycleAggregate
 
     @Assign
     TargetAssignedToCommand on(AssignTargetToCommand event) {
+        Timestamp when = getCurrentTime();
         return TargetAssignedToCommand.newBuilder()
                                       .setId(event.getId())
                                       .setTarget(event.getTarget())
+                                      .setWhen(when)
                                       .build();
     }
 
@@ -136,13 +138,13 @@ final class CommandLifecycleAggregate
         Timestamp when = getCurrentTime();
         return CommandRejected.newBuilder()
                               .setId(command.getId())
-                              .setRejection(command.getRejection())
+                              .setRejectionEvent(command.getRejectionEvent())
                               .setWhen(when)
                               .build();
     }
 
     @Apply
-    private void on(CommandReceived event) {
+    void on(CommandReceived event) {
         CommandTimeline status = CommandTimeline
                 .newBuilder()
                 .setWhenReceived(event.getWhen())
@@ -158,7 +160,7 @@ final class CommandLifecycleAggregate
     }
 
     @Apply
-    private void on(CommandAcknowledged event) {
+    void on(CommandAcknowledged event) {
         CommandTimeline status = statusBuilder()
                 .setWhenAcknowledged(event.getWhen())
                 .build();
@@ -166,7 +168,7 @@ final class CommandLifecycleAggregate
     }
 
     @Apply
-    private void on(CommandScheduled event) {
+    void on(CommandScheduled event) {
         Command updatedCommand = updateSchedule(event.getSchedule());
         CommandTimeline status = statusBuilder()
                 .setWhenScheduled(event.getWhen())
@@ -176,7 +178,7 @@ final class CommandLifecycleAggregate
     }
 
     @Apply
-    private void on(CommandDispatched event) {
+    void on(CommandDispatched event) {
         CommandTimeline status = statusBuilder()
                 .setWhenDispatched(event.getWhen())
                 .build();
@@ -184,18 +186,25 @@ final class CommandLifecycleAggregate
     }
 
     @Apply
-    private void on(TargetAssignedToCommand event) {
+    void on(TargetAssignedToCommand event) {
         CommandTarget target = event.getTarget();
-        getBuilder().setTarget(target);
+        CommandTimeline status = getBuilder()
+                .getStatus()
+                .toBuilder()
+                .setWhenTargetAssgined(event.getWhen())
+                .build();
+        getBuilder()
+                .setStatus(status)
+                .setTarget(target);
     }
 
     @Apply
-    private void on(CommandHandled event) {
+    void on(CommandHandled event) {
         setStatus(Responses.statusOk(), event.getWhen());
     }
 
     @Apply
-    private void on(CommandErrored event) {
+    void on(CommandErrored event) {
         Status status = Status
                 .newBuilder()
                 .setError(event.getError())
@@ -204,10 +213,10 @@ final class CommandLifecycleAggregate
     }
 
     @Apply
-    private void on(CommandRejected event) {
+    void on(CommandRejected event) {
         Status status = Status
                 .newBuilder()
-                .setRejection(event.getRejection())
+                .setRejection(event.getRejectionEvent())
                 .build();
         setStatus(status, event.getWhen());
     }

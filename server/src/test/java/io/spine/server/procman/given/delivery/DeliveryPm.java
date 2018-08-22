@@ -22,9 +22,9 @@ package io.spine.server.procman.given.delivery;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.core.React;
 import io.spine.server.command.Assign;
 import io.spine.server.delivery.given.ThreadStats;
+import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmCreateProject;

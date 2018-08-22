@@ -25,8 +25,10 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.server.event.model.EventReceiverClass;
 import io.spine.server.event.model.EventReceivingClassDelegate;
 import io.spine.server.event.model.EventSubscriberMethod;
+import io.spine.server.event.model.EventSubscriberSignature;
 import io.spine.server.event.model.SubscribingClass;
 import io.spine.server.projection.Projection;
+import io.spine.type.MessageClass;
 
 import java.util.Set;
 
@@ -47,7 +49,7 @@ public final class ProjectionClass<P extends Projection>
 
     private ProjectionClass(Class<P> cls) {
         super(cls);
-        this.delegate = new EventReceivingClassDelegate<>(cls, EventSubscriberMethod.factory());
+        this.delegate = new EventReceivingClassDelegate<>(cls, new EventSubscriberSignature());
     }
 
     /**
@@ -71,7 +73,7 @@ public final class ProjectionClass<P extends Projection>
     }
 
     @Override
-    public EventSubscriberMethod getSubscriber(EventClass eventClass) {
-        return delegate.getMethod(eventClass);
+    public EventSubscriberMethod getSubscriber(EventClass eventClass, MessageClass originClass) {
+        return delegate.getMethod(eventClass, originClass);
     }
 }

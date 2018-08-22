@@ -46,7 +46,7 @@ public class EventSubscriberTestEnv {
         private @Nullable RuntimeException lastException;
 
         @Subscribe
-        public void on(BoolValue message, EventContext context) {
+        void on(BoolValue message, EventContext context) {
             methodCalled = true;
             if (!message.getValue()) {
                 throw new UnsupportedOperationException("Do not want false messages!");
@@ -54,12 +54,12 @@ public class EventSubscriberTestEnv {
         }
 
         @Subscribe
-        public void on(FloatValue message) {
+        void on(FloatValue message) {
             // Do nothing. Just expose the method.
         }
 
         @Subscribe
-        public void on(UInt32Value message) {
+        void on(UInt32Value message) {
             // Do nothing. Just expose the method.
         }
 

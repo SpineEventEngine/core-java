@@ -26,6 +26,7 @@ import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
 import io.spine.server.model.ModelClass;
+import io.spine.type.MessageClass;
 
 import java.util.Set;
 
@@ -48,7 +49,7 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
 
     private EventSubscriberClass(Class<? extends S> cls) {
         super(cls);
-        this.eventSubscriptions = new MessageHandlerMap<>(cls, EventSubscriberMethod.factory());
+        this.eventSubscriptions = MessageHandlerMap.create(cls, new EventSubscriberSignature());
         this.domesticSubscriptions =
                     eventSubscriptions.getMessageClasses(HandlerMethod::isDomestic);
         this.externalSubscriptions =
@@ -77,7 +78,7 @@ public final class EventSubscriberClass<S extends AbstractEventSubscriber> exten
     }
 
     @Override
-    public EventSubscriberMethod getSubscriber(EventClass eventClass) {
-        return eventSubscriptions.getMethod(eventClass);
+    public EventSubscriberMethod getSubscriber(EventClass eventClass, MessageClass originClass) {
+        return eventSubscriptions.getMethod(eventClass, originClass);
     }
 }

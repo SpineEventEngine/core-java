@@ -29,10 +29,8 @@ import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.UserId;
 import io.spine.people.PersonName;
-import io.spine.server.event.EventEnricher;
-import io.spine.server.event.EventEnricherTest;
-import io.spine.server.outbus.enrich.given.StringToPersonName;
-import io.spine.server.outbus.enrich.given.StringToZoneOffset;
+import io.spine.server.event.Enricher;
+import io.spine.server.event.EnricherTest;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
@@ -69,7 +67,7 @@ public class EventEnricherTestEnv {
     }
 
     public static Event createEvent(Message msg) {
-        TestEventFactory eventFactory = newInstance(EventEnricherTest.class);
+        TestEventFactory eventFactory = newInstance(EnricherTest.class);
         Event event = eventFactory.createEvent(msg);
         return event;
     }
@@ -208,8 +206,8 @@ public class EventEnricherTestEnv {
         }
 
         /** Creates a new enricher with all required enrichment functions set. */
-        public static EventEnricher newEventEnricher() {
-            EventEnricher.Builder builder = EventEnricher
+        public static Enricher newEventEnricher() {
+            Enricher.Builder builder = Enricher
                     .newBuilder()
                     .add(ProjectId.class, String.class, new GetProjectName())
                     .add(ProjectId.class, UserId.class, new GetProjectOwnerId())

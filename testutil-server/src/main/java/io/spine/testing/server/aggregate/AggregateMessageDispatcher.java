@@ -24,11 +24,10 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Message;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
-import io.spine.core.RejectionEnvelope;
+import io.spine.core.Events;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateCommandEndpoint;
 import io.spine.server.aggregate.AggregateEventEndpoint;
-import io.spine.server.aggregate.AggregateRejectionEndpoint;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.testing.server.NoOpLifecycle;
@@ -36,6 +35,7 @@ import io.spine.testing.server.NoOpLifecycle;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -85,48 +85,6 @@ public class AggregateMessageDispatcher {
     }
 
     /**
-     * Dispatches the {@linkplain RejectionEnvelope rejection envelope} and applies the
-     * resulting events to the given {@code Aggregate}.
-     *
-     * @return the list of event messages.
-     */
-    @CanIgnoreReturnValue
-    public static List<? extends Message> dispatchRejection(Aggregate<?, ?, ?> aggregate,
-                                                            RejectionEnvelope envelope) {
-        checkNotNull(envelope);
-
-        List<? extends Message> eventMessages =
-                TestAggregateRejectionEndpoint.dispatch(aggregate, envelope);
-        return eventMessages;
-    }
-
-    /**
-     * A test-only implementation of an {@link AggregateRejectionEndpoint}, that dispatches
-     * rejections to an instance of {@code Aggregate} and returns the list of events.
-     *
-     * @param <I> the type of {@code Aggregate} identifier
-     * @param <A> the type of {@code Aggregate}
-     */
-    private static class TestAggregateRejectionEndpoint<I, A extends Aggregate<I, ?, ?>>
-            extends AggregateRejectionEndpoint<I, A> {
-
-        @SuppressWarnings("ConstantConditions")     /*  {@code null} is supplied to the ctor,
-                                                        since in the workflow of this test endpoint
-                                                        the repository is not used. */
-        private TestAggregateRejectionEndpoint(RejectionEnvelope envelope) {
-            super(mockRepository(), envelope);
-        }
-
-        private static <I, A extends Aggregate<I, ?, ?>>
-        List<? extends Message> dispatch(A aggregate, RejectionEnvelope envelope) {
-            TestAggregateRejectionEndpoint<I, A> endpoint =
-                    new TestAggregateRejectionEndpoint<>(envelope);
-            List<? extends Message> result = endpoint.dispatchInTx(aggregate);
-            return result;
-        }
-    }
-
-    /**
      * A test-only implementation of an {@link AggregateEventEndpoint}, that dispatches
      * events to an instance of {@code Aggregate} into its reactor methods and returns
      * the list of produced events.
@@ -148,7 +106,10 @@ public class AggregateMessageDispatcher {
         List<? extends Message> dispatch(A aggregate, EventEnvelope envelope) {
             TestAggregateEventEndpoint<I, A> endpoint =
                     new TestAggregateEventEndpoint<>(envelope);
-            List<? extends Message> result = endpoint.dispatchInTx(aggregate);
+            List<? extends Message> result = endpoint.dispatchInTx(aggregate)
+                                                     .stream()
+                                                     .map(Events::getMessage)
+                                                     .collect(toList());
             return result;
         }
     }
@@ -174,7 +135,10 @@ public class AggregateMessageDispatcher {
         List<? extends Message> dispatch(A aggregate, CommandEnvelope envelope) {
             TestAggregateCommandEndpoint<I, A> endpoint =
                     new TestAggregateCommandEndpoint<>(envelope);
-            List<? extends Message> result = endpoint.dispatchInTx(aggregate);
+            List<? extends Message> result = endpoint.dispatchInTx(aggregate)
+                                                     .stream()
+                                                     .map(Events::getMessage)
+                                                     .collect(toList());
             return result;
         }
     }

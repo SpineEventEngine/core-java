@@ -26,8 +26,9 @@ import io.spine.core.EventClass;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.model.HandlerMethod;
 import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.model.MethodFactory;
 import io.spine.server.model.ModelClass;
+import io.spine.server.model.declare.MethodSignature;
+import io.spine.type.MessageClass;
 
 import java.util.Set;
 
@@ -54,9 +55,10 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      * Creates new instance for the passed raw class with methods obtained
      * though the passed factory.
      */
-    public EventReceivingClassDelegate(Class<? extends T> rawClass, MethodFactory<M> factory) {
+    public EventReceivingClassDelegate(Class<? extends T> rawClass,
+                                       MethodSignature<M, ?> signature) {
         super(rawClass);
-        this.events = new MessageHandlerMap<>(rawClass, factory);
+        this.events = MessageHandlerMap.create(rawClass, signature);
         this.domesticEvents = events.getMessageClasses(HandlerMethod::isDomestic);
         this.externalEvents = events.getMessageClasses(HandlerMethod::isExternal);
     }
@@ -84,7 +86,7 @@ public class EventReceivingClassDelegate<T extends EventReceiver,
      *
      * @throws IllegalStateException if there is such method in the class
      */
-    public M getMethod(EventClass eventClass) {
-        return events.getMethod(eventClass);
+    public M getMethod(EventClass eventClass, MessageClass originClass) {
+        return events.getMethod(eventClass, originClass);
     }
 }

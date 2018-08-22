@@ -77,33 +77,6 @@ public final class Enrichments {
         return getFromContainer(enrichmentClass, container.get());
     }
 
-    /**
-     * Obtains all enrichments (if available) from the rejection context.
-     */
-    public static Optional<Enrichment.Container> getEnrichments(RejectionContext context) {
-        checkNotNull(context);
-        Enrichment enrichment = context.getEnrichment();
-        return getContainer(enrichment);
-    }
-
-    /**
-     * Obtains a specific enrichment from the context.
-     *
-     * @param  enrichmentClass a class of the rejection enrichment
-     * @param  context         a context to get an enrichment from
-     * @param  <E>             a type of the rejection enrichment
-     * @return an optional of the enrichment
-     */
-    public static <E extends Message> Optional<E> getEnrichment(Class<E> enrichmentClass,
-                                                                RejectionContext context) {
-        checkNotNull(enrichmentClass);
-        Optional<Enrichment.Container> container = getEnrichments(checkNotNull(context));
-        if (!container.isPresent()) {
-            return Optional.empty();
-        }
-        return getFromContainer(enrichmentClass, container.get());
-    }
-
     private static <E extends Message>
     Optional<E> getFromContainer(Class<E> enrichmentClass, Enrichment.Container enrichments) {
         String typeName = TypeName.of(enrichmentClass)

@@ -28,7 +28,6 @@ import io.spine.base.Time;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventId;
-import io.spine.core.RejectionContext;
 import io.spine.core.Version;
 import io.spine.server.aggregate.given.StorageRecords;
 import io.spine.server.entity.LifecycleFlags;
@@ -560,29 +559,6 @@ public abstract class AggregateStorageTest
                                                 .getEvent(0)
                                                 .getContext();
             assertTrue(isDefault(loadedContext.getEnrichment()));
-        }
-
-        @Test
-        @DisplayName("for origin of RejectionContext type")
-        void forRejectionContextOrigin() {
-            RejectionContext origin = RejectionContext.newBuilder()
-                                                      .setEnrichment(withOneAttribute())
-                                                      .build();
-            EventContext context = EventContext.newBuilder()
-                                               .setRejectionContext(origin)
-                                               .build();
-            Event event = Event.newBuilder()
-                               .setId(newEventId())
-                               .setContext(context)
-                               .setMessage(Any.getDefaultInstance())
-                               .build();
-            storage.writeEvent(id, event);
-            RejectionContext loadedOrigin = storage.read(newReadRequest(id))
-                                                   .get()
-                                                   .getEvent(0)
-                                                   .getContext()
-                                                   .getRejectionContext();
-            assertTrue(isDefault(loadedOrigin.getEnrichment()));
         }
 
         @Test

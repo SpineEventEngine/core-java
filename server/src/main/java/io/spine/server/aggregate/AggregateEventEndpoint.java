@@ -20,10 +20,10 @@
 
 package io.spine.server.aggregate;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.core.React;
+import io.spine.server.event.React;
 
 import java.util.List;
 import java.util.Set;
@@ -51,7 +51,7 @@ public class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected List<? extends Message> doDispatch(A aggregate, EventEnvelope envelope) {
+    protected List<Event> doDispatch(A aggregate, EventEnvelope envelope) {
         repository().onDispatchEvent(aggregate.getId(), envelope.getOuterObject());
         return aggregate.reactOn(envelope);
     }

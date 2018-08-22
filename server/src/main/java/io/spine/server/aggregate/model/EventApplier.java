@@ -20,28 +20,20 @@
 
 package io.spine.server.aggregate.model;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
 import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.Apply;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.HandlerMethodPredicate;
-import io.spine.server.model.MethodAccessChecker;
 import io.spine.server.model.MethodAttribute;
-import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
+import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Predicate;
-
-import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
  * A wrapper for event applier method.
@@ -49,15 +41,17 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  * @author Alexander Yevsyukov
  */
 public final class EventApplier
-        extends AbstractHandlerMethod<Aggregate, EventClass, Empty, MethodResult<Empty>> {
+        extends AbstractHandlerMethod<Aggregate, EventClass, EventEnvelope, MethodResult<Empty>> {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param method subscriber method
+     * @param method   the applier method
+     * @param signature {@link ParameterSpec} which describes the method
      */
-    private EventApplier(Method method) {
-        super(method);
+    EventApplier(Method method,
+                 ParameterSpec<EventEnvelope> signature) {
+        super(method, signature);
     }
 
     /**
@@ -73,89 +67,12 @@ public final class EventApplier
         return EventClass.from(rawMessageClass());
     }
 
-    boolean allowsImport() {
-        return getAttributes().contains(AllowImportAttribute.ALLOW);
-    }
-
-    @VisibleForTesting
-    static Predicate<Method> predicate() {
-        return factory().getPredicate();
-    }
-
-    static MethodFactory<EventApplier> factory() {
-        return Factory.INSTANCE;
-    }
-
-    /**
-     * Invokes the applier method.
-     *
-     * <p>The method {@linkplain HandlerMethod#invoke(Object, Message, Message) delegates}
-     * the invocation passing {@linkplain Empty#getDefaultInstance() empty message}
-     * as the context parameter because event appliers do not have a context parameter.
-     *
-     * <p>Such redirection is correct because {@linkplain #getParamCount()} the number of parameters}
-     * is set to one during instance construction.
-     */
-    @SuppressWarnings("CheckReturnValue") // since method appliers do not return values
-    public void invoke(Aggregate aggregate, Message message) {
-        invoke(aggregate, message, Empty.getDefaultInstance());
-    }
-
     @Override
     protected MethodResult<Empty> toResult(Aggregate target, Object rawMethodOutput) {
         return MethodResult.empty();
     }
 
-    /** The factory for filtering methods that match {@code EventApplier} specification. */
-    private static class Factory extends MethodFactory<EventApplier> {
-
-        private static final Factory INSTANCE = new Factory();
-
-        private Factory() {
-            super(EventApplier.class, new Filter());
-        }
-
-        @Override
-        public void checkAccessModifier(Method method) {
-            MethodAccessChecker checker = forMethod(method);
-            checker.checkPrivate("Event applier method `{}` must be declared `private`.");
-        }
-
-        @Override
-        protected EventApplier doCreate(Method method) {
-            return new EventApplier(method);
-        }
-    }
-
-    /**
-     * The predicate for filtering event applier methods.
-     */
-    private static class Filter extends HandlerMethodPredicate<Empty> {
-
-        private static final int NUMBER_OF_PARAMS = 1;
-        private static final int EVENT_PARAM_INDEX = 0;
-
-        private Filter() {
-            super(Apply.class, Empty.class);
-        }
-
-        @SuppressWarnings("MethodDoesntCallSuperMethod") // because we override the checking.
-        @Override
-        protected boolean verifyParams(Method method) {
-            Class<?>[] parameterTypes = method.getParameterTypes();
-            boolean paramCountIsValid = parameterTypes.length == NUMBER_OF_PARAMS;
-            if (!paramCountIsValid) {
-                return false;
-            }
-            Class<?> paramType = parameterTypes[EVENT_PARAM_INDEX];
-            boolean paramIsMessage = Message.class.isAssignableFrom(paramType);
-            return paramIsMessage;
-        }
-
-        @Override
-        protected boolean verifyReturnType(Method method) {
-            boolean isVoid = Void.TYPE.equals(method.getReturnType());
-            return isVoid;
-        }
+    boolean allowsImport() {
+        return getAttributes().contains(AllowImportAttribute.ALLOW);
     }
 }

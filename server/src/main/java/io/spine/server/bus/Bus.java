@@ -27,7 +27,6 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
-import io.spine.core.Rejection;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -128,10 +127,10 @@ public abstract class Bus<T extends Message,
      * {@link io.spine.base.Error Error} status is passed in {@code Ack} instance.
      *
      * <p>Depending on the underlying {@link MessageDispatcher}, a message which causes a business
-     * {@link Rejection} may result ether a {@link Rejection} status or
+     * {@linkplain io.spine.base.ThrowableMessage rejection} may result either a rejection status or
      * an {@link io.spine.core.Status.StatusCase#OK OK} status {@link Ack} instance. Usually,
-     * the {@link Rejection} status may only pop up if the {@link MessageDispatcher}
-     * processes the message sequentially and throws the rejection (wrapped in a
+     * the rejection status may only pop up if the {@link MessageDispatcher} processes the message
+     * sequentially and throws the rejection (wrapped in a
      * the {@linkplain io.spine.base.ThrowableMessage ThrowableMessages}) instead of handling them.
      * Otherwise, the {@code OK} status should be expected.
      *

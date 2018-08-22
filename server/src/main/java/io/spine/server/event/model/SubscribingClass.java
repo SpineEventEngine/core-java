@@ -21,6 +21,7 @@
 package io.spine.server.event.model;
 
 import io.spine.core.EventClass;
+import io.spine.type.MessageClass;
 
 /**
  * An interface common for model classes that subscribe to events.
@@ -32,5 +33,5 @@ public interface SubscribingClass {
     /**
      * Obtains a method that handles the passed class of events.
      */
-    EventSubscriberMethod getSubscriber(EventClass eventClass);
+    EventSubscriberMethod getSubscriber(EventClass eventClass, MessageClass originClass);
 }

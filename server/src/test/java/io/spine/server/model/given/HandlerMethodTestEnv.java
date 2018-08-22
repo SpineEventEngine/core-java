@@ -20,18 +20,33 @@
 
 package io.spine.server.model.given;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
-import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
+import io.spine.server.model.declare.AccessModifier;
+import io.spine.server.model.declare.MethodSignature;
+import io.spine.server.model.declare.ParameterSpec;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+
+import static com.google.common.collect.ImmutableSet.of;
+import static io.spine.server.model.declare.AccessModifier.PACKAGE_PRIVATE;
+import static io.spine.server.model.declare.AccessModifier.PRIVATE;
+import static io.spine.server.model.declare.AccessModifier.PROTECTED;
+import static io.spine.server.model.declare.AccessModifier.PUBLIC;
+import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
+import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
 
 /**
  * @author Alexander Litus
@@ -121,10 +136,11 @@ public class HandlerMethodTestEnv {
     }
 
     public static class TwoParamMethod
-        extends AbstractHandlerMethod<Object, EventClass, EventContext, MethodResult<Empty>> {
+            extends AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> {
 
-        public TwoParamMethod(Method method) {
-            super(method);
+        public TwoParamMethod(Method method,
+                              ParameterSpec<EventEnvelope> parameterSpec) {
+            super(method, parameterSpec);
         }
 
         @Override
@@ -144,10 +160,10 @@ public class HandlerMethodTestEnv {
     }
 
     public static class OneParamMethod
-            extends AbstractHandlerMethod<Object, EventClass, Empty, MethodResult<Empty>> {
+            extends AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> {
 
-        public OneParamMethod(Method method) {
-            super(method);
+        public OneParamMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+            super(method, parameterSpec);
         }
 
         @Override
@@ -155,36 +171,9 @@ public class HandlerMethodTestEnv {
             return MethodResult.empty();
         }
 
-        public static Factory factory() {
-            return Factory.getInstance();
-        }
-
         @Override
         public EventClass getMessageClass() {
             return EventClass.from(rawMessageClass());
-        }
-
-        private static class Factory extends MethodFactory<OneParamMethod> {
-
-            private static final Factory INSTANCE = new Factory();
-
-            private Factory() {
-                super(OneParamMethod.class, method -> true);
-            }
-
-            private static Factory getInstance() {
-                return INSTANCE;
-            }
-
-            @Override
-            public void checkAccessModifier(Method method) {
-                // Any access modifier is accepted for the test method.
-            }
-
-            @Override
-            protected OneParamMethod doCreate(Method method) {
-                return new OneParamMethod(method);
-            }
         }
 
         @Override
@@ -192,4 +181,95 @@ public class HandlerMethodTestEnv {
             throw new IllegalStateException("The method is not a target of the test.");
         }
     }
+
+    @Immutable
+    public enum OneParamSpec implements ParameterSpec<EventEnvelope> {
+
+        INSTANCE;
+
+        @Override
+        public boolean matches(Class<?>[] methodParams) {
+            return consistsOfSingle(methodParams, Message.class);
+        }
+
+        @Override
+        public Object[] extractArguments(EventEnvelope envelope) {
+            return new Object[]{envelope.getMessage()};
+        }
+    }
+
+    public static class OneParamSignature extends MethodSignature<OneParamMethod, EventEnvelope> {
+
+        public OneParamSignature() {
+            super(Annotation.class);
+        }
+
+        @Override
+        public Class<? extends ParameterSpec<EventEnvelope>> getParamSpecClass() {
+            return OneParamSpec.class;
+        }
+
+        @Override
+        protected ImmutableSet<AccessModifier> getAllowedModifiers() {
+            return allModifiers();
+        }
+
+        @Override
+        protected ImmutableSet<Class<?>> getValidReturnTypes() {
+            return of(Object.class);
+        }
+
+        @Override
+        public OneParamMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+            return new OneParamMethod(method, parameterSpec);
+        }
+    }
+
+    @Immutable
+    public enum TwoParamSpec implements ParameterSpec<EventEnvelope> {
+
+        INSTANCE;
+
+        @Override
+        public boolean matches(Class<?>[] methodParams) {
+            return consistsOfTwo(methodParams, Message.class, EventContext.class);
+        }
+
+        @Override
+        public Object[] extractArguments(EventEnvelope envelope) {
+            return new Object[]{envelope.getMessage(), envelope.getEventContext()};
+        }
+    }
+
+    private static class TwoParamSignature extends MethodSignature<TwoParamMethod, EventEnvelope> {
+
+        protected TwoParamSignature() {
+            super(Annotation.class);
+        }
+
+        @Override
+        public Class<? extends ParameterSpec<EventEnvelope>> getParamSpecClass() {
+            return TwoParamSpec.class;
+        }
+
+        @Override
+        protected ImmutableSet<AccessModifier> getAllowedModifiers() {
+            return allModifiers();
+        }
+
+        @Override
+        protected ImmutableSet<Class<?>> getValidReturnTypes() {
+            return of(Object.class);
+        }
+
+        @Override
+        public TwoParamMethod doCreate(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+            return new TwoParamMethod(method, parameterSpec);
+        }
+    }
+
+    private static ImmutableSet<AccessModifier> allModifiers() {
+        return of(PUBLIC, PROTECTED, PACKAGE_PRIVATE, PRIVATE);
+    }
+
 }

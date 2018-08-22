@@ -30,10 +30,10 @@ import io.spine.base.Identifier;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.core.RejectionEnvelope;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.event.EventBus;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.procman.given.pm.AddTaskDispatcher;
 import io.spine.server.procman.given.pm.DirectQuizProcmanRepository;
 import io.spine.server.procman.given.pm.QuizProcmanRepository;
@@ -43,7 +43,7 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.NoOpSystemGateway;
 import io.spine.test.procman.command.PmAddTask;
-import io.spine.test.procman.command.PmCencelIteration;
+import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmPlanIteration;
 import io.spine.test.procman.command.PmReviewBacklog;
 import io.spine.test.procman.command.PmScheduleRetrospective;
@@ -120,6 +120,7 @@ class ProcessManagerTest {
 
     private CommandBus commandBus;
     private TestProcessManager processManager;
+    private EventBus eventBus;
 
     @BeforeEach
     void setUp() {
@@ -131,9 +132,13 @@ class ProcessManagerTest {
         StorageFactory storageFactory = bc.getStorageFactory();
         TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false, storageFactory);
 
+        eventBus = EventBus.newBuilder()
+                           .setStorageFactory(storageFactory)
+                           .build();
         commandBus = spy(CommandBus.newBuilder()
                                    .injectTenantIndex(tenantIndex)
                                    .injectSystemGateway(NoOpSystemGateway.INSTANCE)
+                                   .injectEventBus(eventBus)
                                    .build());
         processManager = Given.processManagerOfClass(TestProcessManager.class)
                               .withId(TestProcessManager.ID)
@@ -200,17 +205,18 @@ class ProcessManagerTest {
         @DisplayName("rejection message only")
         void rejectionMessage() {
             RejectionEnvelope rejection = entityAlreadyArchived(StringValue.class);
-            dispatch(processManager, rejection);
-            assertEquals(rejection.getOuterObject()
-                                  .getMessage(), processManager.getState());
+            dispatch(processManager, rejection.getEvent());
+            assertEquals(rejection.getOuterObject().getMessage(),
+                         processManager.getState());
         }
 
         @Test
         @DisplayName("rejection and command message")
         void rejectionAndCommandMessage() {
             RejectionEnvelope rejection = entityAlreadyArchived(PmAddTask.class);
-            dispatch(processManager, rejection);
-            assertEquals(AnyPacker.pack(rejection.getCommandMessage()), processManager.getState());
+            dispatch(processManager, rejection.getEvent());
+            assertEquals(rejection.getOrigin().getMessage(),
+                         processManager.getState());
         }
     }
 
@@ -289,7 +295,7 @@ class ProcessManagerTest {
 
             /**
              * Tests splitting incoming command into two.
-             * @see TestProcessManager#split(PmCencelIteration)
+             * @see TestProcessManager#split(PmCancelIteration)
              */
             @Test
             @DisplayName("when splitting incoming command")

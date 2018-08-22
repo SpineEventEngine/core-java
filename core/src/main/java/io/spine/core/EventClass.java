@@ -35,11 +35,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public final class EventClass extends MessageClass {
+public class EventClass extends MessageClass {
 
     private static final long serialVersionUID = 0L;
 
-    private EventClass(Class<? extends Message> value) {
+    EventClass(Class<? extends Message> value) {
         super(value);
     }
 
@@ -70,11 +70,21 @@ public final class EventClass extends MessageClass {
         return from(eventMessage.getClass());
     }
 
+    /**
+     * Creates a new instance of the event class.
+     *
+     * @param value a value to hold
+     * @return new instance
+     */
+    public static EventClass of(Class<? extends Message> value) {
+        return new EventClass(checkNotNull(value));
+    }
+
     /** Creates immutable set of {@code EventClass} from the passed set. */
     public static Set<EventClass> setOf(Iterable<Class<? extends Message>> classes) {
         ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
-            builder.add(from(cls));
+            builder.add(of(cls));
         }
         return builder.build();
     }

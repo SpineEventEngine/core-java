@@ -26,12 +26,12 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
-import io.spine.core.React;
 import io.spine.server.command.Assign;
 import io.spine.server.command.Command;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.entity.rejection.StandardRejections;
+import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
 import io.spine.test.procman.Project;
@@ -186,7 +186,7 @@ public class TestProcessManager
     }
 
     @React
-    public Empty on(PmTaskAdded event) {
+    Empty on(PmTaskAdded event) {
         keep(event);
 
         Task task = event.getTask();
@@ -195,7 +195,7 @@ public class TestProcessManager
     }
 
     @React
-    public Empty on(PmProjectStarted event) {
+    Empty on(PmProjectStarted event) {
         keep(event);
 
         handleProjectStarted();
@@ -203,7 +203,7 @@ public class TestProcessManager
     }
 
     @React
-    public Empty on(PmProjectCreated event, EventContext ignored) {
+    Empty on(PmProjectCreated event, EventContext ignored) {
         keep(event);
 
         handleProjectCreated(event.getProjectId());

@@ -36,8 +36,7 @@ import io.spine.grpc.LoggingObserver;
 import io.spine.grpc.LoggingObserver.Level;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
-import io.spine.server.outbus.CommandOutputBus;
-import io.spine.server.outbus.OutputDispatcherRegistry;
+import io.spine.server.bus.MulticastBus;
 import io.spine.server.storage.StorageFactory;
 import io.spine.validate.MessageValidator;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -50,6 +49,7 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.ImmutableSet.of;
+import static java.lang.String.format;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -91,7 +91,7 @@ import static com.google.common.collect.ImmutableSet.of;
  * @see io.spine.core.Subscribe @Subscribe
  */
 public class EventBus
-        extends CommandOutputBus<Event, EventEnvelope, EventClass, EventDispatcher<?>> {
+        extends MulticastBus<Event, EventEnvelope, EventClass, EventDispatcher<?>> {
 
     /*
      * NOTE: Even though, the EventBus has a private constructor and
@@ -119,7 +119,7 @@ public class EventBus
     private @MonotonicNonNull EventValidator eventValidator;
 
     /** The enricher for posted events or {@code null} if the enrichment is not supported. */
-    private final @Nullable EventEnricher enricher;
+    private final @Nullable Enricher enricher;
 
     /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {
@@ -161,7 +161,7 @@ public class EventBus
     }
 
     @Override
-    protected OutputDispatcherRegistry<EventClass, EventDispatcher<?>> createRegistry() {
+    protected EventDispatcherRegistry createRegistry() {
         return new EventDispatcherRegistry();
     }
 
@@ -184,11 +184,11 @@ public class EventBus
      * Posts the event for handling.
      *
      * <p>Performs the same action as the
-     * {@linkplain CommandOutputBus#post(Message, StreamObserver)} parent method}, but does not
+     * {@linkplain io.spine.server.bus.Bus#post(Message, StreamObserver)} parent method}, but does not
      * require any response observer.
      *
      * @param event the event to be handled
-     * @see CommandOutputBus#post(Message, StreamObserver)
+     * @see io.spine.server.bus.Bus#post(Message, StreamObserver)
      */
     public final void post(Event event) {
         post(event, streamObserver);
@@ -198,25 +198,32 @@ public class EventBus
      * Posts the events for handling.
      *
      * <p>Performs the same action as the
-     * {@linkplain CommandOutputBus#post(Iterable, StreamObserver)} parent method}, but does not
-     * require any response observer.
+     * {@linkplain io.spine.server.bus.Bus#post(Iterable, StreamObserver)} parent method}, but
+     * does not require any response observer.
      *
      * <p>This method should be used if the callee does not care about the events acknowledgement.
      *
      * @param events the events to be handled
-     * @see CommandOutputBus#post(Message, StreamObserver)
+     * @see io.spine.server.bus.Bus#post(Message, StreamObserver)
      */
     public final void post(Iterable<Event> events) {
         post(events, streamObserver);
     }
 
-    @Override
     protected EventEnvelope enrich(EventEnvelope event) {
         if (enricher == null || !enricher.canBeEnriched(event)) {
             return event;
         }
         EventEnvelope enriched = enricher.enrich(event);
         return enriched;
+    }
+
+    @Override
+    protected void dispatch(EventEnvelope envelope) {
+        EventEnvelope enrichedEnvelope = enrich(envelope);
+        int dispatchersCalled = callDispatchers(enrichedEnvelope);
+        checkState(dispatchersCalled != 0,
+                   format("Message %s has no dispatchers.", envelope.getMessage()));
     }
 
     @Override
@@ -292,7 +299,7 @@ public class EventBus
          * <p>If not set, the enrichments will NOT be supported
          * in the {@code EventBus} instance built.
          */
-        private @Nullable EventEnricher enricher;
+        private @Nullable Enricher enricher;
 
         /** Logging level for posted events.  */
         private LoggingObserver.Level logLevelForPost = Level.TRACE;
@@ -383,21 +390,21 @@ public class EventBus
         }
 
         /**
-         * Sets a custom {@link EventEnricher} for events posted to
+         * Sets a custom {@link Enricher} for events posted to
          * the {@code EventBus} which is being built.
          *
-         * <p>If the {@code EventEnricher} is not set, the enrichments
+         * <p>If the {@code Enricher} is not set, the enrichments
          * will <strong>NOT</strong> be supported for the {@code EventBus} instance built.
          *
-         * @param enricher the {@code EventEnricher} for events or {@code null} if enrichment is
+         * @param enricher the {@code Enricher} for events or {@code null} if enrichment is
          *                 not supported
          */
-        public Builder setEnricher(EventEnricher enricher) {
+        public Builder setEnricher(Enricher enricher) {
             this.enricher = enricher;
             return this;
         }
 
-        public Optional<EventEnricher> getEnricher() {
+        public Optional<Enricher> getEnricher() {
             return Optional.ofNullable(enricher);
         }
 

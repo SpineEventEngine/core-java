@@ -27,11 +27,9 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
-import io.spine.core.RejectionEnvelope;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.procman.PmCommandEndpoint;
 import io.spine.server.procman.PmEventEndpoint;
-import io.spine.server.procman.PmRejectionEndpoint;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.testing.server.NoOpLifecycle;
@@ -50,6 +48,7 @@ import static org.mockito.Mockito.when;
  * @author Alex Tymchenko
  */
 @VisibleForTesting
+@CanIgnoreReturnValue
 public class PmDispatcher {
 
     @SuppressWarnings("unchecked") // casts are ensured by type matching in key-value pairs
@@ -61,8 +60,6 @@ public class PmDispatcher {
                          (p, m) -> TestPmCommandEndpoint.dispatch(p, (CommandEnvelope) m))
                     .put(EventEnvelope.class,
                          (p, m) -> TestPmEventEndpoint.dispatch(p, (EventEnvelope) m))
-                    .put(RejectionEnvelope.class,
-                         (p, m) -> TestPmRejectionEndpoint.dispatch(p, (RejectionEnvelope) m))
                     .build();
 
     /** Prevents this utility class from instantiation. */
@@ -139,31 +136,6 @@ public class PmDispatcher {
             TestPmEventEndpoint<I, P, S> endpoint = new TestPmEventEndpoint<>(envelope);
             List<Event> events = endpoint.dispatchInTx(manager);
             return events;
-        }
-    }
-
-    /**
-     * A test-only implementation of an {@link PmRejectionEndpoint}, that dispatches
-     * rejection to an instance of {@code ProcessManager} and returns the list of events.
-     *
-     * @param <I> the type of {@code ProcessManager} identifier
-     * @param <P> the type of {@code ProcessManager}
-     * @param <S> the type of {@code ProcessManager} state object
-     */
-    private static class TestPmRejectionEndpoint<I,
-                                                 P extends ProcessManager<I, S, ?>,
-                                                 S extends Message>
-            extends PmRejectionEndpoint<I, P> {
-
-        private TestPmRejectionEndpoint(RejectionEnvelope envelope) {
-            super(mockRepository(), envelope);
-        }
-
-        private static <I, P extends ProcessManager<I, S, ?>, S extends Message>
-        List<Event> dispatch(P manager, RejectionEnvelope envelope) {
-            TestPmRejectionEndpoint<I, P, S> endpoint = new TestPmRejectionEndpoint<>(envelope);
-            List<Event> messages = endpoint.dispatchInTx(manager);
-            return messages;
         }
     }
 

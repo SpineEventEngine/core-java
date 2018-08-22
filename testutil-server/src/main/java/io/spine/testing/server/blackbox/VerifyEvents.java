@@ -66,4 +66,8 @@ public class VerifyEvents extends DelegatingVerify<EmittedEvents> {
                                              Class<? extends Message>... otherEventClasses) {
         return new VerifyEvents(classes(firstEventClass, otherEventClasses));
     }
+
+    public static VerifyEvents emmiterEventsHadVersions(int... versions) {
+        return new VerifyEvents(new EventVersionsVerifier(versions));
+    }
 }
