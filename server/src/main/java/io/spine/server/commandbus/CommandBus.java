@@ -37,10 +37,10 @@ import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.bus.BusBuilder;
-import io.spine.server.bus.UnicastBus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
+import io.spine.server.bus.UnicastBus;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.RejectionEnvelope;
@@ -56,6 +56,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.server.bus.BusBuilder.FieldCheck.checkSet;
 import static io.spine.server.bus.BusBuilder.FieldCheck.gatewayNotSet;
 import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
 import static io.spine.system.server.GatewayFunction.delegatingTo;
@@ -255,15 +256,6 @@ public class CommandBus extends UnicastBus<Command,
         tenantIndex.keep(tenantId);
     }
 
-    private CommandDispatcher<?> getDispatcher(CommandEnvelope commandEnvelope) {
-        Optional<? extends CommandDispatcher<?>> dispatcher =
-                getDispatcher(commandEnvelope.getMessageClass());
-        if (!dispatcher.isPresent()) {
-            throw noDispatcherFound(commandEnvelope);
-        }
-        return dispatcher.get();
-    }
-
     /**
      * Closes the instance, preventing any for further posting of commands.
      *
@@ -363,6 +355,12 @@ public class CommandBus extends UnicastBus<Command,
             return ofNullable(eventBus);
         }
 
+        @Override
+        protected void checkFieldsSet() {
+            super.checkFieldsSet();
+            checkSet(eventBus, EventBus.class, "injectEventBus");
+        }
+
         /**
          * Builds an instance of {@link CommandBus}.
          *
@@ -374,13 +372,14 @@ public class CommandBus extends UnicastBus<Command,
         @CheckReturnValue
         public CommandBus build() {
             checkFieldsSet();
-            checkSet(eventBus, EventBus.class, "injectEventBus");
 
             if (commandScheduler == null) {
                 commandScheduler = new ExecutorCommandScheduler();
             }
             flowWatcher = new CommandFlowWatcher((tenantId) -> {
-                SystemGateway result = delegatingTo(systemGateway()).get(tenantId);
+                @SuppressWarnings("OptionalGetWithoutIsPresent") // ensured by checkFieldsSet()
+                SystemGateway gateway = systemGateway().get();
+                SystemGateway result = delegatingTo(gateway).get(tenantId);
                 return result;
             });
             commandScheduler.setFlowWatcher(flowWatcher);

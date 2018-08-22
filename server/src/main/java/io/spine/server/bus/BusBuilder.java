@@ -167,7 +167,7 @@ public abstract class BusBuilder<E extends MessageEnvelope<?, T, ?>,
             checkSet(builder.tenantIndex, TenantIndex.class, TENANT_INDEX_METHOD);
         }
 
-        private static void checkSet(@Nullable Object field,
+        public static void checkSet(@Nullable Object field,
                                      Class<?> fieldType,
                                      String setterName) {
             checkState(field != null, ERROR_FORMAT, fieldType.getSimpleName(), setterName);

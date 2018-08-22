@@ -134,8 +134,8 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
      *
      * @param method
      *         the method to determine if it should be inspected at all
-     * @return {@code true} if this method should be walked through further examination, {@code
-     *         false} otherwise
+     * @return {@code true} if this method should be walked through further examination,
+     *         {@code false} otherwise
      */
     protected boolean skipMethod(Method method) {
         return !method.isAnnotationPresent(annotation);

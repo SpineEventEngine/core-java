@@ -21,7 +21,6 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
@@ -75,7 +74,7 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    protected List<? extends Message> doDispatch(A aggregate, EventEnvelope envelope) {
+    protected List<Event> doDispatch(A aggregate, EventEnvelope envelope) {
         I id = aggregate.getId();
         Event event = envelope.getOuterObject();
         repository().onImportEvent(id, event);
