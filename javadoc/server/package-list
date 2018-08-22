@@ -10,10 +10,8 @@ io.spine.server.entity.storage
 io.spine.server.event
 io.spine.server.event.storage
 io.spine.server.integration
-io.spine.server.outbus.enrich
 io.spine.server.procman
 io.spine.server.projection
-io.spine.server.rejection
 io.spine.server.route
 io.spine.server.stand
 io.spine.server.storage
