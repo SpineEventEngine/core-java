@@ -20,13 +20,21 @@
 
 package io.spine.system.server;
 
-import io.spine.core.CommandId;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.route.EventProducers;
 
 /**
- * The repository for {@link CommandLifecycleAggregate}s.
+ * Abstract base for system aggregate repositories.
  *
- * @author Dmytro Dashenkov
+ * <p>System repositories dispatch imported events using the first event message field.
+ *
+ * @author Alexander Yevsyukov
  */
-final class CommandLifecycleRepository
-        extends SystemRepository<CommandId, CommandLifecycleAggregate> {
+abstract class SystemRepository<I, A extends Aggregate<I, ?, ?>>
+        extends AggregateRepository<I, A> {
+
+    SystemRepository() {
+        getEventImportRouting().replaceDefault(EventProducers.fromFirstMessageField());
+    }
 }

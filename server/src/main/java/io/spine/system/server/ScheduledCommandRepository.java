@@ -37,9 +37,7 @@ import static com.google.common.collect.ImmutableSet.of;
 final class ScheduledCommandRepository
         extends ProjectionRepository<CommandId, ScheduledCommand, ScheduledCommandRecord> {
 
-    @Override
-    public void onRegistered() {
-        super.onRegistered();
+    ScheduledCommandRepository() {
         EventRouting<CommandId> routing = getEventRouting();
         routing.route(CommandDispatched.class,
                       (message, context) -> routeToExisting(message));

@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.CommandClass;
@@ -48,7 +47,6 @@ import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
-import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
@@ -109,7 +107,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * The route for event import, which obtains the target aggregate ID as the
      * {@linkplain io.spine.core.EventContext#getProducerId() producer ID} of the event.
      */
-    private final EventRoute<I, Message> eventImportRoute = EventProducers.fromContext();
+    private final EventRouting<I> eventImportRoute =
+            EventRouting.withDefault(EventProducers.fromContext());
 
     private final Supplier<AggregateCommandDelivery<I, A>> commandDeliverySupplier =
             memoize(this::createCommandDelivery);
@@ -310,7 +309,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * {@linkplain io.spine.core.EventContext#getProducerId() producer ID} of the event
      * as the target aggregate ID.
      */
-    protected final EventRoute<I, Message> getEventImportRoute() {
+    protected final EventRouting<I> getEventImportRouting() {
         return eventImportRoute;
     }
 

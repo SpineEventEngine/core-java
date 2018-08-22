@@ -60,9 +60,6 @@ public final class CommandRouting<I> extends MessageRouting<CommandContext, Comm
         return new CommandRouting<>(defaultRoute);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public final CommandRoute<I, Message> getDefault() {
         return (CommandRoute<I, Message>) super.getDefault();

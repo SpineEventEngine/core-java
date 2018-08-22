@@ -41,7 +41,7 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
     @Override
     protected I getTargets() {
         EventEnvelope envelope = envelope();
-        Set<I> ids = repository().getEventImportRoute()
+        Set<I> ids = repository().getEventImportRouting()
                                  .apply(envelope.getMessage(), envelope.getEventContext());
         int numberOfTargets = ids.size();
         checkState(
