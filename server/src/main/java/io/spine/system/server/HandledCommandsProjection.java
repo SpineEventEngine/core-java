@@ -57,9 +57,12 @@ public class HandledCommandsProjection
         HandledCommandsVBuilder builder = getBuilder();
         int size = builder.getCommand().size();
         int limit = builder.getMemoryLimit();
-        int shift = size - limit;
-        List<CommandId> ids = builder.getCommand().subList(shift, size);
-        builder.clearCommand()
-               .addAllCommand(ids);
+        if (size > limit) {
+            int shift = size - limit;
+            List<CommandId> ids = builder.getCommand()
+                                         .subList(shift, size);
+            builder.clearCommand()
+                   .addAllCommand(ids);
+        }
     }
 }

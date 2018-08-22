@@ -65,9 +65,11 @@ public class HandledEventsProjection
         HandledEventsVBuilder builder = getBuilder();
         int size = builder.getEvent().size();
         int limit = builder.getMemoryLimit();
-        int shift = size - limit;
-        List<EventId> ids = builder.getEvent().subList(shift, size);
-        builder.clearEvent()
-               .addAllEvent(ids);
+        if (size > limit) {
+            int shift = size - limit;
+            List<EventId> ids = builder.getEvent().subList(shift, size);
+            builder.clearEvent()
+                   .addAllEvent(ids);
+        }
     }
 }
