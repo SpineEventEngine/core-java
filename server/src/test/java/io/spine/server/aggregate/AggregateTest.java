@@ -23,9 +23,7 @@ package io.spine.server.aggregate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.Time;
-import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
@@ -42,7 +40,6 @@ import io.spine.server.aggregate.given.aggregate.TaskAggregate;
 import io.spine.server.aggregate.given.aggregate.TaskAggregateRepository;
 import io.spine.server.aggregate.given.aggregate.TestAggregate;
 import io.spine.server.aggregate.given.aggregate.TestAggregateRepository;
-import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -71,17 +68,11 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Throwables.getRootCause;
-import static com.google.common.collect.ImmutableList.copyOf;
-import static com.google.common.collect.ImmutableList.of;
-import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.CommandEnvelope.of;
-import static io.spine.core.Events.getRootCommandId;
-import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
@@ -443,21 +434,12 @@ public class AggregateTest {
                                        command(addTask),
                                        command(startProject));
 
-            List<Event> events = aggregate().getUncommittedEvents().list();
+            List<Event> events = aggregate().getUncommittedEvents()
+                                            .list();
 
             assertEventClasses(getEventClasses(events),
-                               AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class);
-        }
-
-        @Test
-        @DisplayName("which are being committed")
-        void beingCommittedAfterDispatch() {
-            aggregate.dispatchCommands(command(createProject),
-                                       command(addTask),
-                                       command(startProject));
-            aggregate().commitEvents();
-            assertEventClasses(getEventClasses(copyOf(aggregate().historyBackward())),
-                               AggProjectCreated.class, AggTaskAdded.class, AggProjectStarted.class);
+                               AggProjectCreated.class, AggTaskAdded.class,
+                               AggProjectStarted.class);
         }
 
         private Collection<EventClass> getEventClasses(Collection<Event> events) {
@@ -486,7 +468,8 @@ public class AggregateTest {
         @DisplayName("which are being committed")
         void beingCommittedByDefault() {
             aggregate().commitEvents();
-            assertFalse(aggregate.historyBackward().hasNext());
+            Aggregate entity = aggregate;
+            assertFalse(entity.getUncommittedEvents().nonEmpty());
         }
     }
 
@@ -656,63 +639,6 @@ public class AggregateTest {
     @DisplayName("not allow getting state builder from outside event applier")
     void notGetStateBuilderOutsideOfApplier() {
         assertThrows(IllegalStateException.class, () -> new IntAggregate(100).getBuilder());
-    }
-
-    @Nested
-    @DisplayName("traverse history")
-    class TraverseHistory {
-
-        @Test
-        @DisplayName("iterating through newest events first")
-        void throughNewestEventsFirst() {
-            TenantId tenantId = newTenantId();
-            Command createCommand = command(createProject, tenantId);
-            Command startCommand = command(startProject, tenantId);
-            Command addTaskCommand = command(addTask, tenantId);
-            Command addTaskCommand2 = command(addTask, tenantId);
-
-            CommandBus commandBus = boundedContext.getCommandBus();
-            StreamObserver<Ack> noOpObserver = noOpObserver();
-            commandBus.post(createCommand, noOpObserver);
-            commandBus.post(addTaskCommand, noOpObserver);
-            commandBus.post(newArrayList(addTaskCommand2, startCommand), noOpObserver);
-
-            TestAggregate aggregate = repository.loadAggregate(tenantId, ID);
-
-            Iterator<Event> history = aggregate.historyBackward();
-
-            assertEquals(startCommand.getId(), getRootCommandId(history.next()));
-            assertEquals(addTaskCommand2.getId(), getRootCommandId(history.next()));
-            assertEquals(addTaskCommand.getId(), getRootCommandId(history.next()));
-            assertEquals(createCommand.getId(), getRootCommandId(history.next()));
-            assertFalse(history.hasNext());
-        }
-
-        @Test
-        @DisplayName("up to latest snapshot")
-        void upToLatestSnapshot() {
-            repository.setSnapshotTrigger(3);
-
-            TenantId tenantId = newTenantId();
-            Command createCommand = command(createProject, tenantId);
-            Command startCommand = command(startProject, tenantId);
-            Command addTaskCommand = command(addTask, tenantId);
-            Command addTaskCommand2 = command(addTask, tenantId);
-
-            CommandBus commandBus = boundedContext.getCommandBus();
-            StreamObserver<Ack> noOpObserver = noOpObserver();
-            commandBus.post(createCommand, noOpObserver);
-            commandBus.post(startCommand, noOpObserver);
-            commandBus.post(of(addTaskCommand, addTaskCommand2), noOpObserver);
-
-            TestAggregate aggregate = repository.loadAggregate(tenantId, ID);
-
-            Iterator<Event> history = aggregate.historyBackward();
-
-            Event singleEvent = history.next();
-            assertEquals(addTaskCommand2.getId(), getRootCommandId(singleEvent));
-            assertFalse(history.hasNext());
-        }
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")

@@ -46,7 +46,6 @@ import io.spine.server.model.ReactorMethodResult;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -353,19 +352,6 @@ public abstract class Aggregate<I,
                 .setVersion(getVersion())
                 .setTimestamp(getCurrentTime());
         return builder.build();
-    }
-
-    /**
-     * Creates an iterator of the aggregate event history with reverse traversal.
-     *
-     * <p>The records are returned sorted by timestamp in a descending order (from newer to older).
-     *
-     * <p>The iterator is empty if there's no history for the aggregate.
-     *
-     * @return new iterator instance
-     */
-    protected Iterator<Event> historyBackward() {
-        return null;
     }
 
     /**
