@@ -24,21 +24,19 @@ import com.google.protobuf.Message;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.server.BoundedContext;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.AggregateWithLifecycle;
 import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.RepoOfAggregateWithLifecycle;
-import io.spine.server.delivery.InProcessSharding;
-import io.spine.server.delivery.Sharding;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.test.aggregate.command.AggCancelTask;
 import io.spine.test.aggregate.command.AggCompleteTask;
 import io.spine.test.aggregate.command.AggCreateTask;
 import io.spine.test.aggregate.task.AggTaskId;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.ShardingReset;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.noOpObserver;
@@ -48,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Alexander Yevsyukov
  */
+@ExtendWith(ShardingReset.class)
 @DisplayName("AggregateRepository views should")
 class AggregateRepositoryViewsTest {
 
@@ -62,10 +61,6 @@ class AggregateRepositoryViewsTest {
 
     @BeforeEach
     void setUp() {
-        ServerEnvironment serverEnvironment = ServerEnvironment.getInstance();
-        Sharding sharding = new InProcessSharding(InMemoryTransportFactory.newInstance());
-        serverEnvironment.replaceSharding(sharding);
-
         id = AggTaskId
                 .newBuilder()
                 .setId(newUuid())
