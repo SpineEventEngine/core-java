@@ -144,13 +144,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public void onRegistered() {
+        checkNotVoid();
+
         super.onRegistered();
+
         BoundedContext boundedContext = getBoundedContext();
         boundedContext.registerCommandDispatcher(this);
         boundedContext.registerEventDispatcher(this);
         boundedContext.registerRejectionDispatcher(this);
-
-        checkNotVoid();
 
         this.commandErrorHandler = boundedContext.createCommandErrorHandler();
         registerWithSharding();
@@ -179,7 +180,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     /** Obtains class information of aggregates managed by this repository. */
     AggregateClass<A> aggregateClass() {
-        return (AggregateClass<A>)entityClass();
+        return (AggregateClass<A>) entityClass();
     }
 
     @Override
