@@ -257,24 +257,6 @@ public class CommandBus extends UnicastBus<Command,
     }
 
     /**
-     * Closes the instance, preventing any for further posting of commands.
-     *
-     * <p>The following operations are performed:
-     * <ol>
-     * <li>All command dispatchers are un-registered.
-     * <li>{@code CommandStore} is closed.
-     * <li>{@code CommandScheduler} is shut down.
-     * </ol>
-     *
-     * @throws Exception if closing the {@code CommandStore} cases an exception
-     */
-    @Override
-    public void close() throws Exception {
-        super.close();
-        eventBus.close();
-    }
-
-    /**
      * {@inheritDoc}
      *
      * <p>Overrides for return type covariance.
