@@ -25,6 +25,8 @@ import io.spine.core.Subscribe;
 import io.spine.server.entity.IdempotencySpec;
 import io.spine.server.projection.Projection;
 
+import java.util.List;
+
 /**
  * @author Dmytro Dashenkov
  */
@@ -48,7 +50,7 @@ public class HandledEventsProjection
         EventId eventId = event.getPayload()
                                .getEvent();
         getBuilder().addEvent(eventId);
-        trimTail();
+        trimHead();
     }
 
     @Subscribe
@@ -56,18 +58,16 @@ public class HandledEventsProjection
         EventId eventId = event.getPayload()
                                .getEvent();
         getBuilder().addEvent(eventId);
-        trimTail();
+        trimHead();
     }
 
-    private void trimTail() {
+    private void trimHead() {
         HandledEventsVBuilder builder = getBuilder();
         int size = builder.getEvent().size();
         int limit = builder.getMemoryLimit();
-        while (size > limit) {
-            int lastElementIndex = size - 1;
-            builder.removeEvent(lastElementIndex);
-
-            size = builder.getEvent().size();
-        }
+        int shift = size - limit;
+        List<EventId> ids = builder.getEvent().subList(shift, size);
+        builder.clearEvent()
+               .addAllEvent(ids);
     }
 }

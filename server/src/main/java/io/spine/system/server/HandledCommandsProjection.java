@@ -25,6 +25,8 @@ import io.spine.core.Subscribe;
 import io.spine.server.entity.IdempotencySpec;
 import io.spine.server.projection.Projection;
 
+import java.util.List;
+
 /**
  * @author Dmytro Dashenkov
  */
@@ -48,18 +50,16 @@ public class HandledCommandsProjection
         CommandId commandId = event.getPayload()
                                    .getCommand();
         getBuilder().addCommand(commandId);
-        trimTail();
+        trimHead();
     }
 
-    private void trimTail() {
+    private void trimHead() {
         HandledCommandsVBuilder builder = getBuilder();
         int size = builder.getCommand().size();
         int limit = builder.getMemoryLimit();
-        while (size > limit) {
-            int lastElementIndex = size - 1;
-            builder.removeCommand(lastElementIndex);
-
-            size = builder.getCommand().size();
-        }
+        int shift = size - limit;
+        List<CommandId> ids = builder.getCommand().subList(shift, size);
+        builder.clearCommand()
+               .addAllCommand(ids);
     }
 }
