@@ -20,21 +20,19 @@
 
 package io.spine.server.aggregate.given;
 
-import com.google.common.base.Splitter;
-import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
-import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.route.CommandRoute;
-import io.spine.validate.StringValueVBuilder;
-
-import static io.spine.protobuf.TypeConverter.toMessage;
-import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
-import static java.lang.String.format;
+import io.spine.test.aggregate.command.AggCancelTask;
+import io.spine.test.aggregate.command.AggCompleteTask;
+import io.spine.test.aggregate.command.AggCreateTask;
+import io.spine.test.aggregate.event.AggTaskCanceled;
+import io.spine.test.aggregate.event.AggTaskCompleted;
+import io.spine.test.aggregate.event.AggTaskCreated;
+import io.spine.test.aggregate.task.AggTask;
+import io.spine.test.aggregate.task.AggTaskId;
+import io.spine.test.aggregate.task.AggTaskVBuilder;
 
 /**
  * Test environment for {@link io.spine.server.aggregate.AggregateRepositoryTest}.
@@ -54,31 +52,52 @@ public class AggregateRepositoryViewTestEnv {
      * in the tests. Real aggregates should use generated messages.
      */
     public static class AggregateWithLifecycle
-            extends Aggregate<Long, StringValue, StringValueVBuilder> {
+            extends Aggregate<AggTaskId, AggTask, AggTaskVBuilder> {
 
-        private AggregateWithLifecycle(Long id) {
+        private AggregateWithLifecycle(AggTaskId id) {
             super(id);
         }
 
         @Assign
-        StringValue handle(StringValue commandMessage) {
-            String msg = commandMessage.getValue();
-            // Transform the command to the event (the fact in the past).
-            return toMessage(msg + 'd');
+        AggTaskCreated handle(AggCreateTask command) {
+            return AggTaskCreated
+                    .newBuilder()
+                    .setTaskId(command.getTaskId())
+                    .build();
+        }
+
+        @Assign
+        AggTaskCompleted handle(AggCompleteTask command) {
+            return AggTaskCompleted
+                    .newBuilder()
+                    .setTaskId(command.getTaskId())
+                    .build();
+        }
+
+        @Assign
+        AggTaskCanceled handle(AggCancelTask command) {
+            return AggTaskCanceled
+                    .newBuilder()
+                    .setTaskId(command.getTaskId())
+                    .build();
         }
 
         @Apply
-        void on(StringValue eventMessage) {
-            String msg = RepoOfAggregateWithLifecycle.getMessage(eventMessage);
-            if (archived.name()
-                        .equalsIgnoreCase(msg)) {
-                setArchived(true);
-            }
-            if (deleted.name()
-                       .equalsIgnoreCase(msg)) {
-                setDeleted(true);
-            }
-            getBuilder().setValue(msg);
+        void on(AggTaskCreated event) {
+            getBuilder().setId(event.getTaskId());
+        }
+
+        @Apply
+        void on(@SuppressWarnings("unused") // OK for an applier.
+                AggTaskCompleted event) {
+            setArchived(true);
+        }
+
+
+        @Apply
+        void on(@SuppressWarnings("unused") // OK for an applier.
+                AggTaskCanceled event) {
+            setDeleted(true);
         }
     }
 
@@ -89,49 +108,6 @@ public class AggregateRepositoryViewTestEnv {
      * {@code AggregateId-CommandMessage}.
      */
     public static class RepoOfAggregateWithLifecycle
-            extends AggregateRepository<Long, AggregateWithLifecycle> {
-
-        private static final char SEPARATOR = '-';
-        /**
-         * Custom {@code IdCommandFunction} that parses an aggregate ID from {@code StringValue}.
-         */
-        private static final CommandRoute<Long, Message> parsingRoute =
-                new CommandRoute<Long, Message>() {
-
-                    private static final long serialVersionUID = 0L;
-
-                    @Override
-                    public Long apply(Message message, CommandContext context) {
-                        Long result = getId((StringValue) message);
-                        return result;
-                    }
-                };
-
-        public RepoOfAggregateWithLifecycle() {
-            super();
-            getCommandRouting().replaceDefault(parsingRoute);
-        }
-
-        /**
-         * Creates a command message in the form {@code <id>-<action>}.
-         *
-         * @see #getId(StringValue)
-         * @see #getMessage(StringValue)
-         */
-        public static StringValue createCommandMessage(Long id, String msg) {
-            return toMessage(format("%d%s%s", id, SEPARATOR, msg));
-        }
-
-        private static Long getId(StringValue commandMessage) {
-            return Long.valueOf(Splitter.on(SEPARATOR)
-                                        .splitToList(commandMessage.getValue())
-                                        .get(0));
-        }
-
-        static String getMessage(StringValue commandMessage) {
-            return Splitter.on(SEPARATOR)
-                           .splitToList(commandMessage.getValue())
-                           .get(1);
-        }
+            extends AggregateRepository<AggTaskId, AggregateWithLifecycle> {
     }
 }

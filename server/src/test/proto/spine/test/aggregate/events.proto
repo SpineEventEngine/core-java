@@ -84,3 +84,11 @@ message AggUserNotified {
     AggTaskId task_id = 1;
     spine.core.UserId user_id = 2;
 }
+
+message AggTaskCompleted {
+    AggTaskId task_id = 1;
+}
+
+message AggTaskCanceled {
+    AggTaskId task_id = 1;
+}

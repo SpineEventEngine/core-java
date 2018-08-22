@@ -20,19 +20,24 @@
 
 package io.spine.server.aggregate;
 
+import com.google.protobuf.Message;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Command;
-import io.spine.grpc.StreamObservers;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.AggregateWithLifecycle;
 import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.RepoOfAggregateWithLifecycle;
+import io.spine.test.aggregate.command.AggCancelTask;
+import io.spine.test.aggregate.command.AggCompleteTask;
+import io.spine.test.aggregate.command.AggCreateTask;
+import io.spine.test.aggregate.task.AggTaskId;
 import io.spine.testing.client.TestActorRequestFactory;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
+import static io.spine.base.Identifier.newUuid;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,74 +48,84 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class AggregateRepositoryViewsTest {
 
     /** The Aggregate ID used in all tests */
-    private static final Long id = 100L;
     private final ActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
+
+    private AggregateWithLifecycle aggregate;
     private BoundedContext boundedContext;
-    /**
-     * The default behaviour of an {@code AggregateRepository}.
-     */
-    private AggregateRepository<Long, AggregateWithLifecycle> repository;
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // It's on purpose for tests.
-    private Optional<AggregateWithLifecycle> aggregate;
+    private AggregateRepository<AggTaskId, AggregateWithLifecycle> repository;
+    private AggTaskId id;
 
     @BeforeEach
     void setUp() {
+        id = AggTaskId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
         boundedContext = BoundedContext.newBuilder()
                                        .build();
         repository = new RepoOfAggregateWithLifecycle();
         boundedContext.register(repository);
 
         // Create the aggregate instance.
-        postCommand("createCommand");
+        AggCreateTask createCommand = AggCreateTask
+                .newBuilder()
+                .setTaskId(id)
+                .build();
+        postCommand(createCommand);
     }
 
     /**
      * Creates a command and posts it to {@code CommandBus}
      * for being processed by the repository.
      */
-    private void postCommand(String cmd) {
-        Command command =
-                requestFactory.command()
-                              .create(RepoOfAggregateWithLifecycle.createCommandMessage(id, cmd));
+    private void postCommand(Message commandMessage) {
+        Command command = requestFactory.command()
+                                        .create(commandMessage);
         boundedContext.getCommandBus()
-                      .post(command, StreamObservers.noOpObserver());
+                      .post(command, noOpObserver());
     }
 
     @Test
     @DisplayName("find aggregate if no status flags are set")
     void findAggregatesWithNoStatus() {
-        aggregate = repository.find(id);
+        ensureAggregate();
 
-        assertTrue(aggregate.isPresent());
-        AggregateWithLifecycle agg = aggregate.get();
-        assertFalse(agg.isArchived());
-        assertFalse(agg.isDeleted());
+        assertFalse(aggregate.isArchived());
+        assertFalse(aggregate.isDeleted());
     }
 
     @Test
     @DisplayName("find aggregates with `archived` status")
     void findArchivedAggregates() {
-        postCommand("archive");
+        AggCompleteTask complete = AggCompleteTask
+                .newBuilder()
+                .setTaskId(id)
+                .build();
+        postCommand(complete);
+        ensureAggregate();
 
-        aggregate = repository.find(id);
-
-        assertTrue(aggregate.isPresent());
-        AggregateWithLifecycle agg = aggregate.get();
-        assertTrue(agg.isArchived());
-        assertFalse(agg.isDeleted());
+        assertTrue(aggregate.isArchived());
+        assertFalse(aggregate.isDeleted());
     }
 
     @Test
     @DisplayName("find aggregates with `deleted` status")
     void findDeletedAggregates() {
-        postCommand("delete");
+        AggCancelTask cancel = AggCancelTask
+                .newBuilder()
+                .setTaskId(id)
+                .build();
+        postCommand(cancel);
 
-        aggregate = repository.find(id);
+        ensureAggregate();
 
-        assertTrue(aggregate.isPresent());
-        AggregateWithLifecycle agg = aggregate.get();
-        assertFalse(agg.isArchived());
-        assertTrue(agg.isDeleted());
+        assertFalse(aggregate.isArchived());
+        assertTrue(aggregate.isDeleted());
+    }
+
+    private void ensureAggregate() {
+        aggregate = repository.find(id)
+                              .orElseGet(Assertions::fail);
     }
 }
