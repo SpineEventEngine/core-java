@@ -60,6 +60,7 @@ public class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     protected List<Event> doDispatch(A aggregate, CommandEnvelope envelope) {
+        aggregate.idempotencyGuard().check(envelope);
         EntityLifecycle lifecycle = repository().lifecycleOf(aggregate.getId());
         DispatchCommand dispatch = operationFor(lifecycle, aggregate, envelope);
         return dispatch.perform();

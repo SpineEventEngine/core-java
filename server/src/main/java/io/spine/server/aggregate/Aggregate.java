@@ -192,7 +192,6 @@ public abstract class Aggregate<I,
      */
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope command) {
-        idempotencyGuard().check(command);
         CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         EventsResult result = method.invoke(this, command);
         return result.produceEvents(command);
@@ -209,7 +208,6 @@ public abstract class Aggregate<I,
      *         an empty list if the aggregate state does not change in reaction to the event
      */
     List<Event> reactOn(EventEnvelope event) {
-        idempotencyGuard().check(event);
         EventReactorMethod method =
                 thisClass().getReactor(event.getMessageClass(), event.getOriginClass());
         ReactorMethodResult result =

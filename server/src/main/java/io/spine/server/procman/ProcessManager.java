@@ -140,7 +140,6 @@ public abstract class ProcessManager<I,
         CommandClass commandClass = command.getMessageClass();
 
         if (thisClass.handlesCommand(commandClass)) {
-            idempotencyGuard().check(command);
             CommandHandlerMethod method = thisClass.getHandler(commandClass);
             CommandHandlerMethod.Result result =
                     method.invoke(this, command);
@@ -149,7 +148,6 @@ public abstract class ProcessManager<I,
         }
 
         if (thisClass.substitutesCommand(commandClass)) {
-            idempotencyGuard().check(command);
             CommandSubstituteMethod method = thisClass.getCommander(commandClass);
             CommandSubstituteMethod.Result result = method.invoke(this, command);
             result.transformOrSplitAndPost(command, commandBus);
@@ -181,7 +179,6 @@ public abstract class ProcessManager<I,
         ProcessManagerClass<?> thisClass = thisClass();
         EventClass eventClass = event.getMessageClass();
         if (thisClass.reactsOnEvent(eventClass)) {
-            idempotencyGuard().check(event);
             EventReactorMethod method = thisClass.getReactor(eventClass, event.getOriginClass());
             ReactorMethodResult methodResult = method.invoke(this, event);
             List<Event> result = methodResult.produceEvents(event);
@@ -189,7 +186,6 @@ public abstract class ProcessManager<I,
         }
 
         if (thisClass.producesCommandsOn(eventClass)) {
-            idempotencyGuard().check(event);
             CommandReactionMethod method = thisClass.getCommander(eventClass);
             CommandReactionMethod.Result result = method.invoke(this, event);
             result.produceAndPost(event, commandBus);
