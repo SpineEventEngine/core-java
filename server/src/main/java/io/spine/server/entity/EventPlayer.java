@@ -25,6 +25,7 @@ import io.spine.core.Event;
 
 import java.util.Collection;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.singleton;
 
 /**
@@ -54,5 +55,20 @@ public interface EventPlayer {
     default void play(Event event) {
         Collection<Event> events = singleton(event);
         play(events);
+    }
+
+    /**
+     * Creates a transactional {@code .EventPlayer} for the given
+     * {@linkplain TransactionalEntity entity}.
+     *
+     * <p>It is expected that the given entity is currently in a transaction. If this condition is
+     * not met, an {@code IllegalStateException} is {@linkplain TransactionalEntity#tx() thrown}.
+     *
+     * @param entity the entity to create the player for
+     * @return new instance on {@code EventPlayer}
+     */
+    static EventPlayer forTransactionOf(TransactionalEntity<?, ?, ?> entity) {
+        checkNotNull(entity);
+        return new TransactionalEventPlayer(entity.tx());
     }
 }

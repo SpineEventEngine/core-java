@@ -42,7 +42,6 @@ import io.spine.server.aggregate.model.EventApplier;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.entity.EventPlayer;
-import io.spine.server.entity.EventPlayers;
 import io.spine.server.event.EventFactory;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
@@ -266,8 +265,8 @@ public abstract class Aggregate<I,
 
     @Override
     public void play(Iterable<Event> events) {
-        EventPlayers.forTransactionOf(this)
-                    .play(events);
+        EventPlayer.forTransactionOf(this)
+                   .play(events);
     }
 
     /**

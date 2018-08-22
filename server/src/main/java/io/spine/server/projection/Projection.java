@@ -26,7 +26,6 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.server.entity.EventPlayer;
-import io.spine.server.entity.EventPlayers;
 import io.spine.server.entity.TransactionalEntity;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.event.model.EventSubscriberMethod;
@@ -113,7 +112,7 @@ public abstract class Projection<I,
 
     @Override
     public void play(Iterable<Event> events) {
-        EventPlayer eventPlayer = EventPlayers.forTransactionOf(this);
+        EventPlayer eventPlayer = EventPlayer.forTransactionOf(this);
         eventPlayer.play(events);
     }
 }
