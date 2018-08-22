@@ -29,10 +29,10 @@ import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
+import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
-import io.spine.server.commandbus.CommandErrorHandler;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
@@ -296,11 +296,7 @@ public abstract class BoundedContext
      */
     public CommandErrorHandler createCommandErrorHandler() {
         SystemGateway systemGateway = getSystemGateway();
-        CommandErrorHandler result = CommandErrorHandler
-                .newBuilder()
-                .setRejectionBus(getRejectionBus())
-                .setSystemGateway(systemGateway)
-                .build();
+        CommandErrorHandler result = CommandErrorHandler.with(systemGateway);
         return result;
     }
     /**

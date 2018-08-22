@@ -29,6 +29,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
+import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.type.TypeName;
 
@@ -213,7 +214,7 @@ public class Enricher {
          */
         public <S, T> Builder add(Class<S> sourceFieldClass,
                                   Class<T> enrichmentFieldClass,
-                                  BiFunction<S, C, T> func) {
+                                  BiFunction<S, EventContext, T> func) {
             checkNotNull(sourceFieldClass);
             checkNotNull(enrichmentFieldClass);
             checkNotNull(func);

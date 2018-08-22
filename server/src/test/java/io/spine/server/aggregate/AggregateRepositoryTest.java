@@ -505,7 +505,8 @@ public class AggregateRepositoryTest {
                     .newBuilder()
                     .setProjectId(id)
                     .build();
-            BlackBoxBoundedContext.with(repository())
+            BlackBoxBoundedContext.newInstance()
+                                  .with(repository())
                                   .receivesCommands(create, addTask, start)
                                   .assertThat(emmiterEventsHadVersions(1, 2, 3));
         }
@@ -529,7 +530,8 @@ public class AggregateRepositoryTest {
                     .setProjectId(parent)
                     .addChildProjectId(id)
                     .build();
-            BlackBoxBoundedContext.with(repository())
+            BlackBoxBoundedContext.newInstance()
+                                  .with(repository())
                                   .receivesCommands(create, start)
                                   .receivesEvent(archived)
                                   .assertThat(emmiterEventsHadVersions(

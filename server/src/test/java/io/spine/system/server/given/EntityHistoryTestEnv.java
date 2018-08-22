@@ -21,9 +21,7 @@
 package io.spine.system.server.given;
 
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
 import io.spine.core.EventClass;
-import io.spine.core.React;
 import io.spine.core.Subscribe;
 import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;

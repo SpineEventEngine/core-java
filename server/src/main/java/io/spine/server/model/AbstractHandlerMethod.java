@@ -205,7 +205,7 @@ public abstract class AbstractHandlerMethod<T,
 
     @CanIgnoreReturnValue
     @Override
-    public final R invoke(T target, E envelope) {
+    public R invoke(T target, E envelope) {
         checkNotNull(target);
         checkNotNull(envelope);
         checkAttributesMatch(envelope);

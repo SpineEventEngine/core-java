@@ -21,7 +21,6 @@
 package io.spine.server.aggregate.given.klasse;
 
 import com.google.protobuf.Empty;
-import io.spine.core.React;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.aggregate.given.klasse.command.StartEngine;
@@ -36,6 +35,7 @@ import io.spine.server.aggregate.given.klasse.rejection.EngineAlreadyStarted;
 import io.spine.server.aggregate.given.klasse.rejection.EngineAlreadyStopped;
 import io.spine.server.aggregate.given.klasse.rejection.Rejections;
 import io.spine.server.command.Assign;
+import io.spine.server.event.React;
 
 import static io.spine.server.aggregate.given.klasse.Engine.Status.STARTED;
 import static io.spine.server.aggregate.given.klasse.Engine.Status.STOPPED;

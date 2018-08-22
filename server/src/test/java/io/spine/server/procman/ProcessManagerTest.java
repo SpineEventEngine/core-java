@@ -43,7 +43,7 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.NoOpSystemGateway;
 import io.spine.test.procman.command.PmAddTask;
-import io.spine.test.procman.command.PmCencelIteration;
+import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmPlanIteration;
 import io.spine.test.procman.command.PmReviewBacklog;
 import io.spine.test.procman.command.PmScheduleRetrospective;
@@ -295,7 +295,7 @@ class ProcessManagerTest {
 
             /**
              * Tests splitting incoming command into two.
-             * @see TestProcessManager#split(PmCencelIteration)
+             * @see TestProcessManager#split(PmCancelIteration)
              */
             @Test
             @DisplayName("when splitting incoming command")

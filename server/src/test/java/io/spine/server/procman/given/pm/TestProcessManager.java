@@ -31,7 +31,7 @@ import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.Pair;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.PmAddTask;
-import io.spine.test.procman.command.PmCencelIteration;
+import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmPlanIteration;
 import io.spine.test.procman.command.PmReviewBacklog;
@@ -141,7 +141,7 @@ public class TestProcessManager
      **************************************/
 
     @Command
-    Pair<PmScheduleRetrospective, PmPlanIteration> split(PmCencelIteration command) {
+    Pair<PmScheduleRetrospective, PmPlanIteration> split(PmCancelIteration command) {
         ProjectId pid = command.getProjectId();
         return Pair.of(PmScheduleRetrospective
                                .newBuilder()

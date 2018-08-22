@@ -31,9 +31,6 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
-import io.spine.server.ServerEnvironment;
-import io.spine.server.bus.Bus;
-import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.command.CaughtError;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.command.CommandHandlingEntity;
@@ -54,13 +51,9 @@ import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.procman.model.ProcessManagerClass;
-import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
-import io.spine.system.server.SystemGateway;
-import io.spine.server.route.RejectionProducers;
-import io.spine.server.route.RejectionRouting;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
 import java.util.Optional;
@@ -133,49 +126,6 @@ public abstract class ProcessManagerRepository<I,
         return processManagerClass();
     }
 
-    /*
-
-    from `rejection-events`:
-
-    @SuppressWarnings("MethodWithMoreThanThreeNegations")   // It's fine, as reflects the logic.
-    @Override
-    public void onRegistered() {
-        super.onRegistered();
-
-        BoundedContext boundedContext = getBoundedContext();
-        boolean handlesCommands = register(boundedContext.getCommandBus(),
-                                           DelegatingCommandDispatcher.of(this));
-        boolean handlesDomesticEvents = !getMessageClasses().isEmpty();
-        boolean handlesExternalEvents = !getExternalEventDispatcher().getMessageClasses()
-                                                                     .isEmpty();
-
-        boolean subscribesToEvents = handlesDomesticEvents || handlesExternalEvents;
-
-        if (!handlesCommands && !subscribesToEvents) {
-            throw newIllegalStateException(
-                    "Process managers of the repository %s have no command handlers, " +
-                            "and do not react upon any rejections or events.", this);
-        }
-        SystemGateway systemGateway = boundedContext.getSystemGateway();
-        this.commandErrorHandler = CommandErrorHandler.with(systemGateway);
-        ServerEnvironment.getInstance()
-                         .getSharding()
-                         .register(this);
-    }
-
-        @SuppressWarnings("unchecked")  // To avoid a long "train" of generic parameter definitions.
-    private static <D extends MessageDispatcher<?, ?, ?>>
-    boolean register(Bus<?, ?, ?, D> bus, D dispatcher) {
-        boolean hasHandlerMethods = !dispatcher.getMessageClasses()
-                                               .isEmpty();
-        if (hasHandlerMethods) {
-            bus.register(dispatcher);
-        }
-        return hasHandlerMethods;
-    }
-
-     */
-
     /**
      * {@inheritDoc}
      *
@@ -203,15 +153,13 @@ public abstract class ProcessManagerRepository<I,
 
         BoundedContext boundedContext = getBoundedContext();
         boundedContext.registerCommandDispatcher(this);
-        boundedContext.registerRejectionDispatcher(this);
 
         boolean dispatchesEvents = dispatchesEvents() || dispatchesExternalEvents();
-        boolean dispatchesRejections = dispatchesRejections() || dispatchesExternalRejections();
 
-        if (!dispatchesCommands() && !dispatchesEvents && !dispatchesRejections) {
+        if (!dispatchesCommands() && !dispatchesEvents) {
             throw newIllegalStateException(
                     "Process managers of the repository %s have no command handlers, " +
-                            "and do not react upon any rejections or events.", this);
+                            "and do not react on any events.", this);
         }
 
         this.commandErrorHandler = boundedContext.createCommandErrorHandler();
@@ -433,10 +381,6 @@ public abstract class ProcessManagerRepository<I,
 
     private PmEventDelivery<I, P> createEventDelivery() {
         return new PmEventDelivery<>(this);
-    }
-
-    private PmRejectionDelivery<I, P> crateRejectionDelivery() {
-        return new PmRejectionDelivery<>(this);
     }
 
     /**

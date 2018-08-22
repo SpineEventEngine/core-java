@@ -65,6 +65,8 @@ import static org.mockito.Mockito.verify;
 @DisplayName("EventSubscriberMethod should")
 class EventSubscriberMethodTest {
 
+    private static final EventSubscriberSignature signature = new EventSubscriberSignature();
+
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
     void passNullToleranceCheck() throws NoSuchMethodException {
@@ -83,7 +85,7 @@ class EventSubscriberMethodTest {
         ValidTwoParams subscriberObject;
         subscriberObject = spy(new ValidTwoParams());
         Optional<EventSubscriberMethod> createdMethod =
-                new EventSubscriberSignature().create(subscriberObject.getMethod());
+                signature.create(subscriberObject.getMethod());
         assertTrue(createdMethod.isPresent());
         EventSubscriberMethod subscriber = createdMethod.get();
         RefProjectCreated msg = Given.EventMessage.projectCreated();
@@ -108,15 +110,14 @@ class EventSubscriberMethodTest {
         @DisplayName("one Message parameter")
         void oneMessageParam() {
             Method subscriber = new ValidOneParam().getMethod();
-
-            assertIsEventSubscriber(subscriber);
+            assertValid(subscriber);
         }
 
         @Test
         @DisplayName("Message and Context parameters")
         void messageAndContextParams() {
             Method subscriber = new ValidTwoParams().getMethod();
-            assertIsEventSubscriber(subscriber);
+            assertValid(subscriber);
         }
 
         @Test
@@ -124,7 +125,7 @@ class EventSubscriberMethodTest {
         void nonPublicAccess() {
             Method method = new ValidButPrivate().getMethod();
 
-            assertIsEventSubscriber(method);
+            assertValid(method);
         }
 
         @Test
@@ -132,7 +133,7 @@ class EventSubscriberMethodTest {
         void rejectionClassType() {
             Method rejectionSubscriber = new ARejectionSubscriber().getMethod();
 
-            assertIsEventSubscriber(rejectionSubscriber);
+            assertValid(rejectionSubscriber);
         }
     }
 
@@ -144,43 +145,43 @@ class EventSubscriberMethodTest {
         @DisplayName("no annotation")
         void noAnnotation() {
             Method method = new InvalidNoAnnotation().getMethod();
-            assertFalse(new EventSubscriberSignature().matches(method));
+            assertFalse(signature.matches(method));
         }
 
         @Test
         @DisplayName("no params")
         void noParams() {
-            assertThrows(SignatureMismatchException.class, InvalidNoParams::new);
+            assertInvalid(new InvalidNoParams().getMethod());
         }
 
         @Test
         @DisplayName("too many params")
         void tooManyParams() {
-            assertThrows(SignatureMismatchException.class, InvalidTooManyParams::new);
+            assertInvalid(new InvalidTooManyParams().getMethod());
         }
 
         @Test
         @DisplayName("one invalid param")
         void oneInvalidParam() {
-            assertThrows(SignatureMismatchException.class, InvalidOneNotMsgParam::new);
+            assertInvalid(new InvalidOneNotMsgParam().getMethod());
         }
 
         @Test
         @DisplayName("first non-Message param")
         void firstNonMessageParam() {
-            assertThrows(SignatureMismatchException.class, InvalidTwoParamsFirstInvalid::new);
+            assertInvalid(new InvalidTwoParamsFirstInvalid().getMethod());
         }
 
         @Test
         @DisplayName("second non-Context param")
         void secondNonContextParam() {
-            assertThrows(SignatureMismatchException.class, InvalidTwoParamsSecondInvalid::new);
+            assertInvalid(new InvalidTwoParamsSecondInvalid().getMethod());
         }
 
         @Test
         @DisplayName("non-void return type")
         void nonVoidReturnType() {
-            assertThrows(SignatureMismatchException.class, InvalidNotVoid::new);
+            assertInvalid(new InvalidNotVoid().getMethod());
         }
     }
 
@@ -204,7 +205,7 @@ class EventSubscriberMethodTest {
 
         private void check(TestEventSubscriber subscriber, boolean external) {
             Method method = subscriber.getMethod();
-            Optional<EventSubscriberMethod> created = new EventSubscriberSignature().create(method);
+            Optional<EventSubscriberMethod> created = signature.create(method);
             assertTrue(created.isPresent());
             EventSubscriberMethod modelMethod = created.get();
             EventContext context = EventContext
@@ -222,7 +223,12 @@ class EventSubscriberMethodTest {
         }
     }
 
-    private static void assertIsEventSubscriber(Method subscriber) {
-        assertTrue(new EventSubscriberSignature().matches(subscriber));
+    @SuppressWarnings("ResultOfMethodCallIgnored")  // It's fine as it throws an exception.
+    private static void assertInvalid(Method method) {
+        assertThrows(SignatureMismatchException.class, () -> signature.matches(method));
+    }
+
+    private static void assertValid(Method subscriber) {
+        assertTrue(signature.matches(subscriber));
     }
 }

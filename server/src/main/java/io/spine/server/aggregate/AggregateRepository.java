@@ -44,8 +44,6 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.event.RejectionEnvelope;
-import io.spine.server.integration.ExternalMessageClass;
-import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
@@ -139,7 +137,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         BoundedContext boundedContext = getBoundedContext();
         boundedContext.registerCommandDispatcher(this);
         boundedContext.registerEventDispatcher(this);
-        boundedContext.registerRejectionDispatcher(this);
 
         checkNotVoid();
 
@@ -153,78 +150,13 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private void checkNotVoid() {
         boolean handlesCommands = dispatchesCommands();
         boolean reactsOnEvents = dispatchesEvents() || dispatchesExternalEvents();
-        boolean reactsOnRejections = dispatchesRejections() || dispatchesExternalRejections();
 
-        if (!handlesCommands && !reactsOnEvents && !reactsOnRejections) {
+        if (!handlesCommands && !reactsOnEvents) {
             throw newIllegalStateException(
                     "Aggregates of the repository %s neither handle commands" +
-                            " nor react on events or rejections.", this);
+                            " nor react on events.", this);
         }
     }
-
-    /*
-
-    In `rejection-events`:
-
-     @Override
-    public void onRegistered() {
-        super.onRegistered();
-        BoundedContext boundedContext = getBoundedContext();
-
-        Set<CommandClass> commandClasses = getMessageClasses();
-
-        DelegatingEventDispatcher<I> eventDispatcher = DelegatingEventDispatcher.of(this);
-        Set<EventClass> eventClasses = eventDispatcher.getMessageClasses();
-
-        ExternalMessageDispatcher<I> extEventDispatcher;
-        extEventDispatcher = eventDispatcher.getExternalDispatcher();
-        Set<ExternalMessageClass> extEventClasses = extEventDispatcher.getMessageClasses();
-
-        if (commandClasses.isEmpty() && eventClasses.isEmpty() && extEventClasses.isEmpty()) {
-            throw newIllegalStateException(
-                    "Aggregates of the repository %s neither handle commands" +
-                            " nor react on events or rejections.", this);
-        }
-
-        registerInCommandBus(boundedContext, commandClasses);
-        registerInEventBus(boundedContext, eventDispatcher, eventClasses);
-
-        registerExtMessageDispatcher(boundedContext, extEventDispatcher, extEventClasses);
-
-        SystemGateway systemGateway = boundedContext.getSystemGateway();
-        this.commandErrorHandler = CommandErrorHandler.with(systemGateway);
-        ServerEnvironment.getInstance()
-                         .getSharding()
-                         .register(this);
-    }
-
-    private void registerExtMessageDispatcher(BoundedContext boundedContext,
-                                              ExternalMessageDispatcher<I> extEventDispatcher,
-                                              Set<ExternalMessageClass> extEventClasses) {
-        if (!extEventClasses.isEmpty()) {
-            boundedContext.getIntegrationBus()
-                          .register(extEventDispatcher);
-        }
-    }
-
-    private void registerInEventBus(BoundedContext boundedContext,
-                                    DelegatingEventDispatcher<I> eventDispatcher,
-                                    Set<EventClass> eventClasses) {
-        if (!eventClasses.isEmpty()) {
-            boundedContext.getEventBus()
-                          .register(eventDispatcher);
-        }
-    }
-
-    private void registerInCommandBus(BoundedContext boundedContext,
-                                      Set<CommandClass> commandClasses) {
-        if (!commandClasses.isEmpty()) {
-            boundedContext.getCommandBus()
-                          .register(this);
-        }
-    }
-
-     */
 
     @Override
     public A create(I id) {

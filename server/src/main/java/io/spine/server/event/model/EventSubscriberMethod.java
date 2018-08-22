@@ -20,17 +20,15 @@
 
 package io.spine.server.event.model;
 
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.MethodAccessChecker;
-import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
 
@@ -43,7 +41,7 @@ import java.lang.reflect.Method;
 public final class EventSubscriberMethod
         extends AbstractHandlerMethod<EventSubscriber,
                                       EventClass,
-                                      EventContext,
+                                      EventEnvelope,
                                       MethodResult<Empty>> {
 
     /** Creates a new instance. */
@@ -54,10 +52,9 @@ public final class EventSubscriberMethod
     @CanIgnoreReturnValue // since event subscriber methods do not return values
     @Override
     public MethodResult<Empty> invoke(EventSubscriber target,
-                                      Message message,
-                                      EventContext context) {
-        ensureExternalMatch(context.getExternal());
-        return super.invoke(target, message, context);
+                                      EventEnvelope envelope) {
+        ensureExternalMatch(envelope.getEventContext().getExternal());
+        return super.invoke(target, envelope);
     }
 
     @Override
@@ -66,7 +63,6 @@ public final class EventSubscriberMethod
     }
 
     @Override
-    protected MethodResult<Empty> toResult(Object target, @Nullable Object rawMethodOutput) {
     protected MethodResult<Empty> toResult(EventSubscriber target, Object rawMethodOutput) {
         return MethodResult.empty();
     }

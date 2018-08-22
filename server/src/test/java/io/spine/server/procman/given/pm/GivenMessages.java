@@ -29,7 +29,7 @@ import io.spine.server.commandbus.Given;
 import io.spine.server.entity.rejection.EntityAlreadyArchived;
 import io.spine.server.event.RejectionEnvelope;
 import io.spine.test.procman.command.PmAddTask;
-import io.spine.test.procman.command.PmCencelIteration;
+import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmOwnerChanged;
@@ -66,8 +66,8 @@ public class GivenMessages {
                 .build();
     }
 
-    public static PmCencelIteration cancelIteration() {
-        return PmCencelIteration
+    public static PmCancelIteration cancelIteration() {
+        return PmCancelIteration
                 .newBuilder()
                 .setProjectId(ID)
                 .build();

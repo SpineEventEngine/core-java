@@ -184,7 +184,11 @@ public abstract class MethodSignature<H extends HandlerMethod<?, ?, E, ?>,
         }
         Optional<? extends ParameterSpec<E>> matchingSpec = findMatching(method,
                                                                          getParamSpecClass());
-        return matchingSpec.map(spec -> doCreate(method, spec));
+        return matchingSpec.map(spec -> {
+            H handler = doCreate(method, spec);
+            handler.discoverAttributes();
+            return handler;
+        });
 
     }
 

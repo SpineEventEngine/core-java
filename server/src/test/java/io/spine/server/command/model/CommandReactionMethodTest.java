@@ -21,13 +21,16 @@
 package io.spine.server.command.model;
 
 import com.google.common.truth.IterableSubject;
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import io.spine.core.Event;
 import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.server.command.model.given.reaction.ReOneParam;
 import io.spine.server.command.model.given.reaction.ReOptionalResult;
 import io.spine.server.command.model.given.reaction.ReTwoParams;
 import io.spine.server.command.model.given.reaction.TestCommandReactor;
 import io.spine.server.event.EventReceiver;
-import io.spine.server.model.MethodFactory;
 import io.spine.test.command.CmdAddTask;
 import io.spine.test.command.ProjectId;
 import io.spine.test.command.event.CmdProjectCreated;
@@ -37,22 +40,23 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
-import java.util.function.Predicate;
+import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.protobuf.AnyPacker.pack;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("InnerClassMayBeStatic")
 @DisplayName("CommandReactionMethod should")
 class CommandReactionMethodTest {
 
     private static final
-    MethodFactory<CommandReactionMethod> factory = CommandReactionMethod.factory();
-    private static final Predicate<Method> predicate = factory.getPredicate();
+    CommandReactionSignature signature = new CommandReactionSignature();
     private static final EventContext context = EventContext.getDefaultInstance();
 
     private static void assertValid(Method rawMethod, boolean isValid) {
-        assertThat(predicate.test(rawMethod)).isEqualTo(isValid);
+        assertThat(signature.matches(rawMethod)).isEqualTo(isValid);
     }
 
     @Nested
@@ -87,7 +91,9 @@ class CommandReactionMethodTest {
         void setUp() {
             target = new ReOneParam();
             rawMethod = ((TestCommandReactor) target).getMethod();
-            method = factory.create(rawMethod);
+            Optional<CommandReactionMethod> result = signature.create(rawMethod);
+            assertTrue(result.isPresent());
+            this.method = result.get();
             id = ProjectId.newBuilder()
                           .setId(newUuid())
                           .build();
@@ -111,7 +117,7 @@ class CommandReactionMethodTest {
             CmdProjectCreated message = createEvent(id);
 
             CommandingMethod.Result result =
-                    method.invoke(target, message, context);
+                    method.invoke(target, envelope(message));
 
             assertResult(result, this.id);
         }
@@ -122,7 +128,9 @@ class CommandReactionMethodTest {
     class OptionalReturn {
 
         private final Method rawMethod = new ReOptionalResult().getMethod();
-        private final CommandReactionMethod method = factory.create(rawMethod);
+
+        @SuppressWarnings("ConstantConditions")     // It's OK for tests.
+        private final CommandReactionMethod method = signature.create(rawMethod).get();
 
         private EventReceiver target;
         private ProjectId id;
@@ -138,8 +146,7 @@ class CommandReactionMethodTest {
         @Test
         @DisplayName("in predicate")
         void inPredicate() {
-            boolean result = factory.getPredicate()
-                                    .test(rawMethod);
+            boolean result = signature.matches(rawMethod);
             assertThat(result).isTrue();
         }
 
@@ -155,7 +162,7 @@ class CommandReactionMethodTest {
             ProjectId givenId = this.id;
             CmdProjectCreated message = createEvent(givenId);
 
-            CommandingMethod.Result result = method.invoke(target, message, context);
+            CommandingMethod.Result result = method.invoke(target, envelope(message));
 
             assertResult(result, givenId);
         }
@@ -169,7 +176,7 @@ class CommandReactionMethodTest {
                     .setInitialize(false) // This will make the method return `Optional.empty()`.
                     .build();
 
-            CommandingMethod.Result result = method.invoke(target, message, context);
+            CommandingMethod.Result result = method.invoke(target, envelope(message));
 
             assertThat(result.asMessages()).isEmpty();
         }
@@ -195,5 +202,16 @@ class CommandReactionMethodTest {
         IterableSubject assertThat = assertThat(result.asMessages());
         assertThat.hasSize(1);
         assertThat.containsExactly(expected);
+    }
+
+    private static EventEnvelope envelope(Message eventMessage) {
+        Any cmd = pack(eventMessage);
+        Event event = Event
+                .newBuilder()
+                .setMessage(cmd)
+                .setContext(EventContext.getDefaultInstance())
+                .build();
+        EventEnvelope envelope = EventEnvelope.of(event);
+        return envelope;
     }
 }

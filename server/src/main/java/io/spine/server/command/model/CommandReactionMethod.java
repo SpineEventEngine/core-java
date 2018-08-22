@@ -22,8 +22,8 @@ package io.spine.server.command.model;
 
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
-import io.spine.server.command.Commander;
 import io.spine.server.command.model.CommandingMethod.Result;
+import io.spine.server.event.EventReceiver;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.declare.ParameterSpec;
 
@@ -35,15 +35,15 @@ import java.lang.reflect.Method;
  * @author Alexander Yevsyukov
  */
 public final class CommandReactionMethod
-        extends AbstractHandlerMethod<Commander, EventClass, EventEnvelope, Result>
-        implements CommandingMethod<EventClass, EventEnvelope, Result> {
+        extends AbstractHandlerMethod<EventReceiver, EventClass, EventEnvelope, Result>
+        implements CommandingMethod<EventReceiver, EventClass, EventEnvelope, Result> {
 
     CommandReactionMethod(Method method, ParameterSpec<EventEnvelope> signature) {
         super(method, signature);
     }
 
     @Override
-    protected Result toResult(Commander target, Object rawMethodOutput) {
+    protected Result toResult(EventReceiver target, Object rawMethodOutput) {
         Result result = new Result(rawMethodOutput, true);
         return result;
     }

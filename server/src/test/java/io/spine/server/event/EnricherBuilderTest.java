@@ -57,7 +57,7 @@ class EnricherBuilderTest {
     @BeforeEach
     void setUp() {
         this.builder = Enricher.newBuilder();
-        this.function = new new BiFunction<Timestamp, EventContext, StringValue>() {
+        this.function = new BiFunction<Timestamp, EventContext, StringValue>() {
             @Override
             public @Nullable StringValue apply(@Nullable Timestamp input, EventContext context) {
                 if (input == null) {
@@ -129,7 +129,7 @@ class EnricherBuilderTest {
         @DisplayName("null source class")
         void nullSourceClass() {
             assertThrows(NullPointerException.class,
-                         () -> builder.add(Tests.<Class<Timestamp>>nullRef(),
+                         () -> builder.add(Tests.nullRef(),
                                            StringValue.class,
                                            function));
         }
@@ -139,7 +139,7 @@ class EnricherBuilderTest {
         void nullTargetClass() {
             assertThrows(NullPointerException.class,
                          () -> builder.add(Timestamp.class,
-                                           Tests.<Class<StringValue>>nullRef(),
+                                           Tests.nullRef(),
                                            function));
         }
 
@@ -149,7 +149,7 @@ class EnricherBuilderTest {
             assertThrows(NullPointerException.class,
                          () -> builder.add(Timestamp.class,
                                            StringValue.class,
-                                           Tests.<BiFunction<Timestamp, EventContext, StringValue>>nullRef()));
+                                           Tests.nullRef()));
         }
 
         @Test

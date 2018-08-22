@@ -18,23 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event.model.given.reactor;
+package io.spine.server.event.model.given.subscriber;
 
-import io.spine.server.event.React;
+import io.spine.core.Subscribe;
 import io.spine.test.reflect.event.RefProjectCreated;
-import io.spine.test.reflect.event.RefProjectStarted;
 
 /**
- * Provides a method which accepts first parameter of wrong type.
+ * A subscriber to external events for {@link io.spine.server.event.model.EventSubscriberMethodTest
+ * EventSubscriberMethodTest}.
  *
- * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-public class RcWrongSecondParam extends TestEventReactor {
+public class ExternalSubscriber extends TestEventSubscriber {
 
-    @React
-    RefProjectStarted react(RefProjectCreated event, Object context) {
-        return RefProjectStarted.newBuilder()
-                                .setProjectId(event.getProjectId())
-                                .build();
+    @Subscribe(external = true)
+    void handle(RefProjectCreated externalEvent) {
     }
 }

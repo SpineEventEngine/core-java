@@ -59,26 +59,6 @@ public final class CommandHandlerMethod
         return new Result(target, rawMethodOutput);
     }
 
-    /*
-
-    changes from `master`:
-
-        private static class Filter extends HandlerMethodPredicate<CommandContext> {
-
-        private Filter() {
-            super(Assign.class, CommandContext.class);
-        }
-
-        @Override
-        protected boolean verifyReturnType(Method method) {
-            boolean returnsMessage = returnsMessage(method, EventMessage.class);
-            boolean returnsIterable = returnsIterable(method);
-            return returnsMessage || returnsIterable;
-        }
-    }
-     */
-
-
     /**
      * The result of a command handler method execution.
      */

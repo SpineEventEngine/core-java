@@ -33,6 +33,7 @@ import io.spine.server.model.declare.MethodSignature;
 import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
+import java.util.Optional;
 
 import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
@@ -62,7 +63,7 @@ public class CommandReactionSignature
 
     @Override
     protected ImmutableSet<Class<?>> getValidReturnTypes() {
-        return of(Message.class, Iterable.class);
+        return of(Message.class, Iterable.class, Optional.class);
     }
 
     @Override
