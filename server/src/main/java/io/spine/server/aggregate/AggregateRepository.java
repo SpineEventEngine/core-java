@@ -564,6 +564,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      *
      * @return delivery strategy for rejections
      */
+    @SPI
     protected AggregateDelivery<I, A, CommandEnvelope, ?, ?> getCommandEndpointDelivery() {
         return commandDeliverySupplier.get();
     }
