@@ -41,13 +41,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Internal
 public final class IdempotencyGuard {
 
-    private final RecentHistory history;
+    private final HistoryLog history;
 
-    private IdempotencyGuard(RecentHistory history) {
+    private IdempotencyGuard(HistoryLog history) {
         this.history = history;
     }
 
-    static IdempotencyGuard lookingAt(RecentHistory history) {
+    static IdempotencyGuard lookingAt(HistoryLog history) {
         checkNotNull(history);
         return new IdempotencyGuard(history);
     }
@@ -64,7 +64,7 @@ public final class IdempotencyGuard {
         Event event = envelope.getOuterObject();
         boolean duplicate = history.contains(event);
         if (duplicate) {
-            throw new DuplicateEventException(history.entity(), envelope);
+            throw new DuplicateEventException(history.id(), envelope);
         }
     }
 }

@@ -241,7 +241,25 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * @param id the id of the entity
      * @return new entity instance
      */
-    public abstract E create(I id);
+    public final E create(I id) {
+        E entity = instantiate(id);
+        initialize(entity);
+        return entity;
+    }
+
+    protected abstract E instantiate(I id);
+
+    @OverridingMethodsMustInvokeSuper
+    protected void initialize(E entity) {
+        if (entity instanceof TransactionalEntity) {
+            TransactionalEntity txEntity = (TransactionalEntity) entity;
+            RecentHistory history = RecentHistory.create()
+                    .of(txEntity)
+                    .readingFrom(boundedContext.getSystemGateway())
+                    .build();
+            txEntity.setRecentHistory(history);
+        }
+    }
 
     /**
      * Stores the passed object.
@@ -331,7 +349,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         return spec;
     }
 
-    protected void setIdempotencySpec(int commands, int events) {
+    protected final void setIdempotencySpec(int commands, int events) {
         IdempotencySpec idempotency = IdempotencySpec
                 .newBuilder()
                 .setCommandIdempotencyThreashold(commands)

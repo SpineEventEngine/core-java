@@ -194,7 +194,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    public A create(I id) {
+    protected A instantiate(I id) {
         A aggregate = aggregateClass().createEntity(id);
         return aggregate;
     }

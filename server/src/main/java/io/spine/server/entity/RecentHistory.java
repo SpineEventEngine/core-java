@@ -43,30 +43,33 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  * @author Dmytro Dashenkov
  */
-public final class RecentHistory {
+public final class RecentHistory implements HistoryLog {
 
     private final SystemGateway gateway;
-    private final EntityHistoryId entityId;
+    private final EntityHistoryId historyId;
 
     private RecentHistory(Builder builder) {
         this.gateway = builder.gateway;
-        this.entityId = builder.entityId;
+        this.historyId = builder.entityId;
     }
 
-    boolean contains(Command command) {
+    @Override
+    public boolean contains(Command command) {
         checkNotNull(command);
         CommandId commandId = command.getId();
-        return gateway.hasHandled(entityId, commandId);
+        return gateway.hasHandled(historyId, commandId);
     }
 
-    boolean contains(Event event) {
+    @Override
+    public boolean contains(Event event) {
         checkNotNull(event);
         EventId eventId = event.getId();
-        return gateway.hasHandled(entityId, eventId);
+        return gateway.hasHandled(historyId, eventId);
     }
 
-    EntityHistoryId entity() {
-        return entityId;
+    @Override
+    public EntityHistoryId id() {
+        return historyId;
     }
 
     /**

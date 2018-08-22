@@ -329,8 +329,8 @@ public abstract class ProcessManagerRepository<I,
     }
 
     @Override
-    public P create(I id) {
-        P procman = super.create(id);
+    protected P instantiate(I id) {
+        P procman = super.instantiate(id);
         lifecycleOf(id).onEntityCreated(this);
         return procman;
     }

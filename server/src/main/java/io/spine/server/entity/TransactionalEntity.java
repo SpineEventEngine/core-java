@@ -58,7 +58,7 @@ public abstract class TransactionalEntity<I,
     private volatile
     @Nullable Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> transaction;
 
-    private final IdempotencyGuard idempotencyGuard;
+    private final IdempotencyGuardSwitch idempotencyGuard = IdempotencyGuardSwitch.newInstance();
 
     /**
      * Creates a new instance.
@@ -69,17 +69,11 @@ public abstract class TransactionalEntity<I,
      */
     protected TransactionalEntity(I id) {
         super(id);
-        RecentHistory recentHistory = RecentHistory
-                .create()
-                .of(this)
-                .readingFrom(null) // TODO:2018-08-08:dmytro.dashenkov: Complete.
-                .build();
-        this.idempotencyGuard = IdempotencyGuard.lookingAt(recentHistory);
     }
 
     @Internal
-    protected IdempotencyGuard idempotencyGuard() {
-        return idempotencyGuard;
+    public IdempotencyGuard idempotencyGuard() {
+        return idempotencyGuard.get();
     }
 
     /**
@@ -235,6 +229,11 @@ public abstract class TransactionalEntity<I,
         Class<B> builderClass = TypeInfo.getBuilderClass(cls);
         B builder = ValidatingBuilders.newInstance(builderClass);
         return builder;
+    }
+
+    void setRecentHistory(HistoryLog history) {
+        checkNotNull(history);
+        idempotencyGuard.init(history);
     }
 
     /**

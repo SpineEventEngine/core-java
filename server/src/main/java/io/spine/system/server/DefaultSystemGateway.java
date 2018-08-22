@@ -76,8 +76,7 @@ public final class DefaultSystemGateway implements SystemGateway {
     @Override
     public boolean hasHandled(EntityHistoryId entity, CommandId commandId) {
         boolean result = findProjection(entity, HandledCommands.class)
-                .map(projection -> projection.getCommandList()
-                                             .contains(commandId))
+                .map(projection -> projection.getCommandList().contains(commandId))
                 .orElse(false);
         return result;
     }
