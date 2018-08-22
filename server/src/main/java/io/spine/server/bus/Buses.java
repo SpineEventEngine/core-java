@@ -25,9 +25,10 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.core.Ack;
-import io.spine.core.Rejection;
+import io.spine.core.Event;
 import io.spine.core.Responses;
 import io.spine.core.Status;
+import io.spine.server.event.RejectionEnvelope;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -64,11 +65,14 @@ public class Buses {
      * @return the {@code Ack} response with the given message ID
      */
     public static Ack reject(Message id, Error cause) {
+        checkNotNull(id);
         checkNotNull(cause);
+
         checkArgument(isNotDefault(cause));
-        Status status = Status.newBuilder()
-                              .setError(cause)
-                              .build();
+        Status status = Status
+                .newBuilder()
+                .setError(cause)
+                .build();
         return setStatus(id, status);
     }
 
@@ -79,23 +83,26 @@ public class Buses {
      * @param cause the cause of the message rejection
      * @return the {@code Ack} response with the given message ID
      */
-    public static Ack reject(Message id, Rejection cause) {
+    public static Ack reject(Message id, RejectionEnvelope cause) {
+        checkNotNull(id);
         checkNotNull(cause);
-        checkArgument(isNotDefault(cause));
-        Status status = Status.newBuilder()
-                              .setRejection(cause)
-                              .build();
+
+        Event event = cause.getOuterObject();
+        checkArgument(isNotDefault(event));
+        Status status = Status
+                .newBuilder()
+                .setRejection(event)
+                .build();
         return setStatus(id, status);
     }
 
     private static Ack setStatus(Message id, Status status) {
-        checkNotNull(id);
-
         Any packedId = pack(id);
-        Ack result = Ack.newBuilder()
-                        .setMessageId(packedId)
-                        .setStatus(status)
-                        .build();
+        Ack result = Ack
+                .newBuilder()
+                .setMessageId(packedId)
+                .setStatus(status)
+                .build();
         return result;
     }
 }

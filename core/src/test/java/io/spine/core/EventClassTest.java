@@ -21,14 +21,10 @@
 package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.BoolValue;
-import com.google.protobuf.Int32Value;
-import com.google.protobuf.StringValue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @DisplayName("EventClass should")
 class EventClassTest {
@@ -38,15 +34,5 @@ class EventClassTest {
     void passNullToleranceCheck() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(EventClass.class);
-    }
-
-    @SuppressWarnings("DuplicateStringLiteralInspection") // Common test display name.
-    @Test
-    @DisplayName("create set on varargs")
-    void createSetOnVarargs() {
-        assertEquals(3, EventClass.setOf(
-                BoolValue.class,
-                Int32Value.class,
-                StringValue.class).size());
     }
 }

@@ -21,9 +21,9 @@
 package io.spine.server.command.given;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.validate.StringValueVBuilder;
 
@@ -59,7 +59,7 @@ public class CommandHandlingEntityTestEnv {
         }
 
         @Override
-        protected List<? extends Message> dispatchCommand(CommandEnvelope cmd) {
+        protected List<Event> dispatchCommand(CommandEnvelope cmd) {
             return ImmutableList.of();
         }
     }

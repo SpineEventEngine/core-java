@@ -20,18 +20,14 @@
 
 package io.spine.server.command.model;
 
-import io.spine.base.EventMessage;
 import io.spine.core.EventClass;
-import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.server.command.model.CommandingMethod.Result;
 import io.spine.server.event.EventReceiver;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.MethodAccessChecker;
-import io.spine.server.model.MethodFactory;
+import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
-
-import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
  * A method which <em>may</em> generate one or more command messages in response to an event.
@@ -39,11 +35,11 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
  * @author Alexander Yevsyukov
  */
 public final class CommandReactionMethod
-        extends AbstractHandlerMethod<EventReceiver, EventClass, EventContext, Result>
-        implements CommandingMethod<EventReceiver, EventClass, EventContext, Result> {
+        extends AbstractHandlerMethod<EventReceiver, EventClass, EventEnvelope, Result>
+        implements CommandingMethod<EventReceiver, EventClass, EventEnvelope, Result> {
 
-    private CommandReactionMethod(Method method) {
-        super(method);
+    CommandReactionMethod(Method method, ParameterSpec<EventEnvelope> signature) {
+        super(method, signature);
     }
 
     @Override
@@ -52,53 +48,8 @@ public final class CommandReactionMethod
         return result;
     }
 
-    static MethodFactory<CommandReactionMethod> factory() {
-        return Factory.INSTANCE;
-    }
-
     @Override
     public EventClass getMessageClass() {
         return EventClass.from(rawMessageClass());
-    }
-
-    /**
-     * Obtains {@code CommandReactionMethod}s from a class.
-     */
-    private static final class Factory extends MethodFactory<CommandReactionMethod> {
-
-        private static final Factory INSTANCE = new Factory();
-
-        private Factory() {
-            super(CommandReactionMethod.class, new Filter());
-        }
-
-        @Override
-        public void checkAccessModifier(Method method) {
-            MethodAccessChecker checker = forMethod(method);
-            checker.checkPublic("Commanding event reaction `{}` must be declared `public`");
-        }
-
-        @Override
-        protected CommandReactionMethod doCreate(Method method) {
-            CommandReactionMethod result = new CommandReactionMethod(method);
-            return result;
-        }
-    }
-
-    /**
-     * Recognizes methods that accept events and generate command messages.
-     */
-    private static final class Filter extends AbstractPredicate<EventContext> {
-
-        private Filter() {
-            super(EventContext.class);
-        }
-
-        @Override
-        protected boolean verifyReturnType(Method method) {
-            boolean returnsMessage = returnsMessage(method, EventMessage.class);
-            boolean returnsIterableOrOptional = returnsIterableOrOptional(method);
-            return returnsMessage || returnsIterableOrOptional;
-        }
     }
 }

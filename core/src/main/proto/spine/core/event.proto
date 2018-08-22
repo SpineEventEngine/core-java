@@ -28,13 +28,29 @@ option java_package = "io.spine.core";
 option java_multiple_files = true;
 option java_outer_classname = "EventProto";
 
-import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 import "spine/core/command.proto";
-import "spine/core/rejection.proto";
 import "spine/core/version.proto";
 import "spine/core/enrichment.proto";
+
+// Event identifier.
+message EventId {
+
+    // An event is generated in response to a message. The event ID is based on the value of the
+    // incoming message:
+    //
+    //     `<originId>-<sequenceNumber>`
+    //
+    // where the `sequenceNumber` is a number in the sequence of events generated in response to
+    // the incoming message.
+    //
+    // See `io.spine.server.event.EventIdSequence` for details on event ID generation.
+    //
+    string value = 1;
+}
 
 // `Event` is something, which happened in the past.
 //
@@ -53,6 +69,12 @@ import "spine/core/enrichment.proto";
 // The event context contains attributes common for all events.
 // It can also contain additional attributes added by the code handling the event.
 //
+// There is a special case of an event - a rejection event.
+// A rejection event represents erroneous conditions in business, which do not allow to execute
+// a command. The event is a rejection event iff the `EventContext.rejection` field is present.
+//
+// See `EventContext.rejection` to detemine the event kind.
+//
 message Event {
 
     // The ID of the event.
@@ -63,13 +85,6 @@ message Event {
 
     // The context of the event.
     EventContext context = 3 [(required) = true];
-}
-
-// Event identifier.
-message EventId {
-
-    // UUID-based value.
-    string value = 1;
 }
 
 // Meta-information for an event.
@@ -84,9 +99,6 @@ message EventContext {
 
         // The context of the event which generated this event.
         EventContext event_context = 6 [(required) = true];
-
-        // The context of a rejection which generated this event.
-        RejectionContext rejection_context = 7 [(required) = true];
 
         // The event was imported into an aggregate.
         google.protobuf.Any event_import = 11 [(required) = true];
@@ -117,6 +129,27 @@ message EventContext {
     // An internal runtime attribute, which marks an event as external to the `BoundedContext`
     // in which the event is being processed.
     bool external = 8 [(internal) = true];
+
+    // The context of the associated rejection event.
+    //
+    // If the associated event is a rejection event, this field is present.
+    //
+    RejectionEventContext rejection = 10;
+
+    // Deleted fields.
+    reserved 7;
+    reserved "rejection_context";
+}
+
+// Meta-information about a rejection event.
+//
+message RejectionEventContext {
+
+    // The message of the command which caused the rejection.
+    google.protobuf.Any command_message = 1;
+
+    // A stacktrace of from the code, which generated the rejection message (if available).
+    string stacktrace = 2;
 }
 
 // Enumeration of possible event validation technical error reasons.

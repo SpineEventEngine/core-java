@@ -17,6 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -32,14 +33,17 @@ import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Commands;
+import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.bus.BusBuilder;
+import io.spine.server.bus.UnicastBus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
-import io.spine.server.bus.UnicastBus;
-import io.spine.server.rejection.RejectionBus;
+import io.spine.server.command.CommandErrorHandler;
+import io.spine.server.event.EventBus;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -72,7 +76,7 @@ public class CommandBus extends UnicastBus<Command,
                                            CommandDispatcher<?>> {
 
     private final CommandScheduler scheduler;
-    private final RejectionBus rejectionBus;
+    private final EventBus eventBus;
     private final SystemGateway systemGateway;
     private final TenantIndex tenantIndex;
     private final CommandErrorHandler errorHandler;
@@ -109,16 +113,13 @@ public class CommandBus extends UnicastBus<Command,
                            ? builder.multitenant
                            : false;
         this.scheduler = builder.commandScheduler;
-        this.rejectionBus = builder.rejectionBus;
+        this.eventBus = builder.eventBus;
         this.systemGateway = builder.systemGateway()
                                     .orElseThrow(gatewayNotSet());
         this.tenantIndex = builder.tenantIndex()
                                   .orElseThrow(tenantIndexNotSet());
         this.deadCommandHandler = new DeadCommandHandler();
-        this.errorHandler = CommandErrorHandler.newBuilder()
-                                               .setRejectionBus(rejectionBus)
-                                               .setSystemGateway(systemGateway)
-                                               .build();
+        this.errorHandler = CommandErrorHandler.with(systemGateway);
         this.flowWatcher = builder.flowWatcher;
     }
 
@@ -138,18 +139,6 @@ public class CommandBus extends UnicastBus<Command,
     @VisibleForTesting
     CommandScheduler scheduler() {
         return scheduler;
-    }
-
-    /**
-     * Exposes the {@code RejectionBus} instance for this {@code CommandBus}.
-     *
-     * <p>This method is designed for internal use only. Client code should use
-     * {@link io.spine.server.BoundedContext#getRejectionBus() BoundedContext.getRejectionBus()}
-     * instead.
-     */
-    @Internal
-    public RejectionBus rejectionBus() {
-        return this.rejectionBus;
     }
 
     @Override
@@ -217,8 +206,15 @@ public class CommandBus extends UnicastBus<Command,
         try {
             dispatcher.dispatch(envelope);
         } catch (RuntimeException exception) {
-            errorHandler.handleError(envelope, exception);
+            onError(envelope, exception);
         }
+    }
+
+    private void onError(CommandEnvelope envelope, RuntimeException exception) {
+        Optional<Event> rejection = errorHandler.handleError(envelope, exception)
+                                                .asRejection()
+                                                .map(RejectionEnvelope::getOuterObject);
+        rejection.ifPresent(eventBus::post);
     }
 
     /**
@@ -259,6 +255,15 @@ public class CommandBus extends UnicastBus<Command,
         tenantIndex.keep(tenantId);
     }
 
+    private CommandDispatcher<?> getDispatcher(CommandEnvelope commandEnvelope) {
+        Optional<? extends CommandDispatcher<?>> dispatcher =
+                getDispatcher(commandEnvelope.getMessageClass());
+        if (!dispatcher.isPresent()) {
+            throw noDispatcherFound(commandEnvelope);
+        }
+        return dispatcher.get();
+    }
+
     /**
      * Closes the instance, preventing any for further posting of commands.
      *
@@ -274,7 +279,7 @@ public class CommandBus extends UnicastBus<Command,
     @Override
     public void close() throws Exception {
         super.close();
-        rejectionBus.close();
+        eventBus.close();
     }
 
     /**
@@ -311,7 +316,7 @@ public class CommandBus extends UnicastBus<Command,
          * <p>If unset, the default {@link ExecutorCommandScheduler} implementation is used.
          */
         private CommandScheduler commandScheduler;
-        private RejectionBus rejectionBus;
+        private EventBus eventBus;
         private CommandFlowWatcher flowWatcher;
 
         /** Prevents direct instantiation. */
@@ -334,20 +339,28 @@ public class CommandBus extends UnicastBus<Command,
             return ofNullable(commandScheduler);
         }
 
-        public Optional<RejectionBus> getRejectionBus() {
-            return ofNullable(rejectionBus);
-        }
-
         public Builder setCommandScheduler(CommandScheduler commandScheduler) {
             checkNotNull(commandScheduler);
             this.commandScheduler = commandScheduler;
             return this;
         }
 
-        public Builder setRejectionBus(RejectionBus rejectionBus) {
-            checkNotNull(rejectionBus);
-            this.rejectionBus = rejectionBus;
+        /**
+         * Inject the {@link EventBus} of the bounded context to which the built bus belongs.
+         *
+         * <p>This method is {@link Internal} to the framework. The name of the method starts with
+         * {@code inject} prefix so that this method does not appear in an autocomplete hint for
+         * {@code set} prefix.
+         */
+        @Internal
+        public Builder injectEventBus(EventBus eventBus) {
+            checkNotNull(eventBus);
+            this.eventBus = eventBus;
             return this;
+        }
+
+        Optional<EventBus> getEventBus() {
+            return ofNullable(eventBus);
         }
 
         /**
@@ -361,19 +374,13 @@ public class CommandBus extends UnicastBus<Command,
         @CheckReturnValue
         public CommandBus build() {
             checkFieldsSet();
+            checkSet(eventBus, EventBus.class, "injectEventBus");
 
             if (commandScheduler == null) {
                 commandScheduler = new ExecutorCommandScheduler();
             }
-            if (rejectionBus == null) {
-                rejectionBus = RejectionBus.newBuilder()
-                                           .build();
-            }
-            @SuppressWarnings("OptionalGetWithoutIsPresent") // ensured by `checkFieldsSet()`
-            SystemGateway systemGateway = systemGateway().get();
-
             flowWatcher = new CommandFlowWatcher((tenantId) -> {
-                SystemGateway result = delegatingTo(systemGateway).get(tenantId);
+                SystemGateway result = delegatingTo(systemGateway()).get(tenantId);
                 return result;
             });
             commandScheduler.setFlowWatcher(flowWatcher);

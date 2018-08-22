@@ -21,9 +21,12 @@
 package io.spine.server.event;
 
 import io.spine.core.EventClass;
-import io.spine.server.outbus.OutputDispatcherRegistry;
+import io.spine.server.bus.DispatcherRegistry;
 
 import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The registry of objects that dispatch event to handlers.
@@ -33,17 +36,24 @@ import java.util.Set;
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-class EventDispatcherRegistry extends OutputDispatcherRegistry<EventClass, EventDispatcher<?>> {
+class EventDispatcherRegistry extends DispatcherRegistry<EventClass, EventDispatcher<?>> {
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to expose this method to
-     * {@linkplain EventBus#hasDispatchers(EventClass)} EventBus}.
-     */
     @Override
-    protected boolean hasDispatchersFor(EventClass eventClass) {
-        return super.hasDispatchersFor(eventClass);
+    protected void register(EventDispatcher<?> dispatcher) {
+        checkNotNull(dispatcher);
+        Set<EventClass> eventClasses = dispatcher.getMessageClasses();
+        checkNotEmpty(dispatcher, eventClasses);
+
+        super.register(dispatcher);
+    }
+
+    @Override
+    protected void unregister(EventDispatcher<?> dispatcher) {
+        checkNotNull(dispatcher);
+        Set<EventClass> eventClasses = dispatcher.getMessageClasses();
+        checkNotEmpty(dispatcher, eventClasses);
+
+        super.unregister(dispatcher);
     }
 
     /**
@@ -55,5 +65,29 @@ class EventDispatcherRegistry extends OutputDispatcherRegistry<EventClass, Event
     @Override
     protected Set<EventDispatcher<?>> getDispatchers(EventClass eventClass) {
         return super.getDispatchers(eventClass);
+    }
+
+    /**
+     * Checks if this registry has a dispatcher for events of the given class.
+     *
+     * @param eventClass class to find dispatchers for
+     * @return {@code true} if the dispatcher is present, {@code false} otherwise
+     */
+    boolean hasDispatchersFor(EventClass eventClass) {
+        Set<EventDispatcher<?>> dispatchers = getDispatchers(eventClass);
+        boolean result = !dispatchers.isEmpty();
+        return result;
+    }
+
+    /**
+     * Ensures that the dispatcher forwards at least one event.
+     *
+     * @throws IllegalArgumentException if the dispatcher returns empty set of event classes
+     * @throws NullPointerException     if the dispatcher returns null set
+     */
+    private void checkNotEmpty(EventDispatcher<?> dispatcher, Set<EventClass> messageClasses) {
+        checkArgument(!messageClasses.isEmpty(),
+                      "%s: No message types are forwarded by this dispatcher: %s",
+                      getClass().getName(),  dispatcher);
     }
 }

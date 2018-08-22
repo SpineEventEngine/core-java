@@ -45,7 +45,7 @@ final class ScheduledCommand
     }
 
     @Subscribe
-    public void on(CommandScheduled event, EventContext context) {
+    void on(CommandScheduled event, EventContext context) {
         Optional<CommandEnrichment> command = getEnrichment(CommandEnrichment.class, context);
         checkState(command.isPresent(), "Command enrichment must be present.");
         Command commandWithSchedule = withSchedule(command.get().getCommand(),
@@ -69,7 +69,7 @@ final class ScheduledCommand
     }
 
     @Subscribe
-    public void on(@SuppressWarnings("unused") // Defines the event type.
+    void on(@SuppressWarnings("unused") // Defines the event type.
                    CommandDispatched ignored) {
         setDeleted(true);
     }

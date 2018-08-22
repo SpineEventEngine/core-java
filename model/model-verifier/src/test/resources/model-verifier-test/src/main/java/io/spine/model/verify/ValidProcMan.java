@@ -21,6 +21,8 @@
 package io.spine.model.verify;
 
 import com.google.protobuf.Any;
+import com.google.protobuf.FloatValue;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
 import io.spine.server.command.Assign;
 import io.spine.server.procman.ProcessManager;
@@ -35,10 +37,6 @@ import static java.util.Collections.singletonList;
  *
  * <p>The command handler method handles command of types {@code UInt64Value}.
  *
- * <p>Also, the class defines a malformed command handler for {@code Any} type. The method is
- * malformed as it returns nothing. Though, the Spine model verifier ignoores such methods. This
- * behavior may change in future.
- *
  * @author Dmytro Dashenkov
  */
 public class ValidProcMan extends ProcessManager<String, Any, AnyVBuilder> {
@@ -48,12 +46,7 @@ public class ValidProcMan extends ProcessManager<String, Any, AnyVBuilder> {
     }
 
     @Assign
-    public List<UInt64Value> handle(UInt64Value command) {
+    List<UInt64Value> handle(UInt64Value command) {
         return singletonList(command);
-    }
-
-    @Assign
-    public void handle(Any cmd) {
-        // NoOp for test
     }
 }

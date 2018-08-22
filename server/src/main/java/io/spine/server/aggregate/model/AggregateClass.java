@@ -23,14 +23,13 @@ package io.spine.server.aggregate.model;
 import com.google.common.collect.ImmutableSet;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
-import io.spine.core.RejectionClass;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.model.CommandHandlingEntityClass;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
 import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.rejection.model.RejectionReactorMethod;
+import io.spine.type.MessageClass;
 
 import java.util.Set;
 
@@ -55,7 +54,7 @@ public class AggregateClass<A extends Aggregate>
     /** Creates new instance. */
     protected AggregateClass(Class<A> cls) {
         super(checkNotNull(cls));
-        this.stateEvents = new MessageHandlerMap<>(cls, EventApplier.factory());
+        this.stateEvents = MessageHandlerMap.create(cls, new EventApplierSignature());
         this.importEvents = stateEvents.getMessageClasses(EventApplier::allowsImport);
         this.delegate = new ReactorClassDelegate<>(cls);
     }
@@ -80,16 +79,6 @@ public class AggregateClass<A extends Aggregate>
         return delegate.getExternalEventClasses();
     }
 
-    @Override
-    public Set<RejectionClass> getRejectionClasses() {
-        return delegate.getRejectionClasses();
-    }
-
-    @Override
-    public Set<RejectionClass> getExternalRejectionClasses() {
-        return delegate.getExternalRejectionClasses();
-    }
-
     /**
      * Obtains a set of event classes that are
      * {@linkplain io.spine.server.aggregate.Apply#allowImport() imported}
@@ -100,13 +89,8 @@ public class AggregateClass<A extends Aggregate>
     }
 
     @Override
-    public EventReactorMethod getReactor(EventClass eventClass) {
-        return delegate.getReactor(eventClass);
-    }
-
-    @Override
-    public RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls) {
-        return delegate.getReactor(rejCls, cmdCls);
+    public EventReactorMethod getReactor(EventClass eventClass, MessageClass commandClass) {
+        return delegate.getReactor(eventClass, commandClass);
     }
 
     /**

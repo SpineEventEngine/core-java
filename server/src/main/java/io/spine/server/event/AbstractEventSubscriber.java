@@ -121,8 +121,9 @@ public abstract class AbstractEventSubscriber
     }
 
     private void handle(EventEnvelope envelope) {
-        EventSubscriberMethod method = thisClass.getSubscriber(envelope.getMessageClass());
-        method.invoke(this, envelope.getMessage(), envelope.getEventContext());
+        EventSubscriberMethod method = thisClass.getSubscriber(envelope.getMessageClass(),
+                                                               envelope.getOriginClass());
+        method.invoke(this, envelope);
     }
 
     /**

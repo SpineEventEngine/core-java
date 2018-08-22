@@ -22,22 +22,21 @@ package io.spine.testing.server;
 
 import com.google.errorprone.annotations.CheckReturnValue;
 import com.google.protobuf.Message;
-import io.spine.base.ThrowableMessage;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.Rejection;
+import io.spine.server.command.CaughtError;
+import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.command.CommandHandlingEntity;
-import io.spine.server.model.HandlerMethodFailedException;
+import io.spine.server.event.RejectionEnvelope;
+import io.spine.system.server.NoOpSystemGateway;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.expected.CommandHandlerExpected;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.core.Rejections.causedByRejection;
-import static io.spine.core.Rejections.toRejection;
 import static java.util.Collections.emptyList;
 
 /**
@@ -71,9 +70,10 @@ public abstract class CommandHandlerTest<I,
      * @param entityId       the ID of an aggregate under the tests
      * @param commandMessage the command message to be dispatched to the aggregate
      */
+    @SuppressWarnings("TestOnlyProblems") // OK for a test-util.
     protected CommandHandlerTest(I entityId, C commandMessage) {
         super(entityId, commandMessage);
-        requestFactory = TestActorRequestFactory.newInstance(getClass());
+        this.requestFactory = TestActorRequestFactory.newInstance(getClass());
     }
 
     /**
@@ -100,21 +100,27 @@ public abstract class CommandHandlerTest<I,
     @Override
     protected CommandHandlerExpected<S> expectThat(E entity) {
         S initialState = entity.getState();
-        Rejection rejection = null;
-
+        Message rejection = null;
         List<? extends Message> events = emptyList();
         try {
             events = dispatchTo(entity);
-        } catch (HandlerMethodFailedException e) {
-            Throwable cause = getRootCause(e);
-            if (causedByRejection(cause)) {
-                ThrowableMessage throwableMessage = (ThrowableMessage) cause;
-                rejection = toRejection(throwableMessage, createCommand().getCommand());
-            } else {
-                throw e;
-            }
+        } catch (RuntimeException e) {
+            rejection = rejection(e).getMessage();
         }
         return new CommandHandlerExpected<>(events, rejection, initialState,
                                             entity.getState(), interceptedCommands());
+    }
+
+    private RejectionEnvelope rejection(RuntimeException wrapped) {
+        Command command = createCommand(message());
+        CommandEnvelope envelope = CommandEnvelope.of(command);
+        CaughtError error = CommandErrorHandler.with(NoOpSystemGateway.INSTANCE)
+                                               .handleError(envelope, wrapped);
+        Optional<RejectionEnvelope> rejectionEnvelope = error.asRejection();
+        if (rejectionEnvelope.isPresent()) {
+            return rejectionEnvelope.get();
+        } else {
+            throw wrapped;
+        }
     }
 }

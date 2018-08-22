@@ -27,7 +27,6 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
-import io.spine.base.ThrowableMessage;
 import io.spine.protobuf.AnyPacker;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
@@ -220,30 +219,6 @@ public final class Commands {
         String idStr = Identifier.toString(id);
         checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
         return id;
-    }
-
-    /**
-     * Produces a {@link Rejection} for the given {@link Command} based on the given
-     * {@linkplain ThrowableMessage cause}.
-     *
-     * <p>The given {@link Throwable} should be
-     * {@linkplain Rejections#causedByRejection caused by a Rejection} or
-     * an {@link IllegalArgumentException} is thrown.
-     *
-     * @param command the command to reject
-     * @param cause the rejection cause (may be wrapped into other kinds of {@code Throwable})
-     * @return a {@link Rejection} for the given command
-     * @throws IllegalArgumentException upon an invalid rejection cause
-     */
-    @Internal
-    public static Rejection rejectWithCause(Command command, Throwable cause)
-            throws IllegalArgumentException {
-        checkNotNull(command);
-        checkNotNull(cause);
-
-        ThrowableMessage rejectionThrowable = Rejections.getCause(cause);
-        Rejection rejection = Rejections.toRejection(rejectionThrowable, command);
-        return rejection;
     }
 
     /**

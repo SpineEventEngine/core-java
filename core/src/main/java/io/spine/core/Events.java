@@ -26,6 +26,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
+import io.spine.base.ThrowableMessage;
 import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
@@ -37,9 +38,12 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Throwables.getStackTraceAsString;
+import static io.spine.core.EventContext.OriginCase.EVENT_CONTEXT;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
+import static io.spine.validate.Validate.isDefault;
 import static java.util.stream.Collectors.toList;
 
 /**
@@ -48,6 +52,7 @@ import static java.util.stream.Collectors.toList;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("ClassWithTooManyMethods") // OK for this utility class.
 public final class Events {
 
     /** Compares two events by their timestamps. */
@@ -208,6 +213,40 @@ public final class Events {
     }
 
     /**
+     * Checks whether or not the given event is a rejection event.
+     *
+     * @param event the event to check
+     * @return {@code true} if the given event is a rejection, {@code false} otherwise
+     */
+    public static boolean isRejection(Event event) {
+        checkNotNull(event);
+        EventContext context = event.getContext();
+        boolean result = context.hasRejection()
+                      || !isDefault(context.getRejection());
+        return result;
+    }
+
+    /**
+     * Constructs a new {@link RejectionEventContext} from the given command message and
+     * {@link ThrowableMessage}.
+     *
+     * @param commandMessage   rejected command
+     * @param throwableMessage thrown rejection
+     * @return new instance of {@code RejectionEventContext}
+     */
+    public static RejectionEventContext rejectionContext(Message commandMessage,
+                                                         ThrowableMessage throwableMessage) {
+        checkNotNull(commandMessage);
+        checkNotNull(throwableMessage);
+
+        String stacktrace = getStackTraceAsString(throwableMessage);
+        return RejectionEventContext.newBuilder()
+                                    .setCommandMessage(pack(commandMessage))
+                                    .setStacktrace(stacktrace)
+                                    .build();
+    }
+
+    /**
      * Obtains a {@link TenantId} from the given {@link Event}.
      *
      * <p>The {@code TenantId} is retrieved by traversing the passed {@code Event}s context. It is
@@ -253,17 +292,9 @@ public final class Events {
                 case EVENT_CONTEXT:
                     ctx = ctx.getEventContext();
                     break;
-
                 case COMMAND_CONTEXT:
                     commandContext = ctx.getCommandContext();
                     break;
-
-                case REJECTION_CONTEXT:
-                    commandContext = ctx.getRejectionContext()
-                                        .getCommand()
-                                        .getContext();
-                    break;
-
                 case ORIGIN_NOT_SET:
                 default:
                     return Optional.empty();
@@ -339,29 +370,32 @@ public final class Events {
         EventContext.Builder resultContext = context.toBuilder()
                                                           .clearEnrichment();
         EventContext.OriginCase originCase = resultContext.getOriginCase();
-        switch (originCase) {
-            case EVENT_CONTEXT:
-                resultContext.setEventContext(context.getEventContext()
-                                                     .toBuilder()
-                                                     .clearEnrichment());
-                break;
-            case REJECTION_CONTEXT:
-                resultContext.setRejectionContext(context.getRejectionContext()
-                                                         .toBuilder()
-                                                         .clearEnrichment());
-                break;
-            case COMMAND_CONTEXT:
-                // Nothing to remove.
-                break;
-            case ORIGIN_NOT_SET:
-                // Does nothing because there is no origin for this event.
-                break;
-            default:
-                throw newIllegalStateException("Unsupported origin case is encountered: %s",
-                                               originCase);
+        if (originCase == EVENT_CONTEXT) {
+            resultContext.setEventContext(context.getEventContext()
+                                                 .toBuilder()
+                                                 .clearEnrichment());
         }
         Event result = event.toBuilder()
                             .setContext(resultContext)
+                            .build();
+        return result;
+    }
+
+    /**
+     * Replaces the event version with the given {@code newVersion}.
+     *
+     * @param event      original event
+     * @param newVersion the version to set
+     * @return the copy of the original event but with the new version
+     */
+    @Internal
+    public static Event substituteVersion(Event event, Version newVersion) {
+        EventContext newContext = event.getContext()
+                                          .toBuilder()
+                                          .setVersion(newVersion)
+                                          .build();
+        Event result = event.toBuilder()
+                            .setContext(newContext)
                             .build();
         return result;
     }

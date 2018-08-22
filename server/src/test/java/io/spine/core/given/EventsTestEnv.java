@@ -21,11 +21,9 @@
 package io.spine.core.given;
 
 import io.spine.core.ActorContext;
-import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventContext;
-import io.spine.core.RejectionContext;
 import io.spine.core.TenantId;
 
 /**
@@ -34,22 +32,6 @@ import io.spine.core.TenantId;
 public class EventsTestEnv {
 
     private EventsTestEnv() {
-    }
-
-    public static RejectionContext rejectionContext(TenantId id) {
-        Command command = Command.newBuilder()
-                                 .setContext(commandContext(id))
-                                 .build();
-        RejectionContext result = RejectionContext.newBuilder()
-                                                  .setCommand(command)
-                                                  .build();
-        return result;
-    }
-
-    public static RejectionContext rejectionContext() {
-        RejectionContext result = RejectionContext.newBuilder()
-                                                  .build();
-        return result;
     }
 
     public static CommandContext commandContext(TenantId id) {

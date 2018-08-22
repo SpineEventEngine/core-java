@@ -20,16 +20,9 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.collect.ImmutableSet;
-import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
-import io.spine.core.RejectionClass;
 import io.spine.server.event.EventReceiver;
-import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.rejection.model.RejectionReactorMethod;
-
-import java.util.Set;
+import io.spine.type.MessageClass;
 
 /**
  * The helper class for holding messaging information on behalf of another model class.
@@ -44,37 +37,12 @@ public final class ReactorClassDelegate<T extends EventReceiver>
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<RejectionClass, RejectionReactorMethod> rejectionReactions;
-
-    private final ImmutableSet<RejectionClass> domesticRejections;
-    private final ImmutableSet<RejectionClass> externalRejections;
-
     public ReactorClassDelegate(Class<T> cls) {
-        super(cls, EventReactorMethod.factory());
-        this.rejectionReactions = new MessageHandlerMap<>(cls, RejectionReactorMethod.factory());
-        this.domesticRejections =
-                rejectionReactions.getMessageClasses(HandlerMethod::isDomestic);
-        this.externalRejections =
-                rejectionReactions.getMessageClasses(HandlerMethod::isExternal);
+        super(cls, new EventReactorSignature());
     }
 
     @Override
-    public Set<RejectionClass> getRejectionClasses() {
-        return domesticRejections;
-    }
-
-    @Override
-    public Set<RejectionClass> getExternalRejectionClasses() {
-        return externalRejections;
-    }
-
-    @Override
-    public EventReactorMethod getReactor(EventClass eventClass) {
-        return getMethod(eventClass);
-    }
-
-    @Override
-    public RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls) {
-        return rejectionReactions.getMethod(rejCls, cmdCls);
+    public EventReactorMethod getReactor(EventClass eventClass, MessageClass originClass) {
+        return getMethod(eventClass, originClass);
     }
 }

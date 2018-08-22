@@ -31,8 +31,6 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MulticastBus;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.EventBus;
-import io.spine.server.rejection.RejectionBus;
-import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.server.transport.PublisherHub;
 import io.spine.server.transport.Subscriber;
 import io.spine.server.transport.SubscriberHub;
@@ -139,7 +137,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         this.subscriberHub = new SubscriberHub(transportFactory);
         this.publisherHub = new PublisherHub(transportFactory);
         this.localBusAdapters = createAdapters(builder, publisherHub);
-        configurationChangeObserver = observeConfigurationChanges();
+        this.configurationChangeObserver = observeConfigurationChanges();
         subscriberHub.get(CONFIG_EXCHANGE_CHANNEL_ID)
                      .addObserver(configurationChangeObserver);
     }
@@ -162,10 +160,7 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         return ImmutableSet.of(
                 EventBusAdapter.builderWith(builder.eventBus, builder.boundedContextName)
                                .setPublisherHub(publisherHub)
-                               .build(),
-                RejectionBusAdapter.builderWith(builder.rejectionBus, builder.boundedContextName)
-                                   .setPublisherHub(publisherHub)
-                                   .build()
+                               .build()
         );
     }
 
@@ -307,17 +302,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
     }
 
     /**
-     * Registers the passed rejection subscriber as an external rejection dispatcher
-     * by taking only external subscriptions into account.
-     *
-     * @param rejectionSubscriber the subscriber to register.
-     */
-    public void register(RejectionSubscriber rejectionSubscriber) {
-        ExternalRejectionSubscriber wrapped = new ExternalRejectionSubscriber(rejectionSubscriber);
-        register(wrapped);
-    }
-
-    /**
      * Unregisters the passed event subscriber as an external event dispatcher
      * by taking only external subscriptions into account.
      *
@@ -398,7 +382,6 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
          */
 
         private EventBus eventBus;
-        private RejectionBus rejectionBus;
         private BoundedContextName boundedContextName;
         private TransportFactory transportFactory;
 
@@ -412,21 +395,11 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
             return self();
         }
 
-        public Optional<RejectionBus> getRejectionBus() {
-            return Optional.ofNullable(rejectionBus);
-        }
-
         public Optional<BoundedContextName> getBoundedContextName() {
             BoundedContextName value = Validate.isDefault(this.boundedContextName)
                                        ? null
                                        : this.boundedContextName;
             return Optional.ofNullable(value);
-        }
-
-        @CanIgnoreReturnValue
-        public Builder setRejectionBus(RejectionBus rejectionBus) {
-            this.rejectionBus = checkNotNull(rejectionBus);
-            return self();
         }
 
         @CanIgnoreReturnValue
@@ -448,11 +421,8 @@ public class IntegrationBus extends MulticastBus<ExternalMessage,
         @Override
         @CheckReturnValue
         public IntegrationBus build() {
-
             checkState(eventBus != null,
                        "`eventBus` must be set for IntegrationBus.");
-            checkState(rejectionBus != null,
-                       "`rejectionBus` must be set for IntegrationBus.");
             checkNotDefault(boundedContextName,
                             "`boundedContextName` must be set for IntegrationBus.");
 

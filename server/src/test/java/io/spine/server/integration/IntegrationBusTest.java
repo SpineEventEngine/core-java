@@ -25,22 +25,17 @@ import io.spine.core.Ack;
 import io.spine.core.BoundedContextName;
 import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
-import io.spine.core.Rejection;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.grpc.StreamObservers;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.EventBus;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ContextAwareProjectDetails;
-import io.spine.server.integration.given.IntegrationBusTestEnv.ExternalMismatchSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectCountAggregate;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectDetails;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectEventsSubscriber;
-import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectRejectionsExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectStartedExtSubscriber;
 import io.spine.server.integration.given.IntegrationBusTestEnv.ProjectWizard;
-import io.spine.server.rejection.RejectionBus;
-import io.spine.server.rejection.RejectionSubscriber;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.validate.Validate;
 import org.junit.jupiter.api.BeforeEach;
@@ -52,7 +47,6 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.server.integration.ExternalMessageValidationError.UNSUPPORTED_EXTERNAL_MESSAGE;
-import static io.spine.server.integration.given.IntegrationBusTestEnv.cannotStartArchivedProject;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithContextAwareEntitySubscriber;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExtEntitySubscribers;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithExternalSubscribers;
@@ -61,13 +55,11 @@ import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWit
 import static io.spine.server.integration.given.IntegrationBusTestEnv.contextWithTransport;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectCreated;
 import static io.spine.server.integration.given.IntegrationBusTestEnv.projectStarted;
-import static io.spine.testing.Verify.assertContains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * @author Alex Tymchenko
@@ -86,7 +78,6 @@ class IntegrationBusTest {
         ContextAwareProjectDetails.clear();
         ProjectEventsSubscriber.clear();
         ProjectStartedExtSubscriber.clear();
-        ProjectRejectionsExtSubscriber.clear();
     }
 
     @Nested
@@ -188,28 +179,6 @@ class IntegrationBusTest {
             assertEquals(AnyPacker.unpack(eventB.getMessage()),
                          ProjectStartedExtSubscriber.getExternalEvent());
         }
-    }
-
-    @Test
-    @DisplayName("dispatch rejections from one BC to external subscribers of another BC")
-    void dispatchRejectionsToOtherBc() {
-        InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-
-        BoundedContext sourceContext = contextWithTransport(transportFactory);
-        contextWithExternalSubscribers(transportFactory);
-
-        assertNull(ProjectRejectionsExtSubscriber.getExternalRejection());
-        assertNull(ProjectCountAggregate.getExternalRejection());
-        assertNull(ProjectWizard.getExternalRejection());
-
-        Rejection rejection = cannotStartArchivedProject();
-        sourceContext.getRejectionBus()
-                     .post(rejection);
-        Message rejectionMessage = AnyPacker.unpack(rejection.getMessage());
-
-        assertEquals(rejectionMessage, ProjectRejectionsExtSubscriber.getExternalRejection());
-        assertEquals(rejectionMessage, ProjectCountAggregate.getExternalRejection());
-        assertEquals(rejectionMessage, ProjectWizard.getExternalRejection());
     }
 
     @Nested
@@ -321,28 +290,6 @@ class IntegrationBusTest {
                      ProjectStartedExtSubscriber.getExternalEvent());
     }
 
-    @Test
-    @DisplayName("throw exception on mismatch of external attribute during dispatching")
-    void throwOnExtAttributeMismatch() {
-        InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-
-        BoundedContext sourceContext = contextWithTransport(transportFactory);
-        RejectionSubscriber rejectionSubscriber = new ExternalMismatchSubscriber();
-        sourceContext.getRejectionBus()
-                     .register(rejectionSubscriber);
-        sourceContext.getIntegrationBus()
-                     .register(rejectionSubscriber);
-        Rejection rejection = cannotStartArchivedProject();
-        try {
-            sourceContext.getRejectionBus()
-                         .post(rejection);
-            fail("An exception is expected.");
-        } catch (Exception e) {
-            String exceptionMsg = e.getMessage();
-            assertContains("external", exceptionMsg);
-        }
-    }
-
     @Nested
     @DisplayName("not dispatch to domestic subscribers if they requested external")
     class NotDispatchToDomestic {
@@ -370,30 +317,6 @@ class IntegrationBusTest {
             assertNull(ProjectWizard.getExternalEvent());
             assertNull(ProjectCountAggregate.getExternalEvent());
         }
-
-        @Test
-        @DisplayName("rejections")
-        void rejectionsIfNeedExternal() {
-            InMemoryTransportFactory transportFactory = InMemoryTransportFactory.newInstance();
-
-            BoundedContext sourceContext = contextWithExtEntitySubscribers(transportFactory);
-            ProjectRejectionsExtSubscriber standaloneSubscriber =
-                    new ProjectRejectionsExtSubscriber();
-
-            RejectionBus rejectionBus = sourceContext.getRejectionBus();
-            rejectionBus.register(standaloneSubscriber);
-
-            assertNull(ProjectRejectionsExtSubscriber.getExternalRejection());
-            assertNull(ProjectWizard.getExternalRejection());
-            assertNull(ProjectCountAggregate.getExternalRejection());
-
-            Rejection rejection = cannotStartArchivedProject();
-            rejectionBus.post(rejection);
-
-            assertNull(ProjectRejectionsExtSubscriber.getExternalRejection());
-            assertNull(ProjectWizard.getExternalRejection());
-            assertNull(ProjectCountAggregate.getExternalRejection());
-        }
     }
 
     @Test
@@ -416,6 +339,6 @@ class IntegrationBusTest {
         assertEquals(ExternalMessageValidationError.getDescriptor()
                                                    .getFullName(),
                      error.getType());
-        assertTrue(UNSUPPORTED_EXTERNAL_MESSAGE.getNumber() == error.getCode());
+        assertEquals(UNSUPPORTED_EXTERNAL_MESSAGE.getNumber(), error.getCode());
     }
 }

@@ -21,8 +21,8 @@
 package io.spine.server.procman.given.pm;
 
 import com.google.protobuf.Empty;
-import io.spine.core.React;
 import io.spine.server.command.Assign;
+import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.tuple.EitherOfThree;
 import io.spine.test.procman.quiz.PmAnswer;
@@ -71,7 +71,7 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
         PmQuestionId questionId = answer.getQuestionId();
 
         if (questionIsClosed(questionId)) {
-            return EitherOfThree.withC(Empty.getDefaultInstance());
+            return EitherOfThree.withC(nothing());
         }
 
         boolean answerIsCorrect = answer.getCorrect();
@@ -99,27 +99,34 @@ class DirectQuizProcman extends ProcessManager<PmQuizId, PmQuiz, PmQuizVBuilder>
     }
 
     @React
-    void on(PmQuizStarted event) {
+    Empty on(PmQuizStarted event) {
         getBuilder().setId(event.getQuizId());
+        return nothing();
     }
 
     @React
-    void on(PmQuestionSolved event) {
+    Empty on(PmQuestionSolved event) {
         PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         getBuilder().addSolvedQuestion(questionId);
+        return nothing();
     }
 
     @React
-    void on(PmQuestionFailed event) {
+    Empty on(PmQuestionFailed event) {
         PmQuestionId questionId = event.getQuestionId();
         removeOpenQuestion(questionId);
         getBuilder().addFailedQuestion(questionId);
+        return nothing();
     }
 
     private void removeOpenQuestion(PmQuestionId questionId) {
         List<PmQuestionId> openQuestions = getBuilder().getOpenQuestion();
         int index = openQuestions.indexOf(questionId);
         getBuilder().removeOpenQuestion(index);
+    }
+
+    private static Empty nothing() {
+        return Empty.getDefaultInstance();
     }
 }

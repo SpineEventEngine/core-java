@@ -26,8 +26,10 @@ import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
 import io.spine.server.EventProducer;
 import io.spine.server.event.EventFactory;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.List;
+import java.util.function.Function;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.stream.Collectors.toList;
@@ -44,8 +46,8 @@ public abstract class EventsResult extends MethodResult<Message> {
     /**
      * Creates a new results object.
      *
-     * @param producer the object on behalf of which to produce events
-     * @param output   raw method output, cannot be {@code null}
+     * @param producer  the object on behalf of which to produce events
+     * @param output    raw method output, cannot be {@code null}
      */
     protected EventsResult(EventProducer producer, Object output) {
         super(checkNotNull(output));
@@ -57,13 +59,35 @@ public abstract class EventsResult extends MethodResult<Message> {
      */
     public
     List<Event> produceEvents(MessageEnvelope origin) {
-        EventFactory eventFactory = EventFactory.on(origin, producer.getProducerId());
         List<? extends Message> messages = asMessages();
-        Version version = producer.getVersion();
         List<Event> result =
                 messages.stream()
-                        .map(eventMessage -> eventFactory.createEvent(eventMessage, version))
+                        .map(toEvent(origin))
                         .collect(toList());
         return result;
+    }
+
+    protected Function<Message, Event> toEvent(MessageEnvelope origin) {
+        return new ToEvent(producer, origin);
+    }
+
+    /**
+     * Converts an event message into an {@link Event}.
+     */
+    private static final class ToEvent implements Function<Message, Event> {
+
+        private final EventFactory eventFactory;
+        private final @Nullable Version version;
+
+        private ToEvent(EventProducer producer,
+                        MessageEnvelope origin) {
+            this.eventFactory = EventFactory.on(origin, producer.getProducerId());
+            this.version = producer.getVersion();
+        }
+
+        @Override
+        public Event apply(Message message) {
+            return eventFactory.createEvent(message, version);
+        }
     }
 }

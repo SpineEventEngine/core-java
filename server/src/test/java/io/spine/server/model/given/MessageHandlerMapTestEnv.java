@@ -37,12 +37,12 @@ public class MessageHandlerMapTestEnv {
     public static class HandlerWithDuplicatingMethods {
 
         @Assign
-        public ProjectCreated on(CreateProject cmd) {
+        ProjectCreated on(CreateProject cmd) {
             return ProjectCreated.getDefaultInstance();
         }
 
         @Assign
-        public ProjectCreated handle(CreateProject cmd) {
+        ProjectCreated handle(CreateProject cmd) {
             return ProjectCreated.getDefaultInstance();
         }
     }

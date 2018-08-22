@@ -23,7 +23,6 @@ package io.spine.testing.client.blackbox;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
-import io.spine.core.Rejection;
 import io.spine.core.RejectionClass;
 
 /**
@@ -125,7 +124,7 @@ public abstract class VerifyAcknowledgements {
      ******************************************************************************/
 
     /**
-     * Verifies that a command handling did not respond with any {@link Rejection rejections}.
+     * Verifies that a command handling did not respond with any rejections.
      *
      * @return a new {@link VerifyAcknowledgements} instance
      */
@@ -134,8 +133,7 @@ public abstract class VerifyAcknowledgements {
     }
 
     /**
-     * Verifies that a command or an event was handled responding with some
-     * {@link Rejection rejection}.
+     * Verifies that a command or an event was handled with a rejection.
      *
      * @return a new {@link VerifyAcknowledgements} instance
      */
@@ -144,8 +142,8 @@ public abstract class VerifyAcknowledgements {
     }
 
     /**
-     * Verifies that a command or an event was handled responding with a {@link Rejection rejection}
-     * of the provided type.
+     * Verifies that a command or an event was handled responding with a rejection of the provided
+     * type.
      *
      * @param type rejection type in a form of message class
      * @return a new {@link VerifyAcknowledgements} instance
@@ -156,7 +154,7 @@ public abstract class VerifyAcknowledgements {
     }
 
     /**
-     * Verifies that a command or an event was handled responding with a {@link Rejection rejection}
+     * Verifies that a command or an event was handled responding with a rejection
      * of the provided type.
      *
      * @param type rejection type in a form of {@link RejectionClass RejectionClass}
@@ -192,8 +190,8 @@ public abstract class VerifyAcknowledgements {
     }
 
     /**
-     * Verifies that a command or an event was handled responding with a {@link Rejection rejection}
-     * of a provided type specified amount of times.
+     * Verifies that a command or an event was handled responding with a rejection of a provided
+     * type specified amount of times.
      *
      * @param type          rejection type in a form of message class
      * @param expectedCount an amount of rejection that are expected in Bounded Context
@@ -206,8 +204,8 @@ public abstract class VerifyAcknowledgements {
     }
 
     /**
-     * Verifies that a command or an event was handled responding with a {@link Rejection rejection}
-     * of a provided type specified amount of times.
+     * Verifies that a command or an event was handled responding with a rejection of a provided
+     * type specified amount of times.
      *
      * @param type          rejection type in a form of {@link RejectionClass RejectionClass}
      * @param expectedCount an amount of rejection that are expected in Bounded Context
@@ -279,8 +277,8 @@ public abstract class VerifyAcknowledgements {
     }
 
     /**
-     * Creates a new verifier adding a check to contain an {@link Error error} that
-     * matches the criterion.
+     * Creates a new verifier adding a check to contain an {@link Error error} that matches
+     * the criterion.
      *
      * @param criterion an error criterion specifying which kind of error should be a part
      *                  of acknowledgement
@@ -292,8 +290,8 @@ public abstract class VerifyAcknowledgements {
     }
 
     /**
-     * Creates a new verifier adding a check to contain an {@link Error error} that
-     * matches the criterion.
+     * Creates a new verifier adding a check to contain an {@link Error error} that matches
+     * the criterion.
      *
      * @param criterion     an error criterion specifying which kind of error should be a part
      *                      of acknowledgement
@@ -306,8 +304,7 @@ public abstract class VerifyAcknowledgements {
     }
 
     /**
-     * Creates a new verifier adding a check to not contain any {@link Error errors} or
-     * {@link Rejection rejections}.
+     * Creates a new verifier adding a check to not contain any {@link Error errors} or rejections.
      *
      * @return a new {@link VerifyAcknowledgements} instance
      */
@@ -318,7 +315,7 @@ public abstract class VerifyAcknowledgements {
     }
 
     /**
-     * Creates a new verifier adding a check to not contain any {@link Rejection rejections}.
+     * Creates a new verifier adding a check to not contain any rejections.
      *
      * @return a new {@link VerifyAcknowledgements} instance
      */
@@ -328,7 +325,7 @@ public abstract class VerifyAcknowledgements {
     }
 
     /**
-     * Creates a new verifier adding a check to contain some {@link Rejection rejection}.
+     * Creates a new verifier adding a check to contain some rejection.
      *
      * @return a new {@link VerifyAcknowledgements} instance
      */
@@ -338,7 +335,7 @@ public abstract class VerifyAcknowledgements {
     }
 
     /**
-     * Creates a new verifier adding a check to contain a {@link Rejection rejection} of a
+     * Creates a new verifier adding a check to contain a rejection of a
      * type specified by {@code class}.
      *
      * @param type a type of a domain rejection specified by message class
@@ -350,7 +347,7 @@ public abstract class VerifyAcknowledgements {
     }
 
     /**
-     * Creates a new verifier adding a check to contain a {@link Rejection rejection} of a
+     * Creates a new verifier adding a check to contain a rejection of a
      * type specified by a {@link RejectionClass rejection class}.
      *
      * @param type a type of a domain rejection specified by a {@link RejectionClass}
@@ -362,7 +359,7 @@ public abstract class VerifyAcknowledgements {
     }
 
     /**
-     * Creates a new verifier adding a check to contain a {@link Rejection rejection} of a
+     * Creates a new verifier adding a check to contain a rejection of a
      * type specified by a {@link RejectionClass rejection class} specified amount of times.
      *
      * @param type          rejection type in a form of message class
@@ -376,7 +373,7 @@ public abstract class VerifyAcknowledgements {
     }
 
     /**
-     * Creates a new verifier adding a check to contain a {@link Rejection rejection} of a
+     * Creates a new verifier adding a check to contain a rejection of a
      * type specified by a {@link RejectionClass rejection class} specified amount of times.
      *
      * @param type          rejection type in a form of {@link RejectionClass RejectionClass}

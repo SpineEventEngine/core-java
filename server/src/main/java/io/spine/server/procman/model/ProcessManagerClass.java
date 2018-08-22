@@ -23,7 +23,6 @@ package io.spine.server.procman.model;
 import com.google.common.collect.Sets.SetView;
 import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
-import io.spine.core.RejectionClass;
 import io.spine.server.command.model.CommandReactionMethod;
 import io.spine.server.command.model.CommandSubstituteMethod;
 import io.spine.server.command.model.CommanderClass;
@@ -33,7 +32,7 @@ import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.event.model.ReactingClass;
 import io.spine.server.event.model.ReactorClassDelegate;
 import io.spine.server.procman.ProcessManager;
-import io.spine.server.rejection.model.RejectionReactorMethod;
+import io.spine.type.MessageClass;
 
 import java.util.Set;
 
@@ -95,18 +94,8 @@ public final class ProcessManagerClass<P extends ProcessManager>
     }
 
     @Override
-    public Set<RejectionClass> getRejectionClasses() {
-        return reactorDelegate.getRejectionClasses();
-    }
-
-    @Override
-    public Set<RejectionClass> getExternalRejectionClasses() {
-        return reactorDelegate.getExternalRejectionClasses();
-    }
-
-    @Override
-    public EventReactorMethod getReactor(EventClass eventClass) {
-        return reactorDelegate.getReactor(eventClass);
+    public EventReactorMethod getReactor(EventClass eventClass, MessageClass originClass) {
+        return reactorDelegate.getReactor(eventClass, originClass);
     }
 
     public CommandSubstituteMethod getCommander(CommandClass commandClass) {
@@ -115,11 +104,6 @@ public final class ProcessManagerClass<P extends ProcessManager>
 
     public CommandReactionMethod getCommander(EventClass eventClass) {
         return commanderDelegate.getCommander(eventClass);
-    }
-
-    @Override
-    public RejectionReactorMethod getReactor(RejectionClass rejCls, CommandClass cmdCls) {
-        return reactorDelegate.getReactor(rejCls, cmdCls);
     }
 
     public boolean substitutesCommand(CommandClass commandClass) {

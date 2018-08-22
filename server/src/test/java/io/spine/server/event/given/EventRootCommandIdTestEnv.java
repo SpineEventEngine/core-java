@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.EventContext;
-import io.spine.core.React;
 import io.spine.core.TenantId;
 import io.spine.core.UserId;
 import io.spine.net.EmailAddress;
@@ -35,6 +34,7 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.event.EventRootCommandIdTest;
 import io.spine.server.event.EventStreamQuery;
+import io.spine.server.event.React;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.route.EventRoute;
@@ -270,14 +270,14 @@ public class EventRootCommandIdTestEnv {
         }
 
         @Apply
-        private void event(ProjectCreated event) {
+        void event(ProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Project.Status.CREATED);
         }
 
         @Apply
-        private void event(TaskAdded event) {
+        void event(TaskAdded event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .addTask(event.getTask());
@@ -297,7 +297,7 @@ public class EventRootCommandIdTestEnv {
         }
 
         @Apply
-        private void event(EvTeamProjectAdded event) {
+        void event(EvTeamProjectAdded event) {
             getBuilder()
                     .setId(event.getTeamId())
                     .addProjectId(event.getProjectId());

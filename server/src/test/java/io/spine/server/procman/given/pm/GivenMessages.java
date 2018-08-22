@@ -24,13 +24,12 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.core.Command;
-import io.spine.core.Rejection;
-import io.spine.core.RejectionEnvelope;
-import io.spine.core.Rejections;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.commandbus.Given;
-import io.spine.server.entity.rejection.StandardRejections.EntityAlreadyArchived;
+import io.spine.server.entity.rejection.EntityAlreadyArchived;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.test.procman.command.PmAddTask;
-import io.spine.test.procman.command.PmCencelIteration;
+import io.spine.test.procman.command.PmCancelIteration;
 import io.spine.test.procman.command.PmCreateProject;
 import io.spine.test.procman.command.PmStartProject;
 import io.spine.test.procman.event.PmOwnerChanged;
@@ -67,8 +66,8 @@ public class GivenMessages {
                 .build();
     }
 
-    public static PmCencelIteration cancelIteration() {
-        return PmCencelIteration
+    public static PmCancelIteration cancelIteration() {
+        return PmCancelIteration
                 .newBuilder()
                 .setProjectId(ID)
                 .build();
@@ -76,13 +75,10 @@ public class GivenMessages {
 
     public static RejectionEnvelope entityAlreadyArchived(Class<? extends Message> commandClass) {
         Any id = Identifier.pack(TestProcessManager.class.getName());
-        EntityAlreadyArchived rejectionMessage = EntityAlreadyArchived
-                .newBuilder()
-                .setEntityId(id)
-                .build();
         Command command = Given.ACommand.withMessage(messageOfType(commandClass));
-        Rejection rejection = Rejections.createRejection(rejectionMessage, command);
-        return RejectionEnvelope.of(rejection);
+        RejectionEnvelope result = RejectionEnvelope.from(CommandEnvelope.of(command),
+                                                          new EntityAlreadyArchived(id));
+        return result;
     }
 
     public static PmOwnerChanged ownerChanged() {

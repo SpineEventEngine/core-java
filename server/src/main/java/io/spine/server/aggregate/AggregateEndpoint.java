@@ -21,7 +21,6 @@
 package io.spine.server.aggregate;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Message;
 import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.Event;
 import io.spine.server.entity.EntityLifecycleMonitor;
@@ -56,7 +55,7 @@ abstract class AggregateEndpoint<I,
         A aggregate = loadOrCreate(aggregateId);
         LifecycleFlags flagsBefore = aggregate.getLifecycleFlags();
 
-        dispatchInTx(aggregate);
+        List<Event> produced = dispatchInTx(aggregate);
 
         // Update lifecycle flags only if the message was handled successfully and flags changed.
         LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();
@@ -65,6 +64,7 @@ abstract class AggregateEndpoint<I,
         }
 
         store(aggregate);
+        repository().postEvents(produced);
     }
 
     private A loadOrCreate(I aggregateId) {
@@ -72,6 +72,16 @@ abstract class AggregateEndpoint<I,
     }
 
     @CanIgnoreReturnValue
+    protected final List<Event> dispatchInTx(A aggregate) {
+        List<Event> events = doDispatch(aggregate, envelope());
+        AggregateTransaction tx = startTransaction(aggregate);
+        List<Event> producedEvents = aggregate.apply(events, envelope());
+        tx.commit();
+        return producedEvents;
+    }
+
+    /* Changes from `master` :
+        @CanIgnoreReturnValue
     protected final List<? extends Message> dispatchInTx(A aggregate) {
         M envelope = envelope();
         List<? extends Message> eventMessages = doDispatch(aggregate, envelope);
@@ -80,6 +90,7 @@ abstract class AggregateEndpoint<I,
         tx.commit();
         return eventMessages;
     }
+     */
 
     @SuppressWarnings("unchecked") // to avoid massive generic-related issues.
     private AggregateTransaction startTransaction(A aggregate) {
@@ -96,8 +107,8 @@ abstract class AggregateEndpoint<I,
 
     @Override
     protected final boolean isModified(A aggregate) {
-        List<Event> events = aggregate.getUncommittedEvents();
-        return !events.isEmpty();
+        UncommittedEvents events = aggregate.getUncommittedEvents();
+        return events.nonEmpty();
     }
 
     @Override

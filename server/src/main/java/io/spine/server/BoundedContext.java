@@ -29,10 +29,10 @@ import io.spine.core.BoundedContextNames;
 import io.spine.core.Event;
 import io.spine.logging.Logging;
 import io.spine.option.EntityOption.Visibility;
+import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
-import io.spine.server.commandbus.CommandErrorHandler;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
@@ -47,10 +47,6 @@ import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.IntegrationBus;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
-import io.spine.server.rejection.DelegatingRejectionDispatcher;
-import io.spine.server.rejection.RejectionBus;
-import io.spine.server.rejection.RejectionDispatcher;
-import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
@@ -137,12 +133,21 @@ public abstract class BoundedContext
         this.multitenant = builder.isMultitenant();
         this.storageFactory = memoize(() -> builder.buildStorageFactorySupplier()
                                                    .get());
-        this.commandBus = builder.buildCommandBus();
         this.eventBus = builder.buildEventBus();
         this.stand = builder.buildStand();
         this.tenantIndex = builder.buildTenantIndex();
 
-        this.integrationBus = buildIntegrationBus(builder, eventBus, commandBus, name);
+        this.commandBus = buildCommandBus(builder, eventBus);
+        this.integrationBus = buildIntegrationBus(builder, eventBus, name);
+    }
+
+    private static CommandBus buildCommandBus(BoundedContextBuilder builder, EventBus eventBus) {
+        Optional<CommandBus.Builder> busBuilder = builder.getCommandBus();
+        checkState(busBuilder.isPresent());
+        CommandBus result = busBuilder.get()
+                                      .injectEventBus(eventBus)
+                                      .build();
+        return result;
     }
 
     /**
@@ -165,13 +170,11 @@ public abstract class BoundedContext
      * @param builder    the {@link BoundedContextBuilder} to obtain
      *                   the {@link IntegrationBus.Builder} from
      * @param eventBus   the initialized {@link EventBus}
-     * @param commandBus the initialized {@link CommandBus} to obtain the {@link RejectionBus} from
      * @param name       the name of the constructed bounded context
      * @return new instance of {@link IntegrationBus}
      */
     private static IntegrationBus buildIntegrationBus(BoundedContextBuilder builder,
                                                       EventBus eventBus,
-                                                      CommandBus commandBus,
                                                       BoundedContextName name) {
         Optional<IntegrationBus.Builder> busBuilder = builder.getIntegrationBus();
         checkArgument(busBuilder.isPresent());
@@ -179,7 +182,6 @@ public abstract class BoundedContext
                 busBuilder.get()
                           .setBoundedContextName(name)
                           .setEventBus(eventBus)
-                          .setRejectionBus(commandBus.rejectionBus())
                           .build();
         return result;
     }
@@ -261,21 +263,6 @@ public abstract class BoundedContext
     }
 
     /**
-     * Registers the passed rejection dispatcher with the {@code RejectionBus} of
-     * this {@code BoundedContext}.
-     */
-    public void registerRejectionDispatcher(RejectionDispatcher<?> dispatcher) {
-        checkNotNull(dispatcher);
-        if (dispatcher.dispatchesRejections()) {
-            getRejectionBus().register(dispatcher);
-        }
-
-        if (dispatcher.dispatchesExternalRejections()) {
-            registerWithIntegrationBus(dispatcher);
-        }
-    }
-
-    /**
      * Registers the passed event dispatcher with the {@code EventBus} of
      * this {@code BoundedContext}, if it dispatchers domestic events.
      * If the passed instance dispatches external events, registers it with
@@ -305,31 +292,11 @@ public abstract class BoundedContext
     }
 
     /**
-     * Registers the passed rejection dispatcher with the {@code RejectionBus} of
-     * this {@code BoundedContext}.
-     */
-    public void registerRejectionDispatcher(RejectionDispatcherDelegate<?> dispatcher) {
-        checkNotNull(dispatcher);
-        DelegatingRejectionDispatcher<?> delegatingDispatcher =
-                DelegatingRejectionDispatcher.of(dispatcher);
-        if (dispatcher.dispatchesRejections()) {
-            registerRejectionDispatcher(delegatingDispatcher);
-        }
-        if (dispatcher.dispatchesExternalRejections()) {
-            registerWithIntegrationBus(delegatingDispatcher);
-        }
-    }
-
-    /**
      * Creates a {@code CommandErrorHandler} for objects that handle commands.
      */
     public CommandErrorHandler createCommandErrorHandler() {
         SystemGateway systemGateway = getSystemGateway();
-        CommandErrorHandler result = CommandErrorHandler
-                .newBuilder()
-                .setRejectionBus(getRejectionBus())
-                .setSystemGateway(systemGateway)
-                .build();
+        CommandErrorHandler result = CommandErrorHandler.with(systemGateway);
         return result;
     }
     /**
@@ -372,11 +339,6 @@ public abstract class BoundedContext
     /** Obtains instance of {@link EventBus} of this {@code BoundedContext}. */
     public EventBus getEventBus() {
         return this.eventBus;
-    }
-
-    /** Obtains instance of {@link RejectionBus} of this {@code BoundedContext}. */
-    public RejectionBus getRejectionBus() {
-        return this.commandBus.rejectionBus();
     }
 
     /** Obtains instance of {@link IntegrationBus} of this {@code BoundedContext}. */

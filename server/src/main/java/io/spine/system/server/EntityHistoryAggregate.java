@@ -159,56 +159,56 @@ final class EntityHistoryAggregate
     }
 
     @Apply
-    private void on(EntityCreated event) {
+    void on(EntityCreated event) {
         getBuilder().setId(event.getId());
     }
 
     @Apply
-    private void on(EventDispatchedToSubscriber event) {
+    void on(EventDispatchedToSubscriber event) {
         updateLastEventTime(event.getPayload()
                                  .getWhenDispatched());
     }
 
     @Apply
-    private void on(EventDispatchedToReactor event) {
+    void on(EventDispatchedToReactor event) {
         updateLastEventTime(event.getPayload()
                                  .getWhenDispatched());
     }
 
     @Apply
-    private void on(CommandDispatchedToHandler event) {
+    void on(CommandDispatchedToHandler event) {
         updateLastCommandTime(event.getPayload()
                                    .getWhenDispatched());
     }
 
     @Apply
-    private void on(EntityStateChanged event) {
+    void on(EntityStateChanged event) {
         getBuilder().setLastStateChange(event.getWhen());
     }
 
     @Apply
-    private void on(EntityArchived event) {
+    void on(EntityArchived event) {
         updateLifecycleFlags(builder -> builder.setArchived(true));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenArchived(whenOccurred));
     }
 
     @Apply
-    private void on(EntityDeleted event) {
+    void on(EntityDeleted event) {
         updateLifecycleFlags(builder -> builder.setDeleted(true));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenDeleted(whenOccurred));
     }
 
     @Apply
-    private void on(EntityExtractedFromArchive event) {
+    void on(EntityExtractedFromArchive event) {
         updateLifecycleFlags(builder -> builder.setArchived(false));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenExtractedFromArchive(whenOccurred));
     }
 
     @Apply
-    private void on(EntityRestored event) {
+    void on(EntityRestored event) {
         updateLifecycleFlags(builder -> builder.setDeleted(false));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenRestored(whenOccurred));

@@ -28,10 +28,7 @@ option java_package = "io.spine.server.procman";
 option java_multiple_files = true;
 option java_outer_classname = "CommandEventsProto";
 
-import "google/protobuf/any.proto";
-
 import "spine/core/command.proto";
-import "spine/core/event.proto";
 
 // This event is generated when instead of processing of the `source` command, two or
 // more commands were produced.
@@ -40,6 +37,7 @@ import "spine/core/event.proto";
 // in response to one command which carries data for those parts.
 //
 message CommandSplit {
+    option deprecated = true; // See spine.system.server.CommandSplit.
 
     // The command in response of which we post other commands.
     core.DispatchedCommand source = 1 [(required) = true];
@@ -58,6 +56,7 @@ message CommandSplit {
 // command API.
 //
 message CommandTransformed {
+    option deprecated = true; // See spine.system.server.CommandTransformed.
 
     // The command in response of which we post other commands.
     core.DispatchedCommand source = 1 [(required) = true];

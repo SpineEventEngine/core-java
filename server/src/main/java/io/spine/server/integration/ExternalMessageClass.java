@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
-import io.spine.core.RejectionClass;
 import io.spine.type.MessageClass;
 
 import java.util.Set;
@@ -73,23 +72,6 @@ public final class ExternalMessageClass extends MessageClass {
         ImmutableSet.Builder<ExternalMessageClass> builder = ImmutableSet.builder();
         for (EventClass eventClass : classes) {
             builder.add(of(eventClass));
-        }
-        return builder.build();
-    }
-
-    /**
-     * Transforms a given set of {@linkplain RejectionClass rejection classes} into a set
-     * of {@code ExternalMessageClass}es by wrapping each rejection class
-     * into an external message class.
-     *
-     * @param classes the set of rejection classes to transform
-     * @return a set of {@code ExternalMessageClass}es, each wrapping an item from the original set
-     */
-    public static Set<ExternalMessageClass> fromRejectionClasses(Set<RejectionClass> classes) {
-        checkNotNull(classes);
-        ImmutableSet.Builder<ExternalMessageClass> builder = ImmutableSet.builder();
-        for (RejectionClass rejectionClass : classes) {
-            builder.add(of(rejectionClass));
         }
         return builder.build();
     }

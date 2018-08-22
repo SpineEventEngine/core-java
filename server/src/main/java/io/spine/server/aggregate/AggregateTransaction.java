@@ -61,7 +61,7 @@ public class AggregateTransaction<I,
      */
     @Override
     protected final void dispatch(Aggregate aggregate, EventEnvelope event) {
-        aggregate.invokeApplier(event.getMessage());
+        aggregate.invokeApplier(event);
     }
 
     /**

@@ -22,20 +22,15 @@ package io.spine.server.event.model;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
 import io.spine.core.EventClass;
-import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.MethodAccessChecker;
-import io.spine.server.model.MethodFactory;
 import io.spine.server.model.MethodResult;
+import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
-
-import static io.spine.core.Rejections.isRejection;
-import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
  * A wrapper for an event subscriber method.
@@ -46,12 +41,20 @@ import static io.spine.server.model.MethodAccessChecker.forMethod;
 public final class EventSubscriberMethod
         extends AbstractHandlerMethod<EventSubscriber,
                                       EventClass,
-                                      EventContext,
+                                      EventEnvelope,
                                       MethodResult<Empty>> {
 
     /** Creates a new instance. */
-    private EventSubscriberMethod(Method method) {
-        super(method);
+    EventSubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+        super(method, parameterSpec);
+    }
+
+    @CanIgnoreReturnValue // since event subscriber methods do not return values
+    @Override
+    public MethodResult<Empty> invoke(EventSubscriber target,
+                                      EventEnvelope envelope) {
+        ensureExternalMatch(envelope.getEventContext().getExternal());
+        return super.invoke(target, envelope);
     }
 
     @Override
@@ -59,82 +62,8 @@ public final class EventSubscriberMethod
         return EventClass.from(rawMessageClass());
     }
 
-    /**
-     * Returns the factory for filtering and creating event subscriber methods.
-     */
-    public static MethodFactory<EventSubscriberMethod> factory() {
-        return Factory.INSTANCE;
-    }
-
-    @CanIgnoreReturnValue // since event subscriber methods do not return values
-    @Override
-    public MethodResult<Empty> invoke(EventSubscriber target,
-                                      Message message,
-                                      EventContext context) {
-        ensureExternalMatch(context.getExternal());
-        return super.invoke(target, message, context);
-    }
-
     @Override
     protected MethodResult<Empty> toResult(EventSubscriber target, Object rawMethodOutput) {
         return MethodResult.empty();
-    }
-
-    /**
-     * The factory for creating {@linkplain EventSubscriberMethod event subscriber} methods.
-     */
-    private static class Factory extends MethodFactory<EventSubscriberMethod> {
-
-        private static final Factory INSTANCE = new Factory();
-
-        private Factory() {
-            super(EventSubscriberMethod.class, new Filter());
-        }
-
-        @Override
-        public void checkAccessModifier(Method method) {
-            MethodAccessChecker checker = forMethod(method);
-            checker.checkPublic("Event subscriber `{}` must be declared `public`");
-        }
-
-        @Override
-        protected EventSubscriberMethod doCreate(Method method) {
-            return new EventSubscriberMethod(method);
-        }
-    }
-
-    /**
-     * The predicate class allowing to filter event subscriber methods.
-     *
-     * <p>Please see {@link Subscribe} annotation for more information.
-     */
-    private static class Filter extends EventMethodPredicate {
-
-        private Filter() {
-            super(Subscribe.class);
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * <p>Filters out methods that accept rejection messages as the first parameter.
-         */
-        @Override
-        protected boolean verifyParams(Method method) {
-            if (super.verifyParams(method)) {
-                @SuppressWarnings("unchecked") // The case is safe since super returned `true`.
-                Class<? extends Message> firstParameter =
-                        (Class<? extends Message>) method.getParameterTypes()[0];
-                boolean isRejection = isRejection(firstParameter);
-                return !isRejection;
-            }
-            return false;
-        }
-
-        @Override
-        protected boolean verifyReturnType(Method method) {
-            boolean isVoid = Void.TYPE.equals(method.getReturnType());
-            return isVoid;
-        }
     }
 }

@@ -21,7 +21,7 @@
 package io.spine.server.event.model.given.reactor;
 
 import io.spine.core.EventContext;
-import io.spine.core.React;
+import io.spine.server.event.React;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.test.reflect.event.RefProjectStarted;
 

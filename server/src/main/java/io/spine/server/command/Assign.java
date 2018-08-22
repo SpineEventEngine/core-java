@@ -31,10 +31,14 @@ import java.lang.annotation.Target;
  * <p>A command handler method <strong>must</strong>:
  * <ul>
  *     <li>be annotated with {@link Assign @Assign};
+ *
+ *     <li>have package-private visibility;
+ *
  *     <li>return an event message derived from {@link com.google.protobuf.Message Message}
  *     if there is only one event generated;
  *     <strong>or</strong> an {@link java.lang.Iterable Iterable} of event messages for two or
  *     more events;
+ *
  *     <li>accept a command message derived from {@link com.google.protobuf.Message Message}
  *         as the first parameter.
  * </ul>

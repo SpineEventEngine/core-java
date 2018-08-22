@@ -32,7 +32,7 @@ import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
-import io.spine.core.Rejection;
+import io.spine.core.Event;
 import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
@@ -258,8 +258,8 @@ class CommandLifecycleTest {
                                    Class<? extends Message> expectedRejectionClass) {
             CommandRejected rejected = eventAccumulator.nextEvent(CommandRejected.class);
             assertEquals(commandId, rejected.getId());
-            Rejection rejection = rejected.getRejection();
-            TypeUrl rejectionType = TypeUrl.ofEnclosed(rejection.getMessage());
+            Event rejectionEvent = rejected.getRejectionEvent();
+            TypeUrl rejectionType = TypeUrl.ofEnclosed(rejectionEvent.getMessage());
             TypeUrl expectedType = TypeUrl.of(expectedRejectionClass);
             assertEquals(expectedType, rejectionType);
         }

@@ -54,7 +54,7 @@ public class ModelTestEnv {
         }
 
         @Assign
-        private RefProjectCreated on(RefCreateProject cmd) {
+        RefProjectCreated on(RefCreateProject cmd) {
             return RefProjectCreated.getDefaultInstance();
         }
 
@@ -64,7 +64,7 @@ public class ModelTestEnv {
         }
 
         @Assign
-        private RefProjectStarted on(RefStartProject cmd) {
+        RefProjectStarted on(RefStartProject cmd) {
             return RefProjectStarted.getDefaultInstance();
         }
 
@@ -82,7 +82,7 @@ public class ModelTestEnv {
         }
 
         @Assign
-        private RefProjectCreated on(RefCreateProject cmd) {
+        RefProjectCreated on(RefCreateProject cmd) {
             return RefProjectCreated.getDefaultInstance();
         }
     }
@@ -96,12 +96,12 @@ public class ModelTestEnv {
         }
 
         @Assign
-        private RefProjectCreated on(RefCreateProject cmd) {
+        RefProjectCreated on(RefCreateProject cmd) {
             return RefProjectCreated.getDefaultInstance();
         }
 
         @Assign
-        private RefProjectStarted on(RefStartProject cmd) {
+        RefProjectStarted on(RefStartProject cmd) {
             return RefProjectStarted.getDefaultInstance();
         }
     }

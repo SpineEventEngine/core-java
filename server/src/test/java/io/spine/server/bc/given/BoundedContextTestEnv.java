@@ -64,17 +64,17 @@ public class BoundedContextTestEnv {
         }
 
         @Assign
-        public BcProjectCreated handle(BcCreateProject cmd, CommandContext ctx) {
+        BcProjectCreated handle(BcCreateProject cmd, CommandContext ctx) {
             return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
 
         @Assign
-        public BcTaskAdded handle(BcAddTask cmd, CommandContext ctx) {
+        BcTaskAdded handle(BcAddTask cmd, CommandContext ctx) {
             return Given.EventMessage.taskAdded(cmd.getProjectId());
         }
 
         @Assign
-        public List<BcProjectStarted> handle(BcStartProject cmd, CommandContext ctx) {
+        List<BcProjectStarted> handle(BcStartProject cmd, CommandContext ctx) {
             BcProjectStarted message = Given.EventMessage.projectStarted(cmd.getProjectId());
             return Lists.newArrayList(message);
         }
@@ -107,16 +107,16 @@ public class BoundedContextTestEnv {
         private Message handledEvent;
 
         @Subscribe
-        public void on(BcProjectCreated event, EventContext context) {
+        void on(BcProjectCreated event, EventContext context) {
             this.handledEvent = event;
         }
 
         @Subscribe
-        public void on(BcTaskAdded event, EventContext context) {
+        void on(BcTaskAdded event, EventContext context) {
         }
 
         @Subscribe
-        public void on(BcProjectStarted event, EventContext context) {
+        void on(BcProjectStarted event, EventContext context) {
         }
 
         public Message getHandledEvent() {
@@ -131,7 +131,7 @@ public class BoundedContextTestEnv {
         }
 
         @Assign
-        public List<BcProjectStarted> handle(BcStartProject cmd, CommandContext ctx) {
+        List<BcProjectStarted> handle(BcStartProject cmd, CommandContext ctx) {
             return Lists.newArrayList();
         }
     }
@@ -148,7 +148,7 @@ public class BoundedContextTestEnv {
         }
 
         @Assign
-        public CommandTransformed handle(BcCreateProject command, CommandContext ctx) {
+        CommandTransformed handle(BcCreateProject command, CommandContext ctx) {
             return CommandTransformed.getDefaultInstance();
         }
 
@@ -174,7 +174,7 @@ public class BoundedContextTestEnv {
 
         @SuppressWarnings("UnusedParameters") // OK for test method.
         @Subscribe
-        public void on(BcProjectCreated event, EventContext context) {
+        void on(BcProjectCreated event, EventContext context) {
             // Do nothing. We have the method so that there's one event class exposed
             // by the repository.
         }

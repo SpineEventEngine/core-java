@@ -36,7 +36,7 @@ public final class CommandHandlerClass<C extends AbstractCommandHandler>
     private static final long serialVersionUID = 0L;
 
     private CommandHandlerClass(Class<C> cls) {
-        super(cls, CommandHandlerMethod.factory());
+        super(cls, new CommandHandlerSignature());
     }
 
     /**

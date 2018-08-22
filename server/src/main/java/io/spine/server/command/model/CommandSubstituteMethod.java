@@ -20,15 +20,11 @@
 
 package io.spine.server.command.model;
 
-import io.spine.base.CommandMessage;
-import io.spine.base.ThrowableMessage;
 import io.spine.core.CommandClass;
-import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.command.CommandReceiver;
 import io.spine.server.command.model.CommandingMethod.Result;
-import io.spine.server.model.MethodAccessChecker;
-import io.spine.server.model.MethodExceptionChecker;
-import io.spine.server.model.MethodFactory;
+import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
 
@@ -39,65 +35,16 @@ import java.lang.reflect.Method;
  */
 public final class CommandSubstituteMethod
         extends CommandAcceptingMethod<CommandReceiver, Result>
-        implements CommandingMethod<CommandReceiver, CommandClass, CommandContext, Result> {
+        implements CommandingMethod<CommandReceiver, CommandClass, CommandEnvelope, Result> {
 
-    private CommandSubstituteMethod(Method method) {
-        super(method);
+    CommandSubstituteMethod(Method method,
+                            ParameterSpec<CommandEnvelope> paramSpec) {
+        super(method, paramSpec);
     }
 
     @Override
     protected Result toResult(CommandReceiver target, Object rawMethodOutput) {
         Result result = new Result(rawMethodOutput, false);
         return result;
-    }
-
-    static MethodFactory<CommandSubstituteMethod> factory() {
-        return Factory.INSTANCE;
-    }
-
-    private static final class Factory
-            extends MethodFactory<CommandSubstituteMethod> {
-
-        private static final Factory INSTANCE = new Factory();
-
-        private Factory() {
-            super(CommandSubstituteMethod.class, new Filter());
-        }
-
-        @Override
-        public void checkAccessModifier(Method method) {
-            MethodAccessChecker checker = MethodAccessChecker.forMethod(method);
-            checker.checkPackagePrivate(
-                    "Command substitution method {} should be package-private."
-            );
-        }
-
-        @Override
-        protected void checkThrownExceptions(Method method) {
-            MethodExceptionChecker checker = MethodExceptionChecker.forMethod(method);
-            checker.checkThrowsNoExceptionsBut(ThrowableMessage.class);
-        }
-
-        @Override
-        protected CommandSubstituteMethod doCreate(Method method) {
-            return new CommandSubstituteMethod(method);
-        }
-    }
-
-    /**
-     * Filters command substitution methods.
-     */
-    private static final class Filter extends AbstractPredicate<CommandContext> {
-
-        private Filter() {
-            super(CommandContext.class);
-        }
-
-        @Override
-        protected boolean verifyReturnType(Method method) {
-            boolean returnsMessage = returnsMessage(method, CommandMessage.class);
-            boolean returnsIterable = returnsIterable(method);
-            return returnsMessage || returnsIterable;
-        }
     }
 }

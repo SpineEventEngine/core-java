@@ -46,7 +46,7 @@ import java.lang.annotation.Target;
  * {@code true}, the aggregate would be able receive incoming events as if they were produced
  * by the aggregate.
  *
- * @author Alexander Yevsyukov
+ * @author Alexander YevsyukovA
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
