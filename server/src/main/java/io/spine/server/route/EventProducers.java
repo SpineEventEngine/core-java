@@ -73,7 +73,7 @@ public class EventProducers {
         @Override
         public Set<I> apply(Message message, EventContext context) {
             @SuppressWarnings("unchecked") // The route creator is responsible for the type check.
-            I id = (I)Events.getProducer(context);
+            I id = (I) Events.getProducer(context);
             return ImmutableSet.of(id);
         }
 

@@ -40,7 +40,6 @@ import static io.spine.protobuf.AnyPacker.unpack;
  * A {@link EventDispatcher} which delegates the responsibilities to an aggregated {@link
  * EventDispatcherDelegate delegate instance}.
  *
- * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
  * @see EventDispatcherDelegate
  */

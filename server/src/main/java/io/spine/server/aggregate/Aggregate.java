@@ -59,6 +59,7 @@ import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.core.Events.getMessage;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -72,7 +73,7 @@ import static io.spine.validate.Validate.isNotDefault;
  * one or more events. These events are used later to restore the state of the
  * aggregate.
  *
- * <h2>Creating an aggregate class</h2>
+ * <h1>Creating an aggregate class</h1>
  *
  * <p>In order to create a new aggregate class you need to:
  * <ol>
@@ -110,7 +111,7 @@ import static io.spine.validate.Validate.isNotDefault;
  * <p>An {@code Aggregate} class must have applier methods for
  * <em>all</em> types of the events that it produces.
  *
- * <h2>Performance considerations for aggregate state</h2>
+ * <h1>Performance considerations</h1>
  *
  * <p>In order to improve performance of loading aggregates an
  * {@link AggregateRepository} periodically stores aggregate snapshots.
@@ -314,14 +315,25 @@ public abstract class Aggregate<I,
             Message eventMessage = ensureEventMessage(eventOrMessage);
 
             Event event;
+
+            // If we get instances of Event, it means we are dealing with an event import.
             if (eventOrMessage instanceof Event) {
-                /* If we get instances of Event, it means we are dealing with an import command,
-                   which contains these events in the body. So we deal with a command envelope.
-                */
-                CommandEnvelope ce = (CommandEnvelope)origin;
-                event = importEvent((Event) eventOrMessage,
-                                    ce.getCommandContext(),
-                                    projectedEventVersion);
+
+                // If the origin is command, this means the aggregate returned events enclosed
+                // in the command message body.
+                if (origin instanceof CommandEnvelope) {
+                    CommandEnvelope ce = (CommandEnvelope) origin;
+                    event = importEvent((Event) eventOrMessage,
+                                        ce.getCommandContext(),
+                                        projectedEventVersion);
+                } else if (origin instanceof EventEnvelope) {
+                    // This means we got here via EventImportEndpoint.doDispatch().
+                    // Override the version passed in the event, so that we can play the event
+                    // in the applier.
+                    event = setVersion((Event) eventOrMessage, projectedEventVersion);
+                } else {
+                    throw newIllegalStateException("Unsupported event import origin %s", origin);
+                }
             } else {
                 event = eventFactory.createEvent(eventMessage, projectedEventVersion);
             }
@@ -351,6 +363,21 @@ public abstract class Aggregate<I,
                 event.toBuilder()
                      .setContext(eventContext)
                      .build();
+        return result;
+    }
+
+    /**
+     * Creates a copy of the passed event with passed version set.
+     */
+    private static Event setVersion(Event event, Version version) {
+        Event.Builder eventBuilder = event.toBuilder();
+        EventContext updateContext = eventBuilder
+                .getContextBuilder()
+                .setVersion(version)
+                .build();
+        Event result = eventBuilder
+                .setContext(updateContext)
+                .build();
         return result;
     }
 

@@ -20,6 +20,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Message;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.Command;
@@ -29,6 +30,7 @@ import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
+import io.spine.core.EventId;
 import io.spine.core.RejectionClass;
 import io.spine.core.RejectionEnvelope;
 import io.spine.core.TenantId;
@@ -47,6 +49,7 @@ import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.rejection.RejectionDispatcherDelegate;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
+import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 import io.spine.server.route.RejectionProducers;
 import io.spine.server.route.RejectionRouting;
@@ -105,6 +108,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /** The routing schema for events to which aggregates react. */
     private final EventRouting<I> eventRouting =
             EventRouting.withDefault(EventProducers.fromContext());
+
+    /**
+     * The route for event import, which obtains the target aggregate ID as the
+     * {@linkplain io.spine.core.EventContext#getProducerId() producer ID} of the event.
+     */
+    private final EventRoute<I, Message> eventImportRoute = EventProducers.fromContext();
 
     /** The routing schema for rejections to which aggregates react. */
     private final RejectionRouting<I> rejectionRouting =
@@ -237,9 +246,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Set<CommandClass> getMessageClasses() {
         return aggregateClass().getCommands();
@@ -287,6 +293,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<EventClass> getExternalEventClasses() {
         return aggregateClass().getExternalEventClasses();
+    }
+
+    public Set<EventClass> getImportableEventClasses() {
+        return aggregateClass().getImportableEventClasses();
     }
 
     /**
@@ -349,6 +359,15 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     protected final EventRouting<I> getEventRouting() {
         return eventRouting;
+    }
+
+    /**
+     * Obtains the the route for event import, which uses
+     * {@linkplain io.spine.core.EventContext#getProducerId() producer ID} of the event
+     * as the target aggregate ID.
+     */
+    protected final EventRoute<I, Message> getEventImportRoute() {
+        return eventImportRoute;
     }
 
     /**
@@ -584,6 +603,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     void onCommandTargetSet(I id, CommandId commandId) {
         lifecycleOf(id).onTargetAssignedToCommand(commandId);
+    }
+
+    void onImportTargetSet(I id, EventId eventId) {
+        lifecycleOf(id).onImportTargetSet(eventId);
+    }
+
+    void onImportEvent(I id, Event event) {
+        lifecycleOf(id).onImportEvent(event);
     }
 
     private AggregateEventDelivery<I, A> createEventDelivery() {

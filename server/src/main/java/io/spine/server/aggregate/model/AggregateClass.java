@@ -95,7 +95,7 @@ public class AggregateClass<A extends Aggregate>
      * {@linkplain io.spine.server.aggregate.Apply#allowImport() imported}
      * by the aggregates of this class.
      */
-    public Set<EventClass> getImportEvents() {
+    public Set<EventClass> getImportableEventClasses() {
         return importEvents;
     }
 
@@ -109,8 +109,10 @@ public class AggregateClass<A extends Aggregate>
         return delegate.getReactor(rejCls, cmdCls);
     }
 
+    /**
+     * Obtains event applier method for the passed class of events.
+     */
     public EventApplier getApplier(EventClass eventClass) {
         return stateEvents.getMethod(eventClass);
     }
-
 }

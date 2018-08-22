@@ -59,13 +59,11 @@ public class AggregateMessageDispatcher {
      * @return the list of event messages.
      */
     @CanIgnoreReturnValue
-    public static List<? extends Message> dispatchCommand(Aggregate<?, ?, ?> aggregate,
-                                                          CommandEnvelope envelope) {
-        checkNotNull(envelope);
-
-        List<? extends Message> eventMessages =
-                TestAggregateCommandEndpoint.dispatch(aggregate, envelope);
-        return eventMessages;
+    public static List<? extends Message>
+    dispatchCommand(Aggregate<?, ?, ?> aggregate, CommandEnvelope command) {
+        checkNotNull(aggregate);
+        checkNotNull(command);
+        return TestAggregateCommandEndpoint.dispatch(aggregate, command);
     }
 
     /**
@@ -75,13 +73,11 @@ public class AggregateMessageDispatcher {
      * @return the list of event messages.
      */
     @CanIgnoreReturnValue
-    public static List<? extends Message> dispatchEvent(Aggregate<?, ?, ?> aggregate,
-                                                        EventEnvelope envelope) {
-        checkNotNull(envelope);
-
-        List<? extends Message> eventMessages =
-                TestAggregateEventEndpoint.dispatch(aggregate, envelope);
-        return eventMessages;
+    public static List<? extends Message>
+    dispatchEvent(Aggregate<?, ?, ?> aggregate, EventEnvelope event) {
+        checkNotNull(aggregate);
+        checkNotNull(event);
+        return TestAggregateEventEndpoint.dispatch(aggregate, event);
     }
 
     /**
@@ -91,13 +87,11 @@ public class AggregateMessageDispatcher {
      * @return the list of event messages.
      */
     @CanIgnoreReturnValue
-    public static List<? extends Message> dispatchRejection(Aggregate<?, ?, ?> aggregate,
-                                                            RejectionEnvelope envelope) {
-        checkNotNull(envelope);
-
-        List<? extends Message> eventMessages =
-                TestAggregateRejectionEndpoint.dispatch(aggregate, envelope);
-        return eventMessages;
+    public static List<? extends Message>
+    dispatchRejection(Aggregate<?, ?, ?> aggregate, RejectionEnvelope rejection) {
+        checkNotNull(aggregate);
+        checkNotNull(rejection);
+        return TestAggregateRejectionEndpoint.dispatch(aggregate, rejection);
     }
 
     /**
@@ -110,19 +104,14 @@ public class AggregateMessageDispatcher {
     private static class TestAggregateRejectionEndpoint<I, A extends Aggregate<I, ?, ?>>
             extends AggregateRejectionEndpoint<I, A> {
 
-        @SuppressWarnings("ConstantConditions")     /*  {@code null} is supplied to the ctor,
-                                                        since in the workflow of this test endpoint
-                                                        the repository is not used. */
         private TestAggregateRejectionEndpoint(RejectionEnvelope envelope) {
             super(mockRepository(), envelope);
         }
 
         private static <I, A extends Aggregate<I, ?, ?>>
         List<? extends Message> dispatch(A aggregate, RejectionEnvelope envelope) {
-            TestAggregateRejectionEndpoint<I, A> endpoint =
-                    new TestAggregateRejectionEndpoint<>(envelope);
-            List<? extends Message> result = endpoint.dispatchInTx(aggregate);
-            return result;
+            return new TestAggregateRejectionEndpoint<I, A>(envelope)
+                    .dispatchInTx(aggregate);
         }
     }
 
@@ -137,19 +126,14 @@ public class AggregateMessageDispatcher {
     private static class TestAggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
             extends AggregateEventEndpoint<I, A> {
 
-        @SuppressWarnings("ConstantConditions")     /*  {@code null} is supplied to the ctor,
-                                                        since in the workflow of this test endpoint
-                                                        the repository is not used. */
         private TestAggregateEventEndpoint(EventEnvelope envelope) {
             super(mockRepository(), envelope);
         }
 
         private static <I, A extends Aggregate<I, ?, ?>>
         List<? extends Message> dispatch(A aggregate, EventEnvelope envelope) {
-            TestAggregateEventEndpoint<I, A> endpoint =
-                    new TestAggregateEventEndpoint<>(envelope);
-            List<? extends Message> result = endpoint.dispatchInTx(aggregate);
-            return result;
+            return new TestAggregateEventEndpoint<I, A>(envelope)
+                    .dispatchInTx(aggregate);
         }
     }
 
@@ -163,19 +147,14 @@ public class AggregateMessageDispatcher {
     private static class TestAggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
             extends AggregateCommandEndpoint<I, A> {
 
-        @SuppressWarnings("ConstantConditions")     /*  {@code null} is supplied to the ctor,
-                                                        since in the workflow of this test endpoint
-                                                        the repository is not used. */
         private TestAggregateCommandEndpoint(CommandEnvelope envelope) {
             super(mockRepository(), envelope);
         }
 
         private static <I, A extends Aggregate<I, ?, ?>>
         List<? extends Message> dispatch(A aggregate, CommandEnvelope envelope) {
-            TestAggregateCommandEndpoint<I, A> endpoint =
-                    new TestAggregateCommandEndpoint<>(envelope);
-            List<? extends Message> result = endpoint.dispatchInTx(aggregate);
-            return result;
+            return new TestAggregateCommandEndpoint<I, A>(envelope)
+                    .dispatchInTx(aggregate);
         }
     }
 

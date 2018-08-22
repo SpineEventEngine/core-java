@@ -183,6 +183,14 @@ public class EntityLifecycle {
         systemGateway.postCommand(systemCommand);
     }
 
+    public void onImportTargetSet(EventId id) {
+        //TODO:2018-08-22:alexander.yevsyukov: Implement
+    }
+
+    public void onImportEvent(Event event) {
+        //TODO:2018-08-22:alexander.yevsyukov: Implement
+    }
+
     /**
      * Posts the {@link DispatchEventToReactor} system command.
      *

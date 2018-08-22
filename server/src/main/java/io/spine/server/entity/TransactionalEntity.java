@@ -122,6 +122,12 @@ public abstract class TransactionalEntity<I,
         return tx().getBuilder();
     }
 
+    /**
+     * Ensures that the entity has non-null and active transaction.
+     *
+     * @throws IllegalStateException if the transaction is null or not active
+     */
+    @SuppressWarnings("ConstantConditions") // see Javadoc
     private Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> ensureTransaction() {
         if (!isTransactionInProgress()) {
             throw new IllegalStateException(getMissingTxMessage());
