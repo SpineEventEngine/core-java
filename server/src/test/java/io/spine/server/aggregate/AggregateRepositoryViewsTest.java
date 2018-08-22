@@ -24,8 +24,12 @@ import com.google.protobuf.Message;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.server.BoundedContext;
+import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.AggregateWithLifecycle;
 import io.spine.server.aggregate.given.AggregateRepositoryViewTestEnv.RepoOfAggregateWithLifecycle;
+import io.spine.server.delivery.InProcessSharding;
+import io.spine.server.delivery.Sharding;
+import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.test.aggregate.command.AggCancelTask;
 import io.spine.test.aggregate.command.AggCompleteTask;
 import io.spine.test.aggregate.command.AggCreateTask;
@@ -58,6 +62,10 @@ class AggregateRepositoryViewsTest {
 
     @BeforeEach
     void setUp() {
+        ServerEnvironment serverEnvironment = ServerEnvironment.getInstance();
+        Sharding sharding = new InProcessSharding(InMemoryTransportFactory.newInstance());
+        serverEnvironment.replaceSharding(sharding);
+
         id = AggTaskId
                 .newBuilder()
                 .setId(newUuid())
