@@ -25,11 +25,14 @@ import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
+import io.spine.core.TenantId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.event.DuplicateEventException;
+import io.spine.server.tenant.TenantAwareOperation;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * This guard ensures that the message was not yet dispatched to the {@link Aggregate aggregate}.
@@ -53,6 +56,10 @@ public final class IdempotencyGuard {
     }
 
     public void check(CommandEnvelope envelope) {
+        tenantAware(envelope.getTenantId(), () -> checkCommand(envelope));
+    }
+
+    private void checkCommand(CommandEnvelope envelope) {
         Command command = envelope.getCommand();
         boolean duplicate = history.contains(command);
         if (duplicate) {
@@ -61,10 +68,27 @@ public final class IdempotencyGuard {
     }
 
     public void check(EventEnvelope envelope) {
+        tenantAware(envelope.getTenantId(), () -> checkEvent(envelope));
+    }
+
+    private void checkEvent(EventEnvelope envelope) {
         Event event = envelope.getOuterObject();
         boolean duplicate = history.contains(event);
         if (duplicate) {
             throw new DuplicateEventException(history.id(), envelope);
+        }
+    }
+
+    private static void tenantAware(TenantId tenantId, Runnable operation) {
+        if (isNotDefault(tenantId)) {
+            new TenantAwareOperation(tenantId) {
+                @Override
+                public void run() {
+                    operation.run();
+                }
+            }.execute();
+        } else {
+            operation.run();
         }
     }
 }
