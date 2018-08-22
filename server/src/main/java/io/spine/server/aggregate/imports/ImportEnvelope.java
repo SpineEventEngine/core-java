@@ -21,13 +21,13 @@
 package io.spine.server.aggregate.imports;
 
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.spine.core.AbstractMessageEnvelope;
 import io.spine.core.ActorContext;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.aggregate.ImportEvent;
+import io.spine.server.aggregate.ImportId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifier.newUuid;
@@ -38,7 +38,7 @@ import static io.spine.base.Identifier.newUuid;
  *
  * @author Alexander Yevsyukov
  */
-final class ImportEnvelope extends AbstractMessageEnvelope<StringValue, ImportEvent, ActorContext> {
+final class ImportEnvelope extends AbstractMessageEnvelope<ImportId, ImportEvent, ActorContext> {
 
     private final Message eventMessage;
     private final ActorContext actorContext;
@@ -63,8 +63,10 @@ final class ImportEnvelope extends AbstractMessageEnvelope<StringValue, ImportEv
         this.actorContext = context;
     }
 
-    private static StringValue generateId() {
-        return StringValue.of(newUuid());
+    private static ImportId generateId() {
+        return ImportId.newBuilder()
+                       .setValue(newUuid())
+                       .build();
     }
 
     private static ImportEvent wrap(Message eventMessage, ActorContext actorContext) {
@@ -78,7 +80,7 @@ final class ImportEnvelope extends AbstractMessageEnvelope<StringValue, ImportEv
     }
 
     @Override
-    public StringValue getId() {
+    public ImportId getId() {
         return getOuterObject().getId();
     }
 

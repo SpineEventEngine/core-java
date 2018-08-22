@@ -96,6 +96,9 @@ message EventContext {
 
         // The context of a rejection which generated this event.
         RejectionContext rejection_context = 7 [(required) = true];
+
+        // The event was imported into an aggregate.
+        google.protobuf.Any event_import = 11 [(required) = true];
     }
 
     // An ID of the root command, which lead to this event.
@@ -103,7 +106,9 @@ message EventContext {
     // If the event is a reaction to another event, then this attribute holds the identifier 
     // of the very first command in this chain.
     //
-    CommandId root_command_id = 9 [(required) = true];
+    // This field is not populated if the event was imported.
+    //
+    CommandId root_command_id = 9;
 
     // The ID of the entity which generated the event.
     //

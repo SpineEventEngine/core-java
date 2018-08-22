@@ -33,15 +33,16 @@ import "google/protobuf/wrappers.proto";
 
 import "spine/core/actor_context.proto";
 
+// The ID of the event import.
+message ImportId {
+    string value = 1 [(required) = true];
+}
+
 // A wrapping object that holds an event message and `ActorContext` for the import operation.
 message ImportEvent {
 
-    // UUID-based ID of the import.
-    //
-    // We use `StringValue` instead of string to confirm the contract of `MessageEnvelope`
-    // which requires a Message-based identifier.
-    //
-    google.protobuf.StringValue id = 1 [(required) = true];
+    // The ID of the import.
+    ImportId id = 1 [(required) = true];
 
     // The event message.
     google.protobuf.Any message = 2 [(required) = true];
