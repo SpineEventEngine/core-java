@@ -58,13 +58,14 @@ public interface EventPlayer {
     }
 
     /**
-     * Creates a transactional {@code .EventPlayer} for the given
+     * Creates a transactional {@code EventPlayer} for the given
      * {@linkplain TransactionalEntity entity}.
      *
-     * <p>It is expected that the given entity is currently in a transaction. If this condition is
-     * not met, an {@code IllegalStateException} is {@linkplain TransactionalEntity#tx() thrown}.
+     * <p>It is expected that the given entity is currently in a transaction.
+     * If this condition is not met, an {@code IllegalStateException} is
+     * {@linkplain TransactionalEntity#tx() thrown}.
      *
-     * @param entity the entity to create the player for
+     * @param entity the entity for which to create the player
      * @return new instance on {@code EventPlayer}
      */
     static EventPlayer forTransactionOf(TransactionalEntity<?, ?, ?> entity) {
