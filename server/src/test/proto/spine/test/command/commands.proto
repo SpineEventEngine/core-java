@@ -75,19 +75,16 @@ message SecondCmdStartProject {
     ProjectId id = 1;
 }
 
-// The command issued in response `CmdAddTask` in command transformation tests.
 message CmdCreateTask {
     TaskId task_id = 1;
     Task task = 2;
 }
 
-// The command issued in response `CmdAddTask` in command transformation tests.
 message CmdAssignTask {
     TaskId task_id = 1;
     core.UserId assignee = 2;
 }
 
-// The command issued in response `CmdAddTask` in command transformation tests.
 message CmdSetTaskDescription {
     TaskId task_id = 1;
     string description = 3;

@@ -46,10 +46,10 @@ import io.spine.server.aggregate.Apply;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.command.Assign;
 import io.spine.server.event.AbstractEventSubscriber;
+import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventBusTest;
 import io.spine.server.event.EventDispatcher;
-import io.spine.server.event.EventEnricher;
 import io.spine.server.event.EventStreamQuery;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.event.EBProjectArchived;
@@ -178,7 +178,7 @@ public class EventBusTestEnv {
     }
 
     @SuppressWarnings("CheckReturnValue") // Conditionally calling builder.
-    public static EventBus.Builder eventBusBuilder(@Nullable EventEnricher enricher) {
+    public static EventBus.Builder eventBusBuilder(@Nullable Enricher enricher) {
         EventBus.Builder busBuilder = EventBus
                 .newBuilder()
                 .appendFilter(new TaskCreatedFilter());
@@ -217,13 +217,13 @@ public class EventBusTestEnv {
         }
 
         @Apply
-        private void event(EBProjectCreated event) {
+        void event(EBProjectCreated event) {
             getBuilder().setId(event.getProjectId())
                         .setStatus(Project.Status.CREATED);
         }
 
         @Apply
-        private void event(EBTaskAdded event) {
+        void event(EBTaskAdded event) {
             getBuilder().setId(event.getProjectId())
                         .addTask(event.getTask());
         }
@@ -240,7 +240,6 @@ public class EventBusTestEnv {
                               .setTask(task)
                               .build();
         }
-
     }
 
     /**
@@ -257,7 +256,7 @@ public class EventBusTestEnv {
      */
     public static class TaskCreatedFilter implements BusFilter<EventEnvelope> {
 
-        private static final EventClass TASK_ADDED_CLASS = EventClass.of(EBTaskAdded.class);
+        private static final EventClass TASK_ADDED_CLASS = EventClass.from(EBTaskAdded.class);
 
         @Override
         public Optional<Ack> accept(EventEnvelope envelope) {
@@ -290,7 +289,7 @@ public class EventBusTestEnv {
     public static class EBProjectCreatedNoOpSubscriber extends AbstractEventSubscriber {
 
         @Subscribe
-        public void on(EBProjectCreated message, EventContext context) {
+        void on(EBProjectCreated message, EventContext context) {
             // Do nothing.
         }
     }
@@ -300,7 +299,7 @@ public class EventBusTestEnv {
         private Message eventMessage;
 
         @Subscribe
-        public void on(EBProjectArchived message, EventContext ignored) {
+        void on(EBProjectArchived message, EventContext ignored) {
             this.eventMessage = message;
         }
 
@@ -315,7 +314,7 @@ public class EventBusTestEnv {
         private EventContext eventContext;
 
         @Subscribe
-        public void on(ProjectCreated eventMsg, EventContext context) {
+        void on(ProjectCreated eventMsg, EventContext context) {
             this.eventMessage = eventMsg;
             this.eventContext = context;
         }
@@ -336,7 +335,7 @@ public class EventBusTestEnv {
     public static class EBTaskAddedNoOpSubscriber extends AbstractEventSubscriber {
 
         @Subscribe
-        public void on(EBTaskAdded message, EventContext context) {
+        void on(EBTaskAdded message, EventContext context) {
             // Do nothing.
         }
     }
@@ -344,7 +343,7 @@ public class EventBusTestEnv {
     public static class EBExternalTaskAddedSubscriber extends AbstractEventSubscriber {
 
         @Subscribe(external = true)
-        public void on(EBTaskAdded message, EventContext context) {
+        void on(EBTaskAdded message, EventContext context) {
             if (!context.getExternal()) {
                 fail(format(
                         "Domestic event %s was delivered to an external subscriber.",
@@ -361,7 +360,7 @@ public class EventBusTestEnv {
          * @param event ignored
          */
         @Subscribe
-        public void on(ProjectCreated event) {
+        void on(ProjectCreated event) {
             fail("Unexpected event " + Json.toJson(event));
         }
     }
@@ -376,13 +375,13 @@ public class EventBusTestEnv {
 
         @Override
         public Set<EventClass> getMessageClasses() {
-            return ImmutableSet.of(EventClass.of(ProjectCreated.class));
+            return ImmutableSet.of(EventClass.from(ProjectCreated.class));
         }
 
         @Override
         public Set<String> dispatch(EventEnvelope event) {
             dispatchCalled = true;
-            return Identity.of(this);
+            return identity();
         }
 
         @Override

@@ -26,6 +26,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
+import io.spine.base.ThrowableMessage;
 import io.spine.protobuf.Messages;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
@@ -37,10 +38,13 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Throwables.getStackTraceAsString;
 import static io.spine.core.EventContext.OriginCase.EVENT_CONTEXT;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static io.spine.validate.Validate.isDefault;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Utility class for working with {@link Event} objects.
@@ -48,9 +52,8 @@ import static io.spine.validate.Validate.isDefault;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("ClassWithTooManyMethods") // OK for this utility class.
 public final class Events {
-
-    private static final String REJECTION_CLASS_SUFFIX = "Rejections";
 
     /** Compares two events by their timestamps. */
     private static final Comparator<Event> eventComparator = (o1, o2) -> {
@@ -120,6 +123,18 @@ public final class Events {
         checkNotNull(event);
         Any any = event.getMessage();
         Message result = unpack(any);
+        return result;
+    }
+
+    /**
+     * Extract event messages from the passed events.
+     */
+    public static List<? extends Message> toMessages(List<Event> events) {
+       checkNotNull(events);
+        List<Message> result =
+                events.stream()
+                      .map(Events::getMessage)
+                      .collect(toList());
         return result;
     }
 
@@ -212,17 +227,23 @@ public final class Events {
     }
 
     /**
-     * Tells whether the passed message class represents a rejection message.
+     * Constructs a new {@link RejectionEventContext} from the given command message and
+     * {@link ThrowableMessage}.
+     *
+     * @param commandMessage   rejected command
+     * @param throwableMessage thrown rejection
+     * @return new instance of {@code RejectionEventContext}
      */
-    public static boolean isRejection(Class<? extends Message> messageClass) {
-        checkNotNull(messageClass);
-        Class<?> enclosingClass = messageClass.getEnclosingClass();
-        if (enclosingClass == null) {
-            return false; // Rejection messages are generated as inner static classes.
-        }
-        boolean hasCorrectSuffix = enclosingClass.getName()
-                                                 .endsWith(REJECTION_CLASS_SUFFIX);
-        return hasCorrectSuffix;
+    public static RejectionEventContext rejectionContext(Message commandMessage,
+                                                         ThrowableMessage throwableMessage) {
+        checkNotNull(commandMessage);
+        checkNotNull(throwableMessage);
+
+        String stacktrace = getStackTraceAsString(throwableMessage);
+        return RejectionEventContext.newBuilder()
+                                    .setCommandMessage(pack(commandMessage))
+                                    .setStacktrace(stacktrace)
+                                    .build();
     }
 
     /**
@@ -356,6 +377,25 @@ public final class Events {
         }
         Event result = event.toBuilder()
                             .setContext(resultContext)
+                            .build();
+        return result;
+    }
+
+    /**
+     * Replaces the event version with the given {@code newVersion}.
+     *
+     * @param event      original event
+     * @param newVersion the version to set
+     * @return the copy of the original event but with the new version
+     */
+    @Internal
+    public static Event substituteVersion(Event event, Version newVersion) {
+        EventContext newContext = event.getContext()
+                                          .toBuilder()
+                                          .setVersion(newVersion)
+                                          .build();
+        Event result = event.toBuilder()
+                            .setContext(newContext)
                             .build();
         return result;
     }

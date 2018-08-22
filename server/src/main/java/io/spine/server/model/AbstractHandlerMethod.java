@@ -24,6 +24,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.Immutable;
 import com.google.protobuf.Message;
 import io.spine.core.MessageEnvelope;
+import io.spine.server.model.declare.ParameterSpec;
 import io.spine.type.MessageClass;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -32,10 +33,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.model.MethodExceptionChecker.forMethod;
 import static java.lang.String.format;
 
 /**
@@ -45,9 +44,8 @@ import static java.lang.String.format;
  * same object (not class).
  *
  * @param <T> the type of the target object
- * @param <M> the type of the incoming message class
- * @param <E> the type of the {@link MessageEnvelope} wrapping the method arguments
- * @param <R> the type of the method result object
+ * @param <M> the type of the message class
+ * @param <E> the type of message envelopes, in which the messages to handle are wrapped
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
@@ -65,9 +63,6 @@ public abstract class AbstractHandlerMethod<T,
     /** The class of the first parameter. */
     private final Class<? extends Message> messageClass;
 
-    /** The number of parameters the method has. */
-    private final int paramCount;
-
     /**
      * The set of the metadata attributes set via method annotations.
      *
@@ -79,15 +74,28 @@ public abstract class AbstractHandlerMethod<T,
     private final ImmutableSet<MethodAttribute<?>> attributes;
 
     /**
+     * The specification of parameters for this method.
+     *
+     * @implNote It serves to extract the argument values from the {@linkplain E envelope} used
+     * as a source for the method call.
+     */
+    private final ParameterSpec<E> parameterSpec;
+
+    /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param method subscriber method
+     * @param method
+     *         subscriber method
+     * @param parameterSpec
+     *         the specification of method parameters
      */
-    protected AbstractHandlerMethod(Method method) {
+    protected AbstractHandlerMethod(Method method,
+                                    ParameterSpec<E> parameterSpec) {
         this.method = checkNotNull(method);
         this.messageClass = getFirstParamType(method);
-        this.paramCount = method.getParameterTypes().length;
         this.attributes = discoverAttributes(method);
+        this.parameterSpec = parameterSpec;
+
         method.setAccessible(true);
     }
 
@@ -113,20 +121,19 @@ public abstract class AbstractHandlerMethod<T,
     }
 
     /**
-     * Returns the handling method.
+     * {@inheritDoc}
      */
     @Override
     public Method getRawMethod() {
         return method;
     }
 
-    @Override
-    public HandlerKey key() {
-        return HandlerKey.of(getMessageClass());
-    }
-
     private int getModifiers() {
         return method.getModifiers();
+    }
+
+    protected ParameterSpec<E> getParameterSpec() {
+        return parameterSpec;
     }
 
     /** Returns {@code true} if the method is declared {@code public}, {@code false} otherwise. */
@@ -141,12 +148,10 @@ public abstract class AbstractHandlerMethod<T,
         return result;
     }
 
-    /** Returns the count of the method parameters. */
-    protected int getParamCount() {
-        return paramCount;
-    }
-
-    /** Returns the set of method attributes configured for this method. */
+    /**
+     * {@inheritDoc}
+     */
+    @SuppressWarnings("AssignmentOrReturnOfFieldWithMutableType")   // Returning immutable impl.
     @Override
     public Set<MethodAttribute<?>> getAttributes() {
         return attributes;
@@ -160,41 +165,30 @@ public abstract class AbstractHandlerMethod<T,
 
     @CanIgnoreReturnValue
     @Override
-    public R invoke(T target, E envelope) {
+    public final R invoke(T target, E envelope) {
         checkNotNull(target);
         checkNotNull(envelope);
+        checkAttributesMatch(envelope);
         Message message = envelope.getMessage();
         Message context = envelope.getMessageContext();
         try {
-            int paramCount = getParamCount();
-            Object rawOutput = (paramCount == 1)
-                            ? method.invoke(target, message)
-                            : method.invoke(target, message, context);
+            Object[] arguments = parameterSpec.extractArguments(envelope);
+            Object rawOutput = method.invoke(target, arguments);
             R result = toResult(target, rawOutput);
             return result;
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
-            throw whyFailed(target, message, context, e);
+            throw new HandlerMethodFailedException(target, message, context, e);
         }
+    }
+
+    protected void checkAttributesMatch(E envelope) {
+        // Do nothing by default.
     }
 
     /**
      * Converts the output of the raw method call to the result object.
      */
     protected abstract R toResult(T target, Object rawMethodOutput);
-
-    /**
-     * Creates an exception containing information on the failure of the handler method invocation.
-     *
-     * @param target  the object which method was invoked
-     * @param message the message dispatched to the object
-     * @param context the context of the message
-     * @param cause   exception instance thrown by the invoked method
-     * @return the exception thrown during the invocation
-     */
-    protected HandlerMethodFailedException
-    whyFailed(Object target, Message message, Message context, Exception cause) {
-        return new HandlerMethodFailedException(target, message, context, cause);
-    }
 
     /**
      * Returns a full name of the handler method.
@@ -210,6 +204,12 @@ public abstract class AbstractHandlerMethod<T,
                                  .getName();
         String methodName = method.getName();
         String result = format(template, className, methodName);
+        return result;
+    }
+
+    @Override
+    public HandlerKey key() {
+        HandlerKey result = HandlerKey.of(getMessageClass());
         return result;
     }
 
@@ -239,63 +239,5 @@ public abstract class AbstractHandlerMethod<T,
     @Override
     public String toString() {
         return getFullName();
-    }
-
-    /**
-     * The base class for factory objects that can filter {@link Method} objects
-     * that represent handler methods and create corresponding {@code HandlerMethod} instances
-     * that wrap those methods.
-     *
-     * @param <H> the type of the handler method objects to create
-     */
-    public abstract static class Factory<H extends HandlerMethod> {
-
-        /** Returns the class of the method wrapper. */
-        public abstract Class<H> getMethodClass();
-
-        /** Returns a predicate for filtering methods. */
-        public abstract Predicate<Method> getPredicate();
-
-        /**
-         * Checks an access modifier of the method and logs a warning if it is invalid.
-         *
-         * @param method the method to check
-         * @see MethodAccessChecker
-         */
-        public abstract void checkAccessModifier(Method method);
-
-        /**
-         * Creates a {@linkplain HandlerMethod handler method} from a raw method.
-         *
-         * <p>Performs various checks before wrapper creation, e.g. method access modifier or
-         * whether method throws any prohibited exceptions.
-         *
-         * @param method the method to create wrapper from
-         * @return a wrapper object created from the method
-         * @throws IllegalStateException in case some of the method checks fail
-         */
-        public H create(Method method) {
-            checkAccessModifier(method);
-            checkThrownExceptions(method);
-            return doCreate(method);
-        }
-
-        /** Creates a wrapper object from a method. */
-        protected abstract H doCreate(Method method);
-
-        /**
-         * Ensures method does not throw any prohibited exception types.
-         *
-         * <p>In case it does, the {@link IllegalStateException} containing diagnostics info is
-         * thrown.
-         *
-         * @param method the method to check
-         * @throws IllegalStateException if the method throws any prohibited exception types
-         * @see MethodExceptionChecker
-         */
-        protected void checkThrownExceptions(Method method) {
-            MethodExceptionChecker checker = forMethod(method);
-            checker.checkDeclaresNoExceptionsThrown();
-        }
     }
 }

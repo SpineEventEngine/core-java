@@ -23,29 +23,29 @@ package io.spine.testing.server.blackbox.given;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.testing.server.blackbox.BbAddTask;
-import io.spine.testing.server.blackbox.BbCreateProject;
-import io.spine.testing.server.blackbox.BbProjectAlreadyStarted;
-import io.spine.testing.server.blackbox.BbProjectCreated;
-import io.spine.testing.server.blackbox.BbProjectStarted;
-import io.spine.testing.server.blackbox.BbStartProject;
-import io.spine.testing.server.blackbox.BbTaskAdded;
-import io.spine.testing.server.blackbox.BbTaskCreatedInCompletedProject;
-import io.spine.testing.server.blackbox.Project;
-import io.spine.testing.server.blackbox.ProjectId;
-import io.spine.testing.server.blackbox.ProjectVBuilder;
-import io.spine.testing.server.blackbox.Task;
+import io.spine.testing.server.blackbox.BbProject;
+import io.spine.testing.server.blackbox.BbProjectId;
+import io.spine.testing.server.blackbox.BbProjectVBuilder;
+import io.spine.testing.server.blackbox.BbTask;
+import io.spine.testing.server.blackbox.command.BbAddTask;
+import io.spine.testing.server.blackbox.command.BbCreateProject;
+import io.spine.testing.server.blackbox.command.BbStartProject;
+import io.spine.testing.server.blackbox.event.BbProjectCreated;
+import io.spine.testing.server.blackbox.event.BbProjectStarted;
+import io.spine.testing.server.blackbox.event.BbTaskAdded;
+import io.spine.testing.server.blackbox.rejection.BbProjectAlreadyStarted;
+import io.spine.testing.server.blackbox.rejection.BbTaskCreatedInCompletedProject;
 
-import static io.spine.testing.server.blackbox.Project.Status.COMPLETED;
-import static io.spine.testing.server.blackbox.Project.Status.CREATED;
-import static io.spine.testing.server.blackbox.Project.Status.STARTED;
+import static io.spine.testing.server.blackbox.BbProject.Status.COMPLETED;
+import static io.spine.testing.server.blackbox.BbProject.Status.CREATED;
+import static io.spine.testing.server.blackbox.BbProject.Status.STARTED;
 
 /**
  * @author Mykhailo Drachuk
  */
-public class BbProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBuilder> {
+public class BbProjectAggregate extends Aggregate<BbProjectId, BbProject, BbProjectVBuilder> {
 
-    protected BbProjectAggregate(ProjectId id) {
+    protected BbProjectAggregate(BbProjectId id) {
         super(id);
     }
 
@@ -71,8 +71,8 @@ public class BbProjectAggregate extends Aggregate<ProjectId, Project, ProjectVBu
 
     @Assign
     BbTaskAdded handle(BbAddTask command) throws BbTaskCreatedInCompletedProject {
-        ProjectId projectId = command.getProjectId();
-        Task task = command.getTask();
+        BbProjectId projectId = command.getProjectId();
+        BbTask task = command.getTask();
         if (getState().getStatus() == COMPLETED) {
             throw new BbTaskCreatedInCompletedProject(projectId, task);
         }

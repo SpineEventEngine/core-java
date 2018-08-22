@@ -28,8 +28,6 @@ option java_package = "io.spine.server.tenant";
 option java_multiple_files = true;
 option java_outer_classname = "TenantEventsProto";
 
-import "google/protobuf/any.proto";
-
 import "spine/core/tenant_id.proto";
 
 // An event telling that a new tenant has been added to a multi-tenant application.

@@ -42,6 +42,7 @@ import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -147,7 +148,7 @@ public class CommandBus extends Bus<Command,
 
     @Override
     protected Collection<BusFilter<CommandEnvelope>> filterChainHead() {
-        BusFilter<CommandEnvelope> tap = new CommandReceivedTap(systemGateway);
+        BusFilter<CommandEnvelope> tap = new CommandReceivedTap(this::gatewayFor);
         Deque<BusFilter<CommandEnvelope>> result = newLinkedList();
         result.push(tap);
         return result;
@@ -186,6 +187,17 @@ public class CommandBus extends Bus<Command,
                       .orElse(TenantId.getDefaultInstance());
     }
 
+    SystemGateway gatewayFor(TenantId tenantId) {
+        checkNotNull(tenantId);
+        return gatewayFor(tenantId, systemGateway);
+    }
+
+    @VisibleForTesting
+    static SystemGateway gatewayFor(TenantId tenantId, SystemGateway systemGateway) {
+        SystemGateway result = TenantAwareSystemGateway.forTenant(tenantId, systemGateway);
+        return result;
+    }
+
     @Override
     protected void dispatch(CommandEnvelope envelope) {
         CommandDispatcher<?> dispatcher = getDispatcher(envelope);
@@ -199,7 +211,8 @@ public class CommandBus extends Bus<Command,
 
     private void onError(CommandEnvelope envelope, RuntimeException exception) {
         Optional<Event> rejection = errorHandler.handleError(envelope, exception)
-                                                .asRejection();
+                                                .asRejection()
+                                                .map(RejectionEnvelope::getOuterObject);
         rejection.ifPresent(eventBus::post);
     }
 
@@ -399,7 +412,7 @@ public class CommandBus extends Bus<Command,
             if (commandScheduler == null) {
                 commandScheduler = new ExecutorCommandScheduler();
             }
-            flowWatcher = new CommandFlowWatcher(systemGateway);
+            flowWatcher = new CommandFlowWatcher((tenantId) -> gatewayFor(tenantId, systemGateway));
             commandScheduler.setFlowWatcher(flowWatcher);
 
             CommandBus commandBus = createCommandBus();

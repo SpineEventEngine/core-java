@@ -26,8 +26,6 @@ import io.spine.type.MessageClass;
 
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * Dispatches a message to several entities of the same type.
  *
@@ -39,24 +37,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public interface MulticastDispatcher <C extends MessageClass, E extends MessageEnvelope, I>
         extends MessageDispatcher<C, E, Set<I>> {
 
-    class Identity {
-
-        /** Prevent instantiation of this utility class. */
-        private Identity() {}
-
-        /**
-         * Returns immutable set with one element with the identity of the multicast dispatcher
-         * that dispatches messages to itself.
-         *
-         * <p>The identity obtained as the result of {@link Object#toString()
-         * MulticastDispatcher#toString()}.
-         *
-         * @param self the instance of the dispatcher
-         * @return immutable set with the dispatcher identity
-         */
-        public static Set<String> of(MulticastDispatcher self) {
-            checkNotNull(self);
-            return ImmutableSet.of(self.toString());
-        }
+    /**
+     * Returns immutable set with one element with the identity of the multicast dispatcher
+     * that dispatches messages to itself.
+     *
+     * @implNote The identity obtained as the result of {@link Object#toString()
+     * MulticastDispatcher.toString()}.
+     *
+     * @return immutable set with the dispatcher identity
+     */
+    default Set<String> identity() {
+        return ImmutableSet.of(this.toString());
     }
 }

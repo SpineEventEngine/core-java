@@ -42,7 +42,7 @@ import io.spine.test.aggregate.command.AggStartProject;
 import io.spine.test.aggregate.event.AggProjectCancelled;
 import io.spine.test.aggregate.event.AggProjectPaused;
 import io.spine.test.aggregate.event.AggProjectStarted;
-import io.spine.test.aggregate.rejection.AggCannotReassignUnassignedTask;
+import io.spine.test.aggregate.rejection.Rejections.AggCannotReassignUnassignedTask;
 import io.spine.validate.StringValueVBuilder;
 
 import java.util.Optional;
@@ -103,17 +103,17 @@ public class MessageDeliveryTestEnv {
         }
 
         @Apply
-        private void on(AggProjectStarted event) {
+        void on(AggProjectStarted event) {
             //Do nothing for this test.
         }
 
         @React
-        public Optional<AggProjectCancelled> on(AggProjectCancelled event) {
+        Optional<AggProjectCancelled> on(AggProjectCancelled event) {
             return Optional.empty();
         }
 
         @React
-        public Optional<AggProjectPaused> on(AggCannotReassignUnassignedTask rejection) {
+        Optional<AggProjectPaused> on(AggCannotReassignUnassignedTask rejection) {
             return Optional.empty();
         }
     }

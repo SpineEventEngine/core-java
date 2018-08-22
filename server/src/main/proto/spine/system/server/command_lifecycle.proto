@@ -28,7 +28,7 @@ option (type_url_prefix) = "type.spine.io";
 option (internal_all) = true;
 
 option java_package = "io.spine.system.server";
-option java_outer_classname = "CommandLicecycleProto";
+option java_outer_classname = "CommandLifecycleProto";
 option java_multiple_files = true;
 
 import "google/protobuf/timestamp.proto";
@@ -89,14 +89,40 @@ message CommandTimeline {
     google.protobuf.Timestamp when_dispatched = 4;
 
     // The instant when the command target is assigned to the command.
-    google.protobuf.Timestamp when_target_assgined = 7;
+    google.protobuf.Timestamp when_target_assgined = 5;
 
     // The instant when the command processing is completed, successfully or otherwise.
-    google.protobuf.Timestamp when_handled = 5 [(goes).with = "how_handled"];
+    google.protobuf.Timestamp when_handled = 6 [(goes).with = "how_handled"];
+
+    // The instance when the command was substituted with one or more commands to be
+    // handled instead of this one.
+    //
+    google.protobuf.Timestamp when_substituted = 7 [(goes).with = "substituted"];
 
     // The status of the command after processing.
-    //
-    // An empty field notifies a non-handled command.
-    //
-    spine.core.Status how_handled = 6 [(goes).with = "when_handled"];
+    oneof outcome {
+
+        // The command was handled, rejected, or errored.
+        spine.core.Status how_handled = 8 [(goes).with = "when_handled"];
+
+        // Other commands were generated instead.
+        Substituted substitued = 9 [(goes).with = "when_substituted"];
+    }
+}
+
+// Describes which command(s) were generated instead of incoming one.
+message Substituted {
+
+    oneof kind {
+        // One command was generated.
+        spine.core.CommandId command = 1;
+
+        // Two or more commands were generated.
+        Sequence sequence = 2;
+    }
+
+    // A sequence with two or more command IDs of generated commands.
+    message Sequence {
+        repeated spine.core.CommandId item = 2;
+    }
 }

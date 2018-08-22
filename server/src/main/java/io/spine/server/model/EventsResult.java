@@ -71,10 +71,6 @@ public abstract class EventsResult extends MethodResult<Message> {
         return new ToEvent(producer, origin);
     }
 
-    protected final EventProducer producer() {
-        return producer;
-    }
-
     /**
      * Converts an event message into an {@link Event}.
      */

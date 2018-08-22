@@ -29,6 +29,7 @@ import io.spine.server.entity.EntityLifecycle;
 import java.util.List;
 import java.util.Optional;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.core.Events.isRejection;
 
 /**
@@ -46,22 +47,38 @@ public final class DispatchCommand {
     private final CommandHandlingEntity<?, ?, ?> entity;
     private final CommandEnvelope command;
 
-    private DispatchCommand(Builder builder) {
-        this.lifecycle = builder.lifecycle;
-        this.entity = builder.entity;
-        this.command = builder.command;
+    private DispatchCommand(EntityLifecycle lifecycle,
+                            CommandHandlingEntity<?, ?, ?> entity,
+                            CommandEnvelope command) {
+        this.lifecycle = lifecycle;
+        this.entity = entity;
+        this.command = command;
+    }
+
+    public static DispatchCommand operationFor(EntityLifecycle lifecycle,
+                                                 CommandHandlingEntity<?, ?, ?> entity,
+                                                 CommandEnvelope command) {
+        checkNotNull(lifecycle);
+        checkNotNull(entity);
+        checkNotNull(command);
+
+        return new DispatchCommand(lifecycle, entity, command);
     }
 
     /**
      * Performs the operation.
      *
      * <p>First, the {@link EntityLifecycle#onDispatchCommand(Command)} callback is triggered.
-     * Then, the command is {@linkplain CommandHandlingEntity#dispatchCommand(CommandEnvelope)
-     * passed} to the entity. Lastly, depending on the command handling result, either
-     * {@link EntityLifecycle#onCommandHandled} or {@link EntityLifecycle#onCommandRejected}
-     * callback is triggered.
      *
-     * @return the produced events, may be a single rejection event
+     * <p>Then, the command is {@linkplain CommandHandlingEntity#dispatchCommand(CommandEnvelope)
+     * passed} to the entity.
+     *
+     * <p>Lastly, depending on the command handling result, either
+     * {@link EntityLifecycle#onCommandHandled EntityLifecycle.onCommandHandled(...)} or
+     * {@link EntityLifecycle#onCommandRejected EntityLifecycle.onCommandRejected(...)} callback
+     * is triggered.
+     *
+     * @return the produced events including the rejections thrown by the command handler
      */
     public List<Event> perform() {
         Command cmd = command.getCommand();
@@ -89,54 +106,5 @@ public final class DispatchCommand {
                                  ? Optional.of(singleEvent)
                                  : Optional.empty();
         return result;
-    }
-
-    /**
-     * Creates a new instance of {@code Builder} for {@code DispatchCommand} instances.
-     *
-     * @return new instance of {@code Builder}
-     */
-    public static Builder newBuilder() {
-        return new Builder();
-    }
-
-    /**
-     * A builder for the {@code DispatchCommand} instances.
-     */
-    public static final class Builder {
-
-        private EntityLifecycle lifecycle;
-        private CommandHandlingEntity entity;
-        private CommandEnvelope command;
-
-        /**
-         * Prevents direct instantiation.
-         */
-        private Builder() {
-        }
-
-        public Builder setLifecycle(EntityLifecycle lifecycle) {
-            this.lifecycle = lifecycle;
-            return this;
-        }
-
-        public Builder setEntity(CommandHandlingEntity entity) {
-            this.entity = entity;
-            return this;
-        }
-
-        public Builder setCommand(CommandEnvelope command) {
-            this.command = command;
-            return this;
-        }
-
-        /**
-         * Creates a new instance of {@code DispatchCommand}.
-         *
-         * @return new instance of {@code DispatchCommand}
-         */
-        public DispatchCommand build() {
-            return new DispatchCommand(this);
-        }
     }
 }

@@ -65,7 +65,7 @@ final class ExternalEventSubscriber implements ExternalMessageDispatcher<String>
     @Override
     public Set<ExternalMessageClass> getMessageClasses() {
         EventSubscriberClass<?> subscriberClass = asEventSubscriberClass(delegate.getClass());
-        Set<EventClass> extSubscriptions = subscriberClass.getExternalEventSubscriptions();
+        Set<EventClass> extSubscriptions = subscriberClass.getExternalEventClasses();
         return ExternalMessageClass.fromEventClasses(extSubscriptions);
     }
 

@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import com.google.common.collect.ImmutableList;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.CommandClass;
@@ -33,6 +32,7 @@ import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.model.AggregateClass;
+import io.spine.server.command.CaughtError;
 import io.spine.server.command.CommandErrorHandler;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.delivery.Shardable;
@@ -45,6 +45,7 @@ import io.spine.server.entity.Repository;
 import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.route.CommandRouting;
@@ -62,6 +63,7 @@ import java.util.function.Supplier;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
+import static com.google.common.collect.ImmutableList.of;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.server.entity.EntityKind.AGGREGATE;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -221,10 +223,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         // ignore result of `commitEvents()` because we obtain them in the block before the call. 
     @Override
     protected void store(A aggregate) {
-        Write<I> operation = Write.<I>operation()
-                                  .into(this)
-                                  .write(aggregate)
-                                  .prepare();
+        Write<I> operation = Write.operationFor(this, aggregate);
         operation.perform();
     }
 
@@ -275,19 +274,22 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     @Override
     public void onError(CommandEnvelope envelope, RuntimeException exception) {
-        commandErrorHandler.handleError(envelope, exception)
-                           .rethrowOnce();
+        CaughtError error = commandErrorHandler.handleError(envelope, exception);
+        error.asRejection()
+             .map(RejectionEnvelope::getOuterObject)
+             .ifPresent(event -> postEvents(of(event)));
+        error.rethrowOnce();
     }
 
     @Override
     public Set<EventClass> getEventClasses() {
-        return aggregateClass().getEventReactions();
+        return aggregateClass().getEventClasses();
     }
 
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // We return immutable impl.
     public Set<EventClass> getExternalEventClasses() {
-        return aggregateClass().getExternalEventReactions();
+        return aggregateClass().getExternalEventClasses();
     }
 
     /**
@@ -536,7 +538,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Iterable<ShardedStreamConsumer<?, ?>> getMessageConsumers() {
         Iterable<ShardedStreamConsumer<?, ?>> result =
-                ImmutableList.of(
+                of(
                         getCommandEndpointDelivery().getConsumer(),
                         getEventEndpointDelivery().getConsumer()
                 );

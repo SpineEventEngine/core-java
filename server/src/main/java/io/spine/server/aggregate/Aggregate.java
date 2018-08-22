@@ -26,10 +26,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.MessageEnvelope;
 import io.spine.core.Version;
@@ -50,17 +48,13 @@ import io.spine.validate.ValidatingBuilder;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.base.Time.getCurrentTime;
-import static io.spine.core.Events.getMessage;
-import static io.spine.core.Events.isRejection;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.validate.Validate.isNotDefault;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Abstract base for aggregates.
@@ -264,25 +258,37 @@ public abstract class Aggregate<I,
     /**
      * Applies events to this {@code Aggregate}.
      *
+     * <p>Before applying the events, changes their versions as follows:
+     * <ol>
+     *     <li>The first event in the list gets the current version of the aggregate incremented
+     *         by one.
+     *     <li>All the next events get the following versions.
+     * </ol>
+     *
+     * <p>For example, if the current version number of the aggregate is {@code 42}, and
+     * the {@code events} list is of size 3, the applied events will have versions {@code 43},
+     * {@code 44}, and {@code 45}.
+     *
      * @param events the events to apply
      * @param origin the envelope of a message which caused the events
-     * @return the exact list of {@code events} but with adjusted version
+     * @return the exact list of {@code events} but with adjusted versions
      */
     List<Event> apply(List<Event> events, MessageEnvelope origin) {
         ImmutableList<Event> versionedEvents = prepareEvents(events, origin);
-        List<Event> eventsToApply = notRejections(versionedEvents);
-        play(eventsToApply);
+        play(versionedEvents);
         uncommittedEvents = uncommittedEvents.append(versionedEvents);
         return versionedEvents;
     }
 
-    private static List<Event> notRejections(Collection<Event> events) {
-        List<Event> result = events.stream()
-                                   .filter(event -> !isRejection(event))
-                                   .collect(toList());
-        return result;
-    }
-
+    /**
+     * Prepares the given events to be applied to this aggregate.
+     *
+     * @param originalEvents the events to be applied
+     * @param origin         the origin of those events
+     * @return events ready to be applied to this aggregate
+     * @see #apply(List, MessageEnvelope)
+     * @see AggregateEvents#prepareEvent(Event, MessageEnvelope, Version)
+     */
     private ImmutableList<Event> prepareEvents(Collection<Event> originalEvents,
                                                MessageEnvelope origin) {
         Version currentVersion = getVersion();
@@ -292,68 +298,9 @@ public abstract class Aggregate<I,
                                          .limit(originalEvents.size());
         Stream<Event> events = originalEvents.stream();
         ImmutableList<Event> eventsToApply = Streams.zip(events, versions,
-                                                         prepareEventFunction(origin))
+                                                         AggregateEvents.prepareEventForApplyFn(origin))
                                                     .collect(toImmutableList());
         return eventsToApply;
-    }
-
-    private static BiFunction<Event, Version, Event> prepareEventFunction(MessageEnvelope origin) {
-        return (event, version) -> prepareEvent(event, origin, version);
-    }
-
-    private static Event prepareEvent(Event event,
-                                      MessageEnvelope origin,
-                                      Version projectedVersion) {
-        Message eventMessage = getMessage(event);
-
-        Event eventToApply = eventMessage instanceof Event
-                             ? importEvent(eventMessage, origin, projectedVersion)
-                             : substituteVersion(event, projectedVersion);
-        return eventToApply;
-    }
-
-    private static Event substituteVersion(Event original, Version newVersion) {
-        EventContext newContext = original.getContext()
-                                          .toBuilder()
-                                          .setVersion(newVersion)
-                                          .build();
-        Event result = original.toBuilder()
-                               .setContext(newContext)
-                               .build();
-        return result;
-    }
-
-    private static Event importEvent(Message eventMessage,
-                                     MessageEnvelope origin,
-                                     Version projectedVersion) {
-        CommandEnvelope commandEnvelope = (CommandEnvelope) origin;
-        Event messageAsEvent = (Event) eventMessage;
-        return importEvent(messageAsEvent,
-                           commandEnvelope.getCommandContext(),
-                           projectedVersion);
-    }
-
-    /**
-     * Creates an event based on the event received in an import command.
-     *
-     * @param  event          the event to import
-     * @param  commandContext the context of the import command
-     * @param  version        the version of the aggregate to use for the event
-     * @return an event with updated command context and entity version
-     */
-    private static Event importEvent(Event event, CommandContext commandContext, Version version) {
-        EventContext eventContext =
-                event.getContext()
-                     .toBuilder()
-                     .setCommandContext(commandContext)
-                     .setTimestamp(getCurrentTime())
-                     .setVersion(version)
-                     .build();
-        Event result =
-                event.toBuilder()
-                     .setContext(eventContext)
-                     .build();
-        return result;
     }
 
     /**

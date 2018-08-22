@@ -49,6 +49,7 @@ import io.spine.server.command.given.CommandHandlerMethodTestEnv.ValidHandlerOne
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.ValidHandlerTwoParams;
 import io.spine.server.command.given.CommandHandlerMethodTestEnv.ValidHandlerTwoParamsReturnsList;
 import io.spine.server.model.HandlerMethodFailedException;
+import io.spine.server.model.declare.SignatureMismatchException;
 import io.spine.server.procman.ProcessManager;
 import io.spine.test.reflect.ProjectId;
 import io.spine.test.reflect.command.RefCreateProject;
@@ -56,7 +57,7 @@ import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.aggregate.AggregateMessageDispatcher;
 import io.spine.testing.server.model.ModelTests;
-import io.spine.testing.server.procman.ProcessManagerDispatcher;
+import io.spine.testing.server.procman.PmDispatcher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -64,15 +65,16 @@ import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.testing.Helpers.assertEmpty;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.command.model.CommandHandlerMethod.from;
 import static io.spine.server.model.given.Given.CommandMessage.createProject;
 import static io.spine.server.model.given.Given.CommandMessage.startProject;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.spy;
@@ -118,7 +120,11 @@ class CommandHandlerMethodTest {
         @DisplayName("one Message")
         void returningMessage() {
             ValidHandlerTwoParams handlerObject = spy(new ValidHandlerTwoParams());
-            CommandHandlerMethod handler = from(handlerObject.getHandler());
+
+            Optional<CommandHandlerMethod> createdMethod =
+                    new CommandHandlerSignature().create(handlerObject.getHandler());
+            assertTrue(createdMethod.isPresent());
+            CommandHandlerMethod handler = createdMethod.get();
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
 
@@ -137,7 +143,10 @@ class CommandHandlerMethodTest {
         void returningMessageList() {
             ValidHandlerOneParamReturnsList handlerObject =
                     spy(new ValidHandlerOneParamReturnsList());
-            CommandHandlerMethod handler = from(handlerObject.getHandler());
+            Optional<CommandHandlerMethod> method =
+                    new CommandHandlerSignature().create(handlerObject.getHandler());
+            assertTrue(method.isPresent());
+            CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
 
@@ -159,7 +168,10 @@ class CommandHandlerMethodTest {
         @DisplayName("no events")
         void noEvents() {
             HandlerReturnsEmptyList handlerObject = new HandlerReturnsEmptyList();
-            CommandHandlerMethod handler = from(handlerObject.getHandler());
+            Optional<CommandHandlerMethod> method =
+                    new CommandHandlerSignature().create(handlerObject.getHandler());
+            assertTrue(method.isPresent());
+            CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
 
@@ -171,7 +183,10 @@ class CommandHandlerMethodTest {
         @DisplayName("`Empty` event")
         void emptyEvent() {
             HandlerReturnsEmpty handlerObject = new HandlerReturnsEmpty();
-            CommandHandlerMethod handler = from(handlerObject.getHandler());
+            Optional<CommandHandlerMethod> method =
+                    new CommandHandlerSignature().create(handlerObject.getHandler());
+            assertTrue(method.isPresent());
+            CommandHandlerMethod handler = method.get();
             RefCreateProject cmd = createProject();
             CommandEnvelope envelope = envelope(cmd);
 
@@ -187,7 +202,7 @@ class CommandHandlerMethodTest {
         ProcessManager<ProjectId, ?, ?> entity =
                 new ProcessManagerDoingNothing(commandMessage.getProjectId());
         CommandEnvelope cmd = requestFactory.createEnvelope(commandMessage);
-        List<Event> events = ProcessManagerDispatcher.dispatch(entity, cmd);
+        List<Event> events = PmDispatcher.dispatch(entity, cmd);
         assertEmpty(events);
     }
 
@@ -200,7 +215,7 @@ class CommandHandlerMethodTest {
         void messageParam() {
             Method handler = new ValidHandlerOneParam().getHandler();
 
-            assertIsCommandHandler(handler, true);
+            assertIsCommandHandler(handler);
         }
 
         @Test
@@ -208,7 +223,7 @@ class CommandHandlerMethodTest {
         void messageParamAndListReturn() {
             Method handler = new ValidHandlerOneParamReturnsList().getHandler();
 
-            assertIsCommandHandler(handler, true);
+            assertIsCommandHandler(handler);
         }
 
         @Test
@@ -216,7 +231,7 @@ class CommandHandlerMethodTest {
         void messageAndContextParam() {
             Method handler = new ValidHandlerTwoParams().getHandler();
 
-            assertIsCommandHandler(handler, true);
+            assertIsCommandHandler(handler);
         }
 
         @Test
@@ -224,7 +239,7 @@ class CommandHandlerMethodTest {
         void messageAndContextParamAndListReturn() {
             Method handler = new ValidHandlerTwoParamsReturnsList().getHandler();
 
-            assertIsCommandHandler(handler, true);
+            assertIsCommandHandler(handler);
         }
 
         @Test
@@ -232,7 +247,7 @@ class CommandHandlerMethodTest {
         void nonPublicAccess() {
             Method method = new ValidHandlerButPrivate().getHandler();
 
-            assertIsCommandHandler(method, true);
+            assertIsCommandHandler(method);
         }
     }
 
@@ -244,56 +259,45 @@ class CommandHandlerMethodTest {
         @DisplayName("no annotation")
         void noAnnotation() {
             Method handler = new InvalidHandlerNoAnnotation().getHandler();
-
-            assertIsCommandHandler(handler, false);
+            assertFalse(new CommandHandlerSignature().matches(handler));
         }
 
         @Test
         @DisplayName("no params")
         void noParams() {
-            Method handler = new InvalidHandlerNoParams().getHandler();
-
-            assertIsCommandHandler(handler, false);
+            assertThrows(SignatureMismatchException.class, InvalidHandlerNoParams::new);
         }
 
         @Test
         @DisplayName("too many params")
         void tooManyParams() {
-            Method handler = new InvalidHandlerTooManyParams().getHandler();
-
-            assertIsCommandHandler(handler, false);
+            assertThrows(SignatureMismatchException.class, InvalidHandlerTooManyParams::new);
         }
 
         @Test
         @DisplayName("one invalid param")
         void oneInvalidParam() {
-            Method handler = new InvalidHandlerOneNotMsgParam().getHandler();
-
-            assertIsCommandHandler(handler, false);
+            assertThrows(SignatureMismatchException.class, InvalidHandlerOneNotMsgParam::new);
         }
 
         @Test
         @DisplayName("first non-Message param")
         void firstNonMessageParam() {
-            Method handler = new InvalidHandlerTwoParamsFirstInvalid().getHandler();
-
-            assertIsCommandHandler(handler, false);
+            assertThrows(SignatureMismatchException.class,
+                         InvalidHandlerTwoParamsFirstInvalid::new);
         }
 
         @Test
         @DisplayName("second non-Context param")
         void secondNonContextParam() {
-            Method handler = new InvalidHandlerTwoParamsSecondInvalid().getHandler();
-
-            assertIsCommandHandler(handler, false);
+            assertThrows(SignatureMismatchException.class,
+                         InvalidHandlerTwoParamsSecondInvalid::new);
         }
 
         @Test
         @DisplayName("void return type")
         void voidReturnType() {
-            Method handler = new InvalidHandlerReturnsVoid().getHandler();
-
-            assertIsCommandHandler(handler, false);
+            assertThrows(SignatureMismatchException.class, InvalidHandlerReturnsVoid::new);
         }
     }
 
@@ -351,11 +355,8 @@ class CommandHandlerMethodTest {
         assertThrows(IllegalStateException.class, () -> handler.dispatch(cmd));
     }
 
-    private static void assertIsCommandHandler(Method handler, boolean isHandler) {
-        assertEquals(isHandler,
-                     CommandHandlerMethod.factory()
-                                         .getPredicate()
-                                         .test(handler));
+    private static void assertIsCommandHandler(Method handler) {
+        assertTrue(new CommandHandlerSignature().matches(handler));
     }
 
     private static CommandEnvelope envelope(Message commandMessage) {

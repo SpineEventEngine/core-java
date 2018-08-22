@@ -34,6 +34,8 @@ import java.lang.annotation.Target;
  * <ul>
  *     <li>be annotated with {@link React @React};
  *
+ *     <li>have package-private visibility;
+ *
  *     <li>accept an event message (derived from {@link com.google.protobuf.Message
  *     Message}), as the first parameter;
  *

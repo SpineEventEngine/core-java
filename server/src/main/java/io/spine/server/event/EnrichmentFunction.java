@@ -37,7 +37,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * {@code EnrichmentFunction} defines how a source message class can be transformed
  * into a target message class.
  *
- * <p>{@code EnrichmentFunction}s are used by an {@link EventEnricher} to augment events
+ * <p>{@code EnrichmentFunction}s are used by an {@link Enricher} to augment events
  * passed to {@link EventBus}.
  *
  * @param <S> a type of the source object to enrich
@@ -49,9 +49,9 @@ abstract class EnrichmentFunction<S, T, C extends Message> {
 
     /**
      * We are having the generified class to be able to bound the types of messages and the
-     * translation function when building the {@link EventEnricher}.
+     * translation function when building the {@link Enricher}.
      *
-     * @see EventEnricher.Builder#add(Class, Class, java.util.function.Function)
+     * @see Enricher.Builder#add(Class, Class, java.util.function.Function)
      */
 
     private final Class<S> sourceClass;

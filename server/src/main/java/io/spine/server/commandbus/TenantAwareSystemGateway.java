@@ -38,7 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * a {@link TenantAwareOperation} with the given tenant set.
  *
  * <p>Any call to this gateway is delegated to another instance of {@link SystemGateway}
- * {@linkplain Builder#atopOf(SystemGateway) passed} on construction.
+ * passed on construction.
  *
  * @author Dmytro Dashenkov
  * @see TenantAwareOperation
@@ -48,9 +48,16 @@ final class TenantAwareSystemGateway implements SystemGateway {
     private final SystemGateway delegate;
     private final TenantId tenantId;
 
-    private TenantAwareSystemGateway(Builder builder) {
-        this.delegate = builder.delegate;
-        this.tenantId = builder.tenantId;
+    private TenantAwareSystemGateway(TenantId tenantId, SystemGateway delegate) {
+        this.tenantId = checkNotNull(tenantId);
+        this.delegate = checkNotNull(delegate);
+    }
+
+    static SystemGateway forTenant(TenantId tenantId, SystemGateway systemGateway) {
+        checkNotNull(tenantId);
+        checkNotNull(systemGateway);
+        SystemGateway result = new TenantAwareSystemGateway(tenantId, systemGateway);
+        return result;
     }
 
     /**
@@ -101,64 +108,6 @@ final class TenantAwareSystemGateway implements SystemGateway {
         @Override
         public void run() {
             action.run();
-        }
-    }
-
-    /**
-     * Creates a new instance of {@code Builder} for {@code TenantAwareSystemGateway} instances.
-     *
-     * @return new instance of {@code Builder}
-     */
-    static Builder create() {
-        return new Builder();
-    }
-
-    /**
-     * A builder for the {@code TenantAwareSystemGateway} instances.
-     */
-    static final class Builder {
-
-        private SystemGateway delegate;
-        private TenantId tenantId;
-
-        /**
-         * Prevents direct instantiation.
-         */
-        private Builder() {
-        }
-
-        /**
-         * Specifies the {@link SystemGateway} to delegate calls to.
-         *
-         * @param gateway the delegate {@link SystemGateway}
-         */
-        Builder atopOf(SystemGateway gateway) {
-            this.delegate = checkNotNull(gateway);
-            return this;
-        }
-
-        /**
-         * Specifies the ID of the tenant to work with.
-         *
-         * <p>Use {@code TenantId.getDefaultInstance()} in single-tenant environment.
-         *
-         * @param tenant the tenant ID
-         */
-        Builder withTenant(TenantId tenant) {
-            this.tenantId = checkNotNull(tenant);
-            return this;
-        }
-
-        /**
-         * Creates a new instance of {@code TenantAwareSystemGateway}.
-         *
-         * @return new instance of {@code TenantAwareSystemGateway}
-         */
-        TenantAwareSystemGateway build() {
-            checkNotNull(delegate);
-            checkNotNull(tenantId);
-
-            return new TenantAwareSystemGateway(this);
         }
     }
 }

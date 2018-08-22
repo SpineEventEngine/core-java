@@ -30,15 +30,23 @@ import io.spine.core.EventEnvelope;
 import io.spine.server.model.given.HandlerMethodTestEnv.OneParamMethod;
 import io.spine.server.model.given.HandlerMethodTestEnv.StubHandler;
 import io.spine.server.model.given.HandlerMethodTestEnv.TwoParamMethod;
+import io.spine.server.model.given.HandlerMethodTestEnv.TwoParamSpec;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.model.AbstractHandlerMethod.getFirstParamType;
+import static io.spine.server.model.given.HandlerMethodTestEnv.OneParamSignature;
+import static io.spine.server.model.given.HandlerMethodTestEnv.OneParamSpec;
+import static io.spine.server.model.given.HandlerMethodTestEnv.StubHandler.getMethodWithCheckedException;
+import static io.spine.server.model.given.HandlerMethodTestEnv.StubHandler.getMethodWithRuntimeException;
 import static io.spine.testing.Tests.nullRef;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -51,7 +59,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("AbstractHandlerMethod should")
 class AbstractHandlerMethodTest {
 
-    private final AbstractHandlerMethod.Factory<OneParamMethod> factory = OneParamMethod.factory();
+    private final OneParamSignature signature = new OneParamSignature();
 
     private
     AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>> twoParamMethod;
@@ -62,14 +70,17 @@ class AbstractHandlerMethodTest {
     @BeforeEach
     void setUp() {
         target = new StubHandler();
-        twoParamMethod = new TwoParamMethod(StubHandler.getTwoParameterMethod());
-        oneParamMethod = new OneParamMethod(StubHandler.getOneParameterMethod());
+        twoParamMethod = new TwoParamMethod(StubHandler.getTwoParameterMethod(),
+                                            TwoParamSpec.INSTANCE);
+        oneParamMethod = new OneParamMethod(StubHandler.getOneParameterMethod(),
+                                            OneParamSpec.INSTANCE);
     }
 
     @Test
     @DisplayName("not accept null method")
     void notAcceptNullMethod() {
-        assertThrows(NullPointerException.class, () -> new TwoParamMethod(nullRef()));
+        assertThrows(NullPointerException.class, () -> new TwoParamMethod(nullRef(),
+                                                                          TwoParamSpec.INSTANCE));
     }
 
     @Test
@@ -83,13 +94,13 @@ class AbstractHandlerMethodTest {
     class CheckAccess {
 
         @Test
-        @DisplayName("public")
+        @DisplayName(" public")
         void isPublic() {
             assertTrue(twoParamMethod.isPublic());
         }
 
         @Test
-        @DisplayName("private")
+        @DisplayName(" private")
         void isPrivate() {
             assertTrue(oneParamMethod.isPrivate());
         }
@@ -167,7 +178,8 @@ class AbstractHandlerMethodTest {
         @DisplayName("all fields are compared")
         void allFieldsAreCompared() {
             AbstractHandlerMethod<Object, EventClass, EventEnvelope, MethodResult<Empty>>
-                    anotherMethod = new TwoParamMethod(StubHandler.getTwoParameterMethod());
+                    anotherMethod = new TwoParamMethod(StubHandler.getTwoParameterMethod(),
+                                                       TwoParamSpec.INSTANCE);
 
             assertEquals(twoParamMethod, anotherMethod);
         }
@@ -186,15 +198,15 @@ class AbstractHandlerMethodTest {
         @Test
         @DisplayName("checked exception")
         void checkedException() {
-            assertThrows(IllegalStateException.class,
-                         () -> factory.create(StubHandler.getMethodWithCheckedException()));
+            Optional<OneParamMethod> method = signature.create(getMethodWithCheckedException());
+            assertFalse(method.isPresent());
         }
 
         @Test
         @DisplayName("runtime exception")
         void runtimeException() {
-            assertThrows(IllegalStateException.class,
-                         () -> factory.create(StubHandler.getMethodWithRuntimeException()));
+            Optional<OneParamMethod> method = signature.create(getMethodWithRuntimeException());
+            assertFalse(method.isPresent());
         }
     }
 }

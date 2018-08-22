@@ -34,10 +34,9 @@ option java_multiple_files = true;
 import "spine/base/error.proto";
 import "spine/core/command.proto";
 import "spine/core/event.proto";
-import "spine/client/entities.proto";
 import "spine/system/server/command_lifecycle.proto";
 
-// A system command to mark a domain command as received.
+// Marks a domain command as received.
 //
 message MarkCommandAsReceived {
 
@@ -48,7 +47,7 @@ message MarkCommandAsReceived {
     spine.core.Command payload = 2 [(required) = true];
 }
 
-// A system command to mark a domain command as acknowledged.
+// Marks a domain command as acknowledged.
 //
 message MarkCommandAsAcknowledged {
 
@@ -56,7 +55,7 @@ message MarkCommandAsAcknowledged {
     spine.core.CommandId id = 1;
 }
 
-// A system command to schedule a domain command.
+// Schedules a domain command.
 //
 // See `spine.system.server.ScheduledCommandRecord` projection for the scheduled command
 // representation.
@@ -70,7 +69,7 @@ message ScheduleCommand {
     spine.core.CommandContext.Schedule schedule = 2 [(valid) = true];
 }
 
-// A system command to mark a domain command as dispatched.
+// Marks a domain command as dispatched.
 //
 message MarkCommandAsDispatched {
 
@@ -78,7 +77,7 @@ message MarkCommandAsDispatched {
     spine.core.CommandId id = 1;
 }
 
-// A system command to assign a command target to the command.
+// Assigns a target to a command.
 //
 // This command is posted when the command target is determined, but before the command is delivered
 // to the target.
@@ -92,7 +91,7 @@ message AssignTargetToCommand {
     CommandTarget target = 2 [(valid) = true];
 }
 
-// A system command to mark a domain command as handled.
+// Marks a domain command as handled.
 //
 // Posted only after a successful command handling.
 //
@@ -102,7 +101,7 @@ message MarkCommandAsHandled {
     spine.core.CommandId id = 1;
 }
 
-// A system command to mark a domain command as handled.
+// Marks a domain command as handled.
 //
 // Posted if command processing caused a runtime error at any point.
 //
@@ -115,7 +114,7 @@ message MarkCommandAsErrored {
     spine.base.Error error = 2 [(required) = true];
 }
 
-// A system command to mark a domain command as rejected.
+// Marks a domain command as rejected.
 //
 // Posted if the command handler has rejected the command.
 //
@@ -126,4 +125,48 @@ message MarkCommandAsRejected {
 
     // The command rejection event.
     spine.core.Event rejection_event = 2 [(valid) = true];
+}
+
+// Marks a command as one which was transformed into another command.
+//
+// Posted when a commanding method created one command in response to an incoming one.
+// For the case of more than one produced command, please use `MarkSplit`.
+//
+message MarkTransformed {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // The ID of the command generated in response to the received command.
+    spine.core.CommandId produced = 2 [(required) = true];
+}
+
+// Marks a command which cased two or more commands.
+//
+// Posted when a commanding method created two or more commands in response to an incoming one.
+//
+message MarkSplit {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // Identifiers of commands generated in response to the `source` command.
+    //
+    // There must be two or more produced commands.
+    // For one produced command please use `MarkTransformed`.
+    //
+    repeated core.CommandId produced = 2 [(required) = true];
+}
+
+// Mark a command as one which was created in response to an event.
+//
+// Posted when a commanding method creates one or more commands in response to an incoming event.
+//
+message MarkCausedByEvent {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // The ID of the event which cased the command.
+    spine.core.EventId origin = 2;
 }

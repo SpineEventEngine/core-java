@@ -25,7 +25,6 @@ import com.google.errorprone.annotations.OverridingMethodsMustInvokeSuper;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.server.entity.storage.Column;
@@ -308,23 +307,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         Function<EntityRecord, E> toEntity = entityConverter().reverse();
         Iterator<E> result = transform(records, toEntity::apply);
         return result;
-    }
-
-    /**
-     * Obtains iterator over {@link EntityRecord} for entities matching the passed filters.
-     *
-     * @param filters   the filters for filtering entities
-     * @param fieldMask the mask to apply for returned records
-     * @return an iterator over the matching records
-     */
-    @Internal
-    public Iterator<EntityRecord> findRecords(EntityFilters filters, FieldMask fieldMask) {
-        checkNotNull(filters);
-        checkNotNull(fieldMask);
-
-        EntityQuery<I> entityQuery = EntityQueries.from(filters, recordStorage());
-        EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
-        return recordStorage().readAll(completeQuery, fieldMask);
     }
 
     /**

@@ -99,7 +99,7 @@ public class EventBusTest {
     private CommandBus commandBus;
     private BoundedContext bc;
 
-    private void setUp(@Nullable EventEnricher enricher) {
+    private void setUp(@Nullable Enricher enricher) {
         this.eventFactory = TestEventFactory.newInstance(EventBusTest.class);
         EventBus.Builder eventBusBuilder = eventBusBuilder(enricher);
 
@@ -165,7 +165,7 @@ public class EventBusTest {
             eventBus.register(subscriberOne);
             eventBus.register(subscriberTwo);
 
-            EventClass eventClass = EventClass.of(ProjectCreated.class);
+            EventClass eventClass = EventClass.from(ProjectCreated.class);
             assertTrue(eventBus.hasDispatchers(eventClass));
 
             Collection<? extends EventDispatcher<?>> dispatchers =
@@ -181,7 +181,7 @@ public class EventBusTest {
 
             eventBus.register(dispatcher);
 
-            assertTrue(eventBus.getDispatchers(EventClass.of(ProjectCreated.class))
+            assertTrue(eventBus.getDispatchers(EventClass.from(ProjectCreated.class))
                                .contains(dispatcher));
         }
     }
@@ -197,7 +197,7 @@ public class EventBusTest {
             AbstractEventSubscriber subscriberTwo = new ProjectCreatedSubscriber();
             eventBus.register(subscriberOne);
             eventBus.register(subscriberTwo);
-            EventClass eventClass = EventClass.of(ProjectCreated.class);
+            EventClass eventClass = EventClass.from(ProjectCreated.class);
 
             eventBus.unregister(subscriberOne);
 
@@ -220,7 +220,7 @@ public class EventBusTest {
         void eventDispatcher() {
             EventDispatcher dispatcherOne = new BareDispatcher();
             EventDispatcher dispatcherTwo = new BareDispatcher();
-            EventClass eventClass = EventClass.of(ProjectCreated.class);
+            EventClass eventClass = EventClass.from(ProjectCreated.class);
             eventBus.register(dispatcherOne);
             eventBus.register(dispatcherTwo);
 
@@ -278,7 +278,7 @@ public class EventBusTest {
                 .build();
         eventBus.register(new BareDispatcher());
         eventBus.register(new ProjectCreatedSubscriber());
-        EventClass eventClass = EventClass.of(ProjectCreated.class);
+        EventClass eventClass = EventClass.from(ProjectCreated.class);
 
         eventBus.close();
 
@@ -294,7 +294,7 @@ public class EventBusTest {
         @Test
         @DisplayName("for event that can be enriched")
         void forEnrichable() {
-            EventEnricher enricher = mock(EventEnricher.class);
+            Enricher enricher = mock(Enricher.class);
             EventEnvelope event = EventEnvelope.of(GivenEvent.projectCreated());
             doReturn(true).when(enricher)
                           .canBeEnriched(any(EventEnvelope.class));
@@ -314,7 +314,7 @@ public class EventBusTest {
         @Test
         @DisplayName("for event that cannot be enriched")
         void forNonEnrichable() {
-            EventEnricher enricher = mock(EventEnricher.class);
+            Enricher enricher = mock(Enricher.class);
             doReturn(false).when(enricher)
                            .canBeEnriched(any(EventEnvelope.class));
 

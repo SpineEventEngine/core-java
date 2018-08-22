@@ -22,10 +22,8 @@ package io.spine.model.verify;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.spine.model.CommandHandlers;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.command.AbstractCommandHandler;
+import io.spine.server.command.model.DuplicateHandlerCheck;
 import io.spine.server.model.Model;
-import io.spine.server.procman.ProcessManager;
 import io.spine.tools.gradle.ProjectHierarchy;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.gradle.api.Project;
@@ -40,16 +38,12 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
-import static io.spine.server.command.model.CommandHandlerClass.asCommandHandlerClass;
-import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.Arrays.deepToString;
+import static java.util.stream.Collectors.toList;
 
 /**
  * A utility for verifying Spine model.
@@ -70,7 +64,7 @@ final class ModelVerifier {
      * @param project the Gradle project to verify the model upon
      */
     ModelVerifier(Project project) {
-        this.projectClassLoader = createClassLoaderForProject(project);
+        this.projectClassLoader = createClassLoader(project);
     }
 
     /**
@@ -79,65 +73,17 @@ final class ModelVerifier {
      * @param handlers the listing of the Spine model classes
      */
     void verify(CommandHandlers handlers) {
-        Logger log = log();
-
-        // Ensure there are no models from previous runs in the same JVM.
-        Model.dropAllModels();
-
-        for (String commandHandlingClass : handlers.getCommandHandlingTypesList()) {
-            Class<?> cls;
-            try {
-                log.debug("Trying to load class \'{}\'", commandHandlingClass);
-                cls = createRawClass(commandHandlingClass);
-            } catch (ClassNotFoundException e) {
-                log.warn("Failed to load class {}." +
-                         " Consider using io.spine.tools.spine-model-verifier plugin" +
-                         " only for the modules with the sufficient classpath.",
-                         commandHandlingClass);
-                continue;
-            }
-            verifyCommandHandlingClass(cls);
-        }
+        ClassSet classSet = new ClassSet(projectClassLoader,
+                                         handlers.getCommandHandlingTypesList());
+        classSet.reportNotFoundIfAny(log());
+        DuplicateHandlerCheck.newInstance()
+                             .check(classSet.elements());
     }
 
     /**
-     * Verifies if the passed raw Java class is accepted by
-     * {@link io.spine.server.model.Model Model} as a valid command handling class.
-     *
-     * <p>This means that commands handled by this class are not handled by other classes already
-     * known to the Model.
+     * Creates a ClassLoader for the passed project.
      */
-    @SuppressWarnings({
-            "unchecked" /* Checked by the `if` statements */,
-            "CheckReturnValue" /* Returned values for asXxxClass() are ignored because we use
-                                  these methods only for verification of the classes. */
-    })
-    private static void verifyCommandHandlingClass(Class<?> cls) {
-        Logger log = log();
-        if (Aggregate.class.isAssignableFrom(cls)) {
-            Class<? extends Aggregate> aggregateClass = (Class<? extends Aggregate>) cls;
-            asAggregateClass(aggregateClass);
-            log.debug("\'{}\' classified as Aggregate type.", aggregateClass);
-        } else if (ProcessManager.class.isAssignableFrom(cls)) {
-            Class<? extends ProcessManager> procManClass = (Class<? extends ProcessManager>) cls;
-            asProcessManagerClass(procManClass);
-            log.debug("\'{}\' classified as ProcessManager type.", procManClass);
-        } else if (AbstractCommandHandler.class.isAssignableFrom(cls)) {
-            Class<? extends AbstractCommandHandler> commandHandler = (Class<? extends AbstractCommandHandler>) cls;
-            asCommandHandlerClass(commandHandler);
-            log.debug("\'{}\' classified as CommandHandler type.", commandHandler);
-        } else {
-            throw newIllegalArgumentException(
-                    "Class %s is not a command handling type.", cls.getName()
-            );
-        }
-    }
-
-    private Class<?> createRawClass(String fqn) throws ClassNotFoundException {
-        return Class.forName(fqn, false, projectClassLoader);
-    }
-
-    private static URLClassLoader createClassLoaderForProject(Project project) {
+    private static URLClassLoader createClassLoader(Project project) {
         Collection<JavaCompile> tasks = allJavaCompile(project);
         URL[] compiledCodePath = extractDestinationDirs(tasks);
         log().debug("Initializing ClassLoader for URLs: {}", deepToString(compiledCodePath));
@@ -148,12 +94,14 @@ final class ModelVerifier {
             URLClassLoader result = new URLClassLoader(compiledCodePath, projectClassloader);
             return result;
         } catch (SecurityException e) {
-            throw new IllegalStateException("Cannot analyze project source code.", e);
+            String msg = format("Cannot create ClassLoader for the project %s", project);
+            throw new IllegalStateException(msg, e);
         }
     }
 
+
     private static Collection<JavaCompile> allJavaCompile(Project project) {
-        Collection<JavaCompile> tasks = newLinkedList();
+        Collection<JavaCompile> tasks = newArrayList();
         ProjectHierarchy.applyToAll(project.getRootProject(),
                                     p -> tasks.addAll(javaCompile(p)));
         return tasks;
@@ -167,7 +115,7 @@ final class ModelVerifier {
     private static URL[] extractDestinationDirs(Collection<JavaCompile> tasks) {
         Collection<URL> urls = tasks.stream()
                                     .map(GetDestinationDir.FUNCTION)
-                                    .collect(Collectors.toList());
+                                    .collect(toList());
         URL[] result = urls.toArray(EMPTY_URL_ARRAY);
         return result;
     }
@@ -182,14 +130,14 @@ final class ModelVerifier {
         @Override
         public @Nullable URL apply(@Nullable JavaCompile task) {
             checkNotNull(task);
-            File destDir = task.getDestinationDir();
-            if (destDir == null) {
+            File dir = task.getDestinationDir();
+            if (dir == null) {
                 return null;
             }
-            URI destUri = destDir.toURI();
+            URI uri = dir.toURI();
             try {
-                URL destUrl = destUri.toURL();
-                return destUrl;
+                URL url = uri.toURL();
+                return url;
             } catch (MalformedURLException e) {
                 throw new IllegalArgumentException(format(
                         "Could not retrieve destination directory for task `%s`.",
@@ -198,13 +146,14 @@ final class ModelVerifier {
         }
     }
 
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
     private enum LogSingleton {
         INSTANCE;
+
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(ModelVerifier.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }

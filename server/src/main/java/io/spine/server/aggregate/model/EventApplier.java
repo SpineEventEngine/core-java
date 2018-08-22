@@ -20,24 +20,15 @@
 
 package io.spine.server.aggregate.model;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Empty;
-import com.google.protobuf.Message;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.Apply;
 import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.HandlerMethodPredicate;
-import io.spine.server.model.MethodAccessChecker;
-import io.spine.server.model.MethodPredicate;
 import io.spine.server.model.MethodResult;
+import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
-import java.util.function.Predicate;
-
-import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
  * A wrapper for event applier method.
@@ -50,93 +41,21 @@ public final class EventApplier
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
-     * @param method subscriber method
+     * @param method   the applier method
+     * @param signature {@link ParameterSpec} which describes the method
      */
-    private EventApplier(Method method) {
-        super(method);
+    EventApplier(Method method,
+                 ParameterSpec<EventEnvelope> signature) {
+        super(method, signature);
     }
 
     @Override
     public EventClass getMessageClass() {
-        return EventClass.of(rawMessageClass());
-    }
-
-    static EventApplier from(Method method) {
-        return new EventApplier(method);
-    }
-
-    @VisibleForTesting
-    static Predicate<Method> predicate() {
-        return factory().getPredicate();
-    }
-
-    public static AbstractHandlerMethod.Factory<EventApplier> factory() {
-        return Factory.INSTANCE;
+        return EventClass.from(rawMessageClass());
     }
 
     @Override
     protected MethodResult<Empty> toResult(Aggregate target, Object rawMethodOutput) {
         return MethodResult.empty();
-    }
-
-    /** The factory for filtering methods that match {@code EventApplier} specification. */
-    private static class Factory extends AbstractHandlerMethod.Factory<EventApplier> {
-
-        private static final Factory INSTANCE = new Factory();
-
-        @Override
-        public Class<EventApplier> getMethodClass() {
-            return EventApplier.class;
-        }
-
-        @Override
-        public Predicate<Method> getPredicate() {
-            return Filter.INSTANCE;
-        }
-
-        @Override
-        public void checkAccessModifier(Method method) {
-            MethodAccessChecker checker = forMethod(method);
-            checker.checkPrivate("Event applier method `{}` must be declared `private`.");
-        }
-
-        @Override
-        protected EventApplier doCreate(Method method) {
-            return from(method);
-        }
-    }
-
-    /**
-     * The predicate for filtering event applier methods.
-     */
-    private static class Filter extends HandlerMethodPredicate<Empty> {
-
-        private static final MethodPredicate INSTANCE = new Filter();
-
-        private static final int NUMBER_OF_PARAMS = 1;
-        private static final int EVENT_PARAM_INDEX = 0;
-
-        private Filter() {
-            super(Apply.class, Empty.class);
-        }
-
-        @SuppressWarnings("MethodDoesntCallSuperMethod") // because we override the checking.
-        @Override
-        protected boolean verifyParams(Method method) {
-            Class<?>[] parameterTypes = method.getParameterTypes();
-            boolean paramCountIsValid = parameterTypes.length == NUMBER_OF_PARAMS;
-            if (!paramCountIsValid) {
-                return false;
-            }
-            Class<?> paramType = parameterTypes[EVENT_PARAM_INDEX];
-            boolean paramIsMessage = Message.class.isAssignableFrom(paramType);
-            return paramIsMessage;
-        }
-
-        @Override
-        protected boolean verifyReturnType(Method method) {
-            boolean isVoid = Void.TYPE.equals(method.getReturnType());
-            return isVoid;
-        }
     }
 }

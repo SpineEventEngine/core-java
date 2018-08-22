@@ -20,16 +20,16 @@
 
 package io.spine.server.event.model;
 
-import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Message;
+import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
-import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.server.model.AbstractHandlerMethod;
 import io.spine.server.model.HandlerKey;
 import io.spine.server.model.MethodResult;
+import io.spine.server.model.declare.ParameterSpec;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -37,46 +37,44 @@ import java.lang.reflect.Method;
  *
  * @author Dmytro Dashenkov
  */
-abstract class EventHandlerMethod<T, R extends MethodResult>
+public abstract class EventHandlerMethod<T, R extends MethodResult>
         extends AbstractHandlerMethod<T, EventClass, EventEnvelope, R> {
-
-    private final EventAcceptor acceptor;
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    protected EventHandlerMethod(Method method) {
-        super(method);
-        this.acceptor = EventAcceptor.from(method);
+    EventHandlerMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+        super(method, parameterSpec);
+    }
+
+    @Override
+    protected EventAcceptingMethodParams getParameterSpec() {
+        return (EventAcceptingMethodParams) super.getParameterSpec();
     }
 
     @Override
     public HandlerKey key() {
-        HandlerKey key = acceptor.createKey(getRawMethod());
-        return key;
+        Class<?>[] types = getRawMethod().getParameterTypes();
+        @SuppressWarnings("unchecked")
+        Class<? extends Message> eventMessageClass = (Class<? extends Message>) types[0];
+        EventClass eventClass = EventClass.from(eventMessageClass);
+        if (!getParameterSpec().isAwareOfCommandType()) {
+            return HandlerKey.of(eventClass);
+        } else {
+            @SuppressWarnings("unchecked")
+            Class<? extends Message> commandMessageClass = (Class<? extends Message>) types[1];
+            CommandClass commandClass = CommandClass.from(commandMessageClass);
+            return HandlerKey.of(eventClass, commandClass);
+        }
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return the list of event messages (or an empty list if the reactor method returns nothing)
-     */
-    @CanIgnoreReturnValue
     @Override
-    public R invoke(T target, EventEnvelope event) {
-        EventContext context = event.getEventContext();
-        ensureExternalMatch(context.getExternal());
-
-        Object rawResult;
-        try {
-            rawResult = acceptor.invoke(target, getRawMethod(), event);
-        } catch (InvocationTargetException e) {
-            throw whyFailed(target, event.getMessage(), context, e);
-        }
-        R result = toResult(target, rawResult);
-        return result;
+    protected void checkAttributesMatch(EventEnvelope envelope) {
+        boolean external = envelope.getEventContext()
+                                   .getExternal();
+        ensureExternalMatch(external);
     }
 
     /**

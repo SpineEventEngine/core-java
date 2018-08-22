@@ -120,7 +120,7 @@ class AggregatePartRepositoryLookupTest {
         }
 
         @Assign
-        public AggProjectCreated handle(AggCreateProject msg, CommandContext context) {
+        AggProjectCreated handle(AggCreateProject msg, CommandContext context) {
             return AggProjectCreated.newBuilder()
                                     .setProjectId(msg.getProjectId())
                                     .setName(msg.getName())
@@ -162,14 +162,14 @@ class AggregatePartRepositoryLookupTest {
         }
 
         @Assign
-        public AggTaskAdded handle(AggAddTask cmd) {
+        AggTaskAdded handle(AggAddTask cmd) {
             return AggTaskAdded.newBuilder()
                                .setProjectId(cmd.getProjectId())
                                .build();
         }
 
         @Apply
-        public void apply(AggTaskAdded event) {
+        void apply(AggTaskAdded event) {
             Task task = event.getTask();
             getBuilder().setTitle(task.getTitle())
                         .setDescription(task.getDescription());

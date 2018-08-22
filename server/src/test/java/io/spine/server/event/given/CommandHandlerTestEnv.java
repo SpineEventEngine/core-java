@@ -64,14 +64,14 @@ public class CommandHandlerTestEnv {
 
         @Override
         public Set<EventClass> getMessageClasses() {
-            return ImmutableSet.of(EventClass.of(CmdProjectStarted.class),
-                                   EventClass.of(StringValue.class));
+            return ImmutableSet.of(EventClass.from(CmdProjectStarted.class),
+                                   EventClass.from(StringValue.class));
         }
 
         @Override
         public Set<String> dispatch(EventEnvelope envelope) {
             dispatched.add(envelope);
-            return Identity.of(this);
+            return identity();
         }
 
         @Override

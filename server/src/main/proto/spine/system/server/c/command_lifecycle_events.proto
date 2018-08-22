@@ -36,7 +36,6 @@ import "google/protobuf/timestamp.proto";
 import "spine/base/error.proto";
 import "spine/core/command.proto";
 import "spine/core/event.proto";
-import "spine/client/entities.proto";
 import "spine/system/server/command_lifecycle.proto";
 
 // An event emitted when a new command is received.
@@ -143,4 +142,35 @@ message CommandRejected {
 
     // The time when the event occurred.
     google.protobuf.Timestamp when = 3 [(required) = true];
+}
+
+// An event emitted when another command was generated in response to a received command.
+//
+message CommandTransformed {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // The ID of the command generated in response to the received command.
+    spine.core.CommandId produced = 2 [(required) = true];
+}
+
+// An event emitted when two or more commands were generated in response to a received command.
+message CommandSplit {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // Identifiers of the command generated in response to the received command.
+    repeated spine.core.CommandId produced = 2 [(required) = true];
+}
+
+// An event emitted when a command was generated in response to an event.
+message CommandCausedByEvent {
+
+    // The ID of the command.
+    spine.core.CommandId id = 1;
+
+    // The ID of the event which cased the command.
+    spine.core.EventId origin = 2;
 }

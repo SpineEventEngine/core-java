@@ -30,6 +30,7 @@ import io.spine.core.Status;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.system.server.Substituted.Sequence;
 
 import static io.spine.base.Time.getCurrentTime;
 
@@ -57,7 +58,7 @@ import static io.spine.base.Time.getCurrentTime;
 
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings("OverlyCoupledClass") // OK for an aggregate class.
+@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // OK for an aggregate class.
 public final class CommandLifecycleAggregate
         extends Aggregate<CommandId, CommandLifecycle, CommandLifecycleVBuilder> {
 
@@ -143,7 +144,7 @@ public final class CommandLifecycleAggregate
     }
 
     @Apply
-    private void on(CommandReceived event) {
+    void on(CommandReceived event) {
         CommandTimeline status = CommandTimeline
                 .newBuilder()
                 .setWhenReceived(event.getWhen())
@@ -153,22 +154,23 @@ public final class CommandLifecycleAggregate
                     .setStatus(status);
     }
 
+    private CommandTimeline.Builder statusBuilder() {
+        return getBuilder().getStatus()
+                           .toBuilder();
+    }
+
     @Apply
-    private void on(CommandAcknowledged event) {
-        CommandTimeline status = getBuilder()
-                .getStatus()
-                .toBuilder()
+    void on(CommandAcknowledged event) {
+        CommandTimeline status = statusBuilder()
                 .setWhenAcknowledged(event.getWhen())
                 .build();
         getBuilder().setStatus(status);
     }
 
     @Apply
-    private void on(CommandScheduled event) {
+    void on(CommandScheduled event) {
         Command updatedCommand = updateSchedule(event.getSchedule());
-        CommandTimeline status = getBuilder()
-                .getStatus()
-                .toBuilder()
+        CommandTimeline status = statusBuilder()
                 .setWhenScheduled(event.getWhen())
                 .build();
         getBuilder().setCommand(updatedCommand)
@@ -176,17 +178,15 @@ public final class CommandLifecycleAggregate
     }
 
     @Apply
-    private void on(CommandDispatched event) {
-        CommandTimeline status = getBuilder()
-                .getStatus()
-                .toBuilder()
+    void on(CommandDispatched event) {
+        CommandTimeline status = statusBuilder()
                 .setWhenDispatched(event.getWhen())
                 .build();
         getBuilder().setStatus(status);
     }
 
     @Apply
-    private void on(TargetAssignedToCommand event) {
+    void on(TargetAssignedToCommand event) {
         CommandTarget target = event.getTarget();
         CommandTimeline status = getBuilder()
                 .getStatus()
@@ -199,12 +199,12 @@ public final class CommandLifecycleAggregate
     }
 
     @Apply
-    private void on(CommandHandled event) {
+    void on(CommandHandled event) {
         setStatus(Responses.statusOk(), event.getWhen());
     }
 
     @Apply
-    private void on(CommandErrored event) {
+    void on(CommandErrored event) {
         Status status = Status
                 .newBuilder()
                 .setError(event.getError())
@@ -213,7 +213,7 @@ public final class CommandLifecycleAggregate
     }
 
     @Apply
-    private void on(CommandRejected event) {
+    void on(CommandRejected event) {
         Status status = Status
                 .newBuilder()
                 .setRejection(event.getRejectionEvent())
@@ -221,23 +221,63 @@ public final class CommandLifecycleAggregate
         setStatus(status, event.getWhen());
     }
 
+    @Assign
+    CommandTransformed on(MarkTransformed cmd) {
+        return CommandTransformed.newBuilder()
+                                 .setId(cmd.getId())
+                                 .setProduced(cmd.getProduced())
+                                 .build();
+    }
+
+    @Apply
+    void event(CommandTransformed event) {
+        Substituted.Builder substituted = Substituted
+                .newBuilder()
+                .setCommand(event.getId());
+        CommandTimeline.Builder newStatus =
+                getState().getStatus()
+                          .toBuilder()
+                          .setSubstitued(substituted);
+        getBuilder().setStatus(newStatus.build());
+    }
+
+    @Assign
+    CommandSplit on(MarkSplit cmd) {
+        return CommandSplit.newBuilder()
+                           .setId(cmd.getId())
+                           .addAllProduced(cmd.getProducedList())
+                           .build();
+    }
+
+    @Apply
+    void event(CommandSplit event) {
+        Substituted.Builder substituted = Substituted
+                .newBuilder()
+                .setSequence(Sequence.newBuilder()
+                                     .addAllItem(event.getProducedList()));
+        CommandTimeline.Builder newStatus =
+                getState().getStatus()
+                          .toBuilder()
+                          .setSubstitued(substituted);
+        getBuilder().setStatus(newStatus.build());
+    }
+
     private Command updateSchedule(Schedule schedule) {
-        CommandContext updatedContext = getBuilder().getCommand()
-                                                    .getContext()
-                                                    .toBuilder()
-                                                    .setSchedule(schedule)
-                                                    .build();
-        Command updatedCommand = getBuilder().getCommand()
-                                             .toBuilder()
-                                             .setContext(updatedContext)
-                                             .build();
+        Command command = getBuilder().getCommand();
+        CommandContext updatedContext =
+                command.getContext()
+                       .toBuilder()
+                       .setSchedule(schedule)
+                       .build();
+        Command updatedCommand =
+                command.toBuilder()
+                       .setContext(updatedContext)
+                       .build();
         return updatedCommand;
     }
 
     private void setStatus(Status status, Timestamp whenProcessed) {
-        CommandTimeline commandStatus = getBuilder()
-                .getStatus()
-                .toBuilder()
+        CommandTimeline commandStatus = statusBuilder()
                 .setWhenHandled(whenProcessed)
                 .setHowHandled(status)
                 .build();

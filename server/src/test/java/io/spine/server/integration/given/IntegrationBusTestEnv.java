@@ -33,7 +33,6 @@ import io.spine.core.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.command.Rejection;
 import io.spine.server.event.AbstractEventSubscriber;
 import io.spine.server.event.React;
 import io.spine.server.integration.IntegrationBus;
@@ -149,21 +148,6 @@ public class IntegrationBusTestEnv {
         );
     }
 
-    @SuppressWarnings("ThrowableNotThrown")     // used to create a rejection
-    public static Event cannotStartArchivedProject() {
-        ProjectId projectId = projectId();
-        ItgStartProject cmdMessage = ItgStartProject
-                .newBuilder()
-                .setProjectId(projectId)
-                .build();
-        Command startProjectCmd = toCommand(cmdMessage);
-        io.spine.test.integration.rejection.ItgCannotStartArchivedProject throwable =
-                new io.spine.test.integration.rejection.ItgCannotStartArchivedProject(projectId);
-        throwable.initProducer(pack(projectId));
-        Rejection rejection = Rejection.from(CommandEnvelope.of(startProjectCmd), throwable);
-        return rejection.asEvent();
-    }
-
     private static Command toCommand(ItgStartProject cmdMessage) {
         return TestActorRequestFactory.newInstance(IntegrationBusTestEnv.class)
                                       .createCommand(cmdMessage);
@@ -188,12 +172,12 @@ public class IntegrationBusTestEnv {
         }
 
         @Subscribe(external = true)
-        public void on(ItgProjectCreated event) {
+        void on(ItgProjectCreated event) {
             externalEvent = event;
         }
 
         @Subscribe
-        public void on(ItgProjectStarted event) {
+        void on(ItgProjectStarted event) {
             domesticEvent = event;
         }
 
@@ -332,7 +316,7 @@ public class IntegrationBusTestEnv {
         }
 
         @Subscribe(external = true)
-        public void on(ItgProjectCreated event, EventContext eventContext) {
+        void on(ItgProjectCreated event, EventContext eventContext) {
             externalEvents.add(event);
             externalContexts.add(eventContext);
         }
@@ -368,12 +352,12 @@ public class IntegrationBusTestEnv {
         private static ItgProjectStarted domesticEvent = null;
 
         @Subscribe(external = true)
-        public void on(ItgProjectCreated msg) {
+        void on(ItgProjectCreated msg) {
             externalEvent = msg;
         }
 
         @Subscribe
-        public void on(ItgProjectStarted msg) {
+        void on(ItgProjectStarted msg) {
             domesticEvent = msg;
         }
 
@@ -405,7 +389,7 @@ public class IntegrationBusTestEnv {
         private static ItgProjectStarted externalEvent = null;
 
         @Subscribe(external = true)
-        public void on(ItgProjectStarted msg) {
+        void on(ItgProjectStarted msg) {
             externalEvent = msg;
         }
 
@@ -433,12 +417,12 @@ public class IntegrationBusTestEnv {
     public static final class ExternalMismatchSubscriber extends AbstractEventSubscriber {
 
         @Subscribe(external = true)
-        public void on(ItgCannotStartArchivedProject rejection, ItgStartProject command) {
+        void on(ItgCannotStartArchivedProject rejection, ItgStartProject command) {
             // do nothing.
         }
 
         @Subscribe
-        public void on(ItgCannotStartArchivedProject rejection) {
+        void on(ItgCannotStartArchivedProject rejection) {
             // do nothing.
         }
 

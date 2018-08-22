@@ -46,16 +46,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ResultOfMethodCallIgnored")
-@DisplayName("EventEnricher Builder should")
+@DisplayName("Enricher Builder should")
 class EnricherBuilderTest {
 
-    private EventEnricher.Builder builder;
+    private Enricher.Builder builder;
     private Function<Timestamp, StringValue> function;
     private FieldEnrichment<Timestamp, StringValue, ?> fieldEnrichment;
 
     @BeforeEach
     void setUp() {
-        this.builder = EventEnricher.newBuilder();
+        this.builder = Enricher.newBuilder();
         this.function = new Function<Timestamp, StringValue>() {
             @Override
             public @Nullable StringValue apply(@Nullable Timestamp input) {
@@ -69,13 +69,13 @@ class EnricherBuilderTest {
     }
 
     @Nested
-    @DisplayName("build EventEnricher")
+    @DisplayName("build Enricher")
     class BuildEnricher {
 
         @Test
         @DisplayName("if all functions have been registered")
         void forAllFunctionsRegistered() {
-            EventEnricher enricher = Enrichment.newEnricher();
+            Enricher enricher = Enrichment.newEnricher();
 
             assertNotNull(enricher);
         }
@@ -83,8 +83,8 @@ class EnricherBuilderTest {
         @Test
         @DisplayName("if no functions have been registered")
         void forNoFunctionsRegistered() {
-            EventEnricher enricher = EventEnricher.newBuilder()
-                                             .build();
+            Enricher enricher = Enricher.newBuilder()
+                                        .build();
             assertNotNull(enricher);
         }
 
@@ -95,7 +95,7 @@ class EnricherBuilderTest {
                         new Enrichment.GetProjectOwnerId())
                    .add(ProjectId.class, String.class,
                         new Enrichment.GetProjectName());
-            EventEnricher enricher = builder.build();
+            Enricher enricher = builder.build();
             assertNotNull(enricher);
         }
     }

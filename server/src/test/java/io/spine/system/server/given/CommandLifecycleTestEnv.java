@@ -27,7 +27,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.server.procman.CommandTransformed;
+import io.spine.server.command.Command;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.system.server.CommandAcknowledged;
@@ -106,7 +106,7 @@ public final class CommandLifecycleTestEnv {
         }
 
         @Apply
-        private void on(CompanyEstablished event) {
+        void on(CompanyEstablished event) {
             getBuilder().setId(event.getId())
                         .setName(event.getName());
         }
@@ -143,17 +143,15 @@ public final class CommandLifecycleTestEnv {
                                        .build();
         }
 
-        @Assign
-        CommandTransformed handle(FinalizeCompanyName command, CommandContext context) {
+        @Command
+        EstablishCompany transform(FinalizeCompanyName command, CommandContext context) {
             String name = getBuilder().getProposedName();
             EstablishCompany establishCommand = EstablishCompany
                     .newBuilder()
                     .setId(getBuilder().getId())
                     .setFinalName(name)
                     .build();
-            return transform(command, context)
-                    .to(establishCommand)
-                    .post();
+            return establishCommand;
         }
     }
 

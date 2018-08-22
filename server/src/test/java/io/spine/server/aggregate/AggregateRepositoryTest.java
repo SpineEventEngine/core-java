@@ -63,8 +63,6 @@ import io.spine.test.aggregate.event.AggProjectDeleted;
 import io.spine.testdata.Sample;
 import io.spine.testing.server.TestEventFactory;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
-import io.spine.testing.server.blackbox.EmittedEvents;
-import io.spine.testing.server.blackbox.EmittedEventsVerifier;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,6 +86,7 @@ import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetBo
 import static io.spine.server.aggregate.given.AggregateRepositoryTestEnv.resetRepository;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
 import static io.spine.testing.core.given.GivenTenantId.newUuid;
+import static io.spine.testing.server.blackbox.VerifyEvents.emmiterEventsHadVersions;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -146,8 +145,8 @@ public class AggregateRepositoryTest {
         @DisplayName("event classes on which aggregate reacts")
         void aggregateEventClasses() {
             Set<EventClass> eventClasses = repository().getEventClasses();
-            assertTrue(eventClasses.contains(EventClass.of(AggProjectArchived.class)));
-            assertTrue(eventClasses.contains(EventClass.of(AggProjectDeleted.class)));
+            assertTrue(eventClasses.contains(EventClass.from(AggProjectArchived.class)));
+            assertTrue(eventClasses.contains(EventClass.from(AggProjectDeleted.class)));
         }
     }
 
@@ -508,7 +507,7 @@ public class AggregateRepositoryTest {
                     .build();
             BlackBoxBoundedContext.with(repository())
                                   .receivesCommands(create, addTask, start)
-                                  .verifiesThat(eventsHaveVersions(1, 2, 3));
+                                  .assertThat(emmiterEventsHadVersions(1, 2, 3));
         }
 
         @Test
@@ -533,32 +532,11 @@ public class AggregateRepositoryTest {
             BlackBoxBoundedContext.with(repository())
                                   .receivesCommands(create, start)
                                   .receivesEvent(archived)
-                                  .verifiesThat(eventsHaveVersions(
+                                  .assertThat(emmiterEventsHadVersions(
                                           1, 2, // Product creation
                                           0,    // Manually assembled event (`archived`)
                                           3     // Event produced in response to `archived` event
                                   ));
-        }
-
-        private EmittedEventsVerifier eventsHaveVersions(int... versionNumbers) {
-            return new EventVersionsVerifier(versionNumbers);
-        }
-    }
-
-    /**
-     * An event verifier which checks that the emitted events have the given version numbers.
-     */
-    private static final class EventVersionsVerifier extends EmittedEventsVerifier {
-
-        private final int[] versions;
-
-        private EventVersionsVerifier(int[] versions) {
-            this.versions = versions;
-        }
-
-        @Override
-        public void verify(EmittedEvents events) {
-            assertTrue(events.haveVersions(versions));
         }
     }
 

@@ -59,7 +59,7 @@ public class CommandHandlerMethodTestEnv {
     }
 
     public static class ValidHandlerOneParamReturnsList extends TestCommandHandler {
-        @SuppressWarnings("UnusedReturnValue")
+
         @Assign
         @VisibleForTesting
         public List<Message> handleTest(RefCreateProject cmd) {
@@ -69,7 +69,6 @@ public class CommandHandlerMethodTestEnv {
         }
     }
 
-    @SuppressWarnings("UnusedReturnValue")
     public static class ValidHandlerTwoParams extends TestCommandHandler {
         @Assign
         @VisibleForTesting

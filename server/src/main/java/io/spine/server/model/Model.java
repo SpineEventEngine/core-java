@@ -142,7 +142,7 @@ public class Model {
         InvocationGuard.allowOnly(
                 "io.spine.server.model.ModelTest",
                 "io.spine.testing.server.model.ModelTests",
-                "io.spine.model.verify.ModelVerifier"
+                "io.spine.server.command.model.DuplicateHandlerCheck"
         );
         reset();
     }

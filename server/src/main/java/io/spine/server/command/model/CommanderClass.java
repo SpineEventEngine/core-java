@@ -20,7 +20,15 @@
 
 package io.spine.server.command.model;
 
+import io.spine.core.CommandClass;
+import io.spine.core.EmptyClass;
+import io.spine.core.EventClass;
+import io.spine.server.command.AbstractCommander;
 import io.spine.server.command.Commander;
+import io.spine.server.event.model.EventReceiverClass;
+import io.spine.server.event.model.EventReceivingClassDelegate;
+
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -31,20 +39,53 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 public final class CommanderClass<C extends Commander>
-        extends AbstractCommandHandlingClass<C, CommandSubstituteMethod> {
+        extends AbstractCommandHandlingClass<C, CommandSubstituteMethod>
+        implements EventReceiverClass, CommandingClass {
 
     private static final long serialVersionUID = 0L;
+    private final EventReceivingClassDelegate<C, CommandReactionMethod> delegate;
 
-    private CommanderClass(Class<C> value) {
-        //TODO:2018-07-25:alexander.yevsyukov: A commander may have not only Subst methods!
-        super(value, CommandSubstituteMethod.factory());
+    private CommanderClass(Class<C> cls) {
+        super(cls, new CommandSubstituteSignature());
+        this.delegate = new EventReceivingClassDelegate<>(cls, new CommandReactionSignature());
     }
 
-    public static <C extends Commander>
+    public static <C extends Commander> CommanderClass<C> delegateFor(Class<C> cls) {
+        checkNotNull(cls);
+        CommanderClass<C> result = new CommanderClass<>(cls);
+        return result;
+    }
+
+    public static <C extends AbstractCommander>
     CommanderClass<C> asCommanderClass(Class<C> cls) {
         checkNotNull(cls);
         CommanderClass<C> result = (CommanderClass<C>)
                 get(cls, CommanderClass.class, () -> new CommanderClass<>(cls));
         return result;
+    }
+
+    @Override
+    public Set<EventClass> getEventClasses() {
+        return delegate.getEventClasses();
+    }
+
+    @Override
+    public Set<EventClass> getExternalEventClasses() {
+        return delegate.getExternalEventClasses();
+    }
+
+    /**
+     * Obtains the method which reacts on the passed event class.
+     */
+    public CommandReactionMethod getCommander(EventClass eventClass) {
+        return delegate.getMethod(eventClass, EmptyClass.instance());
+    }
+
+    public boolean substitutesCommand(CommandClass commandClass) {
+        return contains(commandClass);
+    }
+
+    public boolean producesCommandsOn(EventClass eventClass) {
+        return delegate.contains(eventClass);
     }
 }

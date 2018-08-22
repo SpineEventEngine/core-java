@@ -42,7 +42,7 @@ import java.lang.annotation.Target;
  *
  * <p>Typically {@link Aggregate#getBuilder()} method is used to get and update an aggregate state.
  *
- * @author Alexander Yevsyukov
+ * @author Alexander YevsyukovA
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)

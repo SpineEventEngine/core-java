@@ -28,7 +28,9 @@ import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
-import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.aggregate.model.EventApplierSignature.EventApplierParams;
+import io.spine.server.model.declare.MatchCriterion;
+import io.spine.server.model.declare.SignatureMismatch;
 import io.spine.test.reflect.event.RefProjectCreated;
 import io.spine.testdata.Sample;
 import io.spine.validate.StringValueVBuilder;
@@ -37,6 +39,8 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.Optional;
 
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.testing.DisplayNames.NOT_ACCEPT_NULLS;
@@ -51,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @DisplayName("EventApplierMethod should")
 class EventApplierTest {
 
-    private final AbstractHandlerMethod.Factory<EventApplier> factory = EventApplier.factory();
+    private final EventApplierSignature signature = new EventApplierSignature();
 
     @Test
     @DisplayName(NOT_ACCEPT_NULLS)
@@ -62,44 +66,25 @@ class EventApplierTest {
                 .testAllPublicStaticMethods(EventApplier.class);
     }
 
-    @Nested
-    @DisplayName("provide")
-    class Provide {
-
-        @Test
-        @DisplayName("factory instance")
-        void factoryInstance() {
-            assertNotNull(factory);
-        }
-
-        @Test
-        @DisplayName("method class")
-        void methodClass() {
-            assertEquals(EventApplier.class, factory.getMethodClass());
-        }
-
-        @Test
-        @DisplayName("method predicate")
-        void methodPredicate() {
-            assertEquals(EventApplier.predicate(), factory.getPredicate());
-        }
-    }
-
     @Test
-    @DisplayName("be properly created from factory")
+    @DisplayName("be properly created from signature")
     void beCreatedFromFactory() {
         Method method = new ValidApplier().getMethod();
 
-        EventApplier actual = factory.create(method);
 
-        assertEquals(EventApplier.from(method), actual);
+        Optional<EventApplier> actual = signature.create(method);
+        assertTrue(actual.isPresent());
+
+        assertEquals(new EventApplier(method, EventApplierParams.MESSAGE), actual.get());
     }
 
     @Test
     @DisplayName("allow invocation")
     void invokeApplierMethod() {
         ValidApplier applierObject = new ValidApplier();
-        EventApplier applier = EventApplier.from(applierObject.getMethod());
+        Optional<EventApplier> method = signature.create(applierObject.getMethod());
+        assertTrue(method.isPresent());
+        EventApplier applier = method.get();
         RefProjectCreated eventMessage = Sample.messageOfType(RefProjectCreated.class);
         Event event = Event
                 .newBuilder()
@@ -116,7 +101,12 @@ class EventApplierTest {
     void checkMethodAccessModifier() {
         Method method = new ValidApplierButNotPackagePrivate().getMethod();
 
-        factory.checkAccessModifier(method);
+        Collection<SignatureMismatch> mismatches = signature.match(method);
+        assertEquals(1, mismatches.size());
+        SignatureMismatch mismatch = mismatches.iterator()
+                                           .next();
+        assertNotNull(mismatch);
+        assertEquals(MatchCriterion.ACCESS_MODIFIER, mismatch.getUnmetCriterion());
     }
 
     @Nested
@@ -132,7 +122,7 @@ class EventApplierTest {
         }
 
         @Test
-        @DisplayName("it's not private")
+        @DisplayName("it's not package-private")
         void isNotPrivate() {
             Method method = new ValidApplierButNotPackagePrivate().getMethod();
 
@@ -140,8 +130,7 @@ class EventApplierTest {
         }
 
         private void assertIsEventApplier(Method applier) {
-            assertTrue(EventApplier.predicate()
-                                   .test(applier));
+            assertTrue(signature.matches(applier));
         }
     }
 
@@ -190,8 +179,7 @@ class EventApplierTest {
         }
 
         private void assertIsNotEventApplier(Method applier) {
-            assertFalse(EventApplier.predicate()
-                                    .test(applier));
+            assertFalse(signature.match(applier).isEmpty());
         }
     }
 
@@ -210,6 +198,7 @@ class EventApplierTest {
     }
 
     private static class ValidApplierButNotPackagePrivate extends TestEventApplier {
+
         @Apply
         public void apply(RefProjectCreated event) {
         }
@@ -220,30 +209,35 @@ class EventApplierTest {
      *******************/
 
     private static class InvalidApplierNoAnnotation extends TestEventApplier {
+
         @SuppressWarnings("unused")
         public void apply(RefProjectCreated event) {
         }
     }
 
     private static class InvalidApplierNoParams extends TestEventApplier {
+
         @Apply
         public void apply() {
         }
     }
 
     private static class InvalidApplierTooManyParams extends TestEventApplier {
+
         @Apply
         public void apply(RefProjectCreated event, Object redundant) {
         }
     }
 
     private static class InvalidApplierOneNotMsgParam extends TestEventApplier {
+
         @Apply
         public void apply(Exception invalid) {
         }
     }
 
     private static class InvalidApplierNotVoid extends TestEventApplier {
+
         @Apply
         public Object apply(RefProjectCreated event) {
             return event;
@@ -262,7 +256,8 @@ class EventApplierTest {
         public Method getMethod() {
             Method[] methods = getClass().getDeclaredMethods();
             for (Method method : methods) {
-                if (method.getName().equals(APPLIER_METHOD_NAME)) {
+                if (method.getName()
+                          .equals(APPLIER_METHOD_NAME)) {
                     method.setAccessible(true);
                     return method;
                 }

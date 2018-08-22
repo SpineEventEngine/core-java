@@ -84,7 +84,7 @@ public class ProjectionEventDeliveryTestEnv {
         }
 
         @Subscribe
-        public void on(PrjProjectCreated event) {
+        void on(PrjProjectCreated event) {
             stats.recordCallingThread(getId());
         }
 

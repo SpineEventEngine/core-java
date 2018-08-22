@@ -22,7 +22,11 @@ package io.spine.server.aggregate;
 
 import io.spine.core.Event;
 
+import java.util.Collection;
+import java.util.List;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 
 /**
  * An {@link Aggregate} write operation.
@@ -35,40 +39,88 @@ final class Write<I> {
 
     private final AggregateStorage<I> storage;
     private final Aggregate<I, ?, ?> aggregate;
+    private final I id;
     private final int snapshotTrigger;
 
-    private Write(Builder<I> builder) {
-        this.storage = builder.repository.aggregateStorage();
-        this.snapshotTrigger = builder.repository.getSnapshotTrigger();
-        this.aggregate = builder.aggregate;
+    private Write(AggregateStorage<I> storage,
+                  Aggregate<I, ?, ?> aggregate,
+                  I id,
+                  int snapshotTrigger) {
+        this.storage = storage;
+        this.aggregate = aggregate;
+        this.id = id;
+        this.snapshotTrigger = snapshotTrigger;
+    }
+
+    /**
+     * Creates a new instance of {@code Write} operation.
+     *
+     * <p>The resulting operation stores the given {@link Aggregate} into the given
+     * {@link AggregateRepository}.
+     *
+     * @param repository the target {@link AggregateRepository}
+     * @param aggregate  the {@link Aggregate} to write
+     * @param <I>        the type of the aggregate ID
+     * @return new {@code Write} operation
+     */
+    static <I> Write<I> operationFor(AggregateRepository<I, ?> repository,
+                                     Aggregate<I, ?, ?> aggregate) {
+        checkNotNull(repository);
+        checkNotNull(aggregate);
+
+        AggregateStorage<I> storage = repository.aggregateStorage();
+        int snapshotTrigger = repository.getSnapshotTrigger();
+        I id = aggregate.getId();
+        return new Write<>(storage, aggregate, id, snapshotTrigger);
     }
 
     /**
      * Performs this write operation.
      */
     void perform() {
-        I id = aggregate.getId();
-        int eventCount = storage.readEventCountAfterLastSnapshot(id);
         UncommittedEvents uncommittedEvents = aggregate.getUncommittedEvents();
-        for (Event event : uncommittedEvents.list()) {
-            eventCount = writeEvent(event, eventCount);
+        List<Event> eventsToStore = uncommittedEvents.list();
+        writeEvents(eventsToStore);
+    }
+
+    private void writeEvents(List<Event> events) {
+        int eventCount = storage.readEventCountAfterLastSnapshot(aggregate.getId());
+        Collection<Event> eventBatch = newArrayListWithCapacity(snapshotTrigger);
+        for (Event event : events) {
+            eventBatch.add(event);
+            eventCount++;
+            if (eventCount >= snapshotTrigger) {
+                persist(events, aggregate.toSnapshot());
+                aggregate.clearRecentHistory();
+                eventBatch.clear();
+                eventCount = 0;
+            }
+        }
+        if (!eventBatch.isEmpty()) {
+            persist(eventBatch);
         }
         commit(eventCount);
     }
 
-    private int writeEvent(Event event, int eventCount) {
-        storage.writeEvent(aggregate.getId(), event);
-        int newEventCount = eventCount + 1;
-        if (newEventCount >= snapshotTrigger) {
-            writeSnapshot(aggregate);
-            newEventCount = 0;
-        }
-        return newEventCount;
+    private void persist(Collection<Event> events, Snapshot snapshot) {
+        AggregateStateRecord record = AggregateStateRecord
+                .newBuilder()
+                .addAllEvent(events)
+                .setSnapshot(snapshot)
+                .build();
+        persist(record);
     }
 
-    private void writeSnapshot(Aggregate<I, ? ,?> aggregate) {
-        Snapshot snapshot = aggregate.toSnapshot();
-        storage.writeSnapshot(aggregate.getId(), snapshot);
+    private void persist(Collection<Event> events) {
+        AggregateStateRecord record = AggregateStateRecord
+                .newBuilder()
+                .addAllEvent(events)
+                .build();
+        persist(record);
+    }
+
+    private void persist(AggregateStateRecord record) {
+        storage.write(id, record);
     }
 
     private void commit(int eventCount) {
@@ -77,61 +129,6 @@ final class Write<I> {
 
         if (aggregate.lifecycleFlagsChanged()) {
             storage.writeLifecycleFlags(aggregate.getId(), aggregate.getLifecycleFlags());
-        }
-    }
-
-    /**
-     * Creates a new {@link Builder} for a {@code Write} operation.
-     *
-     * @param <I> the type of ID of the {@link Aggregate} which is written
-     * @return new {@link Builder}
-     */
-    static <I> Builder<I> operation() {
-        return new Builder<>();
-    }
-
-    /**
-     * A builder for a {@code Write} operation.
-     *
-     * @param <I> the type of ID of the {@link Aggregate} which is written
-     */
-    static final class Builder<I> {
-
-        private AggregateRepository<I, ? extends Aggregate<I, ?, ?>> repository;
-        private Aggregate<I, ?, ?> aggregate;
-
-        /**
-         * Prevents direct instantiation.
-         */
-        private Builder() {
-        }
-
-        /**
-         * @param aggregate the {@link Aggregate} to store
-         */
-        Builder<I> write(Aggregate<I, ?, ?> aggregate) {
-            this.aggregate = checkNotNull(aggregate);
-            return this;
-        }
-
-        /**
-         * @param repository the {@link AggregateRepository} to store the aggregate into
-         */
-        Builder<I> into(AggregateRepository<I, ? extends Aggregate<I, ?, ?>> repository) {
-            this.repository = checkNotNull(repository);
-            return this;
-        }
-
-        /**
-         * Creates a new instance of {@code Write} with the set attributes.
-         *
-         * @return new instance of {@code Write} operation
-         */
-        Write<I> prepare() {
-            checkNotNull(aggregate);
-            checkNotNull(repository);
-
-            return new Write<>(this);
         }
     }
 }

@@ -28,6 +28,7 @@ import io.spine.base.Errors;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.event.RejectionEnvelope;
 import io.spine.string.Stringifiers;
 import io.spine.system.server.MarkCommandAsErrored;
 import io.spine.system.server.MarkCommandAsRejected;
@@ -36,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.command.Rejection.causedByRejection;
+import static io.spine.server.command.Rejections.causedByRejection;
 import static java.lang.String.format;
 
 /**
@@ -75,7 +76,7 @@ public final class CommandErrorHandler {
      * @return the result of the error handing
      */
     @CanIgnoreReturnValue
-    public HandledError handleError(CommandEnvelope envelope, RuntimeException exception) {
+    public CaughtError handleError(CommandEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
 
@@ -87,22 +88,22 @@ public final class CommandErrorHandler {
         }
     }
 
-    private HandledError handleRejection(CommandEnvelope envelope, RuntimeException exception) {
-        Rejection rejection = Rejection.fromThrowable(envelope, exception);
+    private CaughtError handleRejection(CommandEnvelope envelope, RuntimeException exception) {
+        RejectionEnvelope rejection = RejectionEnvelope.from(envelope, exception);
         markRejected(envelope, rejection);
-        return HandledError.ofRejection(exception, envelope);
+        return CaughtError.ofRejection(exception, envelope);
     }
 
-    private HandledError handleRuntimeError(CommandEnvelope envelope, RuntimeException exception) {
-        if (isPreProcessed(exception)) {
-            return HandledError.ofPreProcessed();
+    private CaughtError handleRuntimeError(CommandEnvelope envelope, RuntimeException exception) {
+        if (isHandled(exception)) {
+            return CaughtError.handled();
         } else {
             return handleNewRuntimeError(envelope, exception);
         }
     }
 
-    private HandledError handleNewRuntimeError(CommandEnvelope envelope,
-                                               RuntimeException exception) {
+    private CaughtError handleNewRuntimeError(CommandEnvelope envelope,
+                                              RuntimeException exception) {
         String commandTypeName = envelope.getMessage()
                                          .getClass()
                                          .getName();
@@ -112,10 +113,22 @@ public final class CommandErrorHandler {
                     exception);
         Error error = Errors.causeOf(exception);
         markErrored(envelope, error);
-        return HandledError.ofRuntime(exception);
+        return CaughtError.ofRuntime(exception);
     }
 
-    private static boolean isPreProcessed(RuntimeException exception) {
+    /**
+     * Determined if the given {@code exception} was previously handled by
+     * a {@code CommandErrorHandler}.
+     *
+     * <p>When a {@code CommandErrorHandler} rethrows a caught exception, it always wraps it into
+     * a {@link CommandDispatchingException}. If the exception is NOT an instance of
+     * {@link CommandDispatchingException}, it is NOT considered handled. Otherwise,
+     * the exception IS considered handled.
+     *
+     * @param exception the {@link RuntimeException} to check
+     * @return {@code true} if the given {@code exception} is handled, {@code false} otherwise
+     */
+    private static boolean isHandled(RuntimeException exception) {
         return exception instanceof CommandDispatchingException;
     }
 
@@ -129,13 +142,13 @@ public final class CommandErrorHandler {
         postSystem(systemCommand);
     }
 
-    private void markRejected(CommandEnvelope command, Rejection rejection) {
+    private void markRejected(CommandEnvelope command, RejectionEnvelope rejection) {
         CommandId commandId = command.getId();
 
         MarkCommandAsRejected systemCommand = MarkCommandAsRejected
                 .newBuilder()
                 .setId(commandId)
-                .setRejectionEvent(rejection.asEvent())
+                .setRejectionEvent(rejection.getOuterObject())
                 .build();
         postSystem(systemCommand);
     }

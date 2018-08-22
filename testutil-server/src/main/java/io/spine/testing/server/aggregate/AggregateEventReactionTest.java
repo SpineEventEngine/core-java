@@ -45,6 +45,10 @@ public abstract class AggregateEventReactionTest<I,
                                                  A extends Aggregate<I, S, ?>>
         extends EventReactionTest<I, E, S, A> {
 
+    protected AggregateEventReactionTest(I aggregateId, E eventMessage) {
+        super(aggregateId, eventMessage);
+    }
+
     @Override
     protected List<? extends Message> dispatchTo(A aggregate) {
         Event event = createEvent(message());

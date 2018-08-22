@@ -205,7 +205,7 @@ class MultiTenantCommandBusTest extends AbstractCommandBusTestSuite {
 
         Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
 
-        assertTrue(cmdClasses.contains(CommandClass.of(CmdCreateProject.class)));
-        assertTrue(cmdClasses.contains(CommandClass.of(CmdAddTask.class)));
+        assertTrue(cmdClasses.contains(CommandClass.from(CmdCreateProject.class)));
+        assertTrue(cmdClasses.contains(CommandClass.from(CmdAddTask.class)));
     }
 }

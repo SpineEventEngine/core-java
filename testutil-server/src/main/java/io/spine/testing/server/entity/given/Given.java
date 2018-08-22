@@ -93,7 +93,7 @@ public class Given {
                    B extends ValidatingBuilder<S, ?>>
     ProcessManagerBuilder<P, I, S, B> processManagerOfClass(Class<P> pmClass) {
         checkNotNull(pmClass);
-        ProcessManagerBuilder<P, I, S, B> result = new ProcessManagerBuilder<>();
+        ProcessManagerBuilder<P, I, S, B> result = ProcessManagerBuilder.newInstance();
         result.setResultClass(pmClass);
         return result;
     }

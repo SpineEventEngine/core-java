@@ -24,9 +24,9 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
-import io.spine.testing.server.Rejections.TUFailedToAssignProject;
-import io.spine.testing.server.TUProjectId;
 import io.spine.testing.server.expected.CommandHandlerExpected;
+import io.spine.testing.server.given.entity.TuProjectId;
+import io.spine.testing.server.given.entity.rejection.Rejections.TuFailedToAssignProject;
 
 import java.util.List;
 
@@ -49,12 +49,13 @@ public class CommandExpectedTestEnv {
     }
 
     public static Message rejectionMessage() {
-        TUProjectId entityId = TUProjectId.newBuilder()
+        TuProjectId entityId = TuProjectId.newBuilder()
                                           .setValue("entity ID")
                                           .build();
-        TUFailedToAssignProject rejectionMessage = TUFailedToAssignProject.newBuilder()
-                                                                          .setId(entityId)
-                                                                          .build();
+        TuFailedToAssignProject rejectionMessage = TuFailedToAssignProject
+                .newBuilder()
+                .setId(entityId)
+                .build();
         return rejectionMessage;
     }
 
@@ -99,9 +100,7 @@ public class CommandExpectedTestEnv {
         return expected;
     }
 
-    public static CommandHandlerExpected<UInt64Value> commandExpected(
-
-    ) {
+    public static CommandHandlerExpected<UInt64Value> commandExpected() {
         CommandHandlerExpected<UInt64Value> expected =
                 new CommandHandlerExpected<>(events(),
                                              null,

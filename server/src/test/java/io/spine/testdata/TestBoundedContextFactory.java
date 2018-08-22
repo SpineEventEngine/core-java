@@ -23,8 +23,8 @@ package io.spine.testdata;
 import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.EventEnricher;
 import io.spine.server.stand.Stand;
 
 /**
@@ -78,7 +78,7 @@ public class TestBoundedContextFactory {
                     .build();
         }
 
-        public static BoundedContext newBoundedContext(EventEnricher enricher) {
+        public static BoundedContext newBoundedContext(Enricher enricher) {
             return BoundedContext.newBuilder()
                                  .setMultitenant(true)
                                  .setEventBus(EventBus.newBuilder()

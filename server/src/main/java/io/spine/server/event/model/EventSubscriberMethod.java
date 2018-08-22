@@ -22,17 +22,13 @@ package io.spine.server.event.model;
 
 import com.google.protobuf.Empty;
 import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
-import io.spine.server.model.AbstractHandlerMethod;
-import io.spine.server.model.MethodAccessChecker;
-import io.spine.server.model.MethodPredicate;
 import io.spine.server.model.MethodResult;
+import io.spine.server.model.declare.ParameterSpec;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.reflect.Method;
-import java.util.function.Predicate;
-
-import static io.spine.server.model.MethodAccessChecker.forMethod;
 
 /**
  * A wrapper for an event subscriber method.
@@ -44,79 +40,17 @@ public final class EventSubscriberMethod
         extends EventHandlerMethod<Object, MethodResult<Empty>> {
 
     /** Creates a new instance. */
-    private EventSubscriberMethod(Method method) {
-        super(method);
+    EventSubscriberMethod(Method method, ParameterSpec<EventEnvelope> parameterSpec) {
+        super(method, parameterSpec);
     }
 
     @Override
     public EventClass getMessageClass() {
-        return EventClass.of(rawMessageClass());
-    }
-
-    public static EventSubscriberMethod from(Method method) {
-        return new EventSubscriberMethod(method);
-    }
-
-    /** Returns the factory for filtering and creating event subscriber methods. */
-    public static AbstractHandlerMethod.Factory<EventSubscriberMethod> factory() {
-        return Factory.getInstance();
+        return EventClass.from(rawMessageClass());
     }
 
     @Override
     protected MethodResult<Empty> toResult(Object target, @Nullable Object rawMethodOutput) {
         return MethodResult.empty();
-    }
-
-    /**
-     * The factory for creating {@linkplain EventSubscriberMethod event subscriber} methods.
-     */
-    private static class Factory extends AbstractHandlerMethod.Factory<EventSubscriberMethod> {
-
-        private static final Factory INSTANCE = new Factory();
-
-        private static Factory getInstance() {
-            return INSTANCE;
-        }
-
-        @Override
-        public Class<EventSubscriberMethod> getMethodClass() {
-            return EventSubscriberMethod.class;
-        }
-
-        @Override
-        public Predicate<Method> getPredicate() {
-            return Filter.INSTANCE;
-        }
-
-        @Override
-        public void checkAccessModifier(Method method) {
-            MethodAccessChecker checker = forMethod(method);
-            checker.checkPublic("Event subscriber `{}` must be declared `public`");
-        }
-
-        @Override
-        protected EventSubscriberMethod doCreate(Method method) {
-            return from(method);
-        }
-    }
-
-    /**
-     * The predicate class allowing to filter event subscriber methods.
-     *
-     * <p>Please see {@link Subscribe} annotation for more information.
-     */
-    private static class Filter extends EventMethodPredicate {
-
-        private static final MethodPredicate INSTANCE = new Filter();
-
-        private Filter() {
-            super(Subscribe.class);
-        }
-
-        @Override
-        protected boolean verifyReturnType(Method method) {
-            boolean isVoid = Void.TYPE.equals(method.getReturnType());
-            return isVoid;
-        }
     }
 }

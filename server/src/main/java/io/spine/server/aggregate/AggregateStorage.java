@@ -99,6 +99,9 @@ public abstract class AggregateStorage<I>
             AggregateEventRecord record = toStorageRecord(event);
             writeRecord(id, record);
         }
+        if (events.hasSnapshot()) {
+            writeSnapshot(id, events.getSnapshot());
+        }
     }
 
     /**

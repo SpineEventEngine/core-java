@@ -114,7 +114,7 @@ public class EventBus
     private @Nullable EventValidator eventValidator;
 
     /** The enricher for posted events or {@code null} if the enrichment is not supported. */
-    private final @Nullable EventEnricher enricher;
+    private final @Nullable Enricher enricher;
 
     /** Creates new instance by the passed builder. */
     private EventBus(Builder builder) {
@@ -294,7 +294,7 @@ public class EventBus
          * <p>If not set, the enrichments will NOT be supported
          * in the {@code EventBus} instance built.
          */
-        private @Nullable EventEnricher enricher;
+        private @Nullable Enricher enricher;
 
         /** Logging level for posted events.  */
         private LoggingObserver.Level logLevelForPost = Level.TRACE;
@@ -385,21 +385,21 @@ public class EventBus
         }
 
         /**
-         * Sets a custom {@link EventEnricher} for events posted to
+         * Sets a custom {@link Enricher} for events posted to
          * the {@code EventBus} which is being built.
          *
-         * <p>If the {@code EventEnricher} is not set, the enrichments
+         * <p>If the {@code Enricher} is not set, the enrichments
          * will <strong>NOT</strong> be supported for the {@code EventBus} instance built.
          *
-         * @param enricher the {@code EventEnricher} for events or {@code null} if enrichment is
+         * @param enricher the {@code Enricher} for events or {@code null} if enrichment is
          *                 not supported
          */
-        public Builder setEnricher(EventEnricher enricher) {
+        public Builder setEnricher(Enricher enricher) {
             this.enricher = enricher;
             return this;
         }
 
-        public Optional<EventEnricher> getEnricher() {
+        public Optional<Enricher> getEnricher() {
             return Optional.ofNullable(enricher);
         }
 

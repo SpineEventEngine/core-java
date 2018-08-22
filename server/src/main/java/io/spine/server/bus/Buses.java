@@ -28,7 +28,7 @@ import io.spine.core.Ack;
 import io.spine.core.Event;
 import io.spine.core.Responses;
 import io.spine.core.Status;
-import io.spine.server.command.Rejection;
+import io.spine.server.event.RejectionEnvelope;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -83,11 +83,11 @@ public class Buses {
      * @param cause the cause of the message rejection
      * @return the {@code Ack} response with the given message ID
      */
-    public static Ack reject(Message id, Rejection cause) {
-        checkNotNull(cause);
+    public static Ack reject(Message id, RejectionEnvelope cause) {
+        checkNotNull(id);
         checkNotNull(cause);
 
-        Event event = cause.asEvent();
+        Event event = cause.getOuterObject();
         checkArgument(isNotDefault(event));
         Status status = Status
                 .newBuilder()

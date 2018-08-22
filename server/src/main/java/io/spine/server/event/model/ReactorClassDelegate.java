@@ -20,16 +20,9 @@
 
 package io.spine.server.event.model;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.core.EventClass;
-import io.spine.server.model.HandlerMethod;
-import io.spine.server.model.MessageHandlerMap;
-import io.spine.server.model.ModelClass;
+import io.spine.server.event.EventReceiver;
 import io.spine.type.MessageClass;
-
-import java.util.Set;
-
-import static com.google.common.collect.ImmutableSet.copyOf;
 
 /**
  * The helper class for holding messaging information on behalf of another model class.
@@ -38,35 +31,18 @@ import static com.google.common.collect.ImmutableSet.copyOf;
  * @author Alex Tymchenko
  * @author Alexander Yevsyukov
  */
-public final class ReactorClassDelegate<T> extends ModelClass<T> implements ReactorClass {
+public final class ReactorClassDelegate<T extends EventReceiver>
+        extends EventReceivingClassDelegate<T, EventReactorMethod>
+        implements ReactingClass {
 
     private static final long serialVersionUID = 0L;
 
-    private final MessageHandlerMap<EventClass, EventReactorMethod> eventReactions;
-
-    private final ImmutableSet<EventClass> domesticEventReactions;
-    private final ImmutableSet<EventClass> externalEventReactions;
-
     public ReactorClassDelegate(Class<T> cls) {
-        super(cls);
-        this.eventReactions = new MessageHandlerMap<>(cls, EventReactorMethod.factory());
-
-        this.domesticEventReactions = eventReactions.getMessageClasses(HandlerMethod::isDomestic);
-        this.externalEventReactions = eventReactions.getMessageClasses(HandlerMethod::isExternal);
-    }
-
-    @Override
-    public Set<EventClass> getEventReactions() {
-        return copyOf(domesticEventReactions);
-    }
-
-    @Override
-    public Set<EventClass> getExternalEventReactions() {
-        return copyOf(externalEventReactions);
+        super(cls, new EventReactorSignature());
     }
 
     @Override
     public EventReactorMethod getReactor(EventClass eventClass, MessageClass originClass) {
-        return eventReactions.getMethod(eventClass, originClass);
+        return getMethod(eventClass, originClass);
     }
 }

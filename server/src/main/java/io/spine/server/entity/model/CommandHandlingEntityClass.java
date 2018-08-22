@@ -23,6 +23,7 @@ package io.spine.server.entity.model;
 import io.spine.annotation.Internal;
 import io.spine.core.CommandClass;
 import io.spine.server.command.model.CommandHandlerMethod;
+import io.spine.server.command.model.CommandHandlerSignature;
 import io.spine.server.command.model.CommandHandlingClass;
 import io.spine.server.entity.Entity;
 import io.spine.server.model.MessageHandlerMap;
@@ -44,12 +45,16 @@ public abstract class CommandHandlingEntityClass<E extends Entity>
 
     protected CommandHandlingEntityClass(Class<E> cls) {
         super(cls);
-        this.commands = new MessageHandlerMap<>(cls, CommandHandlerMethod.factory());
+        this.commands = MessageHandlerMap.create(cls, new CommandHandlerSignature());
     }
 
     @Override
     public Set<CommandClass> getCommands() {
         return commands.getMessageClasses();
+    }
+
+    public boolean handlesCommand(CommandClass commandClass) {
+        return commands.containsClass(commandClass);
     }
 
     @Override

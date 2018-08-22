@@ -46,33 +46,49 @@ public interface HandlerMethod<T,
                                E extends MessageEnvelope<?, ?, ?>,
                                R extends MethodResult> {
 
+    /**
+     * @return the type of the incoming message class
+     */
     M getMessageClass();
 
+    /**
+     * Creates a new instance of {@link HandlerKey handler key} for this method.
+     *
+     * @return the key of the handler method
+     */
     HandlerKey key();
 
+    /**
+     * @return the set of method attributes configured for this method
+     */
     Set<MethodAttribute<?>> getAttributes();
 
+    /**
+     * @return the handling method
+     */
     Method getRawMethod();
 
     /**
      * Invokes the method to handle {@code message} with the {@code context}.
      *
-     * @param target   the target object on which call the method
-     * @param envelope the {@link MessageEnvelope} wrapping the method arguments
+     * @param target
+     *         the target object on which call the method
+     * @param envelope
+     *         the {@link MessageEnvelope} wrapping the method arguments
      * @return the result of message handling
      */
     @CanIgnoreReturnValue
     R invoke(T target, E envelope);
 
     /**
-     * Verifies if the passed method is {@linkplain ExternalAttribute#EXTERNAL external}.
+     * Tells if the passed method is {@linkplain ExternalAttribute#EXTERNAL external}.
      */
     default boolean isExternal() {
         return getAttributes().contains(ExternalAttribute.EXTERNAL);
     }
 
     /**
-     * Verifies if the passed method is domestic, that is not marked as
+     * Tells if the passed method is domestic, that is not marked as
      * {@linkplain ExternalAttribute#EXTERNAL external}).
      */
     default boolean isDomestic() {
@@ -86,9 +102,11 @@ public interface HandlerMethod<T,
      * <p>This method is for checking that an {@code external} attribute of a message context
      * matches the one set for the handler method.
      *
-     * @param expectedValue an expected value of the {@code external} attribute
+     * @param expectedValue
+     *         an expected value of the {@code external} attribute
+     * @throws IllegalArgumentException
+     *         is thrown if the value does not meet the expectation.
      * @see ExternalAttribute
-     * @throws IllegalArgumentException is thrown if the value does not meet the expectation.
      */
     default void ensureExternalMatch(boolean expectedValue) {
         checkArgument(isExternal() == expectedValue,

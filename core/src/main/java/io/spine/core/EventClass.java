@@ -45,7 +45,7 @@ public class EventClass extends MessageClass {
      * @param value a value to hold
      * @return new instance
      */
-    public static EventClass of(Class<? extends Message> value) {
+    public static EventClass from(Class<? extends Message> value) {
         return new EventClass(checkNotNull(value));
     }
 
@@ -63,6 +63,6 @@ public class EventClass extends MessageClass {
      */
     public static EventClass of(Message eventOrMessage) {
         Message eventMessage = Events.ensureMessage(eventOrMessage);
-        return of(eventMessage.getClass());
+        return from(eventMessage.getClass());
     }
 }

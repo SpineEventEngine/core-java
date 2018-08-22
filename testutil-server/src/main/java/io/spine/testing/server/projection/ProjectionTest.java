@@ -48,16 +48,22 @@ public abstract class ProjectionTest<I,
                                      P extends Projection<I, S, ?>>
         extends EventSubscriptionTest<I, M, S, P> {
 
+    protected ProjectionTest(I projectionId, M eventMessage) {
+        super(projectionId, eventMessage);
+    }
+
     @Override
     protected List<? extends Message> dispatchTo(P entity) {
         Event sourceEvent = createEvent();
-        EventContext context = sourceEvent.getContext()
-                                          .toBuilder()
-                                          .setEnrichment(enrichment())
-                                          .build();
-        Event enrichedEvent = sourceEvent.toBuilder()
-                                         .setContext(context)
-                                         .build();
+        EventContext context =
+                sourceEvent.getContext()
+                           .toBuilder()
+                           .setEnrichment(enrichment())
+                           .build();
+        Event enrichedEvent =
+                sourceEvent.toBuilder()
+                           .setContext(context)
+                           .build();
 
         dispatch(entity, enrichedEvent);
         return emptyList();
