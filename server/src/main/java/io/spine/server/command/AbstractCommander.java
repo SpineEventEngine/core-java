@@ -32,14 +32,11 @@ import io.spine.server.command.model.CommandingMethod;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
-import io.spine.string.Stringifiers;
-import io.spine.type.MessageClass;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.command.model.CommanderClass.asCommanderClass;
-import static java.lang.String.format;
 
 /**
  * The abstract base for classes that generate commands in response to incoming messages.
@@ -94,11 +91,9 @@ public abstract class AbstractCommander
     public void onError(EventEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
         checkNotNull(exception);
-        MessageClass messageClass = envelope.getMessageClass();
-        String messageId = Stringifiers.toString(envelope.getId());
-        String errorMessage =
-                format("Unable to create a command from event (class: %s id: %s).",
-                       messageClass, messageId);
-        log().error(errorMessage, exception);
+        _error(exception,
+               "Unable to create a command from event (class: `{}` id: `{}`).",
+               envelope.getMessageClass(),
+               envelope.idAsString());
     }
 }

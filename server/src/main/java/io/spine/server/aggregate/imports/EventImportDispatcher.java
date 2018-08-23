@@ -28,7 +28,6 @@ import io.spine.logging.Logging;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
-import io.spine.string.Stringifiers;
 
 import java.util.Optional;
 import java.util.Set;
@@ -76,7 +75,7 @@ public final class EventImportDispatcher<I> implements EventDispatcher<I>, Loggi
     @Override
     public void onError(EventEnvelope envelope, RuntimeException exception) {
         EventClass eventClass = envelope.getMessageClass();
-        String id = Stringifiers.toString(envelope.getId());
+        String id = envelope.idAsString();
         _error("Unable to import event class: `{}` id: {``} repository: `{}`",
                eventClass, id, repository);
     }

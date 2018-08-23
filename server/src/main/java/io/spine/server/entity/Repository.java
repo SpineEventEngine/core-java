@@ -32,7 +32,6 @@ import io.spine.server.entity.model.EntityClass;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.string.Stringifiers;
 import io.spine.system.server.SystemGateway;
 import io.spine.type.MessageClass;
 import io.spine.type.TypeUrl;
@@ -335,8 +334,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                             MessageEnvelope envelope,
                             RuntimeException exception) {
         MessageClass messageClass = envelope.getMessageClass();
-        String messageId = Stringifiers.toString(envelope.getId());
-        String errorMessage = format(msgFormat, messageClass, messageId);
+        String errorMessage = format(msgFormat, messageClass, envelope.idAsString());
         _error(errorMessage, exception);
     }
 

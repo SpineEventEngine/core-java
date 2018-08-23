@@ -29,7 +29,6 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.event.RejectionEnvelope;
-import io.spine.string.Stringifiers;
 import io.spine.system.server.MarkCommandAsErrored;
 import io.spine.system.server.MarkCommandAsRejected;
 import io.spine.system.server.SystemGateway;
@@ -107,9 +106,9 @@ public final class CommandErrorHandler {
         String commandTypeName = envelope.getMessage()
                                          .getClass()
                                          .getName();
-        String commandIdAsString = Stringifiers.toString(envelope.getId());
+        String commandId = envelope.idAsString();
         log().error(format("Error dispatching command (class: %s id: %s).",
-                           commandTypeName, commandIdAsString),
+                           commandTypeName, commandId),
                     exception);
         Error error = Errors.causeOf(exception);
         markErrored(envelope, error);

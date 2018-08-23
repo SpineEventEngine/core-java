@@ -88,6 +88,13 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     protected void onError(EventEnvelope envelope, RuntimeException exception) {
-        //TODO:2018-08-22:alexander.yevsyukov: Implement
+        _error(exception,
+               "Error importing event of class `{}` into repository `{}`. " +
+                       "Event message: `{}` context: `{}` id: `{}`",
+               envelope.getMessageClass(),
+               repository(),
+               envelope.getMessage(),
+               envelope.getMessageClass(),
+               envelope.idAsString());
     }
 }
