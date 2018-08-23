@@ -46,6 +46,7 @@ message EntProjectStarted {
 message EntTaskRenamed {
     TaskId task_id = 1;
     string new_name = 2;
+    ProjectId project_id = 3;
 }
 
 message EntTaskChanged {

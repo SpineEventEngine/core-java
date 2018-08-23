@@ -21,14 +21,23 @@
 package io.spine.server.entity.given;
 
 import com.google.protobuf.Message;
+import io.spine.core.ActorContext;
 import io.spine.core.Command;
+import io.spine.core.CommandContext;
 import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.core.TenantId;
 import io.spine.test.entity.ProjectId;
+import io.spine.test.entity.Task;
+import io.spine.test.entity.TaskId;
+import io.spine.test.entity.command.EntAddTask;
 import io.spine.test.entity.command.EntCreateProject;
 import io.spine.test.entity.command.EntStartProject;
+import io.spine.test.entity.event.EntTaskRenamed;
 import io.spine.testing.client.TestActorRequestFactory;
 import io.spine.testing.server.TestEventFactory;
+
+import java.util.Random;
 
 import static io.spine.base.Identifier.newUuid;
 
@@ -42,27 +51,61 @@ public class IdempotencyGuardTestEnv {
     }
 
     public static ProjectId newProjectId() {
-        return ProjectId.newBuilder()
-                        .setId(newUuid())
-                        .build();
+        return ProjectId
+                .newBuilder()
+                .setId(newUuid())
+                .build();
+    }
+
+    public static TaskId newTaskId() {
+        @SuppressWarnings("UnsecureRandomNumberGeneration") // OK for tests.
+        int value = new Random().nextInt();
+        return TaskId
+                .newBuilder()
+                .setId(value)
+                .build();
     }
 
     public static TenantId newTenantId() {
-        return TenantId.newBuilder()
-                       .setValue(newUuid())
-                       .build();
+        return TenantId
+                .newBuilder()
+                .setValue(newUuid())
+                .build();
     }
 
     public static EntCreateProject createProject(ProjectId projectId) {
-        return EntCreateProject.newBuilder()
-                               .setProjectId(projectId)
-                               .build();
+        return EntCreateProject
+                .newBuilder()
+                .setProjectId(projectId)
+                .build();
     }
 
     public static EntStartProject startProject(ProjectId projectId) {
-        return EntStartProject.newBuilder()
-                              .setProjectId(projectId)
-                              .build();
+        return EntStartProject
+                .newBuilder()
+                .setProjectId(projectId)
+                .build();
+    }
+
+    public static EntAddTask addTask(ProjectId projectId, TaskId taskId) {
+        Task task = Task
+                .newBuilder()
+                .setTaskId(taskId)
+                .build();
+        return EntAddTask
+                .newBuilder()
+                .setProjectId(projectId)
+                .setTask(task)
+                .build();
+    }
+
+    public static EntTaskRenamed taskRenamed(TaskId id, String newName, ProjectId projectId) {
+        return EntTaskRenamed
+                .newBuilder()
+                .setTaskId(id)
+                .setNewName(newName)
+                .setProjectId(projectId)
+                .build();
     }
 
     public static Command command(Message commandMessage, TenantId tenantId) {
@@ -74,8 +117,36 @@ public class IdempotencyGuardTestEnv {
         return TestActorRequestFactory.newInstance(IdempotencyGuardTestEnv.class, tenantId);
     }
 
-    public static Event event(Message eventMessage) {
-        TestEventFactory factory = TestEventFactory.newInstance(IdempotencyGuardTestEnv.class);
-        return factory.createEvent(eventMessage);
+    public static Event event(Message eventMessage, TenantId tenantId) {
+        TestEventFactory factory = newEventFactory();
+        Event event = factory.createEvent(eventMessage);
+        Event result = setTenant(event, tenantId);
+        return result;
+    }
+
+    private static TestEventFactory newEventFactory() {
+        return TestEventFactory.newInstance(IdempotencyGuardTestEnv.class);
+    }
+
+    private static Event setTenant(Event origin, TenantId tenantId) {
+        EventContext originContext = origin.getContext();
+        CommandContext originCommandContext = originContext.getCommandContext();
+        ActorContext actorContext = originCommandContext
+                .getActorContext()
+                .toBuilder()
+                .setTenantId(tenantId)
+                .build();
+        CommandContext commandContext = originCommandContext
+                .toBuilder()
+                .setActorContext(actorContext)
+                .build();
+        EventContext eventContext = originContext
+                .toBuilder()
+                .setCommandContext(commandContext)
+                .build();
+        Event result = origin.toBuilder()
+                             .setContext(eventContext)
+                             .build();
+        return result;
     }
 }

@@ -22,6 +22,9 @@ package io.spine.server.entity.given;
 
 import io.spine.server.aggregate.given.aggregate.AbstractAggregateTestRepository;
 import io.spine.test.entity.ProjectId;
+import io.spine.test.entity.event.EntTaskRenamed;
+
+import static com.google.common.collect.ImmutableSet.of;
 
 /**
  * Test environment repository for {@linkplain io.spine.server.entity.IdempotencyGuardTest
@@ -32,4 +35,12 @@ import io.spine.test.entity.ProjectId;
  */
 public class IgTestAggregateRepository
         extends AbstractAggregateTestRepository<ProjectId, IgTestAggregate> {
+
+    @Override
+    public void onRegistered() {
+        super.onRegistered();
+
+        getEventRouting().route(EntTaskRenamed.class,
+                                (message, context) -> of(message.getProjectId()));
+    }
 }

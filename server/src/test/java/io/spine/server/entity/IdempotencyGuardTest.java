@@ -24,13 +24,18 @@ import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.entity.given.IgTestAggregate;
 import io.spine.server.entity.given.IgTestAggregateRepository;
+import io.spine.server.event.DuplicateEventException;
 import io.spine.test.entity.ProjectId;
+import io.spine.test.entity.TaskId;
+import io.spine.test.entity.event.EntTaskRenamed;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,11 +44,15 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static io.spine.grpc.StreamObservers.noOpObserver;
+import static io.spine.server.entity.given.IdempotencyGuardTestEnv.addTask;
 import static io.spine.server.entity.given.IdempotencyGuardTestEnv.command;
 import static io.spine.server.entity.given.IdempotencyGuardTestEnv.createProject;
+import static io.spine.server.entity.given.IdempotencyGuardTestEnv.event;
 import static io.spine.server.entity.given.IdempotencyGuardTestEnv.newProjectId;
+import static io.spine.server.entity.given.IdempotencyGuardTestEnv.newTaskId;
 import static io.spine.server.entity.given.IdempotencyGuardTestEnv.newTenantId;
 import static io.spine.server.entity.given.IdempotencyGuardTestEnv.startProject;
+import static io.spine.server.entity.given.IdempotencyGuardTestEnv.taskRenamed;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
@@ -61,7 +70,6 @@ class IdempotencyGuardTest {
         boundedContext = BoundedContext.newBuilder()
                                        .setMultitenant(true)
                                        .build();
-
         repository = new IgTestAggregateRepository();
         boundedContext.register(repository);
     }
@@ -149,22 +157,57 @@ class IdempotencyGuardTest {
     @DisplayName("check events and")
     class Events {
 
-        @Test
-        @DisplayName("throw DuplicateEventException when an event was handled recently")
-        void throwExceptionForDuplicateEvent() {
-            TenantId tenantId = newTenantId();
-            ProjectId projectId = newProjectId();
+        private ProjectId projectId;
+        private TaskId taskId;
+        private TenantId tenantId;
+
+        @BeforeEach
+        void setUp() {
+            projectId = newProjectId();
+            taskId = newTaskId();
+            tenantId = newTenantId();
             Command createCommand = command(createProject(projectId), tenantId);
 
             CommandBus commandBus = boundedContext.getCommandBus();
-            StreamObserver<Ack> noOpObserver = noOpObserver();
-            commandBus.post(createCommand, noOpObserver);
+            commandBus.post(createCommand, noOpObserver());
+            commandBus.post(command(addTask(projectId, taskId), tenantId), noOpObserver());
+        }
+
+        @Test
+        @DisplayName("throw DuplicateEventException when an event was handled recently")
+        void throwExceptionForDuplicateEvent() {
+            EntTaskRenamed eventMessage = taskRenamed(taskId, "New fancy name", projectId);
+            Event taskRenamed = event(eventMessage, tenantId);
+            boundedContext.getEventBus()
+                          .post(taskRenamed);
+            IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
+            IdempotencyGuard guard = aggregate.idempotencyGuard();
+            assertThrows(DuplicateEventException.class,
+                         () -> guard.check(EventEnvelope.of(taskRenamed)));
+        }
+
+        @Test
+        @DisplayName("not throw exception if event was not handled")
+        void notThrowForCommandNotHandled() {
+            EntTaskRenamed eventMessage = taskRenamed(taskId, "Completely new name", projectId);
+            Event taskRenamed = event(eventMessage, tenantId);
 
             IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
             IdempotencyGuard guard = aggregate.idempotencyGuard();
-            assertThrows(DuplicateCommandException.class,
-                         () -> guard.check(CommandEnvelope.of(createCommand)));
+            guard.check(EventEnvelope.of(taskRenamed));
         }
 
+        @Test
+        @DisplayName("not throw exception if another event was handled")
+        void notThrowIfAnotherCommandHandled() {
+            EntTaskRenamed eventMessage = taskRenamed(taskId, "Not new name", projectId);
+            Event event = event(eventMessage, tenantId);
+            Event anotherEvent = event(eventMessage, tenantId);
+            boundedContext.getEventBus()
+                          .post(event);
+            IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
+            IdempotencyGuard guard = aggregate.idempotencyGuard();
+            guard.check(EventEnvelope.of(anotherEvent));
+        }
     }
 }
