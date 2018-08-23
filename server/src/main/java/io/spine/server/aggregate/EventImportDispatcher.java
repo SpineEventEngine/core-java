@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <I> the type of aggregate IDs
  * @author Alexander Yevsyukov
  */
-public final class EventImportDispatcher<I> implements EventDispatcher<I>, Logging {
+final class EventImportDispatcher<I> implements EventDispatcher<I>, Logging {
 
     private final AggregateRepository<I, ?> repository;
 
@@ -47,7 +47,7 @@ public final class EventImportDispatcher<I> implements EventDispatcher<I>, Loggi
         this.repository = repository;
     }
 
-    public static <I> EventImportDispatcher<I> of(AggregateRepository<I, ?> repository) {
+    static <I> EventImportDispatcher<I> of(AggregateRepository<I, ?> repository) {
         checkNotNull(repository);
         return new EventImportDispatcher<>(repository);
     }

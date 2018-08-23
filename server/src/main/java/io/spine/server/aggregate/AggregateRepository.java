@@ -148,6 +148,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         BoundedContext boundedContext = getBoundedContext();
         boundedContext.registerCommandDispatcher(this);
         boundedContext.registerEventDispatcher(this);
+        boundedContext.registerImportDispatcher(EventImportDispatcher.of(this));
 
         this.commandErrorHandler = boundedContext.createCommandErrorHandler();
         registerWithSharding();

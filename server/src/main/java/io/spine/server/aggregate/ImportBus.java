@@ -31,12 +31,11 @@ import io.spine.server.bus.DispatcherRegistry;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MessageUnhandled;
 import io.spine.server.bus.UnicastBus;
+import io.spine.server.event.EventDispatcher;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.SystemGateway;
 
 import java.util.Optional;
 
-import static io.spine.server.bus.BusBuilder.FieldCheck.gatewayNotSet;
 import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
 
 /**
@@ -45,17 +44,14 @@ import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
  * @author Alexander Yevsyukov
  */
 public final class ImportBus
-        extends UnicastBus<Event, EventEnvelope, EventClass, EventImportDispatcher<?>> {
+        extends UnicastBus<Event, EventEnvelope, EventClass, EventDispatcher<?>> {
 
     private final ImportValidator validator = new ImportValidator();
     private final DeadImportEventHandler deadImportEventHandler = new DeadImportEventHandler();
-    private final SystemGateway systemGateway;
     private final TenantIndex tenantIndex;
 
     private ImportBus(Builder builder) {
         super(builder);
-        this.systemGateway = builder.systemGateway()
-                                    .orElseThrow(gatewayNotSet());
         this.tenantIndex = builder.tenantIndex()
                                   .orElseThrow(tenantIndexNotSet());
     }
@@ -86,7 +82,7 @@ public final class ImportBus
 
     @Override
     protected void dispatch(EventEnvelope envelope) {
-        EventImportDispatcher<?> dispatcher = getDispatcher(envelope);
+        EventDispatcher<?> dispatcher = getDispatcher(envelope);
         dispatcher.dispatch(envelope);
     }
 
@@ -132,12 +128,12 @@ public final class ImportBus
      * @author Alexander Yevsyukov
      */
     private static final class Registry
-            extends DispatcherRegistry<EventClass, EventImportDispatcher<?>> {
+            extends DispatcherRegistry<EventClass, EventDispatcher<?>> {
 
         @SuppressWarnings("RedundantMethodOverride") // Overrides to open access to the method.
         @Override
         protected
-        Optional<? extends EventImportDispatcher<?>> getDispatcher(EventClass messageClass) {
+        Optional<? extends EventDispatcher<?>> getDispatcher(EventClass messageClass) {
             return super.getDispatcher(messageClass);
         }
     }
