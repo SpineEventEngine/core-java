@@ -117,9 +117,6 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public boolean lifecycleFlagsChanged() {
         return lifecycleFlagsChanged;
@@ -167,9 +164,6 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         updateState(newState, incrementedVersion());
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public Version getVersion() {
         return version;
@@ -200,9 +194,6 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         return version.getTimestamp();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public LifecycleFlags getLifecycleFlags() {
         LifecycleFlags result = this.lifecycleFlags == null

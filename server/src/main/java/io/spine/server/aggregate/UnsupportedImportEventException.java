@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.imports;
+package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
 import io.spine.base.Error;

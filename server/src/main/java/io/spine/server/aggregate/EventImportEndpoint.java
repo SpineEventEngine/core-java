@@ -78,12 +78,16 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
         I id = aggregate.getId();
         Event event = envelope.getOuterObject();
         repository().onImportEvent(id, event);
+        // We do not need to perform anything with the aggregate. It would consume the passed
+        // event when `AggregateEndpoint` would `apply()` the returned event on the aggregate.
+        // Just return the event to be imported.
         return ImmutableList.of(event);
     }
 
     @Override
     protected void onEmptyResult(A aggregate, EventEnvelope envelope) {
-        //TODO:2018-08-22:alexander.yevsyukov: Implement
+        _error("The aggregate `{}` was not modified during the import of the event `{}`.",
+               aggregate, envelope);
     }
 
     @Override

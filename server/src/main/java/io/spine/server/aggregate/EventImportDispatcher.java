@@ -18,14 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.imports;
+package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
-import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessageDispatcher;
 
@@ -69,8 +68,8 @@ public final class EventImportDispatcher<I> implements EventDispatcher<I>, Loggi
     @CanIgnoreReturnValue
     @Override
     public Set<I> dispatch(EventEnvelope envelope) {
-        //TODO:2018-08-23:alexander.yevsyukov: Implement
-        return null;
+        I result = repository.importEvent(envelope);
+        return ImmutableSet.of(result);
     }
 
     @Override

@@ -38,7 +38,6 @@ import io.spine.server.aggregate.model.EventApplier;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.model.CommandHandlerMethod;
 import io.spine.server.entity.EventPlayer;
-import io.spine.server.event.EventFactory;
 import io.spine.server.event.EventReactor;
 import io.spine.server.event.model.EventReactorMethod;
 import io.spine.server.model.EventsResult;
@@ -54,7 +53,6 @@ import static com.google.common.collect.ImmutableList.toImmutableList;
 import static io.spine.base.Time.getCurrentTime;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
-import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**

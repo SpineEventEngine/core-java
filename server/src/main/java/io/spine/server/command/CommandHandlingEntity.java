@@ -26,7 +26,6 @@ import io.spine.base.Identifier;
 import io.spine.change.MessageMismatch;
 import io.spine.change.StringMismatch;
 import io.spine.change.ValueMismatch;
-import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
 import io.spine.server.entity.TransactionalEntity;
@@ -35,24 +34,10 @@ import io.spine.validate.ValidatingBuilder;
 import java.util.List;
 
 /**
- * An entity that can handle commands.
- *
- * <h2>Command handling methods</h2>
- *
- * <p>A command handling method is a {@code public} method that accepts two parameters.
- * The first parameter is a command message of an <strong>exact</strong> type
- * derived from {@code Message}
- * The second (optional) parameter is {@link CommandContext}.
- *
- * <p>The method returns an event message of the specific type, or {@code List} of messages
- * if it produces more than one event.
- *
- * <p>The method may throw one or more throwables derived from
- * {@link io.spine.base.ThrowableMessage ThrowableMessage}.
- * Throwing a {@code ThrowableMessage} indicates that the passed command cannot be handled because
- * of a rejection.
+ * An entity that {@linkplain Assign handles} commands.
  *
  * @author Alexander Yevsyukov
+ * @see io.spine.server.command.Assign @Assign
  */
 public abstract
 class CommandHandlingEntity<I,

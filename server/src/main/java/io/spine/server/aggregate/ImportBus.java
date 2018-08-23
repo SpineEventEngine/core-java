@@ -18,14 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.imports;
+package io.spine.server.aggregate;
 
 import com.google.common.collect.Streams;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
-import io.spine.server.aggregate.ImportEvent;
 import io.spine.server.bus.BusBuilder;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.DispatcherRegistry;
@@ -45,7 +44,7 @@ import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
  *
  * @author Alexander Yevsyukov
  */
-public class ImportBus
+public final class ImportBus
         extends UnicastBus<Event, EventEnvelope, EventClass, EventImportDispatcher<?>> {
 
     private final ImportValidator validator = new ImportValidator();
@@ -97,7 +96,8 @@ public class ImportBus
     }
 
     /**
-     * Does nothing because instances of {@link ImportEvent} are transient.
+     * Updates the {@link io.spine.server.tenant.TenantIndex TenantIndex} with the ID
+     * obtained from the passed events.
      */
     @Override
     protected void store(Iterable<Event> events) {

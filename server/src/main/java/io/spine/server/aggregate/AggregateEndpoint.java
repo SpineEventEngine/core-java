@@ -80,18 +80,6 @@ abstract class AggregateEndpoint<I,
         return producedEvents;
     }
 
-    /* Changes from `master` :
-        @CanIgnoreReturnValue
-    protected final List<? extends Message> dispatchInTx(A aggregate) {
-        M envelope = envelope();
-        List<? extends Message> eventMessages = doDispatch(aggregate, envelope);
-        AggregateTransaction tx = startTransaction(aggregate);
-        aggregate.apply(eventMessages, envelope);
-        tx.commit();
-        return eventMessages;
-    }
-     */
-
     @SuppressWarnings("unchecked") // to avoid massive generic-related issues.
     private AggregateTransaction startTransaction(A aggregate) {
         AggregateTransaction tx = AggregateTransaction.start(aggregate);

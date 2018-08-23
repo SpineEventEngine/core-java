@@ -283,6 +283,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return result;
     }
 
+    /**
+     * Imports the passed event into one of the aggregates.
+     */
+    I importEvent(EventEnvelope envelope) {
+        checkNotNull(envelope);
+        EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(this, envelope);
+        I result = endpoint.handle();
+        return result;
+    }
+
     @Override
     public void onError(EventEnvelope envelope, RuntimeException exception) {
         checkNotNull(envelope);
