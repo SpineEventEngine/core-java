@@ -20,12 +20,8 @@
 
 package io.spine.server.aggregate.imports;
 
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.core.ActorContext;
-import io.spine.core.ActorContextVBuilder;
 import io.spine.core.TenantId;
-import io.spine.core.UserId;
 import io.spine.server.BoundedContext;
 import io.spine.time.Timestamps2;
 import io.spine.time.ZoneId;
@@ -62,33 +58,6 @@ public class Import {
                             "Did you mean to pass `null`?"
             );
         }
-    }
-
-    void importEvent(Message eventMessage, UserId actor, Timestamp timestamp, ZoneId zoneId) {
-        checkNotNull(eventMessage);
-        checkNotNull(actor);
-        checkNotNull(timestamp);
-        checkNotNull(zoneId);
-
-        ActorContext actorContext = createContext(actor, timestamp, zoneId);
-        ImportEnvelope envelope = new ImportEnvelope(eventMessage, actorContext);
-        
-        //TODO:2018-08-20:alexander.yevsyukov: create envelope
-    }
-
-    private ActorContext createContext(UserId actor, Timestamp timestamp, ZoneId zoneId) {
-        ActorContextVBuilder builder = ActorContextVBuilder.newBuilder();
-        if (tenantId != null) {
-            builder.setTenantId(tenantId);
-        }
-        ZoneOffset offset = offsetAt(timestamp, zoneId);
-
-        builder.setActor(actor)
-               .setTimestamp(timestamp)
-               .setZoneId(zoneId)
-               .setZoneOffset(offset);
-
-        return builder.build();
     }
 
     /**
