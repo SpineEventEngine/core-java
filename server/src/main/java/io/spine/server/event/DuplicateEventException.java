@@ -18,39 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server;
+package io.spine.server.event;
 
-import com.google.protobuf.Message;
-import io.spine.core.CommandId;
-import io.spine.core.EventId;
+import io.spine.core.EventEnvelope;
+import io.spine.system.server.EntityHistoryId;
+
+import static io.spine.base.Identifier.unpack;
+import static java.lang.String.format;
 
 /**
- * An implementation of {@link SystemGateway} which never performs an operation.
- *
- * <p>All the methods inherited from {@link SystemGateway} exit without any action or exception.
- *
- * <p>This implementation is used by the system bounded context itself, since there is no system
- * bounded context for a system bounded context.
- *
  * @author Dmytro Dashenkov
  */
-public enum NoOpSystemGateway implements SystemGateway {
+public class DuplicateEventException extends RuntimeException {
 
-    INSTANCE;
+    private static final long serialVersionUID = 0L;
 
-    @Override
-    public void postCommand(Message systemCommand) {
-        // NOP.
+    public DuplicateEventException(EntityHistoryId entity, EventEnvelope event) {
+        super(format(
+                "Duplicate event %s dispatched to %s (ID: %s)",
+                event.getMessageClass(), entity.getTypeUrl(), unpack(entity.getEntityId().getId())
+        ));
     }
-
-    @Override
-    public boolean hasHandled(EntityHistoryId entity, CommandId commandId) {
-        return false;
-    }
-
-    @Override
-    public boolean hasHandled(EntityHistoryId entity, EventId eventId) {
-        return false;
-    }
-
 }

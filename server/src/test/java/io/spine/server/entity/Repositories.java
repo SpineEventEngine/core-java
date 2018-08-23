@@ -18,39 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server;
-
-import com.google.protobuf.Message;
-import io.spine.core.CommandId;
-import io.spine.core.EventId;
+package io.spine.server.entity;
 
 /**
- * An implementation of {@link SystemGateway} which never performs an operation.
- *
- * <p>All the methods inherited from {@link SystemGateway} exit without any action or exception.
- *
- * <p>This implementation is used by the system bounded context itself, since there is no system
- * bounded context for a system bounded context.
+ * A utility for working with {@link Repository} instances in tests.
  *
  * @author Dmytro Dashenkov
  */
-public enum NoOpSystemGateway implements SystemGateway {
+public final class Repositories {
 
-    INSTANCE;
-
-    @Override
-    public void postCommand(Message systemCommand) {
-        // NOP.
+    /**
+     * Prevents the utility class instantiation.
+     */
+    private Repositories() {
     }
 
-    @Override
-    public boolean hasHandled(EntityHistoryId entity, CommandId commandId) {
-        return false;
+    public static void setIdempotencyLimits(Repository<?, ?> repository,
+                                            int forCommands, int forEvents) {
+        repository.setIdempotencySpec(forCommands, forEvents);
     }
-
-    @Override
-    public boolean hasHandled(EntityHistoryId entity, EventId eventId) {
-        return false;
-    }
-
 }

@@ -37,6 +37,7 @@ import "google/protobuf/timestamp.proto";
 import "spine/core/event.proto";
 import "spine/core/command.proto";
 import "spine/system/server/entity_history.proto";
+import "spine/server/entity/repository.proto";
 
 // An event emitted when an entity is created.
 //
@@ -45,8 +46,7 @@ message EntityCreated {
     // The ID of the entity.
     EntityHistoryId id = 1 [(required) = true];
 
-    // The kind of the entity.
-    EntityOption.Kind kind = 2 [(required) = true];
+    spine.server.entity.RepositorySpec repository_spec = 2 [(required) = true];
 }
 
 // An event emitted when an event is dispatched to a subscriber.

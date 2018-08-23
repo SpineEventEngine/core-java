@@ -70,8 +70,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         extends Repository<I, E> {
 
     /** Creates a new instance. */
-    protected RecordBasedRepository() {
-        super();
+    protected RecordBasedRepository(EntityKind kind) {
+        super(kind);
     }
 
     /**
@@ -110,7 +110,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     @Override
-    public E create(I id) {
+    protected E instantiate(I id) {
         E result = entityFactory().create(id);
         return result;
     }

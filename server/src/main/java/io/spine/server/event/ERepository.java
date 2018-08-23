@@ -79,6 +79,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
      *
      * <p>Overrides to open the method to the package.
      */
+    @SuppressWarnings("RedundantMethodOverride") // See doc.
     @Override
     protected RecordStorage<EventId> recordStorage() {
         return super.recordStorage();

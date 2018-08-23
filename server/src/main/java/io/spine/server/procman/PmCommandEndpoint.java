@@ -74,6 +74,7 @@ public class PmCommandEndpoint<I, P extends ProcessManager<I, ?, ?>>
 
     @Override
     protected List<Event> doDispatch(P processManager, CommandEnvelope envelope) {
+        processManager.idempotencyGuard().check(envelope);
         EntityLifecycle lifecycle = repository().lifecycleOf(processManager.getId());
         DispatchCommand dispatch = operationFor(lifecycle, processManager, envelope);
         return dispatch.perform();

@@ -60,7 +60,7 @@ public class RepositoryTestEnv {
         }
 
         @Override
-        public EntityWithUnsupportedId create(Exception id) {
+        protected EntityWithUnsupportedId instantiate(Exception id) {
             return null;
         }
 

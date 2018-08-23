@@ -44,7 +44,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 @CheckReturnValue
 public class TestEventFactory extends EventFactory {
 
-    private TestEventFactory(MessageEnvelope<?, ?, ?> origin, Any producerId, int eventCount) {
+    private TestEventFactory(MessageEnvelope<?, ?, ?> origin, Any producerId) {
         super(origin, producerId);
     }
 
@@ -56,7 +56,7 @@ public class TestEventFactory extends EventFactory {
                                                TestActorRequestFactory requestFactory) {
         checkNotNull(requestFactory);
         CommandEnvelope cmd = requestFactory.generateEnvelope();
-        return new TestEventFactory(cmd, producerId, 1);
+        return new TestEventFactory(cmd, producerId);
     }
 
     public static TestEventFactory newInstance(TestActorRequestFactory requestFactory) {

@@ -55,8 +55,8 @@ public abstract class EventDispatchingRepository<I,
      *
      * @param defaultFunction the default function for getting target entity IDs
      */
-    protected EventDispatchingRepository(EventRoute<I, Message> defaultFunction) {
-        super();
+    protected EventDispatchingRepository(EntityKind kind, EventRoute<I, Message> defaultFunction) {
+        super(kind);
         this.eventRouting = EventRouting.withDefault(defaultFunction);
     }
 

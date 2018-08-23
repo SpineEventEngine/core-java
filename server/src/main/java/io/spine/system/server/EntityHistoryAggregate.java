@@ -64,7 +64,7 @@ final class EntityHistoryAggregate
     EntityCreated handle(CreateEntity command) {
         return EntityCreated.newBuilder()
                             .setId(command.getId())
-                            .setKind(command.getKind())
+                            .setRepositorySpec(command.getRepositorySpec())
                             .build();
     }
 

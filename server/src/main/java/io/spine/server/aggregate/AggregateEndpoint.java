@@ -57,9 +57,8 @@ abstract class AggregateEndpoint<I,
 
         List<Event> produced = dispatchInTx(aggregate);
 
-        // Update lifecycle flags only if the message was handled successfully and flags changed.
         LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();
-        if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
+        if (!flagsBefore.equals(flagsAfter)) {
             storage().writeLifecycleFlags(aggregateId, flagsAfter);
         }
 
@@ -79,18 +78,6 @@ abstract class AggregateEndpoint<I,
         tx.commit();
         return producedEvents;
     }
-
-    /* Changes from `master` :
-        @CanIgnoreReturnValue
-    protected final List<? extends Message> dispatchInTx(A aggregate) {
-        M envelope = envelope();
-        List<? extends Message> eventMessages = doDispatch(aggregate, envelope);
-        AggregateTransaction tx = startTransaction(aggregate);
-        aggregate.apply(eventMessages, envelope);
-        tx.commit();
-        return eventMessages;
-    }
-     */
 
     @SuppressWarnings("unchecked") // to avoid massive generic-related issues.
     private AggregateTransaction startTransaction(A aggregate) {

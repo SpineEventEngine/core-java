@@ -30,15 +30,11 @@ import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventId;
 import io.spine.grpc.MemoizingObserver;
-import io.spine.option.EntityOption;
 import io.spine.people.PersonName;
 import io.spine.server.BoundedContext;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.delivery.InProcessSharding;
-import io.spine.server.delivery.Sharding;
+import io.spine.server.entity.EntityKind;
 import io.spine.server.event.EventStreamQuery;
-import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.system.server.given.EntityHistoryTestEnv.HistoryEventWatcher;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregate;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestAggregatePart;
@@ -49,23 +45,24 @@ import io.spine.system.server.given.EntityHistoryTestEnv.TestProcmanRepository;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestProjection;
 import io.spine.system.server.given.EntityHistoryTestEnv.TestProjectionRepository;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.ShardingReset;
 import io.spine.testing.server.blackbox.CommandMemoizingTap;
 import io.spine.type.TypeUrl;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.util.Optional;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
-import static io.spine.option.EntityOption.Kind.AGGREGATE;
-import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
-import static io.spine.option.EntityOption.Kind.PROJECTION;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.entity.EntityKind.AGGREGATE;
+import static io.spine.server.entity.EntityKind.PROCESS_MANAGER;
+import static io.spine.server.entity.EntityKind.PROJECTION;
 import static io.spine.server.storage.memory.InMemoryStorageFactory.newInstance;
 import static io.spine.system.server.SystemBoundedContexts.systemOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -79,6 +76,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * @author Dmytro Dashenkov
  */
+@ExtendWith(ShardingReset.class)
 @DisplayName("EntityHistory should")
 @SuppressWarnings("InnerClassMayBeStatic")
 class EntityHistoryTest {
@@ -112,13 +110,6 @@ class EntityHistoryTest {
         context.register(new TestProjectionRepository());
         context.register(new TestAggregatePartRepository());
         context.register(new TestProcmanRepository());
-    }
-
-    @AfterEach
-    void tearDown() {
-        Sharding sharding = new InProcessSharding(InMemoryTransportFactory.newInstance());
-        ServerEnvironment.getInstance()
-                         .replaceSharding(sharding);
     }
 
     @Nested
@@ -330,13 +321,13 @@ class EntityHistoryTest {
             assertEquals(command, commandMessage);
         }
 
-        private void checkEntityCreated(EntityOption.Kind entityKind,
+        private void checkEntityCreated(EntityKind entityKind,
                                         TypeUrl entityType) {
             EntityCreated entityCreatedEvent = eventAccumulator.nextEvent(EntityCreated.class);
             assertId(entityCreatedEvent.getId());
             assertEquals(entityType.value(), entityCreatedEvent.getId()
                                                                .getTypeUrl());
-            assertEquals(entityKind, entityCreatedEvent.getKind());
+            assertEquals(entityKind, entityCreatedEvent.getRepositorySpec().getKind());
         }
 
         private void checkEventDispatchedToSubscriber() {

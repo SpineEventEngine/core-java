@@ -17,39 +17,29 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
+
 syntax = "proto3";
 
-package spine.test.entity.event;
+package spine.system.server;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package="io.spine.test.entity.event";
-option java_outer_classname = "EntityEventsProto";
+option (internal_all) = true;
+
+option java_package = "io.spine.system.server";
+option java_outer_classname = "HandledEventsProto";
 option java_multiple_files = true;
 
-import "spine/test/entity/project.proto";
+import "spine/core/event.proto";
+import "spine/system/server/entity_history.proto";
 
-message EntProjectCreated {
-    ProjectId project_id = 1;
-}
+message HandledEvents {
+    option (entity).kind = PROJECTION;
 
-message EntTaskAdded {
-    ProjectId project_id = 1;
-    Task task = 2;
-}
+    EntityHistoryId id = 1;
 
-message EntProjectStarted {
-    ProjectId project_id = 1;
-}
+    repeated core.EventId event = 2;
 
-message EntTaskRenamed {
-    TaskId task_id = 1;
-    string new_name = 2;
-    ProjectId project_id = 3;
-}
-
-message EntTaskChanged {
-    TaskId id = 1;
-    Task new_task = 2;
+    uint32 memory_limit = 3 [(required) = true];
 }

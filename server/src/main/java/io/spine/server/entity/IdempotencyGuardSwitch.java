@@ -18,39 +18,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server;
+package io.spine.server.entity;
 
-import com.google.protobuf.Message;
-import io.spine.core.CommandId;
-import io.spine.core.EventId;
+import io.spine.base.Environment;
+
+import java.util.function.Supplier;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * An implementation of {@link SystemGateway} which never performs an operation.
- *
- * <p>All the methods inherited from {@link SystemGateway} exit without any action or exception.
- *
- * <p>This implementation is used by the system bounded context itself, since there is no system
- * bounded context for a system bounded context.
- *
  * @author Dmytro Dashenkov
  */
-public enum NoOpSystemGateway implements SystemGateway {
+final class IdempotencyGuardSwitch implements Supplier<IdempotencyGuard> {
 
-    INSTANCE;
+    private IdempotencyGuard value;
 
-    @Override
-    public void postCommand(Message systemCommand) {
-        // NOP.
+    /**
+     * Prevents direct instantiation.
+     */
+    private IdempotencyGuardSwitch() {
+    }
+
+    static IdempotencyGuardSwitch newInstance() {
+        return new IdempotencyGuardSwitch();
+    }
+
+    void init(HistoryLog log) {
+        checkNotNull(log);
+        this.value = IdempotencyGuard.lookingAt(log);
     }
 
     @Override
-    public boolean hasHandled(EntityHistoryId entity, CommandId commandId) {
-        return false;
+    public IdempotencyGuard get() {
+        if (value != null) {
+            return value;
+        } else if (Environment.getInstance().isTests()) {
+            value = IdempotencyGuard.lookingAt(DenyingHistory.INSTANCE);
+            return value;
+        } else {
+            throw new IllegalStateException("IdempotencyGuard is not present.");
+        }
     }
-
-    @Override
-    public boolean hasHandled(EntityHistoryId entity, EventId eventId) {
-        return false;
-    }
-
 }

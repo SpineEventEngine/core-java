@@ -42,13 +42,12 @@ import static io.spine.server.entity.TransactionalEntity.GenericParameter.STATE_
  * to modify the state from the descendants.
  *
  * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
 public abstract class TransactionalEntity<I,
                                           S extends Message,
                                           B extends ValidatingBuilder<S, ? extends Message.Builder>>
                       extends AbstractVersionableEntity<I, S> {
-
-    private final RecentHistory recentHistory = new RecentHistory();
 
     /**
      * The flag, which becomes {@code true}, if the state of the entity has been changed
@@ -58,6 +57,8 @@ public abstract class TransactionalEntity<I,
 
     private volatile
     @Nullable Transaction<I, ? extends TransactionalEntity<I, S, B>, S, B> transaction;
+
+    private final IdempotencyGuardSwitch idempotencyGuard = IdempotencyGuardSwitch.newInstance();
 
     /**
      * Creates a new instance.
@@ -70,25 +71,9 @@ public abstract class TransactionalEntity<I,
         super(id);
     }
 
-    /**
-     * Obtains recent history of events of this entity.
-     */
-    protected RecentHistory recentHistory() {
-        return recentHistory;
-    }
-
-    /**
-     * Adds events to the {@linkplain #recentHistory() recent history}.
-     */
-    protected void remember(Iterable<Event> events) {
-        recentHistory.addAll(events);
-    }
-
-    /**
-     * Clears {@linkplain #recentHistory() recent history}.
-     */
-    protected void clearRecentHistory() {
-        recentHistory.clear();
+    @Internal
+    public IdempotencyGuard idempotencyGuard() {
+        return idempotencyGuard.get();
     }
 
     /**
@@ -244,6 +229,11 @@ public abstract class TransactionalEntity<I,
         Class<B> builderClass = TypeInfo.getBuilderClass(cls);
         B builder = ValidatingBuilders.newInstance(builderClass);
         return builder;
+    }
+
+    void setRecentHistory(HistoryLog history) {
+        checkNotNull(history);
+        idempotencyGuard.init(history);
     }
 
     /**

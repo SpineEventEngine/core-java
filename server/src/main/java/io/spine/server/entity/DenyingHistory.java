@@ -18,17 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given.aggregate;
+package io.spine.server.entity;
 
-import io.spine.test.aggregate.ProjectId;
+import io.spine.core.Command;
+import io.spine.core.Event;
+import io.spine.system.server.EntityHistoryId;
 
 /**
- * Test environment repository for {@linkplain io.spine.server.aggregate.IdempotencyGuardTest
- * IdempotencyGuard tests}.
- *
- * @author Mykhailo Drachuk
- * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
-public class IgTestAggregateRepository
-        extends AbstractAggregateTestRepository<ProjectId, IgTestAggregate> {
+public enum DenyingHistory implements HistoryLog {
+
+    INSTANCE;
+
+    @Override
+    public boolean contains(Command command) {
+        return false;
+    }
+
+    @Override
+    public boolean contains(Event event) {
+        return false;
+    }
+
+    @Override
+    public EntityHistoryId id() {
+        return EntityHistoryId.getDefaultInstance();
+    }
 }

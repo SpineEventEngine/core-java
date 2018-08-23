@@ -20,102 +20,119 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableList;
+import io.spine.base.Identifier;
+import io.spine.client.EntityId;
+import io.spine.core.Command;
+import io.spine.core.CommandId;
 import io.spine.core.Event;
+import io.spine.core.EventId;
+import io.spine.system.server.EntityHistoryId;
+import io.spine.system.server.SystemGateway;
+import io.spine.type.TypeUrl;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 
-import java.util.Deque;
-import java.util.Iterator;
-import java.util.Objects;
-
-import static com.google.common.collect.Queues.newArrayDeque;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A copy of recent history of an {@linkplain TransactionalEntity
  * event-sourced entity}.
- *
+ * // TODO:2018-08-08:dmytro.dashenkov: Update doc.
  * <p>Any modifications to this object will not affect the real history of the entity.
  *
  * @author Mykhailo Drachuk
  * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
-public final class RecentHistory {
+public final class RecentHistory implements HistoryLog {
 
-    /**
-     * Holds the history of all events which happened to the aggregate since the last snapshot.
-     *
-     * <p>Most recent event come first.
-     *
-     * @see #iterator()
-     */
-    private final Deque<Event> history = newArrayDeque();
+    private final SystemGateway gateway;
+    private final EntityHistoryId historyId;
 
-    /**
-     * Creates new instance.
-     */
-    RecentHistory() {
-        super();
-    }
-
-    /**
-     * Returns {@code true} if there are no events in the recent history, {@code false} otherwise.
-     */
-    public boolean isEmpty() {
-        return history.isEmpty();
-    }
-
-    /**
-     * Removes all events from the recent history.
-     */
-    void clear() {
-        history.clear();
-    }
-
-    /**
-     * Creates a new iterator over the recent history items.
-     *
-     * <p>The iterator returns events in the reverse chronological order. That is, most recent
-     * event would be returned first.
-     *
-     * @return an events iterator
-     */
-    public Iterator<Event> iterator() {
-        ImmutableList<Event> events = ImmutableList.copyOf(history);
-        return events.iterator();
-    }
-
-    /**
-     * Adds events to the history.
-     *
-     * @param events events in the chronological order
-     */
-    void addAll(Iterable<Event> events) {
-        for (Event event : events) {
-            history.addFirst(event);
-        }
+    private RecentHistory(Builder builder) {
+        this.gateway = builder.gateway;
+        this.historyId = builder.entityId;
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(history);
+    public boolean contains(Command command) {
+        checkNotNull(command);
+        CommandId commandId = command.getId();
+        return gateway.hasHandled(historyId, commandId);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        RecentHistory other = (RecentHistory) obj;
-        return Objects.equals(this.history, other.history);
+    public boolean contains(Event event) {
+        checkNotNull(event);
+        EventId eventId = event.getId();
+        return gateway.hasHandled(historyId, eventId);
     }
 
     @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                          .add("size", history.size())
-                          .toString();
+    public EntityHistoryId id() {
+        return historyId;
+    }
+
+    /**
+     * Creates a new instance of {@code Builder} for {@code RecentHistory} instances.
+     *
+     * @return new instance of {@code Builder}
+     */
+    public static Builder create() {
+        return new Builder();
+    }
+
+    /**
+     * A builder for the {@code RecentHistory} instances.
+     */
+    public static final class Builder {
+
+        private SystemGateway gateway;
+        private @MonotonicNonNull EntityHistoryId entityId;
+
+        private TransactionalEntity<?, ?, ?> entity;
+
+        /**
+         * Prevents direct instantiation.
+         */
+        private Builder() {
+        }
+
+        public Builder of(TransactionalEntity<?, ?, ?> entity) {
+            this.entity = checkNotNull(entity);
+            return this;
+        }
+
+        public Builder readingFrom(SystemGateway system) {
+            this.gateway = checkNotNull(system);
+            return this;
+        }
+
+        /**
+         * Creates a new instance of {@code RecentHistory}.
+         *
+         * @return new instance of {@code RecentHistory}
+         */
+        public RecentHistory build() {
+            checkNotNull(gateway);
+            checkNotNull(entity);
+
+            initEntityId();
+
+            return new RecentHistory(this);
+        }
+
+        private void initEntityId() {
+            Object id = entity.getId();
+            EntityId entityId = EntityId
+                    .newBuilder()
+                    .setId(Identifier.pack(id))
+                    .build();
+            TypeUrl type = TypeUrl.of(entity.getState());
+            this.entityId = EntityHistoryId
+                    .newBuilder()
+                    .setEntityId(entityId)
+                    .setTypeUrl(type.value())
+                    .build();
+        }
     }
 }

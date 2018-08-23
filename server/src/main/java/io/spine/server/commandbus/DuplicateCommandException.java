@@ -85,8 +85,8 @@ public class DuplicateCommandException extends CommandException implements Messa
      */
     private static String aggregateErrorMessage(CommandEnvelope envelope) {
         return format(
-                "The command (class: `%s`, type: `%s`, id: `%s`) cannot be dispatched twice to a "
-                        + "single aggregate.",
+                "The command (class: `%s`, type: `%s`, id: `%s`) cannot be dispatched to a single "
+                        + "aggregate twice.",
                 envelope.getMessageClass()
                         .value()
                         .getName(),

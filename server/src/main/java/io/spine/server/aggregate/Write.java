@@ -91,7 +91,6 @@ final class Write<I> {
             eventCount++;
             if (eventCount >= snapshotTrigger) {
                 persist(events, aggregate.toSnapshot());
-                aggregate.clearRecentHistory();
                 eventBatch.clear();
                 eventCount = 0;
             }

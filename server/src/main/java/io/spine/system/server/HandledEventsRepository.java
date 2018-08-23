@@ -20,37 +20,12 @@
 
 package io.spine.system.server;
 
-import com.google.protobuf.Message;
-import io.spine.core.CommandId;
-import io.spine.core.EventId;
+import io.spine.server.projection.ProjectionRepository;
 
 /**
- * An implementation of {@link SystemGateway} which never performs an operation.
- *
- * <p>All the methods inherited from {@link SystemGateway} exit without any action or exception.
- *
- * <p>This implementation is used by the system bounded context itself, since there is no system
- * bounded context for a system bounded context.
- *
  * @author Dmytro Dashenkov
  */
-public enum NoOpSystemGateway implements SystemGateway {
-
-    INSTANCE;
-
-    @Override
-    public void postCommand(Message systemCommand) {
-        // NOP.
-    }
-
-    @Override
-    public boolean hasHandled(EntityHistoryId entity, CommandId commandId) {
-        return false;
-    }
-
-    @Override
-    public boolean hasHandled(EntityHistoryId entity, EventId eventId) {
-        return false;
-    }
+public class HandledEventsRepository
+        extends ProjectionRepository<EntityHistoryId, HandledEventsProjection, HandledEvents> {
 
 }

@@ -46,7 +46,6 @@ import io.spine.server.model.ReactorMethodResult;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -133,9 +132,6 @@ public abstract class Aggregate<I,
      */
     private UncommittedEvents uncommittedEvents = UncommittedEvents.ofNone();
 
-    /** A guard for ensuring idempotency of messages dispatched by this aggregate. */
-    private IdempotencyGuard idempotencyGuard;
-
     /**
      * Creates a new instance.
      *
@@ -156,14 +152,6 @@ public abstract class Aggregate<I,
      */
     protected Aggregate(I id) {
         super(id);
-        setIdempotencyGuard();
-    }
-
-    /**
-     * Creates and assigns the aggregate an {@link IdempotencyGuard idempotency guard}.
-     */
-    private void setIdempotencyGuard() {
-        idempotencyGuard = new IdempotencyGuard(this);
     }
 
     /**
@@ -203,7 +191,6 @@ public abstract class Aggregate<I,
      */
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope command) {
-        idempotencyGuard.check(command);
         CommandHandlerMethod method = thisClass().getHandler(command.getMessageClass());
         EventsResult result = method.invoke(this, command);
         return result.produceEvents(command);
@@ -263,7 +250,6 @@ public abstract class Aggregate<I,
         List<Event> events = aggregateStateRecord.getEventList();
 
         play(events);
-        remember(events);
     }
 
     /**
@@ -340,13 +326,7 @@ public abstract class Aggregate<I,
         return uncommittedEvents;
     }
 
-    /**
-     * {@linkplain #remember Remembers} the uncommitted events as
-     * the {@link io.spine.server.entity.RecentHistory RecentHistory} and clears them.
-     */
     void commitEvents() {
-        List<Event> recentEvents = uncommittedEvents.list();
-        remember(recentEvents);
         uncommittedEvents = UncommittedEvents.ofNone();
     }
 
@@ -372,29 +352,6 @@ public abstract class Aggregate<I,
                 .setVersion(getVersion())
                 .setTimestamp(getCurrentTime());
         return builder.build();
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Opens the method for the repository.
-     */
-    @Override
-    protected void clearRecentHistory() {
-        super.clearRecentHistory();
-    }
-
-    /**
-     * Creates an iterator of the aggregate event history with reverse traversal.
-     *
-     * <p>The records are returned sorted by timestamp in a descending order (from newer to older).
-     *
-     * <p>The iterator is empty if there's no history for the aggregate.
-     *
-     * @return new iterator instance
-     */
-    protected Iterator<Event> historyBackward() {
-        return recentHistory().iterator();
     }
 
     /**

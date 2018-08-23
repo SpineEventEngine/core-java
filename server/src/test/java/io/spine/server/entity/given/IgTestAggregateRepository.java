@@ -18,39 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.system.server;
+package io.spine.server.entity.given;
 
-import com.google.protobuf.Message;
-import io.spine.core.CommandId;
-import io.spine.core.EventId;
+import io.spine.server.aggregate.given.aggregate.AbstractAggregateTestRepository;
+import io.spine.test.entity.ProjectId;
+import io.spine.test.entity.event.EntTaskRenamed;
+
+import static com.google.common.collect.ImmutableSet.of;
 
 /**
- * An implementation of {@link SystemGateway} which never performs an operation.
+ * Test environment repository for {@linkplain io.spine.server.entity.IdempotencyGuardTest
+ * IdempotencyGuard tests}.
  *
- * <p>All the methods inherited from {@link SystemGateway} exit without any action or exception.
- *
- * <p>This implementation is used by the system bounded context itself, since there is no system
- * bounded context for a system bounded context.
- *
- * @author Dmytro Dashenkov
+ * @author Mykhailo Drachuk
+ * @author Alexander Yevsyukov
  */
-public enum NoOpSystemGateway implements SystemGateway {
-
-    INSTANCE;
-
-    @Override
-    public void postCommand(Message systemCommand) {
-        // NOP.
-    }
+public class IgTestAggregateRepository
+        extends AbstractAggregateTestRepository<ProjectId, IgTestAggregate> {
 
     @Override
-    public boolean hasHandled(EntityHistoryId entity, CommandId commandId) {
-        return false;
-    }
+    public void onRegistered() {
+        super.onRegistered();
 
-    @Override
-    public boolean hasHandled(EntityHistoryId entity, EventId eventId) {
-        return false;
+        getEventRouting().route(EntTaskRenamed.class,
+                                (message, context) -> of(message.getProjectId()));
     }
-
 }

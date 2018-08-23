@@ -23,6 +23,8 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import io.spine.type.TypeUrl;
 
+import static io.spine.server.entity.EntityKind.GENERIC_ENTITY;
+
 /**
  * Implementation of {@link RecordBasedRepository} that manages entities
  * derived from {@link AbstractEntity}.
@@ -45,14 +47,18 @@ public abstract class DefaultRecordBasedRepository<I,
      * specified as the {@code <E>} generic parameter, and with the default
      * {@linkplain #entityConverter() entity storage converter}.
      */
-    protected DefaultRecordBasedRepository() {
-        super();
+    protected DefaultRecordBasedRepository(EntityKind kind) {
+        super(kind);
         @SuppressWarnings("OverridableMethodCallDuringObjectConstruction") // get generic param
         Class<E> entityClass = getEntityClass();
         this.entityFactory = new DefaultEntityFactory<>(entityClass);
         TypeUrl stateType = entityClass().getStateType();
         this.storageConverter = DefaultEntityStorageConverter.forAllFields(stateType,
                                                                            this.entityFactory);
+    }
+
+    protected DefaultRecordBasedRepository() {
+        this(GENERIC_ENTITY);
     }
 
     @Override

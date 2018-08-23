@@ -21,6 +21,8 @@
 package io.spine.system.server;
 
 import com.google.protobuf.Message;
+import io.spine.core.CommandId;
+import io.spine.core.EventId;
 import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -78,6 +80,16 @@ public final class MemoizingGateway implements SystemGateway {
         }.execute();
         checkNotNull(tenantId);
         lastSeenCommand = new MemoizedCommand(systemCommand, tenantId);
+    }
+
+    @Override
+    public boolean hasHandled(EntityHistoryId entity, CommandId commandId) {
+        return NoOpSystemGateway.INSTANCE.hasHandled(entity, commandId);
+    }
+
+    @Override
+    public boolean hasHandled(EntityHistoryId entity, EventId eventId) {
+        return NoOpSystemGateway.INSTANCE.hasHandled(entity, eventId);
     }
 
     /**

@@ -59,8 +59,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.ImmutableList.of;
-import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+import static io.spine.server.entity.EntityKind.AGGREGATE;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -121,7 +121,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     /** Creates a new instance. */
     protected AggregateRepository() {
-        super();
+        super(AGGREGATE);
     }
 
     /**
@@ -159,7 +159,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     @Override
-    public A create(I id) {
+    protected A instantiate(I id) {
         A aggregate = aggregateClass().createEntity(id);
         return aggregate;
     }
@@ -374,7 +374,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             A result = play(id, eventsFromStorage.get());
             return Optional.of(result);
         } else {
-            lifecycleOf(id).onEntityCreated(AGGREGATE);
+            lifecycleOf(id).onEntityCreated(this);
             return Optional.empty();
         }
     }

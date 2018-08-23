@@ -97,8 +97,9 @@ public class ProjectionEndpoint<I, P extends Projection<I, ?, ?>>
 
     @CanIgnoreReturnValue
     @Override
-    protected List<Event> doDispatch(P projection, EventEnvelope event) {
-        projection.play(event.getOuterObject());
+    protected List<Event> doDispatch(P projection, EventEnvelope envelope) {
+        projection.idempotencyGuard().check(envelope);
+        projection.play(envelope.getOuterObject());
         return ImmutableList.of();
     }
 

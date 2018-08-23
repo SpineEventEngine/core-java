@@ -49,8 +49,8 @@ public class BbReportRepository extends AggregateRepository<BbReportId, BbReport
     }
 
     @Override
-    public BbReportAggregate create(BbReportId id) {
-        BbReportAggregate aggregate = super.create(id);
+    protected BbReportAggregate instantiate(BbReportId id) {
+        BbReportAggregate aggregate = super.instantiate(id);
         aggregates.add(aggregate);
         return aggregate;
     }

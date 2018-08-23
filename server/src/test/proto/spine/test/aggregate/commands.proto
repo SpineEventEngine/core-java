@@ -86,3 +86,11 @@ message AggReassignTask {
     AggTaskId task_id = 1;
     spine.core.UserId assignee = 2;
 }
+
+message AggCompleteTask {
+    AggTaskId task_id = 1;
+}
+
+message AggCancelTask {
+    AggTaskId task_id = 1;
+}
