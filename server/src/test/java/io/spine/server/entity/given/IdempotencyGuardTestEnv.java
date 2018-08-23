@@ -22,12 +22,13 @@ package io.spine.server.entity.given;
 
 import com.google.protobuf.Message;
 import io.spine.core.Command;
+import io.spine.core.Event;
 import io.spine.core.TenantId;
-import io.spine.server.aggregate.AggregateTest;
-import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.command.AggCreateProject;
-import io.spine.test.aggregate.command.AggStartProject;
+import io.spine.test.entity.ProjectId;
+import io.spine.test.entity.command.EntCreateProject;
+import io.spine.test.entity.command.EntStartProject;
 import io.spine.testing.client.TestActorRequestFactory;
+import io.spine.testing.server.TestEventFactory;
 
 import static io.spine.base.Identifier.newUuid;
 
@@ -52,24 +53,29 @@ public class IdempotencyGuardTestEnv {
                        .build();
     }
 
-    public static AggCreateProject createProject(ProjectId projectId) {
-        return AggCreateProject.newBuilder()
+    public static EntCreateProject createProject(ProjectId projectId) {
+        return EntCreateProject.newBuilder()
                                .setProjectId(projectId)
                                .build();
     }
 
-    public static AggStartProject startProject(ProjectId projectId) {
-        return AggStartProject.newBuilder()
+    public static EntStartProject startProject(ProjectId projectId) {
+        return EntStartProject.newBuilder()
                               .setProjectId(projectId)
                               .build();
-    }
-
-    public static TestActorRequestFactory newRequestFactory(TenantId tenantId) {
-        return TestActorRequestFactory.newInstance(AggregateTest.class, tenantId);
     }
 
     public static Command command(Message commandMessage, TenantId tenantId) {
         return newRequestFactory(tenantId).command()
                                           .create(commandMessage);
+    }
+
+    private static TestActorRequestFactory newRequestFactory(TenantId tenantId) {
+        return TestActorRequestFactory.newInstance(IdempotencyGuardTestEnv.class, tenantId);
+    }
+
+    public static Event event(Message eventMessage) {
+        TestEventFactory factory = TestEventFactory.newInstance(IdempotencyGuardTestEnv.class);
+        return factory.createEvent(eventMessage);
     }
 }

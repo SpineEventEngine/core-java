@@ -18,26 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given.aggregate;
+package io.spine.server.entity.given;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.test.aggregate.Project;
-import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.ProjectVBuilder;
-import io.spine.test.aggregate.Status;
-import io.spine.test.aggregate.command.AggCreateProject;
-import io.spine.test.aggregate.command.AggStartProject;
-import io.spine.test.aggregate.event.AggProjectCreated;
-import io.spine.test.aggregate.event.AggProjectStarted;
+import io.spine.test.entity.Project;
+import io.spine.test.entity.ProjectId;
+import io.spine.test.entity.ProjectVBuilder;
+import io.spine.test.entity.command.EntCreateProject;
+import io.spine.test.entity.command.EntStartProject;
+import io.spine.test.entity.event.EntProjectCreated;
+import io.spine.test.entity.event.EntProjectStarted;
 
-import static io.spine.server.aggregate.given.Given.EventMessage.projectCreated;
-import static io.spine.server.aggregate.given.Given.EventMessage.projectStarted;
+import static io.spine.test.entity.Project.Status.CREATED;
+import static io.spine.test.entity.Project.Status.STARTED;
 
 /**
- * An aggregate class for {@linkplain
- * io.spine.server.aggregate.IdempotencyGuardTest IdempotencyGuard tests}.
+ * An aggregate class for {@linkplain io.spine.server.entity.IdempotencyGuardTest
+ * IdempotencyGuard tests}.
  *
  * @author Mykhailo Drachuk
  */
@@ -49,29 +48,34 @@ public class IgTestAggregate
     }
 
     @Assign
-    AggProjectCreated handle(AggCreateProject cmd) {
-        AggProjectCreated event = projectCreated(cmd.getProjectId(),
-                                                       cmd.getName());
+    EntProjectCreated handle(EntCreateProject cmd) {
+        EntProjectCreated event = EntProjectCreated
+                .newBuilder()
+                .setProjectId(cmd.getProjectId())
+                .build();
         return event;
     }
 
     @Assign
-    AggProjectStarted handle(AggStartProject cmd) {
-        AggProjectStarted message = projectStarted(cmd.getProjectId());
+    EntProjectStarted handle(EntStartProject cmd) {
+        EntProjectStarted message = EntProjectStarted
+                .newBuilder()
+                .setProjectId(cmd.getProjectId())
+                .build();
         return message;
     }
 
     @Apply
-    void event(AggProjectCreated event) {
+    void event(EntProjectCreated event) {
         getBuilder()
                 .setId(event.getProjectId())
-                .setStatus(Status.CREATED);
+                .setStatus(CREATED);
     }
 
     @Apply
-    void event(AggProjectStarted event) {
+    void event(EntProjectStarted event) {
         getBuilder()
                 .setId(event.getProjectId())
-                .setStatus(Status.STARTED);
+                .setStatus(STARTED);
     }
 }

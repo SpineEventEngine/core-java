@@ -26,11 +26,11 @@ import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
-import io.spine.server.aggregate.given.aggregate.IgTestAggregate;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.DuplicateCommandException;
+import io.spine.server.entity.given.IgTestAggregate;
 import io.spine.server.entity.given.IgTestAggregateRepository;
-import io.spine.test.aggregate.ProjectId;
+import io.spine.test.entity.ProjectId;
 import io.spine.testing.server.model.ModelTests;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,7 +77,7 @@ class IdempotencyGuardTest {
     class Commands {
 
         @Test
-        @DisplayName("throw DuplicateCommandException when command was handled since last snapshot")
+        @DisplayName("throw DuplicateCommandException when a command was handled recently")
         void throwExceptionForDuplicateCommand() {
             TenantId tenantId = newTenantId();
             ProjectId projectId = newProjectId();
@@ -143,5 +143,28 @@ class IdempotencyGuardTest {
             IdempotencyGuard guard = aggregate.idempotencyGuard();
             guard.check(CommandEnvelope.of(startCommand));
         }
+    }
+
+    @Nested
+    @DisplayName("check events and")
+    class Events {
+
+        @Test
+        @DisplayName("throw DuplicateEventException when an event was handled recently")
+        void throwExceptionForDuplicateEvent() {
+            TenantId tenantId = newTenantId();
+            ProjectId projectId = newProjectId();
+            Command createCommand = command(createProject(projectId), tenantId);
+
+            CommandBus commandBus = boundedContext.getCommandBus();
+            StreamObserver<Ack> noOpObserver = noOpObserver();
+            commandBus.post(createCommand, noOpObserver);
+
+            IgTestAggregate aggregate = repository.loadAggregate(tenantId, projectId);
+            IdempotencyGuard guard = aggregate.idempotencyGuard();
+            assertThrows(DuplicateCommandException.class,
+                         () -> guard.check(CommandEnvelope.of(createCommand)));
+        }
+
     }
 }
