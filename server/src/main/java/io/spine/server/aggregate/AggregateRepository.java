@@ -104,7 +104,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             EventRouting.withDefault(EventProducers.fromContext());
 
     /**
-     * The route for event import, which obtains the target aggregate ID as the
+     * The routing for event import, which by default obtains the target aggregate ID as the
      * {@linkplain io.spine.core.EventContext#getProducerId() producer ID} of the event.
      */
     private final EventRouting<I> eventImportRoute =
@@ -315,7 +315,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     /**
-     * Obtains the the route for event import, which uses
+     * Obtains the event import routing, which by default uses
      * {@linkplain io.spine.core.EventContext#getProducerId() producer ID} of the event
      * as the target aggregate ID.
      */
