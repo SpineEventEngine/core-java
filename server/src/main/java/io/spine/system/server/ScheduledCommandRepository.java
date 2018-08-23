@@ -38,6 +38,7 @@ final class ScheduledCommandRepository
         extends ProjectionRepository<CommandId, ScheduledCommand, ScheduledCommandRecord> {
 
     ScheduledCommandRepository() {
+        super();
         EventRouting<CommandId> routing = getEventRouting();
         routing.route(CommandDispatched.class,
                       (message, context) -> routeToExisting(message));

@@ -35,6 +35,7 @@ abstract class SystemRepository<I, A extends Aggregate<I, ?, ?>>
         extends AggregateRepository<I, A> {
 
     SystemRepository() {
+        super();
         getEventImportRouting().replaceDefault(EventProducers.fromFirstMessageField());
     }
 }
