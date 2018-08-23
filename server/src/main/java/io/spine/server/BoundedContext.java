@@ -366,6 +366,11 @@ public abstract class BoundedContext
         return this.integrationBus;
     }
 
+    /** Obtains instance of {@link ImportBus} of this {@code BoundedContext}. */
+    public ImportBus getImportBus() {
+        return this.importBus;
+    }
+
     /** Obtains instance of {@link Stand} of this {@code BoundedContext}. */
     public Stand getStand() {
         return stand;

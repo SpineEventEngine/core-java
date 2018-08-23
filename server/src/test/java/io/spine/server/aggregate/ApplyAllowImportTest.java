@@ -29,7 +29,11 @@ import org.junit.jupiter.api.Test;
 
 import static io.spine.server.aggregate.given.importado.Direction.EAST;
 import static io.spine.server.aggregate.given.importado.Direction.NORTH;
+import static io.spine.server.aggregate.given.importado.Direction.SOUTH;
+import static io.spine.server.aggregate.given.importado.Direction.WEST;
 import static io.spine.server.aggregate.given.importado.MoveMessages.move;
+import static io.spine.server.aggregate.given.importado.MoveMessages.moved;
+import static io.spine.testing.client.blackbox.Count.thrice;
 import static io.spine.testing.client.blackbox.Count.twice;
 import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 
@@ -57,6 +61,21 @@ class ApplyAllowImportTest {
                 .with(new DotSpace())
                 .receivesCommands(move(id, NORTH), move(id, EAST))
                 .assertThat(emittedEvent(Moved.class, twice()))
+                .close();
+    }
+
+    @Test
+    @DisplayName("use event appliers for import")
+    void importingApply() {
+        ObjectId id = ObjectId.newBuilder()
+                              .setValue("LRV")
+                              .build();
+
+        BlackBoxBoundedContext
+                .newInstance()
+                .with(new DotSpace())
+                .importsEvents(moved(id, SOUTH), moved(id, WEST), moved(id, WEST))
+                .assertThat(emittedEvent(Moved.class, thrice()))
                 .close();
     }
 }

@@ -20,64 +20,25 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.annotation.Internal;
-import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.server.event.React;
 
-import java.util.List;
 import java.util.Set;
 
 /**
- * Dispatches events to aggregates of the associated {@code AggregateRepository}.
+ * Abstract base for endpoints that dispatch events to aggregates.
+ *
+ * <p>An aggregate may receive an event if it {@linkplain io.spine.server.event.React reacts} on it,
+ * or if it {@linkplain io.spine.server.aggregate.Apply#allowImport() imports} it.
  *
  * @param <I> the type of the aggregate IDs
  * @param <A> the type of the aggregates
  *
  * @author Alexander Yevsyukov
- * @see React
  */
-@Internal
-public class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
+abstract class AggregateEventEndpoint<I, A extends Aggregate<I, ?, ?>>
         extends AggregateEndpoint<I, A, EventEnvelope, Set<I>> {
 
-    protected AggregateEventEndpoint(AggregateRepository<I, A> repo, EventEnvelope event) {
-        super(repo, event);
-    }
-
-    @Override
-    protected AggregateDelivery<I, A, EventEnvelope, ?, ?> getEndpointDelivery() {
-        return repository().getEventEndpointDelivery();
-    }
-
-    @Override
-    protected List<Event> doDispatch(A aggregate, EventEnvelope envelope) {
-        repository().onDispatchEvent(aggregate.getId(), envelope.getOuterObject());
-        return aggregate.reactOn(envelope);
-    }
-
-    @Override
-    protected void onError(EventEnvelope envelope, RuntimeException exception) {
-        repository().onError(envelope, exception);
-    }
-
-    /**
-     * Does nothing since a state of an aggregate should not be necessarily
-     * updated upon reacting on an event.
-     */
-    @Override
-    protected void onEmptyResult(A aggregate, EventEnvelope envelope) {
-        // Do nothing.
-    }
-
-    /**
-     * Obtains IDs of aggregates that react on the event processed by this endpoint.
-     */
-    @Override
-    protected Set<I> getTargets() {
-        EventEnvelope envelope = envelope();
-        Set<I> ids = repository().getEventRouting()
-                                 .apply(envelope.getMessage(), envelope.getEventContext());
-        return ids;
+    AggregateEventEndpoint(AggregateRepository<I, A> repository, EventEnvelope envelope) {
+        super(repository, envelope);
     }
 }

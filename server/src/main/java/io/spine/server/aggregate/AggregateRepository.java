@@ -58,6 +58,7 @@ import java.util.function.Supplier;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.ImmutableList.of;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
@@ -279,8 +280,15 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Set<I> dispatchEvent(EventEnvelope envelope) {
         checkNotNull(envelope);
-        AggregateEventEndpoint<I, A> endpoint = new AggregateEventEndpoint<>(this, envelope);
+        AggregateEventReactionEndpoint<I, A> endpoint =
+                new AggregateEventReactionEndpoint<>(this, envelope);
         Set<I> result = endpoint.handle();
+        return result;
+    }
+
+    boolean importsEvent(EventClass eventClass) {
+        boolean result = aggregateClass().getImportableEventClasses()
+                                         .contains(eventClass);
         return result;
     }
 
@@ -290,7 +298,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     I importEvent(EventEnvelope envelope) {
         checkNotNull(envelope);
         EventImportEndpoint<I, A> endpoint = new EventImportEndpoint<>(this, envelope);
-        I result = endpoint.handle();
+        Set<I> singleSet = endpoint.handle();
+        checkState(singleSet.size() == 1);
+        I result = singleSet.stream()
+                            .findFirst()
+                            .get();
         return result;
     }
 

@@ -93,7 +93,7 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
     public C get(EntityColumn field) {
         checkNotNull(field);
 
-        Class javaType = field.getPersistedType();
+        Class<?> javaType = field.getPersistedType();
         javaType = Primitives.wrap(javaType);
         C type = null;
 

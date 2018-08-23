@@ -29,6 +29,7 @@ import io.spine.core.Event;
 import io.spine.core.TenantId;
 import io.spine.grpc.MemoizingObserver;
 import io.spine.server.BoundedContext;
+import io.spine.server.aggregate.ImportBus;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
@@ -44,7 +45,6 @@ import io.spine.util.Exceptions;
 import java.util.Collection;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
 import static com.google.common.collect.Lists.newArrayListWithCapacity;
@@ -73,6 +73,7 @@ public class BlackBoxBoundedContext {
     private final TestEventFactory eventFactory;
     private final CommandBus commandBus;
     private final EventBus eventBus;
+    private final ImportBus importBus;
     private final TenantId tenantId;
     private final MemoizingObserver<Ack> observer;
     private final CommandMemoizingTap commandTap;
@@ -93,6 +94,7 @@ public class BlackBoxBoundedContext {
         this.eventFactory = eventFactory(requestFactory);
         this.commandBus = boundedContext.getCommandBus();
         this.eventBus = boundedContext.getEventBus();
+        this.importBus = boundedContext.getImportBus();
         this.observer = memoizingObserver();
     }
 
@@ -151,7 +153,7 @@ public class BlackBoxBoundedContext {
      * @param repositories repositories to register in the Bounded Context
      * @param <I>          the type of IDs used in the repository
      * @param <E>          the type of entities or aggregates
-     * @return current {@link BlackBoxBoundedContext} instance
+     * @return current instance
      */
     @SafeVarargs
     public final <I, E extends Entity<I, ?>> BlackBoxBoundedContext
@@ -172,7 +174,7 @@ public class BlackBoxBoundedContext {
      * Sends off a provided command to the Bounded Context.
      *
      * @param domainCommand a domain command to be dispatched to the Bounded Context
-     * @return current {@link BlackBoxBoundedContext black box} instance
+     * @return current instance
      */
     public BlackBoxBoundedContext receivesCommand(Message domainCommand) {
         return this.receivesCommands(singletonList(domainCommand));
@@ -185,7 +187,7 @@ public class BlackBoxBoundedContext {
      * @param secondCommand a domain command to be dispatched to the Bounded Context second
      * @param otherCommands optional domain commands to be dispatched to the Bounded Context
      *                      in supplied order
-     * @return current {@link BlackBoxBoundedContext black box} instance
+     * @return current instance
      */
     public BlackBoxBoundedContext
     receivesCommands(Message firstCommand, Message secondCommand, Message... otherCommands) {
@@ -196,7 +198,7 @@ public class BlackBoxBoundedContext {
      * Sends off a provided command to the Bounded Context.
      *
      * @param domainCommands a list of domain commands to be dispatched to the Bounded Context
-     * @return current {@link BlackBoxBoundedContext black box} instance
+     * @return current instance
      */
     private BlackBoxBoundedContext receivesCommands(Collection<Message> domainCommands) {
         List<Command> commands = domainCommands.stream()
@@ -213,27 +215,33 @@ public class BlackBoxBoundedContext {
     /**
      * Sends off a provided event to the Bounded Context.
      *
-     * @param domainEvent a domain event to be dispatched to the Bounded Context
-     * @return current {@link BlackBoxBoundedContext black box} instance
+     * @param messageOrEvent
+     *        an event message or {@link Event}. If an instance of {@code Event} is passed, it
+     *        will be posted to {@link EventBus} as is.
+     *        Otherwise, an instance of {@code Event} will be generated basing on the passed
+     *        event message and posted to the bus.
+     * @return current instance
      */
-    public BlackBoxBoundedContext receivesEvent(Message domainEvent) {
-        checkArgument(!(domainEvent instanceof Event), NOT_A_DOMAIN_EVENT_ERROR);
-        return this.receivesEvents(singletonList(domainEvent));
+    public BlackBoxBoundedContext receivesEvent(Message messageOrEvent) {
+        return this.receivesEvents(singletonList(messageOrEvent));
     }
 
     /**
      * Sends off provided events to the Bounded Context.
      *
+     * <p>The method accepts event messages or instances of {@link Event}.
+     * If an instance of {@code Event} is passed, it will be posted to {@link EventBus} as is.
+     * Otherwise, an instance of {@code Event} will be generated basing on the passed event
+     * message and posted to the bus.
+     *
      * @param firstEvent  a domain event to be dispatched to the Bounded Context first
      * @param secondEvent a domain event to be dispatched to the Bounded Context second
      * @param otherEvents optional domain events to be dispatched to the Bounded Context
      *                    in supplied order
-     * @return current {@link BlackBoxBoundedContext black box} instance
+     * @return current instance
      */
     public BlackBoxBoundedContext
     receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
-        checkArgument(!(firstEvent instanceof Event), NOT_A_DOMAIN_EVENT_ERROR);
-        checkArgument(!(secondEvent instanceof Event), NOT_A_DOMAIN_EVENT_ERROR);
         return this.receivesEvents(asList(firstEvent, secondEvent, otherEvents));
     }
 
@@ -241,24 +249,44 @@ public class BlackBoxBoundedContext {
      * Sends off provided events to the Bounded Context.
      *
      * @param domainEvents a list of domain event to be dispatched to the Bounded Context
-     * @return current {@link BlackBoxBoundedContext black box} instance
+     * @return current instance
      */
     private BlackBoxBoundedContext receivesEvents(Collection<Message> domainEvents) {
-        List<Event> events = newArrayListWithCapacity(domainEvents.size());
-        for (Message domainEvent : domainEvents) {
-            events.add(event(domainEvent));
-        }
+        List<Event> events = toEvents(domainEvents);
         eventBus.post(events, observer);
         return this;
     }
 
+    private List<Event> toEvents(Collection<Message> domainEvents) {
+        List<Event> events = newArrayListWithCapacity(domainEvents.size());
+        for (Message domainEvent : domainEvents) {
+            events.add(event(domainEvent));
+        }
+        return events;
+    }
+
+    public BlackBoxBoundedContext
+    importsEvents(Message firstEvent, Message secondEvent, Message ... otherEvents) {
+        return this.importsEvents(asList(firstEvent, secondEvent, otherEvents));
+    }
+
+    private BlackBoxBoundedContext importsEvents(Collection<Message> domainEvents) {
+        List<Event> events = toEvents(domainEvents);
+        importBus.post(events, observer);
+        return this;
+    }
+
     /**
-     * Wraps the provided domain event message in a {@link Event Spine event}.
+     * Generates {@link Event} with the passed instance is an event message. If the passed
+     * instance is {@code Event} returns it.
      *
-     * @param eventMessage a domain event message
-     * @return a newly created command instance
+     * @param eventMessage a domain event message or {@code Event}
+     * @return a newly created {@code Event} instance or passed {@code Event}
      */
     private Event event(Message eventMessage) {
+        if (eventMessage instanceof Event) {
+            return (Event) eventMessage;
+        }
         return eventFactory.createEvent(eventMessage);
     }
 
@@ -270,7 +298,7 @@ public class BlackBoxBoundedContext {
      * Verifies emitted events by the passed verifier.
      *
      * @param verifier a verifier that checks the events emitted in this Bounded Context
-     * @return current {@link BlackBoxBoundedContext black box} instance
+     * @return current instance
      */
     @CanIgnoreReturnValue
     public BlackBoxBoundedContext assertThat(VerifyEvents verifier) {
@@ -289,7 +317,7 @@ public class BlackBoxBoundedContext {
      * unexpected results.
      *
      * @param verifier a verifier that checks the acknowledgements in this Bounded Context
-     * @return current {@link BlackBoxBoundedContext black box} instance
+     * @return current instance
      */
     @CanIgnoreReturnValue
     public BlackBoxBoundedContext assertThat(VerifyAcknowledgements verifier) {
@@ -302,7 +330,7 @@ public class BlackBoxBoundedContext {
      * Verifies emitted commands by the passed verifier.
      *
      * @param verifier a verifier that checks the commands emitted in this Bounded Context
-     * @return current {@link BlackBoxBoundedContext black box} instance
+     * @return current instance
      */
     @CanIgnoreReturnValue
     public BlackBoxBoundedContext assertThat(VerifyCommands verifier) {

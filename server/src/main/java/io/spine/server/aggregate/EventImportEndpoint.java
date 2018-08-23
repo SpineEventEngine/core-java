@@ -21,6 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
@@ -31,28 +32,41 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
 
+/**
+ * The endpoint for importing events into aggregates.
+ *
+ * <p>Importing events one by one uses the same delivery mechanism as in event reaction of
+ * aggregates. But unlike for event reaction, only one aggregate can be a target for event
+ * being imported.
+ *
+ * @author Alexander Yevsyukov
+ * @see io.spine.server.aggregate.Apply#allowImport()
+ */
 class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
-    extends AggregateEndpoint<I, A, EventEnvelope, I> implements Logging {
+    extends AggregateEventEndpoint<I, A> implements Logging {
 
     EventImportEndpoint(AggregateRepository<I, A> repository, EventEnvelope envelope) {
         super(repository, envelope);
     }
 
+    /**
+     * Returns a set with one element of the target aggregate.
+     */
     @Override
-    protected I getTargets() {
+    protected Set<I> getTargets() {
         EventEnvelope envelope = envelope();
         Set<I> ids = repository().getEventImportRouting()
                                  .apply(envelope.getMessage(), envelope.getEventContext());
         int numberOfTargets = ids.size();
         checkState(
                 numberOfTargets > 0,
-                "Cannot get aggregate ID from the event context: `%s`. Event class: `%s`.",
+                "Could not get aggregate ID from the event context: `%s`. Event class: `%s`.",
                 envelope.getEventContext(),
                 envelope.getMessageClass()
         );
 
         checkState(
-                numberOfTargets > 1,
+                numberOfTargets == 1,
                 "Expected one aggregate ID, but got %s (`%s`). Event class: `%s`, context: `%s`.",
                 String.valueOf(numberOfTargets),
                 ids,
@@ -64,7 +78,7 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
                   .findFirst()
                   .get();
         repository().onImportTargetSet(id, envelope.getId());
-        return id;
+        return ImmutableSet.of(id);
     }
 
 
@@ -73,6 +87,12 @@ class EventImportEndpoint<I, A extends Aggregate<I, ?, ?>>
         return repository().getEventEndpointDelivery();
     }
 
+    /**
+     * Notifies the repository about the event being imported and returns the enclosed
+     * {@link Event} instance.
+     *
+     * @return the list with one {@code Event} which is being imported
+     */
     @Override
     protected List<Event> doDispatch(A aggregate, EventEnvelope envelope) {
         I id = aggregate.getId();
