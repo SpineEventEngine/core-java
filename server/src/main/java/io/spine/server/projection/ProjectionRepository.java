@@ -32,7 +32,6 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.delivery.Shardable;
 import io.spine.server.delivery.ShardedStreamConsumer;
 import io.spine.server.delivery.ShardingStrategy;
@@ -55,6 +54,7 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeName;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -125,9 +125,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     @Override
     public void close() {
-        ServerEnvironment.getInstance()
-                         .getSharding()
-                         .unregister(this);
+        unregisterWithSharding();
         super.close();
     }
 
@@ -141,11 +139,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     public void onRegistered() {
         super.onRegistered();
 
-        boolean noEventSubscriptions = getMessageClasses().isEmpty();
+        boolean noEventSubscriptions = !dispatchesEvents();
         if (noEventSubscriptions) {
-            boolean noExternalSubscriptions =
-                    getExternalEventDispatcher().getMessageClasses()
-                                                .isEmpty();
+            boolean noExternalSubscriptions = !dispatchesExternalEvents();
             if (noExternalSubscriptions) {
                 throw newIllegalStateException(
                         "Projections of the repository %s have neither domestic nor external " +
@@ -153,14 +149,15 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
             }
         }
 
-        ServerEnvironment.getInstance()
-                         .getSharding()
-                         .register(this);
+        registerWithSharding();
     }
 
     @Override
-    protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
-        return new ProjectionExternalEventDispatcher();
+    public Optional<ExternalMessageDispatcher<I>> createExternalDispatcher() {
+        if (!dispatchesExternalEvents()) {
+            return Optional.empty();
+        }
+        return Optional.of(new ProjectionExternalEventDispatcher());
     }
 
     /**
@@ -250,6 +247,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     public Set<EventClass> getMessageClasses() {
         return projectionClass().getEventClasses();
+    }
+
+    @Override
+    public Set<EventClass> getExternalEventClasses() {
+        return projectionClass().getExternalEventClasses();
     }
 
     @Override

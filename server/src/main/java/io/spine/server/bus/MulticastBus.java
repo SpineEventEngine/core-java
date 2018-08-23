@@ -27,7 +27,11 @@ import java.util.Collection;
 
 /**
  * A {@code Bus}, which delivers a single message to multiple dispatchers.
- *
+
+ * @param <M> the type of outer objects (containing messages of interest) that are posted to the bus
+ * @param <E> the type of envelopes for outer objects used by this bus
+ * @param <C> the type of message class
+ * @param <D> the type of dispatches used by this bus
  * @author Alex Tymchenko
  */
 public abstract class MulticastBus<M extends Message,

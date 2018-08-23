@@ -30,7 +30,6 @@ import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
-import io.spine.server.ServerEnvironment;
 import io.spine.server.aggregate.model.AggregateClass;
 import io.spine.server.command.CaughtError;
 import io.spine.server.command.CommandErrorHandler;
@@ -42,19 +41,15 @@ import io.spine.server.delivery.UniformAcrossTargets;
 import io.spine.server.entity.EntityLifecycle;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
-import io.spine.server.event.DelegatingEventDispatcher;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventDispatcherDelegate;
 import io.spine.server.event.RejectionEnvelope;
-import io.spine.server.integration.ExternalMessageClass;
-import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.route.CommandRouting;
 import io.spine.server.route.EventProducers;
 import io.spine.server.route.EventRouting;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.system.server.SystemGateway;
 
 import java.util.Optional;
 import java.util.Set;
@@ -90,6 +85,7 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         extends Repository<I, A>
         implements CommandDispatcher<I>,
@@ -107,10 +103,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             EventRouting.withDefault(EventProducers.fromContext());
 
     private final Supplier<AggregateCommandDelivery<I, A>> commandDeliverySupplier =
-            memoize(() -> new AggregateCommandDelivery<>(this));
+            memoize(this::createCommandDelivery);
 
     private final Supplier<AggregateEventDelivery<I, A>> eventDeliverySupplier =
-            memoize(() -> new AggregateEventDelivery<>(this));
+            memoize(this::createEventDelivery);
 
     /**
      * The {@link CommandErrorHandler} tackling the dispatching errors.
@@ -139,57 +135,26 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     public void onRegistered() {
         super.onRegistered();
         BoundedContext boundedContext = getBoundedContext();
+        boundedContext.registerCommandDispatcher(this);
+        boundedContext.registerEventDispatcher(this);
 
-        Set<CommandClass> commandClasses = getMessageClasses();
+        checkNotVoid();
 
-        DelegatingEventDispatcher<I> eventDispatcher = DelegatingEventDispatcher.of(this);
-        Set<EventClass> eventClasses = eventDispatcher.getMessageClasses();
+        this.commandErrorHandler = boundedContext.createCommandErrorHandler();
+        registerWithSharding();
+    }
 
-        ExternalMessageDispatcher<I> extEventDispatcher;
-        extEventDispatcher = eventDispatcher.getExternalDispatcher();
-        Set<ExternalMessageClass> extEventClasses = extEventDispatcher.getMessageClasses();
+    /**
+     * Ensures that this repository dispatches at least one kind of messages.
+     */
+    private void checkNotVoid() {
+        boolean handlesCommands = dispatchesCommands();
+        boolean reactsOnEvents = dispatchesEvents() || dispatchesExternalEvents();
 
-        if (commandClasses.isEmpty() && eventClasses.isEmpty() && extEventClasses.isEmpty()) {
+        if (!handlesCommands && !reactsOnEvents) {
             throw newIllegalStateException(
                     "Aggregates of the repository %s neither handle commands" +
-                            " nor react on events or rejections.", this);
-        }
-
-        registerInCommandBus(boundedContext, commandClasses);
-        registerInEventBus(boundedContext, eventDispatcher, eventClasses);
-
-        registerExtMessageDispatcher(boundedContext, extEventDispatcher, extEventClasses);
-
-        SystemGateway systemGateway = boundedContext.getSystemGateway();
-        this.commandErrorHandler = CommandErrorHandler.with(systemGateway);
-        ServerEnvironment.getInstance()
-                         .getSharding()
-                         .register(this);
-    }
-
-    private void registerExtMessageDispatcher(BoundedContext boundedContext,
-                                              ExternalMessageDispatcher<I> extEventDispatcher,
-                                              Set<ExternalMessageClass> extEventClasses) {
-        if (!extEventClasses.isEmpty()) {
-            boundedContext.getIntegrationBus()
-                          .register(extEventDispatcher);
-        }
-    }
-
-    private void registerInEventBus(BoundedContext boundedContext,
-                                    DelegatingEventDispatcher<I> eventDispatcher,
-                                    Set<EventClass> eventClasses) {
-        if (!eventClasses.isEmpty()) {
-            boundedContext.getEventBus()
-                          .register(eventDispatcher);
-        }
-    }
-
-    private void registerInCommandBus(BoundedContext boundedContext,
-                                      Set<CommandClass> commandClasses) {
-        if (!commandClasses.isEmpty()) {
-            boundedContext.getCommandBus()
-                          .register(this);
+                            " nor react on events.", this);
         }
     }
 
@@ -260,7 +225,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public I dispatch(CommandEnvelope envelope) {
         checkNotNull(envelope);
-        return AggregateCommandEndpoint.handle(this, envelope);
+        AggregateCommandEndpoint<I, A> endpoint = new AggregateCommandEndpoint<>(this, envelope);
+        I result = endpoint.handle();
+        return result;
     }
 
     /**
@@ -301,7 +268,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Set<I> dispatchEvent(EventEnvelope envelope) {
         checkNotNull(envelope);
-        return AggregateEventEndpoint.handle(this, envelope);
+        AggregateEventEndpoint<I, A> endpoint = new AggregateEventEndpoint<>(this, envelope);
+        Set<I> result = endpoint.handle();
+        return result;
     }
 
     @Override
@@ -530,6 +499,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         lifecycleOf(id).onTargetAssignedToCommand(commandId);
     }
 
+    private AggregateEventDelivery<I, A> createEventDelivery() {
+        return new AggregateEventDelivery<>(this);
+    }
+
+    private AggregateCommandDelivery<I, A> createCommandDelivery() {
+        return new AggregateCommandDelivery<>(this);
+    }
+
     @Override
     public ShardingStrategy getShardingStrategy() {
         return UniformAcrossTargets.singleShard();
@@ -553,9 +530,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     @Override
     public void close() {
-        ServerEnvironment.getInstance()
-                         .getSharding()
-                         .unregister(this);
+        unregisterWithSharding();
         super.close();
     }
 }

@@ -96,6 +96,13 @@ public class BlackBoxBoundedContext {
         this.observer = memoizingObserver();
     }
 
+    /**
+     * Creates new instance.
+     */
+    public static BlackBoxBoundedContext newInstance() {
+        return new BlackBoxBoundedContext();
+    }
+
     /*
      * Utilities for instance initialization.
      ******************************************************************************/
@@ -139,38 +146,19 @@ public class BlackBoxBoundedContext {
      ******************************************************************************/
 
     /**
-     * Creates a new {@link BlackBoxBoundedContext black box Bounded Context} with provided
-     * repositories.
+     * Registers passed repositories with the Bounded Context.
      *
-     * @param repositories repositories to register in the bounded context
-     * @param <I>          the type of IDs used in the repository
-     * @param <E>          the type of entities or aggregates
-     * @return a newly created {@link BlackBoxBoundedContext Bounded Context black box}
-     */
-    @SafeVarargs
-    public static <I, E extends Entity<I, ?>> BlackBoxBoundedContext
-    with(Repository<I, E>... repositories) {
-        BlackBoxBoundedContext blackBox = new BlackBoxBoundedContext();
-        for (Repository<I, E> repository : repositories) {
-            blackBox.boundedContext.register(repository);
-        }
-        return blackBox;
-    }
-
-    /**
-     * Registers the provided repositories with the Bounded Context.
-     *
-     * @param repositories repositories to register in the bounded context
+     * @param repositories repositories to register in the Bounded Context
      * @param <I>          the type of IDs used in the repository
      * @param <E>          the type of entities or aggregates
      * @return current {@link BlackBoxBoundedContext} instance
      */
     @SafeVarargs
     public final <I, E extends Entity<I, ?>> BlackBoxBoundedContext
-    andWith(Repository<I, E> firstRepository, Repository<I, E>... repositories) {
-        checkNotNull(firstRepository);
-        boundedContext.register(firstRepository);
+    with(Repository<I, E>... repositories) {
+        checkNotNull(repositories);
         for (Repository<I, E> repository : repositories) {
+            checkNotNull(repository);
             boundedContext.register(repository);
         }
         return this;

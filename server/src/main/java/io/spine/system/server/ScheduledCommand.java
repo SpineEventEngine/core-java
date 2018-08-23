@@ -37,7 +37,7 @@ import static io.spine.core.Enrichments.getEnrichment;
  *
  * @author Dmytro Dashenkov
  */
-public final class ScheduledCommand
+final class ScheduledCommand
         extends Projection<CommandId, ScheduledCommandRecord, ScheduledCommandRecordVBuilder> {
 
     private ScheduledCommand(CommandId id) {

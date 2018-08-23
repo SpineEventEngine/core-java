@@ -25,8 +25,14 @@ import io.spine.core.MessageEnvelope;
 import io.spine.server.model.HandlerMethod;
 
 /**
- * A signature of {@linkplain HandlerMethod methods}, that accept parameters, extracted from
- * a message envelope of a particular kind.
+ * A specification of {@linkplain HandlerMethod handler method} parameters, specific for various
+ * {@code HandlerMethod} implementations.
+ *
+ * <p>As long as handler methods are passed with a {@linkplain MessageEnvelope Message envelope},
+ * the specification also transfers knowledge on how to extract the designed argument values
+ * from the given envelope for the method with this parameter spec.
+ *
+ * <p>Implementing classes are required to be {@code enumeration}s.
  *
  * @param <E>
  *         the type of message envelope
@@ -35,7 +41,22 @@ import io.spine.server.model.HandlerMethod;
 @Immutable
 public interface ParameterSpec<E extends MessageEnvelope<?, ?, ?>> {
 
+    /**
+     * Tells if the given {@code methodParams} are matched against this instance of
+     * {@code ParameterSpec}
+     *
+     * @param methodParams
+     *         the method parameters to match
+     * @return {@code true} if the parameters match, {@code false} otherwise
+     */
     boolean matches(Class<?>[] methodParams);
 
+    /**
+     * Extracts the values to be used during the invocation of the method with this parameter
+     * specification.
+     *
+     * @param envelope the envelope to use as a source
+     * @return the values to use during the method invocation
+     */
     Object[] extractArguments(E envelope);
 }

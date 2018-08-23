@@ -20,7 +20,6 @@
 
 package io.spine.server.tenant;
 
-import com.google.common.collect.ImmutableSet;
 import io.spine.core.TenantId;
 import io.spine.server.storage.StorageFactory;
 
@@ -54,55 +53,26 @@ public interface TenantIndex extends AutoCloseable {
     void close();
 
     /**
-     * Provides default implementations of {@code TenantIndex}.
+     * Creates default implementation of {@code TenantIndex} for multi-tenant context.
+     *
+     * <p>Storage of {@code TenantIndex} data is performed in single-tenant context, and a
+     * {@linkplain StorageFactory#toSingleTenant() single-tenant} version of the passed storage
+     * factory. Therefore, it is safe to pass both single-tenant and multi-tenant storage
+     * factories to this method as long as the passed factory implements
+     * {@link StorageFactory#toSingleTenant()}.
      */
-    class Factory {
+    static TenantIndex createDefault(StorageFactory storageFactory) {
+        checkNotNull(storageFactory);
+        @SuppressWarnings("ClassReferencesSubclass") // OK for this default impl.
+        DefaultTenantRepository tenantRepo = new DefaultTenantRepository();
+        tenantRepo.initStorage(storageFactory);
+        return tenantRepo;
+    }
 
-        private static final ImmutableSet<TenantId> singleTenantIndexSet =
-                ImmutableSet.of(CurrentTenant.singleTenant());
-
-        private static final TenantIndex singleTenantIndex = new TenantIndex() {
-            @Override
-            public void keep(TenantId id) {
-                // Do nothing.
-            }
-
-            @Override
-            public Set<TenantId> getAll() {
-                return singleTenantIndexSet;
-            }
-
-            @Override
-            public void close() {
-                // Do nothing.
-            }
-        };
-
-        private Factory() {
-            // Prevent instantiation of this utility class.
-        }
-
-        /**
-         * Creates default implementation of {@code TenantIndex} for multi-tenant context.
-         *
-         * <p>Storage of {@code TenantIndex} data is performed in single-tenant context, and a
-         * {@linkplain StorageFactory#toSingleTenant() single-tenant} version of the passed storage
-         * factory. Therefore, it is safe to pass both single-tenant and multi-tenant storage
-         * factories to this method as long as the passed factory implements
-         * {@link StorageFactory#toSingleTenant()}.
-         */
-        public static TenantIndex createDefault(StorageFactory storageFactory) {
-            checkNotNull(storageFactory);
-            DefaultTenantRepository tenantRepo = new DefaultTenantRepository();
-            tenantRepo.initStorage(storageFactory);
-            return tenantRepo;
-        }
-
-        /**
-         * Creates an {@code TenantIndex} to be used in single-tenant context.
-         */
-        public static TenantIndex singleTenant() {
-            return singleTenantIndex;
-        }
+    /**
+     * Obtains a {@code TenantIndex} to be used in single-tenant context.
+     */
+    static TenantIndex singleTenant() {
+        return SingleTenantIndex.INSTANCE;
     }
 }

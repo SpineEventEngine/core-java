@@ -53,7 +53,7 @@ import static io.spine.base.Time.getCurrentTime;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"}) // OK for an Aggregate class.
-public final class EntityHistoryAggregate
+final class EntityHistoryAggregate
         extends Aggregate<EntityHistoryId, EntityHistory, EntityHistoryVBuilder> {
 
     private EntityHistoryAggregate(EntityHistoryId id) {

@@ -41,9 +41,11 @@ import static io.spine.server.model.declare.MethodParams.consistsOfTwo;
 /**
  * The signature of a method, that accepts {@code Command} envelopes as parameter values.
  *
+ * @param <H> the type of {@link HandlerMethod} which signature this is
  * @author Alex Tymchenko
  */
-abstract class CommandAcceptingMethodSignature<H extends HandlerMethod<?, CommandClass, CommandEnvelope, ?>>
+abstract class CommandAcceptingMethodSignature
+        <H extends HandlerMethod<?, CommandClass, CommandEnvelope, ?>>
         extends MethodSignature<H, CommandEnvelope> {
 
     CommandAcceptingMethodSignature(Class<? extends Annotation> annotation) {
@@ -76,6 +78,9 @@ abstract class CommandAcceptingMethodSignature<H extends HandlerMethod<?, Comman
         return of(Message.class, Iterable.class);
     }
 
+    /**
+     * Allowed combinations of parameters in the methods, that accept {@code Command}s.
+     */
     @Immutable
     public enum CommandAcceptingMethodParams implements ParameterSpec<CommandEnvelope> {
 

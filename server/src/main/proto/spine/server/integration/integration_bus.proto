@@ -53,7 +53,7 @@ message ExternalMessage {
 // A document message, describing types of messages,
 // requested by some part of the system.
 //
-// One of the typical scenarios is a notification shoout out from the current bounded context
+// One of the typical scenarios is a notification shout out from the current bounded context
 // to other bounded contexts of the application about its `external` subscription needs.
 message RequestForExternalMessages {
 

@@ -36,12 +36,14 @@ import static com.google.common.collect.ImmutableSet.of;
 import static io.spine.server.model.declare.MethodParams.consistsOfSingle;
 
 /**
+ * The signature of the {@link EventApplier} method.
+ *
  * @author Alex Tymchenko
  */
 class EventApplierSignature
         extends MethodSignature<EventApplier, EventEnvelope> {
 
-    public EventApplierSignature() {
+    EventApplierSignature() {
         super(Apply.class);
     }
 
@@ -65,6 +67,9 @@ class EventApplierSignature
         return EventApplierParams.class;
     }
 
+    /**
+     * Allowed combinations of parameters for {@link EventApplier} methods.
+     */
     @VisibleForTesting
     @Immutable
     enum EventApplierParams implements ParameterSpec<EventEnvelope> {

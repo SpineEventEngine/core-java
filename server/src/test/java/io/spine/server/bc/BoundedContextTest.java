@@ -22,6 +22,7 @@ package io.spine.server.bc;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.Ack;
 import io.spine.core.Responses;
 import io.spine.grpc.MemoizingObserver;
@@ -42,6 +43,7 @@ import io.spine.server.event.EventStore;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
+import io.spine.system.server.SystemGateway;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.SecretProject;
 import io.spine.test.bc.event.BcProjectCreated;
@@ -388,5 +390,23 @@ class BoundedContextTest {
 
         assertFalse(boundedContext.findRepository(SecretProject.class)
                                   .isPresent());
+    }
+
+    @Test
+    @DisplayName("prohibit 3rd party descendants")
+    void noExternalDescendants() {
+        assertThrows(
+                IllegalStateException.class,
+
+                () ->
+                new BoundedContext(BoundedContext.newBuilder()) {
+                    @SuppressWarnings("ReturnOfNull") // OK for this test dummy.
+                    @Internal
+                    @Override
+                    public SystemGateway getSystemGateway() {
+                        return null;
+                    }
+                }
+        );
     }
 }

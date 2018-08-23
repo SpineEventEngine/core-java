@@ -35,6 +35,8 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.model.declare.MethodParams.consistsOfTypes;
 
 /**
+ * Allowed combinations of parameters for the methods, that accept {@code Event}s.
+ *
  * @author Alex Tymchenko
  */
 @Immutable

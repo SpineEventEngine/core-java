@@ -21,10 +21,13 @@
 package io.spine.server.aggregate.given;
 
 import com.google.protobuf.Duration;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.core.Event;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.test.aggregate.event.AggProjectCreated;
+import io.spine.testdata.Sample;
 import io.spine.testing.server.TestEventFactory;
 
 import java.util.List;
@@ -38,13 +41,43 @@ import static io.spine.testing.server.TestEventFactory.newInstance;
 import static io.spine.time.Durations2.seconds;
 
 /**
- * Utilities for creating test sequences of {@link AggregateEventRecord}.
+ * Utilities for creating test instances and sequences of {@link AggregateEventRecord}.
  *
  * @author Alexander Yevsyukov
  */
 public class StorageRecords {
 
+    private static final TestEventFactory eventFactory = newInstance(Given.class);
+
+    /** Prevents instantiation of this utility class. */
     private StorageRecords() {
+    }
+
+    /** Creates new builder for an aggregate event record and sets the passed timestamp. */
+    private static AggregateEventRecord.Builder newRecordWith(Timestamp timestamp) {
+        return AggregateEventRecord
+                .newBuilder()
+                .setTimestamp(timestamp);
+    }
+
+    /**
+     * Creates a sample {@linkplain AggregateEventRecord record} with the passed timestamp.
+     */
+    public static AggregateEventRecord create(Timestamp timestamp) {
+        Message eventMessage = Sample.messageOfType(AggProjectCreated.class);
+        Event event = eventFactory.createEvent(eventMessage);
+        return newRecordWith(timestamp)
+                .setEvent(event)
+                .build();
+    }
+
+    /**
+     * Creates a record with the passed event and timestamp.
+     */
+    public static AggregateEventRecord create(Timestamp timestamp, Event event) {
+        return newRecordWith(timestamp)
+                .setEvent(event)
+                .build();
     }
 
     /**
@@ -70,15 +103,15 @@ public class StorageRecords {
         Event e1 = eventFactory.createEvent(projectCreated(id, Given.projectName(id)),
                                             null,
                                             start);
-        AggregateEventRecord record1 = StorageRecord.create(start, e1);
+        AggregateEventRecord record1 = create(start, e1);
 
         Event e2 = eventFactory.createEvent(taskAdded(id), null, timestamp2);
-        AggregateEventRecord record2 = StorageRecord.create(timestamp2, e2);
+        AggregateEventRecord record2 = create(timestamp2, e2);
 
         Event e3 = eventFactory.createEvent(Given.EventMessage.projectStarted(id),
                                             null,
                                             timestamp3);
-        AggregateEventRecord record3 = StorageRecord.create(timestamp3, e3);
+        AggregateEventRecord record3 = create(timestamp3, e3);
 
         return newArrayList(record1, record2, record3);
     }

@@ -29,23 +29,33 @@ import java.lang.annotation.Target;
  * Marks a method of an aggregate as one that modifies the state of the aggregate with data
  * from the passed event.
  *
- * <p>As we apply the event to the aggregate state, we call such method <i>Event Applier</i>.
+ * <p>As we apply the event to the aggregate state, we call such a method <i>Event Applier</i>.
  *
  * <p>An event applier method:
  * <ul>
  *     <li>is annotated with {@link Apply};
- *     <li>has package-private visibility;
  *     <li>is {@code void};
  *     <li>accepts an event derived from {@link com.google.protobuf.Message Message}
  *         as the only parameter.
  * </ul>
  *
- * <p>Typically {@link Aggregate#getBuilder()} method is used to get and update an aggregate state.
+ * <p>In order to update the state of the aggregate, the {@link Aggregate#getBuilder()} method
+ * should be used.
+ *
+ * <p>If the annotation comes with the attribute {@link #allowImport() allowImport} set to
+ * {@code true}, the aggregate would be able receive incoming events as if they were produced
+ * by the aggregate.
  *
  * @author Alexander YevsyukovA
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Apply {
+
+    /**
+     * If {@code true} the aggregate supports importing of events with the messages
+     * defined as the first parameter of the annotated method.
+     */
+    boolean allowImport() default false;
 }
 

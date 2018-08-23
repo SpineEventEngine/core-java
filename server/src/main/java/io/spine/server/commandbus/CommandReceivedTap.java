@@ -25,6 +25,7 @@ import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.bus.BusFilter;
+import io.spine.system.server.GatewayFunction;
 import io.spine.system.server.MarkCommandAsReceived;
 import io.spine.system.server.SystemGateway;
 

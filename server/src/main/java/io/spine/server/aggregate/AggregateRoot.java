@@ -72,13 +72,6 @@ public class AggregateRoot<I> {
     }
 
     /**
-     * Obtains the {@code BoundedContext} to which the aggregate belongs.
-     */
-    private BoundedContext getBoundedContext() {
-        return boundedContext;
-    }
-
-    /**
      * Obtains a part state by its class.
      *
      * @param partStateClass the class of the state of the part
@@ -126,14 +119,7 @@ public class AggregateRoot<I> {
     /** Creates a loader which calls {@link #lookup(Class)}. */
     private CacheLoader<Class<? extends Message>,
             AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>> newLoader() {
-        return new CacheLoader<Class<? extends Message>,
-                       AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>>() {
-                   @Override
-                   public AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>
-                   load(Class<? extends Message> key) throws Exception {
-                       return AggregateRoot.this.lookup(key);
-                   }
-               };
+        return new PartRepositoryCacheLoader<>(this);
     }
 
     /** Finds an aggregate part repository in the Bounded Context. */
@@ -141,10 +127,37 @@ public class AggregateRoot<I> {
     AggregatePartRepository<I, A, ?> lookup(Class<S> stateClass) {
         @SuppressWarnings("unchecked") // The type is ensured by getId() result.
         Class<I> idClass = (Class<I>) getId().getClass();
-        AggregatePartRepositoryLookup<I, S> lookup = createLookup(getBoundedContext(),
-                                                                  idClass,
-                                                                  stateClass);
+        AggregatePartRepositoryLookup<I, S> lookup =
+                createLookup(boundedContext, idClass, stateClass);
         AggregatePartRepository<I, A, ?> result = lookup.find();
         return result;
+    }
+
+    /**
+     * The loader for the cache of aggregate part repositories.
+     *
+     * @param <I> the type of root identifier
+     * @see #createCache()
+     * @see #newLoader()
+     */
+    private static final
+    class PartRepositoryCacheLoader<I>
+            extends CacheLoader<
+                Class<? extends Message>,
+                AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>
+            > {
+
+        private final AggregateRoot<I> root;
+
+        private PartRepositoryCacheLoader(AggregateRoot<I> root) {
+            super();
+            this.root = root;
+        }
+
+        @Override
+        public AggregatePartRepository<I, ? extends AggregatePart<I, ?, ?, ?>, ?>
+        load(Class<? extends Message> key) throws IllegalStateException {
+            return root.lookup(key);
+        }
     }
 }

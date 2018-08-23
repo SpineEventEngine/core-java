@@ -20,15 +20,20 @@
 
 package io.spine.server.aggregate.model;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.protobuf.Empty;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.model.AbstractHandlerMethod;
+import io.spine.server.model.MethodAttribute;
 import io.spine.server.model.MethodResult;
 import io.spine.server.model.declare.ParameterSpec;
 
 import java.lang.reflect.Method;
+import java.util.Set;
+import java.util.function.Function;
 
 /**
  * A wrapper for event applier method.
@@ -49,6 +54,14 @@ public final class EventApplier
         super(method, signature);
     }
 
+    /**
+     * Adds {@link AllowImportAttribute} to the set of method attributes.
+     */
+    @Override
+    protected Set<Function<Method, MethodAttribute<?>>> attributeSuppliers() {
+        return Sets.union(super.attributeSuppliers(), ImmutableSet.of(AllowImportAttribute::of));
+    }
+
     @Override
     public EventClass getMessageClass() {
         return EventClass.from(rawMessageClass());
@@ -57,5 +70,9 @@ public final class EventApplier
     @Override
     protected MethodResult<Empty> toResult(Aggregate target, Object rawMethodOutput) {
         return MethodResult.empty();
+    }
+
+    boolean allowsImport() {
+        return getAttributes().contains(AllowImportAttribute.ALLOW);
     }
 }

@@ -65,3 +65,15 @@ message PmArchiveProcess {
 message PmDeleteProcess {
     ProjectId project_id = 1;
 }
+
+message PmCancelIteration {
+    ProjectId project_id = 1;
+}
+
+message PmScheduleRetrospective {
+    ProjectId project_id = 1;
+}
+
+message PmPlanIteration {
+    ProjectId project_id = 1;
+}

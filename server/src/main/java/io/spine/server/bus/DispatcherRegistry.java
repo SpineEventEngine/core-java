@@ -23,7 +23,6 @@ package io.spine.server.bus;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Multimaps;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;
@@ -31,15 +30,18 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Multimaps.synchronizedMultimap;
 
 /**
  * A registry of message dispatchers.
  *
+ * @param <C> the type of the class of dispatched messages
+ * @param <D> the type of the message dispatchers
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-public class DispatcherRegistry<C extends MessageClass,
-                                D extends MessageDispatcher<C, ?, ?>> {
+public abstract class DispatcherRegistry<C extends MessageClass,
+                                         D extends MessageDispatcher<C, ?, ?>> {
 
     /**
      * The map from a message class to one or more dispatchers of
@@ -49,8 +51,7 @@ public class DispatcherRegistry<C extends MessageClass,
      * will allow only one dispatcher per message class. This should be handled
      * when registering dispatchers.
      */
-    private final Multimap<C, D> dispatchers =
-            Multimaps.synchronizedMultimap(HashMultimap.<C, D>create());
+    private final Multimap<C, D> dispatchers = synchronizedMultimap(HashMultimap.create());
 
     /**
      * Registers the passed dispatcher.

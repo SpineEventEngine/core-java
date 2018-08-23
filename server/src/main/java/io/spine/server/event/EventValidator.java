@@ -36,9 +36,7 @@ import static io.spine.server.event.InvalidEventException.onConstraintViolations
 import static java.util.Optional.ofNullable;
 
 /**
- * The {@link EventEnvelope} validator.
- *
- * <p>Checks if the message of the passed event is {@linkplain MessageValidator#validate(Message)
+ * Checks if the message of the passed event is {@linkplain MessageValidator#validate(Message)
  * valid}.
  *
  * @author Dmytro Dashenkov

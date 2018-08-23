@@ -33,6 +33,8 @@ import java.util.Optional;
 import static com.google.common.collect.ImmutableSet.of;
 
 /**
+ * The signature of {@link EventReactorMethod}.
+ *
  * @author Alex Tymchenko
  */
 class EventReactorSignature extends EventAcceptingSignature<EventReactorMethod> {

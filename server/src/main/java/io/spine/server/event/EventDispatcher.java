@@ -23,14 +23,44 @@ package io.spine.server.event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.bus.MulticastDispatcher;
+import io.spine.server.integration.ExternalDispatcherFactory;
+
+import java.util.Set;
 
 /**
- * {@code EventDispatcher} delivers events to subscribers.
+ * {@code EventDispatcher} delivers events to {@linkplain EventReceiver receiving} objects.
  *
  * @param <I> the type of entity IDs
  * @author Alexander Yevsyukov
  */
-public interface EventDispatcher<I> extends MulticastDispatcher<EventClass, EventEnvelope, I> {
+public interface EventDispatcher<I>
+        extends MulticastDispatcher<EventClass, EventEnvelope, I>, ExternalDispatcherFactory<I> {
+
+    /**
+     * Obtains classes of domestic events processed by this dispatcher.
+     */
+    default Set<EventClass> getEventClasses() {
+        return getMessageClasses();
+    }
+
+    /**
+     * Obtains classes of external events processed by this dispatcher.
+     */
+    Set<EventClass> getExternalEventClasses();
+
+    /**
+     * Verifies if this instance dispatches at least one domestic event.
+     */
+    default boolean dispatchesEvents() {
+        return !getEventClasses().isEmpty();
+    }
+
+    /**
+     * Verifies if this instance dispatches at least one external event.
+     */
+    default boolean dispatchesExternalEvents() {
+        return !getExternalEventClasses().isEmpty();
+    }
 
     enum Error {
 
@@ -40,10 +70,6 @@ public interface EventDispatcher<I> extends MulticastDispatcher<EventClass, Even
 
         Error(String messageFormat) {
             this.messageFormat = messageFormat;
-        }
-
-        public String getMessageFormat() {
-            return messageFormat;
         }
 
         public String format(Object... args) {

@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
+import io.spine.system.server.GatewayFunction;
 import io.spine.system.server.MarkCommandAsReceived;
 import io.spine.system.server.MemoizingGateway;
 import io.spine.testing.client.TestActorRequestFactory;
@@ -55,12 +56,16 @@ class CommandReceivedTapTest {
 
     private void initSingleTenant() {
         gateway = MemoizingGateway.singleTenant();
-        filter = new CommandReceivedTap((t) -> CommandBus.gatewayFor(t, gateway));
+        filter = new CommandReceivedTap(gatewayFn());
     }
 
     private void initMultitenant() {
         gateway = MemoizingGateway.multitenant();
-        filter = new CommandReceivedTap((t) -> CommandBus.gatewayFor(t, gateway));
+        filter = new CommandReceivedTap(gatewayFn());
+    }
+
+    private GatewayFunction gatewayFn() {
+        return GatewayFunction.delegatingTo(gateway);
     }
 
     @Test

@@ -22,30 +22,31 @@ package io.spine.server.bus;
 
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.CheckReturnValue;
+import com.google.errorprone.annotations.concurrent.LazyInit;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.core.Ack;
 import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collection;
 import java.util.Deque;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterables.isEmpty;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.validate.Validate.isNotDefault;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.toList;
 
 /**
  * Abstract base for buses.
  *
- * @param <T> the type of outer objects (containing messages of interest) that are posted the bus
+ * @param <T> the type of outer objects (containing messages of interest) that are posted to the bus
  * @param <E> the type of envelopes for outer objects used by this bus
  * @param <C> the type of message class
  * @param <D> the type of dispatches used by this bus
@@ -53,24 +54,22 @@ import static java.util.stream.Collectors.toList;
  * @author Alexander Yevsyukov
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class Bus<T extends Message,
                           E extends MessageEnvelope<?, T, ?>,
                           C extends MessageClass,
                           D extends MessageDispatcher<C, E, ?>> implements AutoCloseable {
 
-    // A queue of envelopes to post.
+    /** A queue of envelopes to post. */
     private @Nullable DispatchingQueue<E> queue;
 
-    private @Nullable DispatcherRegistry<C, D> registry;
+    /** Dispatchers of messages by their class. */
+    @LazyInit
+    private @MonotonicNonNull DispatcherRegistry<C, D> registry;
 
-    /**
-     * The chain of filters for this bus.
-     *
-     * <p>This field is effectively final, but is initialized lazily.
-     *
-     * @see #filterChain() for the non-null filter chain value
-     */
-    private @Nullable FilterChain<E> filterChain;
+    /** The chain of filters for this bus, {@linkplain #filterChain() lazily initialized}. */
+    @LazyInit
+    private @MonotonicNonNull FilterChain<E> filterChain;
 
     private final ChainBuilder<E> chainBuilder;
 
@@ -82,9 +81,9 @@ public abstract class Bus<T extends Message,
      * Registers the passed dispatcher.
      *
      * @param dispatcher the dispatcher to register
-     * @throws IllegalArgumentException if the set of message classes
-     *                                  {@linkplain MessageDispatcher#getMessageClasses() exposed}
-     *                                  by the dispatcher is empty
+     * @throws IllegalArgumentException
+     *         if the set of message classes {@linkplain MessageDispatcher#getMessageClasses()
+     *         exposed} by the dispatcher is empty
      */
     public void register(D dispatcher) {
         registry().register(checkNotNull(dispatcher));
@@ -150,12 +149,10 @@ public abstract class Bus<T extends Message,
     }
 
     private void filterAndPost(Iterable<T> messages, StreamObserver<Ack> observer) {
-        Collection<T> filteredMessages = filter(messages, observer);
-        if (!isEmpty(filteredMessages)) {
-            store(filteredMessages);
-            Iterable<E> envelopes = filteredMessages.stream()
-                                                    .map(this::toEnvelope)
-                                                    .collect(toList());
+        Map<T, E> filteredMessages = filter(messages, observer);
+        if (!filteredMessages.isEmpty()) {
+            store(filteredMessages.keySet());
+            Iterable<E> envelopes = filteredMessages.values();
             doPost(envelopes, observer);
         }
         observer.onCompleted();
@@ -182,7 +179,7 @@ public abstract class Bus<T extends Message,
      * for the altered behavior specification.
      *
      * @param messages the messages to create an observer for
-     * @param source   the source {@link StreamObserver} to be transforme
+     * @param source   the source {@link StreamObserver} to be transformed
      * @return a transformed observer of {@link Ack} streams
      */
     protected StreamObserver<Ack> prepareObserver(Iterable<T> messages,
@@ -250,8 +247,7 @@ public abstract class Bus<T extends Message,
         Collection<BusFilter<E>> tail = filterChainTail();
         tail.forEach(chainBuilder::append);
 
-        BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(),
-                                                             registry());
+        BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getDeadMessageHandler(), registry());
         BusFilter<E> validatingFilter = new ValidatingFilter<>(getValidator());
 
         chainBuilder.prepend(deadMsgFilter);
@@ -317,18 +313,22 @@ public abstract class Bus<T extends Message,
      *
      * @param messages the message to filter
      * @param observer the observer to receive the negative outcome of the operation
-     * @return a {@code Collection} of messages, which passed all the filters
+     * @return a map of filtered messages where keys are messages, and values are envelopes with
+     *         these messages
+     * @implNote This method returns a map to avoid repeated creation of envelopes when dispatching.
+     * Messages in the returned map come in the same order as in the incoming sequence.
      */
-    private Collection<T> filter(Iterable<T> messages, StreamObserver<Ack> observer) {
+    private Map<T, E> filter(Iterable<T> messages, StreamObserver<Ack> observer) {
         checkNotNull(messages);
         checkNotNull(observer);
-        Collection<T> result = newLinkedList();
+        Map<T, E> result = new LinkedHashMap<>();
         for (T message : messages) {
-            Optional<Ack> response = filter(toEnvelope(message));
+            E envelope = toEnvelope(message);
+            Optional<Ack> response = filter(envelope);
             if (response.isPresent()) {
                 observer.onNext(response.get());
             } else {
-                result.add(message);
+                result.put(message, envelope);
             }
         }
         return result;

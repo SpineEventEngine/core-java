@@ -22,7 +22,7 @@ package io.spine.server.command.model;
 
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.server.command.Commander;
+import io.spine.server.command.CommandReceiver;
 import io.spine.server.command.model.CommandingMethod.Result;
 import io.spine.server.model.declare.ParameterSpec;
 
@@ -34,8 +34,8 @@ import java.lang.reflect.Method;
  * @author Alexander Yevsyukov
  */
 public final class CommandSubstituteMethod
-        extends CommandAcceptingMethod<Commander, Result>
-        implements CommandingMethod<CommandClass, CommandEnvelope, Result> {
+        extends CommandAcceptingMethod<CommandReceiver, Result>
+        implements CommandingMethod<CommandReceiver, CommandClass, CommandEnvelope, Result> {
 
     CommandSubstituteMethod(Method method,
                             ParameterSpec<CommandEnvelope> paramSpec) {
@@ -43,7 +43,7 @@ public final class CommandSubstituteMethod
     }
 
     @Override
-    protected Result toResult(Commander target, Object rawMethodOutput) {
+    protected Result toResult(CommandReceiver target, Object rawMethodOutput) {
         Result result = new Result(rawMethodOutput, false);
         return result;
     }

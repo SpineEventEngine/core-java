@@ -45,4 +45,11 @@ public interface SystemGateway {
     boolean hasHandled(EntityHistoryId entity, CommandId commandId);
 
     boolean hasHandled(EntityHistoryId entity, EventId eventId);
+
+    /**
+     * Creates new instance of the gateway which serves the passed System Bounded Context.
+     */
+    static SystemGateway newInstance(SystemBoundedContext system) {
+        return new DefaultSystemGateway(system);
+    }
 }

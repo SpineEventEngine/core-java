@@ -23,6 +23,7 @@ package io.spine.server.event;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import io.spine.core.EventContext;
 import io.spine.core.UserId;
 import io.spine.server.event.given.EnricherBuilderTestEnv.Enrichment;
 import io.spine.test.event.ProjectId;
@@ -33,7 +34,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -50,15 +51,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class EnricherBuilderTest {
 
     private Enricher.Builder builder;
-    private Function<Timestamp, StringValue> function;
+    private BiFunction<Timestamp, EventContext, StringValue> function;
     private FieldEnrichment<Timestamp, StringValue, ?> fieldEnrichment;
 
     @BeforeEach
     void setUp() {
         this.builder = Enricher.newBuilder();
-        this.function = new Function<Timestamp, StringValue>() {
+        this.function = new BiFunction<Timestamp, EventContext, StringValue>() {
             @Override
-            public @Nullable StringValue apply(@Nullable Timestamp input) {
+            public @Nullable StringValue apply(@Nullable Timestamp input, EventContext context) {
                 if (input == null) {
                     return null;
                 }
@@ -128,7 +129,7 @@ class EnricherBuilderTest {
         @DisplayName("null source class")
         void nullSourceClass() {
             assertThrows(NullPointerException.class,
-                         () -> builder.add(Tests.<Class<Timestamp>>nullRef(),
+                         () -> builder.add(Tests.nullRef(),
                                            StringValue.class,
                                            function));
         }
@@ -138,7 +139,7 @@ class EnricherBuilderTest {
         void nullTargetClass() {
             assertThrows(NullPointerException.class,
                          () -> builder.add(Timestamp.class,
-                                           Tests.<Class<StringValue>>nullRef(),
+                                           Tests.nullRef(),
                                            function));
         }
 
@@ -148,7 +149,7 @@ class EnricherBuilderTest {
             assertThrows(NullPointerException.class,
                          () -> builder.add(Timestamp.class,
                                            StringValue.class,
-                                           Tests.<Function<Timestamp, StringValue>>nullRef()));
+                                           Tests.nullRef()));
         }
 
         @Test

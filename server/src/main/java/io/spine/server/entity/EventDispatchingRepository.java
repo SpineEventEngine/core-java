@@ -23,16 +23,13 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
-import io.spine.server.BoundedContext;
 import io.spine.server.event.EventDispatcher;
 import io.spine.server.integration.ExternalMessage;
-import io.spine.server.integration.ExternalMessageClass;
 import io.spine.server.integration.ExternalMessageDispatcher;
 import io.spine.server.integration.ExternalMessageEnvelope;
 import io.spine.server.route.EventRoute;
 import io.spine.server.route.EventRouting;
 
-import java.util.Collections;
 import java.util.Set;
 
 import static io.spine.protobuf.AnyPacker.unpack;
@@ -80,24 +77,7 @@ public abstract class EventDispatchingRepository<I,
     @Override
     public void onRegistered() {
         super.onRegistered();
-        if(!getMessageClasses().isEmpty()) {
-            registerAsEventDispatcher();
-        }
-
-        ExternalMessageDispatcher<I> thisAsExternal = getExternalEventDispatcher();
-        if(!thisAsExternal.getMessageClasses().isEmpty()) {
-            getBoundedContext().getIntegrationBus()
-                               .register(getExternalEventDispatcher());
-        }
-    }
-
-    /**
-     * Register itself as {@link io.spine.server.event.EventDispatcher EventDispatcher} in
-     * the {@linkplain BoundedContext#getEventBus() EventBus}.
-     */
-    protected void registerAsEventDispatcher() {
-        getBoundedContext().getEventBus()
-                           .register(this);
+        getBoundedContext().registerEventDispatcher(this);
     }
 
     /**
@@ -109,34 +89,6 @@ public abstract class EventDispatchingRepository<I,
     @Override
     public void onError(EventEnvelope envelope, RuntimeException exception) {
         logError("Error dispatching event (class: %s, id: %s", envelope, exception);
-    }
-
-    /**
-     * Obtains an external event dispatcher for this repository.
-     *
-     * <p>This method should be overridden by the repositories, which are eligible
-     * to handle external events. In this case the implementation would typically delegate
-     * the dispatching of external events to the repository itself.
-     *
-     * <p>Such a delegate-based approach is chosen, since it's not possible to make
-     * {@code EventDispatchingRepository} extend another
-     * {@link io.spine.server.bus.MessageDispatcher MessageDispatcher} interface due to clashes
-     * in the class hierarchy.
-     *
-     * @return the external event dispatcher
-     */
-    protected ExternalMessageDispatcher<I> getExternalEventDispatcher() {
-        return new AbstractExternalEventDispatcher() {
-            @Override
-            public Set<ExternalMessageClass> getMessageClasses() {
-                return Collections.emptySet();
-            }
-
-            @Override
-            public void onError(ExternalMessageEnvelope envelope, RuntimeException exception) {
-                logError(Error.DISPATCHING_EXTERNAL_EVENT.getMessageFormat(), envelope, exception);
-            }
-        };
     }
 
     /**

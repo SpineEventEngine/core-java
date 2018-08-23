@@ -51,9 +51,6 @@ public abstract class Consumer<I,
         this.repository = repository;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public ShardedStream<I, ?, M> bindToTransport(BoundedContextName name,
                                                   ShardingKey key,
@@ -67,9 +64,6 @@ public abstract class Consumer<I,
         return stream;
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void onNext(I targetId, M messageEnvelope) {
         deliverNow(targetId, messageEnvelope);
@@ -107,9 +101,6 @@ public abstract class Consumer<I,
      */
     protected abstract B newShardedStreamBuilder();
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public DeliveryTag<M> getTag() {
         return deliveryTag;

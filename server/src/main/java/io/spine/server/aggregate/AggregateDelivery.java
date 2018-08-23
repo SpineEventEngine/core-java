@@ -39,6 +39,7 @@ import io.spine.server.entity.Repository;
  * @author Alex Tymchenko
  */
 @SPI
+@SuppressWarnings("WeakerAccess") // is public for customizable delivery mechanisms
 public abstract class AggregateDelivery<I,
                                         A extends Aggregate<I, ?, ?>,
                                         E extends ActorMessageEnvelope<?, ?, ?>,
