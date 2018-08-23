@@ -69,6 +69,7 @@ public final class EventImportDispatcher<I> implements EventDispatcher<I>, Loggi
     @CanIgnoreReturnValue
     @Override
     public Set<I> dispatch(EventEnvelope envelope) {
+        //TODO:2018-08-23:alexander.yevsyukov: Implement
         return null;
     }
 

@@ -32,6 +32,7 @@ import "google/protobuf/any.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
+import "spine/core/actor_context.proto";
 import "spine/core/command.proto";
 import "spine/core/version.proto";
 import "spine/core/enrichment.proto";
@@ -100,8 +101,8 @@ message EventContext {
         // The context of the event which generated this event.
         EventContext event_context = 6 [(required) = true];
 
-        // The event was imported into an aggregate.
-        google.protobuf.Any event_import = 11 [(required) = true];
+        // The event was imported using this `AсtorContext`.
+        ActorContext import_context = 11 [(required) = true];
     }
 
     // An ID of the root command, which lead to this event.

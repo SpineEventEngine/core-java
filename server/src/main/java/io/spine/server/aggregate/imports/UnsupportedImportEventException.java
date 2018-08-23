@@ -23,6 +23,7 @@ package io.spine.server.aggregate.imports;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
 import io.spine.server.bus.MessageUnhandled;
 import io.spine.type.TypeName;
 
@@ -42,12 +43,12 @@ public final class UnsupportedImportEventException
     private static final long serialVersionUID = 0L;
     private final Error error;
 
-    UnsupportedImportEventException(ImportEnvelope envelope) {
+    UnsupportedImportEventException(EventEnvelope envelope) {
         super(messageFormat(envelope));
         this.error = unsupportedImportEvent(envelope.getMessage(), getMessage());
     }
 
-    private static String messageFormat(ImportEnvelope envelope) {
+    private static String messageFormat(EventEnvelope envelope) {
         EventClass eventClass = envelope.getMessageClass();
         TypeName typeName = eventClass.getTypeName();
         String result = format(

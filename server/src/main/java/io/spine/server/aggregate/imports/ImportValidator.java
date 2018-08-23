@@ -21,6 +21,7 @@
 package io.spine.server.aggregate.imports;
 
 import com.google.protobuf.Message;
+import io.spine.core.EventEnvelope;
 import io.spine.core.MessageInvalid;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.validate.ConstraintViolation;
@@ -39,12 +40,12 @@ import static java.util.Optional.ofNullable;
  *
  * @author Alexander Yevsyukov
  */
-final class ImportValidator implements EnvelopeValidator<ImportEnvelope> {
+final class ImportValidator implements EnvelopeValidator<EventEnvelope> {
 
     private final MessageValidator messageValidator = MessageValidator.newInstance();
 
     @Override
-    public Optional<MessageInvalid> validate(ImportEnvelope envelope) {
+    public Optional<MessageInvalid> validate(EventEnvelope envelope) {
         checkNotNull(envelope);
         MessageInvalid result = null;
         Message eventMessage = envelope.getMessage();

@@ -21,7 +21,9 @@
 package io.spine.server.aggregate.imports;
 
 import com.google.common.collect.Streams;
+import io.spine.core.Event;
 import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.aggregate.ImportEvent;
 import io.spine.server.bus.BusBuilder;
@@ -44,7 +46,7 @@ import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
  * @author Alexander Yevsyukov
  */
 public class ImportBus
-        extends UnicastBus<ImportEvent, ImportEnvelope, EventClass, ImportDispatcher<?>> {
+        extends UnicastBus<Event, EventEnvelope, EventClass, EventImportDispatcher<?>> {
 
     private final ImportValidator validator = new ImportValidator();
     private final DeadImportEventHandler deadImportEventHandler = new DeadImportEventHandler();
@@ -64,12 +66,12 @@ public class ImportBus
     }
 
     @Override
-    protected DeadMessageHandler<ImportEnvelope> getDeadMessageHandler() {
+    protected DeadMessageHandler<EventEnvelope> getDeadMessageHandler() {
         return deadImportEventHandler;
     }
 
     @Override
-    protected EnvelopeValidator<ImportEnvelope> getValidator() {
+    protected EnvelopeValidator<EventEnvelope> getValidator() {
         return validator;
     }
 
@@ -79,13 +81,13 @@ public class ImportBus
     }
 
     @Override
-    protected ImportEnvelope toEnvelope(ImportEvent wrapper) {
-        return new ImportEnvelope(wrapper);
+    protected EventEnvelope toEnvelope(Event wrapper) {
+        return EventEnvelope.of(wrapper);
     }
 
     @Override
-    protected void dispatch(ImportEnvelope envelope) {
-        ImportDispatcher<?> dispatcher = getDispatcher(envelope);
+    protected void dispatch(EventEnvelope envelope) {
+        EventImportDispatcher<?> dispatcher = getDispatcher(envelope);
         dispatcher.dispatch(envelope);
     }
 
@@ -98,14 +100,15 @@ public class ImportBus
      * Does nothing because instances of {@link ImportEvent} are transient.
      */
     @Override
-    protected void store(Iterable<ImportEvent> events) {
+    protected void store(Iterable<Event> events) {
         TenantId tenantId = tenantOf(events);
         tenantIndex.keep(tenantId);
     }
 
-    private static TenantId tenantOf(Iterable<ImportEvent> events) {
+    private static TenantId tenantOf(Iterable<Event> events) {
         return Streams.stream(events)
                       .map((e) -> e.getContext()
+                                   .getImportContext()
                                    .getTenantId())
                       .findAny()
                       .orElse(TenantId.getDefaultInstance());
@@ -115,10 +118,10 @@ public class ImportBus
      * Creates {@link UnsupportedImportEventException} in response to an event message
      * of unsupported type.
      */
-    private static class DeadImportEventHandler implements DeadMessageHandler<ImportEnvelope> {
+    private static class DeadImportEventHandler implements DeadMessageHandler<EventEnvelope> {
 
         @Override
-        public MessageUnhandled handle(ImportEnvelope envelope) {
+        public MessageUnhandled handle(EventEnvelope envelope) {
             return new UnsupportedImportEventException(envelope);
         }
     }
@@ -129,11 +132,12 @@ public class ImportBus
      * @author Alexander Yevsyukov
      */
     private static final class Registry
-            extends DispatcherRegistry<EventClass, ImportDispatcher<?>> {
+            extends DispatcherRegistry<EventClass, EventImportDispatcher<?>> {
 
         @SuppressWarnings("RedundantMethodOverride") // Overrides to open access to the method.
         @Override
-        protected Optional<? extends ImportDispatcher<?>> getDispatcher(EventClass messageClass) {
+        protected
+        Optional<? extends EventImportDispatcher<?>> getDispatcher(EventClass messageClass) {
             return super.getDispatcher(messageClass);
         }
     }
@@ -141,7 +145,7 @@ public class ImportBus
     /**
      * The builder for {@link ImportBus}.
      */
-    public static class Builder extends BusBuilder<ImportEnvelope, ImportEvent, Builder> {
+    public static class Builder extends BusBuilder<EventEnvelope, Event, Builder> {
 
         /** Prevents direct instantiation. */
         private Builder() {
