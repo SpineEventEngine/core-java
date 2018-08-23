@@ -57,9 +57,8 @@ abstract class AggregateEndpoint<I,
 
         List<Event> produced = dispatchInTx(aggregate);
 
-        // Update lifecycle flags only if the message was handled successfully and flags changed.
         LifecycleFlags flagsAfter = aggregate.getLifecycleFlags();
-        if (flagsAfter != null && !flagsBefore.equals(flagsAfter)) {
+        if (!flagsBefore.equals(flagsAfter)) {
             storage().writeLifecycleFlags(aggregateId, flagsAfter);
         }
 
