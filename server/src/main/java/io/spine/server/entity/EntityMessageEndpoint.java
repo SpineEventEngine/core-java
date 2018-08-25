@@ -34,6 +34,7 @@ import io.spine.string.Stringifiers;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -90,12 +91,21 @@ public abstract class EntityMessageEndpoint<I,
             Set<I> handlingEntities = (Set<I>) targets;
             return (R) (dispatchToMany(handlingEntities));
         }
-        try {
-            dispatchToOne((I) targets);
-        } catch (RuntimeException exception) {
-            onError(envelope(), exception);
-        }
+        dispatchToOne((I) targets);
         return targets;
+    }
+
+    /**
+     * Dispatches the message to multiple entities.
+     *
+     * @param targets the set of entity IDs to which dispatch the message
+     * @return the set of entity IDs to which the message was successfully dispatched
+     */
+    private Set<I> dispatchToMany(Set<I> targets) {
+        ImmutableSet<I> result = targets.stream()
+                                        .peek(this::dispatchToOne)
+                                        .collect(toImmutableSet());
+        return result;
     }
 
     /**
@@ -104,6 +114,14 @@ public abstract class EntityMessageEndpoint<I,
      * @param entityId the ID of the entity for which to dispatch the message
      */
     private void dispatchToOne(I entityId) {
+        try {
+            doDispatchToOne(entityId);
+        } catch (RuntimeException exception) {
+            onError(envelope(), exception);
+        }
+    }
+
+    private void doDispatchToOne(I entityId) {
         M envelope = envelope();
         Delivery<I, E, M, ?, ?> delivery = getEndpointDelivery();
         delivery.getSender()
@@ -172,25 +190,6 @@ public abstract class EntityMessageEndpoint<I,
      * Processes the exception thrown during dispatching the message.
      */
     protected abstract void onError(M envelope, RuntimeException exception);
-
-    /**
-     * Dispatches the message to multiple entities.
-     *
-     * @param targets the set of entity IDs to which dispatch the message
-     * @return the set of entity IDs to which the message was successfully dispatched
-     */
-    private Set<I> dispatchToMany(Set<I> targets) {
-        ImmutableSet.Builder<I> result = ImmutableSet.builder();
-        for (I id : targets) {
-            try {
-                dispatchToOne(id);
-                result.add(id);
-            } catch (RuntimeException exception) {
-                onError(envelope(), exception);
-            }
-        }
-        return result.build();
-    }
 
     /**
      * Obtains the envelope of the message processed by this endpoint.
