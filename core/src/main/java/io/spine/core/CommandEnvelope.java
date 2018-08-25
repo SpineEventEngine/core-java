@@ -127,8 +127,9 @@ public final class CommandEnvelope
     @SuppressWarnings("CheckReturnValue") // calling builder
     @Override
     public void setOriginFields(EventContext.Builder builder) {
-        builder.setCommandContext(getCommandContext());
-        builder.setRootCommandId(getId());
+        builder.setCommandContext(getCommandContext())
+               .setRootCommandId(getId())
+               .setCommandId(getId());
     }
 
     /**

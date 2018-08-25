@@ -121,8 +121,9 @@ public final class EventEnvelope
     @Override
     public void setOriginFields(EventContext.Builder builder) {
         EventContext context = getEventContext();
-        builder.setEventContext(context);
-        builder.setRootCommandId(context.getRootCommandId());
+        builder.setEventContext(context)
+               .setRootCommandId(context.getRootCommandId())
+               .setEventId(getId());
     }
 
     /**
