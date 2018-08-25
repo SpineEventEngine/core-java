@@ -131,6 +131,14 @@ message EventContext {
     //
     RejectionEventContext rejection = 10;
 
+    // TODO:2018-08-25:dmytro.dashenkov: Merge with `origin`?
+    oneof origin_id {
+
+        CommandId command_id = 11;
+
+        EventId event_id = 12;
+    }
+
     // Deleted fields.
     reserved 7;
     reserved "rejection_context";

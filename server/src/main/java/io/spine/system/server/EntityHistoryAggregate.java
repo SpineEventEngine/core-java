@@ -22,6 +22,10 @@ package io.spine.system.server;
 
 import com.google.protobuf.Timestamp;
 import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
+import io.spine.core.Event;
+import io.spine.core.EventContext;
+import io.spine.core.EventId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
@@ -29,6 +33,7 @@ import io.spine.server.entity.LifecycleFlags;
 
 import java.util.function.UnaryOperator;
 
+import static com.google.common.collect.Streams.stream;
 import static com.google.protobuf.util.Timestamps.compare;
 import static io.spine.base.Time.getCurrentTime;
 
@@ -69,7 +74,9 @@ final class EntityHistoryAggregate
     }
 
     @Assign
-    EventDispatchedToSubscriber handle(DispatchEventToSubscriber command) {
+    EventDispatchedToSubscriber handle(DispatchEventToSubscriber command)
+            throws CannotDispatchEventTwice {
+        checkNotDuplicate(command.getEventId());
         DispatchedEvent dispatchedEvent = DispatchedEvent
                 .newBuilder()
                 .setEvent(command.getEventId())
@@ -82,7 +89,9 @@ final class EntityHistoryAggregate
     }
 
     @Assign
-    EventDispatchedToReactor handle(DispatchEventToReactor command) {
+    EventDispatchedToReactor handle(DispatchEventToReactor command)
+            throws CannotDispatchEventTwice {
+        checkNotDuplicate(command.getEventId());
         DispatchedEvent dispatchedEvent = DispatchedEvent
                 .newBuilder()
                 .setEvent(command.getEventId())
@@ -95,7 +104,9 @@ final class EntityHistoryAggregate
     }
 
     @Assign
-    CommandDispatchedToHandler handle(DispatchCommandToHandler command) {
+    CommandDispatchedToHandler handle(DispatchCommandToHandler command)
+            throws CannotDispatchCommandTwice {
+        checkNotDuplicate(command.getCommandId());
         DispatchedCommand dispatchedCommand = DispatchedCommand
                 .newBuilder()
                 .setCommand(command.getCommandId())
@@ -212,6 +223,28 @@ final class EntityHistoryAggregate
         updateLifecycleFlags(builder -> builder.setDeleted(false));
         Timestamp whenOccurred = event.getWhen();
         updateLifecycleTimestamp(builder -> builder.setWhenRestored(whenOccurred));
+    }
+
+    private void checkNotDuplicate(EventId eventId) throws CannotDispatchEventTwice {
+        boolean duplicate = stream(recentHistory().iterator())
+                .map(Event::getContext)
+                .filter(EventContext::hasEventId)
+                .map(EventContext::getEventId)
+                .anyMatch(eventId::equals);
+        if (duplicate) {
+            throw new CannotDispatchEventTwice(eventId, getId());
+        }
+    }
+
+    private void checkNotDuplicate(CommandId commandId) throws CannotDispatchCommandTwice {
+        boolean duplicate = stream(recentHistory().iterator())
+                .map(Event::getContext)
+                .filter(EventContext::hasCommandId)
+                .map(EventContext::getCommandId)
+                .anyMatch(commandId::equals);
+        if (duplicate) {
+            throw new CannotDispatchCommandTwice(commandId, getId());
+        }
     }
 
     private void updateLifecycleFlags(UnaryOperator<LifecycleFlags.Builder> mutation) {
