@@ -55,6 +55,7 @@ message CreateEntity {
 // This command is relevant only to histories of Projections.
 //
 message DispatchEventToSubscriber {
+    option (rejections) = "CannotDispatchEventTwice";
 
     // The ID of the entity, which the event is dispatched to.
     EntityHistoryId receiver = 1;
@@ -68,6 +69,7 @@ message DispatchEventToSubscriber {
 // This command is relevant to histories of Aggregates and ProcessManagers.
 //
 message DispatchEventToReactor {
+    option (rejections) = "CannotDispatchEventTwice";
 
     // The ID of the entity, which the event is dispatched to.
     EntityHistoryId receiver = 1;
@@ -81,6 +83,7 @@ message DispatchEventToReactor {
 // This command is relevant to histories of Aggregates and ProcessManagers.
 //
 message DispatchCommandToHandler {
+    option (rejections) = "CannotDispatchCommandTwice";
 
     // The ID of the entity, which the command is dispatched to.
     EntityHistoryId receiver = 1;
