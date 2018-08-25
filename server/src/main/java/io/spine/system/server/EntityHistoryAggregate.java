@@ -52,8 +52,8 @@ import static io.spine.base.Time.getCurrentTime;
  * of {@code EntityHistory} the history of a record-based entity can be investigated and
  * manipulated. The major use case for this facility is implementing idempotent message handlers.
  *
- * <p>This aggregate belongs to the {@code System} bounded context. The aggregate doesn't have
- * an own entity history.
+ * <p>This aggregate belongs to the {@code System} bounded context. This aggregate doesn't have
+ * an entity history of its own.
  *
  * @author Dmytro Dashenkov
  */
