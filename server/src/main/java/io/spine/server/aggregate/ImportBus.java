@@ -71,7 +71,7 @@ import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
  * importing of events <em>as they occur</em>.
  *
  * <p>Importing events which occurred before the events already stored in the aggregate
- * history may cause in hard to track bugs, and is not recommended.
+ * history may result in hard to track bugs, and is not recommended.
  *
  * @author Alexander Yevsyukov
  */

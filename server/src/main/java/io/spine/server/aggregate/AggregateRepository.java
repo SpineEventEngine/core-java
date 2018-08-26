@@ -479,17 +479,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Loads an aggregate by the passed ID.
      *
      * <p>An aggregate will be loaded despite its {@linkplain LifecycleFlags visibility}.
-     * I.e. even if the aggregate is
+     * That is, even if the aggregate is
      * {@linkplain io.spine.server.entity.EntityWithLifecycle#isArchived() archived}
      * or {@linkplain io.spine.server.entity.EntityWithLifecycle#isDeleted() deleted},
      * it is loaded and returned.
      *
      * @param  id the ID of the aggregate to load
-     * @return the loaded object or {@link Optional#empty()} if there are no events for the aggregate
-     * @throws IllegalStateException
-     *         if the storage of the repository is not {@linkplain #initStorage(StorageFactory)
-     *         initialized} prior to this call
-     * @see AggregateStateRecord
+     * @return the aggregate instance, or {@link Optional#empty() empty()} if there is no
+     *         aggregate with such ID
      */
     @Override
     public Optional<A> find(I id) throws IllegalStateException {
