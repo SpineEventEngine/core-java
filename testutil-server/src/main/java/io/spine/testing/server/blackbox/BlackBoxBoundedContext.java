@@ -132,7 +132,7 @@ public class BlackBoxBoundedContext {
     }
 
     /**
-     * @return a new {@link TenantId Tenant ID} with a random UUID value convenient
+     * Creates a new {@link TenantId Tenant ID} with a random UUID value convenient
      * for test purposes.
      */
     private static TenantId newTenantId() {
@@ -373,7 +373,7 @@ public class BlackBoxBoundedContext {
     }
 
     /**
-     * @return a new {@link EventStreamQuery} without any filters.
+     * Creates a new {@link EventStreamQuery} without any filters.
      */
     private static EventStreamQuery allEventsQuery() {
         return EventStreamQuery.newBuilder()
