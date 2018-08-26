@@ -69,8 +69,8 @@ import static io.spine.protobuf.TypeConverter.toAny;
  */
 public final class ColumnFilters {
 
+    /** Prevent this utility class initialization. */
     private ColumnFilters() {
-        // Prevent this utility class initialization.
     }
 
     /**

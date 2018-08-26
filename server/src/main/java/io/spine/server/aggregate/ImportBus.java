@@ -42,6 +42,37 @@ import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
  * Dispatches events to repositories of aggregates that
  * {@linkplain io.spine.server.aggregate.Apply#allowImport() import} these events.
  *
+ * <h1>Usage Scenarios</h1>
+ *
+ * <p>Importing events may be used for registering facts occurred in a legacy or a third-party
+ * system, which the Bounded Context translates into facts (events) of its history.
+ *
+ * <p>Another scenario is registering facts occurred <em>within</em> a Bounded Context
+ * <em>without</em> having intermediate commands or events.
+ *
+ * <p>Adding an event to an aggregate history normally requires
+ * either a command (handling of which produces the event), or an event (reaction on which may
+ * produce the event). Such a command or an event:
+ * <ol>
+ *   <li>serves as a dispatched message type, which is used as the first argument of the
+ *       corresponding aggregate handler method;
+ *   <li>carries the information about the fact we want to remember.
+ * </ol>
+ *
+ * <p>{@linkplain Apply#allowImport() Marking} events and ensuring proper
+ * {@linkplain AggregateRepository#getEventImportRouting() routing} allows to store aggregate
+ * events without having intermediate messages.
+ *
+ * <h1>Temporal Logic</h1>
+ *
+ * <p>Importing events through dispatching
+ * {@linkplain #post(com.google.protobuf.Message, io.grpc.stub.StreamObserver) one} or
+ * {@linkplain #post(Iterable, io.grpc.stub.StreamObserver) several} events is designed for
+ * importing of events <em>as they occur</em>.
+ *
+ * <p>Importing events which occurred before the events already stored in the aggregate
+ * history may cause in hard to track bugs, and is not recommended.
+ *
  * @author Alexander Yevsyukov
  */
 public final class ImportBus
