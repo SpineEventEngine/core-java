@@ -55,6 +55,9 @@ public @interface Apply {
     /**
      * If {@code true} the aggregate supports importing of events with the messages
      * defined as the first parameter of the annotated method.
+     *
+     * @see ImportBus
+     * @see AggregateRepository#getEventImportRouting()
      */
     boolean allowImport() default false;
 }
