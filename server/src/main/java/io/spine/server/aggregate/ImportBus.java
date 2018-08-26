@@ -88,6 +88,9 @@ public final class ImportBus
                                   .orElseThrow(tenantIndexNotSet());
     }
 
+    /**
+     * Creates a builder for creating a new {@code ImportBus}.
+     */
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -156,8 +159,6 @@ public final class ImportBus
 
     /**
      * The registry of import dispatchers.
-     *
-     * @author Alexander Yevsyukov
      */
     private static final class Registry
             extends DispatcherRegistry<EventClass, EventImportDispatcher<?>> {
