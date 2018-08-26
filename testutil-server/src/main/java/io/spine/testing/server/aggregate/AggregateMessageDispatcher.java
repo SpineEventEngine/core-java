@@ -81,7 +81,7 @@ public class AggregateMessageDispatcher {
     }
 
     /**
-     * A test-only implementation of an {@link io.spine.server.aggregate.AggregateEventReactionEndpoint}, that dispatches
+     * A test-only implementation of an {@link AggregateEventReactionEndpoint}, that dispatches
      * events to an instance of {@code Aggregate} into its reactor methods and returns
      * the list of produced events.
      *
