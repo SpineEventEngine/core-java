@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import io.spine.annotation.Internal;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.logging.Logging;
@@ -38,16 +39,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @param <I> the type of aggregate IDs
  * @author Alexander Yevsyukov
- * @apiNote This class is {@code public} so that it can be used as a generic parameter {@code <D>}
- *          of {@link io.spine.server.aggregate.ImportBus ImportBus}. This way we
- *          allow only instances of this class being registered for dispatching imported events
- *          (thus preventing an arbitrary
- *         {@link io.spine.server.event.EventDispatcher EventDispatcher} being used for import).
- *         This way, only {@linkplain io.spine.server.aggregate.AggregateRepository
- *         Aggregate Repositories}
- *         {@link io.spine.server.aggregate.ImportBus#dispatch(io.spine.core.EventEnvelope)
- *         ImportBus}.
+ * @apiNote
+ * This internal class is made {@code public} for restricting types of dispatchers that can be
+ * registered with an {@link io.spine.server.aggregate.ImportBus ImportBus}. Since only
+ * {@linkplain io.spine.server.aggregate.AggregateRepository Aggregate Repositories} can dispatch
+ * imported events to their aggregates, we limit the type of the import event dispatches to
+ * this class, which neither can be extended, nor created from outside of this package.
+ * Instances of this class are proxies that Aggregate Repositories create and
+ * {@linkplain io.spine.server.aggregate.ImportBus#register(
+ * io.spine.server.bus.MessageDispatcher) register} with an {@code ImportBus} of their parent
+ * Bounded Context.
  */
+@Internal
 public final class EventImportDispatcher<I> implements EventDispatcher<I>, Logging {
 
     private final AggregateRepository<I, ?> repository;
