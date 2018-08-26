@@ -136,9 +136,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /**
      * {@inheritDoc}
      *
-     * <p>{@linkplain io.spine.server.commandbus.CommandBus#register(
-     * io.spine.server.bus.MessageDispatcher) Registers} itself with the {@code CommandBus} of the
-     * parent {@code BoundedContext}.
+     * <p>{@code AggregateRepository} also registers itself with:
+     *
+     * <ul>
+     *     <li>{@link io.spine.server.commandbus.CommandBus CommandBus},
+     *         {@link io.spine.server.event.EventBus EventBus}, and
+     *         {@link io.spine.server.aggregate.ImportBus ImportBus} of
+     *         the parent {@code BoundedContext} for dispatching messages to its aggregates;
+     *     <li>{@link io.spine.server.delivery.Sharding#register(io.spine.server.delivery.Shardable)
+     *     Sharding} for groupping of messages sent to its aggregates.
+     * </ul>
      */
     @Override
     public void onRegistered() {
@@ -149,7 +156,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         BoundedContext boundedContext = getBoundedContext();
         boundedContext.registerCommandDispatcher(this);
         boundedContext.registerEventDispatcher(this);
-        boundedContext.registerImportDispatcher(EventImportDispatcher.of(this));
+        boundedContext.getImportBus()
+                      .register(EventImportDispatcher.of(this));
 
         this.commandErrorHandler = boundedContext.createCommandErrorHandler();
         registerWithSharding();

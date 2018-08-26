@@ -293,16 +293,6 @@ public abstract class BoundedContext
     }
 
     /**
-     * Registers the passed dispatcher of import operations with the {@link ImportBus}.
-     */
-    public void registerImportDispatcher(EventDispatcher<?> dispatcher) {
-        checkNotNull(dispatcher);
-        if (dispatcher.dispatchesEvents()) {
-            importBus.register(dispatcher);
-        }
-    }
-
-    /**
      * Supplies {@code IllegalStateException} for the cases when dispatchers or dispatcher
      * delegates do not provide an external message dispatcher.
      */

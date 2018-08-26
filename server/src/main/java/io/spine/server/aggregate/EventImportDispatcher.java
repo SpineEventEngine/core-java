@@ -38,8 +38,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @param <I> the type of aggregate IDs
  * @author Alexander Yevsyukov
+ * @apiNote This class is {@code public} so that it can be used as a generic parameter {@code <D>}
+ *          of {@link io.spine.server.aggregate.ImportBus ImportBus}. This way we
+ *          allow only instances of this class being registered for dispatching imported events
+ *          (thus preventing an arbitrary
+ *         {@link io.spine.server.event.EventDispatcher EventDispatcher} being used for import).
+ *         This way, only {@linkplain io.spine.server.aggregate.AggregateRepository
+ *         Aggregate Repositories}
+ *         {@link io.spine.server.aggregate.ImportBus#dispatch(io.spine.core.EventEnvelope)
+ *         ImportBus}.
  */
-final class EventImportDispatcher<I> implements EventDispatcher<I>, Logging {
+public final class EventImportDispatcher<I> implements EventDispatcher<I>, Logging {
 
     private final AggregateRepository<I, ?> repository;
 

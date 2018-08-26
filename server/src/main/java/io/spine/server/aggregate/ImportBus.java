@@ -39,12 +39,13 @@ import java.util.Optional;
 import static io.spine.server.bus.BusBuilder.FieldCheck.tenantIndexNotSet;
 
 /**
- * Dispatches import events to aggregates that import these events.
+ * Dispatches events to repositories of aggregates that
+ * {@linkplain io.spine.server.aggregate.Apply#allowImport() import} these events.
  *
  * @author Alexander Yevsyukov
  */
 public final class ImportBus
-        extends UnicastBus<Event, EventEnvelope, EventClass, EventDispatcher<?>> {
+        extends UnicastBus<Event, EventEnvelope, EventClass, EventImportDispatcher<?>> {
 
     private final ImportValidator validator = new ImportValidator();
     private final DeadImportEventHandler deadImportEventHandler = new DeadImportEventHandler();
@@ -128,12 +129,12 @@ public final class ImportBus
      * @author Alexander Yevsyukov
      */
     private static final class Registry
-            extends DispatcherRegistry<EventClass, EventDispatcher<?>> {
+            extends DispatcherRegistry<EventClass, EventImportDispatcher<?>> {
 
         @SuppressWarnings("RedundantMethodOverride") // Overrides to open access to the method.
         @Override
         protected
-        Optional<? extends EventDispatcher<?>> getDispatcher(EventClass messageClass) {
+        Optional<? extends EventImportDispatcher<?>> getDispatcher(EventClass messageClass) {
             return super.getDispatcher(messageClass);
         }
     }
