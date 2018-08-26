@@ -36,7 +36,7 @@ import io.spine.server.tenant.TenantIndex;
 import io.spine.server.transport.TransportFactory;
 import io.spine.server.transport.memory.InMemoryTransportFactory;
 import io.spine.system.server.NoOpSystemGateway;
-import io.spine.system.server.SystemBoundedContext;
+import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemGateway;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -245,22 +245,22 @@ public final class BoundedContextBuilder implements Logging {
      */
     @CheckReturnValue
     public BoundedContext build() {
-        SystemBoundedContext system = buildSystem();
+        SystemContext system = buildSystem();
         BoundedContext result = buildDefault(system);
         log().info(result.nameForLogging() + " created.");
         return result;
     }
 
-    private BoundedContext buildDefault(SystemBoundedContext system) {
-        BiFunction<BoundedContextBuilder, SystemGateway, DomainBoundedContext>
-                instanceFactory = DomainBoundedContext::newInstance;
+    private BoundedContext buildDefault(SystemContext system) {
+        BiFunction<BoundedContextBuilder, SystemGateway, DomainContext>
+                instanceFactory = DomainContext::newInstance;
         SystemGateway systemGateway = SystemGateway.newInstance(system);
         BoundedContext result = buildPartial(instanceFactory, systemGateway);
         return result;
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored") // Builder methods.
-    private SystemBoundedContext buildSystem() {
+    private SystemContext buildSystem() {
         BoundedContextName name = BoundedContextNames.system(this.name);
         BoundedContextBuilder system = BoundedContext
                 .newBuilder()
@@ -272,10 +272,10 @@ public final class BoundedContextBuilder implements Logging {
         Optional<? extends TenantIndex> tenantIndex = getTenantIndex();
         tenantIndex.ifPresent(system::setTenantIndex);
 
-        BiFunction<BoundedContextBuilder, SystemGateway, SystemBoundedContext> instanceFactory =
-                (builder, systemGateway) -> SystemBoundedContext.newInstance(builder);
+        BiFunction<BoundedContextBuilder, SystemGateway, SystemContext> instanceFactory =
+                (builder, systemGateway) -> SystemContext.newInstance(builder);
         NoOpSystemGateway systemGateway = NoOpSystemGateway.INSTANCE;
-        SystemBoundedContext result = system.buildPartial(instanceFactory, systemGateway);
+        SystemContext result = system.buildPartial(instanceFactory, systemGateway);
         return result;
     }
 

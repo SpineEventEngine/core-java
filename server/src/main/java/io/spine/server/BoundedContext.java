@@ -51,7 +51,7 @@ import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantIndex;
-import io.spine.system.server.SystemBoundedContext;
+import io.spine.system.server.SystemContext;
 import io.spine.system.server.SystemGateway;
 import io.spine.type.TypeName;
 
@@ -151,8 +151,8 @@ public abstract class BoundedContext
     private void checkInheritance() {
         Class<? extends BoundedContext> thisClass = getClass();
         checkState(
-                DomainBoundedContext.class.equals(thisClass) ||
-                        SystemBoundedContext.class.equals(thisClass),
+                DomainContext.class.equals(thisClass) ||
+                        SystemContext.class.equals(thisClass),
                 "The class `BoundedContext` is not designed for " +
                         "inheritance by the framework users."
         );
@@ -387,7 +387,8 @@ public abstract class BoundedContext
     }
 
     /**
-     * @return {@code true} if the bounded context serves many organizations
+     * Returns {@code true} if the Bounded Context is designed to serve more than one tenant of
+     * the application, {@code false} otherwise.
      */
     public boolean isMultitenant() {
         return multitenant;

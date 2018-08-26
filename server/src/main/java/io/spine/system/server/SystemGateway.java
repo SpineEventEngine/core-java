@@ -43,7 +43,7 @@ public interface SystemGateway {
     /**
      * Creates new instance of the gateway which serves the passed System Bounded Context.
      */
-    static SystemGateway newInstance(SystemBoundedContext system) {
+    static SystemGateway newInstance(SystemContext system) {
         return new DefaultSystemGateway(system);
     }
 }
