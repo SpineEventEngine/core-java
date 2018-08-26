@@ -21,7 +21,6 @@
 package io.spine.server.aggregate.model;
 
 import com.google.common.collect.ImmutableSet;
-import io.spine.core.CommandClass;
 import io.spine.core.EventClass;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.entity.model.CommandHandlingEntityClass;
@@ -48,14 +47,14 @@ public class AggregateClass<A extends Aggregate>
     private static final long serialVersionUID = 0L;
 
     private final MessageHandlerMap<EventClass, EventApplier> stateEvents;
-    private final ImmutableSet<EventClass> importEvents;
+    private final ImmutableSet<EventClass> importableEvents;
     private final ReactorClassDelegate<A> delegate;
 
     /** Creates new instance. */
     protected AggregateClass(Class<A> cls) {
         super(checkNotNull(cls));
         this.stateEvents = MessageHandlerMap.create(cls, new EventApplierSignature());
-        this.importEvents = stateEvents.getMessageClasses(EventApplier::allowsImport);
+        this.importableEvents = stateEvents.getMessageClasses(EventApplier::allowsImport);
         this.delegate = new ReactorClassDelegate<>(cls);
     }
 
@@ -85,7 +84,16 @@ public class AggregateClass<A extends Aggregate>
      * by the aggregates of this class.
      */
     public Set<EventClass> getImportableEventClasses() {
-        return importEvents;
+        return importableEvents;
+    }
+
+    /**
+     * Returns {@code true} if aggregates of this class
+     * {@link io.spine.server.aggregate.Apply#allowImport() import} events of at least one class;
+     * {@code false} otherwise.
+     */
+    public final boolean importsEvents() {
+        return !importableEvents.isEmpty();
     }
 
     @Override

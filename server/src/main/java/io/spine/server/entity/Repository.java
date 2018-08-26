@@ -53,8 +53,6 @@ import static java.lang.String.format;
 /**
  * Abstract base class for repositories.
  *
- * @param <I> the type of IDs of entities managed by the repository
- * @param <E> the entity type
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ClassWithTooManyMethods") // OK for this core class.

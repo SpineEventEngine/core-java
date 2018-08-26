@@ -21,7 +21,7 @@
 package io.spine.server.aggregate.given.importado;
 
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.route.EventProducers;
+import io.spine.server.route.EventRoute;
 
 /**
  * A repository for {@link Dot} objects.
@@ -38,6 +38,6 @@ public class DotSpace extends AggregateRepository<ObjectId, Dot> {
      * of creating {@code Event} instances. Real imports would need to create those.
      */
     public DotSpace() {
-        getEventImportRouting().replaceDefault(EventProducers.fromFirstMessageField());
+        getEventImportRouting().replaceDefault(EventRoute.fromFirstMessageField());
     }
 }

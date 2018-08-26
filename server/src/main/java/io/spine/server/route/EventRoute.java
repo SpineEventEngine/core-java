@@ -30,5 +30,28 @@ import io.spine.core.EventContext;
  * @param <M> the type of event messages to get IDs from
  * @author Alexander Yevsyukov
  */
+@FunctionalInterface
 public interface EventRoute<I, M extends Message> extends Multicast<I, M, EventContext> {
+
+    /**
+     * Creates an event route that obtains event producer ID from an {@code EventContext} and
+     * returns it as a sole element of the immutable set.
+     *
+     * @param <I> the type of the entity IDs to which the event would be routed
+     * @return new route instance
+     */
+    static <I> EventRoute<I, Message> fromContext() {
+        return new EventProducers.FromContext<>();
+    }
+
+    /**
+     * Creates an event route that obtains event producer ID from an {@code EventContext} and
+     * returns it as a sole element of the the immutable set.
+     *
+     * @param <I> the type of the IDs for which the event would be routed
+     * @return new function instance
+     */
+    static <I> EventRoute<I, Message> fromFirstMessageField() {
+        return new EventProducers.FromFirstMessageField<>();
+    }
 }

@@ -37,9 +37,6 @@ import static io.spine.protobuf.AnyPacker.unpack;
 /**
  * Abstract base for repositories that deliver events to entities they manage.
  *
- * @param <I> the type of IDs of entities
- * @param <E> the type of entities
- * @param <S> the type of entity state messages
  * @author Alexander Yevsyukov
  */
 public abstract class EventDispatchingRepository<I,

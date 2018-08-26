@@ -22,7 +22,7 @@ package io.spine.system.server;
 
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
-import io.spine.server.route.EventProducers;
+import io.spine.server.route.EventRoute;
 
 /**
  * Abstract base for system aggregate repositories.
@@ -36,6 +36,6 @@ abstract class SystemRepository<I, A extends Aggregate<I, ?, ?>>
 
     SystemRepository() {
         super();
-        getEventImportRouting().replaceDefault(EventProducers.fromFirstMessageField());
+        getEventImportRouting().replaceDefault(EventRoute.fromFirstMessageField());
     }
 }

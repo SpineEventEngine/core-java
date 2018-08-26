@@ -22,51 +22,26 @@ package io.spine.server.route;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.annotation.Internal;
 import io.spine.core.EventContext;
 import io.spine.core.Events;
 
 import java.util.Set;
 
 /**
- * Internal utility class that provides default {@link EventRoute}s
- * for obtaining a producer from an event.
+ * Provides default {@link EventRoute}s for obtaining a producer ID from an event.
  *
  * @author Alexander Yevsyukov
  */
-@Internal
-public class EventProducers {
+final class EventProducers {
 
     /** Prevents instantiation of this utility class. */
     private EventProducers() {
     }
 
     /**
-     * Creates an event route that obtains event producer ID from an {@code EventContext} and
-     * returns it as a sole element of the immutable set.
-     *
-     * @param <I> the type of the entity IDs to which the event would be routed
-     * @return new route instance
-     */
-    public static <I> EventRoute<I, Message> fromContext() {
-        return new FromContext<>();
-    }
-
-    /**
-     * Creates an event route that obtains event producer ID from an {@code EventContext} and
-     * returns it as a sole element of the the immutable set.
-     *
-     * @param <I> the type of the IDs for which the event would be routed
-     * @return new function instance
-     */
-    public static <I> EventRoute<I, Message> fromFirstMessageField() {
-        return new FromFirstMessageField<>();
-    }
-
-    /**
      * Obtains an event producer ID from the context of the event.
      */
-    private static final class FromContext<I> implements EventRoute<I, Message> {
+    static final class FromContext<I> implements EventRoute<I, Message> {
 
         private static final long serialVersionUID = 0L;
 
@@ -86,7 +61,7 @@ public class EventProducers {
     /**
      * The route that obtains a producer ID from the first field of the event message.
      */
-    private static final class FromFirstMessageField<I> implements EventRoute<I, Message> {
+    static final class FromFirstMessageField<I> implements EventRoute<I, Message> {
 
         private static final long serialVersionUID = 0L;
 
@@ -107,7 +82,7 @@ public class EventProducers {
     /**
      * Obtains an event producer ID from a field of an event message.
      */
-    private static final class FromEventMessage<I> extends FieldAtIndex<I, Message, EventContext> {
+    static final class FromEventMessage<I> extends FieldAtIndex<I, Message, EventContext> {
 
         private static final long serialVersionUID = 0L;
 
