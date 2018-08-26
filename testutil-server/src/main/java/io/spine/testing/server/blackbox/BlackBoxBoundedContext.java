@@ -66,8 +66,6 @@ import static java.util.stream.Collectors.toList;
 @VisibleForTesting
 public class BlackBoxBoundedContext {
 
-    private static final String NOT_A_DOMAIN_EVENT_ERROR = 
-            "The Black Box bounded context expects a domain event, not a Spine Event instance";
     private final BoundedContext boundedContext;
     private final TestActorRequestFactory requestFactory;
     private final TestEventFactory eventFactory;
