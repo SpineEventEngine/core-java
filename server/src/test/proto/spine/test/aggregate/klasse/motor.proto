@@ -35,7 +35,6 @@ message EngineId {
 }
 
 message Engine {
-    EngineId id = 1 [(required) = true];
 
     enum Status {
         ENGINE_STATE_UNDEFINED = 0;
@@ -43,5 +42,5 @@ message Engine {
         STARTED = 2;
     }
 
-    Status status = 2 [(required) = true];
+    Status status = 1 [(required) = true];
 }

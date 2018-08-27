@@ -87,7 +87,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Creates a new {@code ProjectionRepository}.
      */
     protected ProjectionRepository() {
-        super(EventRoute.fromContext());
+        super(EventRoute.byProducerId());
     }
 
     @VisibleForTesting

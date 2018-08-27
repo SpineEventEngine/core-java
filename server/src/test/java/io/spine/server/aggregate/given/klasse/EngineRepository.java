@@ -18,26 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.aggregate.given.importado;
+package io.spine.server.aggregate.given.klasse;
 
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.route.EventRoute;
 
 /**
- * A repository for {@link Dot} objects.
+ * Test environment aggregate repository which can switch default routing of importable events.
  *
  * @author Alexander Yevsyukov
+ * @see io.spine.server.aggregate.EventImportTest
  */
-public class DotSpace extends AggregateRepository<ObjectId, Dot> {
+public class EngineRepository extends AggregateRepository<EngineId, EngineAggregate> {
 
-    /**
-     * Replaces event import routing to take first message field.
-     *
-     * @implNote Default behaviour defined in {@link AggregateRepository#eventImportRoute}
-     * is to take producer ID from an {@code EventContext}. We redefine this to avoid the need
-     * of creating {@code Event} instances. Real imports would need to create those.
-     */
-    public DotSpace() {
+    public void routeImportByFirstMessageField() {
         getEventImportRouting().replaceDefault(EventRoute.byFirstMessageField());
     }
 }

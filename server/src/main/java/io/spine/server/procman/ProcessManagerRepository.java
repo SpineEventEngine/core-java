@@ -106,7 +106,7 @@ public abstract class ProcessManagerRepository<I,
      * Creates a new instance with the event routing by the first message field.
      */
     protected ProcessManagerRepository() {
-        super(EventRoute.fromFirstMessageField());
+        super(EventRoute.byFirstMessageField());
     }
 
     /** Obtains class information of process managers managed by this repository. */

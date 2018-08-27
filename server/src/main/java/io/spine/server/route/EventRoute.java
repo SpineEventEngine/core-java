@@ -40,7 +40,7 @@ public interface EventRoute<I, M extends Message> extends Multicast<I, M, EventC
      * @param <I> the type of the entity IDs to which the event would be routed
      * @return new route instance
      */
-    static <I> EventRoute<I, Message> fromContext() {
+    static <I> EventRoute<I, Message> byProducerId() {
         return new EventProducers.FromContext<>();
     }
 
@@ -51,7 +51,7 @@ public interface EventRoute<I, M extends Message> extends Multicast<I, M, EventC
      * @param <I> the type of the IDs for which the event would be routed
      * @return new function instance
      */
-    static <I> EventRoute<I, Message> fromFirstMessageField() {
+    static <I> EventRoute<I, Message> byFirstMessageField() {
         return new EventProducers.FromFirstMessageField<>();
     }
 }

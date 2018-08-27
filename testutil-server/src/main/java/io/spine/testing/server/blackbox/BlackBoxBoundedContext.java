@@ -107,6 +107,10 @@ public class BlackBoxBoundedContext {
      * Utilities for instance initialization.
      ******************************************************************************/
 
+    public TestActorRequestFactory requestFactory() {
+        return requestFactory;
+    }
+
     /**
      * Creates a new {@link io.spine.client.ActorRequestFactory actor request factory} for tests
      * with a provided tenant ID.
@@ -238,6 +242,7 @@ public class BlackBoxBoundedContext {
      *                    in supplied order
      * @return current instance
      */
+    @SuppressWarnings("unused")
     public BlackBoxBoundedContext
     receivesEvents(Message firstEvent, Message secondEvent, Message... otherEvents) {
         return this.receivesEvents(asList(firstEvent, secondEvent, otherEvents));
@@ -263,12 +268,16 @@ public class BlackBoxBoundedContext {
         return events;
     }
 
-    public BlackBoxBoundedContext
-    importsEvents(Message firstEvent, Message secondEvent, Message ... otherEvents) {
-        return this.importsEvents(asList(firstEvent, secondEvent, otherEvents));
+    public BlackBoxBoundedContext importsEvent(Message eventOrMessage) {
+        return this.importAll(singletonList(eventOrMessage));
     }
 
-    private BlackBoxBoundedContext importsEvents(Collection<Message> domainEvents) {
+    public BlackBoxBoundedContext
+    importsEvents(Message firstEvent, Message secondEvent, Message ... otherEvents) {
+        return this.importAll(asList(firstEvent, secondEvent, otherEvents));
+    }
+
+    private BlackBoxBoundedContext importAll(Collection<Message> domainEvents) {
         List<Event> events = toEvents(domainEvents);
         importBus.post(events, observer);
         return this;

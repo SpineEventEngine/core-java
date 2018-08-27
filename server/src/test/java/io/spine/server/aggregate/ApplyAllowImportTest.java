@@ -24,6 +24,8 @@ import io.spine.server.aggregate.given.importado.DotSpace;
 import io.spine.server.aggregate.given.importado.ObjectId;
 import io.spine.server.aggregate.given.importado.event.Moved;
 import io.spine.testing.server.blackbox.BlackBoxBoundedContext;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -46,6 +48,20 @@ import static io.spine.testing.server.blackbox.VerifyEvents.emittedEvent;
 @DisplayName("Aggregate which supports event import should")
 class ApplyAllowImportTest {
 
+    private BlackBoxBoundedContext boundedContext;
+
+    @BeforeEach
+    void setUp() {
+        boundedContext = BlackBoxBoundedContext
+                .newInstance()
+                .with(new DotSpace());
+    }
+
+    @AfterEach
+    void tearDown() {
+        boundedContext.close();
+    }
+
     /**
      * Black-box test that ensures that the aggregate works in a normal way.
      */
@@ -56,12 +72,9 @@ class ApplyAllowImportTest {
                               .setValue("Луноход-1")
                               .build();
 
-        BlackBoxBoundedContext
-                .newInstance()
-                .with(new DotSpace())
+        boundedContext
                 .receivesCommands(move(id, NORTH), move(id, EAST))
-                .assertThat(emittedEvent(Moved.class, twice()))
-                .close();
+                .assertThat(emittedEvent(Moved.class, twice()));
     }
 
     @Test
@@ -71,11 +84,8 @@ class ApplyAllowImportTest {
                               .setValue("LRV")
                               .build();
 
-        BlackBoxBoundedContext
-                .newInstance()
-                .with(new DotSpace())
+        boundedContext
                 .importsEvents(moved(id, SOUTH), moved(id, WEST), moved(id, WEST))
-                .assertThat(emittedEvent(Moved.class, thrice()))
-                .close();
+                .assertThat(emittedEvent(Moved.class, thrice()));
     }
 }
