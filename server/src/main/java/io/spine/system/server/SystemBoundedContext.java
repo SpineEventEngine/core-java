@@ -25,10 +25,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.BoundedContextBuilder;
 import io.spine.server.event.Enricher;
 import io.spine.server.event.EventBus;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * An implementation of {@link BoundedContext} used for the System domain.
@@ -51,8 +47,6 @@ import static com.google.common.base.Preconditions.checkState;
  */
 @Internal
 public final class SystemBoundedContext extends BoundedContext {
-
-    private @MonotonicNonNull DomainGateway gateway;
 
     private SystemBoundedContext(BoundedContextBuilder builder) {
         super(builder);
@@ -86,17 +80,6 @@ public final class SystemBoundedContext extends BoundedContext {
         register(commandLifecycle);
         register(new EntityHistoryRepository());
         register(new ScheduledCommandRepository());
-    }
-
-    void setDomainGateway(DomainGateway gateway) {
-        checkNotNull(gateway);
-        checkState(this.gateway == null, "Gateway is already set.");
-        this.gateway = gateway;
-    }
-
-    private DomainGateway gateway() {
-        checkNotNull(gateway, "setDomainGateway() is never called.");
-        return gateway;
     }
 
     /**
