@@ -261,17 +261,24 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     @Override
     public Set<I> dispatch(EventEnvelope envelope) {
-        EventRouting<I> routing = getEventRouting();
-        Set<I> ids = routing.apply(envelope.getMessage(), envelope.getEventContext());
+        checkNotNull(envelope);
+        Set<I> ids = route(envelope);
         Event event = envelope.getOuterObject();
         ids.forEach(id -> lifecycleOf(id).onDispatchEventToSubscriber(event));
         return ids;
     }
 
     @Internal
-    protected final Set<I> dispatchNow(EventEnvelope envelope) {
-        Set<I> ids = ProjectionEndpoint.handle(this, envelope);
+    protected final Set<I> route(EventEnvelope envelope) {
+        EventRouting<I> routing = getEventRouting();
+        Set<I> ids = routing.apply(envelope.getMessage(), envelope.getEventContext());
         return ids;
+    }
+
+    @Internal
+    protected final void dispatchNowTo(I id, EventEnvelope envelope) {
+        ProjectionEndpoint<I, P> endpoint = ProjectionEndpoint.of(this, envelope);
+        endpoint.dispatchToOne(id);
     }
 
     @Internal
@@ -286,6 +293,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return nullToDefault(timestamp);
     }
 
+    @VisibleForTesting
     EventStreamQuery createStreamQuery() {
         Set<EventFilter> eventFilters = createEventFilters();
 

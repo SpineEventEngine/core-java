@@ -27,6 +27,8 @@ import io.spine.server.projection.ProjectionRepository;
 
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @author Dmytro Dashenkov
  */
@@ -35,6 +37,9 @@ public class SystemProjectionRepository<I, P extends Projection<I, S, ?>, S exte
 
     @Override
     public final Set<I> dispatch(EventEnvelope envelope) {
-        return dispatchNow(envelope);
+        checkNotNull(envelope);
+        Set<I> ids = route(envelope);
+        ids.forEach(id -> dispatchNowTo(id, envelope));
+        return ids;
     }
 }

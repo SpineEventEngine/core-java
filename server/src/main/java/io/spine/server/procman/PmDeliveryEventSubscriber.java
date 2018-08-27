@@ -20,8 +20,14 @@
 
 package io.spine.server.procman;
 
+import io.spine.core.Command;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
+import io.spine.core.EventEnvelope;
 import io.spine.core.Subscribe;
+import io.spine.server.commandbus.DuplicateCommandException;
 import io.spine.server.delivery.DeliveryEventSubscriber;
+import io.spine.server.event.DuplicateEventException;
 import io.spine.system.server.CommandDispatchedToHandler;
 import io.spine.system.server.EventDispatchedToReactor;
 import io.spine.system.server.HistoryRejections;
@@ -29,11 +35,11 @@ import io.spine.system.server.HistoryRejections;
 /**
  * @author Dmytro Dashenkov
  */
-final class PmDeliveryEventSubscriber extends DeliveryEventSubscriber {
+final class PmDeliveryEventSubscriber<I> extends DeliveryEventSubscriber<I> {
 
-    private final ProcessManagerRepository<?, ?, ?> repository;
+    private final ProcessManagerRepository<I, ?, ?> repository;
 
-    PmDeliveryEventSubscriber(ProcessManagerRepository<?, ?, ?> repository) {
+    PmDeliveryEventSubscriber(ProcessManagerRepository<I, ?, ?> repository) {
         super(repository.getEntityStateType());
         this.repository = repository;
     }
@@ -41,28 +47,38 @@ final class PmDeliveryEventSubscriber extends DeliveryEventSubscriber {
     @Subscribe(external = true)
     public void on(CommandDispatchedToHandler event) {
         if (correctType(event.getReceiver())) {
-            // repository -> dispatch ...
+            I id = idFrom(event.getReceiver());
+            CommandEnvelope envelope = CommandEnvelope.of(event.getPayload());
+            repository.dispatchNowTo(id, envelope);
         }
     }
 
     @Subscribe(external = true)
     public void on(HistoryRejections.CannotDispatchCommandTwice event) {
         if (correctType(event.getReceiver())) {
-            // repository -> dispatch ...
+            Command command = event.getPayload();
+            DuplicateCommandException exception = DuplicateCommandException.of(command);
+            CommandEnvelope envelope = CommandEnvelope.of(command);
+            repository.onError(envelope, exception);
         }
     }
 
     @Subscribe(external = true)
     public void on(EventDispatchedToReactor event) {
         if (correctType(event.getReceiver())) {
-            // repository -> dispatch ...
+            I id = idFrom(event.getReceiver());
+            EventEnvelope envelope = EventEnvelope.of(event.getPayload());
+            repository.dispatchNowTo(id, envelope);
         }
     }
 
     @Subscribe(external = true)
     public void on(HistoryRejections.CannotDispatchEventTwice event) {
         if (correctType(event.getReceiver())) {
-            // repository -> dispatch ...
+            Event payload = event.getPayload();
+            DuplicateEventException exception = new DuplicateEventException(payload);
+            EventEnvelope envelope = EventEnvelope.of(payload);
+            repository.onError(envelope, exception);
         }
     }
 }

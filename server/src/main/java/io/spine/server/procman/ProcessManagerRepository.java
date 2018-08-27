@@ -102,8 +102,6 @@ public abstract class ProcessManagerRepository<I,
      */
     private @MonotonicNonNull CommandErrorHandler commandErrorHandler;
 
-    private @MonotonicNonNull PmDeliveryEventSubscriber systemSubscriber;
-
     /**
      * Creates a new instance with the event routing by the first message field.
      */
@@ -165,7 +163,7 @@ public abstract class ProcessManagerRepository<I,
         }
 
         this.commandErrorHandler = boundedContext.createCommandErrorHandler();
-        this.systemSubscriber = new PmDeliveryEventSubscriber(this);
+        PmDeliveryEventSubscriber<I> systemSubscriber = new PmDeliveryEventSubscriber<>(this);
         systemSubscriber.registerAt(boundedContext);
 
         registerWithSharding();
@@ -224,7 +222,20 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public I dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
-        return PmCommandEndpoint.handle(this, command);
+        I target = route(command);
+        lifecycleOf(target).onDispatchCommand(command.getCommand());
+        return target;
+    }
+
+    private I route(CommandEnvelope envelope) {
+        CommandRouting<I> routing = getCommandRouting();
+        I target = routing.apply(envelope.getMessage(), envelope.getCommandContext());
+        return target;
+    }
+
+    final void dispatchNowTo(I id, CommandEnvelope command) {
+        PmCommandEndpoint<I, P> endpoint = PmCommandEndpoint.of(this, command);
+        endpoint.dispatchToOne(id);
     }
 
     /**
@@ -233,13 +244,27 @@ public abstract class ProcessManagerRepository<I,
      * <p>If there is no stored process manager with such an ID, a new process manager is created
      * and stored after it handles the passed event.
      *
-     * @param event the event to dispatch
+     * @param envelope the event to dispatch
      * @see ProcessManager#dispatchEvent(EventEnvelope)
      */
     @Override
-    public Set<I> dispatch(EventEnvelope event) {
-        Set<I> result = PmEventEndpoint.handle(this, event);
-        return result;
+    public Set<I> dispatch(EventEnvelope envelope) {
+        checkNotNull(envelope);
+        Set<I> targets = route(envelope);
+        Event event = envelope.getOuterObject();
+        targets.forEach(id -> lifecycleOf(id).onDispatchEventToReactor(event));
+        return targets;
+    }
+
+    private Set<I> route(EventEnvelope envelope) {
+        EventRouting<I> routing = getEventRouting();
+        Set<I> targets = routing.apply(envelope.getMessage(), envelope.getEventContext());
+        return targets;
+    }
+
+    final void dispatchNowTo(I id, EventEnvelope event) {
+        PmEventEndpoint<I, P> endpoint = PmEventEndpoint.of(this, event);
+        endpoint.dispatchToOne(id);
     }
 
     @Override

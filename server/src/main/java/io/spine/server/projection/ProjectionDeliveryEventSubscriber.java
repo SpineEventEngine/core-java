@@ -46,8 +46,8 @@ final class ProjectionDeliveryEventSubscriber<I> extends DeliveryEventSubscriber
         EntityHistoryId receiver = event.getReceiver();
         if (correctType(receiver)) {
             I id = idFrom(receiver);
-            ProjectionEndpoint<I, ?> endpoint = endpointFor(event.getPayload());
-            endpoint.dispatchToOne(id);
+            EventEnvelope envelope = EventEnvelope.of(event.getPayload());
+            repository.dispatchNowTo(id, envelope);
         }
     }
 
@@ -58,16 +58,9 @@ final class ProjectionDeliveryEventSubscriber<I> extends DeliveryEventSubscriber
         }
     }
 
-    private ProjectionEndpoint<I, ?> endpointFor(Event event) {
-        EventEnvelope envelope = EventEnvelope.of(event);
-        ProjectionEndpoint<I, ?> endpoint = ProjectionEndpoint.of(repository, envelope);
-        return endpoint;
-    }
-
     private void onError(Event event) {
         RuntimeException exception = new DuplicateEventException(event);
         EventEnvelope envelope = EventEnvelope.of(event);
-        ProjectionEndpoint<I, ?> endpoint = endpointFor(event);
-        endpoint.onError(envelope, exception);
+        repository.onError(envelope, exception);
     }
 }
