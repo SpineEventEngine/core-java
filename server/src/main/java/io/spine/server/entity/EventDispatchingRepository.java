@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventDispatcher;
@@ -32,7 +33,9 @@ import io.spine.server.route.EventRouting;
 
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.tenant.TenantAwareExecutor.with;
 
 /**
  * Abstract base for repositories that deliver events to entities they manage.
@@ -78,6 +81,36 @@ public abstract class EventDispatchingRepository<I,
     public void onRegistered() {
         super.onRegistered();
         getBoundedContext().registerEventDispatcher(this);
+    }
+
+    /**
+     * Dispatches the event to a corresponding entities.
+     *
+     * <p>If there is no stored entity with such an ID, a new one is created and stored after it
+     * handles the passed event.
+     *
+     * @param envelope the event to dispatch
+     */
+    @Override
+    public Set<I> dispatch(EventEnvelope envelope) {
+        checkNotNull(envelope);
+        Set<I> targets = with(envelope.getTenantId())
+                .evaluate(() -> doDispatch(envelope));
+        return targets;
+    }
+
+    private Set<I> doDispatch(EventEnvelope envelope) {
+        Set<I> targets = route(envelope);
+        Event event = envelope.getOuterObject();
+        targets.forEach(id -> lifecycleOf(id).onDispatchEventToReactor(event));
+        return targets;
+    }
+
+    @Internal
+    protected final Set<I> route(EventEnvelope envelope) {
+        EventRouting<I> routing = getEventRouting();
+        Set<I> targets = routing.apply(envelope.getMessage(), envelope.getEventContext());
+        return targets;
     }
 
     /**

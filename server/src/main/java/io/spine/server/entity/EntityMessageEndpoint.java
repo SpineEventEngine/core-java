@@ -25,9 +25,7 @@ import io.spine.core.ActorMessageEnvelope;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.Event;
-import io.spine.core.TenantId;
 import io.spine.server.delivery.Delivery;
-import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.string.Stringifiers;
 
 import java.util.List;
@@ -70,18 +68,6 @@ public abstract class EntityMessageEndpoint<I,
      */
     public void dispatchTo(I entityId) {
         checkNotNull(entityId);
-        TenantId tenantId = envelope().getTenantId();
-        dispatchForTenant(entityId, tenantId);
-    }
-
-    private void dispatchForTenant(I entityId, TenantId tenantId) {
-        TenantAwareOperation operation = new Operation(entityId, tenantId);
-        operation.execute();
-    }
-
-    @SuppressWarnings("MethodOnlyUsedFromInnerClass")
-        // Avoid writing logic in a TenantAwareOperation.
-    private void dispatchToOne(I entityId) {
         try {
             doDispatchToOne(entityId);
         } catch (RuntimeException exception) {
@@ -188,20 +174,5 @@ public abstract class EntityMessageEndpoint<I,
         String commandId = Stringifiers.toString(cmd.getId());
         CommandClass commandClass = cmd.getMessageClass();
         throw newIllegalStateException(format, entityClass, entityId, commandClass, commandId);
-    }
-
-    private final class Operation extends TenantAwareOperation {
-
-        private final I target;
-
-        private Operation(I target, TenantId tenantId) {
-            super(tenantId);
-            this.target = target;
-        }
-
-        @Override
-        public void run() {
-            dispatchToOne(target);
-        }
     }
 }

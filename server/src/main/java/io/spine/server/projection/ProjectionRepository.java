@@ -28,7 +28,6 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
-import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
@@ -257,22 +256,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     public Set<EventClass> getExternalEventClasses() {
         return projectionClass().getExternalEventClasses();
-    }
-
-    @Override
-    public Set<I> dispatch(EventEnvelope envelope) {
-        checkNotNull(envelope);
-        Set<I> ids = route(envelope);
-        Event event = envelope.getOuterObject();
-        ids.forEach(id -> lifecycleOf(id).onDispatchEventToSubscriber(event));
-        return ids;
-    }
-
-    @Internal
-    protected final Set<I> route(EventEnvelope envelope) {
-        EventRouting<I> routing = getEventRouting();
-        Set<I> ids = routing.apply(envelope.getMessage(), envelope.getEventContext());
-        return ids;
     }
 
     @Internal

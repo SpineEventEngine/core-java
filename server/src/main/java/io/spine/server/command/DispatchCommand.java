@@ -56,8 +56,8 @@ public final class DispatchCommand {
     }
 
     public static DispatchCommand operationFor(EntityLifecycle lifecycle,
-                                                 CommandHandlingEntity<?, ?, ?> entity,
-                                                 CommandEnvelope command) {
+                                               CommandHandlingEntity<?, ?, ?> entity,
+                                               CommandEnvelope command) {
         checkNotNull(lifecycle);
         checkNotNull(entity);
         checkNotNull(command);

@@ -26,7 +26,6 @@ import io.spine.annotation.SPI;
 import io.spine.core.BoundedContextName;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
-import io.spine.core.CommandId;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventEnvelope;
@@ -65,6 +64,7 @@ import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.ImmutableList.of;
 import static io.spine.option.EntityOption.Kind.PROCESS_MANAGER;
 import static io.spine.server.procman.model.ProcessManagerClass.asProcessManagerClass;
+import static io.spine.server.tenant.TenantAwareExecutor.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -222,6 +222,11 @@ public abstract class ProcessManagerRepository<I,
     @Override
     public I dispatchCommand(CommandEnvelope command) {
         checkNotNull(command);
+        I target = with(command.getTenantId()).evaluate(() -> doDispatch(command));
+        return target;
+    }
+
+    private I doDispatch(CommandEnvelope command) {
         I target = route(command);
         lifecycleOf(target).onDispatchCommand(command.getCommand());
         return target;
@@ -236,30 +241,6 @@ public abstract class ProcessManagerRepository<I,
     final void dispatchNowTo(I id, CommandEnvelope command) {
         PmCommandEndpoint<I, P> endpoint = PmCommandEndpoint.of(this, command);
         endpoint.dispatchTo(id);
-    }
-
-    /**
-     * Dispatches the event to a corresponding process manager.
-     *
-     * <p>If there is no stored process manager with such an ID, a new process manager is created
-     * and stored after it handles the passed event.
-     *
-     * @param envelope the event to dispatch
-     * @see ProcessManager#dispatchEvent(EventEnvelope)
-     */
-    @Override
-    public Set<I> dispatch(EventEnvelope envelope) {
-        checkNotNull(envelope);
-        Set<I> targets = route(envelope);
-        Event event = envelope.getOuterObject();
-        targets.forEach(id -> lifecycleOf(id).onDispatchEventToReactor(event));
-        return targets;
-    }
-
-    private Set<I> route(EventEnvelope envelope) {
-        EventRouting<I> routing = getEventRouting();
-        Set<I> targets = routing.apply(envelope.getMessage(), envelope.getEventContext());
-        return targets;
     }
 
     final void dispatchNowTo(I id, EventEnvelope event) {
@@ -297,14 +278,6 @@ public abstract class ProcessManagerRepository<I,
     @Override
     protected EntityLifecycle lifecycleOf(I id) {
         return super.lifecycleOf(id);
-    }
-
-    void onDispatchEvent(I id, Event event) {
-        lifecycleOf(id).onDispatchEventToReactor(event);
-    }
-
-    void onCommandTargetSet(I id, CommandId commandId) {
-        lifecycleOf(id).onTargetAssignedToCommand(commandId);
     }
 
     /**

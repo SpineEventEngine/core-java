@@ -61,6 +61,7 @@ import static com.google.common.base.Suppliers.memoize;
 import static com.google.common.collect.ImmutableList.of;
 import static io.spine.option.EntityOption.Kind.AGGREGATE;
 import static io.spine.server.aggregate.model.AggregateClass.asAggregateClass;
+import static io.spine.server.tenant.TenantAwareExecutor.with;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -225,10 +226,17 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public I dispatch(CommandEnvelope envelope) {
         checkNotNull(envelope);
+        I target = with(envelope.getTenantId())
+                .evaluate(() -> doDispatch(envelope));
+        return target;
+    }
+
+    private I doDispatch(CommandEnvelope envelope) {
         I target = route(envelope);
         dispatchTo(target, envelope);
         return target;
     }
+
 
     private I route(CommandEnvelope envelope) {
         CommandRouting<I> routing = getCommandRouting();
@@ -279,6 +287,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @Override
     public Set<I> dispatchEvent(EventEnvelope envelope) {
         checkNotNull(envelope);
+        Set<I> targets = with(envelope.getTenantId())
+                .evaluate(() -> doDispatch(envelope));
+        return targets;
+    }
+
+    private Set<I> doDispatch(EventEnvelope envelope) {
         Set<I> targets = route(envelope);
         targets.forEach(id -> dispatchTo(id, envelope));
         return targets;
@@ -518,6 +532,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     void onCommandTargetSet(I id, CommandId commandId) {
+        // TODO:2018-08-27:dmytro.dashenkov: Use.
         lifecycleOf(id).onTargetAssignedToCommand(commandId);
     }
 
