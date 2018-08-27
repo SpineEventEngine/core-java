@@ -97,7 +97,7 @@ public abstract class Projection<I,
      *
      * @return {@code true} if the projection state was changed as the result of playing the events
      */
-    static boolean play(Projection<?, ?, ?> projection, Iterable<Event> events) {
+    static boolean playOn(Projection<?, ?, ?> projection, Iterable<Event> events) {
         ProjectionTransaction<?, ?, ?> tx = ProjectionTransaction.start(projection);
         projection.play(events);
         tx.commit();
