@@ -122,7 +122,6 @@ class ProcessManagerTest {
 
     private CommandBus commandBus;
     private TestProcessManager processManager;
-    private EventBus eventBus;
 
     @BeforeEach
     void setUp() {
@@ -134,9 +133,9 @@ class ProcessManagerTest {
         StorageFactory storageFactory = bc.getStorageFactory();
         TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false, storageFactory);
 
-        eventBus = EventBus.newBuilder()
-                           .setStorageFactory(storageFactory)
-                           .build();
+        EventBus eventBus = EventBus.newBuilder()
+                                    .setStorageFactory(storageFactory)
+                                    .build();
         commandBus = spy(CommandBus.newBuilder()
                                    .injectTenantIndex(tenantIndex)
                                    .injectSystemGateway(NoOpSystemGateway.INSTANCE)
